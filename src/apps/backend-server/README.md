@@ -1,4 +1,4 @@
-# backend-rest-app
+# backend-server
 
 To install dependencies:
 
