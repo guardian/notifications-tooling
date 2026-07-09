@@ -1,0 +1,14 @@
+{
+  "name": "notifications-tooling",
+  "module": "index.ts",
+  "type": "module",
+  "workspaces": ["src/apps/*", "src/packages/*"],
+  "scripts": {
+    "check": "bunx @biomejs/biome check ./src",
+    "lint": "bunx @biomejs/biome lint ./src"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.3",
+    "@types/bun": "latest"
+  }
+}

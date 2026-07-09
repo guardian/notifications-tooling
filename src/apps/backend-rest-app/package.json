@@ -1,0 +1,12 @@
+{
+  "name": "backend-rest-app",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
