@@ -130,7 +130,15 @@ Response:
     { "channel": "push",       "planId": "…#push",       "status": "accepted" },
     { "channel": "newsletter", "planId": "…#newsletter", "status": "accepted" }
   ],
-  "statusUrl": "/v1/notifications/a1b2c3d4-.../status"
+
+  // Status URL
+  "statusUrl": "/v1/notifications/a1b2c3d4-.../status",
+
+  // Ability to cancel notification send off before the `expiresAt` value
+  "cancellable": {
+    "cancelUrl": "/v1/notifications/a1b2c3d4-.../cancel",
+    "expiresAt": "<unix_timestamp>"
+  }
 }
 ```
 
