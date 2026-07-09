@@ -1,10 +1,11 @@
 {
   "name": "notifications-tooling",
   "module": "index.ts",
+  "private": true,
   "type": "module",
-  "workspaces": ["src/apps/*", "src/packages/*"],
+  "workspaces": ["src/apps/*", "src/apps/workers/*", "src/packages/*"],
   "scripts": {
-    "check": "bunx @biomejs/biome check ./src",
+    "check": "bunx @biomejs/biome check --write ./src",
     "lint": "bunx @biomejs/biome lint ./src"
   },
   "devDependencies": {

@@ -32,6 +32,9 @@
         "@types/react-dom": "^19",
       },
     },
+    "src/packages/config": {
+      "name": "@config",
+    },
   },
   "packages": {
     "@backend-server": ["@backend-server@workspace:src/apps/backend-server"],
@@ -53,6 +56,8 @@
     "@biomejs/cli-win32-arm64": ["@biomejs/cli-win32-arm64@2.5.3", "", { "os": "win32", "cpu": "arm64" }, "sha512-cX5z+GYwRcqEok0AH3KSfQGgqYd0Nomfp6Fbe1uiTtELE38hdH2k842wQ9wLNaF/JJ7r4rjJQ4VR+ce+fRmQbw=="],
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.5.3", "", { "os": "win32", "cpu": "x64" }, "sha512-ExSaJWi4/u6+GXCszlSKpWSjKNbDseAYqqkCznsCsZ/4uidZ/BEqsCc5/3ctlq6dfIubdIIRSVLC/PG9xPl70Q=="],
+
+    "@config": ["@config@workspace:src/packages/config"],
 
     "@frontend": ["@frontend@workspace:src/apps/frontend"],
 
