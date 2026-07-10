@@ -16,8 +16,6 @@ app.disable("x-powered-by");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Request logging
 app.use(pinoHttp({ logger }));
 
 // --- Routes ---
