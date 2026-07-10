@@ -1,6 +1,5 @@
-pre-commit:
+pre-push:
   commands:
     check:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}"
-      run: bun run format --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
-      stage_fixed: true
+      run: bun run format --no-errors-on-unmatched --files-ignore-unknown=true {push_files}
