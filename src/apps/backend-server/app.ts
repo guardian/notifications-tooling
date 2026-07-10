@@ -19,6 +19,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 	next();
 });
 
+
 // --- Routes ---
 
 app.use("/", rootRouter);

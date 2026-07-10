@@ -12,6 +12,7 @@
     "src/apps/backend-server": {
       "name": "@backend-server",
       "dependencies": {
+        "@config": "workspace:*",
         "express": "^5.2.1",
       },
       "devDependencies": {
