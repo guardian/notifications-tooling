@@ -1,9 +1,9 @@
 import "./index.css";
 
-import { LayoutComponent } from "./LayoutComponent";
+import { DispatchPage } from "./features/dispatch/DispatchPage";
 
 export function App() {
-  return <LayoutComponent></LayoutComponent>;
+  return <DispatchPage />;
 }
 
 export default App;
