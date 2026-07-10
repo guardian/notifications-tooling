@@ -7,7 +7,9 @@
   "scripts": {
     "test": "bun test",
     "format": "bunx @biomejs/biome check --write ./src",
-    "lint": "bunx @biomejs/biome lint ./src"
+    "lint": "bunx @biomejs/biome lint ./src",
+    "docker:compose:up": "docker compose -f docker/docker-compose.local.yml up -d",
+    "docker:compose:down": "docker compose -f docker/docker-compose.local.yml down"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.3",
