@@ -182,6 +182,6 @@ code {
   *,
   ::before,
   ::after {
-    animation: none !important;
+    animation: none;
   }
 }

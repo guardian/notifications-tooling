@@ -6,6 +6,9 @@ export function APITester() {
   const testEndpoint = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const responseInput = responseInputRef.current;
+    if (!responseInput) return;
+
     try {
       const form = e.currentTarget;
       const formData = new FormData(form);
@@ -15,9 +18,9 @@ export function APITester() {
       const res = await fetch(url, { method });
 
       const data = await res.json();
-      responseInputRef.current!.value = JSON.stringify(data, null, 2);
+      responseInput.value = JSON.stringify(data, null, 2);
     } catch (error) {
-      responseInputRef.current!.value = String(error);
+      responseInput.value = String(error);
     }
   };
 

@@ -11,7 +11,7 @@ describe("health handler", () => {
 
     expect(json).toHaveBeenCalledTimes(1);
 
-    const body = json.mock.calls[0]![0] as { status: string; uptime: number };
+    const body = json.mock.calls[0]?.[0] as { status: string; uptime: number };
     expect(body.status).toBe("ok");
     expect(typeof body.uptime).toBe("number");
   });
