@@ -6,6 +6,7 @@ import express, {
 } from "express";
 import healthCheckRouter from "./routers/health";
 import notificationsRouter from "./routers/notifications";
+import rootRouter from "./routers/root";
 
 const app: Application = express();
 
@@ -20,6 +21,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 // --- Routes ---
 
+app.use("/", rootRouter);
 app.use("/v1/health", healthCheckRouter);
 app.use("/v1/notifications", notificationsRouter);
 
