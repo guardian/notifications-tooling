@@ -18,11 +18,27 @@ It's helpful to install VSCode, install Biome extension so that the file will be
 
 ## Install dependencies
 
-To install the dependencies for every app, and package, install npm dependencies on from the repo root:
+To install the dependencies for every app, package etc, simply invoke this while current working dir is the root of the repo:
 
 ```sh
 bun install
 ```
+
+### To add dependencies
+
+As we rely on Bun on pretty much everything here, to install npm modules we need to use bun. An example:
+
+```sh
+bun add some_npm_dependency
+
+# dev dependency
+bun add -D dev_dependency
+
+# targetting a specific app, package etc
+bun --filter @backend-server add some_npm_module
+```
+
+Bun will generate or update the existing `bun.lock` file, similar to `package-lock.json`.
 
 ## Docker compose
 
