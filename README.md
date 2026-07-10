@@ -24,6 +24,14 @@ To install the dependencies for every app, package etc, simply invoke this while
 bun install
 ```
 
+## Install biome formatter as pre-commit hook using `lefthook`
+
+```sh
+bunx lefthook install
+```
+
+Now biome will auto-format supported files as part of each `git commit` command run.
+
 ### To add dependencies
 
 As we rely on Bun on pretty much everything here, to install npm modules we need to use bun. An example:
