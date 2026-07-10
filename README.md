@@ -43,7 +43,7 @@ bun add some_npm_dependency
 bun add -D dev_dependency
 
 # targetting a specific app, package etc
-bun --filter @backend-server add some_npm_module
+bun --filter @backend add some_npm_module
 ```
 
 Bun will generate or update the existing `bun.lock` file, similar to `package-lock.json`.
@@ -69,7 +69,7 @@ bun docker:compose:down
 Backend server app currently uses Express.js as its REST server. To start the backend app:
 
 ```sh
-cd ./src/apps/backend-server
+cd ./src/apps/backend
 bun run dev
 ```
 
@@ -97,12 +97,12 @@ To run on a specific app or package there are couple of ways:
 Having current working dir open inside that app:
 
 ```sh
-cd ./src/apps/backend-server
+cd ./src/apps/backend
 bun test
 ```
 
 Using workspace filters, ie:
 
 ```sh
-bun --filter @backend-server test
+bun --filter @backend test
 ```

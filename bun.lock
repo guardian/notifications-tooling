@@ -10,8 +10,8 @@
         "lefthook": "^2.1.10",
       },
     },
-    "src/apps/backend-server": {
-      "name": "@backend-server",
+    "src/apps/backend": {
+      "name": "@backend",
       "dependencies": {
         "@config": "workspace:*",
         "express": "^5.2.1",
@@ -39,7 +39,7 @@
     },
   },
   "packages": {
-    "@backend-server": ["@backend-server@workspace:src/apps/backend-server"],
+    "@backend": ["@backend@workspace:src/apps/backend"],
 
     "@biomejs/biome": ["@biomejs/biome@2.5.3", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "2.5.3", "@biomejs/cli-darwin-x64": "2.5.3", "@biomejs/cli-linux-arm64": "2.5.3", "@biomejs/cli-linux-arm64-musl": "2.5.3", "@biomejs/cli-linux-x64": "2.5.3", "@biomejs/cli-linux-x64-musl": "2.5.3", "@biomejs/cli-win32-arm64": "2.5.3", "@biomejs/cli-win32-x64": "2.5.3" }, "bin": { "biome": "bin/biome" } }, "sha512-MrJswFdei9EfDwwUy2tQrPDpK0AO+RmMFvBoaaJ6ayBc3sUbHdCE+XG5N8vp+5So41ZupZJQm0roHFFhMGVD7A=="],
 
