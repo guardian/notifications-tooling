@@ -1,5 +1,5 @@
-import { Grid, Item } from "@guardian/stand/Grid";
 import { AlertBanner } from "@guardian/stand/AlertBanner";
+import { Grid, Item } from "@guardian/stand/Grid";
 import { Layout } from "@guardian/stand/Layout";
 import { TopBar, TopBarToolName } from "@guardian/stand/TopBar";
 
