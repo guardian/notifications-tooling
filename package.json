@@ -3,10 +3,14 @@
   "module": "index.ts",
   "private": true,
   "type": "module",
-  "workspaces": ["src/apps/*", "src/apps/workers/*", "src/packages/*"],
+  "workspaces": [
+    "src/apps/*",
+    "src/apps/workers/*",
+    "src/packages/*"
+  ],
   "scripts": {
     "test": "bun test",
-    "format": "bunx @biomejs/biome check --write ./src",
+    "format": "bunx @biomejs/biome check ./src --write",
     "lint": "bunx @biomejs/biome lint ./src",
     "docker:compose:up": "docker compose -f docker/docker-compose.local.yml up -d",
     "docker:compose:down": "docker compose -f docker/docker-compose.local.yml down"

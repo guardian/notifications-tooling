@@ -1,20 +1,20 @@
 {
-	"name": "@backend",
-	"module": "index.ts",
-	"type": "module",
-	"private": true,
-	"scripts": {
-		"start": "bun run --hot index.ts",
-		"dev": "bun run --hot index.ts",
-		"build": "bun build index.ts --outfile=dist/index.js --target=bun",
-		"test": "bun test"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"@types/express": "^5.0.6"
-	},
-	"dependencies": {
-		"@config": "workspace:*",
-		"express": "^5.2.1"
-	}
+  "name": "@backend",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run --hot index.ts",
+    "dev": "bun run --hot index.ts",
+    "build": "bun build index.ts --outfile=dist/index.js --target=bun",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/express": "^5.0.6"
+  },
+  "dependencies": {
+    "@config": "workspace:*",
+    "express": "^5.2.1"
+  }
 }

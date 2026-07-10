@@ -1,3 +1,3 @@
 export default {
-    HELLO: 'Hello, World!',
-}
+  HELLO: "Hello, World!",
+};
