@@ -1,6 +1,7 @@
+import type { ValidatedRequest } from "express-zod-safe";
 import { z } from "zod";
 
-export const notificationPushRequestBodySchema = {
+export const bodySchema = {
   subject: z
     .string()
     .min(2, "Subject must be at least 2 characters")
@@ -11,7 +12,6 @@ export const notificationPushRequestBodySchema = {
     .max(500, "Description must be at most 500 characters"),
 };
 
-// Infer types to use inside your controllers if needed
-export type notificationPushRequestInput = z.infer<
-  typeof notificationPushRequestBodySchema
->;
+export type NotificationPushRequest = ValidatedRequest<{
+  body: typeof bodySchema;
+}>;

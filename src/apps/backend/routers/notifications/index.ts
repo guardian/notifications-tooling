@@ -1,6 +1,9 @@
 import { type Request, type Response, Router } from "express";
 import validate from "express-zod-safe";
-import { notificationPushRequestBodySchema } from "../../schemas/notification-push-request";
+import {
+  bodySchema,
+  type NotificationPushRequest,
+} from "../../schemas/notification-push-request";
 
 const router = Router();
 
@@ -10,8 +13,8 @@ router.get("/", (_req: Request, res: Response) => {
 
 router.post(
   "/",
-  validate({ body: notificationPushRequestBodySchema }),
-  (req: Request, res: Response) => {
+  validate({ body: bodySchema }),
+  (req: NotificationPushRequest, res: Response) => {
     res.status(201).json({ id: Date.now(), ...req.body });
   },
 );
