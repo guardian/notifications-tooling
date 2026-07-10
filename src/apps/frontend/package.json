@@ -9,7 +9,10 @@
     "start": "NODE_ENV=production bun src/index.ts"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@guardian/stand": "^0.0.57",
     "react": "^19",
+    "react-aria-components": "^1.19.0",
     "react-dom": "^19"
   },
   "devDependencies": {
