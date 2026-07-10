@@ -23,7 +23,7 @@ app.use(pinoHttp({ logger }));
 // --- Routes ---
 
 app.use("/", rootRouter);
-app.use("/v1/health", healthCheckRouter);
+app.use("/health", healthCheckRouter);
 app.use("/v1/notifications", notificationsRouter);
 
 // --- 404 Handler ---
