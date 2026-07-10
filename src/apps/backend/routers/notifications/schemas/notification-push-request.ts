@@ -1,4 +1,3 @@
-import type { ValidatedRequest } from "express-zod-safe";
 import { z } from "zod";
 
 export const bodySchema = {
@@ -11,7 +10,3 @@ export const bodySchema = {
     .min(2, "Description must be at least 2 characters")
     .max(500, "Description must be at most 500 characters"),
 };
-
-export type NotificationPushRequest = ValidatedRequest<{
-  body: typeof bodySchema;
-}>;
