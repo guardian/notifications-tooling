@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { Icon } from "@guardian/stand/Icon";
 import { semanticColors } from "@guardian/stand";
+import { Icon } from "@guardian/stand/Icon";
 import { DELIVERY_OPTIONS } from "../constants";
 import type { DeliveryMode } from "../types";
 

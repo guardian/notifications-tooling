@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
+import { semanticColors } from "@guardian/stand";
 import { Avatar } from "@guardian/stand/Avatar";
 import { Favicon } from "@guardian/stand/Favicon";
 import { Icon } from "@guardian/stand/Icon";
-import { semanticColors } from "@guardian/stand";
 
 const styles = {
   bar: css({

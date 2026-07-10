@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { InlineMessage } from "@guardian/stand/InlineMessage";
 import { semanticColors } from "@guardian/stand";
+import { InlineMessage } from "@guardian/stand/InlineMessage";
 import type { DispatchState } from "../useDispatchState";
 import { Field } from "./Field";
 import { SegmentSelector } from "./SegmentSelector";

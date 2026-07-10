@@ -1,7 +1,8 @@
 /** @jsxImportSource @emotion/react */
-import type { ReactNode } from "react";
+
 import { css } from "@emotion/react";
 import { semanticColors } from "@guardian/stand";
+import type { ReactNode } from "react";
 
 const styles = {
   field: css({

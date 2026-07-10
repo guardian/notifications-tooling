@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
+import { semanticColors } from "@guardian/stand";
 import { Button } from "@guardian/stand/Button";
 import { Icon } from "@guardian/stand/Icon";
-import { semanticColors } from "@guardian/stand";
 import { TextArea } from "@guardian/stand/TextArea";
 import { TextInput } from "@guardian/stand/TextInput";
 import { PREVIEW_MAX_LENGTH, SUBJECT_MAX_LENGTH } from "../constants";

@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
+import { semanticColors } from "@guardian/stand";
 import { Button } from "@guardian/stand/Button";
 import { InlineMessage } from "@guardian/stand/InlineMessage";
-import { semanticColors } from "@guardian/stand";
 import { DELIVERY_SUMMARY, SEGMENT_OPTIONS } from "../constants";
 import type { DispatchState } from "../useDispatchState";
 import { EmailPreview } from "./EmailPreview";

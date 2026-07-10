@@ -1,9 +1,10 @@
 /** @jsxImportSource @emotion/react */
-import { useState } from "react";
+
 import { css } from "@emotion/react";
-import { Icon } from "@guardian/stand/Icon";
-import type { IconProps } from "@guardian/stand/Icon";
 import { semanticColors } from "@guardian/stand";
+import type { IconProps } from "@guardian/stand/Icon";
+import { Icon } from "@guardian/stand/Icon";
+import { useState } from "react";
 import type { ComposerTab } from "../types";
 import type { DispatchState } from "../useDispatchState";
 import { AudiencePanel } from "./AudiencePanel";
