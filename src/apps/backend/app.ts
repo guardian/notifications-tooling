@@ -4,20 +4,19 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import { pinoHttp } from "pino-http";
 import healthCheckRouter from "./routers/health";
 import notificationsRouter from "./routers/notifications";
 import rootRouter from "./routers/root";
+import { logger } from "./utils/logger";
 
 const app: Application = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Simple request logger
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
+// Request logging
+app.use(pinoHttp({ logger }));
 
 // --- Routes ---
 
@@ -31,8 +30,8 @@ app.use((_req: Request, res: Response) => {
 });
 
 // --- Error Handler (must have 4 args) ---
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err.stack);
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+  req.log.error(err);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
