@@ -10,7 +10,10 @@ export const LayoutComponent = () => (
     </Layout.AlertBanner>
     <Layout.TopBar>
       <TopBar>
-        <TopBarToolName name="Layout Demo" favicon={{ letter: "L" }} />
+        <TopBarToolName
+          name="Notifications Tooling"
+          favicon={{ letter: "N" }}
+        />
       </TopBar>
     </Layout.TopBar>
     <Layout.Sidebar
