@@ -10,11 +10,32 @@ On Mac OS install its latest version using Homebrew:
 brew install bun
 ```
 
-## Biome as alternative to prettier and eslint
+## Linting & formatting
 
-Biome acts as a formatter and linter all in a single package. Biome is highly configurable, is just as opinionated as prettier. We can add additional overrides to biome very easily when needed.
+This repo follows the [Guardian's linting recommendations](https://github.com/guardian/recommendations/blob/main/client-side.md#coding-style) using the shared department configs:
 
-It's helpful to install VSCode, install Biome extension so that the file will be formatted on save. [Biome extension can be downloaded from here](https://marketplace.visualstudio.com/items?itemName=biomejs.biome).
+- [`@guardian/eslint-config`](https://github.com/guardian/csnx/tree/main/libs/%40guardian/eslint-config) for linting JavaScript, TypeScript and React (this bundles the TypeScript, React, hooks, a11y, imports and comments rule sets).
+- [`@guardian/prettier`](https://github.com/guardian/csnx/tree/main/libs/%40guardian/prettier) for formatting.
+
+ESLint is configured via [`eslint.config.js`](./eslint.config.js) (flat config). The React ruleset is scoped to the frontend app only.
+
+Available scripts (run from the repo root):
+
+```sh
+# Lint everything
+bun run lint
+
+# Lint and auto-fix where possible
+bun run lint:fix
+
+# Format all files
+bun run format
+
+# Check formatting without writing
+bun run format:check
+```
+
+Install the [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) VSCode extensions to get inline linting and format-on-save.
 
 ## Install dependencies
 
@@ -24,13 +45,13 @@ To install the dependencies for every app, package etc, simply invoke this while
 bun install
 ```
 
-## Install biome formatter as pre-commit hook using `lefthook`
+## Install lint & format checks as a git hook using `lefthook`
 
 ```sh
 bunx lefthook install
 ```
 
-Now biome will auto-format supported files as part of each `git commit` command run.
+Now, on each `git push`, ESLint and Prettier will check the files being pushed.
 
 ### To add dependencies
 
