@@ -1,19 +1,23 @@
 :root {
-  font-family: "Open Sans", system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  color-scheme: light;
+	font-family:
+		'Open Sans',
+		system-ui,
+		-apple-system,
+		sans-serif;
+	line-height: 1.5;
+	color-scheme: light;
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 body {
-  margin: 0;
+	margin: 0;
 }
 
 button {
-  font-family: inherit;
+	font-family: inherit;
 }

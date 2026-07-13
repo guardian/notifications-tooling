@@ -1,9 +1,9 @@
 {
-  "name": "@config",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "dependencies": {
-    "zod": "^4.4.3"
-  }
+	"name": "@config",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"dependencies": {
+		"zod": "^4.4.3"
+	}
 }

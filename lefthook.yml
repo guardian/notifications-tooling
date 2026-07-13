@@ -1,5 +1,8 @@
 pre-push:
   commands:
-    check:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}"
-      run: bun run format --no-errors-on-unmatched --files-ignore-unknown=true {push_files}
+    lint:
+      glob: '*.{js,ts,cjs,mjs,jsx,tsx}'
+      run: bunx eslint --no-warn-ignored {push_files}
+    format:
+      glob: '*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css,md}'
+      run: bunx prettier --check {push_files}

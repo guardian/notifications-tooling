@@ -1,24 +1,32 @@
 {
-  "name": "notifications-tooling",
-  "module": "index.ts",
-  "private": true,
-  "type": "module",
-  "workspaces": [
-    "src/apps/*",
-    "src/apps/workers/*",
-    "src/packages/*"
-  ],
-  "scripts": {
-    "test": "bun test",
-    "format": "bunx @biomejs/biome check ./src --write",
-    "lint": "bunx @biomejs/biome lint ./src",
-    "docker:compose:up": "docker compose -f docker/docker-compose.local.yml up -d",
-    "docker:compose:down": "docker compose -f docker/docker-compose.local.yml down"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.5.3",
-    "@types/bun": "latest",
-    "@types/node": "^26.1.1",
-    "lefthook": "^2.1.10"
-  }
+	"name": "notifications-tooling",
+	"module": "index.ts",
+	"private": true,
+	"type": "module",
+	"prettier": "@guardian/prettier",
+	"workspaces": [
+		"src/apps/*",
+		"src/apps/workers/*",
+		"src/packages/*"
+	],
+	"scripts": {
+		"test": "bun test",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"docker:compose:up": "docker compose -f docker/docker-compose.local.yml up -d",
+		"docker:compose:down": "docker compose -f docker/docker-compose.local.yml down"
+	},
+	"devDependencies": {
+		"@guardian/eslint-config": "^16.0.0",
+		"@guardian/prettier": "^11.0.0",
+		"@types/bun": "latest",
+		"@types/node": "^26.1.1",
+		"eslint": "^9.39.1",
+		"lefthook": "^2.1.10",
+		"prettier": "^3.7.4",
+		"tslib": "^2.8.1",
+		"typescript": "^5.9.0"
+	}
 }

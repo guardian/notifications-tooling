@@ -1,10 +1,9 @@
 # Suggested model to send notifications independent of channel or category
 
 **Definitions**:
-    
+
 - SPA Frontend: React app + Guardian/Stand UI elements
 - Backend App: Scala or Nodejs app. Could be a standalone EC2 instance + additional worker Lambda functions triggered by SQS per-channel notification push queues
-
 
 **Assumption**:
 
@@ -22,7 +21,6 @@
 - `GET /v1/notifications` - Retrieves a list of already enqueued notifications
 - `POST /v1/notifications` - Validate and enqueue notification to be pushed out to every requested channel
 - `GET /v1/notifications/abc123.../status` - Returns enqueued notification status having delivery statuses exposed for each supported channel
-
 
 ## Suggested backend architecture to support the model
 
@@ -45,16 +43,16 @@ Request:
 ```jsonc
 // GET /v1/channels/constraints -> the SPA fetches this to drive its UI (char counters, etc.)
 {
-  "push": {
-    "title":   { "maxLength": 50,  "onExceed": "reject" },
-    "body":    { "maxLength": 150, "onExceed": "truncate", "ellipsis": "…" },
-    "supports": ["title", "body", "link", "media.imageUrl"]   // no multi-item, no subject
-  },
-  "newsletter": {
-    "subject": { "maxLength": 120, "onExceed": "reject" },
-    "supports": ["items", "template", "subject"],             // multi-item allowed
-    "maxItems": 12
-  }
+	"push": {
+		"title": { "maxLength": 50, "onExceed": "reject" },
+		"body": { "maxLength": 150, "onExceed": "truncate", "ellipsis": "…" },
+		"supports": ["title", "body", "link", "media.imageUrl"], // no multi-item, no subject
+	},
+	"newsletter": {
+		"subject": { "maxLength": 120, "onExceed": "reject" },
+		"supports": ["items", "template", "subject"], // multi-item allowed
+		"maxItems": 12,
+	},
 }
 ```
 
@@ -65,57 +63,80 @@ Request:
 ```jsonc
 // POST /v1/notifications
 {
-  "idempotencyKey": "morning-briefing-2026-07-08",   // request-level; see idempotency note below
-  "category": "editorial",
-  "priority": "standard",
+	"idempotencyKey": "morning-briefing-2026-07-08", // request-level; see idempotency note below
+	"category": "editorial",
+	"priority": "standard",
 
-  // WHAT — a LIBRARY of reusable, channel-neutral content items
-  // Plans below pick which item(s) to use, so one article can feed push while
-  // several articles feed the newsletter — from a single request.
-  "content": {
-    "items": {
-      "lead": {
-        "title": "Ukraine summit begins",
-        "body": "World leaders gather in Geneva as talks open...",
-        "link": { "type": "guardianContent", "contentApiId": "world/2026/jul/08/ukraine-summit" },
-        "media": { "type": "image", "imageUrl": "https://.../lead.jpg", "thumbnailUrl": "https://.../thumb.jpg" }
-      },
-      "secondary": {
-        "title": "Markets react to summit news",
-        "body": "The FTSE rose 1.2% in early trading...",
-        "link": { "type": "guardianContent", "contentApiId": "business/2026/jul/08/markets" }
-      },
-      "opinion": {
-        "title": "What the summit means for Europe",
-        "body": "Our chief correspondent analyses...",
-        "link": { "type": "guardianContent", "contentApiId": "commentisfree/2026/jul/08/europe" }
-      }
-    }
-  },
+	// WHAT — a LIBRARY of reusable, channel-neutral content items
+	// Plans below pick which item(s) to use, so one article can feed push while
+	// several articles feed the newsletter — from a single request.
+	"content": {
+		"items": {
+			"lead": {
+				"title": "Ukraine summit begins",
+				"body": "World leaders gather in Geneva as talks open...",
+				"link": {
+					"type": "guardianContent",
+					"contentApiId": "world/2026/jul/08/ukraine-summit",
+				},
+				"media": {
+					"type": "image",
+					"imageUrl": "https://.../lead.jpg",
+					"thumbnailUrl": "https://.../thumb.jpg",
+				},
+			},
+			"secondary": {
+				"title": "Markets react to summit news",
+				"body": "The FTSE rose 1.2% in early trading...",
+				"link": {
+					"type": "guardianContent",
+					"contentApiId": "business/2026/jul/08/markets",
+				},
+			},
+			"opinion": {
+				"title": "What the summit means for Europe",
+				"body": "Our chief correspondent analyses...",
+				"link": {
+					"type": "guardianContent",
+					"contentApiId": "commentisfree/2026/jul/08/europe",
+				},
+			},
+		},
+	},
 
-  // WHERE — an ARRAY OF PLANS. Each plan is self-contained: its own channel,
-  // its own audience, and its own content selection.
-  // Multiple plans = multi-channel in one request.
-  "channels": [
-    {
-      "channel": "push",
-      "audience": { "type": "topic", "topics": [ { "type": "breaking", "name": "uk" } ] },
-      "compose": { "use": "lead" },              // push takes ONE item only
-      "overrides": { "importance": "Major" }
-    },
-    {
-      "channel": "newsletter",
-      "audience": { "type": "segment", "segments": [ { "name": "morning-briefing-subscribers" }, { "name": "editorial-something-something" } ] },
-      "compose": {                                // newsletter assembles MANY items
-        "layout": "digest",
-        "items": ["lead", "secondary", "opinion"],
-        "subject": "Your morning briefing: Ukraine summit"
-      }
-    }
-  ],
+	// WHERE — an ARRAY OF PLANS. Each plan is self-contained: its own channel,
+	// its own audience, and its own content selection.
+	// Multiple plans = multi-channel in one request.
+	"channels": [
+		{
+			"channel": "push",
+			"audience": {
+				"type": "topic",
+				"topics": [{ "type": "breaking", "name": "uk" }],
+			},
+			"compose": { "use": "lead" }, // push takes ONE item only
+			"overrides": { "importance": "Major" },
+		},
+		{
+			"channel": "newsletter",
+			"audience": {
+				"type": "segment",
+				"segments": [
+					{ "name": "morning-briefing-subscribers" },
+					{ "name": "editorial-something-something" },
+				],
+			},
+			"compose": {
+				// newsletter assembles MANY items
+				"layout": "digest",
+				"items": ["lead", "secondary", "opinion"],
+				"subject": "Your morning briefing: Ukraine summit",
+			},
+		},
+	],
 
-  "options": { "dryRun": false, "scheduledFor": null },
-  "sender": "notifications-tooling-spa/v1"      // consumer of the backend api (constant)
+	"options": { "dryRun": false, "scheduledFor": null },
+	"sender": "notifications-tooling-spa/v1", // consumer of the backend api (constant)
 }
 ```
 
@@ -124,21 +145,21 @@ Response:
 ```jsonc
 // 202 Accepted
 {
-  "notificationId": "a1b2c3d4-...",
-  "status": "accepted",
-  "plans": [
-    { "channel": "push",       "planId": "…#push",       "status": "accepted" },
-    { "channel": "newsletter", "planId": "…#newsletter", "status": "accepted" }
-  ],
+	"notificationId": "a1b2c3d4-...",
+	"status": "accepted",
+	"plans": [
+		{ "channel": "push", "planId": "…#push", "status": "accepted" },
+		{ "channel": "newsletter", "planId": "…#newsletter", "status": "accepted" },
+	],
 
-  // Status URL
-  "statusUrl": "/v1/notifications/a1b2c3d4-.../status",
+	// Status URL
+	"statusUrl": "/v1/notifications/a1b2c3d4-.../status",
 
-  // Ability to cancel notification send off before the `expiresAt` value
-  "cancellable": {
-    "cancelUrl": "/v1/notifications/a1b2c3d4-.../cancel",
-    "expiresAt": "<unix_timestamp>"
-  }
+	// Ability to cancel notification send off before the `expiresAt` value
+	"cancellable": {
+		"cancelUrl": "/v1/notifications/a1b2c3d4-.../cancel",
+		"expiresAt": "<unix_timestamp>",
+	},
 }
 ```
 
@@ -146,13 +167,21 @@ Response:
 // Retry of an already-submitted idempotencyKey where `push` succeeded earlier
 // but `newsletter` had failed. HTTP 202 Accepted.
 {
-  "notificationId": "a1b2c3d4-...",
-  "status": "accepted",                 // request-level: accepted for (re)processing
-  "plans": [
-    { "channel": "push",       "planId": "a1b2c3d4-...#push",       "status": "duplicate_ignored" },
-    { "channel": "newsletter", "planId": "a1b2c3d4-...#newsletter", "status": "retrying" }
-  ],
-  "statusUrl": "/v1/notifications/a1b2c3d4-.../status"
+	"notificationId": "a1b2c3d4-...",
+	"status": "accepted", // request-level: accepted for (re)processing
+	"plans": [
+		{
+			"channel": "push",
+			"planId": "a1b2c3d4-...#push",
+			"status": "duplicate_ignored",
+		},
+		{
+			"channel": "newsletter",
+			"planId": "a1b2c3d4-...#newsletter",
+			"status": "retrying",
+		},
+	],
+	"statusUrl": "/v1/notifications/a1b2c3d4-.../status",
 }
 ```
 
@@ -160,16 +189,16 @@ Response:
 
 ```jsonc
 {
-  "channel": "push",
-  "audience": {
-    "type": "test",
-    "recipients": [
-      { "deviceToken": "fZ9x...APNS_token...", "platform": "ios" },
-      { "deviceToken": "eH2k...FCM_token...",  "platform": "android" }
-    ]
-  },
-  "compose": { "use": "lead" },        // push still takes ONE item
-  "overrides": { "importance": "Major" }
+	"channel": "push",
+	"audience": {
+		"type": "test",
+		"recipients": [
+			{ "deviceToken": "fZ9x...APNS_token...", "platform": "ios" },
+			{ "deviceToken": "eH2k...FCM_token...", "platform": "android" },
+		],
+	},
+	"compose": { "use": "lead" }, // push still takes ONE item
+	"overrides": { "importance": "Major" },
 }
 ```
 
@@ -177,19 +206,19 @@ Response:
 
 ```jsonc
 {
-  "channel": "newsletter",
-  "audience": {
-    "type": "test",
-    "recipients": [
-      { "email": "editor@guardian.co.uk" },
-      { "email": "qa@guardian.co.uk" }
-    ]
-  },
-  "compose": {
-    "layout": "digest",
-    "items": ["lead", "secondary", "opinion"],
-    "subject": "[TEST] Your morning briefing: Ukraine summit"
-  }
+	"channel": "newsletter",
+	"audience": {
+		"type": "test",
+		"recipients": [
+			{ "email": "editor@guardian.co.uk" },
+			{ "email": "qa@guardian.co.uk" },
+		],
+	},
+	"compose": {
+		"layout": "digest",
+		"items": ["lead", "secondary", "opinion"],
+		"subject": "[TEST] Your morning briefing: Ukraine summit",
+	},
 }
 ```
 
@@ -206,53 +235,58 @@ Response:
 ```jsonc
 // HTTP 422 Unprocessable Entity — multiple problems across the payload
 {
-  "error": "validation_failed",
-  "message": "The notification request failed validation. See details.",
-  "requestId": "req-7f3a...",            // for log correlation
-  "details": [
-    {
-      "code": "MAX_LENGTH_EXCEEDED",
-      "path": "/content/items/lead/title",
-      "message": "title exceeds the 50-character limit for channel 'push' (was 63).",
-      "meta": { "channel": "push", "field": "title", "maxLength": 50, "actualLength": 63 }
-    },
-    {
-      "code": "UNKNOWN_CONTENT_REF",
-      "path": "/channels/1/compose/items/2",
-      "message": "compose references content item 'opinion' which is not defined in content.items.",
-      "meta": { "ref": "opinion" }
-    },
-    {
-      "code": "TOO_MANY_ITEMS",
-      "path": "/channels/1/compose/items",
-      "message": "newsletter layout 'digest' allows at most 12 items (got 15).",
-      "meta": { "channel": "newsletter", "maxItems": 12, "actualItems": 15 }
-    },
-    {
-      "code": "UNSUPPORTED_COMPOSE_FOR_CHANNEL",
-      "path": "/channels/0/compose",
-      "message": "channel 'push' takes a single item via 'use'; 'items[]' is not supported.",
-      "meta": { "channel": "push" }
-    },
-    {
-      "code": "AUDIENCE_FIELD_MISMATCH",
-      "path": "/channels/0/audience",
-      "message": "audience.type 'userId' requires 'userIds' but 'topics' was provided.",
-      "meta": { "type": "userId", "expected": "userIds", "got": "topics" }
-    },
-    {
-      "code": "TEST_RECIPIENT_INCOMPLETE",
-      "path": "/channels/1/audience/recipients/0",
-      "message": "a test recipient with 'deviceToken' must also specify 'platform' (ios|android).",
-      "meta": { "missing": "platform" }
-    },
-    {
-      "code": "CHANNEL_AUDIENCE_INCOMPATIBLE",
-      "path": "/channels/1/audience/recipients/1",
-      "message": "a 'deviceToken' recipient is not valid for channel 'newsletter'.",
-      "meta": { "channel": "newsletter", "recipientKind": "deviceToken" }
-    }
-  ]
+	"error": "validation_failed",
+	"message": "The notification request failed validation. See details.",
+	"requestId": "req-7f3a...", // for log correlation
+	"details": [
+		{
+			"code": "MAX_LENGTH_EXCEEDED",
+			"path": "/content/items/lead/title",
+			"message": "title exceeds the 50-character limit for channel 'push' (was 63).",
+			"meta": {
+				"channel": "push",
+				"field": "title",
+				"maxLength": 50,
+				"actualLength": 63,
+			},
+		},
+		{
+			"code": "UNKNOWN_CONTENT_REF",
+			"path": "/channels/1/compose/items/2",
+			"message": "compose references content item 'opinion' which is not defined in content.items.",
+			"meta": { "ref": "opinion" },
+		},
+		{
+			"code": "TOO_MANY_ITEMS",
+			"path": "/channels/1/compose/items",
+			"message": "newsletter layout 'digest' allows at most 12 items (got 15).",
+			"meta": { "channel": "newsletter", "maxItems": 12, "actualItems": 15 },
+		},
+		{
+			"code": "UNSUPPORTED_COMPOSE_FOR_CHANNEL",
+			"path": "/channels/0/compose",
+			"message": "channel 'push' takes a single item via 'use'; 'items[]' is not supported.",
+			"meta": { "channel": "push" },
+		},
+		{
+			"code": "AUDIENCE_FIELD_MISMATCH",
+			"path": "/channels/0/audience",
+			"message": "audience.type 'userId' requires 'userIds' but 'topics' was provided.",
+			"meta": { "type": "userId", "expected": "userIds", "got": "topics" },
+		},
+		{
+			"code": "TEST_RECIPIENT_INCOMPLETE",
+			"path": "/channels/1/audience/recipients/0",
+			"message": "a test recipient with 'deviceToken' must also specify 'platform' (ios|android).",
+			"meta": { "missing": "platform" },
+		},
+		{
+			"code": "CHANNEL_AUDIENCE_INCOMPATIBLE",
+			"path": "/channels/1/audience/recipients/1",
+			"message": "a 'deviceToken' recipient is not valid for channel 'newsletter'.",
+			"meta": { "channel": "newsletter", "recipientKind": "deviceToken" },
+		},
+	],
 }
 ```
 
@@ -263,28 +297,28 @@ Response:
 ```jsonc
 // HTTP 400 Bad Request — structurally invalid (fails before business validation)
 {
-  "error": "bad_request",
-  "message": "The request body is malformed.",
-  "requestId": "req-9c1d...",
-  "details": [
-    {
-      "code": "MISSING_REQUIRED_FIELD",
-      "path": "/idempotencyKey",
-      "message": "idempotencyKey is required."
-    },
-    {
-      "code": "INVALID_TYPE",
-      "path": "/channels",
-      "message": "channels must be a non-empty array of plan objects.",
-      "meta": { "expected": "array", "got": "object" }
-    },
-    {
-      "code": "INVALID_ENUM_VALUE",
-      "path": "/channels/0/channel",
-      "message": "unknown channel 'telegram'. Supported: push, newsletter.",
-      "meta": { "got": "telegram", "allowed": ["push", "newsletter"] }
-    }
-  ]
+	"error": "bad_request",
+	"message": "The request body is malformed.",
+	"requestId": "req-9c1d...",
+	"details": [
+		{
+			"code": "MISSING_REQUIRED_FIELD",
+			"path": "/idempotencyKey",
+			"message": "idempotencyKey is required.",
+		},
+		{
+			"code": "INVALID_TYPE",
+			"path": "/channels",
+			"message": "channels must be a non-empty array of plan objects.",
+			"meta": { "expected": "array", "got": "object" },
+		},
+		{
+			"code": "INVALID_ENUM_VALUE",
+			"path": "/channels/0/channel",
+			"message": "unknown channel 'telegram'. Supported: push, newsletter.",
+			"meta": { "got": "telegram", "allowed": ["push", "newsletter"] },
+		},
+	],
 }
 ```
 
@@ -295,28 +329,28 @@ Response:
 ```jsonc
 // HTTP 409 Conflict — key reused with a different payload
 {
-  "error": "idempotency_key_conflict",
-  "message": "idempotencyKey 'morning-briefing-2026-07-08' was already used with a different request body.",
-  "requestId": "req-2b8e...",
-  "meta": {
-    "notificationId": "a1b2c3d4-...",
-    "originalRequestHash": "sha256:9f2c...",
-    "submittedRequestHash": "sha256:4a71..."
-  }
+	"error": "idempotency_key_conflict",
+	"message": "idempotencyKey 'morning-briefing-2026-07-08' was already used with a different request body.",
+	"requestId": "req-2b8e...",
+	"meta": {
+		"notificationId": "a1b2c3d4-...",
+		"originalRequestHash": "sha256:9f2c...",
+		"submittedRequestHash": "sha256:4a71...",
+	},
 }
 ```
 
 Missing/invalid auth: 401 / 403 HTTP status code
 
-| Scenario | HTTP | Key field(s) |
-|---|---|---|
-| New request accepted | `202` | all plans `accepted` |
-| Partial retry (some plans already sent) | `202` | mix of `duplicate_ignored` / `retrying` |
-| Full duplicate (nothing to do) | `202` | all plans `duplicate_ignored` |
-| Semantic/business validation failure | `422` | `error: validation_failed`, `details[]` |
-| Structurally malformed body | `400` | `error: bad_request`, `details[]` |
-| Same key, different payload | `409` | `error: idempotency_key_conflict` |
-| Missing/invalid auth | `401` / `403` | — |
+| Scenario                                | HTTP          | Key field(s)                            |
+| --------------------------------------- | ------------- | --------------------------------------- |
+| New request accepted                    | `202`         | all plans `accepted`                    |
+| Partial retry (some plans already sent) | `202`         | mix of `duplicate_ignored` / `retrying` |
+| Full duplicate (nothing to do)          | `202`         | all plans `duplicate_ignored`           |
+| Semantic/business validation failure    | `422`         | `error: validation_failed`, `details[]` |
+| Structurally malformed body             | `400`         | `error: bad_request`, `details[]`       |
+| Same key, different payload             | `409`         | `error: idempotency_key_conflict`       |
+| Missing/invalid auth                    | `401` / `403` | —                                       |
 
 ## External service contracts
 
@@ -329,27 +363,28 @@ This is what most Guardian producers emit. Our Newsletter Adapter Lambda writes 
 ```jsonc
 // → SQS: braze-emails-PROD
 {
-  "To": {
-    "Address": "reader@example.com",
-    "SubscriberKey": "reader@example.com",
-    "ContactAttributes": {
-      "SubscriberAttributes": {          // becomes Braze trigger_properties (personalisation)
-        "first_name": "Ada",
-        "subject": "Your morning briefing: Ukraine summit",
-        // multi-article digest is flattened into fields the template renders:
-        "article_1_title": "Ukraine summit begins",
-        "article_1_url": "https://www.theguardian.com/world/2026/jul/08/ukraine-summit",
-        "article_2_title": "Markets react to summit news",
-        "article_2_url": "https://www.theguardian.com/business/2026/jul/08/markets",
-        "article_3_title": "What the summit means for Europe",
-        "article_3_url": "https://www.theguardian.com/commentisfree/2026/jul/08/europe"
-      }
-    }
-  },
-  "DataExtensionName": "morning-briefing",   // logical email/campaign name → mapped to a Braze campaign_id in membership-workflow config
-  "SfContactId": null,                        // optional Salesforce contact id
-  "IdentityUserId": "100002073",              // Guardian identity id (Braze external_user_id)
-  "recordId": "a1b2c3d4-...#newsletter"       // our plan id — great for traceability
+	"To": {
+		"Address": "reader@example.com",
+		"SubscriberKey": "reader@example.com",
+		"ContactAttributes": {
+			"SubscriberAttributes": {
+				// becomes Braze trigger_properties (personalisation)
+				"first_name": "Ada",
+				"subject": "Your morning briefing: Ukraine summit",
+				// multi-article digest is flattened into fields the template renders:
+				"article_1_title": "Ukraine summit begins",
+				"article_1_url": "https://www.theguardian.com/world/2026/jul/08/ukraine-summit",
+				"article_2_title": "Markets react to summit news",
+				"article_2_url": "https://www.theguardian.com/business/2026/jul/08/markets",
+				"article_3_title": "What the summit means for Europe",
+				"article_3_url": "https://www.theguardian.com/commentisfree/2026/jul/08/europe",
+			},
+		},
+	},
+	"DataExtensionName": "morning-briefing", // logical email/campaign name → mapped to a Braze campaign_id in membership-workflow config
+	"SfContactId": null, // optional Salesforce contact id
+	"IdentityUserId": "100002073", // Guardian identity id (Braze external_user_id)
+	"recordId": "a1b2c3d4-...#newsletter", // our plan id — great for traceability
 }
 ```
 
@@ -360,7 +395,7 @@ Key fields ([`BrazeSqsMessage`](https://github.com/guardian/support-service-lamb
 `mobile-n10n` exposes a `POST /push/topic` endpoint (in the [`notification`](https://github.com/guardian/mobile-n10n/blob/main/notification/app/notification/controllers/Main.scala#L67) service, handler `Main.pushTopics`). Consumers call it over HTTPS with:
 
 - **Method / path:** `POST /push/topic`
-- **Auth header:** `Authorization: Bearer <apiKey>` — the key is checked against a configured allow-list, and **the key also scopes which topic *types* we may push to** (e.g. Newsstand is restricted to specific keys). See [`NotificationAuthAction`](https://github.com/guardian/mobile-n10n/blob/main/notification/app/notification/authentication/NotificationAuthAction.scala#L1-L24).
+- **Auth header:** `Authorization: Bearer <apiKey>` — the key is checked against a configured allow-list, and **the key also scopes which topic _types_ we may push to** (e.g. Newsstand is restricted to specific keys). See [`NotificationAuthAction`](https://github.com/guardian/mobile-n10n/blob/main/notification/app/notification/authentication/NotificationAuthAction.scala#L1-L24).
 - **Content-Type:** `application/json; charset=utf-8`
 - **Body:** a single JSON `NotificationPayload`, discriminated by a `type` field.
 
@@ -379,12 +414,12 @@ From [`Main.pushTopics`](https://github.com/guardian/mobile-n10n/blob/main/notif
 
 `NotificationPayload` is a sealed hierarchy — the `type` string selects the variant ([`NotificationPayloadType`](https://github.com/guardian/mobile-n10n/blob/main/api-models/src/main/scala/com/gu/mobile.notifications.client/models/NotificationPayloadType.scala#L9-L22) and [`Payloads.scala`](https://github.com/guardian/mobile-n10n/blob/main/api-models/src/main/scala/com/gu/mobile.notifications.client/models/Payloads.scala#L86-L127)):
 
-| `type` value | Variant | Our broker uses |
-|---|---|---|
-| `"news"` | `BreakingNewsPayload` | ✅ breaking news |
-| `"content"` | `ContentAlertPayload` | follow/new-article alerts |
-| `"football-match-status"` | `FootballMatchStatusPayload` | (football only) |
-| `"football-penalty-shootout"` | `FootballPenaltyShootoutPayload` | (football only) |
+| `type` value                  | Variant                          | Our broker uses           |
+| ----------------------------- | -------------------------------- | ------------------------- |
+| `"news"`                      | `BreakingNewsPayload`            | ✅ breaking news          |
+| `"content"`                   | `ContentAlertPayload`            | follow/new-article alerts |
+| `"football-match-status"`     | `FootballMatchStatusPayload`     | (football only)           |
+| `"football-penalty-shootout"` | `FootballPenaltyShootoutPayload` | (football only)           |
 
 **Common fields** (the `NotificationPayload` trait, [Payloads.scala L86–96](https://github.com/guardian/mobile-n10n/blob/main/api-models/src/main/scala/com/gu/mobile.notifications.client/models/Payloads.scala#L86-L96)): `id`, `type`, `title`, `message`, `thumbnailUrl`, `sender`, `importance`, `topic[]`, `debug`, `dryRun`.
 
@@ -393,27 +428,29 @@ From [`Main.pushTopics`](https://github.com/guardian/mobile-n10n/blob/main/notif
 // Authorization: Bearer <apiKey>
 // Content-Type: application/json; charset=utf-8
 {
-  "id": "a1b2c3d4-....",          // UUID; optional (defaults server-side) but supply yours for traceability
-  "type": "news",                 // discriminator → BreakingNewsPayload
-  "title": "Ukraine summit begins",
-  "message": "World leaders gather in Geneva as talks open...",
-  "thumbnailUrl": "https://.../thumb.jpg",   // optional
-  "sender": "notifications-tooling-spa/v1",  // free-text source identifier
-  "link": {                                  // REQUIRED for news/content (NotificationWithLink)
-    "contentApiId": "world/2026/jul/08/ukraine-summit",
-    "shortUrl": "https://gu.com/p/xyz",
-    "title": "Ukraine summit begins",
-    "git": { "mobileAggregatorPrefix": "item-trimmed" }
-    // ^ GuardianLinkDetails; or use { "url": "https://..." } for an ExternalLink
-  },
-  "imageUrl": "https://.../lead.jpg",        // optional
-  "importance": "Major",                     // "Major" | "Minor"
-  "topic": [                                 // 1–20 entries; {type, name}
-    { "type": "breaking", "name": "uk" },
-    { "type": "breaking", "name": "us" }
-  ],
-  "debug": false,
-  "dryRun": false                            // true = full pipeline, no device delivery
+	"id": "a1b2c3d4-....", // UUID; optional (defaults server-side) but supply yours for traceability
+	"type": "news", // discriminator → BreakingNewsPayload
+	"title": "Ukraine summit begins",
+	"message": "World leaders gather in Geneva as talks open...",
+	"thumbnailUrl": "https://.../thumb.jpg", // optional
+	"sender": "notifications-tooling-spa/v1", // free-text source identifier
+	"link": {
+		// REQUIRED for news/content (NotificationWithLink)
+		"contentApiId": "world/2026/jul/08/ukraine-summit",
+		"shortUrl": "https://gu.com/p/xyz",
+		"title": "Ukraine summit begins",
+		"git": { "mobileAggregatorPrefix": "item-trimmed" },
+		// ^ GuardianLinkDetails; or use { "url": "https://..." } for an ExternalLink
+	},
+	"imageUrl": "https://.../lead.jpg", // optional
+	"importance": "Major", // "Major" | "Minor"
+	"topic": [
+		// 1–20 entries; {type, name}
+		{ "type": "breaking", "name": "uk" },
+		{ "type": "breaking", "name": "us" },
+	],
+	"debug": false,
+	"dryRun": false, // true = full pipeline, no device delivery
 }
 ```
 
@@ -421,15 +458,15 @@ From [`Main.pushTopics`](https://github.com/guardian/mobile-n10n/blob/main/notif
 
 **The public ingest endpoint `POST /push/topic` only accepts topics, not device tokens.** Its controller ([`Main.pushTopics`](https://github.com/guardian/mobile-n10n/blob/main/notification/app/notification/controllers/Main.scala#L67-L76)) rejects an empty topic list outright (`400 "Empty topic list"`) and the payload model ([`BreakingNewsPayload`](https://github.com/guardian/mobile-n10n/blob/main/api-models/src/main/scala/com/gu/mobile.notifications.client/models/Payloads.scala#L113-L127)) has **no device-token field at all** — only `topic[]`. So we **cannot** hand mobile-n10n a raw device token via its normal API.
 
-However, the *capability* exists one layer down. The worker pipeline is built around delivering to individual tokens — [`IndividualNotification(notification, token)`](https://github.com/guardian/mobile-n10n/blob/main/notificationworkerlambda/src/main/scala/com/gu/notifications/worker/tokens/TokenService.scala#L14) and [`ChunkedTokens`](https://github.com/guardian/mobile-n10n/blob/main/notificationworkerlambda/src/main/scala/com/gu/notifications/worker/tokens/TokenService.scala#L16-L18) carry explicit token lists, and their local-dev runner sends to hardcoded tokens ([`NotificationWorkerLocalRun`](https://github.com/guardian/mobile-n10n/blob/main/README.md#L146-L154)). The harvester's whole job is topic → tokens; for a test we already *have* the token, so we'd bypass harvesting.
+However, the _capability_ exists one layer down. The worker pipeline is built around delivering to individual tokens — [`IndividualNotification(notification, token)`](https://github.com/guardian/mobile-n10n/blob/main/notificationworkerlambda/src/main/scala/com/gu/notifications/worker/tokens/TokenService.scala#L14) and [`ChunkedTokens`](https://github.com/guardian/mobile-n10n/blob/main/notificationworkerlambda/src/main/scala/com/gu/notifications/worker/tokens/TokenService.scala#L16-L18) carry explicit token lists, and their local-dev runner sends to hardcoded tokens ([`NotificationWorkerLocalRun`](https://github.com/guardian/mobile-n10n/blob/main/README.md#L146-L154)). The harvester's whole job is topic → tokens; for a test we already _have_ the token, so we'd bypass harvesting.
 
 **What this means for our broker:** a `type: "test"` push plan can't be a passthrough to `/push/topic`. Our Push Adapter has three options, in order of preference:
 
-| Option | How | Verdict |
-|---|---|---|
+| Option                   | How                                                                                                             | Verdict                                                                  |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | **Ephemeral test topic** | Register the test device(s) to a unique topic (e.g. `test//<uuid>`), then push to that topic via the normal API | ✅ Works with the **public** API today, no mobile-n10n change. Cleanest. |
-| **Direct provider send** | Broker calls APNs/FCM itself for test tokens | ✅ Works, but our broker now holds provider creds — avoid if possible |
-| **New n10n endpoint** | Ask mobile-platform for a `POST /push/tokens` test route | ⛔ Requires their change; don't design around it |
+| **Direct provider send** | Broker calls APNs/FCM itself for test tokens                                                                    | ✅ Works, but our broker now holds provider creds — avoid if possible    |
+| **New n10n endpoint**    | Ask mobile-platform for a `POST /push/tokens` test route                                                        | ⛔ Requires their change; don't design around it                         |
 
 I'd model the contract as-is (`type: "test"` with `deviceToken`), and have the adapter implement the **ephemeral test topic** strategy. Confirm the token-registration approach with the mobile-platform team, since it depends on how the apps expose their token for pasting.
 

@@ -1,9 +1,9 @@
-import "./index.css";
+import './index.css';
 
-import { DispatchPage } from "./features/dispatch/DispatchPage";
+import { DispatchPage } from './features/dispatch/DispatchPage';
 
 export function App() {
-  return <DispatchPage />;
+	return <DispatchPage />;
 }
 
 export default App;
