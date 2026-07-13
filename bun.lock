@@ -7,6 +7,7 @@
       "devDependencies": {
         "@guardian/eslint-config": "^16.0.0",
         "@guardian/prettier": "^11.0.0",
+        "@guardian/tsconfig": "^2.0.0",
         "@types/bun": "latest",
         "@types/node": "^26.1.1",
         "eslint": "^9.39.1",
@@ -149,6 +150,8 @@
     "@guardian/prettier": ["@guardian/prettier@11.0.0", "", { "peerDependencies": { "prettier": "^3.7.4", "tslib": "^2.8.1" } }, "sha512-zq3icTMZtkbt7dWSMotYDMSpoXsrf105/EoKC1cNecrFqqY45+R3TBRwGudyA+31eAhR7L6GAyB1qD3074lHYQ=="],
 
     "@guardian/stand": ["@guardian/stand@0.0.57", "", { "peerDependencies": { "@emotion/react": ">=11.11.4 <=11.14.0", "@guardian/prosemirror-invisibles": "^3.1.1", "@internationalized/date": "^3.12.1", "prosemirror-dropcursor": "^1.8.2", "prosemirror-history": "^1.4.1", "prosemirror-keymap": "^1.2.2", "prosemirror-model": "^1.25.0", "prosemirror-state": "^1.4.3", "prosemirror-view": "^1.37.2", "react": "^17.0.2 || ^18.0.0 || ^19.0.0", "react-aria-components": ">= 1.14.0 <= 1.19.0", "react-dom": "^17.0.2 || ^18.0.0 || ^19.0.0", "typescript": ">=5.0.0 <=5.9.3" }, "optionalPeers": ["@emotion/react", "@guardian/prosemirror-invisibles", "@internationalized/date", "prosemirror-dropcursor", "prosemirror-history", "prosemirror-keymap", "prosemirror-model", "prosemirror-state", "prosemirror-view", "react", "react-aria-components", "react-dom", "typescript"] }, "sha512-XhJ2uUi7tZUSe0upC65RRGzJef7EIC4ZX2NA5VHBujSNx57L4TcMUrxZn/3HU0v6fKy/dgGBbPpbQpkTLlw1SA=="],
+
+    "@guardian/tsconfig": ["@guardian/tsconfig@2.0.0", "", {}, "sha512-alvlrRwOF42tCcxkT4zL+0wauoywMK9FzRgZgx8BV/4ggVEUARTTeCc+HXIbG8Gj9EZkFWFVWJJrFLwqJAkgBw=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.2", "", { "dependencies": { "@humanfs/types": "^0.15.0" } }, "sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA=="],
 

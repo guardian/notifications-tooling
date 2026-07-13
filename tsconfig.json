@@ -1,30 +1,11 @@
 {
+	"extends": "@guardian/tsconfig/tsconfig.json",
 	"compilerOptions": {
-		// Environment setup & latest features
-		"lib": ["ESNext"],
-		"target": "ESNext",
-		"module": "Preserve",
-		"moduleDetection": "force",
-		"jsx": "react-jsx",
-		"allowJs": true,
-		"types": ["bun", "node"],
-
-		// Bundler mode
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"verbatimModuleSyntax": true,
+		// tsc is type-check only; Bun handles bundling
 		"noEmit": true,
-
-		// Best practices
-		"strict": true,
-		"skipLibCheck": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUncheckedIndexedAccess": true,
-		"noImplicitOverride": true,
-
-		// Some stricter flags
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noPropertyAccessFromIndexSignature": true
+		// Scope global types (bun + node), otherwise all @types/* are pulled in
+		"types": ["bun", "node"],
+		// bun-types and @types/node declare conflicting globals
+		"skipLibCheck": true
 	}
 }
