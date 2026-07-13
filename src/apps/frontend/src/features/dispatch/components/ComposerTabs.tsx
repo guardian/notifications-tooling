@@ -11,7 +11,11 @@ import { AudiencePanel } from './AudiencePanel';
 import { ContentPanel } from './ContentPanel';
 import { DeliveryPanel } from './DeliveryPanel';
 
-const TABS: { id: ComposerTab; label: string; icon: IconProps['symbol'] }[] = [
+const TABS: Array<{
+	id: ComposerTab;
+	label: string;
+	icon: IconProps['symbol'];
+}> = [
 	{ id: 'content', label: 'Content', icon: 'description' },
 	{ id: 'audience', label: 'Audience', icon: 'group' },
 	{ id: 'delivery', label: 'Delivery', icon: 'schedule' },

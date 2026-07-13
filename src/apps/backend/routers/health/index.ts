@@ -4,4 +4,4 @@ export const healthHandler = (_req: Request, res: Response) => {
 	res.json({ status: 'ok', uptime: process.uptime() });
 };
 
-export default Router().get('/', healthHandler);
+export const healthRouter = Router().get('/', healthHandler);

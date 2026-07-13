@@ -7,7 +7,9 @@ export function APITester() {
 		e.preventDefault();
 
 		const responseInput = responseInputRef.current;
-		if (!responseInput) return;
+		if (!responseInput) {
+			return;
+		}
 
 		try {
 			const form = e.currentTarget;
@@ -17,7 +19,7 @@ export function APITester() {
 			const method = formData.get('method') as string;
 			const res = await fetch(url, { method });
 
-			const data = await res.json();
+			const data: unknown = await res.json();
 			responseInput.value = JSON.stringify(data, null, 2);
 		} catch (error) {
 			responseInput.value = String(error);
@@ -26,7 +28,7 @@ export function APITester() {
 
 	return (
 		<div className="api-tester">
-			<form onSubmit={testEndpoint} className="endpoint-row">
+			<form onSubmit={(e) => void testEndpoint(e)} className="endpoint-row">
 				<select name="method" className="method">
 					<option value="GET">GET</option>
 					<option value="PUT">PUT</option>

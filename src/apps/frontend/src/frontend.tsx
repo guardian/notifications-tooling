@@ -27,8 +27,13 @@ const app = (
 );
 
 // https://bun.com/docs/bundler/hot-reloading#import-meta-hot-data
+// `import.meta.hot` is typed as always present but is `undefined` in production
+// builds, so this runtime guard is intentional.
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- guard needed at runtime
 if (import.meta.hot) {
-	const data = import.meta.hot.data;
+	const data = import.meta.hot.data as {
+		root?: ReturnType<typeof createRoot>;
+	};
 	data.root ??= createRoot(elem);
 	data.root.render(app);
 } else {
