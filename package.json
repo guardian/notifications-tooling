@@ -20,11 +20,13 @@
 		"src/packages/*"
 	],
 	"scripts": {
+		"prepare": "lefthook install",
 		"test": "bun test",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
+		"typecheck": "bun run --filter '*' typecheck",
 		"docker:compose:up": "docker compose -f docker/docker-compose.local.yml up -d",
 		"docker:compose:down": "docker compose -f docker/docker-compose.local.yml down"
 	},

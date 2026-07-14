@@ -47,6 +47,9 @@ bun install
 
 ## Install lint & format checks as a git hook using `lefthook`
 
+The git hooks are installed automatically after `bun install` via the `prepare`
+script. If you ever need to (re)install them manually, run:
+
 ```sh
 bunx lefthook install
 ```
