@@ -21,6 +21,9 @@
 	],
 	"scripts": {
 		"prepare": "lefthook install",
+		"dev": "sh -c 'trap \"kill 0\" EXIT INT TERM; bun run dev:backend & bun run dev:frontend'",
+		"dev:backend": "cd src/apps/backend && bun run dev",
+		"dev:frontend": "cd src/apps/frontend && BUN_PUBLIC_API_BASE_URL=${BUN_PUBLIC_API_BASE_URL:-http://localhost:3000} bun run dev",
 		"test": "bun test",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",

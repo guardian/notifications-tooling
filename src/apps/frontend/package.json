@@ -10,6 +10,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@breaking-news-template": "workspace:*",
 		"@emotion/react": "^11.14.0",
 		"@guardian/stand": "^0.0.57",
 		"react": "^19",

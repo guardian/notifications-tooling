@@ -16,6 +16,18 @@ app.disable('x-powered-by');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req: Request, res: Response, next: NextFunction) => {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Headers', 'Content-Type');
+	res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+
+	if (req.method === 'OPTIONS') {
+		res.sendStatus(204);
+		return;
+	}
+
+	next();
+});
 app.use(pinoHttp({ logger }));
 
 // --- Routes ---

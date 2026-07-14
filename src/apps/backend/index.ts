@@ -1,3 +1,4 @@
+import './env';
 import { env } from '@config';
 import { app } from './app';
 import { logger } from './utils/logger';
