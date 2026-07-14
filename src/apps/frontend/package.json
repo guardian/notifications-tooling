@@ -9,6 +9,7 @@
     "start": "NODE_ENV=production bun src/index.ts"
   },
   "dependencies": {
+    "@breaking-news-template": "workspace:*",
     "react": "^19",
     "react-dom": "^19"
   },

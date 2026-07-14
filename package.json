@@ -9,6 +9,9 @@
     "src/packages/*"
   ],
   "scripts": {
+    "dev": "sh -c 'trap \"kill 0\" EXIT INT TERM; bun run dev:backend & bun run dev:frontend'",
+    "dev:backend": "cd src/apps/backend && bun run dev",
+    "dev:frontend": "cd src/apps/frontend && BUN_PUBLIC_API_BASE_URL=${BUN_PUBLIC_API_BASE_URL:-http://localhost:3000} bun run dev",
     "test": "bun test",
     "format": "bunx @biomejs/biome check ./src --write",
     "lint": "bunx @biomejs/biome lint ./src",
@@ -19,6 +22,8 @@
     "@biomejs/biome": "^2.5.3",
     "@types/bun": "latest",
     "@types/node": "^26.1.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "lefthook": "^2.1.10"
   }
 }

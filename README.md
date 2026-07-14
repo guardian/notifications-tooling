@@ -1,108 +1,71 @@
-# Notifications tooling monorepo
+# Notification tooling
 
-## Install dev tools
+This prototype turns a Guardian article into a templated email and sends it through Braze.
 
-The DevX tooling relies on [Bun](https://bun.com/)
+## Development
 
-On Mac OS install its latest version using Homebrew:
+The project uses [Bun](https://bun.com/). On macOS, install it with Homebrew:
 
 ```sh
 brew install bun
 ```
 
-## Biome as alternative to prettier and eslint
-
-Biome acts as a formatter and linter all in a single package. Biome is highly configurable, is just as opinionated as prettier. We can add additional overrides to biome very easily when needed.
-
-It's helpful to install VSCode, install Biome extension so that the file will be formatted on save. [Biome extension can be downloaded from here](https://marketplace.visualstudio.com/items?itemName=biomejs.biome).
-
-## Install dependencies
-
-To install the dependencies for every app, package etc, simply invoke this while current working dir is the root of the repo:
+Install workspace dependencies:
 
 ```sh
 bun install
 ```
 
-## Install biome formatter as pre-commit hook using `lefthook`
+Start the backend and frontend from the repository root:
 
 ```sh
-bunx lefthook install
-```
-
-Now biome will auto-format supported files as part of each `git commit` command run.
-
-### To add dependencies
-
-As we rely on Bun on pretty much everything here, to install npm modules we need to use bun. An example:
-
-```sh
-bun add some_npm_dependency
-
-# dev dependency
-bun add -D dev_dependency
-
-# targetting a specific app, package etc
-bun --filter @backend add some_npm_module
-```
-
-Bun will generate or update the existing `bun.lock` file, similar to `package-lock.json`.
-
-## Docker compose
-
-Should we require to rely on Postgres DB. There's a minimal working `./docker/docker-compose.local.yml` file and project root `package.json` contains two helper scripts to start & stop docker services.
-
-To start services:
-
-```sh
-bun docker:compose:up
-```
-
-To stop them:
-
-```sh
-bun docker:compose:down
-```
-
-## Start backend server app
-
-Backend server app currently uses Express.js as its REST server. To start the backend app:
-
-```sh
-cd ./src/apps/backend
 bun run dev
 ```
 
-The server will restart seamlessly upon any file changed during it's code changes.
+The backend runs on `http://localhost:3000` and the frontend on `http://localhost:3001`.
 
-## Start frontend app
-
-Frontend app uses React. To start the app:
-
-```sh
-cd ./src/apps/frontend
-bun run dev
-```
-
-## Running tests
-
-To run tests in the scope of the entire project:
+Run the test suite with:
 
 ```sh
 bun test
 ```
 
-To run on a specific app or package there are couple of ways:
+## Flow
 
-Having current working dir open inside that app:
+1. The frontend sends a Guardian article URL to `POST /v1/notifications/guardian-article`.
+2. The backend extracts the article ID and fetches its headline, standfirst, image and canonical URL from Guardian CAPI.
+3. The frontend uses those fields to populate an editable draft and render an email preview.
+4. The email template is stored as HTML in `src/packages/breaking-news-template/breaking-news-us-template.html`. The renderer replaces its named placeholders with the article content.
+5. The frontend sends the edited draft to `POST /v1/notifications/braze-email`.
+6. The backend renders the final HTML and sends it to Braze using `/campaigns/trigger/send`.
 
-```sh
-cd ./src/apps/backend
-bun test
+## Braze payload
+
+The backend sends the subject and rendered HTML as shared trigger properties. The recipient is identified by email.
+
+```json
+{
+  "campaign_id": "<BRAZE_CAMPAIGN_ID>",
+  "trigger_properties": {
+    "subject": "Breaking news: Example headline",
+    "body": "<html>...rendered email...</html>"
+  },
+  "recipients": [
+    {
+      "email": "recipient@example.com",
+      "prioritization": ["unidentified", "most_recently_updated"],
+      "attributes": {
+        "email": "recipient@example.com"
+      },
+      "send_to_existing_only": false
+    }
+  ]
+}
 ```
 
-Using workspace filters, ie:
+The Braze campaign reads the trigger properties with:
 
-```sh
-bun --filter @backend test
+```liquid
+{{api_trigger_properties.subject}}
+{{api_trigger_properties.body}}
 ```

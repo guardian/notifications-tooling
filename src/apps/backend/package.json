@@ -14,7 +14,9 @@
     "@types/express": "^5.0.6"
   },
   "dependencies": {
+    "@breaking-news-template": "workspace:*",
     "@config": "workspace:*",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1"
   }
 }

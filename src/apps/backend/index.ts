@@ -1,3 +1,4 @@
+import "./env";
 import app from "./app";
 
 // --- Start Server ---
