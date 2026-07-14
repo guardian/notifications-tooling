@@ -4,7 +4,7 @@ import { healthHandler } from './index';
 
 describe('health handler', () => {
 	it('responds with status ok and a numeric uptime', () => {
-		const json = mock((_body: unknown) => {});
+		const json = mock<(body: unknown) => void>(() => {});
 		const res = { json } as unknown as Response;
 
 		healthHandler({} as Request, res);
