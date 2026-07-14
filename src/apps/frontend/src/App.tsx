@@ -1,8 +1,6 @@
-import { GuardianEmailTool } from "./GuardianEmailTool";
-import "./index.css";
+import { GuardianEmailTool } from './GuardianEmailTool';
+import './index.css';
 
 export function App() {
-  return <GuardianEmailTool />;
+	return <GuardianEmailTool />;
 }
-
-export default App;

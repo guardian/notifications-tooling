@@ -7,11 +7,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-notifications}
       POSTGRES_DB: ${POSTGRES_DB:-notifications}
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - ./postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notifications} -d ${POSTGRES_DB:-notifications}"]
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-notifications} -d ${POSTGRES_DB:-notifications}',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

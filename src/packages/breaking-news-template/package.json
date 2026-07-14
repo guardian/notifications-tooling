@@ -1,6 +1,6 @@
 {
-  "name": "@breaking-news-template",
-  "module": "index.ts",
-  "type": "module",
-  "private": true
+	"name": "@breaking-news-template",
+	"module": "index.ts",
+	"type": "module",
+	"private": true
 }
