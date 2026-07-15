@@ -67,7 +67,7 @@ bun add some_npm_dependency
 bun add -D dev_dependency
 
 # targetting a specific app, package etc
-bun --filter @backend add some_npm_module
+bun --filter backend add some_npm_module
 ```
 
 Bun will generate or update the existing `bun.lock` file, similar to `package-lock.json`.
@@ -128,5 +128,5 @@ bun test
 Using workspace filters, ie:
 
 ```sh
-bun --filter @backend test
+bun --filter backend test
 ```
