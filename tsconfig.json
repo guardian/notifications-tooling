@@ -6,6 +6,11 @@
 		// Scope global types (bun + node), otherwise all @types/* are pulled in
 		"types": ["bun", "node"],
 		// bun-types and @types/node declare conflicting globals
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		// Explicitly set the target to es2025. As of TypeScript 6.0, the default is es2025, which advances alongside the ECMAScript standard.
+		"target": "es2025",
+		"lib": ["ES2025", "DOM", "DOM.Iterable"],
+		// Controls how JSX constructs are emitted in JavaScript files, react-jsx optimises for production
+		"jsx": "react-jsx"
 	}
 }
