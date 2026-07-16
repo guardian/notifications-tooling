@@ -28,7 +28,9 @@ const glob = new Glob('**/package.json');
 const violations: string[] = [];
 
 for await (const path of glob.scan({ cwd: process.cwd() })) {
-	if (path.includes('node_modules')) continue;
+	if (path.includes('node_modules')) {
+		continue;
+	}
 
 	const pkg = (await Bun.file(path).json()) as Record<
 		string,
@@ -37,7 +39,9 @@ for await (const path of glob.scan({ cwd: process.cwd() })) {
 
 	for (const field of DEP_FIELDS) {
 		const deps = pkg[field];
-		if (!deps) continue;
+		if (!deps) {
+			continue;
+		}
 
 		for (const [name, version] of Object.entries(deps)) {
 			if (!isPinned(version)) {
