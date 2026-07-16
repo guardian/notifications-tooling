@@ -8,6 +8,7 @@ import {
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
 import { type ReactNode, useContext } from 'react';
+import { faviconTheme, topBarTheme } from '../themes';
 import type { TabName, UserData } from '../types';
 import { UserContext } from '../UserContext';
 
@@ -39,14 +40,16 @@ export const MainLayout = ({ children, currentTab, setTab }: Props) => {
 	return (
 		<Layout>
 			<Layout.TopBar>
-				<TopBar>
+				<TopBar theme={topBarTheme}>
 					<TopBarToolName
 						name="Notifications Tool"
-						favicon={{ icon: <Favicon icon="notifications" /> }}
+						favicon={{
+							icon: <Favicon icon="notifications" theme={faviconTheme} />,
+						}}
 					/>
 					<TopBarContainerLeft>
 						{Object.entries(navLinks).map(([tabName, { text }]) => (
-                            <TopBarNavigation
+							<TopBarNavigation
 								key={tabName}
 								text={text}
 								isSelected={currentTab === tabName}
