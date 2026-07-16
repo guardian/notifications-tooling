@@ -19,7 +19,7 @@ const getUser = (): Promise<UserData> => {
 	}
 };
 
-export const NotificationPage = () => {
+export const EmailNotificationPage = () => {
 	const [user, setUser] = useState<UserData>();
 	const [currentTab, setCurrentTab] = useState<TabName>(() => {
 		switch (location.hash) {
