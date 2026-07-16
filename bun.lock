@@ -21,16 +21,16 @@
       "name": "backend",
       "dependencies": {
         "@config": "workspace:*",
-        "express": "^5.2.1",
-        "express-zod-safe": "^3.2.1",
-        "pino": "^10.3.1",
-        "pino-http": "^11.0.0",
-        "zod": "^4.4.3",
+        "express": "5.2.1",
+        "express-zod-safe": "3.2.1",
+        "pino": "10.3.1",
+        "pino-http": "11.0.0",
+        "zod": "4.4.3",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "@types/express": "^5.0.6",
-        "pino-pretty": "^13.1.3",
+        "@types/bun": "1.3.14",
+        "@types/express": "5.0.6",
+        "pino-pretty": "13.1.3",
       },
     },
     "src/apps/frontend": {
@@ -38,7 +38,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@emotion/react": "11.14.0",
-        "@guardian/stand": "0.0.58",
+        "@guardian/stand": "0.0.60",
         "react": "19.2.7",
         "react-aria-components": "1.19.0",
         "react-dom": "19.2.7",
@@ -143,7 +143,7 @@
 
     "@guardian/prettier": ["@guardian/prettier@11.0.0", "", { "peerDependencies": { "prettier": "^3.7.4", "tslib": "^2.8.1" } }, "sha512-zq3icTMZtkbt7dWSMotYDMSpoXsrf105/EoKC1cNecrFqqY45+R3TBRwGudyA+31eAhR7L6GAyB1qD3074lHYQ=="],
 
-    "@guardian/stand": ["@guardian/stand@0.0.58", "", { "peerDependencies": { "@emotion/react": ">=11.11.4 <=11.14.0", "@guardian/prosemirror-invisibles": "^3.1.1", "@internationalized/date": "^3.12.1", "prosemirror-dropcursor": "^1.8.2", "prosemirror-history": "^1.4.1", "prosemirror-keymap": "^1.2.2", "prosemirror-model": "^1.25.0", "prosemirror-state": "^1.4.3", "prosemirror-view": "^1.37.2", "react": "^17.0.2 || ^18.0.0 || ^19.0.0", "react-aria-components": ">= 1.14.0 <= 1.19.0", "react-dom": "^17.0.2 || ^18.0.0 || ^19.0.0", "typescript": ">=5.0.0 <=5.9.3" }, "optionalPeers": ["@emotion/react", "@guardian/prosemirror-invisibles", "@internationalized/date", "prosemirror-dropcursor", "prosemirror-history", "prosemirror-keymap", "prosemirror-model", "prosemirror-state", "prosemirror-view", "react", "react-aria-components", "react-dom", "typescript"] }, "sha512-xwRFc8lGqbivN2dZCnNwgE15+ODg3MtmG0imlLQ/YcDAIu//7VQ9TySwPUw9ZLZCq+5Fm+ODb1DOGZomSJ9SEw=="],
+    "@guardian/stand": ["@guardian/stand@0.0.60", "", { "peerDependencies": { "@emotion/react": ">=11.11.4 <=11.14.0", "@guardian/prosemirror-invisibles": "^3.1.1", "@internationalized/date": "^3.12.1", "prosemirror-dropcursor": "^1.8.2", "prosemirror-history": "^1.4.1", "prosemirror-keymap": "^1.2.2", "prosemirror-model": "^1.25.0", "prosemirror-state": "^1.4.3", "prosemirror-view": "^1.37.2", "react": "^17.0.2 || ^18.0.0 || ^19.0.0", "react-aria-components": ">= 1.14.0 <= 1.19.0", "react-dom": "^17.0.2 || ^18.0.0 || ^19.0.0", "typescript": ">=5.0.0 <=5.9.3" }, "optionalPeers": ["@emotion/react", "@guardian/prosemirror-invisibles", "@internationalized/date", "prosemirror-dropcursor", "prosemirror-history", "prosemirror-keymap", "prosemirror-model", "prosemirror-state", "prosemirror-view", "react", "react-aria-components", "react-dom", "typescript"] }, "sha512-ZE9jsLuwnSCwfzX+7+4kx287N0qohr5iL1M4ZI8QDSM5e9UovaOCQU5zLbWIWC8diCGxLnO1RVt6UUOcl3pNig=="],
 
     "@guardian/tsconfig": ["@guardian/tsconfig@2.0.0", "", {}, "sha512-alvlrRwOF42tCcxkT4zL+0wauoywMK9FzRgZgx8BV/4ggVEUARTTeCc+HXIbG8Gj9EZkFWFVWJJrFLwqJAkgBw=="],
 
