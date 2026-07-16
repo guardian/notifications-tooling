@@ -1,0 +1,11 @@
+{
+	"extends": "@guardian/tsconfig/tsconfig.json",
+	"compilerOptions": {
+		// tsc is type-check only; Bun handles bundling
+		"noEmit": true,
+		// Scope global types (bun + node), otherwise all @types/* are pulled in
+		"types": ["bun", "node"],
+		// bun-types and @types/node declare conflicting globals
+		"skipLibCheck": true
+	}
+}

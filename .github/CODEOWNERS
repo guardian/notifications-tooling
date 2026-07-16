@@ -1,0 +1,19 @@
+# CODEOWNERS
+
+# Define individuals or teams responsible for code in this repository.
+
+# Order matters: the last matching pattern takes precedence.
+
+# Docs: https://docs.github.com/articles/about-code-owners
+
+#
+
+# Examples:
+
+# * @guardian/your-team
+
+# /src/apps/backend/ @guardian/your-team
+
+# /src/apps/frontend/ @guardian/your-team
+
+# *.md @guardian/your-team

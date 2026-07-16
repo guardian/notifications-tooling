@@ -1,0 +1,10 @@
+{
+	"extends": "../../../tsconfig.json",
+	"compilerOptions": {
+		// Browser environment: add DOM, swap node types for react
+		"lib": ["ESNext", "DOM"],
+		"types": ["bun", "react"],
+		// Required to type-check JSX
+		"jsx": "react-jsx"
+	}
+}
