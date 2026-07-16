@@ -19,7 +19,7 @@
 
 ## Suggested Backend RESTful endpoints
 
-- `GET | POST | DELETE /v1/user` - Expose ability to change test email address and test device token (if makes sense and relatively easy to extract one)
+- `GET | POST | DELETE /v1/user` - Expose ability to change test email address and test device token (if makes sense and relatively easy to extract one). Nice to have, instead of must have.
 - `GET /v1/channels/audiences` - Ability to retrieve newsletter segments, push notification topics
 - `GET /v1/channels/constraints` - Retrieves per-channel validation rules/constrains
 - `GET /v1/notifications` - Retrieves a list of already enqueued notifications
@@ -167,6 +167,8 @@ Response:
 }
 ```
 
+NOTE: Having a persistence layer, the `notificationId` is what gets generated on the persistence layer by our backend. As the multiple channels are called later on, each channel successful response will provide its own internal unique identifier. As such, in this case, the backend then updates the `notificationId` row with channel's UID in appropriate column or a nested table such as `notifications_channel_push_attempts`, this way we'd be able to log and track each attempt/retry individually and report back to the SPA accordingly.
+
 ```jsonc
 // Retry of an already-submitted idempotencyKey where `push` succeeded earlier
 // but `newsletter` had failed. HTTP 202 Accepted.
@@ -233,6 +235,8 @@ Note: The emails persisted in the allow-list will have to be pre-validated so on
 ```
 
 One important guard: the **retry body must be semantically equal** (same content + plans) (deep object equality test). If the same idempotencyKey arrives with a different payload, that's a client bug, and we should reject it rather than silently send the old or new version — see the 409 case in the errors below. This is standard idempotency-key hygiene and prevents a whole class of "why did it send the wrong thing" incidents.
+
+NOTE: We need to be careful about situations such as `{ subject: "123" }` and `{ subject: "123", scheduled: null }` incoming request payloads will **NEED** to be treated as equal. To guarantee this, we'll need to carefully consider initialising attribute values with correct defaults. Only this way both payloads will pass deep object equality as both input payloads will produce identical final payload **AFTER** the validation stage.
 
 ### Validation error format
 
