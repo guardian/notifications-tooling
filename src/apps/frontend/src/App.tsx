@@ -6,5 +6,9 @@ import { EmailNotificationPage } from './features/stand-frontend/EmailNotificati
 const useEmailNotificationPage = true as boolean;
 
 export function App() {
-	return useEmailNotificationPage ? <EmailNotificationPage /> : <DispatchPage />;
+	return useEmailNotificationPage ? (
+		<EmailNotificationPage />
+	) : (
+		<DispatchPage />
+	);
 }

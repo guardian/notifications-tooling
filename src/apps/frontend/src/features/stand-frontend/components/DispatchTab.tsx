@@ -1,19 +1,26 @@
 import { css } from '@emotion/react';
-import { semanticColors } from '@guardian/stand';
+import {
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
+import { Option, Select } from '@guardian/stand/Select';
+import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 
 export const DispatchTab = () => {
 	return (
 		<Layout.Main
 			theme={{
-				sm: { padding: { top: '0px' } },
-				md: { padding: { top: '0px' } },
-				lg: { padding: { top: '0px' } },
+				sm: { padding: { top: '0px', bottom: '0px' } },
+				md: { padding: { top: '0px', bottom: '0px' } },
+				lg: { padding: { top: '0px', bottom: '0px' } },
 			}}
 		>
 			<Grid
+				cssOverrides={css({ height: '100%' })}
 				theme={{
 					sm: { gap: '0px' },
 					md: { gap: '0px' },
@@ -23,31 +30,48 @@ export const DispatchTab = () => {
 				<Item
 					size={8}
 					cssOverrides={css({
-						borderRightWidth: 1,
+						borderRightWidth: semanticSizing.border.default,
 						borderRightStyle: 'solid',
 						borderRightColor: semanticColors.border.weak,
-						marginRight: 10,
+						marginRight: semanticSpacing.stackSm,
+						paddingTop: semanticSpacing.stackSm,
 					})}
 				>
-					<Typography variant="headingCompactMd" element="h2">
+					<Typography variant="titleMd" element="h2">
 						Create a Notification
 					</Typography>
 
-					<Typography element="div" variant="headingCompactXs">
-						Article
-					</Typography>
-					<Typography element="div" variant="headingCompactXs">
-						Channel
-					</Typography>
-					<Typography element="div" variant="headingCompactXs">
-						Kicker
-					</Typography>
-					<Typography element="div" variant="headingCompactXs">
-						Subject
-					</Typography>
-					<Typography element="div" variant="headingCompactXs">
-						Preview text
-					</Typography>
+					<div
+						style={{
+							display: 'flex',
+							flexDirection: 'column',
+							gap: semanticSpacing.stackLg,
+						}}
+					>
+						<TextInput
+							label="Article"
+							description="Copy and paste a Guardian URL below"
+						/>
+
+						<Select
+							label="Kicker"
+							description="Choose the kicker for the email newsletter"
+						>
+							<Option>Breaking News</Option>
+							<Option>Exclusive</Option>
+							<Option>None</Option>
+						</Select>
+
+						<TextInput
+							label="Subject"
+							description="The kicker counts towards the character limit of the subject"
+						/>
+
+						<TextInput
+							label="Preview text"
+							description="Choose the preview text for the email newsletter"
+						/>
+					</div>
 				</Item>
 				<Item size={4}>Preview</Item>
 			</Grid>
