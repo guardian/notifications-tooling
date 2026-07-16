@@ -1,5 +1,8 @@
 pre-push:
   commands:
+    pinned-deps:
+      glob: '**/package.json'
+      run: bun run scripts/check-pinned-deps.ts
     lint:
       glob: '*.{js,ts,cjs,mjs,jsx,tsx}'
       run: bunx eslint --no-warn-ignored {push_files}
