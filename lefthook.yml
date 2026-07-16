@@ -9,3 +9,6 @@ pre-push:
     format:
       glob: '*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css,md}'
       run: bunx prettier --check {push_files}
+    typecheck:
+      glob: '**/*.{ts,tsx}'
+      run: bun run typecheck
