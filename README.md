@@ -39,10 +39,10 @@ Install the [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeume
 
 ## Install dependencies
 
-To install the dependencies for every app, package etc, simply invoke this while current working dir is the root of the repo:
+To setup [dev-nginx](https://github.com/guardian/dev-nginx) and install the dependencies for every app, package etc, simply invoke this while current working dir is the root of the repo:
 
 ```sh
-bun install
+./scripts/setup.sh
 ```
 
 ## Install lint & format checks as a git hook using `lefthook`
@@ -88,7 +88,21 @@ To stop them:
 bun docker:compose:down
 ```
 
-## Start backend server app
+## Local development
+
+To run [dev-nginx](https://github.com/guardian/dev-nginx) for the project and run the frontend and backend apps, run the start script from the root of the repo: 
+
+```sh
+./scripts/start.sh
+```
+
+The app will be available on:
+ - https://dispatch.local.dev-gutools.co.uk
+ - https://dispatch-backend.local.dev-gutools.co.uk/
+
+You can also run each app separately as below. 
+
+### Start backend server app
 
 Backend server app currently uses Express.js as its REST server. To start the backend app:
 
@@ -99,7 +113,7 @@ bun run dev
 
 The server will restart seamlessly upon any file changed during it's code changes.
 
-## Start frontend app
+### Start frontend app
 
 Frontend app uses React. To start the app:
 
