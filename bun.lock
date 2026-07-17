@@ -21,6 +21,7 @@
       "name": "backend",
       "dependencies": {
         "@config": "workspace:*",
+        "@utils": "workspace:*",
         "express": "5.2.1",
         "express-zod-safe": "3.2.1",
         "pino": "10.3.1",
@@ -54,6 +55,9 @@
       "dependencies": {
         "zod": "4.4.3",
       },
+    },
+    "src/packages/utils": {
+      "name": "@utils",
     },
   },
   "packages": {
@@ -286,6 +290,8 @@
     "@unrs/resolver-binding-win32-ia32-msvc": ["@unrs/resolver-binding-win32-ia32-msvc@1.12.2", "", { "os": "win32", "cpu": "ia32" }, "sha512-WD9sY00OfpHVGfsnHZoA8jVT+esS/Bg8z8jzxp5BnDCjjwsuKsPQrzswwpFy4J1AUJbXPRfkpcX0mXrzeXW79g=="],
 
     "@unrs/resolver-binding-win32-x64-msvc": ["@unrs/resolver-binding-win32-x64-msvc@1.12.2", "", { "os": "win32", "cpu": "x64" }, "sha512-nAB74NfSNKknqQ1RrYj6uz8FcXEomu/MATJZxh/x+BArzN2U3JbOYC0APYzUIGhVY3m5hRxA8VPNdPBoG8txlA=="],
+
+    "@utils": ["@utils@workspace:src/packages/utils"],
 
     "accepts": ["accepts@2.0.0", "", { "dependencies": { "mime-types": "^3.0.0", "negotiator": "^1.0.0" } }, "sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng=="],
 

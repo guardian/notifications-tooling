@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"@config": "workspace:*",
+		"@utils": "workspace:*",
 		"express": "5.2.1",
 		"express-zod-safe": "3.2.1",
 		"pino": "10.3.1",
