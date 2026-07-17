@@ -1,0 +1,49 @@
+import { semanticSpacing } from '@guardian/stand';
+import { Option, Select } from '@guardian/stand/Select';
+import { TextInput } from '@guardian/stand/TextInput';
+import { Typography } from '@guardian/stand/Typography';
+
+/**
+ * This is a non-functional placeholder to demonstrate how content will appear in the layout
+ */
+export const CreateNotificationForm = () => {
+	return (
+		<>
+			<Typography variant="titleMd" element="h2">
+				Create a Notification
+			</Typography>
+
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'column',
+					gap: semanticSpacing.stackLg,
+				}}
+			>
+				<TextInput
+					label="Article"
+					description="Copy and paste a Guardian URL below"
+				/>
+
+				<Select
+					label="Kicker"
+					description="Choose the kicker for the email newsletter"
+				>
+					<Option>Breaking News</Option>
+					<Option>Exclusive</Option>
+					<Option>None</Option>
+				</Select>
+
+				<TextInput
+					label="Subject"
+					description="The kicker counts towards the character limit of the subject"
+				/>
+
+				<TextInput
+					label="Preview text"
+					description="Choose the preview text for the email newsletter"
+				/>
+			</div>
+		</>
+	);
+};

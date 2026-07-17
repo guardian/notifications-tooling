@@ -6,9 +6,8 @@ import {
 } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
-import { Option, Select } from '@guardian/stand/Select';
-import { TextInput } from '@guardian/stand/TextInput';
-import { Typography } from '@guardian/stand/Typography';
+import { CreateNotificationForm } from './CreateNotificationForm';
+import { EmailPreviewSection } from './EmailPreviewSection';
 
 export const DispatchTab = () => {
 	return (
@@ -20,60 +19,41 @@ export const DispatchTab = () => {
 			}}
 		>
 			<Grid
-				cssOverrides={css({ height: '100%' })}
+				cssOverrides={css({
+					height: '100%',
+				})}
 				theme={{
-					sm: { gap: '0px' },
-					md: { gap: '0px' },
-					lg: { gap: '0px' },
+					sm: { gap: '0px', padding: `0px 0px 0px` },
+					md: { gap: '0px', padding: `0px 0px ${semanticSpacing.stackLg}` },
+					lg: { gap: '0px', padding: `0px 0px ${semanticSpacing.stackXl}` },
 				}}
 			>
 				<Item
 					size={8}
 					cssOverrides={css({
+						paddingLeft: semanticSpacing.stackSm,
+						paddingRight: semanticSpacing.stackSm,
 						borderRightWidth: semanticSizing.border.default,
 						borderRightStyle: 'solid',
 						borderRightColor: semanticColors.border.weak,
-						marginRight: semanticSpacing.stackSm,
 						paddingTop: semanticSpacing.stackSm,
 					})}
 				>
-					<Typography variant="titleMd" element="h2">
-						Create a Notification
-					</Typography>
-
-					<div
-						style={{
-							display: 'flex',
-							flexDirection: 'column',
-							gap: semanticSpacing.stackLg,
-						}}
-					>
-						<TextInput
-							label="Article"
-							description="Copy and paste a Guardian URL below"
-						/>
-
-						<Select
-							label="Kicker"
-							description="Choose the kicker for the email newsletter"
-						>
-							<Option>Breaking News</Option>
-							<Option>Exclusive</Option>
-							<Option>None</Option>
-						</Select>
-
-						<TextInput
-							label="Subject"
-							description="The kicker counts towards the character limit of the subject"
-						/>
-
-						<TextInput
-							label="Preview text"
-							description="Choose the preview text for the email newsletter"
-						/>
-					</div>
+					<CreateNotificationForm />
 				</Item>
-				<Item size={4}>Preview</Item>
+				<Item
+					size={4}
+					cssOverrides={css({
+						paddingRight: semanticSpacing.stackSm,
+						paddingLeft: semanticSpacing.stackSm,
+						paddingTop: semanticSpacing.stackSm,
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'flex-start',
+					})}
+				>
+					<EmailPreviewSection />
+				</Item>
 			</Grid>
 		</Layout.Main>
 	);
