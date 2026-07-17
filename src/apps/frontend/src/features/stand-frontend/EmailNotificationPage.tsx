@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
-import type { TabName, UserData } from './types';
+import { NotificationContext } from './NotificationContext';
+import type {
+	NotificationAction,
+	NotificationState,
+	TabName,
+	UserData,
+} from './types';
 import { UserContext } from './UserContext';
 
 // TO DO - fetch from backend? inject user details onto page?
@@ -38,12 +44,49 @@ export const EmailNotificationPage = () => {
 			});
 	}, []);
 
+	const [notification, updateNotification] = useReducer<
+		NotificationState,
+		[NotificationAction]
+	>(
+		(
+			prevState: NotificationState,
+			action: NotificationAction,
+		): NotificationState => {
+			const state = structuredClone(prevState);
+			switch (action.type) {
+				case 'set-article-id': {
+					return { ...state, articleId: action.text };
+				}
+
+				case 'modify-email-parameters': {
+					if (state.parameters?.type !== 'email') {
+						return state;
+					}
+					return {
+						...state,
+						parameters: { ...state.parameters, ...action.mod },
+					};
+				}
+			}
+		},
+		{
+			parameters: {
+				type: 'email',
+				kicker: 'breaking-news',
+			},
+		},
+	);
+
 	return (
 		<UserContext.Provider value={user}>
-			<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
-				{currentTab === 'create' && <DispatchTab />}
-				{currentTab === 'history' && <HistoryTab />}
-			</MainLayout>
+			<NotificationContext.Provider
+				value={{ notification, updateNotification }}
+			>
+				<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
+					{currentTab === 'create' && <DispatchTab />}
+					{currentTab === 'history' && <HistoryTab />}
+				</MainLayout>
+			</NotificationContext.Provider>
 		</UserContext.Provider>
 	);
 };
