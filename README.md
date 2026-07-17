@@ -90,17 +90,18 @@ bun docker:compose:down
 
 ## Local development
 
-To run [dev-nginx](https://github.com/guardian/dev-nginx) for the project and run the frontend and backend apps, run the start script from the root of the repo: 
+To run [dev-nginx](https://github.com/guardian/dev-nginx) for the project and run the frontend and backend apps, run the start script from the root of the repo:
 
 ```sh
 ./scripts/start.sh
 ```
 
 The app will be available on:
- - https://dispatch.local.dev-gutools.co.uk
- - https://dispatch-backend.local.dev-gutools.co.uk/
 
-You can also run each app separately as below. 
+- https://dispatch.local.dev-gutools.co.uk
+- https://dispatch-backend.local.dev-gutools.co.uk/
+
+You can also run each app separately as below.
 
 ### Start backend server app
 
