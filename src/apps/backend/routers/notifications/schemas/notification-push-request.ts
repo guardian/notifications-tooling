@@ -70,19 +70,27 @@ const contentSchema = z.object({
 		}),
 });
 
-/** Newsletter audiences are addressed by Braze segment. */
+/** Newsletter audiences are addressed by a known Braze segment. */
 const segmentAudience = z.object({
 	type: z.literal('segment'),
-	segments: z.array(z.object({ name: z.string().min(1) })).min(1),
+	segments: z.array(z.object({ name: z.enum(newsletterSegments) })).min(1),
 });
 
-/** Push audiences are addressed by mobile-n10n topic. */
+const knownPushTopics = new Set(
+	pushTopics.map((topic) => `${topic.type}:${topic.name}`),
+);
+
+/** A single, known mobile-n10n topic. */
+const pushTopic = z
+	.object({ type: z.string().min(1), name: z.string().min(1) })
+	.refine((topic) => knownPushTopics.has(`${topic.type}:${topic.name}`), {
+		message: 'unknown push topic.',
+	});
+
+/** Push audiences are addressed by a known mobile-n10n topic. */
 const topicAudience = z.object({
 	type: z.literal('topic'),
-	topics: z
-		.array(z.object({ type: z.string().min(1), name: z.string().min(1) }))
-		.min(1)
-		.max(MAX_PUSH_TOPICS),
+	topics: z.array(pushTopic).min(1).max(MAX_PUSH_TOPICS),
 });
 
 /** Push takes a single content item. */
@@ -139,74 +147,36 @@ export const notificationPushRequestSchema = z
 	.superRefine((value, ctx) => {
 		const { items } = value.content;
 
-		value.channels.forEach((plan, planIndex) => {
-			// Resolve the content item keys this plan composes.
-			const composedKeys =
+		// The only genuinely cross-field rule: a plan's `compose` may only
+		// reference content items that exist and match the plan's channel.
+		for (const [planIndex, plan] of value.channels.entries()) {
+			const refs =
 				plan.channel === NotificationChannel.AppPushNotification
-					? [{ key: plan.compose.use, path: ['compose', 'use'] as const }]
-					: plan.compose.items.map((key, itemIndex) => ({
+					? [{ key: plan.compose.use, path: ['compose', 'use'] }]
+					: plan.compose.items.map((key, index) => ({
 							key,
-							path: ['compose', 'items', itemIndex] as const,
+							path: ['compose', 'items', index],
 						}));
 
-			composedKeys.forEach(({ key, path }) => {
+			for (const { key, path } of refs) {
 				const item = items[key];
+				const issuePath = ['channels', planIndex, ...path];
 
 				if (!item) {
 					ctx.addIssue({
 						code: 'custom',
-						path: ['channels', planIndex, ...path],
+						path: issuePath,
 						message: `compose references content item '${key}' which is not defined in content.items.`,
 					});
-					return;
-				}
-
-				if (item.type !== plan.channel) {
+				} else if (item.type !== plan.channel) {
 					ctx.addIssue({
 						code: 'custom',
-						path: ['channels', planIndex, ...path],
+						path: issuePath,
 						message: `content item '${key}' has type '${item.type}' but is composed into a '${plan.channel}' plan.`,
 					});
 				}
-			});
-
-			// Validate the audience references against the stub allow-lists.
-			if (plan.channel === NotificationChannel.Newsletter) {
-				plan.audience.segments.forEach((segment, segmentIndex) => {
-					if (
-						!(newsletterSegments as readonly string[]).includes(segment.name)
-					) {
-						ctx.addIssue({
-							code: 'custom',
-							path: [
-								'channels',
-								planIndex,
-								'audience',
-								'segments',
-								segmentIndex,
-								'name',
-							],
-							message: `unknown newsletter segment '${segment.name}'.`,
-						});
-					}
-				});
-			} else {
-				plan.audience.topics.forEach((topic, topicIndex) => {
-					const known = pushTopics.some(
-						(candidate) =>
-							candidate.type === topic.type && candidate.name === topic.name,
-					);
-
-					if (!known) {
-						ctx.addIssue({
-							code: 'custom',
-							path: ['channels', planIndex, 'audience', 'topics', topicIndex],
-							message: `unknown push topic '${topic.type}/${topic.name}'.`,
-						});
-					}
-				});
 			}
-		});
+		}
 	});
 
 export type NotificationPushRequest = z.infer<
