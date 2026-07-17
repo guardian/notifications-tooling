@@ -1,6 +1,3 @@
-// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
-
 import guardian from '@guardian/eslint-config';
 /** Scope the React ruleset (browser globals, JSX rules) to the frontend only. */
 const react = guardian.configs.react.map((config) => ({
@@ -8,11 +5,24 @@ const react = guardian.configs.react.map((config) => ({
 	files: ['src/apps/frontend/**/*.{js,ts,jsx,mjsx,tsx,mtsx}'],
 }));
 
-export default [{
-    ignores: [
-        '**/dist/**',
-        'docker/**',
-        '!docker/docker-compose.local.yml',
-        '**/*.d.ts',
-    ],
-}, ...guardian.configs.recommended, ...react, ...storybook.configs["flat/recommended"]];
+export default [
+	{
+		ignores: [
+			'**/dist/**',
+			'docker/**',
+			'!docker/docker-compose.local.yml',
+			'**/*.d.ts',
+		],
+	},
+	...guardian.configs.recommended,
+	...react,
+	...guardian.configs.storybook,
+	{
+		// Storybook requires a default export here; @guardian/eslint-config's
+		// no-default-export exception only covers .storybook/main.*.
+		files: ['**/.storybook/preview.*'],
+		rules: {
+			'import/no-default-export': 'off',
+		},
+	},
+];
