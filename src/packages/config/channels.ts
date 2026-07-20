@@ -4,9 +4,9 @@
  * - `newsletter` is delivered via Braze (email).
  * - `app-push-notification` is delivered via FCM (Android) and APNS (iOS).
  */
-export enum NotificationChannel {
-	Newsletter = 'newsletter',
-	AppPushNotification = 'app-push-notification',
+export enum NOTIFICATION_CHANNEL {
+	NEWSLETTER = 'newsletter',
+	APP_PUSH_NOTIFICATION = 'app-push-notification',
 }
 
 /**
@@ -17,16 +17,36 @@ export enum NotificationChannel {
  * two safe limits. `newsletter` is delivered through Braze email, which allows
  * far more generous copy.
  *
+ * The push limits mirror the existing producer, the Breaking News tool in
+ * `guardian/facia-tool`, which posts to mobile-n10n's `/push/topic`. That tool
+ * derives a short, fixed `title` (e.g. "Breaking news") and treats the `body`
+ * (the article headline) with soft warnings: a ~90-char recommendation and a
+ * ~120-char point beyond which "some characters might not show". mobile-n10n
+ * itself enforces no per-field caps (only the ~4KB APNS payload ceiling), so we
+ * adopt 120 as the safe `body` limit and keep `title` comfortably above the
+ * short labels facia-tool emits.
+ *
  * NOTE: These are sensible stub limits for the initial version and would
  * eventually be surfaced via `GET /v1/channels/constraints`.
  */
-export const notificationChannelContentLimits = {
-	[NotificationChannel.AppPushNotification]: {
+export const NOTIFICATION_CHANNEL_CONTENT_LIMITS = {
+	[NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION]: {
 		title: { maxLength: 50 },
-		body: { maxLength: 150 },
+		body: { maxLength: 120 },
 	},
-	[NotificationChannel.Newsletter]: {
+	[NOTIFICATION_CHANNEL.NEWSLETTER]: {
 		title: { maxLength: 120 },
 		body: { maxLength: 5000 },
 	},
 } as const;
+
+/**
+ * The layouts a `newsletter` plan may compose its items into.
+ *
+ * - `digest` assembles many content items into a single email.
+ * - `single` sends one content item on its own.
+ */
+export enum NEWSLETTER_LAYOUT {
+	DIGEST = 'digest',
+	SINGLE = 'single',
+}

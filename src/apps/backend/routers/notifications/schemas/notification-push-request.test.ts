@@ -1,17 +1,19 @@
 import {
 	MAX_PUSH_TOPICS,
-	newsletterSegments,
-	NotificationChannel,
-	notificationChannelContentLimits,
-	pushTopics,
+	NEWSLETTER_SEGMENTS,
+	NOTIFICATION_CHANNEL,
+	NOTIFICATION_CHANNEL_CONTENT_LIMITS,
+	PUSH_TOPICS,
 } from '@config';
 import { describe, expect, it } from 'bun:test';
 import { notificationPushRequestSchema } from './notification-push-request';
 
 const pushLimits =
-	notificationChannelContentLimits[NotificationChannel.AppPushNotification];
+	NOTIFICATION_CHANNEL_CONTENT_LIMITS[
+		NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION
+	];
 const newsletterLimits =
-	notificationChannelContentLimits[NotificationChannel.Newsletter];
+	NOTIFICATION_CHANNEL_CONTENT_LIMITS[NOTIFICATION_CHANNEL.NEWSLETTER];
 
 const guardianLink =
 	'https://www.theguardian.com/world/2026/jul/08/ukraine-summit';
@@ -21,7 +23,7 @@ const repeat = (length: number) => 'a'.repeat(length);
 // --- Fixture builders (each returns a fresh object; override via spread) ---
 
 const pushItem = (overrides: Record<string, unknown> = {}) => ({
-	type: NotificationChannel.AppPushNotification,
+	type: NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION,
 	title: 'Ukraine summit begins',
 	body: 'World leaders gather in Geneva as talks open.',
 	link: guardianLink,
@@ -29,7 +31,7 @@ const pushItem = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const newsletterItem = (overrides: Record<string, unknown> = {}) => ({
-	type: NotificationChannel.Newsletter,
+	type: NOTIFICATION_CHANNEL.NEWSLETTER,
 	title: 'Your morning briefing',
 	body: 'Today the world woke up to a historic summit.',
 	link: guardianLink,
@@ -37,15 +39,15 @@ const newsletterItem = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const pushPlan = (overrides: Record<string, unknown> = {}) => ({
-	channel: NotificationChannel.AppPushNotification,
+	channel: NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION,
 	audience: { type: 'topic', topics: [{ type: 'breaking', name: 'uk' }] },
 	compose: { use: 'lead' },
 	...overrides,
 });
 
 const newsletterPlan = (overrides: Record<string, unknown> = {}) => ({
-	channel: NotificationChannel.Newsletter,
-	audience: { type: 'segment', segments: [{ name: newsletterSegments[0] }] },
+	channel: NOTIFICATION_CHANNEL.NEWSLETTER,
+	audience: { type: 'segment', segments: [{ name: NEWSLETTER_SEGMENTS[0] }] },
 	compose: { items: ['lead'], subject: 'Your morning briefing' },
 	...overrides,
 });
@@ -579,7 +581,7 @@ describe('notificationPushRequestSchema', () => {
 
 	describe('newsletter segment audience', () => {
 		it('accepts every configured segment', () => {
-			for (const name of newsletterSegments) {
+			for (const name of NEWSLETTER_SEGMENTS) {
 				expectValid(
 					newsletterRequestWithPlan(
 						newsletterPlan({
@@ -618,7 +620,7 @@ describe('notificationPushRequestSchema', () => {
 
 	describe('push topic audience', () => {
 		it('accepts every configured topic', () => {
-			for (const topic of pushTopics) {
+			for (const topic of PUSH_TOPICS) {
 				expectValid(
 					pushRequestWithPlan(
 						pushPlan({
@@ -781,7 +783,7 @@ describe('notificationPushRequestSchema', () => {
 						pushPlan({
 							audience: {
 								type: 'segment',
-								segments: [{ name: newsletterSegments[0] }],
+								segments: [{ name: NEWSLETTER_SEGMENTS[0] }],
 							},
 						}),
 					),

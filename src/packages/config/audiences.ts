@@ -8,21 +8,21 @@
  */
 
 /** Newsletter audiences are addressed by Braze segment name. */
-export const newsletterSegments = [
+export const NEWSLETTER_SEGMENTS = [
 	'morning-briefing-subscribers',
 	'first-edition-subscribers',
 	'editorial-breaking-news',
 ] as const;
 
-export type NewsletterSegment = (typeof newsletterSegments)[number];
+export type NewsletterSegment = (typeof NEWSLETTER_SEGMENTS)[number];
 
 /** The topic `type`s mobile-n10n recognises. */
-export const pushTopicTypes = ['breaking', 'content', 'newsstand'] as const;
+export const PUSH_TOPIC_TYPES = ['breaking', 'content', 'newsstand'] as const;
 
-export type PushTopicType = (typeof pushTopicTypes)[number];
+export type PushTopicType = (typeof PUSH_TOPIC_TYPES)[number];
 
 /** The concrete push topics a notification may currently target. */
-export const pushTopics = [
+export const PUSH_TOPICS = [
 	{ type: 'breaking', name: 'uk' },
 	{ type: 'breaking', name: 'us' },
 	{ type: 'breaking', name: 'international' },
