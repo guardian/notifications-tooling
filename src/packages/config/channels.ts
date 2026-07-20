@@ -39,14 +39,3 @@ export const notificationChannelContentLimits = {
 		body: { maxLength: 280 },
 	},
 } as const;
-
-/**
- * The layouts a `newsletter` plan may compose its items into.
- *
- * - `digest` assembles many content items into a single email.
- * - `single` sends one content item on its own.
- */
-export enum NewsletterLayout {
-	Digest = 'digest',
-	Single = 'single',
-}
