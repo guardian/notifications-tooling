@@ -7,5 +7,6 @@
 		"types": ["bun", "node"],
 		// bun-types and @types/node declare conflicting globals
 		"skipLibCheck": true
-	}
+	},
+	"include": ["src/**/*", "scripts/**/*", "docker/**/*"],
 }
