@@ -1,0 +1,41 @@
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Note: this repo uses Bun, so we use the `bun` package-ecosystem (not `npm`).
+# Dependabot reads the single root `bun.lock`, which covers every workspace
+# package under src/apps/* and src/packages/*.
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: 'chore(deps): '
+    labels:
+      - dependencies
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      # First-party Guardian packages are trusted; skip the cooldown so their
+      # updates (and fixes) land promptly instead of waiting to "stabilise".
+      exclude:
+        - '@guardian/*'
+    groups:
+      all:
+        patterns: ['*']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: 'chore(deps): '
+    labels:
+      - dependencies
+    cooldown:
+      default-days: 7
+    groups:
+      all:
+        patterns: ['*']
