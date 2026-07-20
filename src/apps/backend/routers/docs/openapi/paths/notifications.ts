@@ -6,12 +6,6 @@
  * inspected independently in the docs.
  */
 export const notificationsPath = {
-	get: {
-		summary: 'List enqueued notifications',
-		responses: {
-			'200': { description: 'A list of enqueued notifications.' },
-		},
-	},
 	post: {
 		summary: 'Validate and enqueue a notification',
 		requestBody: {

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { type Request, type Response, Router } from 'express';
+import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { notificationPushRequestSchema } from './schemas/notification-push-request';
 
@@ -59,10 +59,6 @@ const handleValidationErrors: ErrorRequestHandler = (errors, req, res) => {
 };
 
 export const notificationsRouter = Router();
-
-notificationsRouter.get('/', (_req: Request, res: Response) => {
-	res.json([{ id: 1, message: 'You have a new notification!' }]);
-});
 
 notificationsRouter.post(
 	'/',
