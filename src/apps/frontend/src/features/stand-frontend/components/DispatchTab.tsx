@@ -52,7 +52,7 @@ export const DispatchTab = () => {
 						alignItems: 'flex-start',
 					})}
 				>
-					<EmailPreviewSection />
+						<EmailPreviewSection />
 				</Item>
 			</Grid>
 		</Layout.Main>
