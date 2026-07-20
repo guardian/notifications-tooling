@@ -35,8 +35,8 @@ export const generateBrazeEmailRequest = ({
 
 	return {
 		campaign_id: campaignId,
-		// Orchestration selects the UK, US, or AU campaign ID. Each campaign owns
-		// its audience segment in Braze, keeping office data and reporting separate.
+		// Each office campaign owns its audience segment in Braze, keeping audience
+		// data and reporting separate.
 		broadcast: true,
 		trigger_properties: triggerProperties,
 	};
