@@ -47,16 +47,16 @@ Request:
 ```jsonc
 // GET /v1/channels/constraints -> the SPA fetches this to drive its UI (char counters, etc.)
 {
-  "push": {
-    "title": { "maxLength": 50, "onExceed": "reject" },
-    "body": { "maxLength": 150, "onExceed": "truncate", "ellipsis": "…" },
-    "supports": ["title", "body", "link", "media.imageUrl"], // no multi-item, no subject
-  },
-  "newsletter": {
-    "subject": { "maxLength": 120, "onExceed": "reject" },
-    "supports": ["items", "template", "subject"], // multi-item allowed
-    "maxItems": 12,
-  },
+	"push": {
+		"title": { "maxLength": 50, "onExceed": "reject" },
+		"body": { "maxLength": 150, "onExceed": "truncate", "ellipsis": "…" },
+		"supports": ["title", "body", "link", "media.imageUrl"], // no multi-item, no subject
+	},
+	"newsletter": {
+		"subject": { "maxLength": 120, "onExceed": "reject" },
+		"supports": ["items", "template", "subject"], // multi-item allowed
+		"maxItems": 12,
+	},
 }
 ```
 
@@ -67,80 +67,80 @@ Request:
 ```jsonc
 // POST /v1/notifications
 {
-  "idempotencyKey": "morning-briefing-2026-07-08", // request-level; see idempotency note below
-  "category": "editorial",
-  "priority": "standard",
+	"idempotencyKey": "morning-briefing-2026-07-08", // request-level; see idempotency note below
+	"category": "editorial",
+	"priority": "standard",
 
-  // WHAT — a LIBRARY of reusable, channel-neutral content items
-  // Plans below pick which item(s) to use, so one article can feed push while
-  // several articles feed the newsletter — from a single request.
-  "content": {
-    "items": {
-      "lead": {
-        "title": "Ukraine summit begins",
-        "body": "World leaders gather in Geneva as talks open...",
-        "link": {
-          "type": "guardianContent",
-          "contentApiId": "world/2026/jul/08/ukraine-summit",
-        },
-        "media": {
-          "type": "image",
-          "imageUrl": "https://.../lead.jpg",
-          "thumbnailUrl": "https://.../thumb.jpg",
-        },
-      },
-      "secondary": {
-        "title": "Markets react to summit news",
-        "body": "The FTSE rose 1.2% in early trading...",
-        "link": {
-          "type": "guardianContent",
-          "contentApiId": "business/2026/jul/08/markets",
-        },
-      },
-      "opinion": {
-        "title": "What the summit means for Europe",
-        "body": "Our chief correspondent analyses...",
-        "link": {
-          "type": "guardianContent",
-          "contentApiId": "commentisfree/2026/jul/08/europe",
-        },
-      },
-    },
-  },
+	// WHAT — a LIBRARY of reusable, channel-neutral content items
+	// Plans below pick which item(s) to use, so one article can feed push while
+	// several articles feed the newsletter — from a single request.
+	"content": {
+		"items": {
+			"lead": {
+				"title": "Ukraine summit begins",
+				"body": "World leaders gather in Geneva as talks open...",
+				"link": {
+					"type": "guardianContent",
+					"contentApiId": "world/2026/jul/08/ukraine-summit",
+				},
+				"media": {
+					"type": "image",
+					"imageUrl": "https://.../lead.jpg",
+					"thumbnailUrl": "https://.../thumb.jpg",
+				},
+			},
+			"secondary": {
+				"title": "Markets react to summit news",
+				"body": "The FTSE rose 1.2% in early trading...",
+				"link": {
+					"type": "guardianContent",
+					"contentApiId": "business/2026/jul/08/markets",
+				},
+			},
+			"opinion": {
+				"title": "What the summit means for Europe",
+				"body": "Our chief correspondent analyses...",
+				"link": {
+					"type": "guardianContent",
+					"contentApiId": "commentisfree/2026/jul/08/europe",
+				},
+			},
+		},
+	},
 
-  // WHERE — an ARRAY OF PLANS. Each plan is self-contained: its own channel,
-  // its own audience, and its own content selection.
-  // Multiple plans = multi-channel in one request.
-  "channels": [
-    {
-      "channel": "push",
-      "audience": {
-        "type": "topic",
-        "topics": [{ "type": "breaking", "name": "uk" }],
-      },
-      "compose": { "use": "lead" }, // push takes ONE item only
-      "overrides": { "importance": "Major" },
-    },
-    {
-      "channel": "newsletter",
-      "audience": {
-        "type": "segment",
-        "segments": [
-          { "name": "morning-briefing-subscribers" },
-          { "name": "editorial-something-something" },
-        ],
-      },
-      "compose": {
-        // newsletter assembles MANY items
-        "layout": "digest",
-        "items": ["lead", "secondary", "opinion"],
-        "subject": "Your morning briefing: Ukraine summit",
-      },
-    },
-  ],
+	// WHERE — an ARRAY OF PLANS. Each plan is self-contained: its own channel,
+	// its own audience, and its own content selection.
+	// Multiple plans = multi-channel in one request.
+	"channels": [
+		{
+			"channel": "push",
+			"audience": {
+				"type": "topic",
+				"topics": [{ "type": "breaking", "name": "uk" }],
+			},
+			"compose": { "use": "lead" }, // push takes ONE item only
+			"overrides": { "importance": "Major" },
+		},
+		{
+			"channel": "newsletter",
+			"audience": {
+				"type": "segment",
+				"segments": [
+					{ "name": "morning-briefing-subscribers" },
+					{ "name": "editorial-something-something" },
+				],
+			},
+			"compose": {
+				// newsletter assembles MANY items
+				"layout": "digest",
+				"items": ["lead", "secondary", "opinion"],
+				"subject": "Your morning briefing: Ukraine summit",
+			},
+		},
+	],
 
-  "options": { "dryRun": false, "scheduledFor": null },
-  "sender": "notifications-tooling-spa/v1", // consumer of the backend api (constant)
+	"options": { "dryRun": false, "scheduledFor": null },
+	"sender": "notifications-tooling-spa/v1", // consumer of the backend api (constant)
 }
 ```
 
@@ -149,21 +149,21 @@ Response:
 ```jsonc
 // 202 Accepted
 {
-  "notificationId": "a1b2c3d4-...",
-  "status": "accepted",
-  "plans": [
-    { "channel": "push", "planId": "…#push", "status": "accepted" },
-    { "channel": "newsletter", "planId": "…#newsletter", "status": "accepted" },
-  ],
+	"notificationId": "a1b2c3d4-...",
+	"status": "accepted",
+	"plans": [
+		{ "channel": "push", "planId": "…#push", "status": "accepted" },
+		{ "channel": "newsletter", "planId": "…#newsletter", "status": "accepted" },
+	],
 
-  // Status URL
-  "statusUrl": "/v1/notifications/a1b2c3d4-.../status",
+	// Status URL
+	"statusUrl": "/v1/notifications/a1b2c3d4-.../status",
 
-  // Ability to cancel notification send off before the `expiresAt` value
-  "cancellable": {
-    "cancelUrl": "/v1/notifications/a1b2c3d4-.../cancel",
-    "expiresAt": "<unix_timestamp>",
-  },
+	// Ability to cancel notification send off before the `expiresAt` value
+	"cancellable": {
+		"cancelUrl": "/v1/notifications/a1b2c3d4-.../cancel",
+		"expiresAt": "<unix_timestamp>",
+	},
 }
 ```
 
@@ -173,21 +173,21 @@ NOTE: Having a persistence layer, the `notificationId` is what gets generated on
 // Retry of an already-submitted idempotencyKey where `push` succeeded earlier
 // but `newsletter` had failed. HTTP 202 Accepted.
 {
-  "notificationId": "a1b2c3d4-...",
-  "status": "accepted", // request-level: accepted for (re)processing
-  "plans": [
-    {
-      "channel": "push",
-      "planId": "a1b2c3d4-...#push",
-      "status": "duplicate_ignored",
-    },
-    {
-      "channel": "newsletter",
-      "planId": "a1b2c3d4-...#newsletter",
-      "status": "retrying",
-    },
-  ],
-  "statusUrl": "/v1/notifications/a1b2c3d4-.../status",
+	"notificationId": "a1b2c3d4-...",
+	"status": "accepted", // request-level: accepted for (re)processing
+	"plans": [
+		{
+			"channel": "push",
+			"planId": "a1b2c3d4-...#push",
+			"status": "duplicate_ignored",
+		},
+		{
+			"channel": "newsletter",
+			"planId": "a1b2c3d4-...#newsletter",
+			"status": "retrying",
+		},
+	],
+	"statusUrl": "/v1/notifications/a1b2c3d4-.../status",
 }
 ```
 
@@ -197,16 +197,16 @@ Note: We'll need to keep a list of device tokens somewhere attached as a list of
 
 ```jsonc
 {
-  "channel": "push",
-  "audience": {
-    "type": "test",
-    "recipients": [
-      { "deviceToken": "fZ9x...APNS_token...", "platform": "ios" },
-      { "deviceToken": "eH2k...FCM_token...", "platform": "android" },
-    ],
-  },
-  "compose": { "use": "lead" }, // push still takes ONE item
-  "overrides": { "importance": "Major" },
+	"channel": "push",
+	"audience": {
+		"type": "test",
+		"recipients": [
+			{ "deviceToken": "fZ9x...APNS_token...", "platform": "ios" },
+			{ "deviceToken": "eH2k...FCM_token...", "platform": "android" },
+		],
+	},
+	"compose": { "use": "lead" }, // push still takes ONE item
+	"overrides": { "importance": "Major" },
 }
 ```
 
@@ -218,19 +218,19 @@ Note: The emails persisted in the allow-list will have to be pre-validated so on
 
 ```jsonc
 {
-  "channel": "newsletter",
-  "audience": {
-    "type": "test",
-    "recipients": [
-      { "email": "editor@guardian.co.uk" },
-      { "email": "qa@guardian.co.uk" },
-    ],
-  },
-  "compose": {
-    "layout": "digest",
-    "items": ["lead", "secondary", "opinion"],
-    "subject": "[TEST] Your morning briefing: Ukraine summit",
-  },
+	"channel": "newsletter",
+	"audience": {
+		"type": "test",
+		"recipients": [
+			{ "email": "editor@guardian.co.uk" },
+			{ "email": "qa@guardian.co.uk" },
+		],
+	},
+	"compose": {
+		"layout": "digest",
+		"items": ["lead", "secondary", "opinion"],
+		"subject": "[TEST] Your morning briefing: Ukraine summit",
+	},
 }
 ```
 
@@ -249,58 +249,58 @@ Response:
 ```jsonc
 // HTTP 422 Unprocessable Entity — multiple problems across the payload
 {
-  "error": "validation_failed",
-  "message": "The notification request failed validation. See details.",
-  "requestId": "req-7f3a...", // for log correlation
-  "details": [
-    {
-      "code": "MAX_LENGTH_EXCEEDED",
-      "path": "/content/items/lead/title",
-      "message": "title exceeds the 50-character limit for channel 'push' (was 63).",
-      "meta": {
-        "channel": "push",
-        "field": "title",
-        "maxLength": 50,
-        "actualLength": 63,
-      },
-    },
-    {
-      "code": "UNKNOWN_CONTENT_REF",
-      "path": "/channels/1/compose/items/2",
-      "message": "compose references content item 'opinion' which is not defined in content.items.",
-      "meta": { "ref": "opinion" },
-    },
-    {
-      "code": "TOO_MANY_ITEMS",
-      "path": "/channels/1/compose/items",
-      "message": "newsletter layout 'digest' allows at most 12 items (got 15).",
-      "meta": { "channel": "newsletter", "maxItems": 12, "actualItems": 15 },
-    },
-    {
-      "code": "UNSUPPORTED_COMPOSE_FOR_CHANNEL",
-      "path": "/channels/0/compose",
-      "message": "channel 'push' takes a single item via 'use'; 'items[]' is not supported.",
-      "meta": { "channel": "push" },
-    },
-    {
-      "code": "AUDIENCE_FIELD_MISMATCH",
-      "path": "/channels/0/audience",
-      "message": "audience.type 'userId' requires 'userIds' but 'topics' was provided.",
-      "meta": { "type": "userId", "expected": "userIds", "got": "topics" },
-    },
-    {
-      "code": "TEST_RECIPIENT_INCOMPLETE",
-      "path": "/channels/1/audience/recipients/0",
-      "message": "a test recipient with 'deviceToken' must also specify 'platform' (ios|android).",
-      "meta": { "missing": "platform" },
-    },
-    {
-      "code": "CHANNEL_AUDIENCE_INCOMPATIBLE",
-      "path": "/channels/1/audience/recipients/1",
-      "message": "a 'deviceToken' recipient is not valid for channel 'newsletter'.",
-      "meta": { "channel": "newsletter", "recipientKind": "deviceToken" },
-    },
-  ],
+	"error": "validation_failed",
+	"message": "The notification request failed validation. See details.",
+	"requestId": "req-7f3a...", // for log correlation
+	"details": [
+		{
+			"code": "MAX_LENGTH_EXCEEDED",
+			"path": "/content/items/lead/title",
+			"message": "title exceeds the 50-character limit for channel 'push' (was 63).",
+			"meta": {
+				"channel": "push",
+				"field": "title",
+				"maxLength": 50,
+				"actualLength": 63,
+			},
+		},
+		{
+			"code": "UNKNOWN_CONTENT_REF",
+			"path": "/channels/1/compose/items/2",
+			"message": "compose references content item 'opinion' which is not defined in content.items.",
+			"meta": { "ref": "opinion" },
+		},
+		{
+			"code": "TOO_MANY_ITEMS",
+			"path": "/channels/1/compose/items",
+			"message": "newsletter layout 'digest' allows at most 12 items (got 15).",
+			"meta": { "channel": "newsletter", "maxItems": 12, "actualItems": 15 },
+		},
+		{
+			"code": "UNSUPPORTED_COMPOSE_FOR_CHANNEL",
+			"path": "/channels/0/compose",
+			"message": "channel 'push' takes a single item via 'use'; 'items[]' is not supported.",
+			"meta": { "channel": "push" },
+		},
+		{
+			"code": "AUDIENCE_FIELD_MISMATCH",
+			"path": "/channels/0/audience",
+			"message": "audience.type 'userId' requires 'userIds' but 'topics' was provided.",
+			"meta": { "type": "userId", "expected": "userIds", "got": "topics" },
+		},
+		{
+			"code": "TEST_RECIPIENT_INCOMPLETE",
+			"path": "/channels/1/audience/recipients/0",
+			"message": "a test recipient with 'deviceToken' must also specify 'platform' (ios|android).",
+			"meta": { "missing": "platform" },
+		},
+		{
+			"code": "CHANNEL_AUDIENCE_INCOMPATIBLE",
+			"path": "/channels/1/audience/recipients/1",
+			"message": "a 'deviceToken' recipient is not valid for channel 'newsletter'.",
+			"meta": { "channel": "newsletter", "recipientKind": "deviceToken" },
+		},
+	],
 }
 ```
 
@@ -311,28 +311,28 @@ Response:
 ```jsonc
 // HTTP 400 Bad Request — structurally invalid (fails before business validation)
 {
-  "error": "bad_request",
-  "message": "The request body is malformed.",
-  "requestId": "req-9c1d...",
-  "details": [
-    {
-      "code": "MISSING_REQUIRED_FIELD",
-      "path": "/idempotencyKey",
-      "message": "idempotencyKey is required.",
-    },
-    {
-      "code": "INVALID_TYPE",
-      "path": "/channels",
-      "message": "channels must be a non-empty array of plan objects.",
-      "meta": { "expected": "array", "got": "object" },
-    },
-    {
-      "code": "INVALID_ENUM_VALUE",
-      "path": "/channels/0/channel",
-      "message": "unknown channel 'telegram'. Supported: push, newsletter.",
-      "meta": { "got": "telegram", "allowed": ["push", "newsletter"] },
-    },
-  ],
+	"error": "bad_request",
+	"message": "The request body is malformed.",
+	"requestId": "req-9c1d...",
+	"details": [
+		{
+			"code": "MISSING_REQUIRED_FIELD",
+			"path": "/idempotencyKey",
+			"message": "idempotencyKey is required.",
+		},
+		{
+			"code": "INVALID_TYPE",
+			"path": "/channels",
+			"message": "channels must be a non-empty array of plan objects.",
+			"meta": { "expected": "array", "got": "object" },
+		},
+		{
+			"code": "INVALID_ENUM_VALUE",
+			"path": "/channels/0/channel",
+			"message": "unknown channel 'telegram'. Supported: push, newsletter.",
+			"meta": { "got": "telegram", "allowed": ["push", "newsletter"] },
+		},
+	],
 }
 ```
 
@@ -343,14 +343,14 @@ Response:
 ```jsonc
 // HTTP 409 Conflict — key reused with a different payload
 {
-  "error": "idempotency_key_conflict",
-  "message": "idempotencyKey 'morning-briefing-2026-07-08' was already used with a different request body.",
-  "requestId": "req-2b8e...",
-  "meta": {
-    "notificationId": "a1b2c3d4-...",
-    "originalRequestHash": "sha256:9f2c...",
-    "submittedRequestHash": "sha256:4a71...",
-  },
+	"error": "idempotency_key_conflict",
+	"message": "idempotencyKey 'morning-briefing-2026-07-08' was already used with a different request body.",
+	"requestId": "req-2b8e...",
+	"meta": {
+		"notificationId": "a1b2c3d4-...",
+		"originalRequestHash": "sha256:9f2c...",
+		"submittedRequestHash": "sha256:4a71...",
+	},
 }
 ```
 
@@ -377,28 +377,28 @@ This is what most Guardian producers emit. Our Newsletter Adapter Lambda writes 
 ```jsonc
 // → SQS: braze-emails-PROD
 {
-  "To": {
-    "Address": "reader@example.com",
-    "SubscriberKey": "reader@example.com",
-    "ContactAttributes": {
-      "SubscriberAttributes": {
-        // becomes Braze trigger_properties (personalisation)
-        "first_name": "Ada",
-        "subject": "Your morning briefing: Ukraine summit",
-        // multi-article digest is flattened into fields the template renders:
-        "article_1_title": "Ukraine summit begins",
-        "article_1_url": "https://www.theguardian.com/world/2026/jul/08/ukraine-summit",
-        "article_2_title": "Markets react to summit news",
-        "article_2_url": "https://www.theguardian.com/business/2026/jul/08/markets",
-        "article_3_title": "What the summit means for Europe",
-        "article_3_url": "https://www.theguardian.com/commentisfree/2026/jul/08/europe",
-      },
-    },
-  },
-  "DataExtensionName": "morning-briefing", // logical email/campaign name → mapped to a Braze campaign_id in membership-workflow config
-  "SfContactId": null, // optional Salesforce contact id
-  "IdentityUserId": "100002073", // Guardian identity id (Braze external_user_id)
-  "recordId": "a1b2c3d4-...#newsletter", // our plan id — great for traceability
+	"To": {
+		"Address": "reader@example.com",
+		"SubscriberKey": "reader@example.com",
+		"ContactAttributes": {
+			"SubscriberAttributes": {
+				// becomes Braze trigger_properties (personalisation)
+				"first_name": "Ada",
+				"subject": "Your morning briefing: Ukraine summit",
+				// multi-article digest is flattened into fields the template renders:
+				"article_1_title": "Ukraine summit begins",
+				"article_1_url": "https://www.theguardian.com/world/2026/jul/08/ukraine-summit",
+				"article_2_title": "Markets react to summit news",
+				"article_2_url": "https://www.theguardian.com/business/2026/jul/08/markets",
+				"article_3_title": "What the summit means for Europe",
+				"article_3_url": "https://www.theguardian.com/commentisfree/2026/jul/08/europe",
+			},
+		},
+	},
+	"DataExtensionName": "morning-briefing", // logical email/campaign name → mapped to a Braze campaign_id in membership-workflow config
+	"SfContactId": null, // optional Salesforce contact id
+	"IdentityUserId": "100002073", // Guardian identity id (Braze external_user_id)
+	"recordId": "a1b2c3d4-...#newsletter", // our plan id — great for traceability
 }
 ```
 
@@ -442,29 +442,29 @@ From [`Main.pushTopics`](https://github.com/guardian/mobile-n10n/blob/main/notif
 // Authorization: Bearer <apiKey>
 // Content-Type: application/json; charset=utf-8
 {
-  "id": "a1b2c3d4-....", // UUID; optional (defaults server-side) but supply yours for traceability
-  "type": "news", // discriminator → BreakingNewsPayload
-  "title": "Ukraine summit begins",
-  "message": "World leaders gather in Geneva as talks open...",
-  "thumbnailUrl": "https://.../thumb.jpg", // optional
-  "sender": "notifications-tooling-spa/v1", // free-text source identifier
-  "link": {
-    // REQUIRED for news/content (NotificationWithLink)
-    "contentApiId": "world/2026/jul/08/ukraine-summit",
-    "shortUrl": "https://gu.com/p/xyz",
-    "title": "Ukraine summit begins",
-    "git": { "mobileAggregatorPrefix": "item-trimmed" },
-    // ^ GuardianLinkDetails; or use { "url": "https://..." } for an ExternalLink
-  },
-  "imageUrl": "https://.../lead.jpg", // optional
-  "importance": "Major", // "Major" | "Minor"
-  "topic": [
-    // 1–20 entries; {type, name}
-    { "type": "breaking", "name": "uk" },
-    { "type": "breaking", "name": "us" },
-  ],
-  "debug": false,
-  "dryRun": false, // true = full pipeline, no device delivery
+	"id": "a1b2c3d4-....", // UUID; optional (defaults server-side) but supply yours for traceability
+	"type": "news", // discriminator → BreakingNewsPayload
+	"title": "Ukraine summit begins",
+	"message": "World leaders gather in Geneva as talks open...",
+	"thumbnailUrl": "https://.../thumb.jpg", // optional
+	"sender": "notifications-tooling-spa/v1", // free-text source identifier
+	"link": {
+		// REQUIRED for news/content (NotificationWithLink)
+		"contentApiId": "world/2026/jul/08/ukraine-summit",
+		"shortUrl": "https://gu.com/p/xyz",
+		"title": "Ukraine summit begins",
+		"git": { "mobileAggregatorPrefix": "item-trimmed" },
+		// ^ GuardianLinkDetails; or use { "url": "https://..." } for an ExternalLink
+	},
+	"imageUrl": "https://.../lead.jpg", // optional
+	"importance": "Major", // "Major" | "Minor"
+	"topic": [
+		// 1–20 entries; {type, name}
+		{ "type": "breaking", "name": "uk" },
+		{ "type": "breaking", "name": "us" },
+	],
+	"debug": false,
+	"dryRun": false, // true = full pipeline, no device delivery
 }
 ```
 
