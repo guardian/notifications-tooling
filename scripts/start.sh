@@ -18,7 +18,7 @@ start_frontend() {
   echo "Starting frontend..."
   pushd ./src/apps/frontend
   bun run dev &
-  PIDS[0]=$!
+  PIDS+=($!)
   popd
 }
 
@@ -26,7 +26,7 @@ start_backend() {
   echo "Starting backend..."
   pushd ./src/apps/backend
   bun run dev &
-  PIDS[0]=$!
+  PIDS+=($!)
   popd
 }
 
