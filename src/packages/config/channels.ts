@@ -4,9 +4,9 @@
  * - `newsletter` is delivered via Braze (email).
  * - `app-push-notification` is delivered via FCM (Android) and APNS (iOS).
  */
-export enum NOTIFICATION_CHANNEL {
-	NEWSLETTER = 'newsletter',
-	APP_PUSH_NOTIFICATION = 'app-push-notification',
+export enum NotificationChannel {
+	Newsletter = 'newsletter',
+	AppPushNotification = 'app-push-notification',
 }
 
 /**
@@ -29,12 +29,12 @@ export enum NOTIFICATION_CHANNEL {
  * NOTE: These are sensible stub limits for the initial version and would
  * eventually be surfaced via `GET /v1/channels/constraints`.
  */
-export const NOTIFICATION_CHANNEL_CONTENT_LIMITS = {
-	[NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION]: {
+export const notificationChannelContentLimits = {
+	[NotificationChannel.AppPushNotification]: {
 		title: { maxLength: 50 },
 		body: { maxLength: 120 },
 	},
-	[NOTIFICATION_CHANNEL.NEWSLETTER]: {
+	[NotificationChannel.Newsletter]: {
 		title: { maxLength: 120 },
 		body: { maxLength: 5000 },
 	},
@@ -46,7 +46,7 @@ export const NOTIFICATION_CHANNEL_CONTENT_LIMITS = {
  * - `digest` assembles many content items into a single email.
  * - `single` sends one content item on its own.
  */
-export enum NEWSLETTER_LAYOUT {
-	DIGEST = 'digest',
-	SINGLE = 'single',
+export enum NewsletterLayout {
+	Digest = 'digest',
+	Single = 'single',
 }

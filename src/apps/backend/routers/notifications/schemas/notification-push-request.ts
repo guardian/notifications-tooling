@@ -1,20 +1,18 @@
 import {
 	MAX_PUSH_TOPICS,
-	NEWSLETTER_LAYOUT,
-	NEWSLETTER_SEGMENTS,
-	NOTIFICATION_CHANNEL,
-	NOTIFICATION_CHANNEL_CONTENT_LIMITS,
-	PUSH_TOPICS,
+	NewsletterLayout,
+	newsletterSegments,
+	NotificationChannel,
+	notificationChannelContentLimits,
+	pushTopics,
 } from '@config';
 import { isGuardianUrl } from '@utils';
 import { z } from 'zod';
 
 const pushLimits =
-	NOTIFICATION_CHANNEL_CONTENT_LIMITS[
-		NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION
-	];
+	notificationChannelContentLimits[NotificationChannel.AppPushNotification];
 const newsletterLimits =
-	NOTIFICATION_CHANNEL_CONTENT_LIMITS[NOTIFICATION_CHANNEL.NEWSLETTER];
+	notificationChannelContentLimits[NotificationChannel.Newsletter];
 
 /**
  * A Guardian news article link. Provided as a simple URL string, so we check it
@@ -37,7 +35,7 @@ const mediaSchema = z.object({
  * via FCM/APNS, so `title` and `body` use the stricter push limits.
  */
 const appPushContentItem = z.object({
-	type: z.literal(NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION),
+	type: z.literal(NotificationChannel.AppPushNotification),
 	title: z.string().min(1).max(pushLimits.title.maxLength),
 	body: z.string().min(1).max(pushLimits.body.maxLength),
 	link: guardianArticleLink,
@@ -49,7 +47,7 @@ const appPushContentItem = z.object({
  * `title` and `body` use the more generous newsletter limits.
  */
 const newsletterContentItem = z.object({
-	type: z.literal(NOTIFICATION_CHANNEL.NEWSLETTER),
+	type: z.literal(NotificationChannel.Newsletter),
 	title: z.string().min(1).max(newsletterLimits.title.maxLength),
 	body: z.string().min(1).max(newsletterLimits.body.maxLength),
 	link: guardianArticleLink,
@@ -76,11 +74,11 @@ const contentSchema = z.object({
 /** Newsletter audiences are addressed by a known Braze segment. */
 const segmentAudience = z.object({
 	type: z.literal('segment'),
-	segments: z.array(z.object({ name: z.enum(NEWSLETTER_SEGMENTS) })).min(1),
+	segments: z.array(z.object({ name: z.enum(newsletterSegments) })).min(1),
 });
 
 const knownPushTopics = new Set(
-	PUSH_TOPICS.map((topic) => `${topic.type}:${topic.name}`),
+	pushTopics.map((topic) => `${topic.type}:${topic.name}`),
 );
 
 /** A single, known mobile-n10n topic. */
@@ -103,7 +101,7 @@ const appPushCompose = z.object({
 
 /** Newsletter assembles many content items into a digest. */
 const newsletterCompose = z.object({
-	layout: z.enum(NEWSLETTER_LAYOUT).default(NEWSLETTER_LAYOUT.DIGEST),
+	layout: z.enum(NewsletterLayout).default(NewsletterLayout.Digest),
 	items: z.array(z.string().min(1)).min(1),
 	subject: z.string().min(1).max(newsletterLimits.title.maxLength),
 });
@@ -115,12 +113,12 @@ const newsletterCompose = z.object({
  */
 const planSchema = z.discriminatedUnion('channel', [
 	z.object({
-		channel: z.literal(NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION),
+		channel: z.literal(NotificationChannel.AppPushNotification),
 		audience: topicAudience,
 		compose: appPushCompose,
 	}),
 	z.object({
-		channel: z.literal(NOTIFICATION_CHANNEL.NEWSLETTER),
+		channel: z.literal(NotificationChannel.Newsletter),
 		audience: segmentAudience,
 		compose: newsletterCompose,
 	}),
@@ -154,7 +152,7 @@ export const notificationPushRequestSchema = z
 		// reference content items that exist and match the plan's channel.
 		for (const [planIndex, plan] of value.channels.entries()) {
 			const refs =
-				plan.channel === NOTIFICATION_CHANNEL.APP_PUSH_NOTIFICATION
+				plan.channel === NotificationChannel.AppPushNotification
 					? [{ key: plan.compose.use, path: ['compose', 'use'] }]
 					: plan.compose.items.map((key, index) => ({
 							key,
