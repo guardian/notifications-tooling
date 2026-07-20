@@ -1,7 +1,6 @@
 import {
 	MAX_PUSH_TOPICS,
-	NewsletterLayout,
-	newsletterSegments,
+	newsletterCampaigns,
 	NotificationChannel,
 	notificationChannelContentLimits,
 	pushTopics,
@@ -120,15 +119,15 @@ const contentSchema = z.object({
 		}),
 });
 
-/** Newsletter audiences are addressed by a known Braze segment. */
-const segmentAudience = z.object({
-	type: z.literal('segment'),
-	segments: z
-		.array(z.object({ name: z.enum(newsletterSegments) }))
+/** Newsletter audiences are addressed by a known Braze campaign. */
+const campaignAudience = z.object({
+	type: z.literal('campaign'),
+	campaigns: z
+		.array(z.object({ id: z.enum(newsletterCampaigns) }))
 		.min(1)
 		.meta({
-			description: 'One or more known Braze segments to deliver to.',
-			example: [{ name: newsletterSegments[0] }],
+			description: 'One or more known Braze campaigns to deliver to.',
+			example: [{ id: newsletterCampaigns[0] }],
 		}),
 });
 
@@ -176,10 +175,6 @@ const appPushCompose = z.object({
 
 /** Newsletter assembles many content items into a digest. */
 const newsletterCompose = z.object({
-	layout: z.enum(NewsletterLayout).default(NewsletterLayout.Digest).meta({
-		description: 'How the referenced items are assembled into the email.',
-		example: NewsletterLayout.Digest,
-	}),
 	items: z
 		.array(z.string().min(1))
 		.min(1)
@@ -197,7 +192,7 @@ const newsletterCompose = z.object({
 /**
  * A delivery plan. `channel` discriminates the plan and, in doing so, pins the
  * audience and compose shapes valid for that channel (push -> topic + single
- * item, newsletter -> segment + digest).
+ * item, newsletter -> campaign + digest).
  */
 const planSchema = z.discriminatedUnion('channel', [
 	z.object({
@@ -207,7 +202,7 @@ const planSchema = z.discriminatedUnion('channel', [
 	}),
 	z.object({
 		channel: z.literal(NotificationChannel.Newsletter),
-		audience: segmentAudience,
+		audience: campaignAudience,
 		compose: newsletterCompose,
 	}),
 ]);
@@ -312,11 +307,10 @@ export const notificationPushRequestSchema = z
 				{
 					channel: NotificationChannel.Newsletter,
 					audience: {
-						type: 'segment',
-						segments: [{ name: newsletterSegments[0] }],
+						type: 'campaign',
+						campaigns: [{ id: newsletterCampaigns[0] }],
 					},
 					compose: {
-						layout: NewsletterLayout.Digest,
 						items: ['lead-story'],
 						subject: 'Your morning briefing',
 					},

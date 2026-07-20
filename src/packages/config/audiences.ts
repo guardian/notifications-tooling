@@ -2,19 +2,19 @@
  * Stub channel audience allow-lists.
  *
  * In production these would be resolved from the downstream services (Braze
- * segments for newsletters, mobile-n10n topics for push) and exposed via
+ * campaigns for newsletters, mobile-n10n topics for push) and exposed via
  * `GET /v1/channels/audiences`. For now they are hard-coded so the validator
- * can reject references to unknown segments/topics.
+ * can reject references to unknown campaigns/topics.
  */
 
-/** Newsletter audiences are addressed by Braze segment name. */
-export const newsletterSegments = [
-	'morning-briefing-subscribers',
-	'first-edition-subscribers',
+/** Newsletter audiences are addressed by Braze campaign. */
+export const newsletterCampaigns = [
+	'morning-briefing',
+	'first-edition',
 	'editorial-breaking-news',
 ] as const;
 
-export type NewsletterSegment = (typeof newsletterSegments)[number];
+export type NewsletterCampaign = (typeof newsletterCampaigns)[number];
 
 /** The topic `type`s mobile-n10n recognises. */
 export const pushTopicTypes = ['breaking', 'content', 'newsstand'] as const;

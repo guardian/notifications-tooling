@@ -1,6 +1,6 @@
 import {
 	MAX_PUSH_TOPICS,
-	newsletterSegments,
+	newsletterCampaigns,
 	NotificationChannel,
 	notificationChannelContentLimits,
 	pushTopics,
@@ -45,7 +45,7 @@ const pushPlan = (overrides: Record<string, unknown> = {}) => ({
 
 const newsletterPlan = (overrides: Record<string, unknown> = {}) => ({
 	channel: NotificationChannel.Newsletter,
-	audience: { type: 'segment', segments: [{ name: newsletterSegments[0] }] },
+	audience: { type: 'campaign', campaigns: [{ id: newsletterCampaigns[0] }] },
 	compose: { items: ['lead'], subject: 'Your morning briefing' },
 	...overrides,
 });
@@ -131,7 +131,7 @@ describe('notificationPushRequestSchema', () => {
 			const data = expectValid(newsletterRequest());
 
 			// The fully normalised payload, with request-level defaults
-			// (`priority`, `options`) and the newsletter `layout` filled in.
+			// (`priority`, `options`) filled in.
 			expect(data as unknown).toEqual({
 				idempotencyKey: 'mb-2026-07-08',
 				category: 'editorial',
@@ -150,11 +150,10 @@ describe('notificationPushRequestSchema', () => {
 					{
 						channel: 'newsletter',
 						audience: {
-							type: 'segment',
-							segments: [{ name: 'morning-briefing-subscribers' }],
+							type: 'campaign',
+							campaigns: [{ id: 'morning-briefing' }],
 						},
 						compose: {
-							layout: 'digest',
 							items: ['lead'],
 							subject: 'Your morning briefing',
 						},
@@ -234,11 +233,10 @@ describe('notificationPushRequestSchema', () => {
 					{
 						channel: 'newsletter',
 						audience: {
-							type: 'segment',
-							segments: [{ name: 'morning-briefing-subscribers' }],
+							type: 'campaign',
+							campaigns: [{ id: 'morning-briefing' }],
 						},
 						compose: {
-							layout: 'digest',
 							items: ['newsLead'],
 							subject: 'Briefing',
 						},
@@ -577,42 +575,42 @@ describe('notificationPushRequestSchema', () => {
 		});
 	});
 
-	describe('newsletter segment audience', () => {
-		it('accepts every configured segment', () => {
-			for (const name of newsletterSegments) {
+	describe('newsletter campaign audience', () => {
+		it('accepts every configured campaign', () => {
+			for (const id of newsletterCampaigns) {
 				expectValid(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'segment', segments: [{ name }] },
+							audience: { type: 'campaign', campaigns: [{ id }] },
 						}),
 					),
 				);
 			}
 		});
 
-		it('rejects an unknown segment', () => {
+		it('rejects an unknown campaign', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
 							audience: {
-								type: 'segment',
-								segments: [{ name: 'ghost-segment' }],
+								type: 'campaign',
+								campaigns: [{ id: 'ghost-campaign' }],
 							},
 						}),
 					),
 				),
-			).toContain('channels/0/audience/segments/0/name');
+			).toContain('channels/0/audience/campaigns/0/id');
 		});
 
-		it('requires at least one segment', () => {
+		it('requires at least one campaign', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'segment', segments: [] } }),
+						newsletterPlan({ audience: { type: 'campaign', campaigns: [] } }),
 					),
 				),
-			).toContain('channels/0/audience/segments');
+			).toContain('channels/0/audience/campaigns');
 		});
 	});
 
@@ -734,28 +732,6 @@ describe('notificationPushRequestSchema', () => {
 				),
 			).toContain('channels/0/compose/subject');
 		});
-
-		it('newsletter accepts the single layout', () => {
-			expectValid(
-				newsletterRequestWithPlan(
-					newsletterPlan({
-						compose: { items: ['lead'], subject: 'Briefing', layout: 'single' },
-					}),
-				),
-			);
-		});
-
-		it('newsletter rejects an unknown layout', () => {
-			expect(
-				pathsOf(
-					newsletterRequestWithPlan(
-						newsletterPlan({
-							compose: { items: ['lead'], subject: 'Briefing', layout: 'grid' },
-						}),
-					),
-				),
-			).toContain('channels/0/compose/layout');
-		});
 	});
 
 	describe('plan channel discrimination', () => {
@@ -774,14 +750,14 @@ describe('notificationPushRequestSchema', () => {
 			).toBe(true);
 		});
 
-		it('rejects a push plan with a segment audience', () => {
+		it('rejects a push plan with a campaign audience', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
 							audience: {
-								type: 'segment',
-								segments: [{ name: newsletterSegments[0] }],
+								type: 'campaign',
+								campaigns: [{ id: newsletterCampaigns[0] }],
 							},
 						}),
 					),
