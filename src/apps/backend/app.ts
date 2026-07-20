@@ -1,6 +1,3 @@
-import { existsSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import express, {
 	type Application,
 	type NextFunction,
@@ -23,32 +20,9 @@ app.use(pinoHttp({ logger }));
 
 // --- Routes ---
 
+app.use('/', rootRouter);
 app.use('/health', healthRouter);
 app.use('/v1/notifications', notificationsRouter);
-
-const backendDir = dirname(fileURLToPath(import.meta.url));
-const backendRootDir =
-	basename(backendDir) === 'dist' ? dirname(backendDir) : backendDir;
-const frontendDistDir = join(backendRootDir, '../frontend/dist');
-const frontendIndexFile = join(frontendDistDir, 'index.html');
-const hasFrontendBuild = existsSync(frontendIndexFile);
-
-if (hasFrontendBuild) {
-	app.use(express.static(frontendDistDir));
-	app.get('*', (req: Request, res: Response, next: NextFunction) => {
-		if (
-			req.path === '/health' ||
-			req.path === '/v1' ||
-			req.path.startsWith('/v1/')
-		) {
-			return next();
-		}
-
-		res.sendFile(frontendIndexFile);
-	});
-} else {
-	app.use('/', rootRouter);
-}
 
 // --- 404 Handler ---
 app.use((_req: Request, res: Response) => {

@@ -28,6 +28,6 @@ const placeholderIndexFile = join(placeholderAssetsDir, 'index.html');
 app.use(express.static(placeholderAssetsDir));
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express detects error middleware by its 4-arg signature
-app.get('*', (_req: Request, res: Response, _next: NextFunction) => {
+app.get('/', (_req: Request, res: Response, _next: NextFunction) => {
 	res.sendFile(placeholderIndexFile);
 });
