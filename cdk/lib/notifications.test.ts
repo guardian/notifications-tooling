@@ -1,15 +1,15 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { NotificationsToolingStack } from './notifications';
+import { DispatchStack } from './notifications';
 
 describe('The Notifications stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const stack = new NotificationsToolingStack(
+		const stack = new DispatchStack(
 			app,
-			'Notifications',
-			{ stack: 'deploy', stage: 'TEST', env: { region: 'eu-west-1' } },
-			'notifications-tooling',
+			'Dispatch',
+			{ stack: 'notifications', stage: 'TEST', env: { region: 'eu-west-1' } },
+			'dispatch',
 		);
 		const template = Template.fromStack(stack);
 		expect(template.toJSON()).toMatchSnapshot();

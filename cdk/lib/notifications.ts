@@ -4,7 +4,7 @@ import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
-export class NotificationsToolingStack extends GuStack {
+export class DispatchStack extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps, appName: string) {
 		super(scope, id, props);
 
