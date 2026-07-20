@@ -4,8 +4,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$ROOT_DIR/build/lambda"
-ARTIFACT_DIR="$ROOT_DIR/notifications-tooling"
-ZIP_FILE="$ARTIFACT_DIR/notifications-tooling.zip"
+ARTIFACT_DIR="$ROOT_DIR/dist"
+ZIP_FILE="$ARTIFACT_DIR/dispatch.zip"
 BACKEND_HANDLER="$ROOT_DIR/src/apps/backend/dist/handler.js"
 FRONTEND_DIST_DIR="$ROOT_DIR/src/apps/frontend/dist"
 

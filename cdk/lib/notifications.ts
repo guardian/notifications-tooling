@@ -11,7 +11,7 @@ function getBuildId(): string {
 	return process.env.BUILD_ID ?? 'DEV';
 }
 
-export class NotificationsToolingStack extends GuStack {
+export class DispatchStack extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps, appName: string) {
 		super(scope, id, props);
 

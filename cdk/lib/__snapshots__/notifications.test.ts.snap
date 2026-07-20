@@ -11,26 +11,22 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "mylambdamyapiEndpointFD60D497": {
+    "dispatchlambdadispatchapiEndpoint2C4D30C9": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "mylambdamyapiBDA8449A",
+              "Ref": "dispatchlambdadispatchapiEEAA8616",
             },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region",
-            },
-            ".",
+            ".execute-api.eu-west-1.",
             {
               "Ref": "AWS::URLSuffix",
             },
             "/",
             {
-              "Ref": "mylambdamyapiDeploymentStageprodB8A05BA0",
+              "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
             },
             "/",
           ],
@@ -46,7 +42,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGatewayHigh5xxPercentageAlarmMyapp781B8743": {
+    "ApiGatewayHigh5xxPercentageAlarmDispatch8B287436": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -54,11 +50,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             "Fn::Join": [
               "",
               [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
+                "arn:aws:sns:eu-west-1:",
                 {
                   "Ref": "AWS::AccountId",
                 },
@@ -67,15 +59,15 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "AlarmDescription": "my-app exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from my-app (ApiGateway) in TEST",
+        "AlarmDescription": "dispatch exceeded 5% error rate",
+        "AlarmName": "High 5XX error percentage from dispatch (ApiGateway) in TEST",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
           {
             "Expression": "100*m1/m2",
             "Id": "expr_1",
-            "Label": "% of 5XX responses served for my-app",
+            "Label": "% of 5XX responses served for dispatch",
             "ReturnData": true,
           },
           {
@@ -85,7 +77,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "deploy-TEST-my-api",
+                    "Value": "notifications-TEST-dispatch-api",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -103,7 +95,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "deploy-TEST-my-api",
+                    "Value": "notifications-TEST-dispatch-api",
                   },
                 ],
                 "MetricName": "Count",
@@ -126,7 +118,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "deploy",
+            "Value": "notifications",
           },
           {
             "Key": "Stage",
@@ -138,41 +130,42 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "mylambdaE03B2284": {
+    "dispatchlambdaEBD865CC": {
       "DependsOn": [
-        "mylambdaServiceRoleDefaultPolicyBDADF1CE",
-        "mylambdaServiceRoleEF0A78B7",
+        "dispatchlambdaServiceRoleDefaultPolicy2917D760",
+        "dispatchlambdaServiceRole973DFF82",
       ],
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "deploy/TEST/my-app/my-app.zip",
+          "S3Key": "notifications/TEST/dispatch/dispatch.zip",
         },
         "Environment": {
           "Variables": {
-            "APP": "my-app",
-            "STACK": "deploy",
+            "APP": "dispatch",
+            "BUILD_ID": "DEV",
+            "STACK": "notifications",
             "STAGE": "TEST",
           },
         },
-        "Handler": "handler.ts",
+        "Handler": "backend/handler.handler",
         "LoggingConfig": {
           "LogFormat": "JSON",
         },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "mylambdaServiceRoleEF0A78B7",
+            "dispatchlambdaServiceRole973DFF82",
             "Arn",
           ],
         },
-        "Runtime": "nodejs14.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
-            "Value": "my-app",
+            "Value": "dispatch",
           },
           {
             "Key": "gu:cdk:version",
@@ -184,7 +177,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "deploy",
+            "Value": "notifications",
           },
           {
             "Key": "Stage",
@@ -195,7 +188,60 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "mylambdaServiceRoleDefaultPolicyBDADF1CE": {
+    "dispatchlambdaServiceRole973DFF82": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "dispatchlambdaServiceRoleDefaultPolicy2917D760": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -234,7 +280,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/deploy/TEST/my-app/my-app.zip",
+                      "/notifications/TEST/dispatch/dispatch.zip",
                     ],
                   ],
                 },
@@ -247,15 +293,11 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
+                    "arn:aws:ssm:eu-west-1:",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/deploy/my-app",
+                    ":parameter/TEST/notifications/dispatch",
                   ],
                 ],
               },
@@ -270,15 +312,11 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
+                    "arn:aws:ssm:eu-west-1:",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/deploy/my-app/*",
+                    ":parameter/TEST/notifications/dispatch/*",
                   ],
                 ],
               },
@@ -286,69 +324,16 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "mylambdaServiceRoleDefaultPolicyBDADF1CE",
+        "PolicyName": "dispatchlambdaServiceRoleDefaultPolicy2917D760",
         "Roles": [
           {
-            "Ref": "mylambdaServiceRoleEF0A78B7",
+            "Ref": "dispatchlambdaServiceRole973DFF82",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "mylambdaServiceRoleEF0A78B7": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "my-app",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/notifications-tooling",
-          },
-          {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          {
-            "Key": "Stage",
-            "Value": "TEST",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "mylambdamyapiANY00639D79": {
+    "dispatchlambdadispatchapiANY957BDAF9": {
       "Properties": {
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
@@ -363,14 +348,10 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::Partition",
                 },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
+                ":apigateway:eu-west-1:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "mylambdaE03B2284",
+                    "dispatchlambdaEBD865CC",
                     "Arn",
                   ],
                 },
@@ -381,22 +362,22 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         },
         "ResourceId": {
           "Fn::GetAtt": [
-            "mylambdamyapiBDA8449A",
+            "dispatchlambdadispatchapiEEAA8616",
             "RootResourceId",
           ],
         },
         "RestApiId": {
-          "Ref": "mylambdamyapiBDA8449A",
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "mylambdamyapiANYApiPermissionNotificationsmylambdamyapiE675143CANY871845D3": {
+    "dispatchlambdadispatchapiANYApiPermissionDispatchdispatchlambdadispatchapi3C057723ANY0B57AECD": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "mylambdaE03B2284",
+            "dispatchlambdaEBD865CC",
             "Arn",
           ],
         },
@@ -409,21 +390,17 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Partition",
               },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              ":execute-api:eu-west-1:",
               {
                 "Ref": "AWS::AccountId",
               },
               ":",
               {
-                "Ref": "mylambdamyapiBDA8449A",
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
               },
               "/",
               {
-                "Ref": "mylambdamyapiDeploymentStageprodB8A05BA0",
+                "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
               },
               "/*/",
             ],
@@ -432,12 +409,12 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "mylambdamyapiANYApiPermissionTestNotificationsmylambdamyapiE675143CANYC49FC350": {
+    "dispatchlambdadispatchapiANYApiPermissionTestDispatchdispatchlambdadispatchapi3C057723ANY76993E8C": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "mylambdaE03B2284",
+            "dispatchlambdaEBD865CC",
             "Arn",
           ],
         },
@@ -450,17 +427,13 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Partition",
               },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              ":execute-api:eu-west-1:",
               {
                 "Ref": "AWS::AccountId",
               },
               ":",
               {
-                "Ref": "mylambdamyapiBDA8449A",
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
               },
               "/test-invoke-stage/*/",
             ],
@@ -469,15 +442,15 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "mylambdamyapiAccount643BF127": {
+    "dispatchlambdadispatchapiAccount83D5272B": {
       "DeletionPolicy": "Retain",
       "DependsOn": [
-        "mylambdamyapiBDA8449A",
+        "dispatchlambdadispatchapiEEAA8616",
       ],
       "Properties": {
         "CloudWatchRoleArn": {
           "Fn::GetAtt": [
-            "mylambdamyapiCloudWatchRoleE8354865",
+            "dispatchlambdadispatchapiCloudWatchRole3127AE9E",
             "Arn",
           ],
         },
@@ -485,36 +458,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::Account",
       "UpdateReplacePolicy": "Retain",
     },
-    "mylambdamyapiBDA8449A": {
-      "Properties": {
-        "Description": "...",
-        "Name": "deploy-TEST-my-api",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "my-app",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/notifications-tooling",
-          },
-          {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          {
-            "Key": "Stage",
-            "Value": "TEST",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "mylambdamyapiCloudWatchRoleE8354865": {
+    "dispatchlambdadispatchapiCloudWatchRole3127AE9E": {
       "DeletionPolicy": "Retain",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -546,7 +490,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "my-app",
+            "Value": "dispatch",
           },
           {
             "Key": "gu:cdk:version",
@@ -558,7 +502,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "deploy",
+            "Value": "notifications",
           },
           {
             "Key": "Stage",
@@ -569,39 +513,39 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "mylambdamyapiDeployment09F01553f642109ee0484f9e8ce5e9ba6555a2b3": {
+    "dispatchlambdadispatchapiDeployment664A949C24a731e3d45bd9243dedf614052f9c4a": {
       "DependsOn": [
-        "mylambdamyapiproxyANYC5974118",
-        "mylambdamyapiproxy3EEAC04A",
-        "mylambdamyapiANY00639D79",
+        "dispatchlambdadispatchapiproxyANYE34E6F78",
+        "dispatchlambdadispatchapiproxy929EBBAA",
+        "dispatchlambdadispatchapiANY957BDAF9",
       ],
       "Metadata": {
         "aws:cdk:do-not-refactor": true,
       },
       "Properties": {
-        "Description": "...",
+        "Description": "API for the notifications tooling",
         "RestApiId": {
-          "Ref": "mylambdamyapiBDA8449A",
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
         },
       },
       "Type": "AWS::ApiGateway::Deployment",
     },
-    "mylambdamyapiDeploymentStageprodB8A05BA0": {
+    "dispatchlambdadispatchapiDeploymentStageprod8A227FBD": {
       "DependsOn": [
-        "mylambdamyapiAccount643BF127",
+        "dispatchlambdadispatchapiAccount83D5272B",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "mylambdamyapiDeployment09F01553f642109ee0484f9e8ce5e9ba6555a2b3",
+          "Ref": "dispatchlambdadispatchapiDeployment664A949C24a731e3d45bd9243dedf614052f9c4a",
         },
         "RestApiId": {
-          "Ref": "mylambdamyapiBDA8449A",
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
         },
         "StageName": "prod",
         "Tags": [
           {
             "Key": "App",
-            "Value": "my-app",
+            "Value": "dispatch",
           },
           {
             "Key": "gu:cdk:version",
@@ -613,7 +557,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "deploy",
+            "Value": "notifications",
           },
           {
             "Key": "Stage",
@@ -623,27 +567,56 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "mylambdamyapiproxy3EEAC04A": {
+    "dispatchlambdadispatchapiEEAA8616": {
+      "Properties": {
+        "Description": "API for the notifications tooling",
+        "Name": "notifications-TEST-dispatch-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "dispatchlambdadispatchapiproxy929EBBAA": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
-            "mylambdamyapiBDA8449A",
+            "dispatchlambdadispatchapiEEAA8616",
             "RootResourceId",
           ],
         },
         "PathPart": "{proxy+}",
         "RestApiId": {
-          "Ref": "mylambdamyapiBDA8449A",
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "mylambdamyapiproxyANYApiPermissionNotificationsmylambdamyapiE675143CANYproxy7D6D391F": {
+    "dispatchlambdadispatchapiproxyANYApiPermissionDispatchdispatchlambdadispatchapi3C057723ANYproxy12C2B79A": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "mylambdaE03B2284",
+            "dispatchlambdaEBD865CC",
             "Arn",
           ],
         },
@@ -656,21 +629,17 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Partition",
               },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              ":execute-api:eu-west-1:",
               {
                 "Ref": "AWS::AccountId",
               },
               ":",
               {
-                "Ref": "mylambdamyapiBDA8449A",
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
               },
               "/",
               {
-                "Ref": "mylambdamyapiDeploymentStageprodB8A05BA0",
+                "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
               },
               "/*/*",
             ],
@@ -679,12 +648,12 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "mylambdamyapiproxyANYApiPermissionTestNotificationsmylambdamyapiE675143CANYproxyDFD4E0B9": {
+    "dispatchlambdadispatchapiproxyANYApiPermissionTestDispatchdispatchlambdadispatchapi3C057723ANYproxy5AB1F5C9": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "mylambdaE03B2284",
+            "dispatchlambdaEBD865CC",
             "Arn",
           ],
         },
@@ -697,17 +666,13 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Partition",
               },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              ":execute-api:eu-west-1:",
               {
                 "Ref": "AWS::AccountId",
               },
               ":",
               {
-                "Ref": "mylambdamyapiBDA8449A",
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
               },
               "/test-invoke-stage/*/*",
             ],
@@ -716,7 +681,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "mylambdamyapiproxyANYC5974118": {
+    "dispatchlambdadispatchapiproxyANYE34E6F78": {
       "Properties": {
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
@@ -731,14 +696,10 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::Partition",
                 },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
+                ":apigateway:eu-west-1:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "mylambdaE03B2284",
+                    "dispatchlambdaEBD865CC",
                     "Arn",
                   ],
                 },
@@ -748,10 +709,10 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
         },
         "ResourceId": {
-          "Ref": "mylambdamyapiproxy3EEAC04A",
+          "Ref": "dispatchlambdadispatchapiproxy929EBBAA",
         },
         "RestApiId": {
-          "Ref": "mylambdamyapiBDA8449A",
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
         },
       },
       "Type": "AWS::ApiGateway::Method",
