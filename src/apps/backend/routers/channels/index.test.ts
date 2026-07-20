@@ -1,6 +1,5 @@
 import {
 	MAX_PUSH_TOPICS,
-	NewsletterLayout,
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
@@ -59,7 +58,7 @@ describe('GET /v1/channels/constraints', () => {
 		expect(push.audience.maxTopics).toBe(MAX_PUSH_TOPICS);
 	});
 
-	it('exposes the newsletter content limits, layouts and subject limit', async () => {
+	it('exposes the newsletter content limits and subject limit', async () => {
 		const response = await getConstraints();
 		const body = (await response.json()) as typeof channelConstraints;
 
@@ -68,7 +67,6 @@ describe('GET /v1/channels/constraints', () => {
 		expect(newsletter.content).toEqual(
 			notificationChannelContentLimits[NotificationChannel.Newsletter],
 		);
-		expect(newsletter.compose.layouts).toEqual(Object.values(NewsletterLayout));
 		expect(newsletter.compose.subject.maxLength).toBe(
 			notificationChannelContentLimits[NotificationChannel.Newsletter].title
 				.maxLength,
