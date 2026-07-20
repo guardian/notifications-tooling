@@ -33,7 +33,17 @@ describe('GET /v1/channels/constraints', () => {
 		const response = await getConstraints();
 
 		expect(response.status).toBe(200);
+		expect(response.headers.get('content-type')).toContain('application/json');
 		expect(await response.json()).toEqual(channelConstraints);
+	});
+
+	it('exposes exactly the supported channels as top-level keys', async () => {
+		const response = await getConstraints();
+		const body = (await response.json()) as typeof channelConstraints;
+
+		expect(Object.keys(body).sort()).toEqual(
+			Object.values(NotificationChannel).sort(),
+		);
 	});
 
 	it('exposes the push content limits, single-item compose and topic cap', async () => {
