@@ -1,0 +1,67 @@
+import {
+	MAX_PUSH_TOPICS,
+	NewsletterLayout,
+	NotificationChannel,
+	notificationChannelContentLimits,
+} from '@config';
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { startTestServer, type TestServer } from '../../test-utils/server';
+import { channelConstraints } from './index';
+
+/**
+ * Drives the real Express app over HTTP so the whole `GET
+ * /v1/channels/constraints` chain runs through the mounted router.
+ */
+
+let server: TestServer;
+let baseUrl: string;
+
+beforeAll(async () => {
+	server = await startTestServer();
+	baseUrl = server.baseUrl;
+});
+
+afterAll(async () => {
+	await server.close();
+});
+
+const getConstraints = (): Promise<Response> =>
+	fetch(`${baseUrl}/v1/channels/constraints`);
+
+describe('GET /v1/channels/constraints', () => {
+	it('returns 200 with the per-channel constraints from config', async () => {
+		const response = await getConstraints();
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual(channelConstraints);
+	});
+
+	it('exposes the push content limits, single-item compose and topic cap', async () => {
+		const response = await getConstraints();
+		const body = (await response.json()) as typeof channelConstraints;
+
+		const push = body[NotificationChannel.AppPushNotification];
+
+		expect(push.content).toEqual(
+			notificationChannelContentLimits[NotificationChannel.AppPushNotification],
+		);
+		expect(push.compose.maxItems).toBe(1);
+		expect(push.audience.maxTopics).toBe(MAX_PUSH_TOPICS);
+	});
+
+	it('exposes the newsletter content limits, layouts and subject limit', async () => {
+		const response = await getConstraints();
+		const body = (await response.json()) as typeof channelConstraints;
+
+		const newsletter = body[NotificationChannel.Newsletter];
+
+		expect(newsletter.content).toEqual(
+			notificationChannelContentLimits[NotificationChannel.Newsletter],
+		);
+		expect(newsletter.compose.layouts).toEqual(Object.values(NewsletterLayout));
+		expect(newsletter.compose.subject.maxLength).toBe(
+			notificationChannelContentLimits[NotificationChannel.Newsletter].title
+				.maxLength,
+		);
+	});
+});

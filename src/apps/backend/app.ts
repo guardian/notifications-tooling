@@ -5,6 +5,7 @@ import express, {
 	type Response,
 } from 'express';
 import { pinoHttp } from 'pino-http';
+import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
@@ -23,6 +24,7 @@ app.use(pinoHttp({ logger }));
 
 app.use('/', rootRouter);
 app.use('/health', healthRouter);
+app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/docs/api', docsRouter);
 
