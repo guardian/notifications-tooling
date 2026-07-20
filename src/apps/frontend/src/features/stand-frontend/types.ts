@@ -6,11 +6,16 @@ export type UserData = {
 	permissions: Record<string, boolean>;
 };
 
+export type CapiContent = Record<string, unknown> & { id: string };
+
 export type TabName = 'create' | 'history';
 
 export type NotificationState = {
 	articleId?: string;
-	content?: Record<string, unknown>;
+	isFetchingContent?: boolean;
+	fetchedArticleId?: string;
+	fetchArticleError?: string;
+	content?: CapiContent;
 	parameters?: EmailNotification | PushNotification;
 };
 
@@ -33,4 +38,15 @@ export type NotificationAction =
 	| {
 			type: 'modify-email-parameters';
 			mod: Partial<EmailNotification>;
+	  }
+	| {
+			type: 'waiting-for-article';
+	  }
+	| {
+			type: 'receive-article';
+			content: CapiContent;
+	  }
+	| {
+			type: 'report-article-error';
+			errorMessage: string;
 	  };
