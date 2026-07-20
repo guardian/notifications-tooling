@@ -1,5 +1,3 @@
-import { NotificationChannel } from '@config';
-
 /**
  * The `202 Accepted` response body returned by `POST /v1/notifications` once a
  * request passes validation and is enqueued for per-channel dispatch.
@@ -21,10 +19,7 @@ export const acceptedNotificationSchema = {
 				type: 'object',
 				required: ['channel', 'planId', 'status'],
 				properties: {
-					channel: {
-						type: 'string',
-						enum: Object.values(NotificationChannel),
-					},
+					channel: { $ref: '#/components/schemas/NotificationChannel' },
 					planId: {
 						type: 'string',
 						example: '<notificationId>#newsletter',

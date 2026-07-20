@@ -35,8 +35,8 @@ export const notificationChannelContentLimits = {
 		body: { maxLength: 120 },
 	},
 	[NotificationChannel.Newsletter]: {
-		title: { maxLength: 120 },
-		body: { maxLength: 5000 },
+		title: { maxLength: 100 },
+		body: { maxLength: 280 },
 	},
 } as const;
 
