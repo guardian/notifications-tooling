@@ -7,6 +7,8 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
+      "GuCertificate",
+      "GuCname",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -129,6 +131,58 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
+    },
+    "CertificateDispatchB98021E7": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "DomainName": "dispatch.code.dev-gutools.co.uk",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Name",
+            "Value": "Dispatch/CertificateDispatch",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "ValidationMethod": "DNS",
+      },
+      "Type": "AWS::CertificateManager::Certificate",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "DispatchAppDNS": {
+      "Properties": {
+        "Name": "dispatch.code.dev-gutools.co.uk",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "dispatchlambdadispatchapidispatchdomain85127498",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "Stage": "TEST",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
     },
     "dispatchlambdaEBD865CC": {
       "DependsOn": [
@@ -595,6 +649,56 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::ApiGateway::RestApi",
+    },
+    "dispatchlambdadispatchapidispatchdomain85127498": {
+      "Properties": {
+        "DomainName": "dispatch.code.dev-gutools.co.uk",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Ref": "CertificateDispatchB98021E7",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "dispatchlambdadispatchapidispatchdomainMapDispatchdispatchlambdadispatchapi3C057723FB0C4773": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "dispatchlambdadispatchapidispatchdomain85127498",
+        },
+        "RestApiId": {
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
+        },
+        "Stage": {
+          "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
     },
     "dispatchlambdadispatchapiproxy929EBBAA": {
       "Properties": {
