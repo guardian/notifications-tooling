@@ -2,7 +2,7 @@
  * The error envelope returned for a rejected `POST /v1/notifications` request,
  * used by both `400` (structural) and `422` (semantic) responses.
  */
-export const validationErrorSchema = {
+export const notificationValidationErrorSchema = {
 	type: 'object',
 	required: ['error', 'message', 'details'],
 	properties: {

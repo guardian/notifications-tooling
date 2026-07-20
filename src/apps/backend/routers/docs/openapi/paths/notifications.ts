@@ -37,7 +37,9 @@ export const notificationsPath = {
 					'The request body is structurally malformed (missing/mistyped fields, unknown channel, or unexpected keys).',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/ValidationError' },
+						schema: {
+							$ref: '#/components/schemas/NotificationValidationError',
+						},
 					},
 				},
 			},
@@ -46,7 +48,9 @@ export const notificationsPath = {
 					'The request body is well-formed but failed semantic validation (content length limits, unknown references, or cross-field rules).',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/ValidationError' },
+						schema: {
+							$ref: '#/components/schemas/NotificationValidationError',
+						},
 					},
 				},
 			},
