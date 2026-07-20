@@ -60,6 +60,9 @@
     },
     "src/packages/utils": {
       "name": "@utils",
+      "dependencies": {
+        "@config": "workspace:*",
+      },
     },
   },
   "packages": {

@@ -5,5 +5,8 @@
 	"private": true,
 	"scripts": {
 		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@config": "workspace:*"
 	}
 }
