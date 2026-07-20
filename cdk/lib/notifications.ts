@@ -32,6 +32,7 @@ export class NotificationsToolingStack extends GuStack {
 				APP: appName,
 				BUILD_ID: getBuildId(),
 			},
+			reservedConcurrentExecutions: 1,
 		});
 	}
 }

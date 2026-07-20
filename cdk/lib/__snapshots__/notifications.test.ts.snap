@@ -155,6 +155,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           "LogFormat": "JSON",
         },
         "MemorySize": 512,
+        "ReservedConcurrentExecutions": 1,
         "Role": {
           "Fn::GetAtt": [
             "notificationstoolinglambdaServiceRoleA870008B",
