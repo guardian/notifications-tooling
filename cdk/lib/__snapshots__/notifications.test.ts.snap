@@ -145,7 +145,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "notifications-tooling",
-            "BUILD_ID": "DEV",
             "STACK": "deploy",
             "STAGE": "TEST",
           },
@@ -162,7 +161,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs22.x",
+        "Runtime": "nodejs24.x",
         "Tags": [
           {
             "Key": "App",
