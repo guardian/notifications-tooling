@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express, {
 	type Application,
 	type NextFunction,
@@ -9,9 +12,6 @@ import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
 import { rootRouter } from './routers/root';
 import { logger } from './utils/logger';
-import { existsSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 export const app: Application = express();
 
@@ -27,7 +27,8 @@ app.use('/health', healthRouter);
 app.use('/v1/notifications', notificationsRouter);
 
 const backendDir = dirname(fileURLToPath(import.meta.url));
-const backendRootDir = basename(backendDir) === 'dist' ? dirname(backendDir) : backendDir;
+const backendRootDir =
+	basename(backendDir) === 'dist' ? dirname(backendDir) : backendDir;
 const frontendDistDir = join(backendRootDir, '../frontend/dist');
 const frontendIndexFile = join(frontendDistDir, 'index.html');
 const hasFrontendBuild = existsSync(frontendIndexFile);
@@ -35,7 +36,11 @@ const hasFrontendBuild = existsSync(frontendIndexFile);
 if (hasFrontendBuild) {
 	app.use(express.static(frontendDistDir));
 	app.get('*', (req: Request, res: Response, next: NextFunction) => {
-		if (req.path === '/health' || req.path === '/v1' || req.path.startsWith('/v1/')) {
+		if (
+			req.path === '/health' ||
+			req.path === '/v1' ||
+			req.path.startsWith('/v1/')
+		) {
 			return next();
 		}
 
@@ -43,7 +48,7 @@ if (hasFrontendBuild) {
 	});
 } else {
 	app.use('/', rootRouter);
- }
+}
 
 // --- 404 Handler ---
 app.use((_req: Request, res: Response) => {

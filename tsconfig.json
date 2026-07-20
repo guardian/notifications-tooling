@@ -8,5 +8,5 @@
 		// bun-types and @types/node declare conflicting globals
 		"skipLibCheck": true
 	},
-	"include": ["src/**/*", "scripts/**/*", "docker/**/*"],
+	"include": ["src/**/*", "scripts/**/*", "docker/**/*"]
 }

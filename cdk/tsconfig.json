@@ -1,13 +1,9 @@
 {
-  "extends": "@guardian/tsconfig/tsconfig.json",
-  "compilerOptions": {
-    "module": "CommonJS",
-    "types": ["node", "jest"]
-  },
-  "include": ["lib/**/*", "bin/**/*"],
-  "exclude": [
-    "node_modules",
-    "cdk.out",
-    "lib/**/__snapshots__/**"
-  ]
+	"extends": "@guardian/tsconfig/tsconfig.json",
+	"compilerOptions": {
+		"module": "CommonJS",
+		"types": ["node", "jest"]
+	},
+	"include": ["lib/**/*", "bin/**/*"],
+	"exclude": ["node_modules", "cdk.out", "lib/**/__snapshots__/**"]
 }
