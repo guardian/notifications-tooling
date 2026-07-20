@@ -18,17 +18,33 @@ const newsletterLimits =
  * A Guardian news article link. Provided as a simple URL string, so we check it
  * is a real URL *and* that it points at a Guardian domain.
  */
-const guardianArticleLink = z.url().refine(isGuardianUrl, {
-	message:
-		'link must be an https Guardian article URL (e.g. https://www.theguardian.com/...).',
-});
+const guardianArticleLink = z
+	.url()
+	.refine(isGuardianUrl, {
+		message:
+			'link must be an https Guardian article URL (e.g. https://www.theguardian.com/...).',
+	})
+	.meta({
+		description:
+			'Canonical https link to the Guardian article the notification promotes.',
+		example:
+			'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
+	});
 
 /** Media is limited to images for now. */
-const mediaSchema = z.object({
-	type: z.literal('image'),
-	imageUrl: z.url(),
-	thumbnailUrl: z.url().optional(),
-});
+const mediaSchema = z
+	.object({
+		type: z.literal('image'),
+		imageUrl: z.url().meta({
+			description: 'Full-size image displayed alongside the notification.',
+			example: 'https://media.guim.co.uk/img/media/lead.jpg',
+		}),
+		thumbnailUrl: z.url().optional().meta({
+			description: 'Optional smaller preview image.',
+			example: 'https://media.guim.co.uk/img/media/thumb.jpg',
+		}),
+	})
+	.meta({ description: 'Optional media attachment (images only for now).' });
 
 /**
  * A content item destined for the `app-push-notification` channel. Delivered
@@ -36,8 +52,22 @@ const mediaSchema = z.object({
  */
 const appPushContentItem = z.object({
 	type: z.literal(NotificationChannel.AppPushNotification),
-	title: z.string().min(1).max(pushLimits.title.maxLength),
-	body: z.string().min(1).max(pushLimits.body.maxLength),
+	title: z
+		.string()
+		.min(1)
+		.max(pushLimits.title.maxLength)
+		.meta({
+			description: `Short push alert title (1-${pushLimits.title.maxLength} characters).`,
+			example: 'Breaking news',
+		}),
+	body: z
+		.string()
+		.min(1)
+		.max(pushLimits.body.maxLength)
+		.meta({
+			description: `Push alert body (1-${pushLimits.body.maxLength} characters).`,
+			example: 'Historic global climate deal reached at the COP summit',
+		}),
 	link: guardianArticleLink,
 	media: mediaSchema.optional(),
 });
@@ -48,8 +78,23 @@ const appPushContentItem = z.object({
  */
 const newsletterContentItem = z.object({
 	type: z.literal(NotificationChannel.Newsletter),
-	title: z.string().min(1).max(newsletterLimits.title.maxLength),
-	body: z.string().min(1).max(newsletterLimits.body.maxLength),
+	title: z
+		.string()
+		.min(1)
+		.max(newsletterLimits.title.maxLength)
+		.meta({
+			description: `Headline shown in the email (1-${newsletterLimits.title.maxLength} characters).`,
+			example: 'Your morning briefing',
+		}),
+	body: z
+		.string()
+		.min(1)
+		.max(newsletterLimits.body.maxLength)
+		.meta({
+			description: `Email body copy (1-${newsletterLimits.body.maxLength} characters).`,
+			example:
+				'The three stories shaping the day, plus what to keep an eye on.',
+		}),
 	link: guardianArticleLink,
 	media: mediaSchema.optional(),
 });
@@ -68,13 +113,23 @@ const contentSchema = z.object({
 		.record(z.string().min(1), contentItem)
 		.refine((items) => Object.keys(items).length > 0, {
 			message: 'content.items must contain at least one item.',
+		})
+		.meta({
+			description:
+				'Content items keyed by an author-chosen id (e.g. "lead-story"). A plan\'s `compose` references items by these ids.',
 		}),
 });
 
 /** Newsletter audiences are addressed by a known Braze segment. */
 const segmentAudience = z.object({
 	type: z.literal('segment'),
-	segments: z.array(z.object({ name: z.enum(newsletterSegments) })).min(1),
+	segments: z
+		.array(z.object({ name: z.enum(newsletterSegments) }))
+		.min(1)
+		.meta({
+			description: 'One or more known Braze segments to deliver to.',
+			example: [{ name: newsletterSegments[0] }],
+		}),
 });
 
 const knownPushTopics = new Set(
@@ -83,27 +138,60 @@ const knownPushTopics = new Set(
 
 /** A single, known mobile-n10n topic. */
 const pushTopic = z
-	.object({ type: z.string().min(1), name: z.string().min(1) })
+	.object({
+		type: z
+			.string()
+			.min(1)
+			.meta({ description: 'Topic type.', example: 'breaking' }),
+		name: z.string().min(1).meta({ description: 'Topic name.', example: 'uk' }),
+	})
 	.refine((topic) => knownPushTopics.has(`${topic.type}:${topic.name}`), {
 		message: 'unknown push topic.',
+	})
+	.meta({
+		description: 'A single, known mobile-n10n topic.',
+		example: { type: 'breaking', name: 'uk' },
 	});
 
 /** Push audiences are addressed by a known mobile-n10n topic. */
 const topicAudience = z.object({
 	type: z.literal('topic'),
-	topics: z.array(pushTopic).min(1).max(MAX_PUSH_TOPICS),
+	topics: z
+		.array(pushTopic)
+		.min(1)
+		.max(MAX_PUSH_TOPICS)
+		.meta({
+			description: `Up to ${MAX_PUSH_TOPICS} mobile-n10n topics to target.`,
+		}),
 });
 
 /** Push takes a single content item. */
 const appPushCompose = z.object({
-	use: z.string().min(1),
+	use: z.string().min(1).meta({
+		description:
+			'The id of the single content item (from `content.items`) to send.',
+		example: 'lead-story',
+	}),
 });
 
 /** Newsletter assembles many content items into a digest. */
 const newsletterCompose = z.object({
-	layout: z.enum(NewsletterLayout).default(NewsletterLayout.Digest),
-	items: z.array(z.string().min(1)).min(1),
-	subject: z.string().min(1).max(newsletterLimits.title.maxLength),
+	layout: z.enum(NewsletterLayout).default(NewsletterLayout.Digest).meta({
+		description: 'How the referenced items are assembled into the email.',
+		example: NewsletterLayout.Digest,
+	}),
+	items: z
+		.array(z.string().min(1))
+		.min(1)
+		.meta({
+			description:
+				'Ordered ids of the content items (from `content.items`) to include.',
+			example: ['lead-story'],
+		}),
+	subject: z.string().min(1).max(newsletterLimits.title.maxLength).meta({
+		description: 'The email subject line.',
+		example: 'Your morning briefing',
+	}),
 });
 
 /**
@@ -132,16 +220,41 @@ const planSchema = z.discriminatedUnion('channel', [
  */
 export const notificationPushRequestSchema = z
 	.object({
-		idempotencyKey: z.string().min(1),
-		category: z.string().min(1),
-		priority: z.enum(['standard', 'high']).default('standard'),
+		idempotencyKey: z.string().min(1).meta({
+			description:
+				'Client-generated unique key so retries are not delivered twice.',
+			example: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
+		}),
+		category: z.string().min(1).meta({
+			description: 'Editorial category used for routing and reporting.',
+			example: 'breaking-news',
+		}),
+		priority: z.enum(['standard', 'high']).default('standard').meta({
+			description:
+				'Delivery priority. `high` is reserved for time-critical alerts.',
+			example: 'high',
+		}),
 		content: contentSchema,
-		channels: z.array(planSchema).min(1),
-		sender: z.string().min(1),
+		channels: z.array(planSchema).min(1).meta({
+			description:
+				'One delivery plan per channel. Each plan pins the audience and compose shape valid for its channel.',
+		}),
+		sender: z.string().min(1).meta({
+			description: 'Identifier of the team or system sending the notification.',
+			example: 'editorial-breaking-news',
+		}),
 		options: z
 			.object({
-				dryRun: z.boolean().default(false),
-				scheduledFor: z.iso.datetime().nullable().default(null),
+				dryRun: z.boolean().default(false).meta({
+					description:
+						'When true, the request is validated but nothing is dispatched.',
+					example: false,
+				}),
+				scheduledFor: z.iso.datetime().nullable().default(null).meta({
+					description:
+						'ISO-8601 timestamp to send at, or null to send immediately.',
+					example: null,
+				}),
 			})
 			.default({ dryRun: false, scheduledFor: null }),
 	})
@@ -178,6 +291,40 @@ export const notificationPushRequestSchema = z
 				}
 			}
 		}
+	})
+	.meta({
+		description: 'The POST /v1/notifications request body.',
+		example: {
+			idempotencyKey: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
+			category: 'morning-briefing',
+			priority: 'standard',
+			content: {
+				items: {
+					'lead-story': {
+						type: NotificationChannel.Newsletter,
+						title: 'Your morning briefing',
+						body: 'The three stories shaping the day, plus what to keep an eye on.',
+						link: 'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
+					},
+				},
+			},
+			channels: [
+				{
+					channel: NotificationChannel.Newsletter,
+					audience: {
+						type: 'segment',
+						segments: [{ name: newsletterSegments[0] }],
+					},
+					compose: {
+						layout: NewsletterLayout.Digest,
+						items: ['lead-story'],
+						subject: 'Your morning briefing',
+					},
+				},
+			],
+			sender: 'editorial-newsletters',
+			options: { dryRun: false, scheduledFor: null },
+		},
 	});
 
 export type NotificationPushRequest = z.infer<

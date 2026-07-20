@@ -1,16 +1,9 @@
-import { z } from 'zod';
-import { notificationPushRequestSchema } from '../../../notifications/schemas/notification-push-request';
-
-const notificationPushRequestJsonSchema = z.toJSONSchema(
-	notificationPushRequestSchema,
-	{ target: 'openapi-3.0', io: 'input' },
-);
-
 /**
  * The `/v1/notifications` path item.
  *
- * The `POST` request body is derived directly from the Zod validation schema so
- * the docs stay in sync with what the API actually accepts.
+ * The `POST` request body is registered as a named component
+ * (`#/components/schemas/NotificationPushRequest`) so it can be reused and
+ * inspected independently in the docs.
  */
 export const notificationsPath = {
 	get: {
@@ -25,7 +18,7 @@ export const notificationsPath = {
 			required: true,
 			content: {
 				'application/json': {
-					schema: notificationPushRequestJsonSchema,
+					schema: { $ref: '#/components/schemas/NotificationPushRequest' },
 				},
 			},
 		},
