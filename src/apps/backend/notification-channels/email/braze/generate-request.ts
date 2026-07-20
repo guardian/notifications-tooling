@@ -35,8 +35,8 @@ export const generateBrazeEmailRequest = ({
 
 	return {
 		campaign_id: campaignId,
-		// Each office campaign owns its audience segment in Braze, keeping audience
-		// data and reporting separate.
+		// Each editorial office owns its audience in a separate campaign in Braze,
+		// keeping data and reporting separate.
 		broadcast: true,
 		trigger_properties: triggerProperties,
 	};
