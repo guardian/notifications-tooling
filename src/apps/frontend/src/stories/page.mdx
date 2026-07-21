@@ -15,6 +15,12 @@ import * as PageStories from './Page.stories';
 
 <Description />
 
+This story is configured as a full-page layout.
+
+Storybook uses the `fullscreen` layout parameter for this story so the page can render without the default padded docs canvas. That matters here because the component represents a complete screen rather than an isolated widget.
+
+Use this story when you want to review page-level structure, spacing, and overall composition. If you add stories for smaller subcomponents later, they should usually keep the default padded layout instead of reusing this one.
+
 <Primary />
 
 <Controls />

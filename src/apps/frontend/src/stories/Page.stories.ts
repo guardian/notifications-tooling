@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 import { Page } from './Page';
 
 const meta = {
-	title: 'Notifications Page',
+	title: 'Notifications Tool Page',
 	component: Page,
 	parameters: {
 		layout: 'fullscreen',
@@ -13,10 +13,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const FullPage: Story = {
+export const NotificationsPage: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const HelloWorld = canvas.getByText('Hello World', { selector: 'p' });
-		await expect(HelloWorld).toBeInTheDocument();
+		const CreateNotificationHeading = canvas.getByText(
+			'Create a Notification',
+			{
+				selector: 'h2',
+			},
+		);
+		await expect(CreateNotificationHeading).toBeInTheDocument();
 	},
 };
