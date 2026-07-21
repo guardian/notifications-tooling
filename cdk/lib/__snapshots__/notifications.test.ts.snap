@@ -6,7 +6,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuApiGateway5xxPercentageAlarm",
       "GuCertificate",
       "GuCname",
     ],
@@ -44,94 +43,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGatewayHigh5xxPercentageAlarmDispatch8B287436": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:eu-west-1:",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alerts-topic",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "dispatch exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from dispatch (ApiGateway) in TEST",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for dispatch",
-            "ReturnData": true,
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "notifications-TEST-dispatch-api",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "notifications-TEST-dispatch-api",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "64.1.0",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/notifications-tooling",
-          },
-          {
-            "Key": "Stack",
-            "Value": "notifications",
-          },
-          {
-            "Key": "Stage",
-            "Value": "TEST",
-          },
-        ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "CertificateDispatchB98021E7": {
       "DeletionPolicy": "Retain",
       "Properties": {
