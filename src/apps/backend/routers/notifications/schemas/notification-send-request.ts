@@ -14,6 +14,10 @@ const pushLimits =
 const newsletterLimits =
 	notificationChannelContentLimits[NotificationChannel.Newsletter];
 
+/** Every value in the list must be distinct. */
+const hasUniqueItems = (items: unknown[]) =>
+	new Set(items).size === items.length;
+
 const guardianArticleLink = z
 	.url()
 	.refine(isGuardianUrl, {
@@ -121,8 +125,9 @@ const segmentAudience = (
 			.array(z.enum(segmentIds))
 			.min(1)
 			.max(MAX_AUDIENCE_SEGMENTS)
+			.refine(hasUniqueItems, { message: 'segment ids must be unique.' })
 			.meta({
-				description: `Up to ${MAX_AUDIENCE_SEGMENTS} known audience segment ids to deliver to. The valid set is served by GET /v1/audiences.`,
+				description: `Up to ${MAX_AUDIENCE_SEGMENTS} known audience segment ids to deliver to. The valid set is served by GET /v1/channels/audiences.`,
 				example: [segmentIds[0]],
 			}),
 	});
@@ -137,6 +142,7 @@ const testEmailAudience = z.strictObject({
 		.array(z.email())
 		.min(1)
 		.max(MAX_TEST_EMAIL_RECIPIENTS)
+		.refine(hasUniqueItems, { message: 'email addresses must be unique.' })
 		.meta({
 			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send a test to.`,
 			example: ['newsletters.test@theguardian.com'],
@@ -163,6 +169,7 @@ const newsletterCompose = z.strictObject({
 	items: z
 		.array(z.string().min(1))
 		.min(1)
+		.refine(hasUniqueItems, { message: 'compose item ids must be unique.' })
 		.meta({
 			description:
 				'Ordered ids of the content items (from `content.items`) to include.',

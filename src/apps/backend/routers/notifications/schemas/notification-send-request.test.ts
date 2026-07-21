@@ -624,6 +624,21 @@ describe('notificationSendRequestSchema', () => {
 				),
 			).toContain('channels/newsletter/audience/items');
 		});
+
+		it('rejects duplicate segments', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: {
+								type: 'segment',
+								items: ['morning-briefing', 'morning-briefing'],
+							},
+						}),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
 	});
 
 	describe('newsletter test email audience', () => {
@@ -671,6 +686,24 @@ describe('notificationSendRequestSchema', () => {
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({ audience: { type: 'email', items: emails } }),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+
+		it('rejects duplicate recipients', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: {
+								type: 'email',
+								items: [
+									'newsletters.test@theguardian.com',
+									'newsletters.test@theguardian.com',
+								],
+							},
+						}),
 					),
 				),
 			).toContain('channels/newsletter/audience/items');
@@ -737,6 +770,21 @@ describe('notificationSendRequestSchema', () => {
 				),
 			).toContain('channels/app-push/audience/items');
 		});
+
+		it('rejects duplicate segments', () => {
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({
+							audience: {
+								type: 'segment',
+								items: ['breaking-news-uk', 'breaking-news-uk'],
+							},
+						}),
+					),
+				),
+			).toContain('channels/app-push/audience/items');
+		});
 	});
 
 	describe('compose', () => {
@@ -757,6 +805,18 @@ describe('notificationSendRequestSchema', () => {
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({ compose: { items: [], subject: 'Briefing' } }),
+					),
+				),
+			).toContain('channels/newsletter/compose/items');
+		});
+
+		it('newsletter rejects duplicate item ids', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							compose: { items: ['lead', 'lead'], subject: 'Briefing' },
+						}),
 					),
 				),
 			).toContain('channels/newsletter/compose/items');
