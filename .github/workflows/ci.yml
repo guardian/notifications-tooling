@@ -10,13 +10,13 @@ on:
 jobs:
   deploy:
     name: Build and deploy to riff-raff
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Checkout 
+      - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -44,7 +44,6 @@ jobs:
       - name: Build and synth CDK
         working-directory: cdk
         run: |
-          bun install --frozen-lockfile
           bun run lint
           bun run test
           bun run synth
@@ -52,16 +51,15 @@ jobs:
       - name: Bundle assets
         run: |
           bun run build:lambda
-      - name: Upload to riff-raff 
+      - name: Upload to riff-raff
         uses: guardian/actions-riff-raff@v4
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           projectName: Editorial Tools::Dispatch
-          configPath: cdk/cdk-out/riff-raff.yaml
+          configPath: cdk/cdk.out/riff-raff.yaml
           contentDirectories: |
             cdk.out:
               - cdk/cdk.out
             dispatch:
               - dist
-
