@@ -257,11 +257,11 @@ export const notificationSendRequestSchema = z
 
 		// Cross-field rule: `compose` may only reference existing content items
 		// whose type matches the channel it is composed into.
-		const composeRefs: {
+		const composeRefs: Array<{
 			channel: NotificationChannel;
 			key: string;
 			path: PropertyKey[];
-		}[] = [];
+		}> = [];
 
 		const appPush = channels[NotificationChannel.AppPushNotification];
 		if (appPush) {

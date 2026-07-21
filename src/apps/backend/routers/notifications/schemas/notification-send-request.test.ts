@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'bun:test';
 import {
 	appPushNotificationSegmentIds,
 	MAX_AUDIENCE_SEGMENTS,
@@ -6,7 +7,6 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import { describe, expect, it } from 'bun:test';
 import { notificationSendRequestSchema } from './notification-send-request';
 
 const pushLimits =
