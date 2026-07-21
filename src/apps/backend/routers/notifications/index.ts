@@ -70,9 +70,9 @@ notificationsRouter.post(
 		const notificationId = randomUUID();
 		const statusUrl = `/v1/notifications/${notificationId}/status`;
 
-		const plans = body.channels.map((plan) => ({
-			channel: plan.channel,
-			planId: `${notificationId}#${plan.channel}`,
+		const plans = Object.keys(body.channels).map((channel) => ({
+			channel,
+			planId: `${notificationId}#${channel}`,
 			status: 'accepted' as const,
 		}));
 

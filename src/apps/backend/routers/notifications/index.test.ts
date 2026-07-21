@@ -34,20 +34,19 @@ const validPushRequest = () => ({
 	content: {
 		items: {
 			lead: {
-				type: 'app-push-notification',
+				type: 'app-push',
 				title: 'Ukraine summit begins',
 				body: 'World leaders gather in Geneva as talks open.',
 				link: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
 			},
 		},
 	},
-	channels: [
-		{
-			channel: 'app-push-notification',
+	channels: {
+		'app-push': {
 			audience: { type: 'segment', items: ['breaking-news-uk'] },
 			compose: { use: 'lead' },
 		},
-	],
+	},
 });
 
 describe('POST /v1/notifications', () => {
@@ -71,8 +70,8 @@ describe('POST /v1/notifications', () => {
 
 			expect(body.plans).toEqual([
 				{
-					channel: 'app-push-notification',
-					planId: `${body.notificationId}#app-push-notification`,
+					channel: 'app-push',
+					planId: `${body.notificationId}#app-push`,
 					status: 'accepted',
 				},
 			]);
@@ -107,11 +106,14 @@ describe('POST /v1/notifications', () => {
 			).toBe(true);
 		});
 
-		it('rejects an unknown channel discriminator', async () => {
+		it('rejects an unknown channel', async () => {
 			const request = validPushRequest() as unknown as {
-				channels: Array<{ channel: string }>;
+				channels: Record<string, unknown>;
 			};
-			request.channels[0]!.channel = 'telegram';
+			request.channels.telegram = {
+				audience: { type: 'segment', items: ['breaking-news-uk'] },
+				compose: { use: 'lead' },
+			};
 
 			const response = await postNotification(request);
 
@@ -146,7 +148,7 @@ describe('POST /v1/notifications', () => {
 
 		it('rejects a compose that references an unknown content item', async () => {
 			const request = validPushRequest();
-			request.channels[0]!.compose.use = 'missing';
+			request.channels['app-push'].compose.use = 'missing';
 
 			const response = await postNotification(request);
 

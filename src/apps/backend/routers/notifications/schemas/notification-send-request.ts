@@ -41,7 +41,7 @@ const mediaSchema = z
 	})
 	.meta({ description: 'Optional media attachment (images only for now).' });
 
-/** A content item for the `app-push-notification` channel (stricter limits). */
+/** A content item for the `app-push` channel (stricter limits). */
 const appPushContentItem = z.strictObject({
 	type: z.literal(NotificationChannel.AppPushNotification),
 	title: z
@@ -174,22 +174,34 @@ const newsletterCompose = z.strictObject({
 	}),
 });
 
+/** A newsletter delivery plan: who to target and which items to assemble. */
+const newsletterPlan = z.strictObject({
+	audience: newsletterAudience,
+	compose: newsletterCompose,
+});
+
+/** An app-push delivery plan: who to target and the single item to send. */
+const appPushPlan = z.strictObject({
+	audience: appPushSegmentAudience,
+	compose: appPushCompose,
+});
+
 /**
- * A delivery plan. `channel` pins the audience and compose shapes valid for it
- * (push -> segments + single item, newsletter -> segments/test emails + digest).
+ * Delivery plans keyed by channel, so a channel can appear at most once. At
+ * least one channel must be present.
  */
-const planSchema = z.discriminatedUnion('channel', [
-	z.strictObject({
-		channel: z.literal(NotificationChannel.AppPushNotification),
-		audience: appPushSegmentAudience,
-		compose: appPushCompose,
-	}),
-	z.strictObject({
-		channel: z.literal(NotificationChannel.Newsletter),
-		audience: newsletterAudience,
-		compose: newsletterCompose,
-	}),
-]);
+const channelsSchema = z
+	.strictObject({
+		[NotificationChannel.Newsletter]: newsletterPlan.optional(),
+		[NotificationChannel.AppPushNotification]: appPushPlan.optional(),
+	})
+	.refine((channels) => Object.keys(channels).length > 0, {
+		message: 'At least one channel must be provided.',
+	})
+	.meta({
+		description:
+			'Delivery plans keyed by channel. A channel may appear at most once; provide at least one.',
+	});
 
 /**
  * The `POST /v1/notifications` request body. NOTE: `idempotencyKey` is required
@@ -212,10 +224,7 @@ export const notificationSendRequestSchema = z
 			example: 'high',
 		}),
 		content: contentSchema,
-		channels: z.array(planSchema).min(1).meta({
-			description:
-				'One delivery plan per channel. Each plan pins the audience and compose shape valid for its channel.',
-		}),
+		channels: channelsSchema,
 		sender: z.string().min(1).meta({
 			description: 'Identifier of the team or system sending the notification.',
 			example: 'editorial-breaking-news',
@@ -237,35 +246,52 @@ export const notificationSendRequestSchema = z
 	})
 	.superRefine((value, ctx) => {
 		const { items } = value.content;
+		const { channels } = value;
 
 		// Cross-field rule: `compose` may only reference existing content items
-		// whose type matches the plan's channel.
-		for (const [planIndex, plan] of value.channels.entries()) {
-			const refs =
-				plan.channel === NotificationChannel.AppPushNotification
-					? [{ key: plan.compose.use, path: ['compose', 'use'] }]
-					: plan.compose.items.map((key, index) => ({
-							key,
-							path: ['compose', 'items', index],
-						}));
+		// whose type matches the channel it is composed into.
+		const composeRefs: {
+			channel: NotificationChannel;
+			key: string;
+			path: PropertyKey[];
+		}[] = [];
 
-			for (const { key, path } of refs) {
-				const item = items[key];
-				const issuePath = ['channels', planIndex, ...path];
+		const appPush = channels[NotificationChannel.AppPushNotification];
+		if (appPush) {
+			composeRefs.push({
+				channel: NotificationChannel.AppPushNotification,
+				key: appPush.compose.use,
+				path: ['compose', 'use'],
+			});
+		}
 
-				if (!item) {
-					ctx.addIssue({
-						code: 'custom',
-						path: issuePath,
-						message: `compose references content item '${key}' which is not defined in content.items.`,
-					});
-				} else if (item.type !== plan.channel) {
-					ctx.addIssue({
-						code: 'custom',
-						path: issuePath,
-						message: `content item '${key}' has type '${item.type}' but is composed into a '${plan.channel}' plan.`,
-					});
-				}
+		const newsletter = channels[NotificationChannel.Newsletter];
+		if (newsletter) {
+			newsletter.compose.items.forEach((key, index) => {
+				composeRefs.push({
+					channel: NotificationChannel.Newsletter,
+					key,
+					path: ['compose', 'items', index],
+				});
+			});
+		}
+
+		for (const { channel, key, path } of composeRefs) {
+			const item = items[key];
+			const issuePath = ['channels', channel, ...path];
+
+			if (!item) {
+				ctx.addIssue({
+					code: 'custom',
+					path: issuePath,
+					message: `compose references content item '${key}' which is not defined in content.items.`,
+				});
+			} else if (item.type !== channel) {
+				ctx.addIssue({
+					code: 'custom',
+					path: issuePath,
+					message: `content item '${key}' has type '${item.type}' but is composed into a '${channel}' plan.`,
+				});
 			}
 		}
 	})
@@ -285,9 +311,8 @@ export const notificationSendRequestSchema = z
 					},
 				},
 			},
-			channels: [
-				{
-					channel: NotificationChannel.Newsletter,
+			channels: {
+				[NotificationChannel.Newsletter]: {
 					audience: {
 						type: 'segment',
 						items: [newsletterSegmentIds[0]],
@@ -297,7 +322,7 @@ export const notificationSendRequestSchema = z
 						subject: 'Your morning briefing',
 					},
 				},
-			],
+			},
 			sender: 'editorial-newsletters',
 			options: { dryRun: false, scheduledFor: null },
 		},
