@@ -2,6 +2,7 @@ import { semanticSpacing } from '@guardian/stand';
 import { Option, Select } from '@guardian/stand/Select';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
+import { AudienceSegments } from './AudienceSegments';
 
 /**
  * This is a non-functional placeholder to demonstrate how content will appear in the layout
@@ -43,6 +44,7 @@ export const CreateNotificationForm = () => {
 					label="Preview text"
 					description="Choose the preview text for the email newsletter"
 				/>
+				<AudienceSegments/>
 			</div>
 		</>
 	);

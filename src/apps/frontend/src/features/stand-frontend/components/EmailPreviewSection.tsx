@@ -24,7 +24,7 @@ export const EmailPreviewSection = () => {
 	return (
 		<section
 			css={css({
-				background: semanticColors.fill.neutralWeak,
+				background: semanticColors.bg.raisedLevel1,
 				flexBasis: 474,
 				padding: baseSpacing['16Px'],
 				display: 'flex',
@@ -48,7 +48,7 @@ export const EmailPreviewSection = () => {
 					}}
 				>
 					<Icon symbol="preview" />
-					<Typography variant="headingCompactLg">Preview</Typography>
+					<Typography variant="bodyBoldMd">Preview</Typography>
 				</div>
 				<Typography variant="bodySm">
 					The preview for the newsletter email and/or the app alert notification
@@ -56,7 +56,7 @@ export const EmailPreviewSection = () => {
 				</Typography>
 				<HTMLPreview />
 				<RoutingType />
-				<AudienceSegments />
+				<AudienceSegments/>
 				<Typography variant="headingCompactLg">Test send</Typography>
 				<TextInput
 					description="Enter your email to send a test"
