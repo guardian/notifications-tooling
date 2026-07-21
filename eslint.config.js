@@ -16,4 +16,13 @@ export default [
 	},
 	...guardian.configs.recommended,
 	...react,
+	...guardian.configs.storybook,
+	{
+		// Storybook requires a default export here; @guardian/eslint-config's
+		// no-default-export exception only covers .storybook/main.*.
+		files: ['**/.storybook/preview.*'],
+		rules: {
+			'import/no-default-export': 'off',
+		},
+	},
 ];
