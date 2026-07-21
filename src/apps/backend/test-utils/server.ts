@@ -4,16 +4,13 @@ import { app } from '../app';
 
 /** A running test server plus the helpers needed to talk to and stop it. */
 export interface TestServer {
-	/** Base URL (e.g. `http://127.0.0.1:54321`) the app is listening on. */
 	baseUrl: string;
-	/** Stops the server, resolving once the port is released. */
 	close: () => Promise<void>;
 }
 
 /**
- * Starts the Express `app` on an ephemeral port so handler tests can exercise
- * the full middleware chain over real HTTP. Pair with {@link TestServer.close}
- * in an `afterAll` hook.
+ * Starts the Express `app` on an ephemeral port so handler tests exercise the
+ * full middleware chain over real HTTP. Pair with `close` in an `afterAll`.
  */
 export const startTestServer = async (): Promise<TestServer> => {
 	const server: Server = app.listen(0);

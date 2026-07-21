@@ -1,9 +1,10 @@
 import {
-	MAX_PUSH_TOPICS,
-	newsletterCampaigns,
+	appPushNotificationSegmentIds,
+	MAX_AUDIENCE_SEGMENTS,
+	MAX_TEST_EMAIL_RECIPIENTS,
+	newsletterSegmentIds,
 	NotificationChannel,
 	notificationChannelContentLimits,
-	pushTopics,
 } from '@config';
 import { describe, expect, it } from 'bun:test';
 import { notificationPushRequestSchema } from './notification-push-request';
@@ -38,14 +39,14 @@ const newsletterItem = (overrides: Record<string, unknown> = {}) => ({
 
 const pushPlan = (overrides: Record<string, unknown> = {}) => ({
 	channel: NotificationChannel.AppPushNotification,
-	audience: { type: 'topic', topics: [{ type: 'breaking', name: 'uk' }] },
+	audience: { type: 'segment', segments: ['breaking-news-uk'] },
 	compose: { use: 'lead' },
 	...overrides,
 });
 
 const newsletterPlan = (overrides: Record<string, unknown> = {}) => ({
 	channel: NotificationChannel.Newsletter,
-	audience: { type: 'campaign', campaigns: [{ id: newsletterCampaigns[0] }] },
+	audience: { type: 'segment', segments: ['morning-briefing'] },
 	compose: { items: ['lead'], subject: 'Your morning briefing' },
 	...overrides,
 });
@@ -150,8 +151,8 @@ describe('notificationPushRequestSchema', () => {
 					{
 						channel: 'newsletter',
 						audience: {
-							type: 'campaign',
-							campaigns: [{ id: 'morning-briefing' }],
+							type: 'segment',
+							segments: ['morning-briefing'],
 						},
 						compose: {
 							items: ['lead'],
@@ -185,8 +186,8 @@ describe('notificationPushRequestSchema', () => {
 					{
 						channel: 'app-push-notification',
 						audience: {
-							type: 'topic',
-							topics: [{ type: 'breaking', name: 'uk' }],
+							type: 'segment',
+							segments: ['breaking-news-uk'],
 						},
 						compose: { use: 'lead' },
 					},
@@ -225,16 +226,16 @@ describe('notificationPushRequestSchema', () => {
 					{
 						channel: 'app-push-notification',
 						audience: {
-							type: 'topic',
-							topics: [{ type: 'breaking', name: 'uk' }],
+							type: 'segment',
+							segments: ['breaking-news-uk'],
 						},
 						compose: { use: 'pushLead' },
 					},
 					{
 						channel: 'newsletter',
 						audience: {
-							type: 'campaign',
-							campaigns: [{ id: 'morning-briefing' }],
+							type: 'segment',
+							segments: ['morning-briefing'],
 						},
 						compose: {
 							items: ['newsLead'],
@@ -575,113 +576,164 @@ describe('notificationPushRequestSchema', () => {
 		});
 	});
 
-	describe('newsletter campaign audience', () => {
-		it('accepts every configured campaign', () => {
-			for (const id of newsletterCampaigns) {
+	describe('newsletter segment audience', () => {
+		it('accepts every configured newsletter segment', () => {
+			for (const id of newsletterSegmentIds) {
 				expectValid(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'campaign', campaigns: [{ id }] },
+							audience: { type: 'segment', segments: [id] },
 						}),
 					),
 				);
 			}
 		});
 
-		it('rejects an unknown campaign', () => {
+		it('rejects an unknown segment', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: {
-								type: 'campaign',
-								campaigns: [{ id: 'ghost-campaign' }],
-							},
+							audience: { type: 'segment', segments: ['ghost-segment'] },
 						}),
 					),
 				),
-			).toContain('channels/0/audience/campaigns/0/id');
+			).toContain('channels/0/audience/segments/0');
 		});
 
-		it('requires at least one campaign', () => {
+		it('rejects an app-push segment used on a newsletter plan', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'campaign', campaigns: [] } }),
+						newsletterPlan({
+							audience: { type: 'segment', segments: ['breaking-news-uk'] },
+						}),
 					),
 				),
-			).toContain('channels/0/audience/campaigns');
+			).toContain('channels/0/audience/segments/0');
+		});
+
+		it('requires at least one segment', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'segment', segments: [] } }),
+					),
+				),
+			).toContain('channels/0/audience/segments');
 		});
 	});
 
-	describe('push topic audience', () => {
-		it('accepts every configured topic', () => {
-			for (const topic of pushTopics) {
+	describe('newsletter test email audience', () => {
+		it('accepts a list of test email recipients', () => {
+			expectValid(
+				newsletterRequestWithPlan(
+					newsletterPlan({
+						audience: {
+							type: 'test',
+							emails: ['newsletters.test@theguardian.com'],
+						},
+					}),
+				),
+			);
+		});
+
+		it('rejects an invalid email address', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: { type: 'test', emails: ['not-an-email'] },
+						}),
+					),
+				),
+			).toContain('channels/0/audience/emails/0');
+		});
+
+		it('requires at least one recipient', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'test', emails: [] } }),
+					),
+				),
+			).toContain('channels/0/audience/emails');
+		});
+
+		it(`rejects more than ${MAX_TEST_EMAIL_RECIPIENTS} recipients`, () => {
+			const emails = Array.from(
+				{ length: MAX_TEST_EMAIL_RECIPIENTS + 1 },
+				(_, index) => `test-${index}@theguardian.com`,
+			);
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'test', emails } }),
+					),
+				),
+			).toContain('channels/0/audience/emails');
+		});
+	});
+
+	describe('push segment audience', () => {
+		it('accepts every configured app-push segment', () => {
+			for (const id of appPushNotificationSegmentIds) {
 				expectValid(
 					pushRequestWithPlan(
 						pushPlan({
-							audience: {
-								type: 'topic',
-								topics: [{ type: topic.type, name: topic.name }],
-							},
+							audience: { type: 'segment', segments: [id] },
 						}),
 					),
 				);
 			}
 		});
 
-		it('rejects an unknown topic name', () => {
+		it('rejects an unknown segment', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
-							audience: {
-								type: 'topic',
-								topics: [{ type: 'breaking', name: 'mars' }],
-							},
+							audience: { type: 'segment', segments: ['ghost-segment'] },
 						}),
 					),
 				),
-			).toContain('channels/0/audience/topics/0');
+			).toContain('channels/0/audience/segments/0');
 		});
 
-		it('rejects a known name under the wrong topic type', () => {
+		it('rejects a newsletter segment used on a push plan', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
-							audience: {
-								type: 'topic',
-								topics: [{ type: 'newsstand', name: 'uk' }],
-							},
+							audience: { type: 'segment', segments: ['morning-briefing'] },
 						}),
 					),
 				),
-			).toContain('channels/0/audience/topics/0');
+			).toContain('channels/0/audience/segments/0');
 		});
 
-		it('requires at least one topic', () => {
+		it('requires at least one segment', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
-						pushPlan({ audience: { type: 'topic', topics: [] } }),
+						pushPlan({ audience: { type: 'segment', segments: [] } }),
 					),
 				),
-			).toContain('channels/0/audience/topics');
+			).toContain('channels/0/audience/segments');
 		});
 
-		it(`rejects more than ${MAX_PUSH_TOPICS} topics`, () => {
-			const topics = Array.from({ length: MAX_PUSH_TOPICS + 1 }, () => ({
-				type: 'breaking',
-				name: 'uk',
-			}));
+		it(`rejects more than ${MAX_AUDIENCE_SEGMENTS} segments`, () => {
+			const segments = Array.from(
+				{ length: MAX_AUDIENCE_SEGMENTS + 1 },
+				() => 'breaking-news-uk',
+			);
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
-						pushPlan({ audience: { type: 'topic', topics } }),
+						pushPlan({ audience: { type: 'segment', segments } }),
 					),
 				),
-			).toContain('channels/0/audience/topics');
+			).toContain('channels/0/audience/segments');
 		});
 	});
 
@@ -740,24 +792,21 @@ describe('notificationPushRequestSchema', () => {
 				pathsOf(
 					pushRequestWithPlan({
 						channel: 'sms',
-						audience: {
-							type: 'topic',
-							topics: [{ type: 'breaking', name: 'uk' }],
-						},
+						audience: { type: 'segment', segments: ['breaking-news-uk'] },
 						compose: { use: 'lead' },
 					}),
 				).some((path) => path.startsWith('channels/0')),
 			).toBe(true);
 		});
 
-		it('rejects a push plan with a campaign audience', () => {
+		it('rejects a push plan with a test email audience', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
 							audience: {
-								type: 'campaign',
-								campaigns: [{ id: newsletterCampaigns[0] }],
+								type: 'test',
+								emails: ['newsletters.test@theguardian.com'],
 							},
 						}),
 					),
@@ -765,7 +814,7 @@ describe('notificationPushRequestSchema', () => {
 			).toBe(true);
 		});
 
-		it('rejects a newsletter plan with a topic audience', () => {
+		it('rejects a newsletter plan with an unknown audience type', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(

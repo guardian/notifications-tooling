@@ -44,7 +44,7 @@ const validPushRequest = () => ({
 	channels: [
 		{
 			channel: 'app-push-notification',
-			audience: { type: 'topic', topics: [{ type: 'breaking', name: 'uk' }] },
+			audience: { type: 'segment', segments: ['breaking-news-uk'] },
 			compose: { use: 'lead' },
 		},
 	],

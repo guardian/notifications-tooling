@@ -1,9 +1,10 @@
 import {
-	MAX_PUSH_TOPICS,
-	newsletterCampaigns,
+	appPushNotificationSegmentIds,
+	MAX_AUDIENCE_SEGMENTS,
+	MAX_TEST_EMAIL_RECIPIENTS,
+	newsletterSegmentIds,
 	NotificationChannel,
 	notificationChannelContentLimits,
-	pushTopics,
 } from '@config';
 import { isGuardianUrl } from '@utils';
 import { z } from 'zod';
@@ -13,10 +14,6 @@ const pushLimits =
 const newsletterLimits =
 	notificationChannelContentLimits[NotificationChannel.Newsletter];
 
-/**
- * A Guardian news article link. Provided as a simple URL string, so we check it
- * is a real URL *and* that it points at a Guardian domain.
- */
 const guardianArticleLink = z
 	.url()
 	.refine(isGuardianUrl, {
@@ -30,7 +27,6 @@ const guardianArticleLink = z
 			'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
 	});
 
-/** Media is limited to images for now. */
 const mediaSchema = z
 	.object({
 		type: z.literal('image'),
@@ -45,10 +41,7 @@ const mediaSchema = z
 	})
 	.meta({ description: 'Optional media attachment (images only for now).' });
 
-/**
- * A content item destined for the `app-push-notification` channel. Delivered
- * via FCM/APNS, so `title` and `body` use the stricter push limits.
- */
+/** A content item for the `app-push-notification` channel (stricter limits). */
 const appPushContentItem = z.object({
 	type: z.literal(NotificationChannel.AppPushNotification),
 	title: z
@@ -71,10 +64,7 @@ const appPushContentItem = z.object({
 	media: mediaSchema.optional(),
 });
 
-/**
- * A content item destined for the `newsletter` channel. Delivered via Braze, so
- * `title` and `body` use the more generous newsletter limits.
- */
+/** A content item for the `newsletter` channel (more generous limits). */
 const newsletterContentItem = z.object({
 	type: z.literal(NotificationChannel.Newsletter),
 	title: z
@@ -98,10 +88,7 @@ const newsletterContentItem = z.object({
 	media: mediaSchema.optional(),
 });
 
-/**
- * A content item. `type` ties the item to the channel it is authored for, which
- * lets us apply the correct per-channel limits at validation time.
- */
+/** `type` ties each item to its channel so per-channel limits apply. */
 const contentItem = z.discriminatedUnion('type', [
 	appPushContentItem,
 	newsletterContentItem,
@@ -119,54 +106,48 @@ const contentSchema = z.object({
 		}),
 });
 
-/** Newsletter audiences are addressed by a known Braze campaign. */
-const campaignAudience = z.object({
-	type: z.literal('campaign'),
-	campaigns: z
-		.array(z.object({ id: z.enum(newsletterCampaigns) }))
-		.min(1)
-		.meta({
-			description: 'One or more known Braze campaigns to deliver to.',
-			example: [{ id: newsletterCampaigns[0] }],
-		}),
-});
-
-const knownPushTopics = new Set(
-	pushTopics.map((topic) => `${topic.type}:${topic.name}`),
-);
-
-/** A single, known mobile-n10n topic. */
-const pushTopic = z
-	.object({
-		type: z
-			.string()
+/**
+ * A channel-agnostic audience addressed by known segment ids; each channel
+ * accepts only its own. The broker resolves segments to the downstream Braze
+ * campaign / mobile-n10n topic, keeping those internals out of the payload.
+ */
+const segmentAudience = (
+	segmentIds:
+		typeof newsletterSegmentIds | typeof appPushNotificationSegmentIds,
+) =>
+	z.object({
+		type: z.literal('segment'),
+		segments: z
+			.array(z.enum(segmentIds))
 			.min(1)
-			.meta({ description: 'Topic type.', example: 'breaking' }),
-		name: z.string().min(1).meta({ description: 'Topic name.', example: 'uk' }),
-	})
-	.refine((topic) => knownPushTopics.has(`${topic.type}:${topic.name}`), {
-		message: 'unknown push topic.',
-	})
-	.meta({
-		description: 'A single, known mobile-n10n topic.',
-		example: { type: 'breaking', name: 'uk' },
+			.max(MAX_AUDIENCE_SEGMENTS)
+			.meta({
+				description: `Up to ${MAX_AUDIENCE_SEGMENTS} known audience segment ids to deliver to. The valid set is served by GET /v1/audiences.`,
+				example: [segmentIds[0]],
+			}),
 	});
 
-/** Push audiences are addressed by a known mobile-n10n topic. */
-const topicAudience = z.object({
-	type: z.literal('topic'),
-	topics: z
-		.array(pushTopic)
+const appPushSegmentAudience = segmentAudience(appPushNotificationSegmentIds);
+const newsletterSegmentAudience = segmentAudience(newsletterSegmentIds);
+
+/** Ad-hoc test recipients addressed by email, bypassing segments. */
+const testEmailAudience = z.object({
+	type: z.literal('test'),
+	emails: z
+		.array(z.email())
 		.min(1)
-		.max(MAX_PUSH_TOPICS)
+		.max(MAX_TEST_EMAIL_RECIPIENTS)
 		.meta({
-			description: `Up to ${MAX_PUSH_TOPICS} mobile-n10n topics to target.`,
-			example: [
-				{ type: 'breaking', name: 'au' },
-				{ type: 'breaking', name: 'uk-sport' },
-			],
+			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send a test to.`,
+			example: ['newsletters.test@theguardian.com'],
 		}),
 });
+
+/** Newsletter audiences may target segments or an ad-hoc list of test emails. */
+const newsletterAudience = z.discriminatedUnion('type', [
+	newsletterSegmentAudience,
+	testEmailAudience,
+]);
 
 /** Push takes a single content item. */
 const appPushCompose = z.object({
@@ -194,28 +175,25 @@ const newsletterCompose = z.object({
 });
 
 /**
- * A delivery plan. `channel` discriminates the plan and, in doing so, pins the
- * audience and compose shapes valid for that channel (push -> topic + single
- * item, newsletter -> campaign + digest).
+ * A delivery plan. `channel` pins the audience and compose shapes valid for it
+ * (push -> segments + single item, newsletter -> segments/test emails + digest).
  */
 const planSchema = z.discriminatedUnion('channel', [
 	z.object({
 		channel: z.literal(NotificationChannel.AppPushNotification),
-		audience: topicAudience,
+		audience: appPushSegmentAudience,
 		compose: appPushCompose,
 	}),
 	z.object({
 		channel: z.literal(NotificationChannel.Newsletter),
-		audience: campaignAudience,
+		audience: newsletterAudience,
 		compose: newsletterCompose,
 	}),
 ]);
 
 /**
- * The `POST /v1/notifications` request body.
- *
- * NOTE: `idempotencyKey` is required but, without a persistence layer, it is not
- * yet stored or checked against previously sent notifications.
+ * The `POST /v1/notifications` request body. NOTE: `idempotencyKey` is required
+ * but, without a persistence layer, not yet stored or deduplicated against.
  */
 export const notificationPushRequestSchema = z
 	.object({
@@ -260,8 +238,8 @@ export const notificationPushRequestSchema = z
 	.superRefine((value, ctx) => {
 		const { items } = value.content;
 
-		// The only genuinely cross-field rule: a plan's `compose` may only
-		// reference content items that exist and match the plan's channel.
+		// Cross-field rule: `compose` may only reference existing content items
+		// whose type matches the plan's channel.
 		for (const [planIndex, plan] of value.channels.entries()) {
 			const refs =
 				plan.channel === NotificationChannel.AppPushNotification
@@ -311,8 +289,8 @@ export const notificationPushRequestSchema = z
 				{
 					channel: NotificationChannel.Newsletter,
 					audience: {
-						type: 'campaign',
-						campaigns: [{ id: newsletterCampaigns[0] }],
+						type: 'segment',
+						segments: [newsletterSegmentIds[0]],
 					},
 					compose: {
 						items: ['lead-story'],
