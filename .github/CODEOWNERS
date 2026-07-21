@@ -17,3 +17,5 @@
 # /src/apps/frontend/ @guardian/your-team
 
 # *.md @guardian/your-team
+
+* @guardian/notifications-team
