@@ -5,4 +5,11 @@ import type { NotificationAction, NotificationState } from './types';
 export const NotificationContext = createContext<{
 	notification: NotificationState;
 	updateNotification: ActionDispatch<[NotificationAction]>;
-}>({ notification: {}, updateNotification: () => {} });
+}>({
+	notification: {
+		isFetchingContent: false,
+		isWaitingForSend: false,
+		confirmSendModalOpen: false,
+	},
+	updateNotification: () => {},
+});

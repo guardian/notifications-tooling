@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 import { baseSizing } from '@guardian/stand';
 import { TextArea } from '@guardian/stand/TextArea';
 import { CharacterCount } from './CharacterCount';
@@ -32,6 +33,11 @@ export const NotificationTextInput = ({
 						height: `calc(${baseSizing.size16Rem} * 7)`,
 					},
 				}}
+				cssOverrides={css({
+                    textarea :{
+                        resize: 'vertical',
+                    }
+				})}
 				onChange={(value) => {
 					if (allowLineBreak) {
 						update(value);

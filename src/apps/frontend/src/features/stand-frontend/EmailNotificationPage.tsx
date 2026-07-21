@@ -49,6 +49,9 @@ export const EmailNotificationPage = () => {
 		NotificationState,
 		[NotificationAction]
 	>(notificationReducer, {
+		isFetchingContent: false,
+		isWaitingForSend: false,
+		confirmSendModalOpen: false,
 		parameters: {
 			type: 'email',
 			kicker: 'breaking-news',

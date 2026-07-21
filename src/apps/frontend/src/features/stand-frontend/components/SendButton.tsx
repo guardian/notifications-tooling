@@ -8,9 +8,11 @@ import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import { mockSendNotification } from '../../../mocks/mock-send-notification';
 import { checkIfReadyToSend } from '../form-validation';
 import { NotificationContext } from '../NotificationContext';
 import type { NotificationState } from '../types';
+import { LoadingSpinner } from './LoadingSpinner';
 
 const buttonText = (
 	parameters: Required<NotificationState>['parameters'],
@@ -25,7 +27,12 @@ const buttonText = (
 
 export const SendButton = () => {
 	const { notification, updateNotification } = useContext(NotificationContext);
-	const { parameters, confirmSendModalOpen, isFetchingContent } = notification;
+	const {
+		parameters,
+		confirmSendModalOpen,
+		isFetchingContent,
+		isWaitingForSend,
+	} = notification;
 
 	if (!parameters) {
 		return null;
@@ -33,7 +40,15 @@ export const SendButton = () => {
 	const isReady = checkIfReadyToSend(notification);
 
 	const sendNotification = () => {
-		alert('send function placeholder');
+		updateNotification({ type: 'waiting-for-send' });
+		mockSendNotification()
+			.then((result) => {
+				console.log(result);
+				updateNotification({ type: 'receive-send-result', result });
+			})
+			.catch((err) => {
+				console.error(err);
+			});
 	};
 
 	return (
@@ -94,7 +109,12 @@ export const SendButton = () => {
 						>
 							Cancel
 						</Button>
-						<Button onPress={sendNotification}>Confirm send</Button>
+						<Button
+							icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
+							onPress={sendNotification}
+						>
+							Confirm send
+						</Button>
 					</Dialog.Buttons>
 				</Dialog>
 			</Modal>

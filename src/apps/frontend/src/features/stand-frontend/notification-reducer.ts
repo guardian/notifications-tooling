@@ -67,5 +67,32 @@ export const notificationReducer = (
 			state.confirmSendModalOpen = action.isOpen;
 			return state;
 		}
+
+		case 'waiting-for-send': {
+			return {
+				...state,
+				isWaitingForSend: true,
+				sendingResult: undefined,
+			};
+		}
+
+		case 'receive-send-result': {
+			return {
+				...state,
+				isWaitingForSend: false,
+				sendingResult: action.result,
+			};
+		}
+
+		case 'reset': {
+			if (state.isFetchingContent || state.isWaitingForSend) {
+				return state;
+			}
+			return {
+				isFetchingContent: false,
+				confirmSendModalOpen: false,
+				isWaitingForSend: false,
+			};
+		}
 	}
 };

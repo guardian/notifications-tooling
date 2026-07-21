@@ -12,12 +12,14 @@ export type TabName = 'create' | 'history';
 
 export type NotificationState = {
 	articleId?: string;
-	isFetchingContent?: boolean;
+	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
 	content?: Content;
 	parameters?: EmailNotification | PushNotification;
-	confirmSendModalOpen?: boolean;
+	confirmSendModalOpen: boolean;
+	isWaitingForSend: boolean;
+	sendingResult?: SendingResult;
 };
 
 export type EmailNotification = {
@@ -30,6 +32,11 @@ export type EmailNotification = {
 
 export type PushNotification = {
 	type: 'push';
+};
+
+// TO DO - get shape form backend project when ready
+export type SendingResult = {
+	ok: boolean;
 };
 
 export type NotificationAction =
@@ -55,4 +62,14 @@ export type NotificationAction =
 	| {
 			type: 'set-show-confirm-send';
 			isOpen: boolean;
+	  }
+	| {
+			type: 'waiting-for-send';
+	  }
+	| {
+			type: 'receive-send-result';
+			result: SendingResult;
+	  }
+	| {
+			type: 'reset';
 	  };
