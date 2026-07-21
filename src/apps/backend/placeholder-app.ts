@@ -20,11 +20,8 @@ app.use('/health', healthRouter);
 
 const IS_RUNNING_LOCALLY = !process.env.LAMBDA_TASK_ROOT;
 
-const rootDir = dirname(fileURLToPath(import.meta.url));
-const placeholderAssetsDir = join(
-	rootDir,
-	IS_RUNNING_LOCALLY ? 'placeholder-assets' : 'frontend',
-);
+const backendDir = dirname(fileURLToPath(import.meta.url));
+const placeholderAssetsDir = IS_RUNNING_LOCALLY ? join(backendDir, 'placeholder-assets') : '/frontend';
 const placeholderIndexFile = join(placeholderAssetsDir, 'index.html');
 
 app.use(express.static(placeholderAssetsDir));
