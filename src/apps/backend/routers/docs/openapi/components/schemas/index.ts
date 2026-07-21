@@ -1,5 +1,6 @@
 import { acceptedNotificationSchema } from './accepted-notification';
 import { channelConstraintsSchema } from './channel-constraints';
+import { healthStatusSchema } from './health-status';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
 import { notificationPushRequestJsonSchema } from './notification-push-request';
