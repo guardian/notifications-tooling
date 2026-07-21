@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build and deploy to riff-raff
+    name: Build and upload to riff-raff
     runs-on: ubuntu-latest
     permissions:
       id-token: write
