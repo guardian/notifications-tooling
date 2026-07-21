@@ -18,12 +18,10 @@ app.use(express.urlencoded({ extended: true }));
 // --- Routes ---
 app.use('/health', healthRouter);
 
-const IS_RUNNING_LOCALLY = !process.env.LAMBDA_TASK_ROOT;
-
 const backendDir = dirname(fileURLToPath(import.meta.url));
-const placeholderAssetsDir = IS_RUNNING_LOCALLY
+const placeholderAssetsDir = !process.env.LAMBDA_TASK_ROOT
 	? join(backendDir, 'placeholder-assets')
-	: '/frontend';
+	: join(process.env.LAMBDA_TASK_ROOT, 'frontend');
 const placeholderIndexFile = join(placeholderAssetsDir, 'index.html');
 
 app.use(express.static(placeholderAssetsDir));
