@@ -19,10 +19,12 @@ export class DispatchStack extends GuStack {
 			fileName: `${app}.zip`,
 			handler: 'backend/handler.handler',
 			runtime: Runtime.NODEJS_24_X,
-			monitoringConfiguration: {
-				http5xxAlarm: { tolerated5xxPercentage: 5 },
-				snsTopicName: 'alerts-topic',
-			},
+			monitoringConfiguration: isProd
+				? {
+						http5xxAlarm: { tolerated5xxPercentage: 5 },
+						snsTopicName: 'pagerduty-cloudwatch-alerts-low-priority',
+					}
+				: { noMonitoring: true },
 			app,
 			api: {
 				id: `${app}-api`,
