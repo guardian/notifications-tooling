@@ -2,7 +2,7 @@ import { useEffect, useReducer, useState } from 'react';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
-import { notificationReducer } from './notification-reducer';
+import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationContext } from './NotificationContext';
 import type {
 	NotificationAction,
@@ -48,15 +48,7 @@ export const EmailNotificationPage = () => {
 	const [notification, updateNotification] = useReducer<
 		NotificationState,
 		[NotificationAction]
-	>(notificationReducer, {
-		isFetchingContent: false,
-		isWaitingForSend: false,
-		confirmSendModalOpen: false,
-		parameters: {
-			type: 'email',
-			kicker: 'breaking-news',
-		},
-	});
+	>(notificationReducer, defaultState);
 
 	return (
 		<UserContext.Provider value={user}>

@@ -22,9 +22,17 @@ export type NotificationState = {
 	sendingResult?: SendingResult;
 };
 
+type KickerId = 'breaking-news' | 'exclusive';
+
+export const kickerNameMap: Record<KickerId | 'undefined', string> = {
+	'breaking-news': 'Breaking News',
+	exclusive: 'Exclusive',
+	undefined: 'None',
+};
+
 export type EmailNotification = {
 	type: 'email';
-	kicker?: 'breaking-news' | 'exclusive';
+	kicker?: KickerId;
 	subject?: string;
 	preview?: string;
 	emailHtml?: string;

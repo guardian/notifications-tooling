@@ -1,6 +1,16 @@
 import { parseHtml } from '../../util/html-helpers';
 import type { NotificationAction, NotificationState } from './types';
 
+export const defaultState: NotificationState = {
+	isFetchingContent: false,
+	isWaitingForSend: false,
+	confirmSendModalOpen: false,
+	parameters: {
+		type: 'email',
+		kicker: 'breaking-news',
+	},
+};
+
 export const notificationReducer = (
 	prevState: NotificationState,
 	action: NotificationAction,
@@ -88,11 +98,7 @@ export const notificationReducer = (
 			if (state.isFetchingContent || state.isWaitingForSend) {
 				return state;
 			}
-			return {
-				isFetchingContent: false,
-				confirmSendModalOpen: false,
-				isWaitingForSend: false,
-			};
+			return structuredClone(defaultState);
 		}
 	}
 };

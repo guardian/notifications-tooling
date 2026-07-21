@@ -1,6 +1,7 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
 import { NotificationContext } from '../NotificationContext';
+import { kickerNameMap } from '../types';
 import { NotificationTextInput } from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
@@ -44,9 +45,15 @@ export const EmailFields = () => {
 				selectionMode="single"
 				value={toOptionKey(kicker ?? 'undefined')}
 			>
-				<Option id={toOptionKey('breaking-news')}>Breaking News</Option>
-				<Option id={toOptionKey('exclusive')}>Exclusive</Option>
-				<Option id={toOptionKey('undefined')}>None</Option>
+				<Option id={toOptionKey('breaking-news')}>
+					{kickerNameMap['breaking-news']}
+				</Option>
+				<Option id={toOptionKey('exclusive')}>
+					{kickerNameMap['exclusive']}
+				</Option>
+				<Option id={toOptionKey('undefined')}>
+					{kickerNameMap['undefined']}
+				</Option>
 			</Select>
 
 			<NotificationTextInput

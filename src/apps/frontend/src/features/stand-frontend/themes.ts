@@ -1,6 +1,6 @@
 import { baseColors, semanticColors, semanticSizing } from '@guardian/stand';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
-import { LayoutMainProps } from '@guardian/stand/Layout';
+import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 
 export const topBarTheme: TopBarTheme = {
@@ -52,4 +52,3 @@ export const layoutMainTheme: LayoutMainProps['theme'] = {
 	md: { padding: { top: '0px', bottom: '0px' } },
 	lg: { padding: { top: '0px', bottom: '0px' } },
 };
-

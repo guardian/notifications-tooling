@@ -34,9 +34,9 @@ export const NotificationTextInput = ({
 					},
 				}}
 				cssOverrides={css({
-                    textarea :{
-                        resize: 'vertical',
-                    }
+					textarea: {
+						resize: 'vertical',
+					},
 				})}
 				onChange={(value) => {
 					if (allowLineBreak) {
