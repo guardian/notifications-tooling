@@ -1,8 +1,7 @@
 import { Option, Select } from '@guardian/stand/Select';
-import { TextInput } from '@guardian/stand/TextInput';
 import { useContext } from 'react';
 import { NotificationContext } from '../NotificationContext';
-import { CharacterCount } from './CharacterCount';
+import { NotificationTextInput } from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
 
@@ -50,43 +49,31 @@ export const EmailFields = () => {
 				<Option id={toOptionKey('undefined')}>None</Option>
 			</Select>
 
-			<div>
-				<TextInput
-					label="Subject"
-					description="Choose the subject line for the email newsletter"
-					value={subject}
-					onChange={(subject) =>
-						updateNotification({
-							type: 'modify-email-parameters',
-							mod: { subject },
-						})
-					}
-				/>
-				<CharacterCount
-					count={subject.length}
-					softLimit={46}
-					fieldDescription="subject line"
-				/>
-			</div>
+			<NotificationTextInput
+				label="Subject"
+				description="Choose the subject line for the email newsletter"
+				value={subject}
+				update={(subject) =>
+					updateNotification({
+						type: 'modify-email-parameters',
+						mod: { subject },
+					})
+				}
+				softLimit={46}
+			/>
 
-			<div>
-				<TextInput
-					label="Preview text"
-					description="Choose the preview text for the email newsletter"
-					value={preview}
-					onChange={(preview) =>
-						updateNotification({
-							type: 'modify-email-parameters',
-							mod: { preview },
-						})
-					}
-				/>
-				<CharacterCount
-					count={subject.length}
-					softLimit={100}
-					fieldDescription="preview text"
-				/>
-			</div>
+			<NotificationTextInput
+				label="Preview text"
+				description="Choose the preview text for the email newsletter"
+				value={preview}
+				update={(preview) =>
+					updateNotification({
+						type: 'modify-email-parameters',
+						mod: { preview },
+					})
+				}
+				softLimit={100}
+			/>
 		</>
 	);
 };
