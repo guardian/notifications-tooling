@@ -22,6 +22,15 @@ updates:
       # updates (and fixes) land promptly instead of waiting to "stabilise".
       exclude:
         - '@guardian/*'
+    ignore:
+      # ESLint 10 dropped deprecated context APIs (getFilename/getSourceCode/
+      # getScope/getAncestors) that eslint-plugin-react@7.37.5 (via
+      # @guardian/eslint-config) still relies on, so `bun lint` crashes.
+      # Stay on ESLint 9.x until the Guardian toolchain supports ESLint 10.
+      # Still allows 9.x minor/patch updates.
+      - dependency-name: eslint
+        update-types:
+          - version-update:semver-major
     groups:
       all:
         patterns: ['*']
