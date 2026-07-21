@@ -1,24 +1,12 @@
-import { semanticSpacing } from '@guardian/stand';
+import { css } from '@emotion/react';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { useContext } from 'react';
+import { mockCapiFetch } from '../../../mocks/mock-capi-fetch';
 import { NotificationContext } from '../NotificationContext';
-import type { CapiContent } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
-
-const testFetch = (articleId: string): Promise<CapiContent> => {
-	return new Promise<CapiContent>((resolve, reject) => {
-		console.log('fake fetching', articleId);
-		setTimeout(() => {
-			if (articleId === '/') {
-				reject(new Error('no fetch logic yet'));
-			} else {
-				resolve({ id: articleId });
-			}
-		}, 500);
-	});
-};
 
 export const ArticleImportControl = () => {
 	const { notification, updateNotification } = useContext(NotificationContext);
@@ -33,7 +21,7 @@ export const ArticleImportControl = () => {
 	const fetchArticle = () => {
 		updateNotification({ type: 'waiting-for-article' });
 
-		testFetch(articleId)
+		mockCapiFetch(articleId)
 			.then((content) => {
 				updateNotification({
 					type: 'receive-article',
@@ -48,6 +36,11 @@ export const ArticleImportControl = () => {
 				});
 			});
 	};
+
+	const disableFetchButton =
+		articleId.length === 0 ||
+		!!isFetchingContent ||
+		articleId === fetchedArticleId;
 
 	return (
 		<div
@@ -74,11 +67,20 @@ export const ArticleImportControl = () => {
 				}}
 			>
 				<Button
-					isDisabled={articleId.length === 0 || isFetchingContent}
+					isDisabled={disableFetchButton}
 					icon="upload"
 					size="sm"
 					variant="secondary"
 					onClick={fetchArticle}
+					// TO DO - check why disabled styling not being applied by stand
+					cssOverrides={
+						disableFetchButton
+							? css({
+									backgroundColor: semanticColors.fill.disabled,
+									cursor: 'not-allowed',
+								})
+							: undefined
+					}
 				>
 					Fetch Article
 				</Button>

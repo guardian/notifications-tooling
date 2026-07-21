@@ -1,3 +1,4 @@
+import { parseHtml } from '../../util/html-helpers';
 import type { NotificationAction, NotificationState } from './types';
 
 export const notificationReducer = (
@@ -30,6 +31,20 @@ export const notificationReducer = (
 		}
 
 		case 'receive-article': {
+			const { parameters } = state;
+			const { headline, standfirst } = action.content.fields ?? {};
+
+			if (parameters?.type === 'email') {
+				const standfirstParse = parseHtml(standfirst);
+				const shouldUseStandFirst =
+					standfirstParse.textContent.length > 0 &&
+					!standfirstParse.containsLinks;
+				parameters.preview = shouldUseStandFirst
+					? standfirstParse.textContent
+					: parameters.preview;
+				parameters.subject = headline ?? parameters.subject;
+			}
+
 			return {
 				...state,
 				fetchedArticleId: action.content.id,

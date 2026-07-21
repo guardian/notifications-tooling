@@ -1,3 +1,5 @@
+import type { Content } from '@guardian/content-api-models/v1/content';
+
 export type UserData = {
 	firstName?: string;
 	lastName?: string;
@@ -6,8 +8,6 @@ export type UserData = {
 	permissions: Record<string, boolean>;
 };
 
-export type CapiContent = Record<string, unknown> & { id: string };
-
 export type TabName = 'create' | 'history';
 
 export type NotificationState = {
@@ -15,7 +15,7 @@ export type NotificationState = {
 	isFetchingContent?: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
-	content?: CapiContent;
+	content?: Content;
 	parameters?: EmailNotification | PushNotification;
 };
 
@@ -44,7 +44,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'receive-article';
-			content: CapiContent;
+			content: Content;
 	  }
 	| {
 			type: 'report-article-error';
