@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "bun run --hot index.ts",
 		"dev": "bun run --hot index.ts",
-		"build": "bun build handler.ts --outfile=dist/handler.js --target=node",
+		"build": "bun build handler.ts --outfile=dist/handler.js --target=node --format=cjs",
 		"placeholder": "bun run --hot handler.ts",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit -p tsconfig.json"
