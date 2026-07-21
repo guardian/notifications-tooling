@@ -21,9 +21,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByText('Create a Notification'),
-		).toBeInTheDocument();
+		await expect(canvas.getByText('Create a Notification')).toBeInTheDocument();
 		await expect(canvas.getByText('Article')).toBeInTheDocument();
 		await expect(canvas.getByText('Kicker')).toBeInTheDocument();
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
