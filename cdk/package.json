@@ -27,7 +27,6 @@
 		"typescript": "5.9.3"
 	},
 	"prettier": "@guardian/prettier",
-
 	"allowScripts": {
 		"fsevents@2.3.3": true,
 		"unrs-resolver@1.12.2": true
