@@ -6,9 +6,7 @@ import express, {
 	type Request,
 	type Response,
 } from 'express';
-import { pinoHttp } from 'pino-http';
 import { healthRouter } from './routers/health';
-import { logger } from './utils/logger';
 
 export const app: Application = express();
 
@@ -16,7 +14,6 @@ app.disable('x-powered-by');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(pinoHttp({ logger }));
 
 // --- Routes ---
 app.use('/health', healthRouter);
