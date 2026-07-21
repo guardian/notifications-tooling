@@ -1,10 +1,6 @@
 import { HtmlPreviewLoader } from '@guardian/stand/HtmlPreviewLoader';
 
-const fetchHtml = () =>
-	Promise.resolve(
-		`<div>Preview content</div>`,
-	);
-
+const fetchHtml = () => Promise.resolve(`<div>Preview content</div>`);
 
 export const HTMLPreview = () => (
 	<HtmlPreviewLoader

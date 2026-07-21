@@ -58,10 +58,7 @@ export const DispatchTab = () => {
 						alignItems: 'flex-start',
 					})}
 				>
-					<EmailPreviewSection
-						selectedSegments={selectedSegments}
-						onSelectedSegmentsChange={setSelectedSegments}
-					/>
+					<EmailPreviewSection selectedSegments={selectedSegments} />
 				</Item>
 			</Grid>
 		</Layout.Main>

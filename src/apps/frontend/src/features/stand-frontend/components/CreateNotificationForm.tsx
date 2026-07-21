@@ -3,6 +3,7 @@ import { Option, Select } from '@guardian/stand/Select';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { AudienceSegments } from './AudienceSegments';
+import { ChannelSelector } from './ChannelSelector';
 
 interface CreateNotificationFormProps {
 	selectedSegments: string[];
@@ -33,7 +34,7 @@ export const CreateNotificationForm = ({
 					label="Article"
 					description="Copy and paste a Guardian URL below"
 				/>
-
+				<ChannelSelector />
 				<Select
 					label="Kicker"
 					description="Choose the kicker for the email newsletter"

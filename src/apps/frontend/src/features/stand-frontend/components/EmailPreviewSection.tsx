@@ -4,30 +4,27 @@ import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { AudienceSegmentsPreview } from './AudienceSegments';
+import { AudienceSegmentsPreview, DEFAULT_SEGMENTS } from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { RoutingType } from './RoutingType';
 
-
-const customStyles = css`
-	display: flex;
-	width: 50%;
-	height: 40px;
-	radius: 4px;
-	justify-content: center;
-	align-items: center;
-	gap: '8px';
-	padding: 6px baseSpacing['12Px'] 7px baseSpacing['12Px'];
-`;
+const customStyles = css({
+	display: 'flex',
+	width: '50%',
+	height: '40px',
+	borderRadius: '4px',
+	justifyContent: 'center',
+	alignItems: 'center',
+	gap: baseSpacing['8Px'],
+	padding: `6px ${baseSpacing['12Px']} 7px ${baseSpacing['12Px']}`,
+});
 
 interface EmailPreviewSectionProps {
 	selectedSegments: string[];
-	onSelectedSegmentsChange: (selected: string[]) => void;
 }
 
 export const EmailPreviewSection = ({
 	selectedSegments,
-	onSelectedSegmentsChange,
 }: EmailPreviewSectionProps) => {
 	return (
 		<section
@@ -64,7 +61,10 @@ export const EmailPreviewSection = ({
 				</Typography>
 				<HTMLPreview />
 				<RoutingType />
-				<AudienceSegmentsPreview selected={selectedSegments} />
+				<AudienceSegmentsPreview
+					segments={DEFAULT_SEGMENTS}
+					selected={selectedSegments}
+				/>
 				<Typography variant="headingCompactLg">Test send</Typography>
 				<TextInput
 					description="Enter your email to send a test"

@@ -1,15 +1,15 @@
-import { Button } from '@guardian/stand/Button';
-import { ButtonGroup } from '@guardian/stand/ButtonGroup';
-import { Typography } from '@guardian/stand/Typography';
+import { css } from '@emotion/react';
 import {
 	baseColors,
 	baseSpacing,
 	semanticColors,
+	semanticRadius,
 	semanticSizing,
 	semanticSpacing,
-	semanticRadius
 } from '@guardian/stand';
-import { css } from '@emotion/react';
+import { Button } from '@guardian/stand/Button';
+import { ButtonGroup } from '@guardian/stand/ButtonGroup';
+import { Typography } from '@guardian/stand/Typography';
 
 export interface Segment {
 	code: string;
@@ -22,7 +22,12 @@ interface AudienceSegmentPickerProps {
 	onChange: (selected: string[]) => void;
 }
 
-const DEFAULT_SEGMENTS: Segment[] = [
+interface AudienceSegmentsPreviewProps {
+	segments?: Segment[];
+	selected: string[];
+}
+
+export const DEFAULT_SEGMENTS: Segment[] = [
 	{ code: 'UK', label: 'United Kingdom' },
 	{ code: 'US', label: 'United States' },
 	{ code: 'AU', label: 'Australia' },
@@ -32,7 +37,7 @@ const styles = {
 		css({
 			backgroundColor: isSelected
 				? baseColors.magenta[200]
-				: semanticColors.fill.neutral,
+				: semanticColors.fill.weak,
 			color: isSelected
 				? semanticColors.text.strongerInverse
 				: semanticColors.text.weak,
@@ -61,10 +66,6 @@ const styles = {
 			height: '20px',
 			width: '26px',
 		}),
-	audienceSegmentLabel: (isSelected: boolean) =>
-		css({
-			color: isSelected ? semanticColors.text.red : semanticColors.text.weak,
-		}),
 };
 export const AudienceSegments = ({
 	segments = DEFAULT_SEGMENTS,
@@ -88,10 +89,10 @@ export const AudienceSegments = ({
 		>
 			<Typography variant="bodyBoldMd">Audience Segments</Typography>
 			<Typography variant="bodyCompactSm">
-					Choose the audience the email notification will be sent to
+				Choose the audience the email notification will be sent to
 			</Typography>
 
-			<ButtonGroup size="lg" >
+			<ButtonGroup size="lg">
 				{segments.map((segment) => {
 					const isSelected = selected.includes(segment.code);
 					return (
@@ -101,13 +102,18 @@ export const AudienceSegments = ({
 							onClick={() => onSegmentToggle(segment.code)}
 							aria-pressed={isSelected}
 							cssOverrides={styles.audienceSegmentButton(isSelected)}
-							height="14px"
-							gap="12px"
 						>
 							<div css={styles.audienceSegmentIcon(isSelected)}>
 								{segment.code}
 							</div>
-							<Typography variant="bodyBoldSm" cssOverrides={css({ color: isSelected ? semanticColors.text.strongerInverse : semanticColors.text.weak })}>
+							<Typography
+								variant="bodyBoldSm"
+								cssOverrides={css({
+									color: isSelected
+										? semanticColors.text.strongerInverse
+										: semanticColors.text.weak,
+								})}
+							>
 								{segment.label}
 							</Typography>
 						</Button>
@@ -118,13 +124,10 @@ export const AudienceSegments = ({
 	);
 };
 
-
-
 export const AudienceSegmentsPreview = ({
 	segments = DEFAULT_SEGMENTS,
 	selected,
-	onChange,
-}: AudienceSegmentPickerProps) => {
+}: AudienceSegmentsPreviewProps) => {
 	return (
 		<div
 			css={{
@@ -136,26 +139,25 @@ export const AudienceSegmentsPreview = ({
 			<Typography variant="bodyBoldMd">Audience Segments</Typography>
 
 			<ButtonGroup size="lg">
-				{selected.map((segment) => {
+				{selected.map((segmentCode) => {
+					const matchingSegment = segments.find(
+						(segment) => segment.code === segmentCode,
+					);
+					const segmentLabel = matchingSegment?.label ?? segmentCode;
 					return (
 						<Button
-							key={segment}
+							key={segmentCode}
 							variant="tertiary"
-							onClick={()=>{}}
 							cssOverrides={styles.audienceSegmentButton(true)}
-							height="14px"
-							gap="12px"
 						>
-							<div css={styles.audienceSegmentIcon(true)}>
-								{segment}
-							</div>
+							<div css={styles.audienceSegmentIcon(true)}>{segmentCode}</div>
 							<Typography
 								variant="bodyBoldSm"
 								cssOverrides={css({
 									color: semanticColors.text.strongerInverse,
 								})}
 							>
-								{segments.map(s=>s.code === segment ? s.label : '').filter(Boolean)[0]}
+								{segmentLabel}
 							</Typography>
 						</Button>
 					);
