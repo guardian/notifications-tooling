@@ -9,21 +9,31 @@ import { Icon } from '@guardian/stand/Icon';
 import { IconButton } from '@guardian/stand/IconButton';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
+import { ButtonGroup } from '@guardian/stand/ButtonGroup';
+import { Button } from '@guardian/stand/Button';
+import { DEFAULT_SEGMENTS, Segment } from './AudienceSegments';
+
+interface DeliveryAndTimingInfoPreviewProps {
+	channel?: string;
+	deliveryTiming?: string;
+}
+
 
 export const styles = {
-	newsletterTile:(isChecked: boolean)=> css({
-		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		width: '450px',
-		height: '74px',
-		backgroundColor: baseColors.neutral['900'],
-		display: 'flex',
-		gap: semanticSpacing.stackXxs,
-		flexDirection: 'column',
-		backgroundColor: isChecked ? baseColors.magenta['900'] : 'transparent',
-	}),
+	newsletterTile: (isChecked: boolean) =>
+		css({
+			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			width: '450px',
+			height: '74px',
+			backgroundColor: baseColors.neutral['900'],
+			display: 'flex',
+			gap: semanticSpacing.stackXxs,
+			flexDirection: 'column',
+			backgroundColor: isChecked ? baseColors.magenta['900'] : 'transparent',
+		}),
 	iconRow: css({
 		display: 'flex',
 		flexDirection: 'row',
@@ -41,7 +51,7 @@ export const styles = {
 	}),
 };
 
-export const ChannelSelector = () => {
+export const DeliveryAndTimingSelector = () => {
 	const [isChecked, setIsChecked] = useState(false);
 	const toggleChecked = () => setIsChecked((current) => !current);
 
@@ -54,14 +64,14 @@ export const ChannelSelector = () => {
 					gap: semanticSpacing.stackXs,
 				}}
 			>
-				<Typography variant="bodyBoldMd">Channel</Typography>
+				<Typography variant="bodyBoldMd">Delivery and timing</Typography>
 				<Typography
 					variant="bodySm"
 					css={{
 						color: semanticColors.text.weak,
 					}}
 				>
-					Choose the channel the notification is sent to
+					Choose whether the app alert is sent immediately or scheduled for a later
 				</Typography>
 				<div
 					css={styles.newsletterTile(isChecked)}
@@ -77,9 +87,9 @@ export const ChannelSelector = () => {
 					}}
 				>
 					<div css={styles.iconRow}>
-						<Icon size="md" symbol="mail" alt="Newsletter email" />
+						<Icon size="md" symbol="bolt" alt="delivery and timing" />
 						<Typography variant="headingCompactSm" css={styles.newsletterTitle}>
-							Newsletter email
+							Immediate
 						</Typography>
 						<div
 							css={css({
@@ -96,7 +106,7 @@ export const ChannelSelector = () => {
 								symbol={
 									isChecked ? 'radio_button_checked' : 'radio_button_unchecked'
 								}
-								ariaLabel="newsletter email"
+								ariaLabel="delivery and timing"
 								variant="tertiary"
 								size="sm"
 								cssOverrides={css({
@@ -112,10 +122,43 @@ export const ChannelSelector = () => {
 							padding: `0px ${semanticSpacing.stackSm} 12px ${semanticSpacing.stackSm}`,
 						}}
 					>
-						Sends via the Braze breaking-news campaign
+						Send right now via Braze
 					</Typography>
 				</div>
 			</div>
 		</>
 	);
 };
+
+export const DeliveryAndTimingInfoPreview = ({
+	channel,
+	deliveryTiming,
+}:DeliveryAndTimingInfoPreviewProps) => {
+	return (
+		<div
+			css={{
+				display: 'flex',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackXs,
+			}}
+		>
+			<Typography variant="bodyBoldMd">Send info</Typography>
+
+			<ButtonGroup size="lg">
+				<Button
+					key={channel}
+					variant="tertiary"
+				>
+					{deliveryTiming}
+				</Button>
+				<Button
+					key={deliveryTiming}
+					variant="tertiary"
+				>
+					{channel}
+				</Button>
+			</ButtonGroup>
+		</div>
+	);
+};
+

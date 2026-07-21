@@ -4,6 +4,7 @@ import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
+import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 
 interface CreateNotificationFormProps {
 	selectedSegments: string[];
@@ -57,6 +58,7 @@ export const CreateNotificationForm = ({
 					selected={selectedSegments}
 					onChange={onSelectedSegmentsChange}
 				/>
+				<DeliveryAndTimingSelector />
 			</div>
 		</>
 	);

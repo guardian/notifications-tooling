@@ -7,6 +7,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { AudienceSegmentsPreview, DEFAULT_SEGMENTS } from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { RoutingType } from './RoutingType';
+import { DeliveryAndTimingInfoPreview } from './DeliveryAndTimingSelector';
 
 const customStyles = css({
 	display: 'flex',
@@ -59,12 +60,12 @@ export const EmailPreviewSection = ({
 					The preview for the newsletter email and/or the app alert notification
 					will be shown below.
 				</Typography>
-				<HTMLPreview />
-				<RoutingType />
+				<DeliveryAndTimingInfoPreview />
 				<AudienceSegmentsPreview
 					segments={DEFAULT_SEGMENTS}
 					selected={selectedSegments}
 				/>
+				<HTMLPreview />
 				<Typography variant="headingCompactLg">Test send</Typography>
 				<TextInput
 					description="Enter your email to send a test"
