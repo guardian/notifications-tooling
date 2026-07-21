@@ -2,7 +2,7 @@
  * The `/v1/notifications` path item.
  *
  * The `POST` request body is registered as a named component
- * (`#/components/schemas/NotificationPushRequest`) so it can be reused and
+ * (`#/components/schemas/NotificationSendRequest`) so it can be reused and
  * inspected independently in the docs.
  */
 export const notificationsPath = {
@@ -12,7 +12,7 @@ export const notificationsPath = {
 			required: true,
 			content: {
 				'application/json': {
-					schema: { $ref: '#/components/schemas/NotificationPushRequest' },
+					schema: { $ref: '#/components/schemas/NotificationSendRequest' },
 				},
 			},
 		},

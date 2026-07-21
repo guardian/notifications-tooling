@@ -2,7 +2,7 @@ import { acceptedNotificationSchema } from './accepted-notification';
 import { healthStatusSchema } from './health-status';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
-import { notificationPushRequestJsonSchema } from './notification-push-request';
+import { notificationSendRequestJsonSchema } from './notification-send-request';
 import { notificationValidationErrorSchema } from './notification-validation-error';
 import { notificationValidationIssueSchema } from './notification-validation-issue';
 
@@ -10,7 +10,7 @@ import { notificationValidationIssueSchema } from './notification-validation-iss
 export const schemas = {
 	HealthStatus: healthStatusSchema,
 	NotificationChannel: notificationChannelSchema,
-	NotificationPushRequest: notificationPushRequestJsonSchema,
+	NotificationSendRequest: notificationSendRequestJsonSchema,
 	NotificationPlanAcceptance: notificationPlanAcceptanceSchema,
 	AcceptedNotification: acceptedNotificationSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,

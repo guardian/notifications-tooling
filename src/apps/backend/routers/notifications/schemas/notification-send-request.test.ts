@@ -7,7 +7,7 @@ import {
 	notificationChannelContentLimits,
 } from '@config';
 import { describe, expect, it } from 'bun:test';
-import { notificationPushRequestSchema } from './notification-push-request';
+import { notificationSendRequestSchema } from './notification-send-request';
 
 const pushLimits =
 	notificationChannelContentLimits[NotificationChannel.AppPushNotification];
@@ -39,14 +39,14 @@ const newsletterItem = (overrides: Record<string, unknown> = {}) => ({
 
 const pushPlan = (overrides: Record<string, unknown> = {}) => ({
 	channel: NotificationChannel.AppPushNotification,
-	audience: { type: 'segment', segments: ['breaking-news-uk'] },
+	audience: { type: 'segment', items: ['breaking-news-uk'] },
 	compose: { use: 'lead' },
 	...overrides,
 });
 
 const newsletterPlan = (overrides: Record<string, unknown> = {}) => ({
 	channel: NotificationChannel.Newsletter,
-	audience: { type: 'segment', segments: ['morning-briefing'] },
+	audience: { type: 'segment', items: ['morning-briefing'] },
 	compose: { items: ['lead'], subject: 'Your morning briefing' },
 	...overrides,
 });
@@ -101,7 +101,7 @@ const newsletterRequestWithPlan = (plan: Record<string, unknown>) =>
 // --- Assertion helpers ---
 
 const parse = (input: unknown) =>
-	notificationPushRequestSchema.safeParse(input);
+	notificationSendRequestSchema.safeParse(input);
 
 const expectValid = (input: unknown) => {
 	const result = parse(input);
@@ -126,7 +126,7 @@ const issuesOf = (input: unknown) => {
 const pathsOf = (input: unknown) =>
 	issuesOf(input).map((issue) => issue.path.join('/'));
 
-describe('notificationPushRequestSchema', () => {
+describe('notificationSendRequestSchema', () => {
 	describe('happy paths', () => {
 		it('accepts a newsletter push with a single content item', () => {
 			const data = expectValid(newsletterRequest());
@@ -152,7 +152,7 @@ describe('notificationPushRequestSchema', () => {
 						channel: 'newsletter',
 						audience: {
 							type: 'segment',
-							segments: ['morning-briefing'],
+							items: ['morning-briefing'],
 						},
 						compose: {
 							items: ['lead'],
@@ -187,7 +187,7 @@ describe('notificationPushRequestSchema', () => {
 						channel: 'app-push-notification',
 						audience: {
 							type: 'segment',
-							segments: ['breaking-news-uk'],
+							items: ['breaking-news-uk'],
 						},
 						compose: { use: 'lead' },
 					},
@@ -227,7 +227,7 @@ describe('notificationPushRequestSchema', () => {
 						channel: 'app-push-notification',
 						audience: {
 							type: 'segment',
-							segments: ['breaking-news-uk'],
+							items: ['breaking-news-uk'],
 						},
 						compose: { use: 'pushLead' },
 					},
@@ -235,7 +235,7 @@ describe('notificationPushRequestSchema', () => {
 						channel: 'newsletter',
 						audience: {
 							type: 'segment',
-							segments: ['morning-briefing'],
+							items: ['morning-briefing'],
 						},
 						compose: {
 							items: ['newsLead'],
@@ -582,7 +582,7 @@ describe('notificationPushRequestSchema', () => {
 				expectValid(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'segment', segments: [id] },
+							audience: { type: 'segment', items: [id] },
 						}),
 					),
 				);
@@ -594,11 +594,11 @@ describe('notificationPushRequestSchema', () => {
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'segment', segments: ['ghost-segment'] },
+							audience: { type: 'segment', items: ['ghost-segment'] },
 						}),
 					),
 				),
-			).toContain('channels/0/audience/segments/0');
+			).toContain('channels/0/audience/items/0');
 		});
 
 		it('rejects an app-push segment used on a newsletter plan', () => {
@@ -606,21 +606,21 @@ describe('notificationPushRequestSchema', () => {
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'segment', segments: ['breaking-news-uk'] },
+							audience: { type: 'segment', items: ['breaking-news-uk'] },
 						}),
 					),
 				),
-			).toContain('channels/0/audience/segments/0');
+			).toContain('channels/0/audience/items/0');
 		});
 
 		it('requires at least one segment', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'segment', segments: [] } }),
+						newsletterPlan({ audience: { type: 'segment', items: [] } }),
 					),
 				),
-			).toContain('channels/0/audience/segments');
+			).toContain('channels/0/audience/items');
 		});
 	});
 
@@ -630,8 +630,8 @@ describe('notificationPushRequestSchema', () => {
 				newsletterRequestWithPlan(
 					newsletterPlan({
 						audience: {
-							type: 'test',
-							emails: ['newsletters.test@theguardian.com'],
+							type: 'email',
+							items: ['newsletters.test@theguardian.com'],
 						},
 					}),
 				),
@@ -643,21 +643,21 @@ describe('notificationPushRequestSchema', () => {
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'test', emails: ['not-an-email'] },
+							audience: { type: 'email', items: ['not-an-email'] },
 						}),
 					),
 				),
-			).toContain('channels/0/audience/emails/0');
+			).toContain('channels/0/audience/items/0');
 		});
 
 		it('requires at least one recipient', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'test', emails: [] } }),
+						newsletterPlan({ audience: { type: 'email', items: [] } }),
 					),
 				),
-			).toContain('channels/0/audience/emails');
+			).toContain('channels/0/audience/items');
 		});
 
 		it(`rejects more than ${MAX_TEST_EMAIL_RECIPIENTS} recipients`, () => {
@@ -668,10 +668,10 @@ describe('notificationPushRequestSchema', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'test', emails } }),
+						newsletterPlan({ audience: { type: 'email', items: emails } }),
 					),
 				),
-			).toContain('channels/0/audience/emails');
+			).toContain('channels/0/audience/items');
 		});
 	});
 
@@ -681,7 +681,7 @@ describe('notificationPushRequestSchema', () => {
 				expectValid(
 					pushRequestWithPlan(
 						pushPlan({
-							audience: { type: 'segment', segments: [id] },
+							audience: { type: 'segment', items: [id] },
 						}),
 					),
 				);
@@ -693,11 +693,11 @@ describe('notificationPushRequestSchema', () => {
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
-							audience: { type: 'segment', segments: ['ghost-segment'] },
+							audience: { type: 'segment', items: ['ghost-segment'] },
 						}),
 					),
 				),
-			).toContain('channels/0/audience/segments/0');
+			).toContain('channels/0/audience/items/0');
 		});
 
 		it('rejects a newsletter segment used on a push plan', () => {
@@ -705,21 +705,21 @@ describe('notificationPushRequestSchema', () => {
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
-							audience: { type: 'segment', segments: ['morning-briefing'] },
+							audience: { type: 'segment', items: ['morning-briefing'] },
 						}),
 					),
 				),
-			).toContain('channels/0/audience/segments/0');
+			).toContain('channels/0/audience/items/0');
 		});
 
 		it('requires at least one segment', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
-						pushPlan({ audience: { type: 'segment', segments: [] } }),
+						pushPlan({ audience: { type: 'segment', items: [] } }),
 					),
 				),
-			).toContain('channels/0/audience/segments');
+			).toContain('channels/0/audience/items');
 		});
 
 		it(`rejects more than ${MAX_AUDIENCE_SEGMENTS} segments`, () => {
@@ -730,10 +730,10 @@ describe('notificationPushRequestSchema', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
-						pushPlan({ audience: { type: 'segment', segments } }),
+						pushPlan({ audience: { type: 'segment', items: segments } }),
 					),
 				),
-			).toContain('channels/0/audience/segments');
+			).toContain('channels/0/audience/items');
 		});
 	});
 
@@ -792,7 +792,7 @@ describe('notificationPushRequestSchema', () => {
 				pathsOf(
 					pushRequestWithPlan({
 						channel: 'sms',
-						audience: { type: 'segment', segments: ['breaking-news-uk'] },
+						audience: { type: 'segment', items: ['breaking-news-uk'] },
 						compose: { use: 'lead' },
 					}),
 				).some((path) => path.startsWith('channels/0')),
@@ -805,8 +805,8 @@ describe('notificationPushRequestSchema', () => {
 					pushRequestWithPlan(
 						pushPlan({
 							audience: {
-								type: 'test',
-								emails: ['newsletters.test@theguardian.com'],
+								type: 'email',
+								items: ['newsletters.test@theguardian.com'],
 							},
 						}),
 					),
@@ -901,6 +901,67 @@ describe('notificationPushRequestSchema', () => {
 			expect(issues.some((issue) => issue.message.includes('has type'))).toBe(
 				true,
 			);
+		});
+	});
+
+	describe('strict keys (rejects unsupported properties)', () => {
+		const unrecognizedKeyPaths = (input: unknown) =>
+			issuesOf(input)
+				.filter((issue) => issue.code === 'unrecognized_keys')
+				.map((issue) => issue.path.join('/'));
+
+		it('rejects an unknown top-level key', () => {
+			expect(unrecognizedKeyPaths(pushRequest({ surprise: true }))).toContain(
+				'',
+			);
+		});
+
+		it('rejects an unknown key on a content item', () => {
+			expect(
+				unrecognizedKeyPaths(pushRequestWithItem(pushItem({ surprise: true }))),
+			).toContain('content/items/lead');
+		});
+
+		it('rejects an unknown key on an audience', () => {
+			expect(
+				unrecognizedKeyPaths(
+					pushRequestWithPlan(
+						pushPlan({
+							audience: {
+								type: 'segment',
+								items: ['breaking-news-uk'],
+								surprise: true,
+							},
+						}),
+					),
+				),
+			).toContain('channels/0/audience');
+		});
+
+		it('rejects an unknown key on a compose', () => {
+			expect(
+				unrecognizedKeyPaths(
+					pushRequestWithPlan(
+						pushPlan({ compose: { use: 'lead', surprise: true } }),
+					),
+				),
+			).toContain('channels/0/compose');
+		});
+
+		it('rejects an unknown key on a plan', () => {
+			expect(
+				unrecognizedKeyPaths(pushRequestWithPlan(pushPlan({ surprise: true }))),
+			).toContain('channels/0');
+		});
+
+		it('rejects an unknown key on options', () => {
+			expect(
+				unrecognizedKeyPaths(
+					pushRequest({
+						options: { dryRun: false, scheduledFor: null, surprise: true },
+					}),
+				),
+			).toContain('options');
 		});
 	});
 });

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
-import { notificationPushRequestSchema } from './schemas/notification-push-request';
+import { notificationSendRequestSchema } from './schemas/notification-send-request';
 
 /** How long (seconds) an accepted notification may still be cancelled. */
 const CANCELLATION_WINDOW_SECONDS = 5 * 60;
@@ -59,7 +59,7 @@ export const notificationsRouter = Router();
 notificationsRouter.post(
 	'/',
 	validate({
-		body: notificationPushRequestSchema,
+		body: notificationSendRequestSchema,
 		handler: handleValidationErrors,
 	}),
 	(req, res) => {

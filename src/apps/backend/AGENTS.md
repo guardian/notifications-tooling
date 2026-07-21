@@ -30,7 +30,7 @@ Use **clear, specific, self-documenting** names — never generic or loosely
 defined ones.
 
 - Prefer `appPushNotificationSegments`, `notificationChannelContentLimits`,
-  `notificationPushRequestSchema` over `data`, `items`, `config`, `schema`,
+  `notificationSendRequestSchema` over `data`, `items`, `config`, `schema`,
   `result`, `temp`, `obj`, `value`.
 - A reader should understand what a variable holds from its name alone, without
   tracing where it came from.

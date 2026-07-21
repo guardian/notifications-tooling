@@ -28,7 +28,7 @@ const guardianArticleLink = z
 	});
 
 const mediaSchema = z
-	.object({
+	.strictObject({
 		type: z.literal('image'),
 		imageUrl: z.url().meta({
 			description: 'Full-size image displayed alongside the notification.',
@@ -42,7 +42,7 @@ const mediaSchema = z
 	.meta({ description: 'Optional media attachment (images only for now).' });
 
 /** A content item for the `app-push-notification` channel (stricter limits). */
-const appPushContentItem = z.object({
+const appPushContentItem = z.strictObject({
 	type: z.literal(NotificationChannel.AppPushNotification),
 	title: z
 		.string()
@@ -65,7 +65,7 @@ const appPushContentItem = z.object({
 });
 
 /** A content item for the `newsletter` channel (more generous limits). */
-const newsletterContentItem = z.object({
+const newsletterContentItem = z.strictObject({
 	type: z.literal(NotificationChannel.Newsletter),
 	title: z
 		.string()
@@ -94,7 +94,7 @@ const contentItem = z.discriminatedUnion('type', [
 	newsletterContentItem,
 ]);
 
-const contentSchema = z.object({
+const contentSchema = z.strictObject({
 	items: z
 		.record(z.string().min(1), contentItem)
 		.refine((items) => Object.keys(items).length > 0, {
@@ -115,9 +115,9 @@ const segmentAudience = (
 	segmentIds:
 		typeof newsletterSegmentIds | typeof appPushNotificationSegmentIds,
 ) =>
-	z.object({
+	z.strictObject({
 		type: z.literal('segment'),
-		segments: z
+		items: z
 			.array(z.enum(segmentIds))
 			.min(1)
 			.max(MAX_AUDIENCE_SEGMENTS)
@@ -131,9 +131,9 @@ const appPushSegmentAudience = segmentAudience(appPushNotificationSegmentIds);
 const newsletterSegmentAudience = segmentAudience(newsletterSegmentIds);
 
 /** Ad-hoc test recipients addressed by email, bypassing segments. */
-const testEmailAudience = z.object({
-	type: z.literal('test'),
-	emails: z
+const testEmailAudience = z.strictObject({
+	type: z.literal('email'),
+	items: z
 		.array(z.email())
 		.min(1)
 		.max(MAX_TEST_EMAIL_RECIPIENTS)
@@ -150,7 +150,7 @@ const newsletterAudience = z.discriminatedUnion('type', [
 ]);
 
 /** Push takes a single content item. */
-const appPushCompose = z.object({
+const appPushCompose = z.strictObject({
 	use: z.string().min(1).meta({
 		description:
 			'The id of the single content item (from `content.items`) to send.',
@@ -159,7 +159,7 @@ const appPushCompose = z.object({
 });
 
 /** Newsletter assembles many content items into a digest. */
-const newsletterCompose = z.object({
+const newsletterCompose = z.strictObject({
 	items: z
 		.array(z.string().min(1))
 		.min(1)
@@ -179,12 +179,12 @@ const newsletterCompose = z.object({
  * (push -> segments + single item, newsletter -> segments/test emails + digest).
  */
 const planSchema = z.discriminatedUnion('channel', [
-	z.object({
+	z.strictObject({
 		channel: z.literal(NotificationChannel.AppPushNotification),
 		audience: appPushSegmentAudience,
 		compose: appPushCompose,
 	}),
-	z.object({
+	z.strictObject({
 		channel: z.literal(NotificationChannel.Newsletter),
 		audience: newsletterAudience,
 		compose: newsletterCompose,
@@ -195,8 +195,8 @@ const planSchema = z.discriminatedUnion('channel', [
  * The `POST /v1/notifications` request body. NOTE: `idempotencyKey` is required
  * but, without a persistence layer, not yet stored or deduplicated against.
  */
-export const notificationPushRequestSchema = z
-	.object({
+export const notificationSendRequestSchema = z
+	.strictObject({
 		idempotencyKey: z.string().min(1).meta({
 			description:
 				'Client-generated unique key so retries are not delivered twice.',
@@ -221,7 +221,7 @@ export const notificationPushRequestSchema = z
 			example: 'editorial-breaking-news',
 		}),
 		options: z
-			.object({
+			.strictObject({
 				dryRun: z.boolean().default(false).meta({
 					description:
 						'When true, the request is validated but nothing is dispatched.',
@@ -290,7 +290,7 @@ export const notificationPushRequestSchema = z
 					channel: NotificationChannel.Newsletter,
 					audience: {
 						type: 'segment',
-						segments: [newsletterSegmentIds[0]],
+						items: [newsletterSegmentIds[0]],
 					},
 					compose: {
 						items: ['lead-story'],
@@ -303,6 +303,6 @@ export const notificationPushRequestSchema = z
 		},
 	});
 
-export type NotificationPushRequest = z.infer<
-	typeof notificationPushRequestSchema
+export type NotificationSendRequest = z.infer<
+	typeof notificationSendRequestSchema
 >;
