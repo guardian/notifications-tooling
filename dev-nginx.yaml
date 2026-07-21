@@ -1,0 +1,7 @@
+name: dispatch
+mappings:
+  - prefix: dispatch
+    port: 3000
+    path: /
+  - prefix: dispatch-backend
+    port: 4000
