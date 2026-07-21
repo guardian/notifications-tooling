@@ -34,14 +34,14 @@ fi
 # fi
 
 rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR/backend" "$BUILD_DIR/frontend"
-cp "$BACKEND_HANDLER" "$BUILD_DIR/backend/"
+mkdir -p "$BUILD_DIR" "$BUILD_DIR/frontend"
+cp "$BACKEND_HANDLER" "$BUILD_DIR"
 # cp -R "$FRONTEND_DIST_DIR" "$BUILD_DIR/frontend/"
 cp -R "$PLACEHOLDER_ASSETS_DIR" "$BUILD_DIR/frontend/"
 
 cd "$BUILD_DIR" || exit 1
 
-zip -r "$ZIP_FILE" backend frontend
+zip -r "$ZIP_FILE" . 
 
 echo "Lambda build artifact created: $ZIP_FILE"
 

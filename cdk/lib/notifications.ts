@@ -17,7 +17,7 @@ export class DispatchStack extends GuStack {
 
 		const guApiLambda = new GuApiLambda(this, `${app}-lambda`, {
 			fileName: `${app}.zip`,
-			handler: 'backend/handler.handler',
+			handler: 'handler.handler',
 			runtime: Runtime.NODEJS_24_X,
 			monitoringConfiguration: isProd
 				? {
