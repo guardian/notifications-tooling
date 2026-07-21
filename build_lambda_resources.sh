@@ -8,6 +8,7 @@ ARTIFACT_DIR="$ROOT_DIR/dist"
 ZIP_FILE="$ARTIFACT_DIR/dispatch.zip"
 BACKEND_HANDLER="$ROOT_DIR/src/apps/backend/dist/handler.js"
 FRONTEND_DIST_DIR="$ROOT_DIR/src/apps/frontend/dist"
+PLACEHOLDER_ASSETS_DIR="$ROOT_DIR/src/apps/backend/placeholder-assets/index.html"
 
 cd "$ROOT_DIR" || exit 1
 
@@ -17,8 +18,8 @@ mkdir -p "$ARTIFACT_DIR"
 cd "$ROOT_DIR/src/apps/backend" || exit 1
 bun run build
 
-cd "$ROOT_DIR/src/apps/frontend" || exit 1
-bun run build
+# cd "$ROOT_DIR/src/apps/frontend" || exit 1
+# bun run build
 
 cd "$ROOT_DIR" || exit 1
 
@@ -27,15 +28,17 @@ if [[ ! -f "$BACKEND_HANDLER" ]]; then
 	exit 1
 fi
 
-if [[ ! -d "$FRONTEND_DIST_DIR" ]]; then
-	echo "Missing frontend build artifact: $FRONTEND_DIST_DIR" >&2
-	exit 1
-fi
+# if [[ ! -d "$FRONTEND_DIST_DIR" ]]; then
+# 	echo "Missing frontend build artifact: $FRONTEND_DIST_DIR" >&2
+# 	exit 1
+# fi
 
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR/backend" "$BUILD_DIR/frontend"
 cp "$BACKEND_HANDLER" "$BUILD_DIR/backend/"
-cp -R "$FRONTEND_DIST_DIR" "$BUILD_DIR/frontend/"
+# cp -R "$FRONTEND_DIST_DIR" "$BUILD_DIR/frontend/"
+cp -R "$PLACEHOLDER_ASSETS_DIR" "$BUILD_DIR/frontend/"
+
 cd "$BUILD_DIR" || exit 1
 
 zip -r "$ZIP_FILE" backend frontend
