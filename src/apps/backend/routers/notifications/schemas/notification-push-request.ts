@@ -161,6 +161,10 @@ const topicAudience = z.object({
 		.max(MAX_PUSH_TOPICS)
 		.meta({
 			description: `Up to ${MAX_PUSH_TOPICS} mobile-n10n topics to target.`,
+			example: [
+				{ type: 'breaking', name: 'au' },
+				{ type: 'breaking', name: 'uk-sport' },
+			],
 		}),
 });
 

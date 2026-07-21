@@ -15,18 +15,7 @@ export const acceptedNotificationSchema = {
 		plans: {
 			type: 'array',
 			description: 'One entry per requested delivery channel.',
-			items: {
-				type: 'object',
-				required: ['channel', 'planId', 'status'],
-				properties: {
-					channel: { $ref: '#/components/schemas/NotificationChannel' },
-					planId: {
-						type: 'string',
-						example: '<notificationId>#newsletter',
-					},
-					status: { type: 'string', enum: ['accepted'] },
-				},
-			},
+			items: { $ref: '#/components/schemas/NotificationPlanAcceptance' },
 		},
 		statusUrl: {
 			type: 'string',

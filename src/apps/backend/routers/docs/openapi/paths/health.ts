@@ -7,13 +7,7 @@ export const healthPath = {
 				description: 'The service is healthy.',
 				content: {
 					'application/json': {
-						schema: {
-							type: 'object',
-							properties: {
-								status: { type: 'string', example: 'ok' },
-								uptime: { type: 'number', example: 123.45 },
-							},
-						},
+						schema: { $ref: '#/components/schemas/HealthStatus' },
 					},
 				},
 			},

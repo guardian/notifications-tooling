@@ -22,23 +22,7 @@ export const notificationValidationErrorSchema = {
 		details: {
 			type: 'array',
 			description: 'The individual validation issues that caused the failure.',
-			items: {
-				type: 'object',
-				required: ['code', 'path', 'message'],
-				properties: {
-					code: {
-						type: 'string',
-						description: 'The Zod issue code.',
-						example: 'too_big',
-					},
-					path: {
-						type: 'string',
-						description: 'RFC 6901 JSON Pointer to the offending field.',
-						example: '/content/items/lead/title',
-					},
-					message: { type: 'string' },
-				},
-			},
+			items: { $ref: '#/components/schemas/NotificationValidationIssue' },
 		},
 	},
 } as const;
