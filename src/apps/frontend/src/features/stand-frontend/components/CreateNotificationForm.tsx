@@ -4,10 +4,18 @@ import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { AudienceSegments } from './AudienceSegments';
 
+interface CreateNotificationFormProps {
+	selectedSegments: string[];
+	onSelectedSegmentsChange: (selected: string[]) => void;
+}
+
 /**
  * This is a non-functional placeholder to demonstrate how content will appear in the layout
  */
-export const CreateNotificationForm = () => {
+export const CreateNotificationForm = ({
+	selectedSegments,
+	onSelectedSegmentsChange,
+}: CreateNotificationFormProps) => {
 	return (
 		<>
 			<Typography variant="titleMd" element="h2">
@@ -44,7 +52,10 @@ export const CreateNotificationForm = () => {
 					label="Preview text"
 					description="Choose the preview text for the email newsletter"
 				/>
-				<AudienceSegments/>
+				<AudienceSegments
+					selected={selectedSegments}
+					onChange={onSelectedSegmentsChange}
+				/>
 			</div>
 		</>
 	);

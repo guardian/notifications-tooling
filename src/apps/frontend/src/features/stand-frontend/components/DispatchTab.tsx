@@ -6,10 +6,13 @@ import {
 } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
+import { useState } from 'react';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
 export const DispatchTab = () => {
+	const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
+
 	return (
 		<Layout.Main
 			theme={{
@@ -39,7 +42,10 @@ export const DispatchTab = () => {
 						paddingTop: semanticSpacing.stackSm,
 					})}
 				>
-					<CreateNotificationForm />
+					<CreateNotificationForm
+						selectedSegments={selectedSegments}
+						onSelectedSegmentsChange={setSelectedSegments}
+					/>
 				</Item>
 				<Item
 					size={4}
@@ -52,7 +58,10 @@ export const DispatchTab = () => {
 						alignItems: 'flex-start',
 					})}
 				>
-						<EmailPreviewSection />
+					<EmailPreviewSection
+						selectedSegments={selectedSegments}
+						onSelectedSegmentsChange={setSelectedSegments}
+					/>
 				</Item>
 			</Grid>
 		</Layout.Main>

@@ -10,7 +10,6 @@ import {
 	semanticRadius
 } from '@guardian/stand';
 import { css } from '@emotion/react';
-import { useState } from 'react';
 
 export interface Segment {
 	code: string;
@@ -19,8 +18,8 @@ export interface Segment {
 
 interface AudienceSegmentPickerProps {
 	segments?: Segment[];
-	defaultSelected?: string[];
-	onChange?: (selected: string[]) => void;
+	selected: string[];
+	onChange: (selected: string[]) => void;
 }
 
 const DEFAULT_SEGMENTS: Segment[] = [
@@ -69,19 +68,14 @@ const styles = {
 };
 export const AudienceSegments = ({
 	segments = DEFAULT_SEGMENTS,
-	defaultSelected = [],
+	selected,
 	onChange,
 }: AudienceSegmentPickerProps) => {
-	const [selected, setSelected] = useState<string[]>(defaultSelected);
-
 	const onSegmentToggle = (segmentCode: string) => {
-		setSelected((current) => {
-			const next = current.includes(segmentCode)
-				? current.filter((code) => code !== segmentCode)
-				: [...current, segmentCode];
-			onChange?.(next);
-			return next;
-		});
+		const next = selected.includes(segmentCode)
+			? selected.filter((code) => code !== segmentCode)
+			: [...selected, segmentCode];
+		onChange(next);
 	};
 
 	return (
@@ -126,3 +120,47 @@ export const AudienceSegments = ({
 
 
 
+export const AudienceSegmentsPreview = ({
+	segments = DEFAULT_SEGMENTS,
+	selected,
+	onChange,
+}: AudienceSegmentPickerProps) => {
+	return (
+		<div
+			css={{
+				display: 'flex',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackXs,
+			}}
+		>
+			<Typography variant="bodyBoldMd">Audience Segments</Typography>
+
+			<ButtonGroup size="lg">
+				{selected.map((segment) => {
+					return (
+						<Button
+							key={segment}
+							variant="tertiary"
+							onClick={()=>{}}
+							cssOverrides={styles.audienceSegmentButton(true)}
+							height="14px"
+							gap="12px"
+						>
+							<div css={styles.audienceSegmentIcon(true)}>
+								{segment}
+							</div>
+							<Typography
+								variant="bodyBoldSm"
+								cssOverrides={css({
+									color: semanticColors.text.strongerInverse,
+								})}
+							>
+								{segments.map(s=>s.code === segment ? s.label : '').filter(Boolean)[0]}
+							</Typography>
+						</Button>
+					);
+				})}
+			</ButtonGroup>
+		</div>
+	);
+};

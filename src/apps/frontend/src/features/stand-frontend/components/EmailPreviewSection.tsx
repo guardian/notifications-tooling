@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { AudienceSegments } from './AudienceSegments';
+import { AudienceSegmentsPreview } from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { RoutingType } from './RoutingType';
 
@@ -20,7 +20,15 @@ const customStyles = css`
 	padding: 6px baseSpacing['12Px'] 7px baseSpacing['12Px'];
 `;
 
-export const EmailPreviewSection = () => {
+interface EmailPreviewSectionProps {
+	selectedSegments: string[];
+	onSelectedSegmentsChange: (selected: string[]) => void;
+}
+
+export const EmailPreviewSection = ({
+	selectedSegments,
+	onSelectedSegmentsChange,
+}: EmailPreviewSectionProps) => {
 	return (
 		<section
 			css={css({
@@ -56,7 +64,7 @@ export const EmailPreviewSection = () => {
 				</Typography>
 				<HTMLPreview />
 				<RoutingType />
-				<AudienceSegments/>
+				<AudienceSegmentsPreview selected={selectedSegments} />
 				<Typography variant="headingCompactLg">Test send</Typography>
 				<TextInput
 					description="Enter your email to send a test"
