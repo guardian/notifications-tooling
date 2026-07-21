@@ -17,7 +17,8 @@
 	"workspaces": [
 		"src/apps/*",
 		"src/apps/workers/*",
-		"src/packages/*"
+		"src/packages/*",
+		"cdk"
 	],
 	"scripts": {
 		"prepare": "lefthook install",
