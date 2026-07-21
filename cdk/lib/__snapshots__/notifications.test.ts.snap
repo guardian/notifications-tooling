@@ -478,7 +478,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "dispatchlambdadispatchapiDeployment664A949Cc8014fed2cb1bf273b7729f87166472d": {
+    "dispatchlambdadispatchapiDeployment664A949C594d55d1235faa485a8c70453d73a7af": {
       "DependsOn": [
         "dispatchlambdadispatchapiproxyANYE34E6F78",
         "dispatchlambdadispatchapiproxy929EBBAA",
@@ -488,7 +488,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "aws:cdk:do-not-refactor": true,
       },
       "Properties": {
-        "Description": "API for the notifications tooling",
+        "Description": "API for creating, previewing, and dispatching multi-channel notifications. It provides a frontend for users to configure and send notifications, and a backend responsible for forwarding requests to relevant downstream services e.g. app and email notification APIs.",
         "RestApiId": {
           "Ref": "dispatchlambdadispatchapiEEAA8616",
         },
@@ -501,7 +501,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "dispatchlambdadispatchapiDeployment664A949Cc8014fed2cb1bf273b7729f87166472d",
+          "Ref": "dispatchlambdadispatchapiDeployment664A949C594d55d1235faa485a8c70453d73a7af",
         },
         "RestApiId": {
           "Ref": "dispatchlambdadispatchapiEEAA8616",
@@ -534,7 +534,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     },
     "dispatchlambdadispatchapiEEAA8616": {
       "Properties": {
-        "Description": "API for the notifications tooling",
+        "Description": "API for creating, previewing, and dispatching multi-channel notifications. It provides a frontend for users to configure and send notifications, and a backend responsible for forwarding requests to relevant downstream services e.g. app and email notification APIs.",
         "Name": "notifications-TEST-dispatch-api",
         "Tags": [
           {

@@ -28,7 +28,11 @@ export class DispatchStack extends GuStack {
 			app,
 			api: {
 				id: `${app}-api`,
-				description: 'API for the notifications tooling',
+				description:
+					'API for creating, previewing, and dispatching multi-channel notifications. ' +
+					'It provides a frontend for users to configure and send notifications, and a ' +
+					'backend responsible for forwarding requests to relevant downstream services e.g. ' +
+					'app and email notification APIs.',
 			},
 			reservedConcurrentExecutions: 1,
 		});
