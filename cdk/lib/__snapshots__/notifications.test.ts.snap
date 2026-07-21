@@ -114,7 +114,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             "STAGE": "TEST",
           },
         },
-        "Handler": "backend/handler.handler",
+        "Handler": "handler.handler",
         "LoggingConfig": {
           "LogFormat": "JSON",
         },
