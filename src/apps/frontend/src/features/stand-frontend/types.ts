@@ -17,6 +17,7 @@ export type NotificationState = {
 	fetchArticleError?: string;
 	content?: Content;
 	parameters?: EmailNotification | PushNotification;
+	confirmSendModalOpen?: boolean;
 };
 
 export type EmailNotification = {
@@ -24,6 +25,7 @@ export type EmailNotification = {
 	kicker?: 'breaking-news' | 'exclusive';
 	subject?: string;
 	preview?: string;
+	emailHtml?: string;
 };
 
 export type PushNotification = {
@@ -49,4 +51,8 @@ export type NotificationAction =
 	| {
 			type: 'report-article-error';
 			errorMessage: string;
+	  }
+	| {
+			type: 'set-show-confirm-send';
+			isOpen: boolean;
 	  };

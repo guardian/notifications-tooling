@@ -62,5 +62,10 @@ export const notificationReducer = (
 				fetchArticleError: action.errorMessage,
 			};
 		}
+
+		case 'set-show-confirm-send': {
+			state.confirmSendModalOpen = action.isOpen;
+			return state;
+		}
 	}
 };

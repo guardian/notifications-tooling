@@ -2,6 +2,7 @@ import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { ArticleImportControl } from './ArticleImportControl';
 import { EmailFields } from './EmailFields';
+import { SendButton } from './SendButton';
 
 export const CreateNotificationForm = () => {
 	return (
@@ -18,8 +19,8 @@ export const CreateNotificationForm = () => {
 				}}
 			>
 				<ArticleImportControl />
-
 				<EmailFields />
+				<SendButton />
 			</div>
 		</>
 	);
