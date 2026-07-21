@@ -1,5 +1,6 @@
-pre-push:
+pre-commit:
   commands:
     format:
       glob: '*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css,md}'
-      run: bunx prettier --write {push_files}
+      run: bunx prettier --write {staged_files}
+      stage_fixed: true
