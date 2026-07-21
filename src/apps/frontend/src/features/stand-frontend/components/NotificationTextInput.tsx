@@ -11,6 +11,7 @@ type Props = {
 	hardLimit?: number;
 	softLimit: number;
 	allowLineBreak?: boolean;
+	isDisabled?: boolean;
 };
 
 export const NotificationTextInput = ({
@@ -21,6 +22,7 @@ export const NotificationTextInput = ({
 	hardLimit,
 	softLimit,
 	allowLineBreak,
+	isDisabled,
 }: Props) => {
 	return (
 		<div>
@@ -28,6 +30,7 @@ export const NotificationTextInput = ({
 				label={label}
 				description={description}
 				value={value}
+				isDisabled={isDisabled}
 				theme={{
 					shared: {
 						height: `calc(${baseSizing.size16Rem} * 7)`,

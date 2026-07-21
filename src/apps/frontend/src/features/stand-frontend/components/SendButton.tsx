@@ -85,9 +85,12 @@ export const SendButton = () => {
 
 			<Modal
 				isOpen={confirmSendModalOpen}
-				onOpenChange={(isOpen) =>
-					updateNotification({ type: 'set-show-confirm-send', isOpen })
-				}
+				onOpenChange={(isOpen) => {
+					if (isWaitingForSend) {
+						return;
+					}
+					updateNotification({ type: 'set-show-confirm-send', isOpen });
+				}}
 			>
 				<Dialog aria-label="confirm notification send">
 					<Dialog.Dismiss ariaLabel="Close Modal" />
@@ -99,6 +102,7 @@ export const SendButton = () => {
 					</Dialog.Content>
 					<Dialog.Buttons>
 						<Button
+							isDisabled={isWaitingForSend}
 							variant="tertiary"
 							onPress={() => {
 								updateNotification({
@@ -110,6 +114,7 @@ export const SendButton = () => {
 							Cancel
 						</Button>
 						<Button
+							isDisabled={isWaitingForSend}
 							icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
 							onPress={sendNotification}
 						>
