@@ -5,9 +5,8 @@ import { Icon } from '@guardian/stand/Icon';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { AudienceSegmentsPreview, DEFAULT_SEGMENTS } from './AudienceSegments';
-import { HTMLPreview } from './HTMLPreview';
-import { RoutingType } from './RoutingType';
 import { DeliveryAndTimingInfoPreview } from './DeliveryAndTimingSelector';
+import { HTMLPreview } from './HTMLPreview';
 
 const customStyles = css({
 	display: 'flex',
@@ -22,10 +21,14 @@ const customStyles = css({
 
 interface EmailPreviewSectionProps {
 	selectedSegments: string[];
+	selectedChannel?: string;
+	selectedDeliveryTiming?: string;
 }
 
 export const EmailPreviewSection = ({
 	selectedSegments,
+	selectedChannel,
+	selectedDeliveryTiming,
 }: EmailPreviewSectionProps) => {
 	return (
 		<section
@@ -60,7 +63,10 @@ export const EmailPreviewSection = ({
 					The preview for the newsletter email and/or the app alert notification
 					will be shown below.
 				</Typography>
-				<DeliveryAndTimingInfoPreview />
+				<DeliveryAndTimingInfoPreview
+					channel={selectedChannel}
+					deliveryTiming={selectedDeliveryTiming}
+				/>
 				<AudienceSegmentsPreview
 					segments={DEFAULT_SEGMENTS}
 					selected={selectedSegments}

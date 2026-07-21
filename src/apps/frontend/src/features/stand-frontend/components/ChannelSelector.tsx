@@ -8,7 +8,13 @@ import {
 import { Icon } from '@guardian/stand/Icon';
 import { IconButton } from '@guardian/stand/IconButton';
 import { Typography } from '@guardian/stand/Typography';
-import { useState } from 'react';
+
+export const NEWSLETTER_CHANNEL = 'Newsletter email';
+
+interface ChannelSelectorProps {
+	selectedChannel?: string;
+	onChange: (channel?: string) => void;
+}
 
 export const styles = {
 	newsletterTile:(isChecked: boolean)=> css({
@@ -41,9 +47,14 @@ export const styles = {
 	}),
 };
 
-export const ChannelSelector = () => {
-	const [isChecked, setIsChecked] = useState(false);
-	const toggleChecked = () => setIsChecked((current) => !current);
+export const ChannelSelector = ({
+	selectedChannel,
+	onChange,
+}: ChannelSelectorProps) => {
+	const isChecked = selectedChannel === NEWSLETTER_CHANNEL;
+	const toggleChecked = () => {
+		onChange(isChecked ? undefined : NEWSLETTER_CHANNEL);
+	};
 
 	return (
 		<>
@@ -79,7 +90,7 @@ export const ChannelSelector = () => {
 					<div css={styles.iconRow}>
 						<Icon size="md" symbol="mail" alt="Newsletter email" />
 						<Typography variant="headingCompactSm" css={styles.newsletterTitle}>
-							Newsletter email
+							{NEWSLETTER_CHANNEL}
 						</Typography>
 						<div
 							css={css({
@@ -90,6 +101,7 @@ export const ChannelSelector = () => {
 								alignItems: 'center',
 								justifyContent: 'center',
 							})}
+							onClick={(event) => event.stopPropagation()}
 						>
 							<IconButton
 								onPress={toggleChecked}

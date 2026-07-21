@@ -12,6 +12,10 @@ import { EmailPreviewSection } from './EmailPreviewSection';
 
 export const DispatchTab = () => {
 	const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
+	const [selectedChannel, setSelectedChannel] = useState<string | undefined>();
+	const [selectedDeliveryTiming, setSelectedDeliveryTiming] = useState<
+		string | undefined
+	>();
 
 	return (
 		<Layout.Main
@@ -45,6 +49,10 @@ export const DispatchTab = () => {
 					<CreateNotificationForm
 						selectedSegments={selectedSegments}
 						onSelectedSegmentsChange={setSelectedSegments}
+						selectedChannel={selectedChannel}
+						onSelectedChannelChange={setSelectedChannel}
+						selectedDeliveryTiming={selectedDeliveryTiming}
+						onSelectedDeliveryTimingChange={setSelectedDeliveryTiming}
 					/>
 				</Item>
 				<Item
@@ -58,7 +66,11 @@ export const DispatchTab = () => {
 						alignItems: 'flex-start',
 					})}
 				>
-					<EmailPreviewSection selectedSegments={selectedSegments} />
+					<EmailPreviewSection
+						selectedSegments={selectedSegments}
+						selectedChannel={selectedChannel}
+						selectedDeliveryTiming={selectedDeliveryTiming}
+					/>
 				</Item>
 			</Grid>
 		</Layout.Main>

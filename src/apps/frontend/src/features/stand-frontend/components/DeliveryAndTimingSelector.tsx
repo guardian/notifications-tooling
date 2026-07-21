@@ -1,23 +1,29 @@
 import { css } from '@emotion/react';
 import {
 	baseColors,
+	baseSpacing,
 	semanticColors,
+	semanticRadius,
 	semanticSizing,
 	semanticSpacing,
 } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { IconButton } from '@guardian/stand/IconButton';
 import { Typography } from '@guardian/stand/Typography';
-import { useState } from 'react';
 import { ButtonGroup } from '@guardian/stand/ButtonGroup';
 import { Button } from '@guardian/stand/Button';
-import { DEFAULT_SEGMENTS, Segment } from './AudienceSegments';
 
 interface DeliveryAndTimingInfoPreviewProps {
 	channel?: string;
 	deliveryTiming?: string;
 }
 
+interface DeliveryAndTimingSelectorProps {
+	selectedDeliveryTiming?: string;
+	onChange: (deliveryTiming?: string) => void;
+}
+
+export const IMMEDIATE_DELIVERY_TIMING = 'Immediate send';
 
 export const styles = {
 	newsletterTile: (isChecked: boolean) =>
@@ -49,11 +55,24 @@ export const styles = {
 	newsletterTitle: css({
 		gap: '10px',
 	}),
+	deliveryIcon: css({
+		backgroundColor: baseColors.magenta[900],
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
+	}),
 };
 
-export const DeliveryAndTimingSelector = () => {
-	const [isChecked, setIsChecked] = useState(false);
-	const toggleChecked = () => setIsChecked((current) => !current);
+export const DeliveryAndTimingSelector = ({
+	selectedDeliveryTiming,
+	onChange,
+}: DeliveryAndTimingSelectorProps) => {
+	const isChecked = selectedDeliveryTiming === IMMEDIATE_DELIVERY_TIMING;
+	const toggleChecked = () => {
+		onChange(isChecked ? undefined : IMMEDIATE_DELIVERY_TIMING);
+	};
 
 	return (
 		<>
@@ -100,6 +119,7 @@ export const DeliveryAndTimingSelector = () => {
 								alignItems: 'center',
 								justifyContent: 'center',
 							})}
+							onClick={(event) => event.stopPropagation()}
 						>
 							<IconButton
 								onPress={toggleChecked}
@@ -134,6 +154,10 @@ export const DeliveryAndTimingInfoPreview = ({
 	channel,
 	deliveryTiming,
 }:DeliveryAndTimingInfoPreviewProps) => {
+	const selectedValues = [channel, deliveryTiming].filter(
+		(value): value is string => Boolean(value),
+	);
+
 	return (
 		<div
 			css={{
@@ -144,20 +168,18 @@ export const DeliveryAndTimingInfoPreview = ({
 		>
 			<Typography variant="bodyBoldMd">Send info</Typography>
 
-			<ButtonGroup size="lg">
-				<Button
-					key={channel}
-					variant="tertiary"
-				>
-					{deliveryTiming}
-				</Button>
-				<Button
-					key={deliveryTiming}
-					variant="tertiary"
-				>
-					{channel}
-				</Button>
-			</ButtonGroup>
+			{selectedValues.length > 0 ? (
+				<ButtonGroup size="lg">
+					{selectedValues.map((value) => {
+						const iconValue=(value === 'Immediate send') ? 'bolt' : 'mail';
+						return(<Button key={value} variant="tertiary" disabled cssOverrides={styles.deliveryIcon}>
+							<Icon size="md" symbol={iconValue} alt="send info" />
+							{value}
+						</Button>)
+				}
+				)}
+				</ButtonGroup>
+			) : <div></div>}
 		</div>
 	);
 };

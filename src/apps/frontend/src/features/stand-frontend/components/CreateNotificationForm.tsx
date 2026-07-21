@@ -9,6 +9,10 @@ import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 interface CreateNotificationFormProps {
 	selectedSegments: string[];
 	onSelectedSegmentsChange: (selected: string[]) => void;
+	selectedChannel?: string;
+	onSelectedChannelChange: (channel?: string) => void;
+	selectedDeliveryTiming?: string;
+	onSelectedDeliveryTimingChange: (deliveryTiming?: string) => void;
 }
 
 /**
@@ -17,6 +21,10 @@ interface CreateNotificationFormProps {
 export const CreateNotificationForm = ({
 	selectedSegments,
 	onSelectedSegmentsChange,
+	selectedChannel,
+	onSelectedChannelChange,
+	selectedDeliveryTiming,
+	onSelectedDeliveryTimingChange,
 }: CreateNotificationFormProps) => {
 	return (
 		<>
@@ -35,7 +43,10 @@ export const CreateNotificationForm = ({
 					label="Article"
 					description="Copy and paste a Guardian URL below"
 				/>
-				<ChannelSelector />
+				<ChannelSelector
+					selectedChannel={selectedChannel}
+					onChange={onSelectedChannelChange}
+				/>
 				<Select
 					label="Kicker"
 					description="Choose the kicker for the email newsletter"
@@ -58,7 +69,10 @@ export const CreateNotificationForm = ({
 					selected={selectedSegments}
 					onChange={onSelectedSegmentsChange}
 				/>
-				<DeliveryAndTimingSelector />
+				<DeliveryAndTimingSelector
+					selectedDeliveryTiming={selectedDeliveryTiming}
+					onChange={onSelectedDeliveryTimingChange}
+				/>
 			</div>
 		</>
 	);
