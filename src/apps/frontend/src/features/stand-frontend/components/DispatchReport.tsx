@@ -103,7 +103,7 @@ export const DispatchReport = () => {
 									keyName="Audience"
 									value={(notification.parameters.audienceSegments ?? [])
 										.map((segment) => audienceSegmentNameMap[segment])
-										.join(", ")}
+										.join(', ')}
 								/>
 								<ParameterDisplay
 									keyName="Delivery"

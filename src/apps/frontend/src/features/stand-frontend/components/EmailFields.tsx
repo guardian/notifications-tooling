@@ -3,9 +3,7 @@ import { Radio, RadioGroup } from '@guardian/stand/RadioGroup';
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
 import { NotificationContext } from '../NotificationContext';
-import type {
-	AudienceSegment,
-	EmailDeliveryOption} from '../types';
+import type { AudienceSegment, EmailDeliveryOption } from '../types';
 import {
 	audienceSegmentNameMap,
 	emailDeliveryOptionNameMap,
@@ -128,7 +126,7 @@ export const EmailFields = () => {
 			>
 				{Object.entries(emailDeliveryOptionNameMap).map(
 					([deliveryOption, { name }]) => (
-						<Radio key={deliveryOption} value={deliveryOption} >
+						<Radio key={deliveryOption} value={deliveryOption}>
 							{name}
 						</Radio>
 					),

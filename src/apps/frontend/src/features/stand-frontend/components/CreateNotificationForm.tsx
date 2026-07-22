@@ -6,7 +6,6 @@ import { EmailFields } from './EmailFields';
 import { SendButton } from './SendButton';
 
 export const CreateNotificationForm = () => {
-
 	return (
 		<>
 			<Typography variant="heading2Xl" element="h2">
