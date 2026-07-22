@@ -46,8 +46,13 @@ export const channelConstraintsSchema = {
 				},
 				compose: {
 					type: 'object',
-					required: ['maxItems'],
+					required: ['minItems', 'maxItems'],
 					properties: {
+						minItems: {
+							type: 'integer',
+							description:
+								'The minimum number of content items a plan must compose.',
+						},
 						maxItems: {
 							type: 'integer',
 							description:
@@ -58,11 +63,12 @@ export const channelConstraintsSchema = {
 				},
 				audience: {
 					type: 'object',
-					required: ['maxTopics'],
+					required: ['maxSegments'],
 					properties: {
-						maxTopics: {
+						maxSegments: {
 							type: 'integer',
-							description: 'The maximum number of topics a push may target.',
+							description:
+								'The maximum number of audience segments a push may target.',
 						},
 					},
 					example: pushConstraints.audience,
@@ -71,7 +77,7 @@ export const channelConstraintsSchema = {
 		},
 		[NotificationChannel.Newsletter]: {
 			type: 'object',
-			required: ['content', 'compose'],
+			required: ['content', 'compose', 'audience'],
 			properties: {
 				content: {
 					type: 'object',
@@ -84,16 +90,33 @@ export const channelConstraintsSchema = {
 				},
 				compose: {
 					type: 'object',
-					required: ['layouts', 'subject'],
+					required: ['minItems', 'subject'],
 					properties: {
-						layouts: {
-							type: 'array',
-							items: { type: 'string' },
-							description: 'The layouts a newsletter plan may compose into.',
+						minItems: {
+							type: 'integer',
+							description:
+								'The minimum number of content items a newsletter plan must compose.',
 						},
 						subject: maxLengthSchema,
 					},
 					example: newsletterConstraints.compose,
+				},
+				audience: {
+					type: 'object',
+					required: ['maxSegments', 'maxTestRecipients'],
+					properties: {
+						maxSegments: {
+							type: 'integer',
+							description:
+								'The maximum number of audience segments a newsletter may target.',
+						},
+						maxTestRecipients: {
+							type: 'integer',
+							description:
+								'The maximum number of ad-hoc test email recipients a newsletter may target.',
+						},
+					},
+					example: newsletterConstraints.audience,
 				},
 			},
 		},

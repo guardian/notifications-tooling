@@ -1,5 +1,7 @@
 import {
-	MAX_AUDIENCE_SEGMENTS,
+	MAX_APP_PUSH_SEGMENTS,
+	MAX_NEWSLETTER_SEGMENTS,
+	MAX_TEST_EMAIL_RECIPIENTS,
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
@@ -54,8 +56,9 @@ describe('GET /v1/channels/constraints', () => {
 		expect(push.content).toEqual(
 			notificationChannelContentLimits[NotificationChannel.AppPushNotification],
 		);
+		expect(push.compose.minItems).toBe(1);
 		expect(push.compose.maxItems).toBe(1);
-		expect(push.audience.maxTopics).toBe(MAX_AUDIENCE_SEGMENTS);
+		expect(push.audience.maxSegments).toBe(MAX_APP_PUSH_SEGMENTS);
 	});
 
 	it('exposes the newsletter content limits and subject limit', async () => {
@@ -70,6 +73,11 @@ describe('GET /v1/channels/constraints', () => {
 		expect(newsletter.compose.subject.maxLength).toBe(
 			notificationChannelContentLimits[NotificationChannel.Newsletter].title
 				.maxLength,
+		);
+		expect(newsletter.compose.minItems).toBe(1);
+		expect(newsletter.audience.maxSegments).toBe(MAX_NEWSLETTER_SEGMENTS);
+		expect(newsletter.audience.maxTestRecipients).toBe(
+			MAX_TEST_EMAIL_RECIPIENTS,
 		);
 	});
 });
