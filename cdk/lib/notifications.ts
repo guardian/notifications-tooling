@@ -6,8 +6,9 @@ import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/co
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+
 export class DispatchStack extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps, app: string) {
 		super(scope, id, props);
@@ -55,7 +56,7 @@ export class DispatchStack extends GuStack {
 
 		const pandaConfigAndKeyPolicyStatement = new PolicyStatement({
 			effect: Effect.ALLOW,
-			actions: ["s3:GetObject"],
+			actions: ['s3:GetObject'],
 			resources: [`arn:aws:s3:::pan-domain-auth-settings/*`],
 		});
 
