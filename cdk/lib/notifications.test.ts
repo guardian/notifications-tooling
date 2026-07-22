@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'bun:test';
 import { App } from 'aws-cdk-lib';
+import { describe, expect, it } from 'bun:test';
 import { Template } from 'aws-cdk-lib/assertions';
 import { DispatchStack } from './notifications';
 
