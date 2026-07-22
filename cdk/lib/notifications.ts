@@ -57,7 +57,9 @@ export class DispatchStack extends GuStack {
 		const pandaConfigAndKeyPolicyStatement = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
-			resources: [`arn:aws:s3:::pan-domain-auth-settings/*`],
+			resources: [
+				`arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public`,
+			],
 		});
 
 		if (!isProd) {
