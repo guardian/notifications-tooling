@@ -53,8 +53,23 @@ export const dispatchNotification = async (
 		return;
 	}
 
+	if (request.options.scheduledFor) {
+		throw new Error('Scheduled delivery is not implemented.');
+	}
+
+	if (Object.keys(request.channels).length !== 1) {
+		throw new Error('Only one notification channel can be sent at a time.');
+	}
+
 	const newsletterPlan = request.channels[NotificationChannel.Newsletter];
 	if (newsletterPlan) {
+		if (newsletterPlan.audience.type !== 'segment') {
+			throw new Error('Sending test emails is not implemented.');
+		}
+		if (newsletterPlan.compose.items.length !== 1) {
+			throw new Error('Only one newsletter item can be rendered currently.');
+		}
+
 		const item = requireContentItem(
 			request,
 			newsletterPlan.compose.items[0]!,

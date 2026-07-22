@@ -2,6 +2,7 @@ import {
 	appPushNotificationSegmentIds,
 	MAX_APP_PUSH_SEGMENTS,
 	MAX_NEWSLETTER_SEGMENTS,
+	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegmentIds,
 	NotificationChannel,
 	notificationChannelContentLimits,
@@ -64,6 +65,27 @@ const newsletterRequest = (overrides: Record<string, unknown> = {}) => ({
 	sender: 'notifications-tooling-spa/v1',
 	content: { items: { lead: newsletterItem() } },
 	channels: { [NotificationChannel.Newsletter]: newsletterPlan() },
+	...overrides,
+});
+
+const combinedRequest = (overrides: Record<string, unknown> = {}) => ({
+	idempotencyKey: 'combined-2026-07-08',
+	category: 'editorial',
+	sender: 'notifications-tooling-spa/v1',
+	content: {
+		items: {
+			pushLead: pushItem(),
+			newsLead: newsletterItem(),
+		},
+	},
+	channels: {
+		[NotificationChannel.AppPushNotification]: pushPlan({
+			compose: { use: 'pushLead' },
+		}),
+		[NotificationChannel.Newsletter]: newsletterPlan({
+			compose: { items: ['newsLead'], subject: 'Briefing' },
+		}),
+	},
 	...overrides,
 });
 
@@ -179,6 +201,55 @@ describe('notificationSendRequestSchema', () => {
 				options: { dryRun: false, scheduledFor: null },
 			});
 		});
+
+		it('accepts a combined newsletter + app-push request', () => {
+			const data = expectValid(combinedRequest());
+
+			// One request fans out to both channels, reusing the shared
+			// `content.items` library by reference from each plan's `compose`.
+			expect(data as unknown).toEqual({
+				idempotencyKey: 'combined-2026-07-08',
+				category: 'editorial',
+				priority: 'standard',
+				content: {
+					items: {
+						pushLead: {
+							type: 'app-push',
+							title: 'Ukraine summit begins',
+							body: 'World leaders gather in Geneva as talks open.',
+							link: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
+						},
+						newsLead: {
+							type: 'newsletter',
+							title: 'Your morning briefing',
+							body: 'Today the world woke up to a historic summit.',
+							link: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
+						},
+					},
+				},
+				channels: {
+					'app-push': {
+						audience: {
+							type: 'segment',
+							items: ['breaking-news-uk'],
+						},
+						compose: { use: 'pushLead' },
+					},
+					newsletter: {
+						audience: {
+							type: 'segment',
+							items: ['UK'],
+						},
+						compose: {
+							items: ['newsLead'],
+							subject: 'Briefing',
+						},
+					},
+				},
+				sender: 'notifications-tooling-spa/v1',
+				options: { dryRun: false, scheduledFor: null },
+			});
+		});
 	});
 
 	describe('idempotencyKey', () => {
@@ -249,14 +320,16 @@ describe('notificationSendRequestSchema', () => {
 			});
 		});
 
-		it('rejects scheduled delivery', () => {
-			expect(
-				pathsOf(
-					pushRequest({
-						options: { dryRun: true, scheduledFor: '2026-07-08T09:00:00Z' },
-					}),
-				),
-			).toContain('options/scheduledFor');
+		it('accepts a dryRun flag and an ISO scheduledFor', () => {
+			const data = expectValid(
+				pushRequest({
+					options: { dryRun: true, scheduledFor: '2026-07-08T09:00:00Z' },
+				}),
+			);
+			expect(data.options).toEqual({
+				dryRun: true,
+				scheduledFor: '2026-07-08T09:00:00Z',
+			});
 		});
 
 		it('allows scheduledFor to be null and defaults dryRun', () => {
@@ -584,19 +657,71 @@ describe('notificationSendRequestSchema', () => {
 	});
 
 	describe('newsletter test email audience', () => {
-		it('rejects test email recipients', () => {
+		it('accepts a list of test email recipients', () => {
+			expectValid(
+				newsletterRequestWithPlan(
+					newsletterPlan({
+						audience: {
+							type: 'email',
+							items: ['newsletters.test@theguardian.com'],
+						},
+					}),
+				),
+			);
+		});
+
+		it('rejects an invalid email address', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: { type: 'email', items: ['not-an-email'] },
+						}),
+					),
+				),
+			).toContain('channels/newsletter/audience/items/0');
+		});
+
+		it('requires at least one recipient', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'email', items: [] } }),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+
+		it(`rejects more than ${MAX_TEST_EMAIL_RECIPIENTS} recipients`, () => {
+			const emails = Array.from(
+				{ length: MAX_TEST_EMAIL_RECIPIENTS + 1 },
+				(_, index) => `test-${index}@theguardian.com`,
+			);
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'email', items: emails } }),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+
+		it('rejects duplicate recipients', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
 							audience: {
 								type: 'email',
-								items: ['newsletters.test@theguardian.com'],
+								items: [
+									'newsletters.test@theguardian.com',
+									'newsletters.test@theguardian.com',
+								],
 							},
 						}),
 					),
 				),
-			).toContain('channels/newsletter/audience/type');
+			).toContain('channels/newsletter/audience/items');
 		});
 	});
 
@@ -712,21 +837,6 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/newsletter/compose/items');
 		});
 
-		it('newsletter rejects multiple items', () => {
-			expect(
-				pathsOf(
-					newsletterRequestWithPlan(
-						newsletterPlan({
-							compose: {
-								items: ['lead', 'secondary'],
-								subject: 'Briefing',
-							},
-						}),
-					),
-				),
-			).toContain('channels/newsletter/compose/items');
-		});
-
 		it('newsletter requires a subject', () => {
 			expect(
 				pathsOf(
@@ -813,19 +923,6 @@ describe('notificationSendRequestSchema', () => {
 	describe('channels', () => {
 		it('requires at least one channel', () => {
 			expect(pathsOf(pushRequest({ channels: {} }))).toContain('channels');
-		});
-
-		it('rejects multiple channels', () => {
-			expect(
-				pathsOf(
-					pushRequest({
-						channels: {
-							[NotificationChannel.AppPushNotification]: pushPlan(),
-							[NotificationChannel.Newsletter]: newsletterPlan(),
-						},
-					}),
-				),
-			).toContain('channels');
 		});
 	});
 

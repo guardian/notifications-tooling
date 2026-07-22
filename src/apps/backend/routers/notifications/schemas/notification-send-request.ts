@@ -2,6 +2,7 @@ import {
 	appPushNotificationSegmentIds,
 	MAX_APP_PUSH_SEGMENTS,
 	MAX_NEWSLETTER_SEGMENTS,
+	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegmentIds,
 	NotificationChannel,
 	notificationChannelContentLimits,
@@ -145,6 +146,26 @@ const newsletterSegmentAudience = segmentAudience(
 	MAX_NEWSLETTER_SEGMENTS,
 );
 
+/** Ad-hoc test recipients addressed by email, bypassing segments. */
+const testEmailAudience = z.strictObject({
+	type: z.literal('email'),
+	items: z
+		.array(z.email())
+		.min(1)
+		.max(MAX_TEST_EMAIL_RECIPIENTS)
+		.refine(hasUniqueItems, { message: 'email addresses must be unique.' })
+		.meta({
+			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send a test to.`,
+			example: ['newsletters.test@theguardian.com'],
+		}),
+});
+
+/** Newsletter audiences may target segments or an ad-hoc list of test emails. */
+const newsletterAudience = z.discriminatedUnion('type', [
+	newsletterSegmentAudience,
+	testEmailAudience,
+]);
+
 /** Push takes a single content item. */
 const appPushCompose = z.strictObject({
 	use: z.string().min(1).meta({
@@ -154,15 +175,15 @@ const appPushCompose = z.strictObject({
 	}),
 });
 
-/** Newsletter rendering currently supports one content item. */
+/** Newsletter assembles many content items into a digest. */
 const newsletterCompose = z.strictObject({
 	items: z
 		.array(z.string().min(1))
 		.min(1)
-		.max(1)
 		.refine(hasUniqueItems, { message: 'compose item ids must be unique.' })
 		.meta({
-			description: 'The content item id (from `content.items`) to render.',
+			description:
+				'Ordered ids of the content items (from `content.items`) to include.',
 			example: ['lead-story'],
 		}),
 	subject: z.string().min(1).max(newsletterLimits.title.maxLength).meta({
@@ -173,7 +194,7 @@ const newsletterCompose = z.strictObject({
 
 /** A newsletter delivery plan: who to target and which items to assemble. */
 const newsletterPlan = z.strictObject({
-	audience: newsletterSegmentAudience,
+	audience: newsletterAudience,
 	compose: newsletterCompose,
 });
 
@@ -184,19 +205,20 @@ const appPushPlan = z.strictObject({
 });
 
 /**
- * Delivery plans keyed by channel. Exactly one channel must be present.
+ * Delivery plans keyed by channel, so a channel can appear at most once. At
+ * least one channel must be present.
  */
 const channelsSchema = z
 	.strictObject({
 		[NotificationChannel.Newsletter]: newsletterPlan.optional(),
 		[NotificationChannel.AppPushNotification]: appPushPlan.optional(),
 	})
-	.refine((channels) => Object.keys(channels).length === 1, {
-		message: 'Exactly one channel must be provided.',
+	.refine((channels) => Object.keys(channels).length > 0, {
+		message: 'At least one channel must be provided.',
 	})
 	.meta({
 		description:
-			'Delivery plans keyed by channel. Provide exactly one channel.',
+			'Delivery plans keyed by channel. A channel may appear at most once; provide at least one.',
 	});
 
 /**
@@ -232,8 +254,9 @@ export const notificationSendRequestSchema = z
 						'When true, the request is validated but nothing is dispatched.',
 					example: false,
 				}),
-				scheduledFor: z.null().default(null).meta({
-					description: 'Must be null. Scheduled delivery is not supported.',
+				scheduledFor: z.iso.datetime().nullable().default(null).meta({
+					description:
+						'ISO-8601 timestamp to send at, or null to send immediately.',
 					example: null,
 				}),
 			})
