@@ -3,7 +3,7 @@ import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 
 export const topBarTheme: TopBarTheme = {
-	backgroundColor: baseColors.red[200],
+	backgroundColor: baseColors.magenta[200],
 	borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 	borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 	borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,

@@ -7,11 +7,11 @@ import {
 	semanticSizing,
 	semanticSpacing,
 } from '@guardian/stand';
+import { Button } from '@guardian/stand/Button';
+import { ButtonGroup } from '@guardian/stand/ButtonGroup';
 import { Icon } from '@guardian/stand/Icon';
 import { IconButton } from '@guardian/stand/IconButton';
 import { Typography } from '@guardian/stand/Typography';
-import { ButtonGroup } from '@guardian/stand/ButtonGroup';
-import { Button } from '@guardian/stand/Button';
 
 interface DeliveryAndTimingInfoPreviewProps {
 	channel?: string;
@@ -34,11 +34,12 @@ export const styles = {
 			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 			width: '450px',
 			height: '74px',
-			backgroundColor: baseColors.neutral['900'],
 			display: 'flex',
 			gap: semanticSpacing.stackXxs,
 			flexDirection: 'column',
-			backgroundColor: isChecked ? baseColors.magenta['900'] : 'transparent',
+			backgroundColor: isChecked
+				? baseColors.magenta['900']
+				: baseColors.neutral['900'],
 		}),
 	iconRow: css({
 		display: 'flex',
@@ -90,7 +91,8 @@ export const DeliveryAndTimingSelector = ({
 						color: semanticColors.text.weak,
 					}}
 				>
-					Choose whether the app alert is sent immediately or scheduled for a later
+					Choose whether the app alert is sent immediately or scheduled for a
+					later
 				</Typography>
 				<div
 					css={styles.newsletterTile(isChecked)}
@@ -153,7 +155,7 @@ export const DeliveryAndTimingSelector = ({
 export const DeliveryAndTimingInfoPreview = ({
 	channel,
 	deliveryTiming,
-}:DeliveryAndTimingInfoPreviewProps) => {
+}: DeliveryAndTimingInfoPreviewProps) => {
 	const selectedValues = [channel, deliveryTiming].filter(
 		(value): value is string => Boolean(value),
 	);
@@ -171,16 +173,23 @@ export const DeliveryAndTimingInfoPreview = ({
 			{selectedValues.length > 0 ? (
 				<ButtonGroup size="lg">
 					{selectedValues.map((value) => {
-						const iconValue=(value === 'Immediate send') ? 'bolt' : 'mail';
-						return(<Button key={value} variant="tertiary" disabled cssOverrides={styles.deliveryIcon}>
-							<Icon size="md" symbol={iconValue} alt="send info" />
-							{value}
-						</Button>)
-				}
-				)}
+						const iconValue = value === 'Immediate send' ? 'bolt' : 'mail';
+						return (
+							<Button
+								key={value}
+								variant="tertiary"
+								isDisabled={true}
+								cssOverrides={styles.deliveryIcon}
+							>
+								<Icon size="md" symbol={iconValue} alt="send info" />
+								{value}
+							</Button>
+						);
+					})}
 				</ButtonGroup>
-			) : <div></div>}
+			) : (
+				<div></div>
+			)}
 		</div>
 	);
 };
-

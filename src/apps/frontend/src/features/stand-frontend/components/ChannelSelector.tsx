@@ -17,19 +17,21 @@ interface ChannelSelectorProps {
 }
 
 export const styles = {
-	newsletterTile:(isChecked: boolean)=> css({
-		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		width: '450px',
-		height: '74px',
-		backgroundColor: baseColors.neutral['900'],
-		display: 'flex',
-		gap: semanticSpacing.stackXxs,
-		flexDirection: 'column',
-		backgroundColor: isChecked ? baseColors.magenta['900'] : 'transparent',
-	}),
+	newsletterTile: (isChecked: boolean) =>
+		css({
+			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			width: '450px',
+			height: '74px',
+			display: 'flex',
+			gap: semanticSpacing.stackXxs,
+			flexDirection: 'column',
+			backgroundColor: isChecked
+				? baseColors.magenta['900']
+				: baseColors.neutral['900'],
+		}),
 	iconRow: css({
 		display: 'flex',
 		flexDirection: 'row',
