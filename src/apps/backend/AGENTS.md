@@ -29,18 +29,35 @@ follow-up work, do it or flag it explicitly.
 Use **clear, specific, self-documenting** names — never generic or loosely
 defined ones.
 
-- Prefer `knownPushTopics`, `notificationChannelContentLimits`,
-  `notificationPushRequestSchema` over `data`, `items`, `config`, `schema`,
+- Prefer `appPushNotificationSegments`, `notificationChannelContentLimits`,
+  `notificationSendRequestSchema` over `data`, `items`, `config`, `schema`,
   `result`, `temp`, `obj`, `value`.
 - A reader should understand what a variable holds from its name alone, without
   tracing where it came from.
-- Match the domain vocabulary already in the codebase (channels, topics,
-  campaigns, audiences, compose, plan) rather than inventing synonyms.
+- Match the domain vocabulary already in the codebase (channels, segments,
+  audiences, compose, plan) rather than inventing synonyms.
 - Follow the repo's `@guardian/eslint-config` conventions: enums use PascalCase
   for the enum name and its members (e.g. `NotificationChannel.AppPushNotification`);
-  module-level constants use camelCase (e.g. `pushTopics`). Do **not** use
+  module-level constants use camelCase (e.g. `newsletterSegments`). Do **not** use
   UPPER_SNAKE_CASE for consts/enums (except pre-existing exceptions like
-  `MAX_PUSH_TOPICS`).
+  `MAX_AUDIENCE_SEGMENTS`).
+
+## Comments
+
+Comment sparingly — prefer self-documenting code (see "Naming") over narration.
+Only add a comment when it carries information the code cannot:
+
+- Context a reader can't infer locally: external services and their quirks
+  (Braze, mobile-n10n, FCM/APNS), why a limit or value exists, links to specs
+  (e.g. RFC 6901), or a non-obvious constraint (e.g. idempotency not yet
+  persisted).
+- A deliberate rule that isn't obvious from the code (e.g. the 400 vs 422
+  split, Express's 4-arg error-handler signature).
+
+Do **not** add comments that restate the code, label obvious sections
+(`// --- Routes ---`), or duplicate a self-explanatory name or type. Keep the
+comments you do write short. API-facing descriptions belong in Zod `.meta(...)`
+/ OpenAPI, not in code comments.
 
 ## OpenAPI docs
 
@@ -71,7 +88,7 @@ When you add or change an endpoint:
 - Give **every** response status its own named response-payload schema (success
   and error alike) and `$ref` it — do not inline response bodies in the path
   file.
-- Add examples that reflect real, valid values (e.g. real push topics from
+- Add examples that reflect real, valid values (e.g. real segment ids from
   `@config`), not placeholders.
 
 ## Quick commands

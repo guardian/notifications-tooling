@@ -1,9 +1,10 @@
 import {
-	MAX_PUSH_TOPICS,
-	newsletterCampaigns,
+	appPushNotificationSegmentIds,
+	MAX_AUDIENCE_SEGMENTS,
+	MAX_TEST_EMAIL_RECIPIENTS,
+	newsletterSegmentIds,
 	NotificationChannel,
 	notificationChannelContentLimits,
-	pushTopics,
 } from '@config';
 import { isGuardianUrl } from '@utils';
 import { z } from 'zod';
@@ -13,10 +14,10 @@ const pushLimits =
 const newsletterLimits =
 	notificationChannelContentLimits[NotificationChannel.Newsletter];
 
-/**
- * A Guardian news article link. Provided as a simple URL string, so we check it
- * is a real URL *and* that it points at a Guardian domain.
- */
+/** Every value in the list must be distinct. */
+const hasUniqueItems = (items: unknown[]) =>
+	new Set(items).size === items.length;
+
 const guardianArticleLink = z
 	.url()
 	.refine(isGuardianUrl, {
@@ -30,9 +31,8 @@ const guardianArticleLink = z
 			'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
 	});
 
-/** Media is limited to images for now. */
 const mediaSchema = z
-	.object({
+	.strictObject({
 		type: z.literal('image'),
 		imageUrl: z.url().meta({
 			description: 'Full-size image displayed alongside the notification.',
@@ -45,11 +45,8 @@ const mediaSchema = z
 	})
 	.meta({ description: 'Optional media attachment (images only for now).' });
 
-/**
- * A content item destined for the `app-push-notification` channel. Delivered
- * via FCM/APNS, so `title` and `body` use the stricter push limits.
- */
-const appPushContentItem = z.object({
+/** A content item for the `app-push` channel (stricter limits). */
+const appPushContentItem = z.strictObject({
 	type: z.literal(NotificationChannel.AppPushNotification),
 	title: z
 		.string()
@@ -71,11 +68,8 @@ const appPushContentItem = z.object({
 	media: mediaSchema.optional(),
 });
 
-/**
- * A content item destined for the `newsletter` channel. Delivered via Braze, so
- * `title` and `body` use the more generous newsletter limits.
- */
-const newsletterContentItem = z.object({
+/** A content item for the `newsletter` channel (more generous limits). */
+const newsletterContentItem = z.strictObject({
 	type: z.literal(NotificationChannel.Newsletter),
 	title: z
 		.string()
@@ -98,16 +92,13 @@ const newsletterContentItem = z.object({
 	media: mediaSchema.optional(),
 });
 
-/**
- * A content item. `type` ties the item to the channel it is authored for, which
- * lets us apply the correct per-channel limits at validation time.
- */
+/** `type` ties each item to its channel so per-channel limits apply. */
 const contentItem = z.discriminatedUnion('type', [
 	appPushContentItem,
 	newsletterContentItem,
 ]);
 
-const contentSchema = z.object({
+const contentSchema = z.strictObject({
 	items: z
 		.record(z.string().min(1), contentItem)
 		.refine((items) => Object.keys(items).length > 0, {
@@ -119,57 +110,53 @@ const contentSchema = z.object({
 		}),
 });
 
-/** Newsletter audiences are addressed by a known Braze campaign. */
-const campaignAudience = z.object({
-	type: z.literal('campaign'),
-	campaigns: z
-		.array(z.object({ id: z.enum(newsletterCampaigns) }))
-		.min(1)
-		.meta({
-			description: 'One or more known Braze campaigns to deliver to.',
-			example: [{ id: newsletterCampaigns[0] }],
-		}),
-});
-
-const knownPushTopics = new Set(
-	pushTopics.map((topic) => `${topic.type}:${topic.name}`),
-);
-
-/** A single, known mobile-n10n topic. */
-const pushTopic = z
-	.object({
-		type: z
-			.string()
+/**
+ * A channel-agnostic audience addressed by known segment ids; each channel
+ * accepts only its own. The broker resolves segments to the downstream Braze
+ * campaign / mobile-n10n topic, keeping those internals out of the payload.
+ */
+const segmentAudience = (
+	segmentIds:
+		typeof newsletterSegmentIds | typeof appPushNotificationSegmentIds,
+) =>
+	z.strictObject({
+		type: z.literal('segment'),
+		items: z
+			.array(z.enum(segmentIds))
 			.min(1)
-			.meta({ description: 'Topic type.', example: 'breaking' }),
-		name: z.string().min(1).meta({ description: 'Topic name.', example: 'uk' }),
-	})
-	.refine((topic) => knownPushTopics.has(`${topic.type}:${topic.name}`), {
-		message: 'unknown push topic.',
-	})
-	.meta({
-		description: 'A single, known mobile-n10n topic.',
-		example: { type: 'breaking', name: 'uk' },
+			.max(MAX_AUDIENCE_SEGMENTS)
+			.refine(hasUniqueItems, { message: 'segment ids must be unique.' })
+			.meta({
+				description: `Up to ${MAX_AUDIENCE_SEGMENTS} known audience segment ids to deliver to. The valid set is served by GET /v1/channels/audiences.`,
+				example: [segmentIds[0]],
+			}),
 	});
 
-/** Push audiences are addressed by a known mobile-n10n topic. */
-const topicAudience = z.object({
-	type: z.literal('topic'),
-	topics: z
-		.array(pushTopic)
+const appPushSegmentAudience = segmentAudience(appPushNotificationSegmentIds);
+const newsletterSegmentAudience = segmentAudience(newsletterSegmentIds);
+
+/** Ad-hoc test recipients addressed by email, bypassing segments. */
+const testEmailAudience = z.strictObject({
+	type: z.literal('email'),
+	items: z
+		.array(z.email())
 		.min(1)
-		.max(MAX_PUSH_TOPICS)
+		.max(MAX_TEST_EMAIL_RECIPIENTS)
+		.refine(hasUniqueItems, { message: 'email addresses must be unique.' })
 		.meta({
-			description: `Up to ${MAX_PUSH_TOPICS} mobile-n10n topics to target.`,
-			example: [
-				{ type: 'breaking', name: 'au' },
-				{ type: 'breaking', name: 'uk-sport' },
-			],
+			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send a test to.`,
+			example: ['newsletters.test@theguardian.com'],
 		}),
 });
 
+/** Newsletter audiences may target segments or an ad-hoc list of test emails. */
+const newsletterAudience = z.discriminatedUnion('type', [
+	newsletterSegmentAudience,
+	testEmailAudience,
+]);
+
 /** Push takes a single content item. */
-const appPushCompose = z.object({
+const appPushCompose = z.strictObject({
 	use: z.string().min(1).meta({
 		description:
 			'The id of the single content item (from `content.items`) to send.',
@@ -178,10 +165,11 @@ const appPushCompose = z.object({
 });
 
 /** Newsletter assembles many content items into a digest. */
-const newsletterCompose = z.object({
+const newsletterCompose = z.strictObject({
 	items: z
 		.array(z.string().min(1))
 		.min(1)
+		.refine(hasUniqueItems, { message: 'compose item ids must be unique.' })
 		.meta({
 			description:
 				'Ordered ids of the content items (from `content.items`) to include.',
@@ -193,32 +181,41 @@ const newsletterCompose = z.object({
 	}),
 });
 
-/**
- * A delivery plan. `channel` discriminates the plan and, in doing so, pins the
- * audience and compose shapes valid for that channel (push -> topic + single
- * item, newsletter -> campaign + digest).
- */
-const planSchema = z.discriminatedUnion('channel', [
-	z.object({
-		channel: z.literal(NotificationChannel.AppPushNotification),
-		audience: topicAudience,
-		compose: appPushCompose,
-	}),
-	z.object({
-		channel: z.literal(NotificationChannel.Newsletter),
-		audience: campaignAudience,
-		compose: newsletterCompose,
-	}),
-]);
+/** A newsletter delivery plan: who to target and which items to assemble. */
+const newsletterPlan = z.strictObject({
+	audience: newsletterAudience,
+	compose: newsletterCompose,
+});
+
+/** An app-push delivery plan: who to target and the single item to send. */
+const appPushPlan = z.strictObject({
+	audience: appPushSegmentAudience,
+	compose: appPushCompose,
+});
 
 /**
- * The `POST /v1/notifications` request body.
- *
- * NOTE: `idempotencyKey` is required but, without a persistence layer, it is not
- * yet stored or checked against previously sent notifications.
+ * Delivery plans keyed by channel, so a channel can appear at most once. At
+ * least one channel must be present.
  */
-export const notificationPushRequestSchema = z
-	.object({
+const channelsSchema = z
+	.strictObject({
+		[NotificationChannel.Newsletter]: newsletterPlan.optional(),
+		[NotificationChannel.AppPushNotification]: appPushPlan.optional(),
+	})
+	.refine((channels) => Object.keys(channels).length > 0, {
+		message: 'At least one channel must be provided.',
+	})
+	.meta({
+		description:
+			'Delivery plans keyed by channel. A channel may appear at most once; provide at least one.',
+	});
+
+/**
+ * The `POST /v1/notifications` request body. NOTE: `idempotencyKey` is required
+ * but, without a persistence layer, not yet stored or deduplicated against.
+ */
+export const notificationSendRequestSchema = z
+	.strictObject({
 		idempotencyKey: z.string().min(1).meta({
 			description:
 				'Client-generated unique key so retries are not delivered twice.',
@@ -234,16 +231,13 @@ export const notificationPushRequestSchema = z
 			example: 'high',
 		}),
 		content: contentSchema,
-		channels: z.array(planSchema).min(1).meta({
-			description:
-				'One delivery plan per channel. Each plan pins the audience and compose shape valid for its channel.',
-		}),
+		channels: channelsSchema,
 		sender: z.string().min(1).meta({
 			description: 'Identifier of the team or system sending the notification.',
 			example: 'editorial-breaking-news',
 		}),
 		options: z
-			.object({
+			.strictObject({
 				dryRun: z.boolean().default(false).meta({
 					description:
 						'When true, the request is validated but nothing is dispatched.',
@@ -259,35 +253,52 @@ export const notificationPushRequestSchema = z
 	})
 	.superRefine((value, ctx) => {
 		const { items } = value.content;
+		const { channels } = value;
 
-		// The only genuinely cross-field rule: a plan's `compose` may only
-		// reference content items that exist and match the plan's channel.
-		for (const [planIndex, plan] of value.channels.entries()) {
-			const refs =
-				plan.channel === NotificationChannel.AppPushNotification
-					? [{ key: plan.compose.use, path: ['compose', 'use'] }]
-					: plan.compose.items.map((key, index) => ({
-							key,
-							path: ['compose', 'items', index],
-						}));
+		// Cross-field rule: `compose` may only reference existing content items
+		// whose type matches the channel it is composed into.
+		const composeRefs: Array<{
+			channel: NotificationChannel;
+			key: string;
+			path: PropertyKey[];
+		}> = [];
 
-			for (const { key, path } of refs) {
-				const item = items[key];
-				const issuePath = ['channels', planIndex, ...path];
+		const appPush = channels[NotificationChannel.AppPushNotification];
+		if (appPush) {
+			composeRefs.push({
+				channel: NotificationChannel.AppPushNotification,
+				key: appPush.compose.use,
+				path: ['compose', 'use'],
+			});
+		}
 
-				if (!item) {
-					ctx.addIssue({
-						code: 'custom',
-						path: issuePath,
-						message: `compose references content item '${key}' which is not defined in content.items.`,
-					});
-				} else if (item.type !== plan.channel) {
-					ctx.addIssue({
-						code: 'custom',
-						path: issuePath,
-						message: `content item '${key}' has type '${item.type}' but is composed into a '${plan.channel}' plan.`,
-					});
-				}
+		const newsletter = channels[NotificationChannel.Newsletter];
+		if (newsletter) {
+			newsletter.compose.items.forEach((key, index) => {
+				composeRefs.push({
+					channel: NotificationChannel.Newsletter,
+					key,
+					path: ['compose', 'items', index],
+				});
+			});
+		}
+
+		for (const { channel, key, path } of composeRefs) {
+			const item = items[key];
+			const issuePath = ['channels', channel, ...path];
+
+			if (!item) {
+				ctx.addIssue({
+					code: 'custom',
+					path: issuePath,
+					message: `compose references content item '${key}' which is not defined in content.items.`,
+				});
+			} else if (item.type !== channel) {
+				ctx.addIssue({
+					code: 'custom',
+					path: issuePath,
+					message: `content item '${key}' has type '${item.type}' but is composed into a '${channel}' plan.`,
+				});
 			}
 		}
 	})
@@ -307,24 +318,23 @@ export const notificationPushRequestSchema = z
 					},
 				},
 			},
-			channels: [
-				{
-					channel: NotificationChannel.Newsletter,
+			channels: {
+				[NotificationChannel.Newsletter]: {
 					audience: {
-						type: 'campaign',
-						campaigns: [{ id: newsletterCampaigns[0] }],
+						type: 'segment',
+						items: [newsletterSegmentIds[0]],
 					},
 					compose: {
 						items: ['lead-story'],
 						subject: 'Your morning briefing',
 					},
 				},
-			],
+			},
 			sender: 'editorial-newsletters',
 			options: { dryRun: false, scheduledFor: null },
 		},
 	});
 
-export type NotificationPushRequest = z.infer<
-	typeof notificationPushRequestSchema
+export type NotificationSendRequest = z.infer<
+	typeof notificationSendRequestSchema
 >;

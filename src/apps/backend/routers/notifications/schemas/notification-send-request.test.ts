@@ -1,12 +1,13 @@
+import { describe, expect, it } from 'bun:test';
 import {
-	MAX_PUSH_TOPICS,
-	newsletterCampaigns,
+	appPushNotificationSegmentIds,
+	MAX_AUDIENCE_SEGMENTS,
+	MAX_TEST_EMAIL_RECIPIENTS,
+	newsletterSegmentIds,
 	NotificationChannel,
 	notificationChannelContentLimits,
-	pushTopics,
 } from '@config';
-import { describe, expect, it } from 'bun:test';
-import { notificationPushRequestSchema } from './notification-push-request';
+import { notificationSendRequestSchema } from './notification-send-request';
 
 const pushLimits =
 	notificationChannelContentLimits[NotificationChannel.AppPushNotification];
@@ -37,15 +38,13 @@ const newsletterItem = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const pushPlan = (overrides: Record<string, unknown> = {}) => ({
-	channel: NotificationChannel.AppPushNotification,
-	audience: { type: 'topic', topics: [{ type: 'breaking', name: 'uk' }] },
+	audience: { type: 'segment', items: ['breaking-news-uk'] },
 	compose: { use: 'lead' },
 	...overrides,
 });
 
 const newsletterPlan = (overrides: Record<string, unknown> = {}) => ({
-	channel: NotificationChannel.Newsletter,
-	audience: { type: 'campaign', campaigns: [{ id: newsletterCampaigns[0] }] },
+	audience: { type: 'segment', items: ['morning-briefing'] },
 	compose: { items: ['lead'], subject: 'Your morning briefing' },
 	...overrides,
 });
@@ -55,7 +54,7 @@ const pushRequest = (overrides: Record<string, unknown> = {}) => ({
 	category: 'editorial',
 	sender: 'notifications-tooling-spa/v1',
 	content: { items: { lead: pushItem() } },
-	channels: [pushPlan()],
+	channels: { [NotificationChannel.AppPushNotification]: pushPlan() },
 	...overrides,
 });
 
@@ -64,7 +63,7 @@ const newsletterRequest = (overrides: Record<string, unknown> = {}) => ({
 	category: 'editorial',
 	sender: 'notifications-tooling-spa/v1',
 	content: { items: { lead: newsletterItem() } },
-	channels: [newsletterPlan()],
+	channels: { [NotificationChannel.Newsletter]: newsletterPlan() },
 	...overrides,
 });
 
@@ -78,10 +77,14 @@ const combinedRequest = (overrides: Record<string, unknown> = {}) => ({
 			newsLead: newsletterItem(),
 		},
 	},
-	channels: [
-		pushPlan({ compose: { use: 'pushLead' } }),
-		newsletterPlan({ compose: { items: ['newsLead'], subject: 'Briefing' } }),
-	],
+	channels: {
+		[NotificationChannel.AppPushNotification]: pushPlan({
+			compose: { use: 'pushLead' },
+		}),
+		[NotificationChannel.Newsletter]: newsletterPlan({
+			compose: { items: ['newsLead'], subject: 'Briefing' },
+		}),
+	},
 	...overrides,
 });
 
@@ -92,15 +95,19 @@ const newsletterRequestWithItem = (item: Record<string, unknown>) =>
 	newsletterRequest({ content: { items: { lead: item } } });
 
 const pushRequestWithPlan = (plan: Record<string, unknown>) =>
-	pushRequest({ channels: [plan] });
+	pushRequest({
+		channels: { [NotificationChannel.AppPushNotification]: plan },
+	});
 
 const newsletterRequestWithPlan = (plan: Record<string, unknown>) =>
-	newsletterRequest({ channels: [plan] });
+	newsletterRequest({
+		channels: { [NotificationChannel.Newsletter]: plan },
+	});
 
 // --- Assertion helpers ---
 
 const parse = (input: unknown) =>
-	notificationPushRequestSchema.safeParse(input);
+	notificationSendRequestSchema.safeParse(input);
 
 const expectValid = (input: unknown) => {
 	const result = parse(input);
@@ -125,7 +132,7 @@ const issuesOf = (input: unknown) => {
 const pathsOf = (input: unknown) =>
 	issuesOf(input).map((issue) => issue.path.join('/'));
 
-describe('notificationPushRequestSchema', () => {
+describe('notificationSendRequestSchema', () => {
 	describe('happy paths', () => {
 		it('accepts a newsletter push with a single content item', () => {
 			const data = expectValid(newsletterRequest());
@@ -146,25 +153,24 @@ describe('notificationPushRequestSchema', () => {
 						},
 					},
 				},
-				channels: [
-					{
-						channel: 'newsletter',
+				channels: {
+					newsletter: {
 						audience: {
-							type: 'campaign',
-							campaigns: [{ id: 'morning-briefing' }],
+							type: 'segment',
+							items: ['morning-briefing'],
 						},
 						compose: {
 							items: ['lead'],
 							subject: 'Your morning briefing',
 						},
 					},
-				],
+				},
 				sender: 'notifications-tooling-spa/v1',
 				options: { dryRun: false, scheduledFor: null },
 			});
 		});
 
-		it('accepts an app-push-notification push with a single content item', () => {
+		it('accepts an app-push push with a single content item', () => {
 			const data = expectValid(pushRequest());
 
 			expect(data as unknown).toEqual({
@@ -174,23 +180,22 @@ describe('notificationPushRequestSchema', () => {
 				content: {
 					items: {
 						lead: {
-							type: 'app-push-notification',
+							type: 'app-push',
 							title: 'Ukraine summit begins',
 							body: 'World leaders gather in Geneva as talks open.',
 							link: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
 						},
 					},
 				},
-				channels: [
-					{
-						channel: 'app-push-notification',
+				channels: {
+					'app-push': {
 						audience: {
-							type: 'topic',
-							topics: [{ type: 'breaking', name: 'uk' }],
+							type: 'segment',
+							items: ['breaking-news-uk'],
 						},
 						compose: { use: 'lead' },
 					},
-				],
+				},
 				sender: 'notifications-tooling-spa/v1',
 				options: { dryRun: false, scheduledFor: null },
 			});
@@ -208,7 +213,7 @@ describe('notificationPushRequestSchema', () => {
 				content: {
 					items: {
 						pushLead: {
-							type: 'app-push-notification',
+							type: 'app-push',
 							title: 'Ukraine summit begins',
 							body: 'World leaders gather in Geneva as talks open.',
 							link: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
@@ -221,27 +226,25 @@ describe('notificationPushRequestSchema', () => {
 						},
 					},
 				},
-				channels: [
-					{
-						channel: 'app-push-notification',
+				channels: {
+					'app-push': {
 						audience: {
-							type: 'topic',
-							topics: [{ type: 'breaking', name: 'uk' }],
+							type: 'segment',
+							items: ['breaking-news-uk'],
 						},
 						compose: { use: 'pushLead' },
 					},
-					{
-						channel: 'newsletter',
+					newsletter: {
 						audience: {
-							type: 'campaign',
-							campaigns: [{ id: 'morning-briefing' }],
+							type: 'segment',
+							items: ['morning-briefing'],
 						},
 						compose: {
 							items: ['newsLead'],
 							subject: 'Briefing',
 						},
 					},
-				],
+				},
 				sender: 'notifications-tooling-spa/v1',
 				options: { dryRun: false, scheduledFor: null },
 			});
@@ -575,127 +578,226 @@ describe('notificationPushRequestSchema', () => {
 		});
 	});
 
-	describe('newsletter campaign audience', () => {
-		it('accepts every configured campaign', () => {
-			for (const id of newsletterCampaigns) {
+	describe('newsletter segment audience', () => {
+		it('accepts every configured newsletter segment', () => {
+			for (const id of newsletterSegmentIds) {
 				expectValid(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'campaign', campaigns: [{ id }] },
+							audience: { type: 'segment', items: [id] },
 						}),
 					),
 				);
 			}
 		});
 
-		it('rejects an unknown campaign', () => {
+		it('rejects an unknown segment', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: { type: 'segment', items: ['ghost-segment'] },
+						}),
+					),
+				),
+			).toContain('channels/newsletter/audience/items/0');
+		});
+
+		it('rejects an app-push segment used on a newsletter plan', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: { type: 'segment', items: ['breaking-news-uk'] },
+						}),
+					),
+				),
+			).toContain('channels/newsletter/audience/items/0');
+		});
+
+		it('requires at least one segment', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'segment', items: [] } }),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+
+		it('rejects duplicate segments', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
 							audience: {
-								type: 'campaign',
-								campaigns: [{ id: 'ghost-campaign' }],
+								type: 'segment',
+								items: ['morning-briefing', 'morning-briefing'],
 							},
 						}),
 					),
 				),
-			).toContain('channels/0/audience/campaigns/0/id');
-		});
-
-		it('requires at least one campaign', () => {
-			expect(
-				pathsOf(
-					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'campaign', campaigns: [] } }),
-					),
-				),
-			).toContain('channels/0/audience/campaigns');
+			).toContain('channels/newsletter/audience/items');
 		});
 	});
 
-	describe('push topic audience', () => {
-		it('accepts every configured topic', () => {
-			for (const topic of pushTopics) {
+	describe('newsletter test email audience', () => {
+		it('accepts a list of test email recipients', () => {
+			expectValid(
+				newsletterRequestWithPlan(
+					newsletterPlan({
+						audience: {
+							type: 'email',
+							items: ['newsletters.test@theguardian.com'],
+						},
+					}),
+				),
+			);
+		});
+
+		it('rejects an invalid email address', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: { type: 'email', items: ['not-an-email'] },
+						}),
+					),
+				),
+			).toContain('channels/newsletter/audience/items/0');
+		});
+
+		it('requires at least one recipient', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'email', items: [] } }),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+
+		it(`rejects more than ${MAX_TEST_EMAIL_RECIPIENTS} recipients`, () => {
+			const emails = Array.from(
+				{ length: MAX_TEST_EMAIL_RECIPIENTS + 1 },
+				(_, index) => `test-${index}@theguardian.com`,
+			);
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'email', items: emails } }),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+
+		it('rejects duplicate recipients', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: {
+								type: 'email',
+								items: [
+									'newsletters.test@theguardian.com',
+									'newsletters.test@theguardian.com',
+								],
+							},
+						}),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+	});
+
+	describe('push segment audience', () => {
+		it('accepts every configured app-push segment', () => {
+			for (const id of appPushNotificationSegmentIds) {
 				expectValid(
 					pushRequestWithPlan(
 						pushPlan({
-							audience: {
-								type: 'topic',
-								topics: [{ type: topic.type, name: topic.name }],
-							},
+							audience: { type: 'segment', items: [id] },
 						}),
 					),
 				);
 			}
 		});
 
-		it('rejects an unknown topic name', () => {
+		it('rejects an unknown segment', () => {
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({
+							audience: { type: 'segment', items: ['ghost-segment'] },
+						}),
+					),
+				),
+			).toContain('channels/app-push/audience/items/0');
+		});
+
+		it('rejects a newsletter segment used on a push plan', () => {
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({
+							audience: { type: 'segment', items: ['morning-briefing'] },
+						}),
+					),
+				),
+			).toContain('channels/app-push/audience/items/0');
+		});
+
+		it('requires at least one segment', () => {
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({ audience: { type: 'segment', items: [] } }),
+					),
+				),
+			).toContain('channels/app-push/audience/items');
+		});
+
+		it(`rejects more than ${MAX_AUDIENCE_SEGMENTS} segments`, () => {
+			const segments = Array.from(
+				{ length: MAX_AUDIENCE_SEGMENTS + 1 },
+				() => 'breaking-news-uk',
+			);
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({ audience: { type: 'segment', items: segments } }),
+					),
+				),
+			).toContain('channels/app-push/audience/items');
+		});
+
+		it('rejects duplicate segments', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
 							audience: {
-								type: 'topic',
-								topics: [{ type: 'breaking', name: 'mars' }],
+								type: 'segment',
+								items: ['breaking-news-uk', 'breaking-news-uk'],
 							},
 						}),
 					),
 				),
-			).toContain('channels/0/audience/topics/0');
-		});
-
-		it('rejects a known name under the wrong topic type', () => {
-			expect(
-				pathsOf(
-					pushRequestWithPlan(
-						pushPlan({
-							audience: {
-								type: 'topic',
-								topics: [{ type: 'newsstand', name: 'uk' }],
-							},
-						}),
-					),
-				),
-			).toContain('channels/0/audience/topics/0');
-		});
-
-		it('requires at least one topic', () => {
-			expect(
-				pathsOf(
-					pushRequestWithPlan(
-						pushPlan({ audience: { type: 'topic', topics: [] } }),
-					),
-				),
-			).toContain('channels/0/audience/topics');
-		});
-
-		it(`rejects more than ${MAX_PUSH_TOPICS} topics`, () => {
-			const topics = Array.from({ length: MAX_PUSH_TOPICS + 1 }, () => ({
-				type: 'breaking',
-				name: 'uk',
-			}));
-			expect(
-				pathsOf(
-					pushRequestWithPlan(
-						pushPlan({ audience: { type: 'topic', topics } }),
-					),
-				),
-			).toContain('channels/0/audience/topics');
+			).toContain('channels/app-push/audience/items');
 		});
 	});
 
 	describe('compose', () => {
 		it('push requires a use reference', () => {
 			expect(pathsOf(pushRequestWithPlan(pushPlan({ compose: {} })))).toContain(
-				'channels/0/compose/use',
+				'channels/app-push/compose/use',
 			);
 		});
 
 		it('push rejects an empty use', () => {
 			expect(
 				pathsOf(pushRequestWithPlan(pushPlan({ compose: { use: '' } }))),
-			).toContain('channels/0/compose/use');
+			).toContain('channels/app-push/compose/use');
 		});
 
 		it('newsletter requires at least one item', () => {
@@ -705,7 +807,19 @@ describe('notificationPushRequestSchema', () => {
 						newsletterPlan({ compose: { items: [], subject: 'Briefing' } }),
 					),
 				),
-			).toContain('channels/0/compose/items');
+			).toContain('channels/newsletter/compose/items');
+		});
+
+		it('newsletter rejects duplicate item ids', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							compose: { items: ['lead', 'lead'], subject: 'Briefing' },
+						}),
+					),
+				),
+			).toContain('channels/newsletter/compose/items');
 		});
 
 		it('newsletter requires a subject', () => {
@@ -715,7 +829,7 @@ describe('notificationPushRequestSchema', () => {
 						newsletterPlan({ compose: { items: ['lead'] } }),
 					),
 				),
-			).toContain('channels/0/compose/subject');
+			).toContain('channels/newsletter/compose/subject');
 		});
 
 		it('newsletter rejects a subject over the limit', () => {
@@ -730,7 +844,7 @@ describe('notificationPushRequestSchema', () => {
 						}),
 					),
 				),
-			).toContain('channels/0/compose/subject');
+			).toContain('channels/newsletter/compose/subject');
 		});
 	});
 
@@ -738,34 +852,34 @@ describe('notificationPushRequestSchema', () => {
 		it('rejects an unknown channel', () => {
 			expect(
 				pathsOf(
-					pushRequestWithPlan({
-						channel: 'sms',
-						audience: {
-							type: 'topic',
-							topics: [{ type: 'breaking', name: 'uk' }],
+					pushRequest({
+						channels: {
+							sms: {
+								audience: { type: 'segment', items: ['breaking-news-uk'] },
+								compose: { use: 'lead' },
+							},
 						},
-						compose: { use: 'lead' },
 					}),
-				).some((path) => path.startsWith('channels/0')),
+				).some((path) => path.startsWith('channels')),
 			).toBe(true);
 		});
 
-		it('rejects a push plan with a campaign audience', () => {
+		it('rejects a push plan with a test email audience', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
 							audience: {
-								type: 'campaign',
-								campaigns: [{ id: newsletterCampaigns[0] }],
+								type: 'email',
+								items: ['newsletters.test@theguardian.com'],
 							},
 						}),
 					),
-				).some((path) => path.startsWith('channels/0/audience')),
+				).some((path) => path.startsWith('channels/app-push/audience')),
 			).toBe(true);
 		});
 
-		it('rejects a newsletter plan with a topic audience', () => {
+		it('rejects a newsletter plan with an unknown audience type', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
@@ -776,7 +890,7 @@ describe('notificationPushRequestSchema', () => {
 							},
 						}),
 					),
-				).some((path) => path.startsWith('channels/0/audience')),
+				).some((path) => path.startsWith('channels/newsletter/audience')),
 			).toBe(true);
 		});
 
@@ -787,13 +901,13 @@ describe('notificationPushRequestSchema', () => {
 						pushPlan({ compose: { items: ['lead'], subject: 'Briefing' } }),
 					),
 				),
-			).toContain('channels/0/compose/use');
+			).toContain('channels/app-push/compose/use');
 		});
 	});
 
 	describe('channels', () => {
 		it('requires at least one channel', () => {
-			expect(pathsOf(pushRequest({ channels: [] }))).toContain('channels');
+			expect(pathsOf(pushRequest({ channels: {} }))).toContain('channels');
 		});
 	});
 
@@ -803,7 +917,7 @@ describe('notificationPushRequestSchema', () => {
 				pushRequestWithPlan(pushPlan({ compose: { use: 'ghost' } })),
 			);
 			expect(issues.map((issue) => issue.path.join('/'))).toContain(
-				'channels/0/compose/use',
+				'channels/app-push/compose/use',
 			);
 			expect(
 				issues.some((issue) => issue.message.includes('not defined')),
@@ -819,7 +933,7 @@ describe('notificationPushRequestSchema', () => {
 						}),
 					),
 				),
-			).toContain('channels/0/compose/items/0');
+			).toContain('channels/newsletter/compose/items/0');
 		});
 
 		it('reports every missing reference in one pass', () => {
@@ -830,8 +944,8 @@ describe('notificationPushRequestSchema', () => {
 					}),
 				),
 			);
-			expect(paths).toContain('channels/0/compose/items/0');
-			expect(paths).toContain('channels/0/compose/items/1');
+			expect(paths).toContain('channels/newsletter/compose/items/0');
+			expect(paths).toContain('channels/newsletter/compose/items/1');
 		});
 
 		it('rejects composing an item whose type does not match the channel', () => {
@@ -839,19 +953,80 @@ describe('notificationPushRequestSchema', () => {
 			const issues = issuesOf(
 				newsletterRequest({
 					content: { items: { lead: pushItem() } },
-					channels: [
-						newsletterPlan({
+					channels: {
+						newsletter: newsletterPlan({
 							compose: { items: ['lead'], subject: 'Briefing' },
 						}),
-					],
+					},
 				}),
 			);
 			expect(issues.map((issue) => issue.path.join('/'))).toContain(
-				'channels/0/compose/items/0',
+				'channels/newsletter/compose/items/0',
 			);
 			expect(issues.some((issue) => issue.message.includes('has type'))).toBe(
 				true,
 			);
+		});
+	});
+
+	describe('strict keys (rejects unsupported properties)', () => {
+		const unrecognizedKeyPaths = (input: unknown) =>
+			issuesOf(input)
+				.filter((issue) => issue.code === 'unrecognized_keys')
+				.map((issue) => issue.path.join('/'));
+
+		it('rejects an unknown top-level key', () => {
+			expect(unrecognizedKeyPaths(pushRequest({ surprise: true }))).toContain(
+				'',
+			);
+		});
+
+		it('rejects an unknown key on a content item', () => {
+			expect(
+				unrecognizedKeyPaths(pushRequestWithItem(pushItem({ surprise: true }))),
+			).toContain('content/items/lead');
+		});
+
+		it('rejects an unknown key on an audience', () => {
+			expect(
+				unrecognizedKeyPaths(
+					pushRequestWithPlan(
+						pushPlan({
+							audience: {
+								type: 'segment',
+								items: ['breaking-news-uk'],
+								surprise: true,
+							},
+						}),
+					),
+				),
+			).toContain('channels/app-push/audience');
+		});
+
+		it('rejects an unknown key on a compose', () => {
+			expect(
+				unrecognizedKeyPaths(
+					pushRequestWithPlan(
+						pushPlan({ compose: { use: 'lead', surprise: true } }),
+					),
+				),
+			).toContain('channels/app-push/compose');
+		});
+
+		it('rejects an unknown key on a plan', () => {
+			expect(
+				unrecognizedKeyPaths(pushRequestWithPlan(pushPlan({ surprise: true }))),
+			).toContain('channels/app-push');
+		});
+
+		it('rejects an unknown key on options', () => {
+			expect(
+				unrecognizedKeyPaths(
+					pushRequest({
+						options: { dryRun: false, scheduledFor: null, surprise: true },
+					}),
+				),
+			).toContain('options');
 		});
 	});
 });

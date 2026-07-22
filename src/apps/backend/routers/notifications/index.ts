@@ -1,19 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
-import { notificationPushRequestSchema } from './schemas/notification-push-request';
+import { notificationSendRequestSchema } from './schemas/notification-send-request';
 
-/**
- * How long (in seconds) a freshly-accepted notification may still be cancelled
- * before it is handed off to the downstream channel services.
- */
+/** How long (seconds) an accepted notification may still be cancelled. */
 const CANCELLATION_WINDOW_SECONDS = 5 * 60;
 
 /**
- * Zod issue codes that mean the body is *structurally* wrong (missing/typed
- * fields, unknown channel discriminator, extra keys). Per the proposal these
- * are a 400; everything else (length limits, unknown content refs, cross-field
- * rules from `.refine`/`.superRefine`) is a semantic 422.
+ * Zod issue codes meaning the body is *structurally* wrong (a 400 per the
+ * proposal). Everything else — length limits, unknown refs, `.superRefine`
+ * rules — is a semantic 422.
  */
 const STRUCTURAL_ISSUE_CODES = new Set([
 	'invalid_type',
@@ -63,29 +59,26 @@ export const notificationsRouter = Router();
 notificationsRouter.post(
 	'/',
 	validate({
-		body: notificationPushRequestSchema,
+		body: notificationSendRequestSchema,
 		handler: handleValidationErrors,
 	}),
 	(req, res) => {
-		// `validate` guarantees a well-formed, business-valid body here; anything
-		// that fails schema/refinement is rejected by the middleware before us.
 		const body = req.body;
 
-		// Without a persistence layer yet, we mint the id in-process. Once a store
-		// exists this becomes the primary key the channel adapters update.
+		// No persistence layer yet, so mint the id in-process. Once a store exists
+		// this becomes the primary key the channel adapters update.
 		const notificationId = randomUUID();
 		const statusUrl = `/v1/notifications/${notificationId}/status`;
 
-		const plans = body.channels.map((plan) => ({
-			channel: plan.channel,
-			planId: `${notificationId}#${plan.channel}`,
+		const plans = Object.keys(body.channels).map((channel) => ({
+			channel,
+			planId: `${notificationId}#${channel}`,
 			status: 'accepted' as const,
 		}));
 
 		const expiresAt =
 			Math.floor(Date.now() / 1000) + CANCELLATION_WINDOW_SECONDS;
 
-		// 202 Accepted: the request is valid and enqueued for per-channel dispatch.
 		res.status(202).json({
 			notificationId,
 			status: 'accepted',
