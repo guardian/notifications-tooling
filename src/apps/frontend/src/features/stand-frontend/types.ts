@@ -10,10 +10,10 @@ export type UserData = {
 
 export type TabName = 'create' | 'history';
 
-// for phase one, email is the only supported channel
-export type ChannelOption = 'email';
+
+export type ChannelOption = 'email' | 'push';
 export const channelOptionNameMap: Record<
-	ChannelOption,
+	'email', // for phase one, email is the only supported channel
 	{ name: string; description: string }
 > = {
 	email: {

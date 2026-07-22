@@ -3,12 +3,17 @@ import type {
 	EmailNotification,
 	NotificationAction,
 	NotificationState,
+	PushNotification,
 } from './types';
 
 export const defaultEmailParams: EmailNotification = {
 	type: 'email',
 	kicker: 'breaking-news',
 	emailDeliveryOption: 'immediate',
+};
+
+export const defaultPushParams: PushNotification = {
+	type: 'push',
 };
 
 export const defaultState: NotificationState = {
@@ -40,16 +45,21 @@ export const notificationReducer = (
 
 		case 'set-channel': {
 			switch (action.channel) {
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- will add more
 				case 'email':
 					return {
 						...state,
 						parameters: defaultEmailParams,
 					};
+				case 'push': {
+					return {
+						...state,
+						parameters: defaultPushParams,
+					};
+				}
 			}
-			return state
 		}
 
+		// eslint-disable-next-line no-fallthrough -- previous case has exhaustive switch
 		case 'waiting-for-article':
 			return {
 				...state,
@@ -57,7 +67,6 @@ export const notificationReducer = (
 				isFetchingContent: true,
 				fetchArticleError: undefined,
 			};
-
 
 		case 'receive-article': {
 			const { parameters } = state;
