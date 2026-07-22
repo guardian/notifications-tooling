@@ -21,6 +21,7 @@
 	},
 	"dependencies": {
 		"@config": "workspace:*",
+		"@guardian/pan-domain-node": "1.2.5",
 		"@http-logger": "workspace:*",
 		"@utils": "workspace:*",
 		"express": "5.2.1",
