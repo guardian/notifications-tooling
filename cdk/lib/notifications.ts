@@ -2,11 +2,12 @@ import { GuCertificate } from '@guardian/cdk/lib/constructs/acm';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
+import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 export class DispatchStack extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps, app: string) {
 		super(scope, id, props);
@@ -51,5 +52,19 @@ export class DispatchStack extends GuStack {
 			ttl: Duration.hours(1),
 			resourceRecord: domain.domainNameAliasDomainName,
 		});
+
+		const pandaConfigAndKeyPolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ["s3:GetObject"],
+			resources: [`arn:aws:s3:::pan-domain-auth-settings/*`],
+		});
+
+		if (!isProd) {
+			new GuDeveloperPolicyExperimental(this, 'DispatchLocalPolicy', {
+				grantId: 'run-dispatch-locally',
+				friendlyName: 'Run dispatch locally',
+				statements: [pandaConfigAndKeyPolicyStatement],
+			});
+		}
 	}
 }

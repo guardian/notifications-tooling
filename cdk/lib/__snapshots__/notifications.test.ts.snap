@@ -8,6 +8,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "GuApiLambda",
       "GuCertificate",
       "GuCname",
+      "GuDeveloperPolicyExperimental",
     ],
     "gu:cdk:version": "64.1.0",
   },
@@ -94,6 +95,23 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "TTL": 3600,
       },
       "Type": "Guardian::DNS::RecordSet",
+    },
+    "DispatchLocalPolicy64F95F55": {
+      "Properties": {
+        "Description": "Run dispatch locally",
+        "Path": "/developer-policy/guardian/notifications-tooling/notifications/TEST/run-dispatch-locally/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::pan-domain-auth-settings/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::ManagedPolicy",
     },
     "dispatchlambdaEBD865CC": {
       "DependsOn": [
