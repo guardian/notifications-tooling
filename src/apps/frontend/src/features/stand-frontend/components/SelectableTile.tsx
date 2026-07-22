@@ -2,12 +2,14 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import type { ComponentProps } from 'react';
 import { selectableTileTheme } from '../themes';
 
+type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 interface SelectableTileProps {
 	tileLabel: string;
 	tileDescription: string;
-	tileSymbol?: string;
+	tileSymbol?: IconSymbol;
 	selectedValue?: string;
 	onChange: (selected?: string) => void;
 }

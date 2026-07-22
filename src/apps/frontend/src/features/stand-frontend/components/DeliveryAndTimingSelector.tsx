@@ -1,9 +1,7 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
-import { Button } from '@guardian/stand/Button';
-import { ButtonGroup } from '@guardian/stand/ButtonGroup';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
-import { selectableTileTheme } from '../themes';
+import { activePillTheme } from '../themes';
 import { SelectableTile } from './SelectableTile';
 
 interface DeliveryAndTimingInfoPreviewProps {
@@ -69,25 +67,31 @@ export const DeliveryAndTimingInfoPreview = ({
 		>
 			<Typography variant="bodyBoldMd">Send info</Typography>
 
-			{selectedValues.length > 0 ? (
-				<ButtonGroup size="lg">
+			{selectedValues.length > 0 && (
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'row',
+						gap: semanticSpacing.stackSm,
+					}}
+				>
 					{selectedValues.map((value) => {
 						const iconValue = value === 'Immediate' ? 'bolt' : 'mail';
 						return (
-							<Button
-								key={value}
-								variant="tertiary"
-								isDisabled={true}
-								cssOverrides={selectableTileTheme.deliveryIcon}
-							>
-								<Icon size="md" symbol={iconValue} alt="send info" />
-								{value === 'Immediate' ? 'Immediate send' : value}
-							</Button>
+							<div key={value} css={activePillTheme.activePill}>
+								<Icon
+									size="md"
+									symbol={iconValue}
+									alt="send info"
+									cssOverrides={activePillTheme.activePillIcon}
+								/>
+								<Typography variant={'headingCompactSm'}>
+									{value === 'Immediate' ? 'Immediate send' : value}
+								</Typography>
+							</div>
 						);
 					})}
-				</ButtonGroup>
-			) : (
-				<div></div>
+				</div>
 			)}
 		</div>
 	);

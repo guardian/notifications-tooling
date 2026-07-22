@@ -2,7 +2,10 @@ import { css } from '@emotion/react';
 import { baseSpacing, semanticColors } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
-import { AudienceSegmentsPreview, DEFAULT_SEGMENTS } from './AudienceSegments';
+import {
+	AudienceSegmentsPreviewPill,
+	DEFAULT_SEGMENTS,
+} from './AudienceSegments';
 import { DeliveryAndTimingInfoPreview } from './DeliveryAndTimingSelector';
 import { HTMLPreview } from './HTMLPreview';
 
@@ -55,7 +58,7 @@ export const EmailPreviewSection = ({
 				channel={selectedChannel}
 				deliveryTiming={selectedDeliveryTiming}
 			/>
-			<AudienceSegmentsPreview
+			<AudienceSegmentsPreviewPill
 				segments={DEFAULT_SEGMENTS}
 				selected={selectedSegments}
 			/>

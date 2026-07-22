@@ -22,7 +22,7 @@ interface AudienceSegmentPickerProps {
 	onChange: (selected: string[]) => void;
 }
 
-interface AudienceSegmentsPreviewProps {
+interface AudienceSegmentsPreviewPillProps {
 	segments?: Segment[];
 	selected: string[];
 }
@@ -50,10 +50,10 @@ const styles = {
 		}),
 	audienceSegmentIcon: (isSelected: boolean) =>
 		css({
-			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderTop: `${semanticSizing.border.default} solid  ${isSelected ? baseColors.magenta[500] : semanticColors.border.weak}`,
+			borderRight: `${semanticSizing.border.default} solid  ${isSelected ? baseColors.magenta[500] : semanticColors.border.weak}`,
 			borderBottom: `${semanticSizing.border.default} solid ${isSelected ? baseColors.magenta[500] : semanticColors.border.weak}`,
-			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderLeft: `${semanticSizing.border.default} solid  ${isSelected ? baseColors.magenta[500] : semanticColors.border.weak}`,
 			padding: `${baseSpacing['2Px']} ${baseSpacing['2Px']}`,
 			gap: `${baseSpacing['8Px']}`,
 			borderRadius: semanticRadius.cornerSm,
@@ -65,7 +65,9 @@ const styles = {
 				: semanticColors.text.weak,
 			height: '20px',
 			width: '26px',
-			fontSize: 12,
+			fontSize: '12px',
+			lineHeight: ' 16px',
+			fontWeight: 700,
 			textAlign: 'center',
 		}),
 };
@@ -126,10 +128,10 @@ export const AudienceSegments = ({
 	);
 };
 
-export const AudienceSegmentsPreview = ({
+export const AudienceSegmentsPreviewPill = ({
 	segments = DEFAULT_SEGMENTS,
 	selected,
-}: AudienceSegmentsPreviewProps) => {
+}: AudienceSegmentsPreviewPillProps) => {
 	return (
 		<div
 			css={{
@@ -140,18 +142,20 @@ export const AudienceSegmentsPreview = ({
 		>
 			<Typography variant="bodyBoldMd">Audience Segments</Typography>
 
-			<ButtonGroup size="lg">
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'row',
+					gap: semanticSpacing.stackXs,
+				}}
+			>
 				{selected.map((segmentCode) => {
 					const matchingSegment = segments.find(
 						(segment) => segment.code === segmentCode,
 					);
 					const segmentLabel = matchingSegment?.label ?? segmentCode;
 					return (
-						<Button
-							key={segmentCode}
-							variant="tertiary"
-							cssOverrides={styles.audienceSegmentButton(true)}
-						>
+						<div key={segmentCode} css={styles.audienceSegmentButton(true)}>
 							<div css={styles.audienceSegmentIcon(true)}>{segmentCode}</div>
 							<Typography
 								variant="bodyBoldSm"
@@ -161,10 +165,10 @@ export const AudienceSegmentsPreview = ({
 							>
 								{segmentLabel}
 							</Typography>
-						</Button>
+						</div>
 					);
 				})}
-			</ButtonGroup>
+			</div>
 		</div>
 	);
 };
