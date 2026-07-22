@@ -43,6 +43,10 @@ jobs:
       - name: Test
         run: bun test
 
+      - name: Build application
+        working-directory: src/apps/backend
+        run: bun run build:placeholder
+
       - name: Build and synth CDK
         working-directory: cdk
         run: |
@@ -50,8 +54,14 @@ jobs:
           bun test
           bun synth
 
-      - name: Bundle assets
-        run: bun build:lambda
+      - name: Combine application and CDK into dist
+        run: |
+          mkdir -p dist/frontend
+          cp -v src/apps/backend/dist/handler.js dist/
+          cp -v src/apps/backend/placeholder-assets/index.html dist/frontend
+          cd dist
+          zip -r dispatch.zip .
+
       - name: Upload to riff-raff
         uses: guardian/actions-riff-raff@ab360a150e2540439f7f675c37d170a2fd6c8604
         with:
@@ -63,4 +73,4 @@ jobs:
             cdk.out:
               - cdk/cdk.out
             dispatch:
-              - dist
+              - dist/dispatch.zip
