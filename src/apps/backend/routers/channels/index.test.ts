@@ -1,13 +1,15 @@
 import {
+	appPushNotificationSegments,
 	MAX_APP_PUSH_SEGMENTS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
+	newsletterSegments,
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { startTestServer, type TestServer } from '../../test-utils/server';
-import { channelConstraints } from './index';
+import { channelAudiences, channelConstraints } from './index';
 
 /**
  * Drives the real Express app over HTTP so the whole `GET
@@ -28,6 +30,9 @@ afterAll(async () => {
 
 const getConstraints = (): Promise<Response> =>
 	fetch(`${baseUrl}/v1/channels/constraints`);
+
+const getAudiences = (): Promise<Response> =>
+	fetch(`${baseUrl}/v1/channels/audiences`);
 
 describe('GET /v1/channels/constraints', () => {
 	it('returns 200 with the per-channel constraints from config', async () => {
@@ -79,5 +84,61 @@ describe('GET /v1/channels/constraints', () => {
 		expect(newsletter.audience.maxTestRecipients).toBe(
 			MAX_TEST_EMAIL_RECIPIENTS,
 		);
+	});
+});
+
+describe('GET /v1/channels/audiences', () => {
+	it('returns 200 with the per-channel audience segments from config', async () => {
+		const response = await getAudiences();
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get('content-type')).toContain('application/json');
+		expect(await response.json()).toEqual(channelAudiences);
+	});
+
+	it('exposes exactly the supported channels under `channels`', async () => {
+		const response = await getAudiences();
+		const body = (await response.json()) as typeof channelAudiences;
+
+		expect(Object.keys(body.channels).sort()).toEqual(
+			Object.values(NotificationChannel).sort(),
+		);
+	});
+
+	it('exposes only the id and label of every push segment', async () => {
+		const response = await getAudiences();
+		const body = (await response.json()) as typeof channelAudiences;
+
+		expect(
+			body.channels[NotificationChannel.AppPushNotification].segments,
+		).toEqual(
+			Object.entries(appPushNotificationSegments).map(([id, { label }]) => ({
+				id,
+				label,
+			})),
+		);
+	});
+
+	it('exposes only the id and label of every newsletter segment', async () => {
+		const response = await getAudiences();
+		const body = (await response.json()) as typeof channelAudiences;
+
+		expect(body.channels[NotificationChannel.Newsletter].segments).toEqual(
+			Object.entries(newsletterSegments).map(([id, { label }]) => ({
+				id,
+				label,
+			})),
+		);
+	});
+
+	it('does not leak downstream addressing (campaign/topic)', async () => {
+		const response = await getAudiences();
+		const body = (await response.json()) as typeof channelAudiences;
+
+		for (const { segments } of Object.values(body.channels)) {
+			for (const segment of segments) {
+				expect(Object.keys(segment).sort()).toEqual(['id', 'label']);
+			}
+		}
 	});
 });

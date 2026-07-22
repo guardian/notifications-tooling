@@ -16,3 +16,22 @@ export const channelsConstraintsPath = {
 		},
 	},
 } as const;
+
+/** The `/v1/channels/audiences` path item. */
+export const channelsAudiencesPath = {
+	get: {
+		summary: 'Retrieve per-channel audience segments',
+		description:
+			'Returns the selectable audience segments (id + label) per channel the SPA uses to populate its audience pickers.',
+		responses: {
+			'200': {
+				description: 'The per-channel audience segments.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/ChannelAudiences' },
+					},
+				},
+			},
+		},
+	},
+} as const;
