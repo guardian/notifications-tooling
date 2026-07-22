@@ -13,7 +13,7 @@
 	},
 	"dependencies": {
 		"@emotion/react": "11.14.0",
-		"@guardian/stand": "0.0.60",
+		"@guardian/stand": "0.0.63",
 		"react": "19.2.7",
 		"react-aria-components": "1.19.0",
 		"react-dom": "19.2.7"
