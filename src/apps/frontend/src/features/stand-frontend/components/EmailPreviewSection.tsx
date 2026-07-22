@@ -50,16 +50,16 @@ export const EmailPreviewSection = ({
 					The preview for the newsletter email and/or the app alert notification
 					will be shown below.
 				</Typography>
-				<DeliveryAndTimingInfoPreview
-					channel={selectedChannel}
-					deliveryTiming={selectedDeliveryTiming}
-				/>
-				<AudienceSegmentsPreview
-					segments={DEFAULT_SEGMENTS}
-					selected={selectedSegments}
-				/>
-				<HTMLPreview />
 			</header>
+			<DeliveryAndTimingInfoPreview
+				channel={selectedChannel}
+				deliveryTiming={selectedDeliveryTiming}
+			/>
+			<AudienceSegmentsPreview
+				segments={DEFAULT_SEGMENTS}
+				selected={selectedSegments}
+			/>
+			<HTMLPreview />
 		</section>
 	);
 };

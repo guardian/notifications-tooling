@@ -1,7 +1,6 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
-import { IconButton } from '@guardian/stand/IconButton';
 import { Typography } from '@guardian/stand/Typography';
 import { selectableTileTheme } from '../themes';
 
@@ -71,17 +70,15 @@ export const ChannelSelector = ({
 							})}
 							onClick={(event) => event.stopPropagation()}
 						>
-							<IconButton
-								onPress={toggleChecked}
+							<Icon
+								size="sm"
 								symbol={
 									isChecked ? 'radio_button_checked' : 'radio_button_unchecked'
 								}
-								ariaLabel="newsletter email"
-								variant="tertiary"
-								size="sm"
 								cssOverrides={css({
 									border: 'none',
 								})}
+								alt="newsletter email"
 							/>
 						</div>
 					</div>
