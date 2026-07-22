@@ -8,6 +8,8 @@ import type {
 	NotificationAction,
 	NotificationState,
 } from '../features/stand-frontend/types';
+import { mockCapiFetch } from '../mocks/mock-capi-fetch';
+import { mockSendNotification } from '../mocks/mock-send-notification';
 
 export const WithNotificationContext = (
 	reactNode: ReactNode,
@@ -23,6 +25,8 @@ export const WithNotificationContext = (
 			value={{
 				notification,
 				updateNotification,
+				capiFetch: mockCapiFetch,
+				sendNotification: mockSendNotification,
 			}}
 		>
 			{reactNode}

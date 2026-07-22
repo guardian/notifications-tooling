@@ -7,7 +7,7 @@ export const mockCapiFetch = (articleId: string): Promise<Content> => {
 			if (articleId === '/') {
 				reject(new Error('no fetch logic yet'));
 			} else {
-				resolve(articleFixture);
+				resolve({ ...articleFixture, id: articleId });
 			}
 		}, 500);
 	});

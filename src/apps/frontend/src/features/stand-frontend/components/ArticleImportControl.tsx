@@ -4,12 +4,13 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { useContext } from 'react';
-import { mockCapiFetch } from '../../../mocks/mock-capi-fetch';
 import { NotificationFormContext } from '../NotificationContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
 export const ArticleImportControl = () => {
-	const { notification, updateNotification } = useContext(NotificationFormContext);
+	const { notification, updateNotification, capiFetch } = useContext(
+		NotificationFormContext,
+	);
 
 	const {
 		articleId = '',
@@ -21,7 +22,7 @@ export const ArticleImportControl = () => {
 	const fetchArticle = () => {
 		updateNotification({ type: 'waiting-for-article' });
 
-		mockCapiFetch(articleId)
+		capiFetch(articleId)
 			.then((content) => {
 				updateNotification({
 					type: 'receive-article',

@@ -14,7 +14,9 @@ import { NotificationTextInput } from './NotificationTextInput';
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
 
 export const EmailFields = () => {
-	const { notification, updateNotification } = useContext(NotificationFormContext);
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 
 	if (notification.parameters?.type !== 'email') {
 		return null;

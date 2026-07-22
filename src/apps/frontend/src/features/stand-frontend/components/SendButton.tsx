@@ -8,7 +8,6 @@ import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
-import { mockSendNotification } from '../../../mocks/mock-send-notification';
 import { checkIfReadyToSend } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import type { NotificationState } from '../types';
@@ -26,7 +25,9 @@ const buttonText = (
 };
 
 export const SendButton = () => {
-	const { notification, updateNotification } = useContext(NotificationFormContext);
+	const { notification, updateNotification, sendNotification } = useContext(
+		NotificationFormContext,
+	);
 	const {
 		parameters,
 		confirmSendModalOpen,
@@ -39,11 +40,10 @@ export const SendButton = () => {
 	}
 	const isReady = checkIfReadyToSend(notification);
 
-	const sendNotification = () => {
+	const handleSending = () => {
 		updateNotification({ type: 'waiting-for-send' });
-		mockSendNotification()
+		sendNotification(notification)
 			.then((result) => {
-				console.log(result);
 				updateNotification({ type: 'receive-send-result', result });
 			})
 			.catch((err) => {
@@ -121,7 +121,7 @@ export const SendButton = () => {
 						<Button
 							isDisabled={isWaitingForSend}
 							icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
-							onPress={sendNotification}
+							onPress={handleSending}
 						>
 							Confirm send
 						</Button>

@@ -61,7 +61,9 @@ const ParameterDisplay = ({
 };
 
 export const DispatchReport = () => {
-	const { updateNotification, notification } = useContext(NotificationFormContext);
+	const { updateNotification, notification } = useContext(
+		NotificationFormContext,
+	);
 
 	const { sendingResult } = notification;
 

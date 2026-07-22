@@ -5,7 +5,9 @@ import type { ChannelOption } from '../types';
 import { channelOptionNameMap } from '../types';
 
 export const ChannelOptions = () => {
-	const { notification, updateNotification } = useContext(NotificationFormContext);
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 	const channel = notification.parameters?.type;
 
 	return (

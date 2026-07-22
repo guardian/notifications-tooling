@@ -1,4 +1,6 @@
 import { useEffect, useReducer, useState } from 'react';
+import { mockCapiFetch } from '../../mocks/mock-capi-fetch';
+import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
@@ -53,7 +55,12 @@ export const EmailNotificationPage = () => {
 	return (
 		<UserContext.Provider value={user}>
 			<NotificationFormContext.Provider
-				value={{ notification, updateNotification }}
+				value={{
+					notification,
+					updateNotification,
+					capiFetch: mockCapiFetch,
+					sendNotification: mockSendNotification,
+				}}
 			>
 				<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
 					{currentTab === 'create' && <DispatchTab />}
