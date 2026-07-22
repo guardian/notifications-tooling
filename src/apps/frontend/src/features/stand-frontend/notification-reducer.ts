@@ -47,16 +47,17 @@ export const notificationReducer = (
 						parameters: defaultEmailParams,
 					};
 			}
+			return state
 		}
 
-		case 'waiting-for-article': {
+		case 'waiting-for-article':
 			return {
 				...state,
 				fetchedArticleId: state.articleId,
 				isFetchingContent: true,
 				fetchArticleError: undefined,
 			};
-		}
+
 
 		case 'receive-article': {
 			const { parameters } = state;

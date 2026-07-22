@@ -9,8 +9,8 @@ import { Layout } from '@guardian/stand/Layout';
 import { useContext } from 'react';
 import { NotificationContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
-import { Confirmation } from './Confirmation';
 import { CreateNotificationForm } from './CreateNotificationForm';
+import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
 export const DispatchTab = () => {
@@ -30,7 +30,7 @@ export const DispatchTab = () => {
 					lg: { gap: '0px', padding: `0px 0px ${semanticSpacing.stackXl}` },
 				}}
 			>
-				{sendingResult?.ok ? (
+				{sendingResult ? (
 					<Item
 						size={12}
 						cssOverrides={css({
@@ -39,7 +39,7 @@ export const DispatchTab = () => {
 							paddingRight: semanticSpacing.stackLg,
 						})}
 					>
-						<Confirmation />
+						<DispatchReport />
 					</Item>
 				) : (
 					<>
