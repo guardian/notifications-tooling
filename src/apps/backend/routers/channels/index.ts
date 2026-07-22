@@ -12,38 +12,42 @@ import { type Request, type Response, Router } from 'express';
 /**
  * The per-channel validation rules the SPA fetches from
  * `GET /v1/channels/constraints` to drive its UI (character counters, topic
- * limits).
+ * limits). Keyed by channel under `channels`.
  *
  * These are derived from the very same config the backend validates incoming
  * `POST /v1/notifications` requests against, so the client-side hints and the
  * server-side rules can never drift apart.
  */
 export const channelConstraints = {
-	[NotificationChannel.AppPushNotification]: {
-		content:
-			notificationChannelContentLimits[NotificationChannel.AppPushNotification],
-		// Push delivers a single content item (`compose.use`).
-		compose: { minItems: 1, maxItems: 1 },
-		// mobile-n10n rejects a push targeting more than `MAX_APP_PUSH_SEGMENTS` topics.
-		audience: { maxSegments: MAX_APP_PUSH_SEGMENTS },
-	},
-	[NotificationChannel.Newsletter]: {
-		content: notificationChannelContentLimits[NotificationChannel.Newsletter],
-		// Newsletter assembles one or more content items into a single email,
-		// with a subject line bounded by the same limit as an item's title.
-		compose: {
-			minItems: 1,
-			subject: {
-				maxLength:
-					notificationChannelContentLimits[NotificationChannel.Newsletter].title
-						.maxLength,
-			},
+	channels: {
+		[NotificationChannel.AppPushNotification]: {
+			content:
+				notificationChannelContentLimits[
+					NotificationChannel.AppPushNotification
+				],
+			// Push delivers a single content item (`compose.use`).
+			compose: { minItems: 1, maxItems: 1 },
+			// mobile-n10n rejects a push targeting more than `MAX_APP_PUSH_SEGMENTS` topics.
+			audience: { maxSegments: MAX_APP_PUSH_SEGMENTS },
 		},
-		// Newsletter targets Braze campaigns (segments) or an ad-hoc list of test
-		// email recipients.
-		audience: {
-			maxSegments: MAX_NEWSLETTER_SEGMENTS,
-			maxTestRecipients: MAX_TEST_EMAIL_RECIPIENTS,
+		[NotificationChannel.Newsletter]: {
+			content: notificationChannelContentLimits[NotificationChannel.Newsletter],
+			// Newsletter assembles one or more content items into a single email,
+			// with a subject line bounded by the same limit as an item's title.
+			compose: {
+				minItems: 1,
+				subject: {
+					maxLength:
+						notificationChannelContentLimits[NotificationChannel.Newsletter]
+							.title.maxLength,
+				},
+			},
+			// Newsletter targets Braze campaigns (segments) or an ad-hoc list of test
+			// email recipients.
+			audience: {
+				maxSegments: MAX_NEWSLETTER_SEGMENTS,
+				maxTestRecipients: MAX_TEST_EMAIL_RECIPIENTS,
+			},
 		},
 	},
 } as const;
