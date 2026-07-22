@@ -1,10 +1,10 @@
+import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
 	type NextFunction,
 	type Request,
 	type Response,
 } from 'express';
-import { httpLogger } from '@http-logger';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
