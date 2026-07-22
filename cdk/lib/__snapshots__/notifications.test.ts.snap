@@ -1,0 +1,737 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`The Notifications stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuCertificate",
+      "GuCname",
+    ],
+    "gu:cdk:version": "64.1.0",
+  },
+  "Outputs": {
+    "dispatchlambdadispatchapiEndpoint2C4D30C9": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "dispatchlambdadispatchapiEEAA8616",
+            },
+            ".execute-api.eu-west-1.",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "CertificateDispatchB98021E7": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "DomainName": "dispatch.code.dev-gutools.co.uk",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Name",
+            "Value": "Dispatch/CertificateDispatch",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "ValidationMethod": "DNS",
+      },
+      "Type": "AWS::CertificateManager::Certificate",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "DispatchAppDNS": {
+      "Properties": {
+        "Name": "dispatch.code.dev-gutools.co.uk",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "dispatchlambdadispatchapidispatchdomain85127498",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "Stage": "TEST",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
+    "dispatchlambdaEBD865CC": {
+      "DependsOn": [
+        "dispatchlambdaServiceRoleDefaultPolicy2917D760",
+        "dispatchlambdaServiceRole973DFF82",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "notifications/TEST/dispatch/dispatch.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "dispatch",
+            "STACK": "notifications",
+            "STAGE": "TEST",
+          },
+        },
+        "Handler": "handler.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
+        "MemorySize": 512,
+        "ReservedConcurrentExecutions": 1,
+        "Role": {
+          "Fn::GetAtt": [
+            "dispatchlambdaServiceRole973DFF82",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs24.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "dispatchlambdaServiceRole973DFF82": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "dispatchlambdaServiceRoleDefaultPolicy2917D760": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/notifications/TEST/dispatch/dispatch.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/TEST/notifications/dispatch",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/TEST/notifications/dispatch/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "dispatchlambdaServiceRoleDefaultPolicy2917D760",
+        "Roles": [
+          {
+            "Ref": "dispatchlambdaServiceRole973DFF82",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "dispatchlambdadispatchapiANY957BDAF9": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:eu-west-1:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "dispatchlambdaEBD865CC",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "dispatchlambdadispatchapiEEAA8616",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "dispatchlambdadispatchapiANYApiPermissionDispatchdispatchlambdadispatchapi3C057723ANY0B57AECD": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dispatchlambdaEBD865CC",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
+              },
+              "/",
+              {
+                "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "dispatchlambdadispatchapiANYApiPermissionTestDispatchdispatchlambdadispatchapi3C057723ANY76993E8C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dispatchlambdaEBD865CC",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "dispatchlambdadispatchapiAccount83D5272B": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "dispatchlambdadispatchapiEEAA8616",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "dispatchlambdadispatchapiCloudWatchRole3127AE9E",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "dispatchlambdadispatchapiCloudWatchRole3127AE9E": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "dispatchlambdadispatchapiDeployment664A949C594d55d1235faa485a8c70453d73a7af": {
+      "DependsOn": [
+        "dispatchlambdadispatchapiproxyANYE34E6F78",
+        "dispatchlambdadispatchapiproxy929EBBAA",
+        "dispatchlambdadispatchapiANY957BDAF9",
+      ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
+      "Properties": {
+        "Description": "API for creating, previewing, and dispatching multi-channel notifications. It provides a frontend for users to configure and send notifications, and a backend responsible for forwarding requests to relevant downstream services e.g. app and email notification APIs.",
+        "RestApiId": {
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "dispatchlambdadispatchapiDeploymentStageprod8A227FBD": {
+      "DependsOn": [
+        "dispatchlambdadispatchapiAccount83D5272B",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "dispatchlambdadispatchapiDeployment664A949C594d55d1235faa485a8c70453d73a7af",
+        },
+        "RestApiId": {
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
+        },
+        "StageName": "prod",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "dispatchlambdadispatchapiEEAA8616": {
+      "Properties": {
+        "Description": "API for creating, previewing, and dispatching multi-channel notifications. It provides a frontend for users to configure and send notifications, and a backend responsible for forwarding requests to relevant downstream services e.g. app and email notification APIs.",
+        "Name": "notifications-TEST-dispatch-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "dispatchlambdadispatchapidispatchdomain85127498": {
+      "Properties": {
+        "DomainName": "dispatch.code.dev-gutools.co.uk",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Ref": "CertificateDispatchB98021E7",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "dispatchlambdadispatchapidispatchdomainMapDispatchdispatchlambdadispatchapi3C057723FB0C4773": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "dispatchlambdadispatchapidispatchdomain85127498",
+        },
+        "RestApiId": {
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
+        },
+        "Stage": {
+          "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "dispatchlambdadispatchapiproxy929EBBAA": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "dispatchlambdadispatchapiEEAA8616",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "dispatchlambdadispatchapiproxyANYApiPermissionDispatchdispatchlambdadispatchapi3C057723ANYproxy12C2B79A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dispatchlambdaEBD865CC",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
+              },
+              "/",
+              {
+                "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "dispatchlambdadispatchapiproxyANYApiPermissionTestDispatchdispatchlambdadispatchapi3C057723ANYproxy5AB1F5C9": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dispatchlambdaEBD865CC",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "dispatchlambdadispatchapiproxyANYE34E6F78": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:eu-west-1:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "dispatchlambdaEBD865CC",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "dispatchlambdadispatchapiproxy929EBBAA",
+        },
+        "RestApiId": {
+          "Ref": "dispatchlambdadispatchapiEEAA8616",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+  },
+}
+`;
