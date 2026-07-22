@@ -1,5 +1,5 @@
 import {
-	MAX_PUSH_TOPICS,
+	MAX_AUDIENCE_SEGMENTS,
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
@@ -55,7 +55,7 @@ describe('GET /v1/channels/constraints', () => {
 			notificationChannelContentLimits[NotificationChannel.AppPushNotification],
 		);
 		expect(push.compose.maxItems).toBe(1);
-		expect(push.audience.maxTopics).toBe(MAX_PUSH_TOPICS);
+		expect(push.audience.maxTopics).toBe(MAX_AUDIENCE_SEGMENTS);
 	});
 
 	it('exposes the newsletter content limits and subject limit', async () => {

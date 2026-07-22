@@ -1,5 +1,5 @@
 import {
-	MAX_PUSH_TOPICS,
+	MAX_AUDIENCE_SEGMENTS,
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
@@ -20,8 +20,8 @@ export const channelConstraints = {
 			notificationChannelContentLimits[NotificationChannel.AppPushNotification],
 		// Push delivers a single content item (`compose.use`).
 		compose: { maxItems: 1 },
-		// mobile-n10n rejects a push targeting more than `MAX_PUSH_TOPICS` topics.
-		audience: { maxTopics: MAX_PUSH_TOPICS },
+		// mobile-n10n rejects a push targeting more than `MAX_AUDIENCE_SEGMENTS` topics.
+		audience: { maxTopics: MAX_AUDIENCE_SEGMENTS },
 	},
 	[NotificationChannel.Newsletter]: {
 		content: notificationChannelContentLimits[NotificationChannel.Newsletter],
