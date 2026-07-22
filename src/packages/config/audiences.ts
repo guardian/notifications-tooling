@@ -1,8 +1,8 @@
 /**
- * Maps public, channel-agnostic segment ids (surfaced to the FE and, in future,
- * served by `GET /v1/audiences`) to the internal downstream addressing the
- * broker resolves them to: Braze campaigns for newsletters, mobile-n10n topics
- * for push. These internals are kept out of the public
+ * Defines public, channel-agnostic segment ids surfaced to the FE and, in future,
+ * served by `GET /v1/audiences`. The backend resolves newsletter segments to
+ * Braze campaigns and push segments to mobile-n10n topics. These internals are
+ * kept out of the public
  * `POST /v1/notifications` contract, which references segment ids only.
  * Hard-coded stub until resolved from the downstream services.
  */
@@ -13,17 +13,17 @@ export interface NewsletterSegment {
 }
 
 export const newsletterSegments = {
-	'morning-briefing': {
-		label: 'Morning briefing',
-		brazeCampaignId: 'morning-briefing',
+	UK: {
+		label: 'UK',
+		brazeCampaignId: 'uk_campaign_id',
 	},
-	'first-edition': {
-		label: 'First edition',
-		brazeCampaignId: 'first-edition',
+	US: {
+		label: 'US',
+		brazeCampaignId: 'us_campaign_id',
 	},
-	'editorial-breaking-news': {
-		label: 'Editorial breaking news',
-		brazeCampaignId: 'editorial-breaking-news',
+	AU: {
+		label: 'AU',
+		brazeCampaignId: 'au_campaign_id',
 	},
 } as const satisfies Record<string, NewsletterSegment>;
 

@@ -1,10 +1,15 @@
-import type { AppNotificationRequest } from './generate-request';
-
-export type MockAppNotificationClient = {
-	send: (request: AppNotificationRequest) => Promise<{ status: 'mocked' }>;
+export type AppNotificationRequest = {
+	topics: ReadonlyArray<{ type: string; name: string }>;
+	title: string;
+	body: string;
+	link: string;
+	media?: {
+		type: 'image';
+		imageUrl: string;
+		thumbnailUrl?: string;
+	};
 };
 
-export const createMockAppNotificationClient =
-	(): MockAppNotificationClient => ({
-		send: () => Promise.resolve({ status: 'mocked' }),
-	});
+export const sendAppNotification: (
+	request: AppNotificationRequest,
+) => Promise<void> = () => Promise.resolve();
