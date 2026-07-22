@@ -1,17 +1,11 @@
 import { css } from '@emotion/react';
-import {
-	baseColors,
-	baseSpacing,
-	semanticColors,
-	semanticRadius,
-	semanticSizing,
-	semanticSpacing,
-} from '@guardian/stand';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { ButtonGroup } from '@guardian/stand/ButtonGroup';
 import { Icon } from '@guardian/stand/Icon';
 import { IconButton } from '@guardian/stand/IconButton';
 import { Typography } from '@guardian/stand/Typography';
+import { selectableTileTheme } from '../themes';
 
 interface DeliveryAndTimingInfoPreviewProps {
 	channel?: string;
@@ -24,47 +18,6 @@ interface DeliveryAndTimingSelectorProps {
 }
 
 export const IMMEDIATE_DELIVERY_TIMING = 'Immediate send';
-
-export const styles = {
-	newsletterTile: (isChecked: boolean) =>
-		css({
-			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			width: '450px',
-			height: '74px',
-			display: 'flex',
-			gap: semanticSpacing.stackXxs,
-			flexDirection: 'column',
-			backgroundColor: isChecked
-				? baseColors.magenta['900']
-				: baseColors.neutral['900'],
-		}),
-	iconRow: css({
-		display: 'flex',
-		flexDirection: 'row',
-		padding: '8px 8px 8px 12px',
-		gap: semanticSpacing.stackXs,
-		alignItems: 'center',
-	}),
-	emailIcon: css({
-		width: '20px',
-		height: '20px',
-		gap: '10px',
-	}),
-	newsletterTitle: css({
-		gap: '10px',
-	}),
-	deliveryIcon: css({
-		backgroundColor: baseColors.magenta[900],
-		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
-		borderRadius: semanticRadius.cornerSm,
-		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		gap: `${baseSpacing['8Px']}`,
-		height: '32px',
-	}),
-};
 
 export const DeliveryAndTimingSelector = ({
 	selectedDeliveryTiming,
@@ -95,7 +48,7 @@ export const DeliveryAndTimingSelector = ({
 					later
 				</Typography>
 				<div
-					css={styles.newsletterTile(isChecked)}
+					css={selectableTileTheme.selectableTile(isChecked)}
 					onClick={toggleChecked}
 					role="button"
 					tabIndex={0}
@@ -107,9 +60,12 @@ export const DeliveryAndTimingSelector = ({
 						}
 					}}
 				>
-					<div css={styles.iconRow}>
+					<div css={selectableTileTheme.iconRow}>
 						<Icon size="md" symbol="bolt" alt="delivery and timing" />
-						<Typography variant="headingCompactSm" css={styles.newsletterTitle}>
+						<Typography
+							variant="headingCompactSm"
+							css={selectableTileTheme.newsletterTitle}
+						>
 							Immediate
 						</Typography>
 						<div
@@ -179,7 +135,7 @@ export const DeliveryAndTimingInfoPreview = ({
 								key={value}
 								variant="tertiary"
 								isDisabled={true}
-								cssOverrides={styles.deliveryIcon}
+								cssOverrides={selectableTileTheme.deliveryIcon}
 							>
 								<Icon size="md" symbol={iconValue} alt="send info" />
 								{value}

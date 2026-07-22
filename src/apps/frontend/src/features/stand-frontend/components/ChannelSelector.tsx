@@ -1,13 +1,9 @@
 import { css } from '@emotion/react';
-import {
-	baseColors,
-	semanticColors,
-	semanticSizing,
-	semanticSpacing,
-} from '@guardian/stand';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { IconButton } from '@guardian/stand/IconButton';
 import { Typography } from '@guardian/stand/Typography';
+import { selectableTileTheme } from '../themes';
 
 export const NEWSLETTER_CHANNEL = 'Newsletter email';
 
@@ -15,39 +11,6 @@ interface ChannelSelectorProps {
 	selectedChannel?: string;
 	onChange: (channel?: string) => void;
 }
-
-export const styles = {
-	newsletterTile: (isChecked: boolean) =>
-		css({
-			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-			width: '450px',
-			height: '74px',
-			display: 'flex',
-			gap: semanticSpacing.stackXxs,
-			flexDirection: 'column',
-			backgroundColor: isChecked
-				? baseColors.magenta['900']
-				: baseColors.neutral['900'],
-		}),
-	iconRow: css({
-		display: 'flex',
-		flexDirection: 'row',
-		padding: '8px 8px 8px 12px',
-		gap: semanticSpacing.stackXs,
-		alignItems: 'center',
-	}),
-	emailIcon: css({
-		width: '20px',
-		height: '20px',
-		gap: '10px',
-	}),
-	newsletterTitle: css({
-		gap: '10px',
-	}),
-};
 
 export const ChannelSelector = ({
 	selectedChannel,
@@ -77,7 +40,7 @@ export const ChannelSelector = ({
 					Choose the channel the notification is sent to
 				</Typography>
 				<div
-					css={styles.newsletterTile(isChecked)}
+					css={selectableTileTheme.selectableTile(isChecked)}
 					onClick={toggleChecked}
 					role="button"
 					tabIndex={0}
@@ -89,9 +52,12 @@ export const ChannelSelector = ({
 						}
 					}}
 				>
-					<div css={styles.iconRow}>
+					<div css={selectableTileTheme.iconRow}>
 						<Icon size="md" symbol="mail" alt="Newsletter email" />
-						<Typography variant="headingCompactSm" css={styles.newsletterTitle}>
+						<Typography
+							variant="headingCompactSm"
+							css={selectableTileTheme.newsletterTitle}
+						>
 							{NEWSLETTER_CHANNEL}
 						</Typography>
 						<div

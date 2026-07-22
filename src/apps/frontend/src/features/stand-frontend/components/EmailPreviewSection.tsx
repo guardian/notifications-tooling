@@ -1,23 +1,10 @@
 import { css } from '@emotion/react';
 import { baseSpacing, semanticColors } from '@guardian/stand';
-import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
-import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { AudienceSegmentsPreview, DEFAULT_SEGMENTS } from './AudienceSegments';
 import { DeliveryAndTimingInfoPreview } from './DeliveryAndTimingSelector';
 import { HTMLPreview } from './HTMLPreview';
-
-const customStyles = css({
-	display: 'flex',
-	width: '50%',
-	height: '40px',
-	borderRadius: '4px',
-	justifyContent: 'center',
-	alignItems: 'center',
-	gap: baseSpacing['8Px'],
-	padding: `6px ${baseSpacing['12Px']} 7px ${baseSpacing['12Px']}`,
-});
 
 interface EmailPreviewSectionProps {
 	selectedSegments: string[];
@@ -72,18 +59,6 @@ export const EmailPreviewSection = ({
 					selected={selectedSegments}
 				/>
 				<HTMLPreview />
-				<Typography variant="headingCompactLg">Test send</Typography>
-				<TextInput
-					description="Enter your email to send a test"
-					placeholder="name@theguardian.com"
-				/>
-				<Typography variant="bodyCompactSm">
-					Sends test only to the email address above, on the enabled channels —
-					audience segments and timing are ignored.
-				</Typography>
-				<Button variant="primary" size="sm" cssOverrides={customStyles}>
-					Send test notification
-				</Button>
 			</header>
 		</section>
 	);
