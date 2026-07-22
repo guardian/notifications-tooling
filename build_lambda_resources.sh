@@ -16,7 +16,7 @@ rm -f "$ZIP_FILE"
 mkdir -p "$ARTIFACT_DIR"
 
 cd "$ROOT_DIR/src/apps/backend" || exit 1
-bun run build
+bun run build:placeholder
 
 # cd "$ROOT_DIR/src/apps/frontend" || exit 1
 # bun run build
