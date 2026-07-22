@@ -65,6 +65,8 @@ const styles = {
 				: semanticColors.text.weak,
 			height: '20px',
 			width: '26px',
+			fontSize: 12,
+			textAlign: 'center',
 		}),
 };
 export const AudienceSegments = ({

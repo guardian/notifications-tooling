@@ -62,7 +62,7 @@ export const selectableTileTheme = {
 			borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 			width: '450px',
-			height: '74px',
+			minHeight: '74px',
 			display: 'flex',
 			gap: semanticSpacing.stackXxs,
 			flexDirection: 'column',
