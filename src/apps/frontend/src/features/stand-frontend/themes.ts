@@ -82,7 +82,7 @@ export const selectableTileTheme = {
 		height: '20px',
 		gap: '10px',
 	}),
-	newsletterTitle: css({
+	titleStyle: css({
 		gap: '10px',
 	}),
 	deliveryIcon: css({

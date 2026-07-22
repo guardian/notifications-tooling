@@ -1,10 +1,10 @@
-import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { ButtonGroup } from '@guardian/stand/ButtonGroup';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { selectableTileTheme } from '../themes';
+import { SelectableTile } from './SelectableTile';
 
 interface DeliveryAndTimingInfoPreviewProps {
 	channel?: string;
@@ -16,17 +16,10 @@ interface DeliveryAndTimingSelectorProps {
 	onChange: (deliveryTiming?: string) => void;
 }
 
-export const IMMEDIATE_DELIVERY_TIMING = 'Immediate send';
-
 export const DeliveryAndTimingSelector = ({
 	selectedDeliveryTiming,
 	onChange,
 }: DeliveryAndTimingSelectorProps) => {
-	const isChecked = selectedDeliveryTiming === IMMEDIATE_DELIVERY_TIMING;
-	const toggleChecked = () => {
-		onChange(isChecked ? undefined : IMMEDIATE_DELIVERY_TIMING);
-	};
-
 	return (
 		<>
 			<div
@@ -46,60 +39,13 @@ export const DeliveryAndTimingSelector = ({
 					Choose whether the app alert is sent immediately or scheduled for a
 					later
 				</Typography>
-				<div
-					css={selectableTileTheme.selectableTile(isChecked)}
-					onClick={toggleChecked}
-					role="button"
-					tabIndex={0}
-					aria-pressed={isChecked}
-					onKeyDown={(event) => {
-						if (event.key === 'Enter' || event.key === ' ') {
-							event.preventDefault();
-							toggleChecked();
-						}
-					}}
-				>
-					<div css={selectableTileTheme.iconRow}>
-						<Icon size="md" symbol="bolt" alt="delivery and timing" />
-						<Typography
-							variant="headingCompactSm"
-							css={selectableTileTheme.newsletterTitle}
-						>
-							Immediate
-						</Typography>
-						<div
-							css={css({
-								height: '32px',
-								width: '32px',
-								marginLeft: 'auto',
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-							})}
-							onClick={(event) => event.stopPropagation()}
-						>
-							<Icon
-								size="sm"
-								symbol={
-									isChecked ? 'radio_button_checked' : 'radio_button_unchecked'
-								}
-								cssOverrides={css({
-									border: 'none',
-								})}
-								alt="delivery and timing"
-							/>
-						</div>
-					</div>
-					<Typography
-						variant="bodySm"
-						css={{
-							color: semanticColors.text.weak,
-							padding: `0px ${semanticSpacing.stackSm} 12px ${semanticSpacing.stackSm}`,
-						}}
-					>
-						Send right now via Braze
-					</Typography>
-				</div>
+				<SelectableTile
+					tileLabel={'Immediate'}
+					tileDescription={'Send right now via Braze'}
+					tileSymbol={'bolt'}
+					selectedValue={selectedDeliveryTiming}
+					onChange={onChange}
+				/>
 			</div>
 		</>
 	);
@@ -126,7 +72,7 @@ export const DeliveryAndTimingInfoPreview = ({
 			{selectedValues.length > 0 ? (
 				<ButtonGroup size="lg">
 					{selectedValues.map((value) => {
-						const iconValue = value === 'Immediate send' ? 'bolt' : 'mail';
+						const iconValue = value === 'Immediate' ? 'bolt' : 'mail';
 						return (
 							<Button
 								key={value}
@@ -135,7 +81,7 @@ export const DeliveryAndTimingInfoPreview = ({
 								cssOverrides={selectableTileTheme.deliveryIcon}
 							>
 								<Icon size="md" symbol={iconValue} alt="send info" />
-								{value}
+								{value === 'Immediate' ? 'Immediate send' : value}
 							</Button>
 						);
 					})}
