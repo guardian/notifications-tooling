@@ -1,147 +1,133 @@
-# Notifications tooling monorepo
+# Notifications tooling
 
-## Install dev tools
+A monorepo for Guardian notifications tooling.
 
-The DevX tooling relies on [Bun](https://bun.com/)
+It currently contains a single editorial tool called Dispatch (under development), used to compose and send notifications.
 
-On Mac OS install its latest version using Homebrew:
+## Contents
 
-```sh
-brew install bun
-```
+- [Introduction](#1-introduction)
+- [Getting Started](#2-getting-started)
+- [How It Works](#3-how-it-works)
+- [Useful Links](#4-useful-links)
+- [Terminology](#5-terminology)
 
-## Linting & formatting
+## 1. Introduction
 
-This repo follows the [Guardian's linting recommendations](https://github.com/guardian/recommendations/blob/main/client-side.md#coding-style) using the shared department configs:
+Dispatch gives editorial staff one place to compose and send breaking-news notifications.
 
-- [`@guardian/eslint-config`](https://github.com/guardian/csnx/tree/main/libs/%40guardian/eslint-config) for linting JavaScript, TypeScript and React (this bundles the TypeScript, React, hooks, a11y, imports and comments rule sets).
-- [`@guardian/prettier`](https://github.com/guardian/csnx/tree/main/libs/%40guardian/prettier) for formatting.
+It replaces a fragmented workflow spread across multiple systems and legacy tooling.
 
-ESLint is configured via [`eslint.config.js`](./eslint.config.js) (flat config). The React ruleset is scoped to the frontend app only.
+Email delivery currently integrates with Braze, and app push integration with the [notifications API](https://github.com/guardian/mobile-n10n).
 
-Available scripts (run from the repo root):
+## 2. Getting Started
 
-```sh
-# Lint everything
-bun run lint
+### Prerequisites
 
-# Lint and auto-fix where possible
-bun run lint:fix
+- This project relies on [Bun](https://bun.com/). On Mac OS install its latest version using Homebrew:
+  ```sh
+  brew install bun
+  ```
+- [dev-nginx](https://github.com/guardian/dev-nginx)
+- Docker (optional; required for local Postgres if needed)
 
-# Format all files
-bun run format
+### First-time setup
 
-# Check formatting without writing
-bun run format:check
-```
-
-Install the [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) VSCode extensions to get inline linting and format-on-save.
-
-## Install dependencies
-
-To setup [dev-nginx](https://github.com/guardian/dev-nginx) and install the dependencies for every app, package etc, simply invoke this while current working dir is the root of the repo:
-
-```sh
+```bash
 ./scripts/setup.sh
 ```
 
-## Install lint & format checks as a git hook using `lefthook`
+### Run locally
 
-The git hooks are installed automatically after `bun install` via the `prepare`
-script. If you ever need to (re)install them manually, run:
+Start both frontend and backend:
 
-```sh
-bunx lefthook install
-```
-
-Now, on each `git push`, ESLint and Prettier will check the files being pushed.
-
-### To add dependencies
-
-As we rely on Bun on pretty much everything here, to install npm modules we need to use bun. An example:
-
-```sh
-bun add some_npm_dependency
-
-# dev dependency
-bun add -D dev_dependency
-
-# targetting a specific app, package etc
-bun --filter backend add some_npm_module
-```
-
-Bun will generate or update the existing `bun.lock` file, similar to `package-lock.json`.
-
-## Docker compose
-
-Should we require to rely on Postgres DB. There's a minimal working `./docker/docker-compose.local.yml` file and project root `package.json` contains two helper scripts to start & stop docker services.
-
-To start services:
-
-```sh
-bun docker:compose:up
-```
-
-To stop them:
-
-```sh
-bun docker:compose:down
-```
-
-## Local development
-
-To run [dev-nginx](https://github.com/guardian/dev-nginx) for the project and run the frontend and backend apps, run the start script from the root of the repo:
-
-```sh
+```bash
 ./scripts/start.sh
 ```
 
-The app will be available on:
+Local URLs:
 
-- https://dispatch.local.dev-gutools.co.uk
-- https://dispatch-backend.local.dev-gutools.co.uk/
+- `https://dispatch.local.dev-gutools.co.uk`
+- `https://dispatch-backend.local.dev-gutools.co.uk/`
 
-You can also run each app separately as below.
+Run apps separately if needed:
 
-### Start backend server app
+```bash
+cd src/apps/frontend
+bun run dev
 
-Backend server app currently uses Express.js as its REST server. To start the backend app:
-
-```sh
-cd ./src/apps/backend
+cd src/apps/backend
 bun run dev
 ```
 
-The server will restart seamlessly upon any file changed during it's code changes.
+### Optional local Postgres
 
-### Start frontend app
+Should Postgres be required, there is a minimal working ./docker/docker-compose.local.yml file and two helper scripts to start & stop docker services.
 
-Frontend app uses React. To start the app:
-
-```sh
-cd ./src/apps/frontend
-bun run dev
+```bash
+bun run docker:compose:up
+bun run docker:compose:down
 ```
 
-## Running tests
+### Tests, linting, formatting, and type checks
 
-To run tests in the scope of the entire project:
+Run from the repo root:
 
-```sh
+```bash
 bun test
+bun run lint
+bun run lint:fix
+bun run format
+bun run format:check
+bun run typecheck
 ```
 
-To run on a specific app or package there are couple of ways:
+Run commands for one workspace package/app when needed:
 
-Having current working dir open inside that app:
-
-```sh
-cd ./src/apps/backend
-bun test
-```
-
-Using workspace filters, ie:
-
-```sh
+```bash
 bun --filter backend test
+bun --filter frontend typecheck
 ```
+
+Git hooks are managed with `lefthook` and installed automatically via `bun install` (`prepare` script).
+
+## 3. How It Works
+
+### Core technologies
+
+- Bun workspaces for package management and scripts.
+- React (frontend) and Express + Zod validation (backend).
+- AWS CDK (`@guardian/cdk`) for infrastructure definitions.
+
+### Repository layout
+
+- `src/apps/frontend`: UI for composing notifications.
+- `src/apps/backend`: API and channel request generation.
+- `src/packages/config`: shared config package.
+- `cdk`: infrastructure stack and deployment definitions.
+
+### Infrastructure model
+
+This is deployed using AWS API Gateway + Lambda.
+
+```mermaid
+flowchart LR
+    Editor[Editorial user] --> APIGW[API Gateway\ndispatch.gutools.co.uk]
+    APIGW --> Lambda[Lambda\nNode.js 24.x\nExpress app via serverless adapter]
+
+    Lambda --> Braze[Braze API\nemail channel]
+    Lambda -. planned .-> N10N[mobile-n10n notifications API\napp push channel]
+```
+
+## 4. Useful Links
+
+- Braze REST API: https://www.braze.com/docs/developer_guide/rest_api/sending_messages
+- Existing Breaking News tool: https://fronts.gutools.co.uk/breaking-news
+- Existing Breaking News tool code: https://github.com/guardian/facia-tool
+- Bun documentation: https://bun.sh/
+
+## 5. Terminology
+
+- **Segment**: A target audience group (`UK`, `US`, `AU`, `EU`, `ALL`).
+- **Delivery mode**: The dispatch timing strategy (`immediate`, `scheduled`, `intelligent`).
+- **Channel**: A delivery destination such as `email` or `app-notification`.
