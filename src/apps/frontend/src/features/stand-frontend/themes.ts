@@ -20,11 +20,11 @@ export const topBarTheme: TopBarTheme = {
 	collapsedNavMenu: {
 		button: {
 			color: semanticColors.text.strongerInverse,
-			active: { backgroundColor: baseColors.red[100] },
-			hovered: { backgroundColor: baseColors.red[100] },
+			active: { backgroundColor: baseColors.magenta[100] },
+			hovered: { backgroundColor: baseColors.magenta[100] },
 		},
 		popover: {
-			backgroundColor: baseColors.red[200],
+			backgroundColor: baseColors.magenta[200],
 		},
 	},
 	toolName: {
@@ -34,7 +34,7 @@ export const topBarTheme: TopBarTheme = {
 		shared: {
 			_menuOpen: {
 				selected: {
-					backgroundColor: baseColors.red[100],
+					backgroundColor: baseColors.magenta[100],
 				},
 			},
 		},

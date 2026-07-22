@@ -3,8 +3,8 @@ import pino from 'pino';
 
 const isProduction = env.NODE_ENV === 'production';
 
-// Paths to redact from logs to avoid leaking secrets (cookies, auth tokens, etc.).
-// Covers both the shapes produced by pino-http (req/res serializers) and plain objects.
+// Redact secrets from logs. Covers both pino-http's req/res serializer shapes
+// and plain objects.
 const redactPaths = [
 	'req.headers.cookie',
 	'req.headers.authorization',
