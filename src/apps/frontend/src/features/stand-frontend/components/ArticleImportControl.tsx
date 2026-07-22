@@ -5,11 +5,11 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { useContext } from 'react';
 import { mockCapiFetch } from '../../../mocks/mock-capi-fetch';
-import { NotificationContext } from '../NotificationContext';
+import { NotificationFormContext } from '../NotificationContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
 export const ArticleImportControl = () => {
-	const { notification, updateNotification } = useContext(NotificationContext);
+	const { notification, updateNotification } = useContext(NotificationFormContext);
 
 	const {
 		articleId = '',

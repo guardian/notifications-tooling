@@ -1,11 +1,11 @@
 import { Radio, RadioGroup } from '@guardian/stand/RadioGroup';
 import { useContext } from 'react';
-import { NotificationContext } from '../NotificationContext';
+import { NotificationFormContext } from '../NotificationContext';
 import type { ChannelOption } from '../types';
 import { channelOptionNameMap } from '../types';
 
 export const ChannelOptions = () => {
-	const { notification, updateNotification } = useContext(NotificationContext);
+	const { notification, updateNotification } = useContext(NotificationFormContext);
 	const channel = notification.parameters?.type;
 
 	return (

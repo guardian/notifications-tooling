@@ -2,7 +2,7 @@ import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
 import type { NotificationAction, NotificationState } from './types';
 
-export const NotificationContext = createContext<{
+export const NotificationFormContext = createContext<{
 	notification: NotificationState;
 	updateNotification: ActionDispatch<[NotificationAction]>;
 }>({

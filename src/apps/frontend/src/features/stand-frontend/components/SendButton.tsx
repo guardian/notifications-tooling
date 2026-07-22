@@ -10,7 +10,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { mockSendNotification } from '../../../mocks/mock-send-notification';
 import { checkIfReadyToSend } from '../form-validation';
-import { NotificationContext } from '../NotificationContext';
+import { NotificationFormContext } from '../NotificationContext';
 import type { NotificationState } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 
@@ -26,7 +26,7 @@ const buttonText = (
 };
 
 export const SendButton = () => {
-	const { notification, updateNotification } = useContext(NotificationContext);
+	const { notification, updateNotification } = useContext(NotificationFormContext);
 	const {
 		parameters,
 		confirmSendModalOpen,

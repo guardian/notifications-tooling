@@ -3,7 +3,7 @@ import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
 import { defaultState, notificationReducer } from './notification-reducer';
-import { NotificationContext } from './NotificationContext';
+import { NotificationFormContext } from './NotificationContext';
 import type {
 	NotificationAction,
 	NotificationState,
@@ -52,14 +52,14 @@ export const EmailNotificationPage = () => {
 
 	return (
 		<UserContext.Provider value={user}>
-			<NotificationContext.Provider
+			<NotificationFormContext.Provider
 				value={{ notification, updateNotification }}
 			>
 				<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
 					{currentTab === 'create' && <DispatchTab />}
 					{currentTab === 'history' && <HistoryTab />}
 				</MainLayout>
-			</NotificationContext.Provider>
+			</NotificationFormContext.Provider>
 		</UserContext.Provider>
 	);
 };

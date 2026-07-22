@@ -7,7 +7,7 @@ import {
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { useContext } from 'react';
-import { NotificationContext } from '../NotificationContext';
+import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
@@ -16,7 +16,7 @@ import { EmailPreviewSection } from './EmailPreviewSection';
 export const DispatchTab = () => {
 	const {
 		notification: { sendingResult },
-	} = useContext(NotificationContext);
+	} = useContext(NotificationFormContext);
 
 	return (
 		<Layout.Main theme={layoutMainTheme}>

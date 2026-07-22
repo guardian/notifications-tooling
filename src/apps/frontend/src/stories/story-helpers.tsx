@@ -1,20 +1,31 @@
-import type { ReactNode } from 'react';
-import { defaultState } from '../features/stand-frontend/notification-reducer';
-import { NotificationContext } from '../features/stand-frontend/NotificationContext';
-import type { NotificationState } from '../features/stand-frontend/types';
+import { type ReactNode, useReducer } from 'react';
+import {
+	defaultState,
+	notificationReducer,
+} from '../features/stand-frontend/notification-reducer';
+import { NotificationFormContext } from '../features/stand-frontend/NotificationContext';
+import type {
+	NotificationAction,
+	NotificationState,
+} from '../features/stand-frontend/types';
 
 export const WithNotificationContext = (
 	reactNode: ReactNode,
 	notificationState: NotificationState = defaultState,
 ) => {
+	const [notification, updateNotification] = useReducer<
+		NotificationState,
+		[NotificationAction]
+	>(notificationReducer, notificationState);
+
 	return (
-		<NotificationContext
+		<NotificationFormContext
 			value={{
-				notification: notificationState,
-				updateNotification: () => {},
+				notification,
+				updateNotification,
 			}}
 		>
 			{reactNode}
-		</NotificationContext>
+		</NotificationFormContext>
 	);
 };

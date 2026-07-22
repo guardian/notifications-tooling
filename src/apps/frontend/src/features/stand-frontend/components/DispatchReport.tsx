@@ -8,7 +8,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
-import { NotificationContext } from '../NotificationContext';
+import { NotificationFormContext } from '../NotificationContext';
 import {
 	audienceSegmentNameMap,
 	emailDeliveryOptionNameMap,
@@ -61,7 +61,7 @@ const ParameterDisplay = ({
 };
 
 export const DispatchReport = () => {
-	const { updateNotification, notification } = useContext(NotificationContext);
+	const { updateNotification, notification } = useContext(NotificationFormContext);
 
 	const { sendingResult } = notification;
 

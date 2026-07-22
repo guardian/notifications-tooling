@@ -2,7 +2,7 @@ import { Checkbox, CheckboxGroup } from '@guardian/stand/Checkbox';
 import { Radio, RadioGroup } from '@guardian/stand/RadioGroup';
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
-import { NotificationContext } from '../NotificationContext';
+import { NotificationFormContext } from '../NotificationContext';
 import type { AudienceSegment, EmailDeliveryOption } from '../types';
 import {
 	audienceSegmentNameMap,
@@ -14,7 +14,7 @@ import { NotificationTextInput } from './NotificationTextInput';
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
 
 export const EmailFields = () => {
-	const { notification, updateNotification } = useContext(NotificationContext);
+	const { notification, updateNotification } = useContext(NotificationFormContext);
 
 	if (notification.parameters?.type !== 'email') {
 		return null;
