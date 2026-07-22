@@ -40,7 +40,7 @@ defined ones.
   for the enum name and its members (e.g. `NotificationChannel.AppPushNotification`);
   module-level constants use camelCase (e.g. `newsletterSegments`). Do **not** use
   UPPER_SNAKE_CASE for consts/enums (except pre-existing exceptions like
-  `MAX_AUDIENCE_SEGMENTS`).
+  `MAX_APP_PUSH_SEGMENTS` / `MAX_NEWSLETTER_SEGMENTS`).
 
 ## Comments
 

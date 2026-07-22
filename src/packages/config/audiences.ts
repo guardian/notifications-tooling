@@ -155,6 +155,19 @@ export const appPushNotificationSegmentIds = Object.keys(
 	appPushNotificationSegments,
 ) as [AppPushNotificationSegmentId, ...AppPushNotificationSegmentId[]];
 
-export const MAX_AUDIENCE_SEGMENTS = 20;
+/**
+ * mobile-n10n's `POST /push/topic` rejects a push targeting more than 20 topics
+ * (`Main.pushTopics`: `val MaxTopics = 20` → `400 "Too many topics, maximum:
+ * 20"`). Each push segment resolves to one mobile-n10n topic, so this caps the
+ * segments a single push plan may target.
+ */
+export const MAX_APP_PUSH_SEGMENTS = 20;
+
+/**
+ * Newsletter segments resolve to Braze campaigns. Capped independently of push
+ * (mobile-n10n) so a change to either downstream contract can't silently move
+ * the other, even though both currently sit at 20.
+ */
+export const MAX_NEWSLETTER_SEGMENTS = 20;
 
 export const MAX_TEST_EMAIL_RECIPIENTS = 20;
