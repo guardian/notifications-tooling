@@ -7,8 +7,19 @@ export const checkIfReadyToSend = (
 
 	if (parameters?.type === 'email') {
 		// TO DO - validate in full
-		const { subject = '', preview = '' } = parameters;
-		return !!fetchedArticleId && subject.length > 0 && preview.length > 0;
+		const {
+			subject = '',
+			preview = '',
+			emailDeliveryOption,
+			audienceSegments = [],
+		} = parameters;
+		return (
+			!!fetchedArticleId &&
+			subject.length > 0 &&
+			preview.length > 0 &&
+			audienceSegments.length > 0 &&
+			!!emailDeliveryOption
+		);
 	}
 	if (parameters?.type === 'push') {
 		return false;

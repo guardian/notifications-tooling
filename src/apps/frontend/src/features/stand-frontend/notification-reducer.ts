@@ -1,14 +1,21 @@
 import { parseHtml } from '../../util/html-helpers';
-import type { NotificationAction, NotificationState } from './types';
+import type {
+	EmailNotification,
+	NotificationAction,
+	NotificationState,
+} from './types';
+
+export const defaultEmailParams: EmailNotification = {
+	type: 'email',
+	kicker: 'breaking-news',
+	emailDeliveryOption: 'immediate',
+};
 
 export const defaultState: NotificationState = {
 	isFetchingContent: false,
 	isWaitingForSend: false,
 	confirmSendModalOpen: false,
-	parameters: {
-		type: 'email',
-		kicker: 'breaking-news',
-	},
+	parameters: defaultEmailParams,
 };
 
 export const notificationReducer = (
@@ -29,6 +36,17 @@ export const notificationReducer = (
 				...state,
 				parameters: { ...state.parameters, ...action.mod },
 			};
+		}
+
+		case 'set-channel': {
+			switch (action.channel) {
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- will add more
+				case 'email':
+					return {
+						...state,
+						parameters: defaultEmailParams,
+					};
+			}
 		}
 
 		case 'waiting-for-article': {

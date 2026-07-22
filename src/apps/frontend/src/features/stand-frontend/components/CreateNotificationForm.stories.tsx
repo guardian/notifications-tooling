@@ -4,7 +4,7 @@ import { articleFixture } from '../../../mocks/capi-fixtures';
 import { WithNotificationContext } from '../../../stories/story-helpers';
 import { parseHtml } from '../../../util/html-helpers';
 import { defaultState } from '../notification-reducer';
-import type { NotificationState } from '../types';
+import type { EmailNotification, NotificationState } from '../types';
 import { CreateNotificationForm } from './CreateNotificationForm';
 
 type StoryArgs = { notificationState: NotificationState };
@@ -45,6 +45,15 @@ export const Default: Story = {
 	},
 };
 
+const completeEmailParamer: EmailNotification = {
+	type: 'email',
+	kicker: 'exclusive',
+	subject: articleFixture.fields?.headline,
+	preview: parseHtml(articleFixture.fields?.standfirst).textContent,
+	emailDeliveryOption: 'immediate',
+	audienceSegments: ['AU', 'UK'],
+};
+
 export const Empty: Story = {
 	args: {
 		notificationState: {
@@ -81,12 +90,7 @@ export const PopulatedEmail: Story = {
 			articleId: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
-			parameters: {
-				type: 'email',
-				kicker: 'exclusive',
-				subject: articleFixture.fields?.headline,
-				preview: parseHtml(articleFixture.fields?.standfirst).textContent,
-			},
+			parameters: completeEmailParamer,
 		},
 	},
 };
@@ -98,12 +102,7 @@ export const ConfirmationStep: Story = {
 			articleId: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
-			parameters: {
-				type: 'email',
-				kicker: 'exclusive',
-				subject: articleFixture.fields?.headline,
-				preview: parseHtml(articleFixture.fields?.standfirst).textContent,
-			},
+			parameters: completeEmailParamer,
 			confirmSendModalOpen: true,
 		},
 	},
@@ -116,12 +115,7 @@ export const SendingEmail: Story = {
 			articleId: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
-			parameters: {
-				type: 'email',
-				kicker: 'exclusive',
-				subject: articleFixture.fields?.headline,
-				preview: parseHtml(articleFixture.fields?.standfirst).textContent,
-			},
+			parameters: completeEmailParamer,
 			confirmSendModalOpen: true,
 			isWaitingForSend: true,
 		},

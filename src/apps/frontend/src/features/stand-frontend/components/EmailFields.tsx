@@ -1,7 +1,16 @@
+import { Checkbox, CheckboxGroup } from '@guardian/stand/Checkbox';
+import { Radio, RadioGroup } from '@guardian/stand/RadioGroup';
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
 import { NotificationContext } from '../NotificationContext';
-import { kickerNameMap } from '../types';
+import type {
+	AudienceSegment,
+	EmailDeliveryOption} from '../types';
+import {
+	audienceSegmentNameMap,
+	emailDeliveryOptionNameMap,
+	kickerNameMap,
+} from '../types';
 import { NotificationTextInput } from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
@@ -13,7 +22,13 @@ export const EmailFields = () => {
 		return null;
 	}
 
-	const { kicker, subject = '', preview = '' } = notification.parameters;
+	const {
+		kicker,
+		subject = '',
+		preview = '',
+		audienceSegments = [],
+		emailDeliveryOption,
+	} = notification.parameters;
 
 	return (
 		<>
@@ -81,6 +96,44 @@ export const EmailFields = () => {
 				}
 				softLimit={100}
 			/>
+
+			<CheckboxGroup
+				label="Audience Segment"
+				description="Choose the audience the email newsletter will be sent to"
+				value={audienceSegments}
+				onChange={(newValue) => {
+					updateNotification({
+						type: 'modify-email-parameters',
+						mod: { audienceSegments: newValue as AudienceSegment[] },
+					});
+				}}
+			>
+				{Object.entries(audienceSegmentNameMap).map(([segment, name]) => (
+					<Checkbox key={segment} value={segment}>
+						{name}
+					</Checkbox>
+				))}
+			</CheckboxGroup>
+
+			<RadioGroup
+				label="Delivery and timing"
+				description="Choose whether the app alert is sent immediately or scheduled for later"
+				value={emailDeliveryOption ?? null}
+				onChange={(newValue) => {
+					updateNotification({
+						type: 'modify-email-parameters',
+						mod: { emailDeliveryOption: newValue as EmailDeliveryOption },
+					});
+				}}
+			>
+				{Object.entries(emailDeliveryOptionNameMap).map(
+					([deliveryOption, { name }]) => (
+						<Radio key={deliveryOption} value={deliveryOption} >
+							{name}
+						</Radio>
+					),
+				)}
+			</RadioGroup>
 		</>
 	);
 };

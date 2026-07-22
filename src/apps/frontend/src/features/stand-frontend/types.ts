@@ -10,6 +10,18 @@ export type UserData = {
 
 export type TabName = 'create' | 'history';
 
+// for phase one, email is the only supported channel
+export type ChannelOption = 'email';
+export const channelOptionNameMap: Record<
+	ChannelOption,
+	{ name: string; description: string }
+> = {
+	email: {
+		name: 'Newsletter email',
+		description: 'Sends via the braze breaking-news campaign',
+	},
+};
+
 export type NotificationState = {
 	articleId?: string;
 	isFetchingContent: boolean;
@@ -22,12 +34,29 @@ export type NotificationState = {
 	sendingResult?: SendingResult;
 };
 
-type KickerId = 'breaking-news' | 'exclusive';
-
+export type KickerId = 'breaking-news' | 'exclusive';
 export const kickerNameMap: Record<KickerId | 'undefined', string> = {
 	'breaking-news': 'Breaking News',
 	exclusive: 'Exclusive',
 	undefined: 'None',
+};
+
+export type AudienceSegment = 'UK' | 'US' | 'AU';
+export const audienceSegmentNameMap: Record<AudienceSegment, string> = {
+	UK: 'United Kingdom',
+	US: 'United States',
+	AU: 'Australia',
+};
+
+export type EmailDeliveryOption = 'immediate';
+export const emailDeliveryOptionNameMap: Record<
+	EmailDeliveryOption,
+	{ name: string; description: string }
+> = {
+	immediate: {
+		name: 'Immediate',
+		description: 'Sends right now via Braze',
+	},
 };
 
 export type EmailNotification = {
@@ -36,6 +65,8 @@ export type EmailNotification = {
 	subject?: string;
 	preview?: string;
 	emailHtml?: string;
+	audienceSegments?: AudienceSegment[];
+	emailDeliveryOption?: EmailDeliveryOption;
 };
 
 export type PushNotification = {
@@ -51,6 +82,10 @@ export type NotificationAction =
 	| {
 			type: 'set-article-id';
 			text: string;
+	  }
+	| {
+			type: 'set-channel';
+			channel: ChannelOption;
 	  }
 	| {
 			type: 'modify-email-parameters';
