@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'bun:test';
 import {
 	appPushNotificationSegmentIds,
-	MAX_AUDIENCE_SEGMENTS,
+	MAX_APP_PUSH_SEGMENTS,
+	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegmentIds,
 	NotificationChannel,
@@ -625,6 +626,20 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/newsletter/audience/items');
 		});
 
+		it(`rejects more than ${MAX_NEWSLETTER_SEGMENTS} segments`, () => {
+			const segments = Array.from(
+				{ length: MAX_NEWSLETTER_SEGMENTS + 1 },
+				() => 'morning-briefing',
+			);
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({ audience: { type: 'segment', items: segments } }),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+
 		it('rejects duplicate segments', () => {
 			expect(
 				pathsOf(
@@ -757,9 +772,9 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/app-push/audience/items');
 		});
 
-		it(`rejects more than ${MAX_AUDIENCE_SEGMENTS} segments`, () => {
+		it(`rejects more than ${MAX_APP_PUSH_SEGMENTS} segments`, () => {
 			const segments = Array.from(
-				{ length: MAX_AUDIENCE_SEGMENTS + 1 },
+				{ length: MAX_APP_PUSH_SEGMENTS + 1 },
 				() => 'breaking-news-uk',
 			);
 			expect(

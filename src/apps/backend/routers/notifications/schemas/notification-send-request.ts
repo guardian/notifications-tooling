@@ -1,6 +1,7 @@
 import {
 	appPushNotificationSegmentIds,
-	MAX_AUDIENCE_SEGMENTS,
+	MAX_APP_PUSH_SEGMENTS,
+	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegmentIds,
 	NotificationChannel,
@@ -114,26 +115,35 @@ const contentSchema = z.strictObject({
  * A channel-agnostic audience addressed by known segment ids; each channel
  * accepts only its own. The broker resolves segments to the downstream Braze
  * campaign / mobile-n10n topic, keeping those internals out of the payload.
+ * `maxSegments` is the channel's downstream cap (Braze campaigns for
+ * newsletter, mobile-n10n topics for push), which differ per contract.
  */
 const segmentAudience = (
 	segmentIds:
 		typeof newsletterSegmentIds | typeof appPushNotificationSegmentIds,
+	maxSegments: number,
 ) =>
 	z.strictObject({
 		type: z.literal('segment'),
 		items: z
 			.array(z.enum(segmentIds))
 			.min(1)
-			.max(MAX_AUDIENCE_SEGMENTS)
+			.max(maxSegments)
 			.refine(hasUniqueItems, { message: 'segment ids must be unique.' })
 			.meta({
-				description: `Up to ${MAX_AUDIENCE_SEGMENTS} known audience segment ids to deliver to. The valid set is served by GET /v1/channels/audiences.`,
+				description: `Up to ${maxSegments} known audience segment ids to deliver to. The valid set is served by GET /v1/channels/audiences.`,
 				example: [segmentIds[0]],
 			}),
 	});
 
-const appPushSegmentAudience = segmentAudience(appPushNotificationSegmentIds);
-const newsletterSegmentAudience = segmentAudience(newsletterSegmentIds);
+const appPushSegmentAudience = segmentAudience(
+	appPushNotificationSegmentIds,
+	MAX_APP_PUSH_SEGMENTS,
+);
+const newsletterSegmentAudience = segmentAudience(
+	newsletterSegmentIds,
+	MAX_NEWSLETTER_SEGMENTS,
+);
 
 /** Ad-hoc test recipients addressed by email, bypassing segments. */
 const testEmailAudience = z.strictObject({
