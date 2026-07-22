@@ -4,7 +4,7 @@ import { NotificationContext } from '../NotificationContext';
 import type { ChannelOption } from '../types';
 import { channelOptionNameMap } from '../types';
 
-export const CHannelOptions = () => {
+export const ChannelOptions = () => {
 	const { notification, updateNotification } = useContext(NotificationContext);
 	const channel = notification.parameters?.type;
 

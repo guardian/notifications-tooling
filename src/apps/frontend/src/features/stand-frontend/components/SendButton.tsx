@@ -91,6 +91,11 @@ export const SendButton = () => {
 					}
 					updateNotification({ type: 'set-show-confirm-send', isOpen });
 				}}
+				theme={{
+					overlay: {
+						position: 'fixed',
+					},
+				}}
 			>
 				<Dialog aria-label="confirm notification send">
 					<Dialog.Dismiss ariaLabel="Close Modal" />
