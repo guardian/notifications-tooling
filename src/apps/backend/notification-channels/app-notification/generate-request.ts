@@ -1,6 +1,23 @@
-export type AppNotificationRequestPlaceholder = {
-	status: 'not_implemented';
+export type AppNotificationRequest = {
+	topics: ReadonlyArray<{ type: string; name: string }>;
+	title: string;
+	body: string;
+	link: string;
+	media?: {
+		type: 'image';
+		imageUrl: string;
+		thumbnailUrl?: string;
+	};
 };
 
-export const generateAppNotificationRequest =
-	(): AppNotificationRequestPlaceholder => ({ status: 'not_implemented' });
+export type AppNotificationRequestPlaceholder = {
+	status: 'not_implemented';
+	request: AppNotificationRequest;
+};
+
+export const generateAppNotificationRequest = (
+	request: AppNotificationRequest,
+): AppNotificationRequestPlaceholder => ({
+	status: 'not_implemented',
+	request,
+});

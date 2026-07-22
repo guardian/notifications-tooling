@@ -13,6 +13,13 @@ const config: NotificationChannelConfig = {
 	},
 };
 
+const appNotificationRequest = {
+	topics: [{ type: 'breaking', name: 'uk' }],
+	title: 'Breaking news',
+	body: 'Lead summary',
+	link: 'https://www.theguardian.com/world/lead',
+};
+
 describe('generateNotificationChannelRequest', () => {
 	it('generates an email request for the selected office campaign', () => {
 		expect(
@@ -42,12 +49,13 @@ describe('generateNotificationChannelRequest', () => {
 	it('reports that app notification generation is not implemented', () => {
 		expect(
 			generateNotificationChannelRequest(
-				{ channel: 'app-notification' },
+				{ channel: 'app-notification', request: appNotificationRequest },
 				config,
 			),
 		).toEqual({
 			channel: 'app-notification',
 			status: 'not_implemented',
+			request: appNotificationRequest,
 		});
 	});
 });
@@ -62,7 +70,7 @@ describe('generateNotificationChannelRequests', () => {
 					html: '<html>UK news</html>',
 					subject: 'UK briefing',
 				},
-				{ channel: 'app-notification' },
+				{ channel: 'app-notification', request: appNotificationRequest },
 			],
 			config,
 		);
@@ -83,6 +91,7 @@ describe('generateNotificationChannelRequests', () => {
 		expect(results[1]).toEqual({
 			channel: 'app-notification',
 			status: 'not_implemented',
+			request: appNotificationRequest,
 		});
 	});
 
@@ -96,7 +105,7 @@ describe('generateNotificationChannelRequests', () => {
 						html: '<html>US news</html>',
 						subject: 'US briefing',
 					},
-					{ channel: 'app-notification' },
+					{ channel: 'app-notification', request: appNotificationRequest },
 				],
 				{
 					brazeCampaignIds: {

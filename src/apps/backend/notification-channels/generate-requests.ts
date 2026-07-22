@@ -1,4 +1,7 @@
-import { generateAppNotificationRequest } from './app-notification/generate-request';
+import {
+	type AppNotificationRequest,
+	generateAppNotificationRequest,
+} from './app-notification/generate-request';
 import {
 	type AudienceSegment,
 	type BrazeCampaignIds,
@@ -18,6 +21,7 @@ export type NotificationChannelRequestInput =
 	  }
 	| {
 			channel: 'app-notification';
+			request: AppNotificationRequest;
 	  };
 
 export type NotificationChannelConfig = {
@@ -33,6 +37,7 @@ export type GeneratedNotificationChannelRequest =
 	| {
 			channel: 'app-notification';
 			status: 'not_implemented';
+			request: AppNotificationRequest;
 	  };
 
 export const generateNotificationChannelRequest = (
@@ -56,7 +61,7 @@ export const generateNotificationChannelRequest = (
 		case 'app-notification':
 			return {
 				channel: 'app-notification',
-				...generateAppNotificationRequest(),
+				...generateAppNotificationRequest(input.request),
 			};
 	}
 };
