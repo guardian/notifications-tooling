@@ -1,4 +1,5 @@
 import { acceptedNotificationSchema } from './accepted-notification';
+import { channelConstraintsSchema } from './channel-constraints';
 import { healthStatusSchema } from './health-status';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
@@ -15,4 +16,5 @@ export const schemas = {
 	AcceptedNotification: acceptedNotificationSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,
 	NotificationValidationError: notificationValidationErrorSchema,
+	ChannelConstraints: channelConstraintsSchema,
 } as const;
