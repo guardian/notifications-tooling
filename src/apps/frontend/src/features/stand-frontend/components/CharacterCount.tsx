@@ -1,6 +1,12 @@
 import { css } from '@emotion/react';
-import { semanticColors, semanticSizing } from '@guardian/stand';
+import {
+	baseSpacing,
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import type { ReactNode } from 'react';
 
 interface Props {
 	count: number;
@@ -12,8 +18,22 @@ interface Props {
 const styles = {
 	container: css({
 		display: 'flex',
-		justifyContent: 'flex-end',
+		justifyContent: 'space-between',
 		maxWidth: semanticSizing.input.maxWidthPx,
+		paddingTop: semanticSpacing.stackXxs,
+		flexWrap: 'wrap-reverse',
+		gap: semanticSpacing.stackXs,
+	}),
+
+	badgeAndText: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+	}),
+
+	countAndLimit: css({
+		marginLeft: 'auto',
+		flexShrink: 0,
 	}),
 
 	count: (level?: 'warn' | 'error') => {
@@ -24,22 +44,55 @@ const styles = {
 			case 'error':
 				return css({
 					...base,
+					fontWeight: 'bold',
 					color: semanticColors.text.error,
-					backgroundColor: semanticColors.fill.errorWeak,
 				});
 
 			case 'warn':
 				return css({
 					...base,
+					fontWeight: 'bold',
 					display: 'inline-block',
 					color: semanticColors.text.warning,
-					backgroundColor: semanticColors.fill.warningWeak,
 				});
 
 			default:
 				return css(base);
 		}
 	},
+};
+
+// TODO - replace with Stand/Badge when released
+const Badge = ({
+	children,
+	color,
+}: {
+	children: ReactNode;
+	color: 'green' | 'yellow' | 'red';
+}) => {
+	const getBackgroundColor = (color: 'green' | 'yellow' | 'red') => {
+		switch (color) {
+			case 'green':
+				return semanticColors.fill.greenWeak;
+			case 'yellow':
+				return semanticColors.fill.yellowWeak;
+			case 'red':
+				return semanticColors.fill.redWeak;
+		}
+	};
+	return (
+		<div
+			css={{
+				display: 'inline-block',
+				paddingLeft: baseSpacing['4Px'],
+				paddingRight: baseSpacing['4Px'],
+				lineHeight: 1,
+				backgroundColor: getBackgroundColor(color),
+			}}
+		>
+			<Typography variant="bodyXs">{children}</Typography>
+		</div>
+	);
 };
 
 export const CharacterCount = ({
@@ -52,14 +105,26 @@ export const CharacterCount = ({
 		count <= softLimit ? undefined : count <= hardLimit ? 'warn' : 'error';
 
 	return (
-		<div
-			css={styles.container}
-			aria-live="polite"
-			aria-label={`${fieldDescription} character count`}
-		>
-			<Typography cssOverrides={styles.count(warningLevel)}>{count}</Typography>
-			<Typography>/</Typography>
-			<Typography>{softLimit}</Typography>
+		<div css={styles.container}>
+			<div css={styles.badgeAndText}>
+				{!warningLevel && <Badge color="green">Recommended</Badge>}
+				{warningLevel === 'warn' && <Badge color="yellow">Warning</Badge>}
+				{warningLevel === 'error' && <Badge color="red">Limit Reached</Badge>}
+				<Typography variant="bodySm">
+					{softLimit} characters or fewer preferred
+				</Typography>
+			</div>
+			<div
+				aria-live="polite"
+				aria-label={`${fieldDescription} character count`}
+				css={styles.countAndLimit}
+			>
+				<Typography cssOverrides={styles.count(warningLevel)}>
+					{count}
+				</Typography>
+				<Typography>/</Typography>
+				<Typography>{softLimit}</Typography>
+			</div>
 		</div>
 	);
 };
