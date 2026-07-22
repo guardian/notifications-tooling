@@ -38,11 +38,11 @@ describe('GET /v1/channels/constraints', () => {
 		expect(await response.json()).toEqual(channelConstraints);
 	});
 
-	it('exposes exactly the supported channels as top-level keys', async () => {
+	it('exposes exactly the supported channels under `channels`', async () => {
 		const response = await getConstraints();
 		const body = (await response.json()) as typeof channelConstraints;
 
-		expect(Object.keys(body).sort()).toEqual(
+		expect(Object.keys(body.channels).sort()).toEqual(
 			Object.values(NotificationChannel).sort(),
 		);
 	});
@@ -51,7 +51,7 @@ describe('GET /v1/channels/constraints', () => {
 		const response = await getConstraints();
 		const body = (await response.json()) as typeof channelConstraints;
 
-		const push = body[NotificationChannel.AppPushNotification];
+		const push = body.channels[NotificationChannel.AppPushNotification];
 
 		expect(push.content).toEqual(
 			notificationChannelContentLimits[NotificationChannel.AppPushNotification],
@@ -65,7 +65,7 @@ describe('GET /v1/channels/constraints', () => {
 		const response = await getConstraints();
 		const body = (await response.json()) as typeof channelConstraints;
 
-		const newsletter = body[NotificationChannel.Newsletter];
+		const newsletter = body.channels[NotificationChannel.Newsletter];
 
 		expect(newsletter.content).toEqual(
 			notificationChannelContentLimits[NotificationChannel.Newsletter],

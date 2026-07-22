@@ -2,9 +2,9 @@ import { NotificationChannel } from '@config';
 import { channelConstraints } from '../../../../channels';
 
 const pushConstraints =
-	channelConstraints[NotificationChannel.AppPushNotification];
+	channelConstraints.channels[NotificationChannel.AppPushNotification];
 const newsletterConstraints =
-	channelConstraints[NotificationChannel.Newsletter];
+	channelConstraints.channels[NotificationChannel.Newsletter];
 
 /** A `{ maxLength }` limit applied to a single text field. */
 const maxLengthSchema = {
@@ -26,97 +26,103 @@ const maxLengthSchema = {
 export const channelConstraintsSchema = {
 	type: 'object',
 	description: 'Per-channel validation rules, keyed by channel.',
-	required: [
-		NotificationChannel.AppPushNotification,
-		NotificationChannel.Newsletter,
-	],
+	required: ['channels'],
 	properties: {
-		[NotificationChannel.AppPushNotification]: {
+		channels: {
 			type: 'object',
-			required: ['content', 'compose', 'audience'],
+			required: [
+				NotificationChannel.AppPushNotification,
+				NotificationChannel.Newsletter,
+			],
 			properties: {
-				content: {
+				[NotificationChannel.AppPushNotification]: {
 					type: 'object',
-					required: ['title', 'body'],
+					required: ['content', 'compose', 'audience'],
 					properties: {
-						title: maxLengthSchema,
-						body: maxLengthSchema,
+						content: {
+							type: 'object',
+							required: ['title', 'body'],
+							properties: {
+								title: maxLengthSchema,
+								body: maxLengthSchema,
+							},
+							example: pushConstraints.content,
+						},
+						compose: {
+							type: 'object',
+							required: ['minItems', 'maxItems'],
+							properties: {
+								minItems: {
+									type: 'integer',
+									description:
+										'The minimum number of content items a plan must compose.',
+								},
+								maxItems: {
+									type: 'integer',
+									description:
+										'The maximum number of content items a plan may compose.',
+								},
+							},
+							example: pushConstraints.compose,
+						},
+						audience: {
+							type: 'object',
+							required: ['maxSegments'],
+							properties: {
+								maxSegments: {
+									type: 'integer',
+									description:
+										'The maximum number of audience segments a push may target.',
+								},
+							},
+							example: pushConstraints.audience,
+						},
 					},
-					example: pushConstraints.content,
 				},
-				compose: {
+				[NotificationChannel.Newsletter]: {
 					type: 'object',
-					required: ['minItems', 'maxItems'],
+					required: ['content', 'compose', 'audience'],
 					properties: {
-						minItems: {
-							type: 'integer',
-							description:
-								'The minimum number of content items a plan must compose.',
+						content: {
+							type: 'object',
+							required: ['title', 'body'],
+							properties: {
+								title: maxLengthSchema,
+								body: maxLengthSchema,
+							},
+							example: newsletterConstraints.content,
 						},
-						maxItems: {
-							type: 'integer',
-							description:
-								'The maximum number of content items a plan may compose.',
+						compose: {
+							type: 'object',
+							required: ['minItems', 'subject'],
+							properties: {
+								minItems: {
+									type: 'integer',
+									description:
+										'The minimum number of content items a newsletter plan must compose.',
+								},
+								subject: maxLengthSchema,
+							},
+							example: newsletterConstraints.compose,
+						},
+						audience: {
+							type: 'object',
+							required: ['maxSegments', 'maxTestRecipients'],
+							properties: {
+								maxSegments: {
+									type: 'integer',
+									description:
+										'The maximum number of audience segments a newsletter may target.',
+								},
+								maxTestRecipients: {
+									type: 'integer',
+									description:
+										'The maximum number of ad-hoc test email recipients a newsletter may target.',
+								},
+							},
+							example: newsletterConstraints.audience,
 						},
 					},
-					example: pushConstraints.compose,
-				},
-				audience: {
-					type: 'object',
-					required: ['maxSegments'],
-					properties: {
-						maxSegments: {
-							type: 'integer',
-							description:
-								'The maximum number of audience segments a push may target.',
-						},
-					},
-					example: pushConstraints.audience,
-				},
-			},
-		},
-		[NotificationChannel.Newsletter]: {
-			type: 'object',
-			required: ['content', 'compose', 'audience'],
-			properties: {
-				content: {
-					type: 'object',
-					required: ['title', 'body'],
-					properties: {
-						title: maxLengthSchema,
-						body: maxLengthSchema,
-					},
-					example: newsletterConstraints.content,
-				},
-				compose: {
-					type: 'object',
-					required: ['minItems', 'subject'],
-					properties: {
-						minItems: {
-							type: 'integer',
-							description:
-								'The minimum number of content items a newsletter plan must compose.',
-						},
-						subject: maxLengthSchema,
-					},
-					example: newsletterConstraints.compose,
-				},
-				audience: {
-					type: 'object',
-					required: ['maxSegments', 'maxTestRecipients'],
-					properties: {
-						maxSegments: {
-							type: 'integer',
-							description:
-								'The maximum number of audience segments a newsletter may target.',
-						},
-						maxTestRecipients: {
-							type: 'integer',
-							description:
-								'The maximum number of ad-hoc test email recipients a newsletter may target.',
-						},
-					},
-					example: newsletterConstraints.audience,
 				},
 			},
 		},
