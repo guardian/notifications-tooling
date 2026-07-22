@@ -1,6 +1,6 @@
 import { App } from 'aws-cdk-lib';
-import { describe, expect, it } from 'bun:test';
 import { Template } from 'aws-cdk-lib/assertions';
+import { describe, expect, it } from 'bun:test';
 import { DispatchStack } from './notifications';
 
 describe('The Notifications stack', () => {
