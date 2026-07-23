@@ -52,7 +52,7 @@ export const WithDeliveryTiming: Story = {
 	args: {
 		selectedSegments: [],
 		selectedChannel: undefined,
-		selectedDeliveryTiming: 'Immediate send',
+		selectedDeliveryTiming: 'Immediate',
 	},
 };
 
@@ -68,6 +68,6 @@ export const FullyPopulated: Story = {
 	args: {
 		selectedSegments: ['UK', 'US', 'AU'],
 		selectedChannel: 'Newsletter email',
-		selectedDeliveryTiming: 'Immediate send',
+		selectedDeliveryTiming: 'Immediate',
 	},
 };
