@@ -58,11 +58,11 @@ export const SendButton = () => {
 				display: 'flex',
 				flexDirection: 'column',
 				alignItems: 'flex-start',
-				gap: semanticSpacing.stackXs,
+				gap: semanticSpacing.stackXxs,
 			}}
 		>
 			<Typography variant="labelFormCompactMd">Send</Typography>
-			<Typography variant="helpTextFormMd">
+			<Typography variant="helpTextFormMd" color={semanticColors.text.weak}>
 				Before sending, review in the preview on the right
 			</Typography>
 			<Button
@@ -105,7 +105,7 @@ export const SendButton = () => {
 					<Dialog.Content>
 						Sent newsletter emails cannot be undone
 					</Dialog.Content>
-					<Dialog.Buttons>
+					<Dialog.Buttons theme={{ flexDirection: 'row' }}>
 						<Button
 							isDisabled={isWaitingForSend}
 							variant="tertiary"
