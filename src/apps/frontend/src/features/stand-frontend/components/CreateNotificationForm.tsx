@@ -42,6 +42,7 @@ export const CreateNotificationForm = ({
 				<TextInput
 					label="Article"
 					description="Copy and paste a Guardian URL below"
+					id="article-section"
 				/>
 				<ChannelSelector
 					selectedChannel={selectedChannel}
@@ -50,6 +51,7 @@ export const CreateNotificationForm = ({
 				<Select
 					label="Kicker"
 					description="Choose the kicker for the email newsletter"
+					id="kicker-section"
 				>
 					<Option>Breaking News</Option>
 					<Option>Exclusive</Option>

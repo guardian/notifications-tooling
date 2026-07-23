@@ -1,18 +1,26 @@
 import { css } from '@emotion/react';
-import {
-	semanticColors,
-	semanticSizing,
-	semanticSpacing,
-} from '@guardian/stand';
+import { baseColors, semanticColors, semanticSizing } from '@guardian/stand';
 import { baseSpacing } from '@guardian/stand';
+import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
-
-// interface SideNavigationPanelProps {}
 
 interface SideNavigationPanelTileProps {
 	title: string;
 	tileNumber: number;
+	href: string;
 }
+
+const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
+	{ tileNumber: 1, title: 'Article and channel', href: '#article-section' },
+	{ tileNumber: 2, title: 'Content', href: '#kicker-section' },
+	{ tileNumber: 3, title: 'Audience', href: '#audience-section' },
+	{
+		tileNumber: 4,
+		title: 'Timing and Delivery',
+		href: '#delivery-timing-section',
+	},
+	{ tileNumber: 5, title: 'Send', href: '#preview-section' },
+];
 
 const sideNavigationPanelTileStyle = {
 	tileNumberStyle: css({
@@ -24,16 +32,19 @@ const sideNavigationPanelTileStyle = {
 		borderRight: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 		padding: `${baseSpacing['12Px']} ${baseSpacing['10Px']}`,
 		gap: `${baseSpacing['10Px']}`,
+		active: {
+			backgroundColor: baseColors.magenta[200],
+			color: semanticColors.text.strongerInverse,
+		},
 	}),
 	tileStyle: css({
 		height: '50px',
 		width: '100%',
-		display: 'flex',
 		padding: `${baseSpacing['16Px']} ${baseSpacing['12Px']}`,
 		gap: `${baseSpacing['4Px']}`,
 	}),
 	tileTextStyle: css({
-		size: '16px',
+		fontSize: '16px',
 	}),
 };
 
@@ -47,11 +58,14 @@ export const SideNavigationPanel = () => {
 				minHeight: '72px',
 			}}
 		>
-			<SideNavigationPanelTile tileNumber={1} title={'Article and channel'} />
-			<SideNavigationPanelTile tileNumber={2} title={'Content'} />
-			<SideNavigationPanelTile tileNumber={3} title={'Audience'} />
-			<SideNavigationPanelTile tileNumber={4} title={'Timing and Delivery'} />
-			<SideNavigationPanelTile tileNumber={5} title={'Send'} />
+			{SIDE_NAVIGATION_PANEL_ITEMS.map((item) => (
+				<SideNavigationPanelTile
+					key={item.title}
+					tileNumber={item.tileNumber}
+					title={item.title}
+					href={item.href}
+				/>
+			))}
 		</div>
 	);
 };
@@ -59,34 +73,34 @@ export const SideNavigationPanel = () => {
 export const SideNavigationPanelTile = ({
 	title,
 	tileNumber,
+	href,
 }: SideNavigationPanelTileProps) => {
 	return (
-		<>
-			<div
-				css={{
-					display: 'flex',
-					flexDirection: 'row',
-					alignItems: 'center',
-					justifyContent: 'center',
-					gap: semanticSpacing.stackXs,
-					borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-				}}
+		<LinkButton
+			href={href}
+			variant="tertiary"
+			css={{
+				alignItems: 'center',
+				justifyContent: 'center',
+				minHeight: '72px',
+				border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+				padding: '0px 0px',
+			}}
+		>
+			<Typography
+				variant="headingLg"
+				cssOverrides={sideNavigationPanelTileStyle.tileNumberStyle}
 			>
+				{tileNumber}
+			</Typography>
+			<div css={sideNavigationPanelTileStyle.tileStyle}>
 				<Typography
-					variant={'headingLg'}
-					cssOverrides={sideNavigationPanelTileStyle.tileNumberStyle}
+					variant="headingMd"
+					cssOverrides={sideNavigationPanelTileStyle.tileTextStyle}
 				>
-					{tileNumber}
+					{title}
 				</Typography>
-				<div css={sideNavigationPanelTileStyle.tileStyle}>
-					<Typography
-						variant={'headingMd'}
-						cssOverrides={sideNavigationPanelTileStyle.tileTextStyle}
-					>
-						{title}
-					</Typography>
-				</div>
 			</div>
-		</>
+		</LinkButton>
 	);
 };

@@ -48,7 +48,7 @@ export const DispatchTab = () => {
 				</Item>
 
 				<Item
-					size={5}
+					size={6}
 					cssOverrides={css({
 						paddingLeft: '147px',
 						paddingRight: semanticSpacing.stackXl,
@@ -69,7 +69,7 @@ export const DispatchTab = () => {
 					/>
 				</Item>
 				<Item
-					size={4}
+					size={'auto'}
 					cssOverrides={css({
 						paddingRight: semanticSpacing.stackSm,
 						paddingLeft: semanticSpacing.stackSm,

@@ -20,7 +20,9 @@ export const DeliveryAndTimingSelector = ({
 					gap: semanticSpacing.stackXs,
 				}}
 			>
-				<Typography variant="bodyBoldMd">Delivery and timing</Typography>
+				<Typography variant="bodyBoldMd" id="delivery-timing-section">
+					Delivery and timing
+				</Typography>
 				<Typography
 					variant="bodySm"
 					css={{
