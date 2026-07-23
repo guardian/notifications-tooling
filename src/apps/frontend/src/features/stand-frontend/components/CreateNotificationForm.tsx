@@ -1,4 +1,11 @@
-import { semanticSpacing } from '@guardian/stand';
+import { css } from '@emotion/react';
+import {
+	baseSpacing,
+	semanticColors,
+	semanticRadius,
+	semanticSpacing,
+} from '@guardian/stand';
+import { Button } from '@guardian/stand/Button';
 import { Option, Select } from '@guardian/stand/Select';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
@@ -14,6 +21,20 @@ interface CreateNotificationFormProps {
 	selectedDeliveryTiming?: string;
 	onSelectedDeliveryTimingChange: (deliveryTiming?: string) => void;
 }
+
+const styles = {
+	customStyles: css({
+		display: 'flex',
+		width: '180px',
+		height: '40px',
+		radius: semanticRadius.cornerSm,
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: '8px',
+		padding: `${baseSpacing['6Px']} ${baseSpacing['12Px']} 7px ${baseSpacing['12Px']}`,
+		fill: semanticColors.fill.accentStrong,
+	}),
+};
 
 /**
  * This is a non-functional placeholder to demonstrate how content will appear in the layout
@@ -73,6 +94,29 @@ export const CreateNotificationForm = ({
 					selectedDeliveryTiming={selectedDeliveryTiming}
 					onChange={onSelectedDeliveryTimingChange}
 				/>
+
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: semanticSpacing.stackXs,
+					}}
+				>
+					<Typography variant="labelFormMd">Send</Typography>
+					<Typography variant="helpTextFormMd">
+						Before sending, review in the preview on the right
+					</Typography>
+					<Button
+						variant="primary"
+						size="sm"
+						cssOverrides={styles.customStyles}
+						onClick={() => {
+							console.log('Send newsletter email clicked');
+						}}
+					>
+						Send newsletter email
+					</Button>
+				</div>
 			</div>
 		</>
 	);
