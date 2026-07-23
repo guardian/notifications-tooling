@@ -6,8 +6,8 @@ import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,
 } from './AudienceSegments';
-import { DeliveryAndTimingInfoPreview } from './DeliveryAndTimingSelector';
 import { HTMLPreview } from './HTMLPreview';
+import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 interface EmailPreviewSectionProps {
 	selectedSegments: string[];
@@ -54,7 +54,7 @@ export const EmailPreviewSection = ({
 					will be shown below.
 				</Typography>
 			</header>
-			<DeliveryAndTimingInfoPreview
+			<SendInfoPreviewPill
 				channel={selectedChannel}
 				deliveryTiming={selectedDeliveryTiming}
 			/>
