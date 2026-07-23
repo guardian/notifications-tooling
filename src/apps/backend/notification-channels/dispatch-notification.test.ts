@@ -54,7 +54,7 @@ const createDependencies = () => {
 };
 
 describe('dispatchNotification', () => {
-	it('resolves push segments and calls the mocked app-notification client', () => {
+	it('resolves push segments and calls the mocked app-notification client', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -70,9 +70,7 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		expect(
-			dispatchNotification(request, dependencies),
-		).resolves.toBeUndefined();
+		await dispatchNotification(request, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledWith({
 			topics: [
 				{ type: 'breaking', name: 'uk' },
@@ -84,7 +82,7 @@ describe('dispatchNotification', () => {
 		});
 	});
 
-	it('renders each newsletter segment and sends it through Braze', () => {
+	it('renders each newsletter segment and sends it through Braze', async () => {
 		const { dependencies, renderEmail, sendBrazeCampaign } =
 			createDependencies();
 		const request: NotificationSendRequest = {
@@ -101,9 +99,7 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		expect(
-			dispatchNotification(request, dependencies),
-		).resolves.toBeUndefined();
+		await dispatchNotification(request, dependencies);
 		expect(renderEmail).toHaveBeenNthCalledWith(1, {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
@@ -130,7 +126,66 @@ describe('dispatchNotification', () => {
 		});
 	});
 
-	it('does not call downstream clients for a dry run', () => {
+	it('dispatches every channel in a combined request', async () => {
+		const {
+			dependencies,
+			renderEmail,
+			sendAppNotification,
+			sendBrazeCampaign,
+		} = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { push: pushItem, newsletter: newsletterItem } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: { type: 'segment', items: ['breaking-news-uk'] },
+					compose: { use: 'push' },
+				},
+				[NotificationChannel.Newsletter]: {
+					audience: { type: 'segment', items: ['UK'] },
+					compose: { items: ['newsletter'], subject: 'Daily briefing' },
+				},
+			},
+		};
+
+		await dispatchNotification(request, dependencies);
+		expect(renderEmail).toHaveBeenCalledTimes(1);
+		expect(sendBrazeCampaign).toHaveBeenCalledTimes(1);
+		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+	});
+
+	it('attempts both channels when one fails', async () => {
+		const { dependencies, renderEmail, sendAppNotification } =
+			createDependencies();
+		renderEmail.mockRejectedValue(new Error('Rendering failed'));
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { push: pushItem, newsletter: newsletterItem } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: { type: 'segment', items: ['breaking-news-uk'] },
+					compose: { use: 'push' },
+				},
+				[NotificationChannel.Newsletter]: {
+					audience: { type: 'segment', items: ['UK'] },
+					compose: { items: ['newsletter'], subject: 'Daily briefing' },
+				},
+			},
+		};
+
+		let dispatchError: unknown;
+		try {
+			await dispatchNotification(request, dependencies);
+		} catch (error) {
+			dispatchError = error;
+		}
+
+		expect(dispatchError).toEqual(new Error('Rendering failed'));
+		expect(renderEmail).toHaveBeenCalledTimes(1);
+		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+	});
+
+	it('does not call downstream clients for a dry run', async () => {
 		const {
 			dependencies,
 			renderEmail,
@@ -149,9 +204,7 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		expect(
-			dispatchNotification(request, dependencies),
-		).resolves.toBeUndefined();
+		await dispatchNotification(request, dependencies);
 		expect(renderEmail).not.toHaveBeenCalled();
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
 		expect(sendAppNotification).not.toHaveBeenCalled();
