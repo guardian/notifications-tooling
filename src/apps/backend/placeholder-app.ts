@@ -2,10 +2,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express, {
 	type Application,
-	type NextFunction,
 	type Request,
 	type Response,
 } from 'express';
+import { authMiddleware } from './middleware/auth-middleware';
 import { healthRouter } from './routers/health';
 
 export const app: Application = express();
@@ -24,9 +24,8 @@ const placeholderAssetsDir = !process.env.LAMBDA_TASK_ROOT
 	: join(process.env.LAMBDA_TASK_ROOT, 'frontend');
 const placeholderIndexFile = join(placeholderAssetsDir, 'index.html');
 
-app.use(express.static(placeholderAssetsDir));
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express detects error middleware by its 4-arg signature
-app.get('/', (_req: Request, res: Response, _next: NextFunction) => {
+app.get('/', authMiddleware, (_req: Request, res: Response) => {
 	res.sendFile(placeholderIndexFile);
 });
+
+app.use(express.static(placeholderAssetsDir));
