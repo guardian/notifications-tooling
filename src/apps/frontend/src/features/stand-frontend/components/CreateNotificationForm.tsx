@@ -8,7 +8,7 @@ import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { EmailFields } from './EmailFields';
 import { SendButton } from './SendButton';
 
-interface CreateNotificationFormProps {
+export interface CreateNotificationFormProps {
 	selectedSegments: string[];
 	onSelectedSegmentsChange: (selected: string[]) => void;
 	selectedChannel?: string;
@@ -17,9 +17,6 @@ interface CreateNotificationFormProps {
 	onSelectedDeliveryTimingChange: (deliveryTiming?: string) => void;
 }
 
-/**
- * This is a non-functional placeholder to demonstrate how content will appear in the layout
- */
 export const CreateNotificationForm = ({
 	selectedSegments,
 	onSelectedSegmentsChange,
