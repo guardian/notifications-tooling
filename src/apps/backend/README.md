@@ -11,9 +11,10 @@ and populate them with the CODE environment values.
 - `PROVIDER_REQUEST_TIMEOUT_MS` limits each provider request and defaults to 10
   seconds.
 
-UK, US, and AU newsletter labels and their Braze campaign IDs are configured in
-`src/packages/config/audiences.ts`. Campaign IDs contain placeholder values until
-the real values are populated.
+UK, US, and AU newsletter labels, email-rendering newsletter IDs, and Braze
+campaign IDs are configured in `src/packages/config/audiences.ts`. The public
+segment key, display label, and downstream IDs are independent values. Campaign
+IDs contain placeholder values until the real values are populated.
 
 The app-notification client is currently a mock. It receives the translated
 topic and content request but does not make a network call.

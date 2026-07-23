@@ -1,8 +1,8 @@
 /**
  * Defines public, channel-agnostic segment ids surfaced to the FE and, in future,
  * served by `GET /v1/audiences`. The backend resolves newsletter segments to
- * Braze campaigns and push segments to mobile-n10n topics. These internals are
- * kept out of the public
+ * email-rendering newsletter configurations and Braze campaigns, and push
+ * segments to mobile-n10n topics. These internals are kept out of the public
  * `POST /v1/notifications` contract, which references segment ids only.
  * Hard-coded stub until resolved from the downstream services.
  */
@@ -10,20 +10,24 @@
 export interface NewsletterSegment {
 	label: string;
 	brazeCampaignId: string;
+	emailRenderingNewsletterId: string;
 }
 
 export const newsletterSegments = {
 	UK: {
 		label: 'UK',
-		brazeCampaignId: 'uk_campaign_id',
+		brazeCampaignId: 'da019800-869e-4e1d-9c2e-029741829af1',
+		emailRenderingNewsletterId: 'breaking-news-us',
 	},
 	US: {
 		label: 'US',
 		brazeCampaignId: 'us_campaign_id',
+		emailRenderingNewsletterId: 'breaking-news-us',
 	},
 	AU: {
 		label: 'AU',
 		brazeCampaignId: 'au_campaign_id',
+		emailRenderingNewsletterId: 'breaking-news-us',
 	},
 } as const satisfies Record<string, NewsletterSegment>;
 

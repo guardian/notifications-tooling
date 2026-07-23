@@ -1,4 +1,4 @@
-import { NotificationChannel } from '@config';
+import { newsletterSegments, NotificationChannel } from '@config';
 import { describe, expect, it, mock } from 'bun:test';
 import type { NotificationSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import type { DispatchNotificationDependencies } from './dispatch-notification';
@@ -103,19 +103,19 @@ describe('dispatchNotification', () => {
 		expect(renderEmail).toHaveBeenNthCalledWith(1, {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
-			newsletterId: 'UK',
+			newsletterId: newsletterSegments.UK.emailRenderingNewsletterId,
 			timeoutMs: 10_000,
 		});
 		expect(renderEmail).toHaveBeenNthCalledWith(2, {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
-			newsletterId: 'US',
+			newsletterId: newsletterSegments.US.emailRenderingNewsletterId,
 			timeoutMs: 10_000,
 		});
 		expect(sendBrazeCampaign).toHaveBeenNthCalledWith(1, {
 			apiKey: 'test-api-key',
 			restEndpoint: 'https://rest.example.braze.eu',
-			campaignId: 'uk_campaign_id',
+			campaignId: newsletterSegments.UK.brazeCampaignId,
 			html: '<html>Rendered newsletter</html>',
 			subject: 'Daily briefing',
 			timeoutMs: 10_000,
@@ -123,7 +123,7 @@ describe('dispatchNotification', () => {
 		expect(sendBrazeCampaign).toHaveBeenNthCalledWith(2, {
 			apiKey: 'test-api-key',
 			restEndpoint: 'https://rest.example.braze.eu',
-			campaignId: 'us_campaign_id',
+			campaignId: newsletterSegments.US.brazeCampaignId,
 			html: '<html>Rendered newsletter</html>',
 			subject: 'Daily briefing',
 			timeoutMs: 10_000,

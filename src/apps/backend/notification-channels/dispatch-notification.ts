@@ -76,14 +76,20 @@ const resolveNewsletterDispatch = (
 	);
 
 	const segments = plan.audience.items.map((segmentId) => {
-		const { brazeCampaignId } = newsletterSegments[segmentId];
+		const { brazeCampaignId, emailRenderingNewsletterId } =
+			newsletterSegments[segmentId];
 		if (!brazeCampaignId.trim()) {
 			throw new Error(
 				`No Braze campaign ID is configured for newsletter segment '${segmentId}'.`,
 			);
 		}
+		if (!emailRenderingNewsletterId.trim()) {
+			throw new Error(
+				`No email-rendering newsletter ID is configured for newsletter segment '${segmentId}'.`,
+			);
+		}
 
-		return { brazeCampaignId, segmentId };
+		return { brazeCampaignId, emailRenderingNewsletterId };
 	});
 
 	return { environment, item, plan, segments };
@@ -98,13 +104,13 @@ const dispatchNewsletter = async (
 	}
 
 	const { environment, item, plan, segments } = resolvedDispatch;
-	for (const { brazeCampaignId, segmentId } of segments) {
+	for (const { brazeCampaignId, emailRenderingNewsletterId } of segments) {
 		// Email-rendering currently derives content from the article URL. Title,
 		// body, and media overrides remain unused until its POST contract exists.
 		const html = await dependencies.renderEmail({
 			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 			articleUrl: item.link,
-			newsletterId: segmentId,
+			newsletterId: emailRenderingNewsletterId,
 			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 
