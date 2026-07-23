@@ -75,7 +75,6 @@ describe('POST /v1/notifications', () => {
 				expect(response.status).toBe(202);
 				expect(dispatchRequest).toHaveBeenCalledWith({
 					...validPushRequest(),
-					priority: 'standard',
 					options: { dryRun: false, scheduledFor: null },
 				});
 			} finally {

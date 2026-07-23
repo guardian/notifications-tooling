@@ -50,10 +50,10 @@ const dispatchNewsletter = async (
 	dependencies: DispatchNotificationDependencies,
 ): Promise<void> => {
 	const plan = request.channels[NotificationChannel.Newsletter];
+
 	if (!plan) {
 		return;
 	}
-
 	if (plan.audience.type !== 'segment') {
 		throw new Error('Sending test emails is not implemented.');
 	}
