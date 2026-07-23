@@ -7,11 +7,6 @@ import { ChannelSelector } from './ChannelSelector';
 import { EmailFields } from './EmailFields';
 import { SendButton } from './SendButton';
 
-export interface CreateNotificationFormProps {
-	selectedDeliveryTiming?: string;
-	onSelectedDeliveryTimingChange: (deliveryTiming?: string) => void;
-}
-
 export const CreateNotificationForm = () => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,

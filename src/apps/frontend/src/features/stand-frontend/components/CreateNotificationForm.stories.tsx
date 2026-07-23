@@ -5,10 +5,9 @@ import { WithNotificationContext } from '../../../stories/story-helpers';
 import { parseHtml } from '../../../util/html-helpers';
 import { defaultState } from '../notification-reducer';
 import type { EmailNotification, NotificationState } from '../types';
-import type { CreateNotificationFormProps } from './CreateNotificationForm';
 import { CreateNotificationForm } from './CreateNotificationForm';
 
-type StoryArgs = CreateNotificationFormProps & {
+type StoryArgs = {
 	notificationState: NotificationState;
 };
 type Story = StoryObj<StoryArgs>;
@@ -18,26 +17,11 @@ const meta: Meta<StoryArgs> = {
 	component: CreateNotificationForm,
 	args: {
 		notificationState: defaultState,
-		selectedSegments: [],
-		onSelectedSegmentsChange: () => {},
-		selectedChannel: undefined,
-		onSelectedChannelChange: () => {},
-		selectedDeliveryTiming: undefined,
-		onSelectedDeliveryTimingChange: () => {},
-	},
-	parameters: {
-		docs: {
-			description: {
-				component:
-					'This is a non-functional placeholder to demonstrate how content will appear in the layout.',
-			},
-		},
 	},
 	render: (args) => {
-		const { notificationState, ...props } = args;
-
+		const { notificationState } = args;
 		return WithNotificationContext(
-			<CreateNotificationForm {...props} />,
+			<CreateNotificationForm />,
 			notificationState,
 		);
 	},
