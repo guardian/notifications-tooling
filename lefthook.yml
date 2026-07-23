@@ -19,5 +19,6 @@ pre-push:
 post-merge:
   commands:
     install:
+      files: git diff --name-only ORIG_HEAD HEAD
       glob: '{bun.lock,**/package.json}'
       run: printf '\033[0;31mDependencies have changed, please run "bun install"\033[0m\n'
