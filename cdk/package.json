@@ -6,7 +6,8 @@
 		"test": "bun test",
 		"test-update": "bun test --update-snapshots",
 		"synth": "cdk synth --path-metadata false --version-reporting false",
-		"diff": "cdk diff --path-metadata false --version-reporting false"
+		"diff": "cdk diff --path-metadata false --version-reporting false",
+		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@guardian/cdk": "64.1.0",

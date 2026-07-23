@@ -174,15 +174,15 @@ const appPushCompose = z.strictObject({
 	}),
 });
 
-/** Newsletter assembles many content items into a digest. */
+/** Newsletter composes a single content item into an email. */
 const newsletterCompose = z.strictObject({
 	items: z
 		.array(z.string().min(1))
 		.min(1)
-		.refine(hasUniqueItems, { message: 'compose item ids must be unique.' })
+		.max(1)
 		.meta({
 			description:
-				'Ordered ids of the content items (from `content.items`) to include.',
+				'Id of the single content item (from `content.items`) to include, provided as a one-element array.',
 			example: ['lead-story'],
 		}),
 	subject: z.string().min(1).max(newsletterLimits.title.maxLength).meta({
