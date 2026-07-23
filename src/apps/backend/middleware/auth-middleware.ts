@@ -14,18 +14,18 @@ export interface AuthenticatedRequest extends Request {
 
 const LOCAL_PROFILE = 'composer';
 const IS_RUNNING_LOCALLY = !process.env.LAMBDA_TASK_ROOT;
-const stage = process.env.STAGE || 'DEV';
+const stage = process.env.STAGE ?? 'DEV';
 const settingsFileName = (stage: string) => {
-        switch (stage) {
-            case 'DEV':
-                return 'local.dev-gutools.co.uk.settings.public';
-            case 'CODE':
-                return 'code.dev-gutools.co.uk.settings.public';
-            case 'PROD':
-                return 'gutools.co.uk.settings.public';
-            default:
-                throw new Error(`Unknown stage: ${stage}`);
-    }
+	switch (stage) {
+		case 'DEV':
+			return 'local.dev-gutools.co.uk.settings.public';
+		case 'CODE':
+			return 'code.dev-gutools.co.uk.settings.public';
+		case 'PROD':
+			return 'gutools.co.uk.settings.public';
+		default:
+			throw new Error(`Unknown stage: ${stage}`);
+	}
 };
 
 const panda = new PanDomainAuthentication(
