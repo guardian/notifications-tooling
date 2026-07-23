@@ -15,14 +15,6 @@ export const SendInfoPreviewPill = ({
 	const selectedValues = [channel, deliveryTiming].filter(
 		(value): value is string => Boolean(value),
 	);
-	console.log(
-		'Channel:',
-		channel,
-		'Delivery Timing:',
-		deliveryTiming,
-		'Selected Values:',
-		selectedValues,
-	);
 
 	return (
 		<div
