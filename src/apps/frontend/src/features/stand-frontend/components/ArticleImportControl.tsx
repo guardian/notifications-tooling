@@ -4,6 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { useContext } from 'react';
+import { parseArticleUrlInputToContentId } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
@@ -13,15 +14,21 @@ export const ArticleImportControl = () => {
 	);
 
 	const {
-		articleId = '',
+		articleInputText = '',
 		fetchedArticleId,
 		isFetchingContent,
 		fetchArticleError,
 	} = notification;
 
-	const fetchArticle = () => {
-		updateNotification({ type: 'waiting-for-article' });
+	const { articleId, failure } =
+		parseArticleUrlInputToContentId(articleInputText);
 
+	const fetchArticle = () => {
+		if (!articleId) {
+			return;
+		}
+
+		updateNotification({ type: 'waiting-for-article' });
 		capiFetch(articleId)
 			.then((content) => {
 				updateNotification({
@@ -39,9 +46,7 @@ export const ArticleImportControl = () => {
 	};
 
 	const disableFetchButton =
-		articleId.length === 0 ||
-		!!isFetchingContent ||
-		articleId === fetchedArticleId;
+		!articleId || !!isFetchingContent || articleId === fetchedArticleId;
 
 	return (
 		<div
@@ -52,8 +57,10 @@ export const ArticleImportControl = () => {
 			}}
 		>
 			<TextInput
+				isInvalid={!!failure}
+				error={failure}
 				label="Article"
-				value={notification.articleId ?? ''}
+				value={notification.articleInputText ?? ''}
 				isDisabled={isFetchingContent}
 				description="Copy and paste a Guardian URL below"
 				onChange={(text) =>
@@ -88,7 +95,7 @@ export const ArticleImportControl = () => {
 
 				{isFetchingContent && <LoadingSpinner />}
 
-				{!isFetchingContent && fetchedArticleId === articleId && (
+				{!isFetchingContent && fetchedArticleId === articleInputText && (
 					<InlineMessage level="success">Article Imported</InlineMessage>
 				)}
 

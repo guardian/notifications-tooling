@@ -22,7 +22,7 @@ export const channelOptionNameMap: Record<
 };
 
 export type NotificationState = {
-	articleId?: string;
+	articleInputText?: string;
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;

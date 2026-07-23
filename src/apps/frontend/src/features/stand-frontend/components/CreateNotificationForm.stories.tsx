@@ -87,7 +87,7 @@ export const PopulatedEmail: Story = {
 	args: {
 		notificationState: {
 			...defaultState,
-			articleId: articleFixture.webUrl,
+			articleInputText: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
 			parameters: completeEmailParamer,
@@ -99,7 +99,7 @@ export const ConfirmationStep: Story = {
 	args: {
 		notificationState: {
 			...defaultState,
-			articleId: articleFixture.webUrl,
+			articleInputText: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
 			parameters: completeEmailParamer,
@@ -112,7 +112,7 @@ export const SendingEmail: Story = {
 	args: {
 		notificationState: {
 			...defaultState,
-			articleId: articleFixture.webUrl,
+			articleInputText: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
 			parameters: completeEmailParamer,

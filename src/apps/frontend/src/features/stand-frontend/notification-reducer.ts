@@ -30,7 +30,7 @@ export const notificationReducer = (
 	const state = structuredClone(prevState);
 	switch (action.type) {
 		case 'set-article-id': {
-			return { ...state, articleId: action.text };
+			return { ...state, articleInputText: action.text };
 		}
 
 		case 'modify-email-parameters': {
@@ -63,7 +63,7 @@ export const notificationReducer = (
 		case 'waiting-for-article':
 			return {
 				...state,
-				fetchedArticleId: state.articleId,
+				fetchedArticleId: state.articleInputText,
 				isFetchingContent: true,
 				fetchArticleError: undefined,
 			};
