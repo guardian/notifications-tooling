@@ -14,10 +14,10 @@ pre-push:
       glob: '**/*.{ts,tsx}'
       run: bun run typecheck
 
-# Runs after `git pull`/`git merge`. Keep dependencies in sync automatically,
+# Runs after `git pull`/`git merge`. Tell the user dependencies changed,
 # but only when the merge actually touched the lockfile or a package.json.
 post-merge:
   commands:
     install:
       glob: '{bun.lock,**/package.json}'
-      run: bun install
+      run: printf '\033[0;31mDependencies have changed, please run "bun install"\033[0m\n'
