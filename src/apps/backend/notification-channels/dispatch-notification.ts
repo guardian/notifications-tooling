@@ -50,10 +50,10 @@ const requireContentItem = (
 	return item;
 };
 
-const dispatchNewsletter = async (
+const resolveNewsletterDispatch = (
 	request: NotificationSendRequest,
 	dependencies: DispatchNotificationDependencies,
-): Promise<void> => {
+) => {
 	const plan = request.channels[NotificationChannel.Newsletter];
 
 	if (!plan) {
@@ -75,7 +75,7 @@ const dispatchNewsletter = async (
 		dependencies.environment,
 	);
 
-	for (const segmentId of plan.audience.items) {
+	const segments = plan.audience.items.map((segmentId) => {
 		const { brazeCampaignId } = newsletterSegments[segmentId];
 		if (!brazeCampaignId.trim()) {
 			throw new Error(
@@ -83,6 +83,24 @@ const dispatchNewsletter = async (
 			);
 		}
 
+		return { brazeCampaignId, segmentId };
+	});
+
+	return { environment, item, plan, segments };
+};
+
+const dispatchNewsletter = async (
+	resolvedDispatch: ReturnType<typeof resolveNewsletterDispatch>,
+	dependencies: DispatchNotificationDependencies,
+): Promise<void> => {
+	if (!resolvedDispatch) {
+		return;
+	}
+
+	const { environment, item, plan, segments } = resolvedDispatch;
+	for (const { brazeCampaignId, segmentId } of segments) {
+		// Email-rendering currently derives content from the article URL. Title,
+		// body, and media overrides remain unused until its POST contract exists.
 		const html = await dependencies.renderEmail({
 			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 			articleUrl: item.link,
@@ -101,10 +119,7 @@ const dispatchNewsletter = async (
 	}
 };
 
-const dispatchAppPush = async (
-	request: NotificationSendRequest,
-	dependencies: DispatchNotificationDependencies,
-): Promise<void> => {
+const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 	const plan = request.channels[NotificationChannel.AppPushNotification];
 	if (!plan) {
 		return;
@@ -115,10 +130,26 @@ const dispatchAppPush = async (
 		plan.compose.use,
 		NotificationChannel.AppPushNotification,
 	);
-	await dependencies.sendAppNotification({
+
+	return {
+		item,
 		topics: plan.audience.items.map(
 			(segmentId) => appPushNotificationSegments[segmentId].mobileN10nTopic,
 		),
+	};
+};
+
+const dispatchAppPush = async (
+	resolvedDispatch: ReturnType<typeof resolveAppPushDispatch>,
+	dependencies: DispatchNotificationDependencies,
+): Promise<void> => {
+	if (!resolvedDispatch) {
+		return;
+	}
+
+	const { item, topics } = resolvedDispatch;
+	await dependencies.sendAppNotification({
+		topics,
 		title: item.title,
 		body: item.body,
 		link: item.link,
@@ -138,8 +169,14 @@ export const dispatchNotification = async (
 		throw new Error('Scheduled delivery is not implemented.');
 	}
 
+	const newsletterDispatch = resolveNewsletterDispatch(request, dependencies);
+	const appPushDispatch = resolveAppPushDispatch(request);
+
+	// Delivery outcomes are not persisted yet. Retrying after a partial failure
+	// can resend targets that already succeeded, so failures must not be retried
+	// automatically until partial-delivery recovery is implemented.
 	await Promise.all([
-		dispatchNewsletter(request, dependencies),
-		dispatchAppPush(request, dependencies),
+		dispatchNewsletter(newsletterDispatch, dependencies),
+		dispatchAppPush(appPushDispatch, dependencies),
 	]);
 };

@@ -189,6 +189,46 @@ describe('dispatchNotification', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 	});
 
+	it('does not dispatch any channel when a plan is unsupported', async () => {
+		const {
+			dependencies,
+			renderEmail,
+			sendAppNotification,
+			sendBrazeCampaign,
+		} = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { push: pushItem, newsletter: newsletterItem } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: { type: 'segment', items: ['breaking-news-uk'] },
+					compose: { use: 'push' },
+				},
+				[NotificationChannel.Newsletter]: {
+					audience: {
+						type: 'email',
+						items: ['test.user@guardian.co.uk'],
+					},
+					compose: { items: ['newsletter'], subject: 'Test briefing' },
+				},
+			},
+		};
+
+		let dispatchError: unknown;
+		try {
+			await dispatchNotification(request, dependencies);
+		} catch (error) {
+			dispatchError = error;
+		}
+
+		expect(dispatchError).toEqual(
+			new Error('Sending test emails is not implemented.'),
+		);
+		expect(renderEmail).not.toHaveBeenCalled();
+		expect(sendBrazeCampaign).not.toHaveBeenCalled();
+		expect(sendAppNotification).not.toHaveBeenCalled();
+	});
+
 	it('does not call downstream clients for a dry run', async () => {
 		const {
 			dependencies,
