@@ -42,7 +42,13 @@ jobs:
         run: bun format:check
 
       - name: Lint
-        run: bun lint
+        # Force the Bun runtime (`--bun`) so ESLint runs under Bun instead of
+        # Node. The `import-x/order` rule classifies `bun:` imports as builtins
+        # only when it can read `process.versions.bun`, which is unset when the
+        # node-shebang `eslint` binary runs under Node (present on CI runners
+        # but not necessarily locally). Without this, `bun:test` import ordering
+        # differs between local and CI.
+        run: bun --bun run lint
 
       - name: Typecheck
         run: bun typecheck
