@@ -174,15 +174,15 @@ const appPushCompose = z.strictObject({
 	}),
 });
 
-/** Newsletter assembles many content items into a digest. */
+/** Newsletter composes a single content item into an email. */
 const newsletterCompose = z.strictObject({
 	items: z
 		.array(z.string().min(1))
 		.min(1)
-		.refine(hasUniqueItems, { message: 'compose item ids must be unique.' })
+		.max(1)
 		.meta({
 			description:
-				'Ordered ids of the content items (from `content.items`) to include.',
+				'Id of the single content item (from `content.items`) to include, provided as a one-element array.',
 			example: ['lead-story'],
 		}),
 	subject: z.string().min(1).max(newsletterLimits.title.maxLength).meta({
@@ -230,15 +230,6 @@ export const notificationSendRequestSchema = z
 			description:
 				'Client-generated unique key so retries are not delivered twice.',
 			example: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-		}),
-		category: z.string().min(1).meta({
-			description: 'Editorial category used for routing and reporting.',
-			example: 'breaking-news',
-		}),
-		priority: z.enum(['standard', 'high']).default('standard').meta({
-			description:
-				'Delivery priority. `high` is reserved for time-critical alerts.',
-			example: 'high',
 		}),
 		content: contentSchema,
 		channels: channelsSchema,
@@ -316,8 +307,6 @@ export const notificationSendRequestSchema = z
 		description: 'The POST /v1/notifications request body.',
 		example: {
 			idempotencyKey: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-			category: 'morning-briefing',
-			priority: 'standard',
 			content: {
 				items: {
 					'lead-story': {

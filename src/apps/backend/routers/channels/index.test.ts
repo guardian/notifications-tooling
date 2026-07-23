@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import {
 	appPushNotificationSegments,
 	MAX_APP_PUSH_SEGMENTS,
@@ -7,7 +8,6 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { startTestServer, type TestServer } from '../../test-utils/server';
 import { channelAudiences, channelConstraints } from './index';
 
@@ -80,6 +80,7 @@ describe('GET /v1/channels/constraints', () => {
 				.maxLength,
 		);
 		expect(newsletter.compose.minItems).toBe(1);
+		expect(newsletter.compose.maxItems).toBe(1);
 		expect(newsletter.audience.maxSegments).toBe(MAX_NEWSLETTER_SEGMENTS);
 		expect(newsletter.audience.maxTestRecipients).toBe(
 			MAX_TEST_EMAIL_RECIPIENTS,

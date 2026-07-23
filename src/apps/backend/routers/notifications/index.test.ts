@@ -29,7 +29,6 @@ const postNotification = (body: unknown): Promise<Response> =>
 /** A minimal, fully valid single-channel app-push request. */
 const validPushRequest = () => ({
 	idempotencyKey: 'push-2026-07-08',
-	category: 'editorial',
 	sender: 'notifications-tooling-spa/v1',
 	content: {
 		items: {

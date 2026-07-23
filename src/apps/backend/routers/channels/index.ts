@@ -32,10 +32,11 @@ export const channelConstraints = {
 		},
 		[NotificationChannel.Newsletter]: {
 			content: notificationChannelContentLimits[NotificationChannel.Newsletter],
-			// Newsletter assembles one or more content items into a single email,
-			// with a subject line bounded by the same limit as an item's title.
+			// Newsletter composes a single content item into an email, with a
+			// subject line bounded by the same limit as an item's title.
 			compose: {
 				minItems: 1,
+				maxItems: 1,
 				subject: {
 					maxLength:
 						notificationChannelContentLimits[NotificationChannel.Newsletter]

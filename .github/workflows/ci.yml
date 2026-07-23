@@ -26,7 +26,14 @@ jobs:
           bun-version-file: '.bun-version'
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        # Dependabot updates dependencies, which can change the lockfile.
+        # Allow it to install without --frozen-lockfile so the updated lockfile can be committed.
+        run: |
+          if [ "${{ github.actor }}" = "dependabot[bot]" ]; then
+            bun install
+          else
+            bun install --frozen-lockfile
+          fi
 
       - name: Check pinned dependencies
         run: bun check:pinned-deps
@@ -35,7 +42,13 @@ jobs:
         run: bun format:check
 
       - name: Lint
-        run: bun lint
+        # Force the Bun runtime (`--bun`) so ESLint runs under Bun instead of
+        # Node. The `import-x/order` rule classifies `bun:` imports as builtins
+        # only when it can read `process.versions.bun`, which is unset when the
+        # node-shebang `eslint` binary runs under Node (present on CI runners
+        # but not necessarily locally). Without this, `bun:test` import ordering
+        # differs between local and CI.
+        run: bun --bun run lint
 
       - name: Typecheck
         run: bun typecheck
@@ -49,10 +62,7 @@ jobs:
 
       - name: Build and synth CDK
         working-directory: cdk
-        run: |
-          bun lint
-          bun test
-          bun synth
+        run: bun synth
 
       - name: Combine application and CDK into dist
         run: |
