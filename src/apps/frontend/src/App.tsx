@@ -1,4 +1,4 @@
-// import './index.css';
+import './index.css';
 
 import { DispatchPage } from './features/dispatch/DispatchPage';
 import { EmailNotificationPage } from './features/stand-frontend/EmailNotificationPage';
