@@ -1,7 +1,9 @@
 import {
+	appPushNotificationSegments,
 	MAX_APP_PUSH_SEGMENTS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
+	newsletterSegments,
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
@@ -30,10 +32,11 @@ export const channelConstraints = {
 		},
 		[NotificationChannel.Newsletter]: {
 			content: notificationChannelContentLimits[NotificationChannel.Newsletter],
-			// Newsletter assembles one or more content items into a single email,
-			// with a subject line bounded by the same limit as an item's title.
+			// Newsletter composes a single content item into an email, with a
+			// subject line bounded by the same limit as an item's title.
 			compose: {
 				minItems: 1,
+				maxItems: 1,
 				subject: {
 					maxLength:
 						notificationChannelContentLimits[NotificationChannel.Newsletter]
@@ -50,16 +53,44 @@ export const channelConstraints = {
 	},
 } as const;
 
+/** Reduces a segment config record to the public `{ id, label }` pairs. */
+const toSegmentOptions = (
+	segments: Record<string, { label: string }>,
+): Array<{ id: string; label: string }> =>
+	Object.entries(segments).map(([id, { label }]) => ({ id, label }));
+
+/**
+ * The selectable audience segments per channel the SPA fetches from
+ * `GET /v1/channels/audiences` to populate its audience pickers. Keyed by
+ * channel, each exposing a `segments` list. Only the public segment id and
+ * human label are exposed; the downstream addressing (Braze campaign /
+ * mobile-n10n topic) each id resolves to is kept server-side.
+ */
+export const channelAudiences = {
+	channels: {
+		[NotificationChannel.AppPushNotification]: {
+			segments: toSegmentOptions(appPushNotificationSegments),
+		},
+		[NotificationChannel.Newsletter]: {
+			segments: toSegmentOptions(newsletterSegments),
+		},
+	},
+} as const;
+
 /**
  * `GET /v1/channels/constraints`. Returns the per-channel validation rules
  * (content length limits, compose shape, audience caps) the SPA uses to drive
  * its UI — character counters and topic limits — so it can warn before the
  * backend rejects a `POST /v1/notifications`.
+ *
+ * `GET /v1/channels/audiences`. Returns the selectable audience segments
+ * (`id` + `label`) per channel the SPA uses to populate its audience pickers.
  */
 
-export const channelsRouter = Router().get(
-	'/constraints',
-	(_req: Request, res: Response) => {
+export const channelsRouter = Router()
+	.get('/constraints', (_req: Request, res: Response) => {
 		res.json(channelConstraints);
-	},
-);
+	})
+	.get('/audiences', (_req: Request, res: Response) => {
+		res.json(channelAudiences);
+	});

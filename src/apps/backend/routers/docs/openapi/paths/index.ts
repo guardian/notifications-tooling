@@ -1,4 +1,4 @@
-import { channelsConstraintsPath } from './channels';
+import { channelsAudiencesPath, channelsConstraintsPath } from './channels';
 import { healthPath } from './health';
 import { notificationsPath } from './notifications';
 
@@ -6,5 +6,6 @@ import { notificationsPath } from './notifications';
 export const paths = {
 	'/health': healthPath,
 	'/v1/channels/constraints': channelsConstraintsPath,
+	'/v1/channels/audiences': channelsAudiencesPath,
 	'/v1/notifications': notificationsPath,
 } as const;
