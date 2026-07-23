@@ -3,13 +3,13 @@ export const userPath = {
 	get: {
 		summary: 'Retrieve the authenticated user',
 		description:
-			'Returns the authenticated user, as resolved from the pan-domain (Panda) cookie. Currently a mock returning a sample user until pan-domain-node verification is integrated.',
+			'Returns the authenticated user (under `user`) and their permissions. Currently a mock returning a sample user and permissions until pan-domain-node verification and the permissions store are integrated.',
 		responses: {
 			'200': {
-				description: 'The authenticated user.',
+				description: 'The authenticated user and their permissions.',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/User' },
+						schema: { $ref: '#/components/schemas/UserResponse' },
 					},
 				},
 			},
