@@ -1,4 +1,12 @@
-import { baseColors, semanticColors, semanticSizing } from '@guardian/stand';
+import { css } from '@emotion/react';
+import {
+	baseColors,
+	baseSpacing,
+	semanticColors,
+	semanticRadius,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
@@ -51,4 +59,69 @@ export const layoutMainTheme: LayoutMainProps['theme'] = {
 	sm: { padding: { top: '0px', bottom: '0px' } },
 	md: { padding: { top: '0px', bottom: '0px' } },
 	lg: { padding: { top: '0px', bottom: '0px' } },
+};
+
+export const selectableTileTheme = {
+	selectableTile: (isChecked: boolean) =>
+		css({
+			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+			width: '450px',
+			minHeight: '74px',
+			display: 'flex',
+			gap: semanticSpacing.stackXxs,
+			flexDirection: 'column',
+			backgroundColor: isChecked
+				? baseColors.magenta['900']
+				: baseColors.neutral['900'],
+		}),
+	iconRow: css({
+		display: 'flex',
+		flexDirection: 'row',
+		padding: '8px 8px 8px 12px',
+		gap: semanticSpacing.stackXs,
+		alignItems: 'center',
+	}),
+	emailIcon: css({
+		width: '20px',
+		height: '20px',
+		gap: '10px',
+	}),
+	titleStyle: css({
+		gap: '10px',
+	}),
+	deliveryIcon: css({
+		backgroundColor: baseColors.magenta[900],
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
+	}),
+};
+
+export const activePillTheme = {
+	activePill: css({
+		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		backgroundColor: baseColors.magenta[900],
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		height: '36px',
+		display: 'flex',
+		flexDirection: 'row',
+		gap: semanticSpacing.stackXs,
+		alignItems: 'center',
+		justifyContent: 'center',
+	}),
+	activePillIcon: css({
+		height: '20px',
+		width: '20px',
+		gap: '10px',
+	}),
 };
