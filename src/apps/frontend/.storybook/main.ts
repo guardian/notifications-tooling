@@ -13,5 +13,7 @@ const config: StorybookConfig = {
 	stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
 	addons: ['@storybook/addon-docs'],
 	framework: getAbsolutePath('@storybook/react-vite'),
+	// Serves public/mockServiceWorker.js so stories can use MSW (msw-storybook-addon).
+	staticDirs: ['../public'],
 };
 export default config;

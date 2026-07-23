@@ -9,6 +9,7 @@ export default [
 	{
 		ignores: [
 			'**/dist/**',
+			'**/storybook-static/**',
 			'docker/**',
 			'!docker/docker-compose.local.yml',
 			'**/*.d.ts',

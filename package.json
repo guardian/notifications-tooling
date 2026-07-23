@@ -22,7 +22,7 @@
 	],
 	"scripts": {
 		"prepare": "lefthook install",
-		"test": "bun test",
+		"test": "bun run --filter '*' test",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"check:pinned-deps": "bun run scripts/check-pinned-deps.ts",

@@ -11,18 +11,26 @@ import '@guardian/stand/fonts/OpenSans.css';
 import '@guardian/stand/fonts/MaterialSymbolsOutlined.css';
 import '@guardian/stand/semantic/colors.css';
 
+import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { queryClient } from './api/queryClient';
 import { App } from './App';
+import { worker } from './mocks/browser';
 
 const elem = document.getElementById('root');
 if (!elem) {
 	throw new Error('Root element "#root" was not found in the document');
 }
 
+// Preview remains mocked until the backend provides a render endpoint.
+await worker.start({ onUnhandledRequest: 'bypass' });
+
 const app = (
 	<StrictMode>
-		<App />
+		<QueryClientProvider client={queryClient}>
+			<App />
+		</QueryClientProvider>
 	</StrictMode>
 );
 

@@ -6,10 +6,23 @@ import {
 } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
+import { buildDryRunNotificationRequest } from '../api/buildDryRunNotificationRequest';
+import { useSendNotification } from '../api/useSendNotification';
+import { useNotificationDraft } from '../useNotificationDraft';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
 export const DispatchTab = () => {
+	const { draft, ...draftActions } = useNotificationDraft();
+	const sendNotification = useSendNotification();
+
+	const handleSend = () => {
+		sendNotification.mutate(
+			buildDryRunNotificationRequest(draftActions.idempotencyKey, draft),
+			{ onSuccess: draftActions.rotateIdempotencyKey },
+		);
+	};
+
 	return (
 		<Layout.Main
 			theme={{
@@ -39,7 +52,17 @@ export const DispatchTab = () => {
 						paddingTop: semanticSpacing.stackSm,
 					})}
 				>
-					<CreateNotificationForm />
+					<CreateNotificationForm
+						draft={draft}
+						onArticleUrlChange={draftActions.setArticleUrl}
+						onKickerChange={draftActions.setKicker}
+						onSubjectChange={draftActions.setSubject}
+						onPreviewTextChange={draftActions.setPreviewText}
+						onSend={handleSend}
+						isSending={sendNotification.isPending}
+						sendSucceeded={sendNotification.isSuccess}
+						sendErrorMessage={sendNotification.error?.message}
+					/>
 				</Item>
 				<Item
 					size={4}
