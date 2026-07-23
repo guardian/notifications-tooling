@@ -52,7 +52,6 @@ const newsletterPlan = (overrides: Record<string, unknown> = {}) => ({
 
 const pushRequest = (overrides: Record<string, unknown> = {}) => ({
 	idempotencyKey: 'push-2026-07-08',
-	category: 'editorial',
 	sender: 'notifications-tooling-spa/v1',
 	content: { items: { lead: pushItem() } },
 	channels: { [NotificationChannel.AppPushNotification]: pushPlan() },
@@ -61,7 +60,6 @@ const pushRequest = (overrides: Record<string, unknown> = {}) => ({
 
 const newsletterRequest = (overrides: Record<string, unknown> = {}) => ({
 	idempotencyKey: 'mb-2026-07-08',
-	category: 'editorial',
 	sender: 'notifications-tooling-spa/v1',
 	content: { items: { lead: newsletterItem() } },
 	channels: { [NotificationChannel.Newsletter]: newsletterPlan() },
@@ -70,7 +68,6 @@ const newsletterRequest = (overrides: Record<string, unknown> = {}) => ({
 
 const combinedRequest = (overrides: Record<string, unknown> = {}) => ({
 	idempotencyKey: 'combined-2026-07-08',
-	category: 'editorial',
 	sender: 'notifications-tooling-spa/v1',
 	content: {
 		items: {
@@ -139,11 +136,9 @@ describe('notificationSendRequestSchema', () => {
 			const data = expectValid(newsletterRequest());
 
 			// The fully normalised payload, with request-level defaults
-			// (`priority`, `options`) filled in.
+			// (`options`) filled in.
 			expect(data as unknown).toEqual({
 				idempotencyKey: 'mb-2026-07-08',
-				category: 'editorial',
-				priority: 'standard',
 				content: {
 					items: {
 						lead: {
@@ -176,8 +171,6 @@ describe('notificationSendRequestSchema', () => {
 
 			expect(data as unknown).toEqual({
 				idempotencyKey: 'push-2026-07-08',
-				category: 'editorial',
-				priority: 'standard',
 				content: {
 					items: {
 						lead: {
@@ -209,8 +202,6 @@ describe('notificationSendRequestSchema', () => {
 			// `content.items` library by reference from each plan's `compose`.
 			expect(data as unknown).toEqual({
 				idempotencyKey: 'combined-2026-07-08',
-				category: 'editorial',
-				priority: 'standard',
 				content: {
 					items: {
 						pushLead: {
@@ -272,18 +263,6 @@ describe('notificationSendRequestSchema', () => {
 		});
 	});
 
-	describe('category', () => {
-		it('is required', () => {
-			expect(pathsOf(pushRequest({ category: undefined }))).toContain(
-				'category',
-			);
-		});
-
-		it('rejects an empty string', () => {
-			expect(pathsOf(pushRequest({ category: '' }))).toContain('category');
-		});
-	});
-
 	describe('sender', () => {
 		it('is required', () => {
 			expect(pathsOf(pushRequest({ sender: undefined }))).toContain('sender');
@@ -291,24 +270,6 @@ describe('notificationSendRequestSchema', () => {
 
 		it('rejects an empty string', () => {
 			expect(pathsOf(pushRequest({ sender: '' }))).toContain('sender');
-		});
-	});
-
-	describe('priority', () => {
-		it('defaults to standard when omitted', () => {
-			expect(expectValid(pushRequest()).priority).toBe('standard');
-		});
-
-		it('accepts high', () => {
-			expect(expectValid(pushRequest({ priority: 'high' })).priority).toBe(
-				'high',
-			);
-		});
-
-		it('rejects an unknown priority', () => {
-			expect(pathsOf(pushRequest({ priority: 'urgent' }))).toContain(
-				'priority',
-			);
 		});
 	});
 

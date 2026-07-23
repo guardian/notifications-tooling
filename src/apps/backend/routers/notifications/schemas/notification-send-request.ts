@@ -231,15 +231,6 @@ export const notificationSendRequestSchema = z
 				'Client-generated unique key so retries are not delivered twice.',
 			example: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
 		}),
-		category: z.string().min(1).meta({
-			description: 'Editorial category used for routing and reporting.',
-			example: 'breaking-news',
-		}),
-		priority: z.enum(['standard', 'high']).default('standard').meta({
-			description:
-				'Delivery priority. `high` is reserved for time-critical alerts.',
-			example: 'high',
-		}),
 		content: contentSchema,
 		channels: channelsSchema,
 		sender: z.string().min(1).meta({
@@ -316,8 +307,6 @@ export const notificationSendRequestSchema = z
 		description: 'The POST /v1/notifications request body.',
 		example: {
 			idempotencyKey: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-			category: 'morning-briefing',
-			priority: 'standard',
 			content: {
 				items: {
 					'lead-story': {
