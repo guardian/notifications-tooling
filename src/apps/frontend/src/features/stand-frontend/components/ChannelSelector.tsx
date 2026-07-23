@@ -1,7 +1,7 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { channelOptionNameMap } from '../option-values';
 import type { ChannelOption } from '../types';
-import { channelOptionNameMap } from '../types';
 import { SelectableTile } from './SelectableTile';
 
 interface ChannelSelectorProps {

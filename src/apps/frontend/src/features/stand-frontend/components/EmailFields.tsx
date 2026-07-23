@@ -1,7 +1,7 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
-import { kickerNameMap } from '../types';
+import { kickerNameMap } from '../option-values';
 import { AudienceSegments } from './AudienceSegments';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { NotificationTextInput } from './NotificationTextInput';

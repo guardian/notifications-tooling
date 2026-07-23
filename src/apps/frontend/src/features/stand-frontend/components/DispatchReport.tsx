@@ -13,7 +13,7 @@ import {
 	audienceSegmentNameMap,
 	emailDeliveryOptionNameMap,
 	kickerNameMap,
-} from '../types';
+} from '../option-values';
 
 const styles = {
 	container: css({

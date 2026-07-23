@@ -1,7 +1,8 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { emailDeliveryOptionNameMap } from '../option-values';
 import type { ChannelOption } from '../types';
-import { type EmailDeliveryOption, emailDeliveryOptionNameMap } from '../types';
+import { type EmailDeliveryOption } from '../types';
 import { SelectableTile } from './SelectableTile';
 
 interface DeliveryAndTimingSelectorProps {
