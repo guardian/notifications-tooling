@@ -3,3 +3,4 @@ cdk/cdk.out/**
 # Ignore everything under docker except the local compose file
 docker/**
 !docker/docker-compose.local.yml
+src/apps/frontend/public/mockServiceWorker.js
