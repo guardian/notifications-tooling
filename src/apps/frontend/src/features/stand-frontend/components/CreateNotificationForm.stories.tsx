@@ -5,6 +5,14 @@ import { CreateNotificationForm } from './CreateNotificationForm';
 const meta = {
 	title: 'Stand Frontend/CreateNotificationForm',
 	component: CreateNotificationForm,
+	args: {
+		selectedSegments: [],
+		onSelectedSegmentsChange: () => {},
+		selectedChannel: undefined,
+		onSelectedChannelChange: () => {},
+		selectedDeliveryTiming: undefined,
+		onSelectedDeliveryTimingChange: () => {},
+	},
 	parameters: {
 		docs: {
 			description: {

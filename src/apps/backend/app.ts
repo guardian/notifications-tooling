@@ -1,26 +1,27 @@
+import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
 	type NextFunction,
 	type Request,
 	type Response,
 } from 'express';
-import { pinoHttp } from 'pino-http';
+import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
 import { rootRouter } from './routers/root';
-import { logger } from './utils/logger';
 
 export const app: Application = express();
 
 app.disable('x-powered-by');
 
+app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(pinoHttp({ logger }));
 
 app.use('/', rootRouter);
 app.use('/health', healthRouter);
+app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/docs/api', docsRouter);
 

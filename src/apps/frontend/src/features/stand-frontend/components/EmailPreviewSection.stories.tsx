@@ -5,6 +5,11 @@ import { EmailPreviewSection } from './EmailPreviewSection';
 const meta = {
 	title: 'Stand Frontend/EmailPreviewSection',
 	component: EmailPreviewSection,
+	args: {
+		selectedSegments: [],
+		selectedChannel: undefined,
+		selectedDeliveryTiming: undefined,
+	},
 	parameters: {
 		docs: {
 			description: {

@@ -2,15 +2,28 @@ import { css } from '@emotion/react';
 import { baseSpacing, semanticColors } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import {
+	AudienceSegmentsPreviewPill,
+	DEFAULT_SEGMENTS,
+} from './AudienceSegments';
+import { HTMLPreview } from './HTMLPreview';
+import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
-/**
- * This is a non-functional placeholder to demonstrate how content will appear in the layout
- */
-export const EmailPreviewSection = () => {
+interface EmailPreviewSectionProps {
+	selectedSegments: string[];
+	selectedChannel?: string;
+	selectedDeliveryTiming?: string;
+}
+
+export const EmailPreviewSection = ({
+	selectedSegments,
+	selectedChannel,
+	selectedDeliveryTiming,
+}: EmailPreviewSectionProps) => {
 	return (
 		<section
 			css={css({
-				background: semanticColors.fill.neutralWeak,
+				background: semanticColors.bg.raisedLevel1,
 				flexBasis: 474,
 				padding: baseSpacing['16Px'],
 				display: 'flex',
@@ -18,7 +31,14 @@ export const EmailPreviewSection = () => {
 				gap: baseSpacing['20Px'],
 			})}
 		>
-			<header>
+			<header
+				css={css({
+					display: 'flex',
+					flexDirection: 'column',
+					gap: baseSpacing['12Px'], // adjust spacing as needed
+					alignItems: 'stretch',
+				})}
+			>
 				<div
 					css={{
 						display: 'flex',
@@ -27,13 +47,22 @@ export const EmailPreviewSection = () => {
 					}}
 				>
 					<Icon symbol="preview" />
-					<Typography variant="headingCompactLg">Preview</Typography>
+					<Typography variant="bodyBoldMd">Preview</Typography>
 				</div>
 				<Typography variant="bodySm">
 					The preview for the newsletter email and/or the app alert notification
 					will be shown below.
 				</Typography>
 			</header>
+			<SendInfoPreviewPill
+				channel={selectedChannel}
+				deliveryTiming={selectedDeliveryTiming}
+			/>
+			<AudienceSegmentsPreviewPill
+				segments={DEFAULT_SEGMENTS}
+				selected={selectedSegments}
+			/>
+			<HTMLPreview />
 		</section>
 	);
 };
