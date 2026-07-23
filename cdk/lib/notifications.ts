@@ -15,7 +15,8 @@ export class DispatchStack extends GuStack {
 
 		const { stage } = props;
 		const isProd = stage === 'PROD';
-		const domainName = `${app}.${isProd ? '' : 'code.dev-'}gutools.co.uk`;
+		const subdomainPrefix = isProd ? '' : 'code.dev-';
+		const domainName = `${app}.${subdomainPrefix}gutools.co.uk`;
 
 		const guApiLambda = new GuApiLambda(this, `${app}-lambda`, {
 			fileName: `${app}.zip`,
@@ -58,6 +59,16 @@ export class DispatchStack extends GuStack {
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
 			resources: [
+				`arn:aws:s3:::pan-domain-auth-settings/${subdomainPrefix}gutools.co.uk.settings.public`,
+			],
+		});
+
+		guApiLambda.addToRolePolicy(pandaConfigAndKeyPolicyStatement);
+
+		const localPandaConfigAndKeyPolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['s3:GetObject'],
+			resources: [
 				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings',
 				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public',
 			],
@@ -82,7 +93,7 @@ export class DispatchStack extends GuStack {
 				grantId: 'run-dispatch-locally',
 				friendlyName: 'Run dispatch locally',
 				statements: [
-					pandaConfigAndKeyPolicyStatement,
+					localPandaConfigAndKeyPolicyStatement,
 					parameterPolicyStatement,
 					parameterKmsPolicyStatement,
 				],
