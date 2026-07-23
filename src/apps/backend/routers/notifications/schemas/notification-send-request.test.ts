@@ -786,7 +786,7 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/newsletter/compose/items');
 		});
 
-		it('newsletter rejects duplicate item ids', () => {
+		it('newsletter rejects more than one item', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
