@@ -5,9 +5,6 @@ import {
 } from '@guardian/pan-domain-node';
 import type { NextFunction, Request, Response } from 'express';
 
-const MISSING_AUTH_COOKIE_MESSAGE =
-	'pan-domain auth cookie missing, invalid or expired';
-
 export interface AuthenticatedRequest extends Request {
 	userEmail?: string;
 }
@@ -28,6 +25,19 @@ const settingsFileName = (stage: string) => {
 	}
 };
 
+const loginHostLookup = (stage: string) => {
+	switch (stage) {
+		case 'DEV':
+			return 'login.local.dev-gutools.co.uk';
+		case 'CODE':
+			return 'login.code.dev-gutools.co.uk';
+		case 'PROD':
+			return 'login.gutools.co.uk';
+		default:
+			throw new Error(`Unknown stage: ${stage}`);
+	}
+};
+
 const panda = new PanDomainAuthentication(
 	'gutoolsAuth-assym', // cookie name
 	'eu-west-1', // AWS region
@@ -39,29 +49,22 @@ const panda = new PanDomainAuthentication(
 		: fromNodeProviderChain(),
 );
 
-const getVerifiedUserEmail = async (
-	cookieHeader: string | undefined,
-): Promise<void | string> => {
-	if (cookieHeader) {
-		const result = await panda.verify(cookieHeader);
-
-		if (result.success) {
-			return result.user.email;
-		}
-	}
-};
-
 export const authMiddleware = async (
 	request: AuthenticatedRequest,
 	response: Response,
 	next: NextFunction,
 ) => {
 	const maybeCookieHeader = request.header('Cookie');
-	const maybeAuthenticatedEmail = await getVerifiedUserEmail(maybeCookieHeader);
+	if (maybeCookieHeader) {
+		const result = await panda.verify(maybeCookieHeader);
 
-	if (!maybeAuthenticatedEmail) {
-		return response.status(403).send(MISSING_AUTH_COOKIE_MESSAGE);
-	} else {
-		return next();
+		if (result.success) {
+			return next();
+		}
 	}
+
+	const returnUrl = `https://${request.hostname}${request.originalUrl}`;
+	const redirectTo = `https://${loginHostLookup(stage)}/login?returnUrl=${returnUrl}`;
+
+	return response.redirect(redirectTo);
 };
