@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import { expect, within } from 'storybook/test';
 import { CreateNotificationForm } from './CreateNotificationForm';
 
@@ -17,7 +18,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					'This is a non-functional placeholder to demonstrate how content will appear in the layout.',
+					'Notification creation form with audience segments, channel, and delivery timing controls.',
 			},
 		},
 	},
@@ -26,7 +27,27 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const CreateNewNotification = () => {
+	const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
+	const [selectedChannel, setSelectedChannel] = useState<string | undefined>();
+	const [selectedDeliveryTiming, setSelectedDeliveryTiming] = useState<
+		string | undefined
+	>();
+
+	return (
+		<CreateNotificationForm
+			selectedSegments={selectedSegments}
+			onSelectedSegmentsChange={setSelectedSegments}
+			selectedChannel={selectedChannel}
+			onSelectedChannelChange={setSelectedChannel}
+			selectedDeliveryTiming={selectedDeliveryTiming}
+			onSelectedDeliveryTimingChange={setSelectedDeliveryTiming}
+		/>
+	);
+};
 export const Default: Story = {
+	render: () => <CreateNewNotification />,
+
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('Create a Notification')).toBeInTheDocument();
@@ -34,5 +55,8 @@ export const Default: Story = {
 		await expect(canvas.getByText('Kicker')).toBeInTheDocument();
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
 		await expect(canvas.getByText('Preview text')).toBeInTheDocument();
+		await expect(canvas.getByText('Audience Segments')).toBeInTheDocument();
+		await expect(canvas.getByText('Channel')).toBeInTheDocument();
+		await expect(canvas.getByText('Delivery and timing')).toBeInTheDocument();
 	},
 };
