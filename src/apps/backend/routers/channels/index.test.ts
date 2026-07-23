@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import {
 	appPushNotificationSegments,
 	MAX_APP_PUSH_SEGMENTS,
@@ -7,7 +8,6 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { startTestServer, type TestServer } from '../../test-utils/server';
 import { channelAudiences, channelConstraints } from './index';
 
