@@ -13,6 +13,11 @@ const newsletterEnvironmentSchema = z.object({
 	BRAZE_API_KEY: z.string().trim().min(1),
 	BRAZE_REST_ENDPOINT: z.url(),
 	EMAIL_RENDERING_ENDPOINT: z.url(),
+	PROVIDER_REQUEST_TIMEOUT_MS: z.coerce
+		.number()
+		.int()
+		.positive()
+		.default(10_000),
 });
 
 export type DispatchNotificationDependencies = {
@@ -82,6 +87,7 @@ const dispatchNewsletter = async (
 			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 			articleUrl: item.link,
 			newsletterId: segmentId,
+			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 
 		await dependencies.sendBrazeCampaign({
@@ -90,6 +96,7 @@ const dispatchNewsletter = async (
 			campaignId: brazeCampaignId,
 			html,
 			subject: plan.compose.subject,
+			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 	}
 };

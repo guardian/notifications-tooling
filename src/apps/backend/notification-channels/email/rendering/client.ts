@@ -8,6 +8,7 @@ type RenderEmailRequest = {
 	endpoint: string;
 	articleUrl: string;
 	newsletterId: string;
+	timeoutMs: number;
 };
 
 const articleIdFromUrl = (articleUrl: string): string => {
@@ -24,6 +25,7 @@ export const renderEmail = async ({
 	endpoint,
 	articleUrl,
 	newsletterId,
+	timeoutMs,
 }: RenderEmailRequest): Promise<string> => {
 	const articleId = articleIdFromUrl(articleUrl)
 		.split('/')
@@ -32,7 +34,9 @@ export const renderEmail = async ({
 	const renderUrl = new URL(`/notification/${articleId}.json`, endpoint);
 	renderUrl.searchParams.set('newsletter-id', newsletterId);
 
-	const response = await fetch(renderUrl);
+	const response = await fetch(renderUrl, {
+		signal: AbortSignal.timeout(timeoutMs),
+	});
 
 	if (!response.ok) {
 		throw new Error(`Email rendering failed with status ${response.status}.`);

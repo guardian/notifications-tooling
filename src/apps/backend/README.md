@@ -8,6 +8,8 @@ and populate them with the CODE environment values.
 - `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send` permission.
 - `BRAZE_REST_ENDPOINT` is the Braze REST instance URL.
 - `EMAIL_RENDERING_ENDPOINT` is the base URL of the email-rendering service.
+- `PROVIDER_REQUEST_TIMEOUT_MS` limits each provider request and defaults to 10
+  seconds.
 
 UK, US, and AU newsletter labels and their Braze campaign IDs are configured in
 `src/packages/config/audiences.ts`. Campaign IDs contain placeholder values until

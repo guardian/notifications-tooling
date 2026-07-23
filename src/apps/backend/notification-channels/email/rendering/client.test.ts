@@ -7,6 +7,10 @@ afterEach(() => {
 
 describe('renderEmail', () => {
 	it('renders an article using the selected newsletter id', () => {
+		const timeoutSignal = new AbortController().signal;
+		const timeout = spyOn(AbortSignal, 'timeout').mockReturnValue(
+			timeoutSignal,
+		);
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({ body: '<html>Rendered</html>' }),
 		);
@@ -17,12 +21,15 @@ describe('renderEmail', () => {
 				articleUrl:
 					'https://www.theguardian.com/world/2026/jul/22/example-story',
 				newsletterId: 'breaking-news-uk',
+				timeoutMs: 10_000,
 			}),
 		).resolves.toBe('<html>Rendered</html>');
+		expect(timeout).toHaveBeenCalledWith(10_000);
 		expect(fetcher).toHaveBeenCalledWith(
 			new URL(
 				'https://email-rendering.example.com/notification/world/2026/jul/22/example-story.json?newsletter-id=breaking-news-uk',
 			),
+			{ signal: timeoutSignal },
 		);
 	});
 
@@ -36,6 +43,7 @@ describe('renderEmail', () => {
 				endpoint: 'https://email-rendering.example.com',
 				articleUrl: 'https://www.theguardian.com/world/example-story',
 				newsletterId: 'breaking-news-uk',
+				timeoutMs: 10_000,
 			}),
 		).rejects.toThrow('Email rendering failed with status 500.');
 	});

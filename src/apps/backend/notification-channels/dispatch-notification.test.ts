@@ -104,11 +104,13 @@ describe('dispatchNotification', () => {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
 			newsletterId: 'UK',
+			timeoutMs: 10_000,
 		});
 		expect(renderEmail).toHaveBeenNthCalledWith(2, {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
 			newsletterId: 'US',
+			timeoutMs: 10_000,
 		});
 		expect(sendBrazeCampaign).toHaveBeenNthCalledWith(1, {
 			apiKey: 'test-api-key',
@@ -116,6 +118,7 @@ describe('dispatchNotification', () => {
 			campaignId: 'uk_campaign_id',
 			html: '<html>Rendered newsletter</html>',
 			subject: 'Daily briefing',
+			timeoutMs: 10_000,
 		});
 		expect(sendBrazeCampaign).toHaveBeenNthCalledWith(2, {
 			apiKey: 'test-api-key',
@@ -123,6 +126,7 @@ describe('dispatchNotification', () => {
 			campaignId: 'us_campaign_id',
 			html: '<html>Rendered newsletter</html>',
 			subject: 'Daily briefing',
+			timeoutMs: 10_000,
 		});
 	});
 

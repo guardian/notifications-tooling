@@ -14,10 +14,15 @@ const request = {
 	campaignId: 'campaign-uk',
 	html: '<html>News</html>',
 	subject: 'Breaking news',
+	timeoutMs: 10_000,
 };
 
 describe('sendBrazeCampaign', () => {
 	it('triggers a Braze campaign with rendered email content', () => {
+		const timeoutSignal = new AbortController().signal;
+		const timeout = spyOn(AbortSignal, 'timeout').mockReturnValue(
+			timeoutSignal,
+		);
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({ message: 'success', dispatch_id: 'dispatch-123' }),
 		);
@@ -42,8 +47,10 @@ describe('sendBrazeCampaign', () => {
 						subject: 'Breaking news',
 					},
 				}),
+				signal: timeoutSignal,
 			},
 		);
+		expect(timeout).toHaveBeenCalledWith(10_000);
 	});
 
 	it('preserves Unicode content', async () => {

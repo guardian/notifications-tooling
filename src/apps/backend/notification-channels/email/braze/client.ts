@@ -8,6 +8,7 @@ type SendBrazeCampaignRequest = {
 	campaignId: string;
 	html: string;
 	subject: string;
+	timeoutMs: number;
 };
 
 export type BrazeCampaignTriggerResponse = {
@@ -35,6 +36,7 @@ export const sendBrazeCampaign = async ({
 	campaignId,
 	html,
 	subject,
+	timeoutMs,
 }: SendBrazeCampaignRequest): Promise<BrazeCampaignTriggerResponse> => {
 	const triggerProperties = { body: html, subject };
 	const triggerPropertiesSize = Buffer.byteLength(
@@ -64,6 +66,7 @@ export const sendBrazeCampaign = async ({
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify(request),
+		signal: AbortSignal.timeout(timeoutMs),
 	});
 
 	if (!response.ok) {
