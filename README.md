@@ -18,7 +18,7 @@ Dispatch gives editorial staff one place to compose and send breaking-news notif
 
 It replaces a fragmented workflow spread across multiple systems and legacy tooling.
 
-Email delivery currently integrates with Braze, and app push integration with the [notifications API](https://github.com/guardian/mobile-n10n).
+Email delivery currently integrates with [Braze](https://www.braze.com/docs/developer_guide/home), and app push integration with the [notifications API](https://github.com/guardian/mobile-n10n).
 
 ## 2. Getting Started
 
@@ -103,7 +103,7 @@ Git hooks are managed with `lefthook` and installed automatically via `bun insta
 
 - `src/apps/frontend`: UI for composing notifications.
 - `src/apps/backend`: API and channel request generation.
-- `src/packages/config`: shared config package.
+- `src/packages`: shared packages.
 - `cdk`: infrastructure stack and deployment definitions.
 
 ### Infrastructure model
@@ -122,6 +122,7 @@ flowchart LR
 ## 4. Useful Links
 
 - Braze REST API: https://www.braze.com/docs/developer_guide/rest_api/sending_messages
+- App notifications monorepo: https://github.com/guardian/mobile-n10n
 - Existing Breaking News tool: https://fronts.gutools.co.uk/breaking-news
 - Existing Breaking News tool code: https://github.com/guardian/facia-tool
 - Bun documentation: https://bun.sh/
@@ -129,5 +130,5 @@ flowchart LR
 ## 5. Terminology
 
 - **Segment**: A target audience group (`UK`, `US`, `AU`, `EU`, `ALL`).
-- **Delivery mode**: The dispatch timing strategy (`immediate`, `scheduled`, `intelligent`).
+- **Delivery mode**: The notification timing strategy (`immediate`, `scheduled`, `intelligent`).
 - **Channel**: A delivery destination such as `email` or `app-notification`.
