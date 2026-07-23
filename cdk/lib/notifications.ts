@@ -67,7 +67,7 @@ export class DispatchStack extends GuStack {
 			effect: Effect.ALLOW,
 			actions: ['ssm:GetParameter', 'ssm:GetParameters'],
 			resources: [
-				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/flexible/login/DEV/play.http.secret.key`,
+				`arn:aws:ssm:${this.region}:${this.account}:parameter/flexible/login/DEV/play.http.secret.key`,
 			],
 		});
 

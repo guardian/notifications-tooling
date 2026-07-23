@@ -116,7 +116,18 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 "ssm:GetParameters",
               ],
               "Effect": "Allow",
-              "Resource": "arn:aws:ssm:undefined:undefined:parameter/flexible/login/DEV/play.http.secret.key",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/flexible/login/DEV/play.http.secret.key",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
