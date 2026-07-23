@@ -1,4 +1,3 @@
-import 'source-map-support/register';
 import { GuRoot } from '@guardian/cdk/lib/constructs/root';
 import { DispatchStack } from '../lib/notifications';
 
