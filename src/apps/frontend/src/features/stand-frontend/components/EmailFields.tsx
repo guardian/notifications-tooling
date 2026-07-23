@@ -1,14 +1,9 @@
-import { Checkbox, CheckboxGroup } from '@guardian/stand/Checkbox';
-import { Radio, RadioGroup } from '@guardian/stand/RadioGroup';
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
-import type { AudienceSegment, EmailDeliveryOption } from '../types';
-import {
-	audienceSegmentNameMap,
-	emailDeliveryOptionNameMap,
-	kickerNameMap,
-} from '../types';
+import { kickerNameMap } from '../types';
+import { AudienceSegments } from './AudienceSegments';
+import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { NotificationTextInput } from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
@@ -41,10 +36,6 @@ export const EmailFields = () => {
 						typeof key === 'string' ? key.split('//').at(1) : undefined;
 					switch (kicker) {
 						case 'breaking-news':
-							return updateNotification({
-								type: 'modify-email-parameters',
-								mod: { kicker },
-							});
 						case 'exclusive':
 							return updateNotification({
 								type: 'modify-email-parameters',
@@ -97,43 +88,25 @@ export const EmailFields = () => {
 				softLimit={100}
 			/>
 
-			<CheckboxGroup
-				label="Audience Segment"
-				description="Choose the audience the email newsletter will be sent to"
-				value={audienceSegments}
-				onChange={(newValue) => {
+			<AudienceSegments
+				selected={audienceSegments}
+				onChange={(audienceSegments) => {
 					updateNotification({
 						type: 'modify-email-parameters',
-						mod: { audienceSegments: newValue as AudienceSegment[] },
+						mod: { audienceSegments },
 					});
 				}}
-			>
-				{Object.entries(audienceSegmentNameMap).map(([segment, name]) => (
-					<Checkbox key={segment} value={segment}>
-						{name}
-					</Checkbox>
-				))}
-			</CheckboxGroup>
+			/>
 
-			<RadioGroup
-				label="Delivery and timing"
-				description="Choose whether the app alert is sent immediately or scheduled for later"
-				value={emailDeliveryOption ?? null}
-				onChange={(newValue) => {
+			<DeliveryAndTimingSelector
+				selectedDeliveryTiming={emailDeliveryOption}
+				onChange={(emailDeliveryOption) => {
 					updateNotification({
 						type: 'modify-email-parameters',
-						mod: { emailDeliveryOption: newValue as EmailDeliveryOption },
+						mod: { emailDeliveryOption },
 					});
 				}}
-			>
-				{Object.entries(emailDeliveryOptionNameMap).map(
-					([deliveryOption, { name }]) => (
-						<Radio key={deliveryOption} value={deliveryOption}>
-							{name}
-						</Radio>
-					),
-				)}
-			</RadioGroup>
+			/>
 		</>
 	);
 };

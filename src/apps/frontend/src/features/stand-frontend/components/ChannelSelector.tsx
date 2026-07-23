@@ -1,5 +1,6 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { channelOptionNameMap } from '../types';
 import { SelectableTile } from './SelectableTile';
 
 interface ChannelSelectorProps {
@@ -31,8 +32,9 @@ export const ChannelSelector = ({
 				</Typography>
 
 				<SelectableTile
-					tileLabel={'Newsletter email'}
-					tileDescription={'Sends via the Braze breaking-news campaign'}
+					tileLabel={channelOptionNameMap['email'].name}
+					tileValue="email"
+					tileDescription={channelOptionNameMap['email'].description}
 					tileSymbol={'mail'}
 					selectedValue={selectedChannel}
 					onChange={onChange}

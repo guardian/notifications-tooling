@@ -41,6 +41,7 @@ export const kickerNameMap: Record<KickerId | 'undefined', string> = {
 };
 
 export type AudienceSegment = 'UK' | 'US' | 'AU';
+// TO DO - replace with DEFAULT_SEGMENTS
 export const audienceSegmentNameMap: Record<AudienceSegment, string> = {
 	UK: 'United Kingdom',
 	US: 'United States',
@@ -70,6 +71,7 @@ export type EmailNotification = {
 
 export type PushNotification = {
 	type: 'push';
+	audienceSegments?: AudienceSegment[];
 };
 
 // TO DO - get shape form backend project when ready

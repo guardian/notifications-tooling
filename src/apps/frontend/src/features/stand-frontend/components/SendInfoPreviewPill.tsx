@@ -8,6 +8,18 @@ interface SendInfoPreviewPillProps {
 	deliveryTiming?: string;
 }
 
+// TO DO - derive from constants
+const getLabel = (value: string) => {
+	switch (value) {
+		case 'immediate':
+			return 'Immediate send';
+		case 'email':
+			return 'Email newsletter';
+	}
+
+	return value;
+};
+
 export const SendInfoPreviewPill = ({
 	channel,
 	deliveryTiming,
@@ -35,7 +47,7 @@ export const SendInfoPreviewPill = ({
 					}}
 				>
 					{selectedValues.map((value) => {
-						const iconValue = value === 'Immediate' ? 'bolt' : 'mail';
+						const iconValue = value === 'immediate' ? 'bolt' : 'mail';
 						return (
 							<div key={value} css={activePillTheme.activePill}>
 								<Icon
@@ -45,7 +57,7 @@ export const SendInfoPreviewPill = ({
 									cssOverrides={activePillTheme.activePillIcon}
 								/>
 								<Typography variant={'headingCompactSm'}>
-									{value === 'Immediate' ? 'Immediate send' : value}
+									{getLabel(value)}
 								</Typography>
 							</div>
 						);

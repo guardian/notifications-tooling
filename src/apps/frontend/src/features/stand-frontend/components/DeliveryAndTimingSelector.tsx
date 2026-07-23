@@ -1,10 +1,11 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { type EmailDeliveryOption, emailDeliveryOptionNameMap } from '../types';
 import { SelectableTile } from './SelectableTile';
 
 interface DeliveryAndTimingSelectorProps {
-	selectedDeliveryTiming?: string;
-	onChange: (deliveryTiming?: string) => void;
+	selectedDeliveryTiming?: EmailDeliveryOption;
+	onChange: (deliveryTiming?: EmailDeliveryOption) => void;
 }
 
 export const DeliveryAndTimingSelector = ({
@@ -12,32 +13,37 @@ export const DeliveryAndTimingSelector = ({
 	onChange,
 }: DeliveryAndTimingSelectorProps) => {
 	return (
-		<>
-			<div
+		<div
+			css={{
+				display: 'flex',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackXs,
+			}}
+		>
+			<Typography variant="bodyBoldMd">Delivery and timing</Typography>
+			<Typography
+				variant="bodySm"
 				css={{
-					display: 'flex',
-					flexDirection: 'column',
-					gap: semanticSpacing.stackXs,
+					color: semanticColors.text.weak,
 				}}
 			>
-				<Typography variant="bodyBoldMd">Delivery and timing</Typography>
-				<Typography
-					variant="bodySm"
-					css={{
-						color: semanticColors.text.weak,
-					}}
-				>
-					Choose whether the app alert is sent immediately or scheduled for a
-					later
-				</Typography>
-				<SelectableTile
-					tileLabel={'Immediate'}
-					tileDescription={'Send right now via Braze'}
-					tileSymbol={'bolt'}
-					selectedValue={selectedDeliveryTiming}
-					onChange={onChange}
-				/>
-			</div>
-		</>
+				Choose whether the app alert is sent immediately or scheduled for a
+				later
+			</Typography>
+			<SelectableTile
+				tileLabel={emailDeliveryOptionNameMap['immediate'].name}
+				tileValue={'immediate'}
+				tileDescription={emailDeliveryOptionNameMap['immediate'].description}
+				tileSymbol={'bolt'}
+				selectedValue={selectedDeliveryTiming}
+				onChange={(selected) => {
+					switch (selected) {
+						case 'immediate':
+							onChange(selected);
+							break;
+					}
+				}}
+			/>
+		</div>
 	);
 };
