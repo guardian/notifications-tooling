@@ -1,7 +1,7 @@
 {
 	"extends": "@guardian/tsconfig/tsconfig.json",
 	"compilerOptions": {
-		"module": "CommonJS",
+		"module": "preserve",
 		"types": ["bun", "node"]
 	},
 	"include": ["lib/**/*", "bin/**/*"],

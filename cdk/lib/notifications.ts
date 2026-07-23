@@ -2,9 +2,11 @@ import { GuCertificate } from '@guardian/cdk/lib/constructs/acm';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
+import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 export class DispatchStack extends GuStack {
@@ -13,7 +15,8 @@ export class DispatchStack extends GuStack {
 
 		const { stage } = props;
 		const isProd = stage === 'PROD';
-		const domainName = `${app}.${isProd ? '' : 'code.dev-'}gutools.co.uk`;
+		const subdomainPrefix = isProd ? '' : 'code.dev-';
+		const domainName = `${app}.${subdomainPrefix}gutools.co.uk`;
 
 		const guApiLambda = new GuApiLambda(this, `${app}-lambda`, {
 			fileName: `${app}.zip`,
@@ -51,5 +54,51 @@ export class DispatchStack extends GuStack {
 			ttl: Duration.hours(1),
 			resourceRecord: domain.domainNameAliasDomainName,
 		});
+
+		const pandaConfigAndKeyPolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['s3:GetObject'],
+			resources: [
+				`arn:aws:s3:::pan-domain-auth-settings/${subdomainPrefix}gutools.co.uk.settings.public`,
+			],
+		});
+
+		guApiLambda.addToRolePolicy(pandaConfigAndKeyPolicyStatement);
+
+		const localPandaConfigAndKeyPolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['s3:GetObject'],
+			resources: [
+				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings',
+				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public',
+			],
+		});
+
+		const parameterPolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['ssm:GetParameter', 'ssm:GetParameters'],
+			resources: [
+				`arn:aws:ssm:${this.region}:${this.account}:parameter/flexible/login/DEV/play.http.secret.key`,
+			],
+		});
+
+		const parameterKmsPolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['kms:Decrypt'],
+			resources: [`arn:aws:kms:${this.region}:${this.account}:alias/aws/ssm`],
+		});
+
+		if (!isProd) {
+			new GuDeveloperPolicyExperimental(this, 'DispatchLocalPolicy', {
+				grantId: 'run-dispatch-locally',
+				friendlyName: 'Run dispatch locally',
+				statements: [
+					localPandaConfigAndKeyPolicyStatement,
+					parameterPolicyStatement,
+					parameterKmsPolicyStatement,
+				],
+				withoutPolicyChecks: true,
+			});
+		}
 	}
 }
