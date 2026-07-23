@@ -100,6 +100,7 @@ export const EmailFields = () => {
 
 			<DeliveryAndTimingSelector
 				selectedDeliveryTiming={emailDeliveryOption}
+				channel={notification.parameters.type}
 				onChange={(emailDeliveryOption) => {
 					updateNotification({
 						type: 'modify-email-parameters',

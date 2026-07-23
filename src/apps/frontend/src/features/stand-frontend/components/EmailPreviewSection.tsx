@@ -2,7 +2,11 @@ import { css } from '@emotion/react';
 import { baseSpacing, semanticColors } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
-import type { AudienceSegment, ChannelOption, EmailDeliveryOption } from '../types';
+import type {
+	AudienceSegment,
+	ChannelOption,
+	EmailDeliveryOption,
+} from '../types';
 import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,

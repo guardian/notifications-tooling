@@ -64,6 +64,7 @@ export const layoutMainTheme: LayoutMainProps['theme'] = {
 export const selectableTileTheme = {
 	selectableTile: (isChecked: boolean) =>
 		css({
+			padding: 0,
 			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 			borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,

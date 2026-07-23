@@ -1,4 +1,8 @@
 import type { Content } from '@guardian/content-api-models/v1/content';
+import type { Icon } from '@guardian/stand/Icon';
+import type { ComponentProps } from 'react';
+
+type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 
 export type UserData = {
 	firstName?: string;
@@ -13,11 +17,16 @@ export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
 export const channelOptionNameMap: Record<
 	'email', // for phase one, email is the only supported channel
-	{ name: string; description: string }
+	{
+		name: string;
+		description: string;
+		symbol?: IconSymbol;
+	}
 > = {
 	email: {
 		name: 'Newsletter email',
 		description: 'Sends via the braze breaking-news campaign',
+		symbol: 'mail',
 	},
 };
 
@@ -41,7 +50,6 @@ export const kickerNameMap: Record<KickerId | 'undefined', string> = {
 };
 
 export type AudienceSegment = 'UK' | 'US' | 'AU';
-// TO DO - replace with DEFAULT_SEGMENTS
 export const audienceSegmentNameMap: Record<AudienceSegment, string> = {
 	UK: 'United Kingdom',
 	US: 'United States',
@@ -51,11 +59,12 @@ export const audienceSegmentNameMap: Record<AudienceSegment, string> = {
 export type EmailDeliveryOption = 'immediate';
 export const emailDeliveryOptionNameMap: Record<
 	EmailDeliveryOption,
-	{ name: string; description: string }
+	{ name: string; description: string; symbol?: IconSymbol }
 > = {
 	immediate: {
 		name: 'Immediate',
 		description: 'Sends right now via Braze',
+		symbol: 'bolt',
 	},
 };
 
