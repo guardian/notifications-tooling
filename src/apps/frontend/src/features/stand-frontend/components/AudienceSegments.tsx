@@ -25,7 +25,7 @@ interface AudienceSegmentPickerProps {
 
 interface AudienceSegmentsPreviewPillProps {
 	segments?: Segment[];
-	selected: string[];
+	selected: AudienceSegment[];
 }
 
 export const DEFAULT_SEGMENTS: Segment[] = [
