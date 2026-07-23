@@ -110,6 +110,11 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 "arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public",
               ],
             },
+            {
+              "Action": "ssm:GetParameters",
+              "Effect": "Allow",
+              "Resource": "/flexible/login/DEV/play.http.secret.key",
+            },
           ],
           "Version": "2012-10-17",
         },

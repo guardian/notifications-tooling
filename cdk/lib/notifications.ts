@@ -58,16 +58,26 @@ export class DispatchStack extends GuStack {
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
 			resources: [
-				`arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings`,
-				`arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public`,
+				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings',
+				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public',
 			],
+		});
+
+		const parameterPolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['ssm:GetParameters'],
+			resources: ['/flexible/login/DEV/play.http.secret.key'],
 		});
 
 		if (!isProd) {
 			new GuDeveloperPolicyExperimental(this, 'DispatchLocalPolicy', {
 				grantId: 'run-dispatch-locally',
 				friendlyName: 'Run dispatch locally',
-				statements: [pandaConfigAndKeyPolicyStatement],
+				statements: [
+					pandaConfigAndKeyPolicyStatement,
+					parameterPolicyStatement,
+				],
+				withoutPolicyChecks: true,
 			});
 		}
 	}
