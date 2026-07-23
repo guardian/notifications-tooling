@@ -80,6 +80,7 @@ describe('GET /v1/channels/constraints', () => {
 				.maxLength,
 		);
 		expect(newsletter.compose.minItems).toBe(1);
+		expect(newsletter.compose.maxItems).toBe(1);
 		expect(newsletter.audience.maxSegments).toBe(MAX_NEWSLETTER_SEGMENTS);
 		expect(newsletter.audience.maxTestRecipients).toBe(
 			MAX_TEST_EMAIL_RECIPIENTS,
