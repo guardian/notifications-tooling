@@ -129,6 +129,22 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:kms:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":alias/aws/ssm",
+                  ],
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },

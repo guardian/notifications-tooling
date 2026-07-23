@@ -71,6 +71,12 @@ export class DispatchStack extends GuStack {
 			],
 		});
 
+		const parameterKmsPolicyStatement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['kms:Decrypt'],
+			resources: [`arn:aws:kms:${this.region}:${this.account}:alias/aws/ssm`],
+		});
+
 		if (!isProd) {
 			new GuDeveloperPolicyExperimental(this, 'DispatchLocalPolicy', {
 				grantId: 'run-dispatch-locally',
@@ -78,6 +84,7 @@ export class DispatchStack extends GuStack {
 				statements: [
 					pandaConfigAndKeyPolicyStatement,
 					parameterPolicyStatement,
+					parameterKmsPolicyStatement,
 				],
 				withoutPolicyChecks: true,
 			});
