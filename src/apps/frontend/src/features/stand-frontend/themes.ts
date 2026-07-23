@@ -87,11 +87,16 @@ export const selectableTileTheme = {
 	}),
 	deliveryIcon: css({
 		backgroundColor: baseColors.magenta[900],
+		color: semanticColors.text.strong,
 		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 		borderRadius: semanticRadius.cornerSm,
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 		gap: `${baseSpacing['8Px']}`,
 		height: '32px',
+		'&:hover': {
+			backgroundColor: baseColors.magenta[900],
+			color: semanticColors.text.strong,
+		},
 	}),
 };
 
