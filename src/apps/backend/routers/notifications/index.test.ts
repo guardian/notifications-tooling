@@ -1,5 +1,7 @@
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import express from 'express';
 import { startTestServer, type TestServer } from '../../test-utils/server';
+import { createNotificationsRouter } from '.';
 
 /**
  * These tests drive the real Express app over HTTP so the whole `POST
@@ -50,6 +52,37 @@ const validPushRequest = () => ({
 
 describe('POST /v1/notifications', () => {
 	describe('happy path', () => {
+		it('dispatches the validated request before accepting it', async () => {
+			const dispatchRequest = mock(() => Promise.resolve());
+			const testApp = express();
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(dispatchRequest),
+			);
+			const dispatchServer = await startTestServer(testApp);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(202);
+				expect(dispatchRequest).toHaveBeenCalledWith({
+					...validPushRequest(),
+					priority: 'standard',
+					options: { dryRun: false, scheduledFor: null },
+				});
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+
 		it('accepts a valid request with 202 and the acceptance envelope', async () => {
 			const response = await postNotification(validPushRequest());
 
