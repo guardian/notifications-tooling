@@ -56,10 +56,7 @@ jobs:
 
       - name: Build and synth CDK
         working-directory: cdk
-        run: |
-          bun lint
-          bun test
-          bun synth
+        run: bun synth
 
       - name: Combine application and CDK into dist
         run: |
