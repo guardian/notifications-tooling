@@ -7,6 +7,7 @@ import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance
 import { notificationSendRequestJsonSchema } from './notification-send-request';
 import { notificationValidationErrorSchema } from './notification-validation-error';
 import { notificationValidationIssueSchema } from './notification-validation-issue';
+import { userSchema } from './user';
 
 /** Reusable schema objects referenced via `#/components/schemas/*`. */
 export const schemas = {
@@ -19,4 +20,5 @@ export const schemas = {
 	NotificationValidationError: notificationValidationErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
+	User: userSchema,
 } as const;
