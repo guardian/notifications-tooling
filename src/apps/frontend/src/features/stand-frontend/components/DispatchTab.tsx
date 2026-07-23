@@ -4,11 +4,13 @@ import {
 	semanticSizing,
 	semanticSpacing,
 } from '@guardian/stand';
+import { baseSpacing } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { useState } from 'react';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { EmailPreviewSection } from './EmailPreviewSection';
+import { SideNavigationPanel } from './SideNavigationPanel';
 
 export const DispatchTab = () => {
 	const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
@@ -31,19 +33,30 @@ export const DispatchTab = () => {
 				})}
 				theme={{
 					sm: { gap: '0px', padding: `0px 0px 0px` },
-					md: { gap: '0px', padding: `0px 0px ${semanticSpacing.stackLg}` },
-					lg: { gap: '0px', padding: `0px 0px ${semanticSpacing.stackXl}` },
+					md: { gap: '0px', padding: `0px 0px 0px` },
+					lg: { gap: '0px', padding: `0px 0px 0px` },
 				}}
 			>
 				<Item
-					size={8}
+					size={2}
 					cssOverrides={css({
-						paddingLeft: semanticSpacing.stackSm,
-						paddingRight: semanticSpacing.stackSm,
+						border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+						gap: `${baseSpacing['10Px']}`,
+					})}
+				>
+					<SideNavigationPanel />
+				</Item>
+
+				<Item
+					size={5}
+					cssOverrides={css({
+						paddingLeft: '147px',
+						paddingRight: semanticSpacing.stackXl,
 						borderRightWidth: semanticSizing.border.default,
 						borderRightStyle: 'solid',
 						borderRightColor: semanticColors.border.weak,
-						paddingTop: semanticSpacing.stackSm,
+						paddingTop: `48px`,
+						width: '720px',
 					})}
 				>
 					<CreateNotificationForm
