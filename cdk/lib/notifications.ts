@@ -65,8 +65,10 @@ export class DispatchStack extends GuStack {
 
 		const parameterPolicyStatement = new PolicyStatement({
 			effect: Effect.ALLOW,
-			actions: ['ssm:GetParameters'],
-			resources: ['/flexible/login/DEV/play.http.secret.key'],
+			actions: ['ssm:GetParameter', 'ssm:GetParameters'],
+			resources: [
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/flexible/login/DEV/play.http.secret.key`,
+			],
 		});
 
 		if (!isProd) {
