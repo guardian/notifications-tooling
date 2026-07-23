@@ -2,18 +2,41 @@ import { semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { activePillTheme } from '../themes';
+import type { ChannelOption, EmailDeliveryOption } from '../types';
 
 interface SendInfoPreviewPillProps {
-	channel?: string;
-	deliveryTiming?: string;
+	channel?: ChannelOption;
+	deliveryTiming?: EmailDeliveryOption;
 }
+
+const getLabel = (value: ChannelOption | EmailDeliveryOption) => {
+	switch (value) {
+		case 'immediate':
+			return 'Immediate send';
+		case 'email':
+			return 'Email newsletter';
+		default:
+			return value;
+	}
+};
+
+const getIcon = (value: ChannelOption | EmailDeliveryOption) => {
+	switch (value) {
+		case 'immediate':
+			return 'bolt';
+		case 'email':
+			return 'mail';
+		default:
+			return 'mail';
+	}
+};
 
 export const SendInfoPreviewPill = ({
 	channel,
 	deliveryTiming,
 }: SendInfoPreviewPillProps) => {
 	const selectedValues = [channel, deliveryTiming].filter(
-		(value): value is string => Boolean(value),
+		(value): value is ChannelOption | EmailDeliveryOption => Boolean(value),
 	);
 
 	return (
@@ -34,22 +57,19 @@ export const SendInfoPreviewPill = ({
 						gap: semanticSpacing.stackSm,
 					}}
 				>
-					{selectedValues.map((value) => {
-						const iconValue = value === 'Immediate' ? 'bolt' : 'mail';
-						return (
-							<div key={value} css={activePillTheme.activePill}>
-								<Icon
-									size="md"
-									symbol={iconValue}
-									alt="send info"
-									cssOverrides={activePillTheme.activePillIcon}
-								/>
-								<Typography variant={'headingCompactSm'}>
-									{value === 'Immediate' ? 'Immediate send' : value}
-								</Typography>
-							</div>
-						);
-					})}
+					{selectedValues.map((value) => (
+						<div key={value} css={activePillTheme.activePill}>
+							<Icon
+								size="md"
+								symbol={getIcon(value)}
+								alt="send info"
+								cssOverrides={activePillTheme.activePillIcon}
+							/>
+							<Typography variant={'headingCompactSm'}>
+								{getLabel(value)}
+							</Typography>
+						</div>
+					))}
 				</div>
 			)}
 		</div>

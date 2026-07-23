@@ -8,6 +8,7 @@ import {
 	semanticSpacing,
 } from '@guardian/stand';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
+import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 
 export const topBarTheme: TopBarTheme = {
@@ -54,9 +55,16 @@ export const faviconTheme: FaviconTheme = {
 	},
 };
 
+export const layoutMainTheme: LayoutMainProps['theme'] = {
+	sm: { padding: { top: '0px', bottom: '0px' } },
+	md: { padding: { top: '0px', bottom: '0px' } },
+	lg: { padding: { top: '0px', bottom: '0px' } },
+};
+
 export const selectableTileTheme = {
 	selectableTile: (isChecked: boolean) =>
 		css({
+			padding: 0,
 			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 			borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,

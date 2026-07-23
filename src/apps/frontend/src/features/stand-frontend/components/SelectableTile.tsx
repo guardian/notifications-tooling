@@ -10,6 +10,7 @@ type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 interface SelectableTileProps {
 	tileLabel: string;
 	tileDescription: string;
+	tileValue: string;
 	tileSymbol?: IconSymbol;
 	selectedValue?: string;
 	onChange: (selected?: string) => void;
@@ -18,13 +19,14 @@ interface SelectableTileProps {
 export const SelectableTile = ({
 	tileLabel,
 	tileDescription,
+	tileValue,
 	tileSymbol,
 	selectedValue,
 	onChange,
 }: SelectableTileProps) => {
-	const isChecked = selectedValue === tileLabel;
+	const isChecked = selectedValue === tileValue;
 	const toggleChecked = () => {
-		onChange(isChecked ? undefined : tileLabel);
+		onChange(isChecked ? undefined : tileValue);
 	};
 
 	return (

@@ -1,9 +1,11 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { channelOptionNameMap } from '../option-values';
+import type { ChannelOption } from '../types';
 import { SelectableTile } from './SelectableTile';
 
 interface ChannelSelectorProps {
-	selectedChannel?: string;
+	selectedChannel?: ChannelOption;
 	onChange: (channel?: string) => void;
 }
 
@@ -30,13 +32,19 @@ export const ChannelSelector = ({
 					Choose the channel the notification is sent to
 				</Typography>
 
-				<SelectableTile
-					tileLabel={'Newsletter email'}
-					tileDescription={'Sends via the Braze breaking-news campaign'}
-					tileSymbol={'mail'}
-					selectedValue={selectedChannel}
-					onChange={onChange}
-				/>
+				{Object.entries(channelOptionNameMap).map(
+					([channelOption, { name, description, symbol }]) => (
+						<SelectableTile
+							key={channelOption}
+							tileLabel={name}
+							tileValue={channelOption}
+							tileDescription={description}
+							tileSymbol={symbol}
+							selectedValue={selectedChannel}
+							onChange={onChange}
+						/>
+					),
+				)}
 			</div>
 		</>
 	);
