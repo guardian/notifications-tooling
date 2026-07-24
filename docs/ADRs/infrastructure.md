@@ -40,21 +40,21 @@ Two hosting options have been considered:
 
 Run an Express server on a Guardian-standard EC2 instance behind a load balancer.
 
-| # | Pros                                                                                                                                                                                 |
-|---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | **Persistent connections** — long-lived TCP connections to downstream services (Braze, mobile-n10n) avoid repeated TLS handshakes and can benefit from connection pooling.           |
-| 2 | **Predictable, low latency** — no cold-start penalty; every request is handled by a warm process.                                                                                    |
-| 3 | **Familiar runtime model** — standard Node.js/Express behaviour; no handler-adapter shim required. Libraries that use global state, timers, or open file handles behave as expected. |
-| 4 | **Long-running tasks** — if the broker ever needs to hold a connection open (e.g. streaming, long polling), there is no execution time limit.                                        |
-| 5 | **Easier local parity** — `bun run dev` locally mirrors production directly; no local Lambda emulation needed.                                                                       |
+| #   | Pros                                                                                                                                                                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | **Persistent connections** — long-lived TCP connections to downstream services (Braze, mobile-n10n) avoid repeated TLS handshakes and can benefit from connection pooling.           |
+| 2   | **Predictable, low latency** — no cold-start penalty; every request is handled by a warm process.                                                                                    |
+| 3   | **Familiar runtime model** — standard Node.js/Express behaviour; no handler-adapter shim required. Libraries that use global state, timers, or open file handles behave as expected. |
+| 4   | **Long-running tasks** — if the broker ever needs to hold a connection open (e.g. streaming, long polling), there is no execution time limit.                                        |
+| 5   | **Easier local parity** — `bun run dev` locally mirrors production directly; no local Lambda emulation needed.                                                                       |
 
-| # | Cons                                                                                                                                                                                                  |
-|---|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | **Always-on cost** — the instance runs 24/7 even when there is no traffic. For a low-volume internal tool this is unnecessary.                                                                        |
-| 2 | **OS / AMI maintenance** — the team must keep the base AMI patched and rotated. Guardian tooling automates much of this, but it still requires periodic attention.                                    |
-| 3 | **Capacity planning** — instance type must be chosen upfront; under-sizing risks OOM/CPU issues; over-sizing wastes money.                                                                            |
-| 4 | **Slower deployments** — rolling AMI updates or instance replacements are slower than a Lambda code push.                                                                                             |
-| 5 | **More IAM / networking surface** — an EC2 instance in a VPC requires security groups, subnets, and instance profiles alongside the application code. In practice this is mostly abstracted by GuCDK. |
+| #   | Cons                                                                                                                                                                                                  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Always-on cost** — the instance runs 24/7 even when there is no traffic. For a low-volume internal tool this is unnecessary.                                                                        |
+| 2   | **OS / AMI maintenance** — the team must keep the base AMI patched and rotated. Guardian tooling automates much of this, but it still requires periodic attention.                                    |
+| 3   | **Capacity planning** — instance type must be chosen upfront; under-sizing risks OOM/CPU issues; over-sizing wastes money.                                                                            |
+| 4   | **Slower deployments** — rolling AMI updates or instance replacements are slower than a Lambda code push.                                                                                             |
+| 5   | **More IAM / networking surface** — an EC2 instance in a VPC requires security groups, subnets, and instance profiles alongside the application code. In practice this is mostly abstracted by GuCDK. |
 
 ---
 
@@ -62,24 +62,24 @@ Run an Express server on a Guardian-standard EC2 instance behind a load balancer
 
 Host the Express app behind API Gateway, with the Lambda runtime wrapping the existing handler via a serverless adapter.
 
-| # | Pros                                                                                                                                                                                         |
-|---|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | **Pay-per-request** — Lambda charges only for invocation duration; idle periods cost nothing.                                                                                                |
-| 2 | **Zero server management** — no AMI patching, OS updates, or instance lifecycle to manage. AWS handles runtime security patches for Node.js 24.x automatically.                              |
-| 3 | **Automatic scaling** — Lambda scales horizontally per request without any configuration.                                                                                                    |
-| 4 | **Fast deployments** — uploading a new zip file and updating the Lambda completes in seconds, making CI/CD fast.                                                                             |
-| 5 | **Native Guardian CDK support** — `GuApiLambda` provides most of what we need out of the box.                                                                                                |
-| 6 | **Built-in structured logging & tracing** — Lambda integrates with CloudWatch Logs, and the Guardian's Kinesis log shipping without additional configuration.                                |
-| 7 | **Concurrency rate-limiting** — `reservedConcurrentExecutions: 1` (already set in CDK for CODE) provides a simple hard cap that protects downstream services and our other Lambda processes. |
+| #   | Pros                                                                                                                                                                                         |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Pay-per-request** — Lambda charges only for invocation duration; idle periods cost nothing.                                                                                                |
+| 2   | **Zero server management** — no AMI patching, OS updates, or instance lifecycle to manage. AWS handles runtime security patches for Node.js 24.x automatically.                              |
+| 3   | **Automatic scaling** — Lambda scales horizontally per request without any configuration.                                                                                                    |
+| 4   | **Fast deployments** — uploading a new zip file and updating the Lambda completes in seconds, making CI/CD fast.                                                                             |
+| 5   | **Native Guardian CDK support** — `GuApiLambda` provides most of what we need out of the box.                                                                                                |
+| 6   | **Built-in structured logging & tracing** — Lambda integrates with CloudWatch Logs, and the Guardian's Kinesis log shipping without additional configuration.                                |
+| 7   | **Concurrency rate-limiting** — `reservedConcurrentExecutions: 1` (already set in CDK for CODE) provides a simple hard cap that protects downstream services and our other Lambda processes. |
 
-| # | Cons                                                                                                                                                                                                                                                                                                          |
-|---|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | **Cold starts** — a Lambda that has been idle for several minutes will incur a cold start (~200–500 ms for a Node.js 24.x function at typical bundle sizes). [Provisioned Concurrency](https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html) can eliminate this if it becomes a problem. |
-| 2 | **15-minute execution limit** — individual Lambda invocations cannot exceed 15 minutes. Not a concern for the application's current requirements, but rules out ever running long batch jobs inside the same function.                                                                                        |
-| 3 | **Stateless by design** — in-memory caches are not shared across concurrent Lambda instances. Shared state requires an external store (ElastiCache, SSM Parameter Store, DynamoDB).                                                                                                                           |
-| 4 | **Adapter shim required** — the Express app must be wrapped with a serverless adapter (`@codegenie/serverless-express`). This adds a thin layer of indirection that must be kept up to date.                                                                                                                  |
-| 5 | **Local development environment** — running the app locally with `bun run dev` uses plain Express; the Lambda handler path is only exercised in deployed environments (or with a local emulator such as SAM CLI).                                                                                             |
-| 6 | **Larger payloads** — API Gateway has a 10 MB request/response payload limit. Not a concern for the current notification payloads, but worth noting if large assets are ever handled.                                                                                                                         |
+| #   | Cons                                                                                                                                                                                                                                                                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Cold starts** — a Lambda that has been idle for several minutes will incur a cold start (~200–500 ms for a Node.js 24.x function at typical bundle sizes). [Provisioned Concurrency](https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html) can eliminate this if it becomes a problem. |
+| 2   | **15-minute execution limit** — individual Lambda invocations cannot exceed 15 minutes. Not a concern for the application's current requirements, but rules out ever running long batch jobs inside the same function.                                                                                        |
+| 3   | **Stateless by design** — in-memory caches are not shared across concurrent Lambda instances. Shared state requires an external store (ElastiCache, SSM Parameter Store, DynamoDB).                                                                                                                           |
+| 4   | **Adapter shim required** — the Express app must be wrapped with a serverless adapter (`@codegenie/serverless-express`). This adds a thin layer of indirection that must be kept up to date.                                                                                                                  |
+| 5   | **Local development environment** — running the app locally with `bun run dev` uses plain Express; the Lambda handler path is only exercised in deployed environments (or with a local emulator such as SAM CLI).                                                                                             |
+| 6   | **Larger payloads** — API Gateway has a 10 MB request/response payload limit. Not a concern for the current notification payloads, but worth noting if large assets are ever handled.                                                                                                                         |
 
 ---
 
