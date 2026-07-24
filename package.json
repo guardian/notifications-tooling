@@ -23,8 +23,8 @@
 	"scripts": {
 		"prepare": "lefthook install",
 		"test": "bun test",
-		"lint": "eslint .",
-		"lint:fix": "eslint . --fix",
+		"lint": "bun --bun eslint .",
+		"lint:fix": "bun --bun eslint . --fix",
 		"check:pinned-deps": "bun run scripts/check-pinned-deps.ts",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",

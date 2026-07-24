@@ -1,5 +1,5 @@
-import { newsletterSegments, NotificationChannel } from '@config';
 import { describe, expect, it, mock } from 'bun:test';
+import { newsletterSegments, NotificationChannel } from '@config';
 import type { NotificationSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import type { DispatchNotificationDependencies } from './dispatch-notification';
 import { dispatchNotification } from './dispatch-notification';
