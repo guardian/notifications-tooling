@@ -7,43 +7,43 @@
  */
 export const notificationsPath = {
 	post: {
-		summary: 'Validate and enqueue a notification',
+		summary: "Validate and enqueue a notification",
 		requestBody: {
 			required: true,
 			content: {
-				'application/json': {
-					schema: { $ref: '#/components/schemas/NotificationSendRequest' },
+				"application/json": {
+					schema: { $ref: "#/components/schemas/NotificationSendRequest" },
 				},
 			},
 		},
 		responses: {
-			'202': {
+			"202": {
 				description:
-					'The notification passed validation and was enqueued for per-channel dispatch.',
+					"The notification passed validation and was enqueued for per-channel dispatch.",
 				content: {
-					'application/json': {
-						schema: { $ref: '#/components/schemas/AcceptedNotification' },
+					"application/json": {
+						schema: { $ref: "#/components/schemas/AcceptedNotification" },
 					},
 				},
 			},
-			'400': {
+			"400": {
 				description:
-					'The request body is structurally malformed (missing/mistyped fields, unknown channel, or unexpected keys).',
+					"The request body is structurally malformed (missing/mistyped fields, unknown channel, or unexpected keys).",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							$ref: '#/components/schemas/NotificationValidationError',
+							$ref: "#/components/schemas/NotificationValidationError",
 						},
 					},
 				},
 			},
-			'422': {
+			"422": {
 				description:
-					'The request body is well-formed but failed semantic validation (content length limits, unknown references, or cross-field rules).',
+					"The request body is well-formed but failed semantic validation (content length limits, unknown references, or cross-field rules).",
 				content: {
-					'application/json': {
+					"application/json": {
 						schema: {
-							$ref: '#/components/schemas/NotificationValidationError',
+							$ref: "#/components/schemas/NotificationValidationError",
 						},
 					},
 				},

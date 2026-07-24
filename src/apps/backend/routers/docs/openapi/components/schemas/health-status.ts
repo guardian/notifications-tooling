@@ -3,13 +3,13 @@
  * `#/components/schemas/HealthStatus`.
  */
 export const healthStatusSchema = {
-	type: 'object',
-	required: ['status', 'uptime'],
+	type: "object",
+	required: ["status", "uptime"],
 	properties: {
-		status: { type: 'string', example: 'ok' },
+		status: { type: "string", example: "ok" },
 		uptime: {
-			type: 'number',
-			description: 'Process uptime in seconds.',
+			type: "number",
+			description: "Process uptime in seconds.",
 			example: 123.45,
 		},
 	},

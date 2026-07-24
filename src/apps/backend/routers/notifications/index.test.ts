@@ -1,7 +1,7 @@
-import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import express from 'express';
-import { startTestServer, type TestServer } from '../../test-utils/server';
-import { createNotificationsRouter } from '.';
+import { afterAll, beforeAll, describe, expect, it, mock } from "bun:test";
+import express from "express";
+import { startTestServer, type TestServer } from "../../test-utils/server";
+import { createNotificationsRouter } from ".";
 
 /**
  * These tests drive the real Express app over HTTP so the whole `POST
@@ -23,41 +23,41 @@ afterAll(async () => {
 
 const postNotification = (body: unknown): Promise<Response> =>
 	fetch(`${baseUrl}/v1/notifications`, {
-		method: 'POST',
-		headers: { 'content-type': 'application/json' },
+		method: "POST",
+		headers: { "content-type": "application/json" },
 		body: JSON.stringify(body),
 	});
 
 /** A minimal, fully valid single-channel app-push request. */
 const validPushRequest = () => ({
-	idempotencyKey: 'push-2026-07-08',
-	sender: 'notifications-tooling-spa/v1',
+	idempotencyKey: "push-2026-07-08",
+	sender: "notifications-tooling-spa/v1",
 	content: {
 		items: {
 			lead: {
-				type: 'app-push',
-				title: 'Ukraine summit begins',
-				body: 'World leaders gather in Geneva as talks open.',
-				link: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
+				type: "app-push",
+				title: "Ukraine summit begins",
+				body: "World leaders gather in Geneva as talks open.",
+				link: "https://www.theguardian.com/world/2026/jul/08/ukraine-summit",
 			},
 		},
 	},
 	channels: {
-		'app-push': {
-			audience: { type: 'segment', items: ['breaking-news-uk'] },
-			compose: { use: 'lead' },
+		"app-push": {
+			audience: { type: "segment", items: ["breaking-news-uk"] },
+			compose: { use: "lead" },
 		},
 	},
 });
 
-describe('POST /v1/notifications', () => {
-	describe('happy path', () => {
-		it('dispatches the validated request before accepting it', async () => {
+describe("POST /v1/notifications", () => {
+	describe("happy path", () => {
+		it("dispatches the validated request before accepting it", async () => {
 			const dispatchRequest = mock(() => Promise.resolve());
 			const testApp = express();
 			testApp.use(express.json());
 			testApp.use(
-				'/v1/notifications',
+				"/v1/notifications",
 				createNotificationsRouter(dispatchRequest),
 			);
 			const dispatchServer = await startTestServer(testApp);
@@ -66,8 +66,8 @@ describe('POST /v1/notifications', () => {
 				const response = await fetch(
 					`${dispatchServer.baseUrl}/v1/notifications`,
 					{
-						method: 'POST',
-						headers: { 'content-type': 'application/json' },
+						method: "POST",
+						headers: { "content-type": "application/json" },
 						body: JSON.stringify(validPushRequest()),
 					},
 				);
@@ -82,7 +82,7 @@ describe('POST /v1/notifications', () => {
 			}
 		});
 
-		it('accepts a valid request with 202 and the acceptance envelope', async () => {
+		it("accepts a valid request with 202 and the acceptance envelope", async () => {
 			const response = await postNotification(validPushRequest());
 
 			expect(response.status).toBe(202);
@@ -95,15 +95,15 @@ describe('POST /v1/notifications', () => {
 				cancellable: { cancelUrl: string; expiresAt: number };
 			};
 
-			expect(body.status).toBe('accepted');
-			expect(typeof body.notificationId).toBe('string');
+			expect(body.status).toBe("accepted");
+			expect(typeof body.notificationId).toBe("string");
 			expect(body.notificationId.length).toBeGreaterThan(0);
 
 			expect(body.plans).toEqual([
 				{
-					channel: 'app-push',
+					channel: "app-push",
 					planId: `${body.notificationId}#app-push`,
-					status: 'accepted',
+					status: "accepted",
 				},
 			]);
 
@@ -113,12 +113,12 @@ describe('POST /v1/notifications', () => {
 			expect(body.cancellable.cancelUrl).toBe(
 				`/v1/notifications/${body.notificationId}/cancel`,
 			);
-			expect(typeof body.cancellable.expiresAt).toBe('number');
+			expect(typeof body.cancellable.expiresAt).toBe("number");
 		});
 	});
 
-	describe('400 bad_request (structural failures)', () => {
-		it('rejects a body missing a required field', async () => {
+	describe("400 bad_request (structural failures)", () => {
+		it("rejects a body missing a required field", async () => {
 			const { idempotencyKey, ...withoutKey } = validPushRequest();
 			void idempotencyKey;
 
@@ -131,19 +131,19 @@ describe('POST /v1/notifications', () => {
 				details: Array<{ code: string; path: string; message: string }>;
 			};
 
-			expect(body.error).toBe('bad_request');
+			expect(body.error).toBe("bad_request");
 			expect(
-				body.details.some((detail) => detail.path === '/idempotencyKey'),
+				body.details.some((detail) => detail.path === "/idempotencyKey"),
 			).toBe(true);
 		});
 
-		it('rejects an unknown channel', async () => {
+		it("rejects an unknown channel", async () => {
 			const request = validPushRequest() as unknown as {
 				channels: Record<string, unknown>;
 			};
 			request.channels.telegram = {
-				audience: { type: 'segment', items: ['breaking-news-uk'] },
-				compose: { use: 'lead' },
+				audience: { type: "segment", items: ["breaking-news-uk"] },
+				compose: { use: "lead" },
 			};
 
 			const response = await postNotification(request);
@@ -151,14 +151,14 @@ describe('POST /v1/notifications', () => {
 			expect(response.status).toBe(400);
 
 			const body = (await response.json()) as { error: string };
-			expect(body.error).toBe('bad_request');
+			expect(body.error).toBe("bad_request");
 		});
 	});
 
-	describe('422 validation_failed (semantic/business failures)', () => {
-		it('rejects a title that exceeds the push length limit', async () => {
+	describe("422 validation_failed (semantic/business failures)", () => {
+		it("rejects a title that exceeds the push length limit", async () => {
 			const request = validPushRequest();
-			request.content.items.lead.title = 'x'.repeat(200);
+			request.content.items.lead.title = "x".repeat(200);
 
 			const response = await postNotification(request);
 
@@ -169,36 +169,36 @@ describe('POST /v1/notifications', () => {
 				details: Array<{ code: string; path: string; message: string }>;
 			};
 
-			expect(body.error).toBe('validation_failed');
+			expect(body.error).toBe("validation_failed");
 			expect(
 				body.details.some(
-					(detail) => detail.path === '/content/items/lead/title',
+					(detail) => detail.path === "/content/items/lead/title",
 				),
 			).toBe(true);
 		});
 
-		it('rejects a compose that references an unknown content item', async () => {
+		it("rejects a compose that references an unknown content item", async () => {
 			const request = validPushRequest();
-			request.channels['app-push'].compose.use = 'missing';
+			request.channels["app-push"].compose.use = "missing";
 
 			const response = await postNotification(request);
 
 			expect(response.status).toBe(422);
 
 			const body = (await response.json()) as { error: string };
-			expect(body.error).toBe('validation_failed');
+			expect(body.error).toBe("validation_failed");
 		});
 
-		it('rejects a non-Guardian article link', async () => {
+		it("rejects a non-Guardian article link", async () => {
 			const request = validPushRequest();
-			request.content.items.lead.link = 'https://evil.example.com/story';
+			request.content.items.lead.link = "https://evil.example.com/story";
 
 			const response = await postNotification(request);
 
 			expect(response.status).toBe(422);
 
 			const body = (await response.json()) as { error: string };
-			expect(body.error).toBe('validation_failed');
+			expect(body.error).toBe("validation_failed");
 		});
 	});
 });

@@ -1,13 +1,13 @@
 /** The `/health` path item. */
 export const healthPath = {
 	get: {
-		summary: 'Health check',
+		summary: "Health check",
 		responses: {
-			'200': {
-				description: 'The service is healthy.',
+			"200": {
+				description: "The service is healthy.",
 				content: {
-					'application/json': {
-						schema: { $ref: '#/components/schemas/HealthStatus' },
+					"application/json": {
+						schema: { $ref: "#/components/schemas/HealthStatus" },
 					},
 				},
 			},

@@ -4,14 +4,14 @@
  * `#/components/schemas/NotificationPlanAcceptance`.
  */
 export const notificationPlanAcceptanceSchema = {
-	type: 'object',
-	required: ['channel', 'planId', 'status'],
+	type: "object",
+	required: ["channel", "planId", "status"],
 	properties: {
-		channel: { $ref: '#/components/schemas/NotificationChannel' },
+		channel: { $ref: "#/components/schemas/NotificationChannel" },
 		planId: {
-			type: 'string',
-			example: '<notificationId>#newsletter',
+			type: "string",
+			example: "<notificationId>#newsletter",
 		},
-		status: { type: 'string', enum: ['accepted'] },
+		status: { type: "string", enum: ["accepted"] },
 	},
 } as const;

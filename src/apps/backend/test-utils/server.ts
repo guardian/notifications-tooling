@@ -1,7 +1,7 @@
-import type { Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
-import type { Application } from 'express';
-import { app } from '../app';
+import type { Server } from "node:http";
+import type { AddressInfo } from "node:net";
+import type { Application } from "express";
+import { app } from "../app";
 
 /** A running test server plus the helpers needed to talk to and stop it. */
 export interface TestServer {
@@ -17,7 +17,7 @@ export const startTestServer = async (
 	application: Application = app,
 ): Promise<TestServer> => {
 	const server: Server = application.listen(0);
-	await new Promise<void>((resolve) => server.once('listening', resolve));
+	await new Promise<void>((resolve) => server.once("listening", resolve));
 
 	const { port } = server.address() as AddressInfo;
 
