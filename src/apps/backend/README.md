@@ -3,7 +3,7 @@
 ## Notification channel configuration
 
 Copy the variable names from `.env.example` into the ignored `.env.local` file
-and populate them with the CODE environment values.
+and populate them with the environment values.
 
 - `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send` permission.
 - `BRAZE_REST_ENDPOINT` is the Braze REST instance URL.
@@ -14,7 +14,7 @@ and populate them with the CODE environment values.
 UK, US, and AU newsletter labels, email-rendering newsletter IDs, and Braze
 campaign IDs are configured in `src/packages/config/audiences.ts`. The public
 segment key, display label, and downstream IDs are independent values. Campaign
-IDs contain placeholder values until the real values are populated.
+IDs point to Braze dev environment test campaigns.
 
 The app-notification client is currently a mock. It receives the translated
 topic and content request but does not make a network call.
@@ -23,7 +23,7 @@ topic and content request but does not make a network call.
 client. For newsletter segments it renders the selected article through
 email-rendering and triggers the mapped Braze campaign.
 
-The current email-rendering endpoint supports one article. Multi-item
-newsletters, direct test-email audiences, and scheduled delivery are rejected
+The current email-rendering endpoint supports one article.
+Direct test-email audiences, and scheduled delivery are rejected
 until their downstream contracts are implemented. Dry runs are accepted without
 calling either downstream client.
