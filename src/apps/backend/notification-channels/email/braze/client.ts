@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const MAX_BRAZE_TRIGGER_PROPERTIES_BYTES = 50_000;
 
@@ -41,7 +41,7 @@ export const sendBrazeCampaign = async ({
 	const triggerProperties = { body: html, subject };
 	const triggerPropertiesSize = Buffer.byteLength(
 		JSON.stringify(triggerProperties),
-		"utf8",
+		'utf8',
 	);
 	if (triggerPropertiesSize > MAX_BRAZE_TRIGGER_PROPERTIES_BYTES) {
 		throw new RangeError(
@@ -55,15 +55,15 @@ export const sendBrazeCampaign = async ({
 		trigger_properties: triggerProperties,
 	};
 	const campaignTriggerUrl = new URL(
-		"/campaigns/trigger/send",
+		'/campaigns/trigger/send',
 		restEndpoint,
 	).toString();
 
 	const response = await fetch(campaignTriggerUrl, {
-		method: "POST",
+		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${apiKey}`,
-			"Content-Type": "application/json",
+			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify(request),
 		signal: AbortSignal.timeout(timeoutMs),

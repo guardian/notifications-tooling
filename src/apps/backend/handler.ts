@@ -1,6 +1,6 @@
-import serverlessExpress from "@codegenie/serverless-express";
-import { env } from "../../packages/config";
-import { app } from "./placeholder-app";
+import serverlessExpress from '@codegenie/serverless-express';
+import { env } from '../../packages/config';
+import { app } from './placeholder-app';
 
 const IS_RUNNING_LOCALLY = !process.env.LAMBDA_TASK_ROOT;
 

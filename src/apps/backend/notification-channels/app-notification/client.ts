@@ -4,7 +4,7 @@ export type AppNotificationRequest = {
 	body: string;
 	link: string;
 	media?: {
-		type: "image";
+		type: 'image';
 		imageUrl: string;
 		thumbnailUrl?: string;
 	};

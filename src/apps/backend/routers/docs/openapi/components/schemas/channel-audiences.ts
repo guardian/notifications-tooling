@@ -1,29 +1,29 @@
-import { NotificationChannel } from "@config";
-import { channelAudiences } from "../../../../channels";
+import { NotificationChannel } from '@config';
+import { channelAudiences } from '../../../../channels';
 
 /** A selectable audience segment exposed to the SPA: its id and human label. */
 const segmentOptionSchema = {
-	type: "object",
-	required: ["id", "label"],
+	type: 'object',
+	required: ['id', 'label'],
 	properties: {
 		id: {
-			type: "string",
-			description: "The public segment id referenced in a notification plan.",
+			type: 'string',
+			description: 'The public segment id referenced in a notification plan.',
 		},
 		label: {
-			type: "string",
-			description: "Human-readable segment name for display in the UI.",
+			type: 'string',
+			description: 'Human-readable segment name for display in the UI.',
 		},
 	},
 } as const;
 
 /** A channel's selectable audience: its list of segments. */
 const channelAudienceSchema = {
-	type: "object",
-	required: ["segments"],
+	type: 'object',
+	required: ['segments'],
 	properties: {
 		segments: {
-			type: "array",
+			type: 'array',
 			items: segmentOptionSchema,
 		},
 	},
@@ -37,12 +37,12 @@ const channelAudienceSchema = {
  * topic) is kept server-side.
  */
 export const channelAudiencesSchema = {
-	type: "object",
-	description: "Per-channel audience segments (id + label), keyed by channel.",
-	required: ["channels"],
+	type: 'object',
+	description: 'Per-channel audience segments (id + label), keyed by channel.',
+	required: ['channels'],
 	properties: {
 		channels: {
-			type: "object",
+			type: 'object',
 			required: [
 				NotificationChannel.AppPushNotification,
 				NotificationChannel.Newsletter,
