@@ -105,26 +105,23 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings",
-                "arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public",
-              ],
+              "Resource": "arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public",
             },
             {
               "Action": [
-                "ssm:GetParameter",
-                "ssm:GetParameters",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
               ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:eu-west-1:",
+                    "'arn:aws:dynamodb:eu-west-1:",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/flexible/login/DEV/play.http.secret.key",
+                    ":table/login.gutools-tokens-DEV'",
                   ],
                 ],
               },
@@ -144,6 +141,33 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                   ],
                 ],
               },
+            },
+            {
+              "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/flexible/login/DEV/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::login-gutools-config/DEV/*",
+                "arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings",
+              ],
             },
           ],
           "Version": "2012-10-17",
