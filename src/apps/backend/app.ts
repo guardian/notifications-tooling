@@ -5,11 +5,16 @@ import express, {
 	type Request,
 	type Response,
 } from 'express';
+import {
+	clientAssetsDir,
+	clientIndexFile,
+	isClientAppRoutePath,
+} from './client-assets';
+import { authMiddleware } from './middleware/auth-middleware';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
-import { rootRouter } from './routers/root';
 
 export const app: Application = express();
 
@@ -19,11 +24,24 @@ app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/', rootRouter);
 app.use('/health', healthRouter);
+
+app.use(authMiddleware);
+
+// Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/docs/api', docsRouter);
+
+app.use(express.static(clientAssetsDir, { index: false }));
+
+app.get('/{*path}', (req, res, next) => {
+	if (!isClientAppRoutePath(req.path)) {
+		return next();
+	}
+
+	res.sendFile(clientIndexFile);
+});
 
 app.use((_req: Request, res: Response) => {
 	res.status(404).json({ error: 'Not Found' });
