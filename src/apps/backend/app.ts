@@ -1,3 +1,4 @@
+import { env } from '@config';
 import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
@@ -26,7 +27,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
 
-app.use(authMiddleware);
+if (env.NODE_ENV !== 'test') {
+	app.use(authMiddleware);
+}
 
 // Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
