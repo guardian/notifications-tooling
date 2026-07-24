@@ -20,8 +20,6 @@ const newsletterItem = {
 
 const baseRequest = {
 	idempotencyKey: 'dispatch-test',
-	category: 'editorial',
-	priority: 'standard',
 	sender: 'dispatch-test',
 	options: { dryRun: false, scheduledFor: null },
 } as const;
