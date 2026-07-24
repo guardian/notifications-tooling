@@ -10,8 +10,6 @@ const loginHostLookup = () => {
 			return 'login.code.dev-gutools.co.uk';
 		case 'PROD':
 			return 'login.gutools.co.uk';
-		default:
-			throw new Error(`Unknown stage: ${env}`);
 	}
 };
 

@@ -15,8 +15,6 @@ const settingsFileName = () => {
 			return 'code.dev-gutools.co.uk.settings.public';
 		case 'PROD':
 			return 'gutools.co.uk.settings.public';
-		default:
-			throw new Error(`Unknown stage: ${env.STAGE}`);
 	}
 };
 

@@ -1,103 +1,86 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test';
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
-const isCookieValid = mock<(cookieHeader?: string) => Promise<boolean>>(
-    async () => false,
+const isCookieValid = mock<(cookieHeader?: string) => Promise<boolean>>(() =>
+	Promise.resolve(false),
 );
 
-mock.module('../auth/pan-domain-authentication', () => ({
-    isCookieValid,
+await mock.module('../auth/pan-domain-authentication', () => ({
+	isCookieValid,
 }));
 
 const { authMiddleware } = await import('./auth-middleware');
 
-const mockNextFunction = mock(() => { });
+const mockNextFunction = mock(() => undefined);
+
+const createMockRequest = (cookieHeader?: string): Request =>
+	({
+		header: (name: string) => (name === 'Cookie' ? cookieHeader : undefined),
+		hostname: 'notifications.local.dev-gutools.co.uk',
+		originalUrl: '/v1/notifications?draft=true',
+	}) as unknown as Request;
+
+const createMockResponse = () => {
+	const redirect = mock((location: string) => location);
+
+	return {
+		redirect,
+		response: {
+			redirect,
+		} as unknown as Response,
+	};
+};
 
 describe('auth-middleware', () => {
-    afterEach(() => {
-        mockNextFunction.mockReset();
-        isCookieValid.mockReset();
-        isCookieValid.mockImplementation(async () => false);
-    });
+	afterEach(() => {
+		mockNextFunction.mockReset();
+		isCookieValid.mockReset();
+		isCookieValid.mockImplementation(() => Promise.resolve(false));
+	});
 
-    it('should redirect to login where no cookie is provided', async () => {
-        const mockRequest = {
-            header: mock((name: string) =>
-                name === 'Cookie' ? undefined : undefined,
-            ),
-            hostname: 'notifications.local.dev-gutools.co.uk',
-            originalUrl: '/v1/notifications?draft=true',
-        } as unknown as Request;
+	it('should redirect to login where no cookie is provided', async () => {
+		const mockRequest = createMockRequest();
+		const { redirect, response } = createMockResponse();
 
-        const mockResponse = {
-            redirect: mock((location: string) => location),
-        } as unknown as Response;
+		await authMiddleware(mockRequest, response, mockNextFunction);
 
-        await authMiddleware(
-            mockRequest,
-            mockResponse,
-            mockNextFunction as unknown as NextFunction,
-        );
+		expect(isCookieValid).toHaveBeenCalledWith(undefined);
+		expect(redirect).toHaveBeenCalledTimes(1);
+		expect(redirect).toHaveBeenCalledWith(
+			expect.stringContaining(
+				'/login?returnUrl=https://notifications.local.dev-gutools.co.uk/v1/notifications?draft=true',
+			),
+		);
+		expect(mockNextFunction).not.toHaveBeenCalled();
+	});
 
-        expect(isCookieValid).toHaveBeenCalledWith(undefined);
-        expect(mockResponse.redirect).toHaveBeenCalledTimes(1);
-        expect(mockResponse.redirect).toHaveBeenCalledWith(
-            expect.stringContaining(
-                '/login?returnUrl=https://notifications.local.dev-gutools.co.uk/v1/notifications?draft=true',
-            ),
-        );
-        expect(mockNextFunction).not.toHaveBeenCalled();
-    });
+	it('should redirect to login where the cookie is invalid', async () => {
+		const mockRequest = createMockRequest('gutoolsAuth-assym=expired-cookie');
+		const { redirect, response } = createMockResponse();
 
-    it('should redirect to login where the cookie is invalid', async () => {
-        const mockRequest = {
-            header: mock((name: string) =>
-                name === 'Cookie' ? 'gutoolsAuth-assym=expired-cookie' : undefined,
-            ),
-            hostname: 'notifications.local.dev-gutools.co.uk',
-            originalUrl: '/v1/notifications?draft=true',
-        } as unknown as Request;
+		isCookieValid.mockResolvedValueOnce(false);
 
-        const mockResponse = {
-            redirect: mock((location: string) => location),
-        } as unknown as Response;
+		await authMiddleware(mockRequest, response, mockNextFunction);
 
-        isCookieValid.mockResolvedValueOnce(false);
+		expect(isCookieValid).toHaveBeenCalledWith(
+			'gutoolsAuth-assym=expired-cookie',
+		);
+		expect(redirect).toHaveBeenCalledTimes(1);
+		expect(mockNextFunction).not.toHaveBeenCalled();
+	});
 
-        await authMiddleware(
-            mockRequest,
-            mockResponse,
-            mockNextFunction as unknown as NextFunction,
-        );
+	it('calls next where user is authenticated', async () => {
+		const mockRequest = createMockRequest('gutoolsAuth-assym=valid-cookie');
+		const { redirect, response } = createMockResponse();
 
-        expect(isCookieValid).toHaveBeenCalledWith('gutoolsAuth-assym=expired-cookie');
-        expect(mockResponse.redirect).toHaveBeenCalledTimes(1);
-        expect(mockNextFunction).not.toHaveBeenCalled();
-    });
+		isCookieValid.mockResolvedValueOnce(true);
 
-    it('calls next where user is authenticated', async () => {
-        const mockRequest = {
-            header: mock((name: string) =>
-                name === 'Cookie' ? 'gutoolsAuth-assym=valid-cookie' : undefined,
-            ),
-            hostname: 'notifications.local.dev-gutools.co.uk',
-            originalUrl: '/v1/notifications?draft=true',
-        } as unknown as Request;
+		await authMiddleware(mockRequest, response, mockNextFunction);
 
-        const mockResponse = {
-            redirect: mock((location: string) => location),
-        } as unknown as Response;
-
-        isCookieValid.mockResolvedValueOnce(true);
-
-        await authMiddleware(
-            mockRequest,
-            mockResponse,
-            mockNextFunction as unknown as NextFunction,
-        );
-
-        expect(isCookieValid).toHaveBeenCalledWith('gutoolsAuth-assym=valid-cookie');
-        expect(mockResponse.redirect).not.toHaveBeenCalled();
-        expect(mockNextFunction).toHaveBeenCalledTimes(1);
-    });
+		expect(isCookieValid).toHaveBeenCalledWith(
+			'gutoolsAuth-assym=valid-cookie',
+		);
+		expect(redirect).not.toHaveBeenCalled();
+		expect(mockNextFunction).toHaveBeenCalledTimes(1);
+	});
 });
