@@ -50,6 +50,10 @@ Local URLs:
 - `https://dispatch.local.dev-gutools.co.uk`
 - `https://dispatch-backend.local.dev-gutools.co.uk/`
 
+This local setup currently depends on a temporary workaround introduced to support local development. Because panda-auth for Node does not generate cookies, you need to run the login tool locally alongside Dispatch.
+
+This is implemented using the [new developer policies](https://github.com/guardian/janus/blob/main/docs/developer-policies.md#gucdk). We considered adding these policies to login directly, but both login and Dispatch use the same Composer AWS profile, so only one policy context can be active at a time.
+
 Run apps separately if needed:
 
 ```bash
