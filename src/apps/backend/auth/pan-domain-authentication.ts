@@ -32,12 +32,7 @@ const panda = new PanDomainAuthentication(
 export const isCookieValid = async (
 	cookieHeader?: string,
 ): Promise<boolean> => {
-	if (cookieHeader) {
-		const result = await panda.verify(cookieHeader);
-		if (result.success) {
-			return true;
-		}
-	}
+	const result = await panda.verify(cookieHeader);
 
-	return false;
+	return result.success;
 };
