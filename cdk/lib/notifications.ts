@@ -107,7 +107,7 @@ const loginToolPolicyStatements = (stack: GuStack) => {
 		actions: ['s3:GetObject'],
 		resources: [
 			'arn:aws:s3:::login-gutools-config/DEV/*',
-			'arn:aws:s3:::pan-domain-auth-settings/local.*',
+			'arn:aws:s3:::pan-domain-auth-settings/*',
 		],
 	});
 	return [

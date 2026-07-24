@@ -147,7 +147,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3:::login-gutools-config/DEV/*",
-                "arn:aws:s3:::pan-domain-auth-settings/local.*",
+                "arn:aws:s3:::pan-domain-auth-settings/*",
               ],
             },
           ],
