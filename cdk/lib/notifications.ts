@@ -55,7 +55,7 @@ export class DispatchStack extends GuStack {
 			resourceRecord: domain.domainNameAliasDomainName,
 		});
 
-		const pandaConfigAndKeyPolicyStatement = new PolicyStatement({
+		const pandaSettingsPolicyStatement = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
 			resources: [
@@ -63,29 +63,14 @@ export class DispatchStack extends GuStack {
 			],
 		});
 
-		guApiLambda.addToRolePolicy(pandaConfigAndKeyPolicyStatement);
+		guApiLambda.addToRolePolicy(pandaSettingsPolicyStatement);
 
-		const localPandaConfigAndKeyPolicyStatement = new PolicyStatement({
+		const localPandaSettingsPolicyStatement = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
 			resources: [
-				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings',
 				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public',
 			],
-		});
-
-		const parameterPolicyStatement = new PolicyStatement({
-			effect: Effect.ALLOW,
-			actions: ['ssm:GetParameter', 'ssm:GetParameters'],
-			resources: [
-				`arn:aws:ssm:${this.region}:${this.account}:parameter/flexible/login/DEV/play.http.secret.key`,
-			],
-		});
-
-		const parameterKmsPolicyStatement = new PolicyStatement({
-			effect: Effect.ALLOW,
-			actions: ['kms:Decrypt'],
-			resources: [`arn:aws:kms:${this.region}:${this.account}:alias/aws/ssm`],
 		});
 
 		if (!isProd) {
@@ -93,12 +78,49 @@ export class DispatchStack extends GuStack {
 				grantId: 'run-dispatch-locally',
 				friendlyName: 'Run dispatch locally',
 				statements: [
-					localPandaConfigAndKeyPolicyStatement,
-					parameterPolicyStatement,
-					parameterKmsPolicyStatement,
+					localPandaSettingsPolicyStatement,
+					...loginToolPolicyStatements(this),
 				],
 				withoutPolicyChecks: true,
 			});
 		}
 	}
 }
+
+// Dispatch redirects unauthenticated users to login.gutools for authentication.
+// We add extra policies so the login tool can be run locally alongside Dispatch.
+const loginToolPolicyStatements = (stack: GuStack) => {
+	const dynamoDBPolicyStatement = new PolicyStatement({
+		effect: Effect.ALLOW,
+		actions: ['dynamodb:GetItem', 'dynamodb:PutItem'],
+		resources: [
+			`'arn:aws:dynamodb:${stack.region}:${stack.account}:table/login.gutools-tokens-DEV'`,
+		],
+	});
+	const parameterKmsPolicyStatement = new PolicyStatement({
+		effect: Effect.ALLOW,
+		actions: ['kms:Decrypt'],
+		resources: [`arn:aws:kms:${stack.region}:${stack.account}:alias/aws/ssm`],
+	});
+	const parameterPolicyStatement = new PolicyStatement({
+		effect: Effect.ALLOW,
+		actions: ['ssm:GetParameter', 'ssm:GetParameters'],
+		resources: [
+			`arn:aws:ssm:${stack.region}:${stack.account}:parameter/flexible/login/DEV/*`,
+		],
+	});
+	const s3PolicyStatement = new PolicyStatement({
+		effect: Effect.ALLOW,
+		actions: ['s3:GetObject'],
+		resources: [
+			'arn:aws:s3:::login-gutools-config/DEV/*',
+			'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings',
+		],
+	});
+	return [
+		dynamoDBPolicyStatement,
+		parameterKmsPolicyStatement,
+		parameterPolicyStatement,
+		s3PolicyStatement,
+	];
+};
