@@ -21,12 +21,12 @@ export const newsletterSegments = {
 	},
 	US: {
 		label: 'US',
-		brazeCampaignId: 'us_campaign_id',
+		brazeCampaignId: 'a945e3ae-165b-46d7-b163-0ca1c6beb2f4',
 		emailRenderingNewsletterId: 'breaking-news-us',
 	},
 	AU: {
 		label: 'AU',
-		brazeCampaignId: 'au_campaign_id',
+		brazeCampaignId: '5da1b754-42f4-440d-9eec-0d595190a0f0',
 		emailRenderingNewsletterId: 'breaking-news-us',
 	},
 } as const satisfies Record<string, NewsletterSegment>;
