@@ -90,13 +90,6 @@ export class DispatchStack extends GuStack {
 // Dispatch redirects unauthenticated users to login.gutools for authentication.
 // We add extra policies so the login tool can be run locally alongside Dispatch.
 const loginToolPolicyStatements = (stack: GuStack) => {
-	const dynamoDBPolicyStatement = new PolicyStatement({
-		effect: Effect.ALLOW,
-		actions: ['dynamodb:GetItem', 'dynamodb:PutItem'],
-		resources: [
-			`'arn:aws:dynamodb:${stack.region}:${stack.account}:table/login.gutools-tokens-DEV'`,
-		],
-	});
 	const parameterKmsPolicyStatement = new PolicyStatement({
 		effect: Effect.ALLOW,
 		actions: ['kms:Decrypt'],
@@ -114,11 +107,10 @@ const loginToolPolicyStatements = (stack: GuStack) => {
 		actions: ['s3:GetObject'],
 		resources: [
 			'arn:aws:s3:::login-gutools-config/DEV/*',
-			'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings',
+			'arn:aws:s3:::pan-domain-auth-settings/*',
 		],
 	});
 	return [
-		dynamoDBPolicyStatement,
 		parameterKmsPolicyStatement,
 		parameterPolicyStatement,
 		s3PolicyStatement,

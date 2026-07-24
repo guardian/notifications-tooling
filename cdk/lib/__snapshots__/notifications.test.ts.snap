@@ -108,25 +108,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               "Resource": "arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public",
             },
             {
-              "Action": [
-                "dynamodb:GetItem",
-                "dynamodb:PutItem",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "'arn:aws:dynamodb:eu-west-1:",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/login.gutools-tokens-DEV'",
-                  ],
-                ],
-              },
-            },
-            {
               "Action": "kms:Decrypt",
               "Effect": "Allow",
               "Resource": {
@@ -166,7 +147,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:s3:::login-gutools-config/DEV/*",
-                "arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings",
+                "arn:aws:s3:::pan-domain-auth-settings/*",
               ],
             },
           ],
