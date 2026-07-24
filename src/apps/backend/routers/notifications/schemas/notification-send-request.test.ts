@@ -45,7 +45,7 @@ const pushPlan = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const newsletterPlan = (overrides: Record<string, unknown> = {}) => ({
-	audience: { type: 'segment', items: ['morning-briefing'] },
+	audience: { type: 'segment', items: ['UK'] },
 	compose: { items: ['lead'], subject: 'Your morning briefing' },
 	...overrides,
 });
@@ -153,7 +153,7 @@ describe('notificationSendRequestSchema', () => {
 					newsletter: {
 						audience: {
 							type: 'segment',
-							items: ['morning-briefing'],
+							items: ['UK'],
 						},
 						compose: {
 							items: ['lead'],
@@ -229,7 +229,7 @@ describe('notificationSendRequestSchema', () => {
 					newsletter: {
 						audience: {
 							type: 'segment',
-							items: ['morning-briefing'],
+							items: ['UK'],
 						},
 						compose: {
 							items: ['newsLead'],
@@ -590,7 +590,7 @@ describe('notificationSendRequestSchema', () => {
 		it(`rejects more than ${MAX_NEWSLETTER_SEGMENTS} segments`, () => {
 			const segments = Array.from(
 				{ length: MAX_NEWSLETTER_SEGMENTS + 1 },
-				() => 'morning-briefing',
+				() => 'UK',
 			);
 			expect(
 				pathsOf(
@@ -608,7 +608,7 @@ describe('notificationSendRequestSchema', () => {
 						newsletterPlan({
 							audience: {
 								type: 'segment',
-								items: ['morning-briefing', 'morning-briefing'],
+								items: ['UK', 'UK'],
 							},
 						}),
 					),
@@ -716,7 +716,7 @@ describe('notificationSendRequestSchema', () => {
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
-							audience: { type: 'segment', items: ['morning-briefing'] },
+							audience: { type: 'segment', items: ['UK'] },
 						}),
 					),
 				),
