@@ -23,6 +23,53 @@ topic and content request but does not make a network call.
 client. For newsletter segments it renders the selected article through
 email-rendering and triggers the mapped Braze campaign.
 
+## Test the notification endpoint
+
+With the backend running on port 4000 and `.env.local` populated, run the
+following request to test newsletter rendering and dispatch through the mapped
+UK Braze dev campaign. This uses `dryRun: false`, so it makes real downstream
+requests.
+
+```sh
+curl --include \
+  --silent \
+  --show-error \
+  --fail-with-body \
+  --request POST \
+  'http://localhost:4000/v1/notifications' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "idempotencyKey": "newsletter-live-2026-07-23-oil-price-01",
+    "sender": "manual-e2e-test",
+    "content": {
+      "items": {
+        "lead": {
+          "type": "newsletter",
+          "title": "Oil price test",
+          "body": "Manual end-to-end newsletter test.",
+          "link": "https://www.theguardian.com/business/2026/jul/23/oil-price-passes-100-a-barrel-again-as-middle-east-conflict-escalates"
+        }
+      }
+    },
+    "channels": {
+      "newsletter": {
+        "audience": {
+          "type": "segment",
+          "items": ["UK"]
+        },
+        "compose": {
+          "items": ["lead"],
+          "subject": "[TEST] Oil price newsletter rendering"
+        }
+      }
+    },
+    "options": {
+      "dryRun": false,
+      "scheduledFor": null
+    }
+  }'
+```
+
 The current email-rendering endpoint supports one article.
 Direct test-email audiences, and scheduled delivery are rejected
 until their downstream contracts are implemented. Dry runs are accepted without
