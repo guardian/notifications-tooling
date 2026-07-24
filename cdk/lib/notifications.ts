@@ -9,14 +9,16 @@ import { Duration } from 'aws-cdk-lib';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
+const PAN_DOMAIN_AUTH_SETTINGS_BUCKET = 'pan-domain-auth-settings';
+const LOGIN_GUTOOLS_CONFIG_BUCKET = 'login-gutools-config';
+
 export class DispatchStack extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps, app: string) {
 		super(scope, id, props);
 
 		const { stage } = props;
 		const isProd = stage === 'PROD';
-		const subdomainPrefix = isProd ? '' : 'code.dev-';
-		const domainName = `${app}.${subdomainPrefix}gutools.co.uk`;
+		const domainName = `${app}.${isProd ? '' : 'code.dev-'}gutools.co.uk`;
 
 		const guApiLambda = new GuApiLambda(this, `${app}-lambda`, {
 			fileName: `${app}.zip`,
@@ -24,9 +26,9 @@ export class DispatchStack extends GuStack {
 			runtime: Runtime.NODEJS_24_X,
 			monitoringConfiguration: isProd
 				? {
-						http5xxAlarm: { tolerated5xxPercentage: 5 },
-						snsTopicName: 'pagerduty-cloudwatch-alerts-low-priority',
-					}
+					http5xxAlarm: { tolerated5xxPercentage: 5 },
+					snsTopicName: 'pagerduty-cloudwatch-alerts-low-priority',
+				}
 				: { noMonitoring: true },
 			app,
 			api: {
@@ -59,7 +61,7 @@ export class DispatchStack extends GuStack {
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
 			resources: [
-				`arn:aws:s3:::pan-domain-auth-settings/${subdomainPrefix}gutools.co.uk.settings.public`,
+				`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/${isProd ? '' : 'code.dev-'}gutools.co.uk.settings.public`,
 			],
 		});
 
@@ -69,7 +71,7 @@ export class DispatchStack extends GuStack {
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
 			resources: [
-				'arn:aws:s3:::pan-domain-auth-settings/local.dev-gutools.co.uk.settings.public',
+				`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/local.dev-gutools.co.uk.settings.public`,
 			],
 		});
 
@@ -79,8 +81,9 @@ export class DispatchStack extends GuStack {
 				friendlyName: 'Run dispatch locally',
 				statements: [
 					localPandaSettingsPolicyStatement,
-					...loginToolPolicyStatements(this),
+					...localLoginToolPolicyStatements(this),
 				],
+				// This allows the local policy to cover the required login tool paths all file paths in the login tool policy statement
 				withoutPolicyChecks: true,
 			});
 		}
@@ -89,7 +92,7 @@ export class DispatchStack extends GuStack {
 
 // Dispatch redirects unauthenticated users to login.gutools for authentication.
 // We add extra policies so the login tool can be run locally alongside Dispatch.
-const loginToolPolicyStatements = (stack: GuStack) => {
+const localLoginToolPolicyStatements = (stack: GuStack) => {
 	const parameterKmsPolicyStatement = new PolicyStatement({
 		effect: Effect.ALLOW,
 		actions: ['kms:Decrypt'],
@@ -106,8 +109,8 @@ const loginToolPolicyStatements = (stack: GuStack) => {
 		effect: Effect.ALLOW,
 		actions: ['s3:GetObject'],
 		resources: [
-			'arn:aws:s3:::login-gutools-config/DEV/*',
-			'arn:aws:s3:::pan-domain-auth-settings/*',
+			`arn:aws:s3:::${LOGIN_GUTOOLS_CONFIG_BUCKET}/DEV/*`,
+			`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/*`,
 		],
 	});
 	return [
