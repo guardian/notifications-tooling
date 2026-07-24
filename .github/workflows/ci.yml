@@ -52,7 +52,11 @@ jobs:
 
       - name: Build application
         working-directory: src/apps/backend
-        run: bun run build:placeholder
+        run: bun run build:handler
+
+      - name: Build frontend assets
+        working-directory: src/apps/frontend
+        run: bun run build
 
       - name: Build and synth CDK
         working-directory: cdk
@@ -62,7 +66,7 @@ jobs:
         run: |
           mkdir -p dist/frontend
           cp -v src/apps/backend/dist/handler.js dist/
-          cp -v src/apps/backend/placeholder-assets/index.html dist/frontend
+          cp -Rv src/apps/frontend/dist/. dist/frontend/
           cd dist
           zip -r dispatch.zip .
 
