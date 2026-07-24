@@ -74,8 +74,7 @@ Host the Express app behind API Gateway, with the Lambda runtime wrapping the ex
 
 | #   | Cons |
 | --- | ---- |
-
-    | 1 | **Cold starts** — a Lambda that has been idle for several minutes will incur a cold start (~200–500 ms for a Node.js 24.x function at typical bundle sizes). [Provisioned Concurrency](https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html) can eliminate this if it becomes a problem. |
+| 1 | **Cold starts** — a Lambda that has been idle for several minutes will incur a cold start (~200–500 ms for a Node.js 24.x function at typical bundle sizes). [Provisioned Concurrency](https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html) can eliminate this if it becomes a problem. |
 
 | 2 | **15-minute execution limit** — individual Lambda invocations cannot exceed 15 minutes. Not a concern for the application's current requirements, but rules out ever running long batch jobs inside the same function. |
 | 3 | **Stateless by design** — in-memory caches are not shared across concurrent Lambda instances. Shared state requires an external store (ElastiCache, SSM Parameter Store, DynamoDB). |
