@@ -95,9 +95,11 @@ export const ArticleImportControl = () => {
 
 				{isFetchingContent && <LoadingSpinner />}
 
-				{!isFetchingContent && fetchedArticleId === articleInputText && (
-					<InlineMessage level="success">Article Imported</InlineMessage>
-				)}
+				{!isFetchingContent &&
+					fetchedArticleId &&
+					fetchedArticleId === articleId && (
+						<InlineMessage level="success">Article Imported</InlineMessage>
+					)}
 
 				{fetchArticleError && (
 					<InlineMessage level="error">{fetchArticleError}</InlineMessage>
