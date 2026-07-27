@@ -52,7 +52,7 @@ const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 ];
 
 const sideNavigationPanelTileStyle = {
-	tileNumberStyle: (isSelected: boolean) =>
+	tileNumberStyle: (isSelected: boolean, isSend: boolean) =>
 		css({
 			minHeight: '72px',
 			width: '32px',
@@ -60,14 +60,17 @@ const sideNavigationPanelTileStyle = {
 			alignItems: 'center',
 			justifyContent: 'center',
 			borderRight: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+			borderBottom: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 			padding: `${baseSpacing['12Px']} ${baseSpacing['10Px']}`,
 			gap: `${baseSpacing['10Px']}`,
 			backgroundColor: isSelected
 				? baseColors.magenta[200]
 				: semanticColors.fill.weak,
-			color: isSelected
-				? semanticColors.text.strongerInverse
-				: semanticColors.text.weak,
+			color: isSend
+				? semanticColors.text.disabled
+				: isSelected
+					? semanticColors.text.strongerInverse
+					: semanticColors.text.weak,
 		}),
 	tileStyle: css({
 		height: '50px',
@@ -75,9 +78,11 @@ const sideNavigationPanelTileStyle = {
 		padding: `${baseSpacing['16Px']} ${baseSpacing['12Px']}`,
 		gap: `${baseSpacing['4Px']}`,
 	}),
-	tileTextStyle: css({
-		fontSize: '16px',
-	}),
+	tileTextStyle: (isSend: boolean) =>
+		css({
+			fontSize: '16px',
+			color: isSend ? semanticColors.text.disabled : semanticColors.text.weak,
+		}),
 };
 
 export const SideNavigationPanel = () => {
@@ -130,14 +135,19 @@ export const SideNavigationPanelTile = ({
 		>
 			<Typography
 				variant="headingLg"
-				cssOverrides={sideNavigationPanelTileStyle.tileNumberStyle(isSelected)}
+				cssOverrides={sideNavigationPanelTileStyle.tileNumberStyle(
+					isSelected,
+					title === 'Send',
+				)}
 			>
 				{tileNumber}
 			</Typography>
 			<div css={sideNavigationPanelTileStyle.tileStyle}>
 				<Typography
 					variant="headingMd"
-					cssOverrides={sideNavigationPanelTileStyle.tileTextStyle}
+					cssOverrides={sideNavigationPanelTileStyle.tileTextStyle(
+						title === 'Send',
+					)}
 				>
 					{title}
 				</Typography>

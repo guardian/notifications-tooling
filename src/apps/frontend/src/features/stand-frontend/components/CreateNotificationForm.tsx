@@ -29,7 +29,7 @@ export const CreateNotificationForm = ({
 	return (
 		<>
 			<Typography variant="titleMd" element="h2">
-				Create a Notification
+				Create a notification
 			</Typography>
 
 			<div
