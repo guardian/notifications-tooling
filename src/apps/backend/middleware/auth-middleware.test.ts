@@ -33,12 +33,14 @@ const createMockRequest = (cookieHeader?: string): Request =>
 	}) as unknown as Request;
 
 const createMockResponse = () => {
-	const redirect = mock((location: string) => location);
+	const json = mock((body: unknown) => body);
+	const status = mock((_code: number) => ({ json }));
 
 	return {
-		redirect,
+		status,
+		json,
 		response: {
-			redirect,
+			status,
 		} as unknown as Response,
 	};
 };
@@ -50,25 +52,27 @@ describe('auth-middleware', () => {
 		verifyCookie.mockImplementation(() => Promise.resolve({ success: false }));
 	});
 
-	it('should redirect to login where no cookie is provided', async () => {
+	it('should respond with 401 and login url where no cookie is provided', async () => {
 		const mockRequest = createMockRequest();
-		const { redirect, response } = createMockResponse();
+		const { status, json, response } = createMockResponse();
 
 		await authMiddleware(mockRequest, response, mockNextFunction);
 
 		expect(verifyCookie).toHaveBeenCalledWith(undefined);
-		expect(redirect).toHaveBeenCalledTimes(1);
-		expect(redirect).toHaveBeenCalledWith(
-			expect.stringContaining(
-				'/login?returnUrl=https://dispatch.test.dev-gutools.co.uk/v1/notifications',
+		expect(status).toHaveBeenCalledTimes(1);
+		expect(status).toHaveBeenCalledWith(401);
+		expect(json).toHaveBeenCalledWith({
+			reason: 'Unauthenticated',
+			loginUrl: expect.stringContaining(
+				'/login?returnUrl=https%3A%2F%2Fdispatch.test.dev-gutools.co.uk%2Fv1%2Fnotifications',
 			),
-		);
+		});
 		expect(mockNextFunction).not.toHaveBeenCalled();
 	});
 
-	it('should redirect to login where the cookie is invalid', async () => {
+	it('should respond with 401 where the cookie is invalid', async () => {
 		const mockRequest = createMockRequest('gutoolsAuth-assym=expired-cookie');
-		const { redirect, response } = createMockResponse();
+		const { status, response } = createMockResponse();
 
 		verifyCookie.mockResolvedValueOnce({ success: false });
 
@@ -77,13 +81,14 @@ describe('auth-middleware', () => {
 		expect(verifyCookie).toHaveBeenCalledWith(
 			'gutoolsAuth-assym=expired-cookie',
 		);
-		expect(redirect).toHaveBeenCalledTimes(1);
+		expect(status).toHaveBeenCalledTimes(1);
+		expect(status).toHaveBeenCalledWith(401);
 		expect(mockNextFunction).not.toHaveBeenCalled();
 	});
 
 	it('calls next and injects the user where authenticated', async () => {
 		const mockRequest = createMockRequest('gutoolsAuth-assym=valid-cookie');
-		const { redirect, response } = createMockResponse();
+		const { status, response } = createMockResponse();
 
 		verifyCookie.mockResolvedValueOnce({ success: true, user: sampleUser });
 
@@ -91,7 +96,7 @@ describe('auth-middleware', () => {
 
 		expect(verifyCookie).toHaveBeenCalledWith('gutoolsAuth-assym=valid-cookie');
 		expect(mockRequest.user).toEqual(sampleUser);
-		expect(redirect).not.toHaveBeenCalled();
+		expect(status).not.toHaveBeenCalled();
 		expect(mockNextFunction).toHaveBeenCalledTimes(1);
 	});
 });

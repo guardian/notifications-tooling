@@ -25,7 +25,12 @@ export const authMiddleware = async (
 	}
 
 	const returnUrl = `https://${request.hostname}${request.originalUrl}`;
-	const redirectTo = `https://${loginHostLookup()}/login?returnUrl=${returnUrl}`;
+	const loginUrl = new URL('/login', `https://${loginHostLookup()}`);
 
-	return response.redirect(redirectTo);
+	loginUrl.searchParams.set('returnUrl', returnUrl);
+
+	return response.status(401).json({
+		reason: 'Unauthenticated',
+		loginUrl: loginUrl.toString(),
+	});
 };

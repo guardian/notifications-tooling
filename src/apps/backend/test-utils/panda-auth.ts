@@ -54,10 +54,9 @@ export interface ProtectedEndpoint {
 
 /**
  * Asserts an unauthenticated request to a protected `/v1` endpoint is stopped by
- * `authMiddleware`: it must redirect (302) to the login host instead of reaching
- * the handler. Forces the next cookie check to fail regardless of the ambient
- * default, and handles the redirect manually so the assertion never follows the
- * 302 out to the (unreachable) login service.
+ * `authMiddleware`: it must respond `401 Unauthorized` with a JSON body carrying
+ * the failure reason and the login URL, instead of reaching the handler. Forces
+ * the next cookie check to fail regardless of the ambient default.
  */
 export const assertUnauthenticatedRequestBlocked = async (
 	baseUrl: string,
@@ -70,6 +69,10 @@ export const assertUnauthenticatedRequestBlocked = async (
 		redirect: 'manual',
 	});
 
-	expect(response.status).toBe(302);
-	expect(response.headers.get('location')).toContain('/login?returnUrl=');
+	expect(response.status).toBe(401);
+	expect(response.headers.get('content-type')).toContain('application/json');
+	expect(await response.json()).toEqual({
+		reason: 'Unauthenticated',
+		loginUrl: expect.stringContaining('/login?returnUrl='),
+	});
 };
