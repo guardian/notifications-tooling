@@ -9,9 +9,9 @@ import type {
 	NotificationAction,
 	NotificationState,
 } from '../features/stand-frontend/types';
+import { articleFixture } from '../mocks/capi-fixtures';
 import { mockCapiFetch } from '../mocks/mock-capi-fetch';
 import { mockSendNotification } from '../mocks/mock-send-notification';
-import { articleFixture } from '../mocks/capi-fixtures';
 import { parseHtml } from '../util/html-helpers';
 
 export const WithNotificationContext = (

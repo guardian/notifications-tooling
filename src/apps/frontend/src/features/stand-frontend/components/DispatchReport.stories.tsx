@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { completeEmailParams, WithNotificationContext } from '../../../stories/story-helpers';
+import {
+	completeEmailParams,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { DispatchReport } from './DispatchReport';
 
 type StoryArgs = { notificationState: NotificationState };
 type Story = StoryObj<StoryArgs>;
-
 
 const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/DispatchReport',

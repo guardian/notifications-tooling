@@ -73,6 +73,7 @@ export const EmailFields = () => {
 					})
 				}
 				softLimit={46}
+				hardLimit={70}
 			/>
 
 			<NotificationTextInput
@@ -85,7 +86,8 @@ export const EmailFields = () => {
 						mod: { preview },
 					})
 				}
-				softLimit={100}
+				softLimit={85}
+				hardLimit={140}
 			/>
 
 			<AudienceSegments
