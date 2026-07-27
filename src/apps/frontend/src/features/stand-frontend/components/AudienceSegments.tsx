@@ -42,6 +42,14 @@ const styles = {
 			color: isSelected
 				? semanticColors.text.strongerInverse
 				: semanticColors.text.weak,
+			'&:hover': {
+				backgroundColor: isSelected
+					? baseColors.magenta[200]
+					: semanticColors.fill.weakPressed,
+				color: isSelected
+					? semanticColors.text.strongerInverse
+					: semanticColors.text.weak,
+			},
 			padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 			borderRadius: semanticRadius.cornerSm,
 			display: 'flex',

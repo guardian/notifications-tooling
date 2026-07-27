@@ -7,6 +7,12 @@ const meta = {
 	component: DispatchTab,
 	parameters: {
 		layout: 'fullscreen',
+		docs: {
+			description: {
+				component:
+					'Dispatch tab combining the notification creation form and  preview with selected audience, channel, and delivery timing.',
+			},
+		},
 	},
 } satisfies Meta<typeof DispatchTab>;
 
