@@ -7,6 +7,7 @@ import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance
 import { notificationSendRequestJsonSchema } from './notification-send-request';
 import { notificationValidationErrorSchema } from './notification-validation-error';
 import { notificationValidationIssueSchema } from './notification-validation-issue';
+import { unauthenticatedSchema } from './unauthenticated';
 import { permissionSchema, userResponseSchema, userSchema } from './user';
 
 /** Reusable schema objects referenced via `#/components/schemas/*`. */
@@ -23,4 +24,5 @@ export const schemas = {
 	User: userSchema,
 	Permission: permissionSchema,
 	UserResponse: userResponseSchema,
+	Unauthenticated: unauthenticatedSchema,
 } as const;

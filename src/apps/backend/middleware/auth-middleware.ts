@@ -31,7 +31,8 @@ export const authMiddleware = async (
 	loginUrl.searchParams.set('returnUrl', returnUrl);
 
 	return response.status(401).json({
-		reason: 'Unauthenticated',
+		error: 'unauthenticated',
+		message: 'Authentication is required to access this resource.',
 		loginUrl: loginUrl.toString(),
 	});
 };

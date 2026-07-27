@@ -4,6 +4,7 @@ export const channelsConstraintsPath = {
 		summary: 'Retrieve per-channel validation rules',
 		description:
 			'Returns the per-channel content limits, compose shape and audience caps the SPA uses to drive its UI (character counters, item and segment limits).',
+		security: [{ pandaCookie: [] }],
 		responses: {
 			'200': {
 				description: 'The per-channel validation rules.',
@@ -13,6 +14,7 @@ export const channelsConstraintsPath = {
 					},
 				},
 			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
 		},
 	},
 } as const;
@@ -23,6 +25,7 @@ export const channelsAudiencesPath = {
 		summary: 'Retrieve per-channel audience segments',
 		description:
 			'Returns the selectable audience segments (id + label) per channel the SPA uses to populate its audience pickers.',
+		security: [{ pandaCookie: [] }],
 		responses: {
 			'200': {
 				description: 'The per-channel audience segments.',
@@ -32,6 +35,7 @@ export const channelsAudiencesPath = {
 					},
 				},
 			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
 		},
 	},
 } as const;

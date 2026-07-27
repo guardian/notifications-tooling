@@ -55,7 +55,7 @@ export interface ProtectedEndpoint {
 /**
  * Asserts an unauthenticated request to a protected `/v1` endpoint is stopped by
  * `authMiddleware`: it must respond `401 Unauthorized` with a JSON body carrying
- * the failure reason and the login URL, instead of reaching the handler. Forces
+ * the error envelope and the login URL, instead of reaching the handler. Forces
  * the next cookie check to fail regardless of the ambient default.
  */
 export const assertUnauthenticatedRequestBlocked = async (
@@ -72,7 +72,8 @@ export const assertUnauthenticatedRequestBlocked = async (
 	expect(response.status).toBe(401);
 	expect(response.headers.get('content-type')).toContain('application/json');
 	expect(await response.json()).toEqual({
-		reason: 'Unauthenticated',
+		error: 'unauthenticated',
+		message: 'Authentication is required to access this resource.',
 		loginUrl: expect.stringContaining('/login?returnUrl='),
 	});
 };

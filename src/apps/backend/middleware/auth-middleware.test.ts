@@ -62,7 +62,8 @@ describe('auth-middleware', () => {
 		expect(status).toHaveBeenCalledTimes(1);
 		expect(status).toHaveBeenCalledWith(401);
 		expect(json).toHaveBeenCalledWith({
-			reason: 'Unauthenticated',
+			error: 'unauthenticated',
+			message: 'Authentication is required to access this resource.',
 			loginUrl: expect.stringContaining(
 				'/login?returnUrl=https%3A%2F%2Fdispatch.test.dev-gutools.co.uk%2Fv1%2Fnotifications',
 			),
