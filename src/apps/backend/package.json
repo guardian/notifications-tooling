@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "bun run --hot index.ts",
 		"dev": "bun run --hot index.ts",
-		"build": "bun build handler.ts --minify --outfile=dist/handler.js --target=node --format=cjs -e @aws-sdk/* --production",
+		"build": "bun build app.ts --minify --outfile=dist/handler.js --target=node --format=cjs -e @aws-sdk/* --production",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit"
 	},
