@@ -1,15 +1,27 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test';
+import type { User } from '@guardian/pan-domain-node';
 import type { Request, Response } from 'express';
+import type { CookieVerificationResult } from '../auth/pan-domain-authentication';
 
-const isCookieValid = mock<(cookieHeader?: string) => Promise<boolean>>(() =>
-	Promise.resolve(false),
-);
+const verifyCookie = mock<
+	(cookieHeader?: string) => Promise<CookieVerificationResult>
+>(() => Promise.resolve({ success: false }));
 
 await mock.module('../auth/pan-domain-authentication', () => ({
-	isCookieValid,
+	verifyCookie,
 }));
 
 const { authMiddleware } = await import('./auth-middleware');
+
+const sampleUser: User = {
+	firstName: 'Ada',
+	lastName: 'Lovelace',
+	email: 'ada.lovelace@guardian.co.uk',
+	authenticatingSystem: 'notifications-tooling',
+	authenticatedIn: ['notifications-tooling'],
+	expires: Date.now() + 60 * 60 * 1000,
+	multifactor: true,
+};
 
 const mockNextFunction = mock(() => undefined);
 
@@ -34,8 +46,8 @@ const createMockResponse = () => {
 describe('auth-middleware', () => {
 	afterEach(() => {
 		mockNextFunction.mockReset();
-		isCookieValid.mockReset();
-		isCookieValid.mockImplementation(() => Promise.resolve(false));
+		verifyCookie.mockReset();
+		verifyCookie.mockImplementation(() => Promise.resolve({ success: false }));
 	});
 
 	it('should redirect to login where no cookie is provided', async () => {
@@ -44,7 +56,7 @@ describe('auth-middleware', () => {
 
 		await authMiddleware(mockRequest, response, mockNextFunction);
 
-		expect(isCookieValid).toHaveBeenCalledWith(undefined);
+		expect(verifyCookie).toHaveBeenCalledWith(undefined);
 		expect(redirect).toHaveBeenCalledTimes(1);
 		expect(redirect).toHaveBeenCalledWith(
 			expect.stringContaining(
@@ -58,28 +70,27 @@ describe('auth-middleware', () => {
 		const mockRequest = createMockRequest('gutoolsAuth-assym=expired-cookie');
 		const { redirect, response } = createMockResponse();
 
-		isCookieValid.mockResolvedValueOnce(false);
+		verifyCookie.mockResolvedValueOnce({ success: false });
 
 		await authMiddleware(mockRequest, response, mockNextFunction);
 
-		expect(isCookieValid).toHaveBeenCalledWith(
+		expect(verifyCookie).toHaveBeenCalledWith(
 			'gutoolsAuth-assym=expired-cookie',
 		);
 		expect(redirect).toHaveBeenCalledTimes(1);
 		expect(mockNextFunction).not.toHaveBeenCalled();
 	});
 
-	it('calls next where user is authenticated', async () => {
+	it('calls next and injects the user where authenticated', async () => {
 		const mockRequest = createMockRequest('gutoolsAuth-assym=valid-cookie');
 		const { redirect, response } = createMockResponse();
 
-		isCookieValid.mockResolvedValueOnce(true);
+		verifyCookie.mockResolvedValueOnce({ success: true, user: sampleUser });
 
 		await authMiddleware(mockRequest, response, mockNextFunction);
 
-		expect(isCookieValid).toHaveBeenCalledWith(
-			'gutoolsAuth-assym=valid-cookie',
-		);
+		expect(verifyCookie).toHaveBeenCalledWith('gutoolsAuth-assym=valid-cookie');
+		expect(mockRequest.user).toEqual(sampleUser);
 		expect(redirect).not.toHaveBeenCalled();
 		expect(mockNextFunction).toHaveBeenCalledTimes(1);
 	});

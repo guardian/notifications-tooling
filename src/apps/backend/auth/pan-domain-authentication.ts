@@ -3,6 +3,7 @@ import { env } from '@config';
 import {
 	guardianValidation,
 	PanDomainAuthentication,
+	type User,
 } from '@guardian/pan-domain-node';
 
 const LOCAL_PROFILE = 'composer';
@@ -29,10 +30,21 @@ const panda = new PanDomainAuthentication(
 		: fromNodeProviderChain(),
 );
 
-export const isCookieValid = async (
+/**
+ * The outcome of verifying a Panda cookie: on success the resolved `user` is
+ * included; on failure only the discriminant is returned.
+ */
+export type CookieVerificationResult =
+	{ success: true; user: User } | { success: false };
+
+export const verifyCookie = async (
 	cookieHeader?: string,
-): Promise<boolean> => {
+): Promise<CookieVerificationResult> => {
 	const result = await panda.verify(cookieHeader);
 
-	return result.success;
+	if (result.success) {
+		return { success: true, user: result.user };
+	}
+
+	return { success: false };
 };
