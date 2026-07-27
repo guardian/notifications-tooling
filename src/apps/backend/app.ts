@@ -26,6 +26,11 @@ app.use(express.urlencoded({ extended: true }));
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 
 app.use('/health', healthRouter);
+
+if (env.NODE_ENV !== 'test') {
+	app.use(authMiddleware);
+}
+
 app.use(
 	express.static(clientAssetsDir, {
 		maxAge: oneYearInMs,
@@ -37,10 +42,6 @@ app.use(
 		},
 	}),
 );
-
-if (env.NODE_ENV !== 'test') {
-	app.use(authMiddleware);
-}
 
 // Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
