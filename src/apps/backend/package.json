@@ -20,7 +20,9 @@
 		"@types/swagger-ui-express": "4.1.8"
 	},
 	"dependencies": {
+		"@aws-sdk/credential-providers": "3.1093.0",
 		"@config": "workspace:*",
+		"@guardian/pan-domain-node": "1.2.5",
 		"@http-logger": "workspace:*",
 		"@utils": "workspace:*",
 		"express": "5.2.1",
