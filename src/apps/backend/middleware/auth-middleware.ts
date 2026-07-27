@@ -1,6 +1,6 @@
 import { env } from '@config';
 import type { NextFunction, Request, Response } from 'express';
-import { verifyCookie } from '../auth/pan-domain-authentication';
+import { verifyCookie } from '../utils/auth/pan-domain-authentication';
 
 const loginHostLookup = () => {
 	switch (env.STAGE) {

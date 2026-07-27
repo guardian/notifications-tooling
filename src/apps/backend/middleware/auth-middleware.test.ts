@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test';
 import type { User } from '@guardian/pan-domain-node';
 import type { Request, Response } from 'express';
-import type { CookieVerificationResult } from '../auth/pan-domain-authentication';
+import type { CookieVerificationResult } from '../utils/auth/pan-domain-authentication';
 
 const verifyCookie = mock<
 	(cookieHeader?: string) => Promise<CookieVerificationResult>
 >(() => Promise.resolve({ success: false }));
 
-await mock.module('../auth/pan-domain-authentication', () => ({
+await mock.module('../utils/auth/pan-domain-authentication', () => ({
 	verifyCookie,
 }));
 

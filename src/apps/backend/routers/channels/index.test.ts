@@ -12,13 +12,13 @@ import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
 	installPandaAuthMock,
-} from '../../test-utils/panda-auth';
-import type { TestServer } from '../../test-utils/server';
+} from '../../utils/test-utils/panda-auth';
+import type { TestServer } from '../../utils/test-utils/server';
 import { channelAudiences, channelConstraints } from './index';
 
 // Stub Panda verification before the app (and its real verifier) is imported.
 installPandaAuthMock();
-const { startTestServer } = await import('../../test-utils/server');
+const { startTestServer } = await import('../../utils/test-utils/server');
 
 /**
  * Drives the real Express app over HTTP so the whole `GET
