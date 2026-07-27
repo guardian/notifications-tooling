@@ -1,43 +1,14 @@
 import { useEffect, useState } from 'react';
 import type { FrontendConfig } from '../../frontend-config';
-import { frontendConfig } from '../../frontend-config';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
+import { getAppConfig, getUser } from './get-config';
 import type { TabName, UserResponse } from './types';
 import { UserContext } from './UserContext';
 
-let config: FrontendConfig | undefined = undefined;
-
-const getAppConfig = async () => {
-	if (config) {
-		return config;
-	}
-	try {
-		const configJson: unknown = await fetch('/config').then((response) =>
-			response.json(),
-		);
-		config = frontendConfig.parse(configJson);
-		return config;
-	} catch (err) {
-		console.error(err);
-		throw new Error('getAppConfig failed');
-	}
-};
-
-const getUser = async (): Promise<UserResponse> => {
-	try {
-		const { backendUrl } = await getAppConfig();
-		const userResponseJson: unknown = await fetch(`${backendUrl}/v1/user`).then(
-			(response) => response.json(),
-		);
-		return Promise.resolve(userResponseJson as UserResponse);
-	} catch (err) {
-		return Promise.reject(err instanceof Error ? err : new Error('UNKNOWN'));
-	}
-};
-
 export const EmailNotificationPage = () => {
+	const [appConfig, setAppConfig] = useState<FrontendConfig>();
 	const [user, setUser] = useState<UserResponse>();
 	const [currentTab, setCurrentTab] = useState<TabName>(() => {
 		switch (location.hash) {
@@ -48,13 +19,25 @@ export const EmailNotificationPage = () => {
 				return 'create';
 		}
 	});
+
 	useEffect(() => {
-		void getUser()
+		void getAppConfig()
+			.then(setAppConfig)
+			.catch((err) => {
+				console.error('failed to get config', err);
+			});
+	}, []);
+
+	useEffect(() => {
+		if (!appConfig) {
+			return;
+		}
+		void getUser(appConfig)
 			.then(setUser)
 			.catch((err) => {
 				console.error('failed to read user', err);
 			});
-	}, []);
+	}, [appConfig]);
 
 	return (
 		<UserContext.Provider value={user}>

@@ -22,6 +22,7 @@ app.use(
 			'https://dispatch.code.dev-gutools.co.uk',
 			'https://dispatch.gutools.co.uk',
 		],
+		credentials: true,
 	}),
 );
 
