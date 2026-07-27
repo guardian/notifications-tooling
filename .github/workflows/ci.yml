@@ -56,7 +56,7 @@ jobs:
 
       - name: Build frontend assets
         working-directory: src/apps/frontend
-        run: bun run build
+        run: bun run build:production
 
       - name: Build and synth CDK
         working-directory: cdk
