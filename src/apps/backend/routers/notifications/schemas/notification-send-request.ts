@@ -118,9 +118,10 @@ const contentSchema = z.strictObject({
  * `maxSegments` is the channel's downstream cap (Braze campaigns for
  * newsletter, mobile-n10n topics for push), which differ per contract.
  */
-const segmentAudience = (
-	segmentIds:
-		typeof newsletterSegmentIds | typeof appPushNotificationSegmentIds,
+const segmentAudience = <
+	const SegmentIds extends readonly [string, ...string[]],
+>(
+	segmentIds: SegmentIds,
 	maxSegments: number,
 ) =>
 	z.strictObject({
