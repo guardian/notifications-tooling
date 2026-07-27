@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { authMiddleware } from '../../middleware/auth-middleware';
+import { rateLimitMiddleware } from '../../middleware/rate-limit-middleware';
 import { dispatchNotification } from '../../notification-channels/dispatch-notification';
 import {
 	type NotificationSendRequest,
@@ -70,6 +71,7 @@ export const createNotificationsRouter = (
 
 	notificationsRouter.post(
 		'/',
+		rateLimitMiddleware,
 		authMiddleware,
 		validate({
 			body: notificationSendRequestSchema,
