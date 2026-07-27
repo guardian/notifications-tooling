@@ -1,8 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import type {
-	Request as ExpressRequest,
-	Response as ExpressResponse,
-} from 'express';
+import type { Response as ExpressResponse } from 'express';
+import type { AuthenticatedRequest } from '../../middleware/auth-middleware';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -25,7 +23,7 @@ describe('user handler', () => {
 		const json = mock<(body: unknown) => void>(() => {});
 		const res = { json } as unknown as ExpressResponse;
 
-		userHandler({} as ExpressRequest, res);
+		userHandler({ user: sampleUser } as unknown as AuthenticatedRequest, res);
 
 		expect(json).toHaveBeenCalledTimes(1);
 		expect(json.mock.calls[0]?.[0]).toEqual({
@@ -44,7 +42,7 @@ describe('GET /v1/user', () => {
 	let baseUrl: string;
 
 	beforeAll(async () => {
-		authenticateRequests();
+		authenticateRequests(sampleUser);
 		server = await startTestServer();
 		baseUrl = server.baseUrl;
 	});

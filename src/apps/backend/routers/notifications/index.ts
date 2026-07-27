@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
+import {
+	authenticated,
+	authMiddleware,
+} from '../../middleware/auth-middleware';
 import { dispatchNotification } from '../../notification-channels/dispatch-notification';
 import {
 	type NotificationSendRequest,
@@ -67,13 +71,15 @@ export const createNotificationsRouter = (
 ) => {
 	const notificationsRouter = Router();
 
+	notificationsRouter.use(authMiddleware);
+
 	notificationsRouter.post(
 		'/',
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
 		}),
-		async (req, res) => {
+		authenticated(async (req, res) => {
 			const body = req.body;
 			await dispatchRequest(body);
 
@@ -101,7 +107,7 @@ export const createNotificationsRouter = (
 					expiresAt,
 				},
 			});
-		},
+		}),
 	);
 
 	return notificationsRouter;

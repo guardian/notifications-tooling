@@ -11,7 +11,6 @@ import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
 import { rootRouter } from './routers/root';
 import { userRouter } from './routers/user';
-import { authMiddleware } from './middleware/auth-middleware';
 
 export const app: Application = express();
 
@@ -23,8 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/', rootRouter);
 app.use('/health', healthRouter);
-
-app.use('/v1/', authMiddleware);
 
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);

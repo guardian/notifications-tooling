@@ -1,25 +1,17 @@
-import { type Request, type Response, Router } from 'express';
+import { type Response, Router } from 'express';
+import type { User } from '@guardian/pan-domain-node';
+import {
+	type AuthenticatedRequest,
+	authenticated,
+	authMiddleware,
+} from '../../middleware/auth-middleware';
 
 /**
  * The authenticated user, as decoded from the pan-domain (Panda) cookie by
- * `pan-domain-node`. Mirrors that library's `User` interface so this mock can
- * be swapped for real Panda verification without changing the response shape.
+ * `pan-domain-node`. Re-exported from that library so the response shape stays
+ * in lockstep with the verifier that populates `req.user`.
  */
-export interface User {
-	firstName: string;
-	lastName: string;
-	email: string;
-	/** Optional profile picture URL; absent when the provider supplies none. */
-	avatarUrl?: string;
-	/** The app that issued the login. */
-	authenticatingSystem: string;
-	/** The apps the user has been validated in. */
-	authenticatedIn: string[];
-	/** Cookie expiry as epoch milliseconds. */
-	expires: number;
-	/** Whether the login was made with multi-factor authentication. */
-	multifactor: boolean;
-}
+export type { User };
 
 /**
  * A permission granted to the user, as registered in the Guardian `permissions`
@@ -74,16 +66,18 @@ export const samplePermissions: Permission[] = [
 
 /**
  * `GET /v1/user`. Returns the authenticated user (under `user`) and their
- * permissions. This is currently a mock returning {@link sampleUser} and
- * {@link samplePermissions}; it will be backed by pan-domain-node cookie
- * verification and the permissions store once they are integrated.
+ * permissions. The user is read from `req.user`, populated by `authMiddleware`
+ * from the verified pan-domain cookie; permissions are currently a mock
+ * ({@link samplePermissions}) until the permissions store is integrated.
  */
-export const userHandler = (_req: Request, res: Response) => {
+export const userHandler = (req: AuthenticatedRequest, res: Response) => {
 	const body: UserResponse = {
-		user: sampleUser,
+		user: req.user,
 		permissions: samplePermissions,
 	};
 	res.json(body);
 };
 
-export const userRouter = Router().get('/', userHandler);
+export const userRouter = Router()
+	.use(authMiddleware)
+	.get('/', authenticated(userHandler));

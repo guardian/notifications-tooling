@@ -1,5 +1,6 @@
 import { env } from '@config';
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
+import type { User } from '@guardian/pan-domain-node';
 import { verifyCookie } from '../auth/pan-domain-authentication';
 
 const loginHostLookup = () => {
@@ -34,3 +35,24 @@ export const authMiddleware = async (
 		loginUrl: loginUrl.toString(),
 	});
 };
+
+/**
+ * A {@link Request} guaranteed to carry an authenticated `user` — the shape a
+ * handler sees once it sits behind {@link authMiddleware}.
+ */
+export interface AuthenticatedRequest extends Request {
+	user: User;
+}
+
+/**
+ * Adapts a handler that requires an authenticated user into a standard Express
+ * {@link RequestHandler}. The `req.user` narrowing is sound only because the
+ * wrapped handler is always mounted after {@link authMiddleware}, which
+ * populates `req.user` (or short-circuits with 401) before it runs.
+ */
+export const authenticated =
+	(
+		handler: (req: AuthenticatedRequest, res: Response) => void,
+	): RequestHandler =>
+	(req, res) =>
+		handler(req as AuthenticatedRequest, res);
