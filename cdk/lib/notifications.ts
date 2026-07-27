@@ -39,7 +39,7 @@ export class DispatchStack extends GuStack {
 					'backend responsible for forwarding requests to relevant downstream services e.g. ' +
 					'app and email notification APIs.',
 			},
-			reservedConcurrentExecutions: 1,
+			reservedConcurrentExecutions: 10,
 		});
 
 		const domain = guApiLambda.api.addDomainName(`${app}-domain`, {
