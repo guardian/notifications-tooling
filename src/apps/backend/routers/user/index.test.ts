@@ -3,13 +3,22 @@ import type {
 	Request as ExpressRequest,
 	Response as ExpressResponse,
 } from 'express';
-import { startTestServer, type TestServer } from '../../test-utils/server';
+import {
+	assertUnauthenticatedRequestBlocked,
+	authenticateRequests,
+	installPandaAuthMock,
+} from '../../test-utils/panda-auth';
+import type { TestServer } from '../../test-utils/server';
 import {
 	samplePermissions,
 	sampleUser,
 	userHandler,
 	type UserResponse,
 } from './index';
+
+// Stub Panda verification before the app (and its real verifier) is imported.
+installPandaAuthMock();
+const { startTestServer } = await import('../../test-utils/server');
 
 describe('user handler', () => {
 	it('responds with the user wrapped under `user` and their permissions', () => {
@@ -35,6 +44,7 @@ describe('GET /v1/user', () => {
 	let baseUrl: string;
 
 	beforeAll(async () => {
+		authenticateRequests();
 		server = await startTestServer();
 		baseUrl = server.baseUrl;
 	});
@@ -44,6 +54,13 @@ describe('GET /v1/user', () => {
 	});
 
 	const getUser = (): Promise<Response> => fetch(`${baseUrl}/v1/user`);
+
+	it('blocks unauthenticated GET /v1/user', async () => {
+		await assertUnauthenticatedRequestBlocked(baseUrl, {
+			method: 'GET',
+			path: '/v1/user',
+		});
+	});
 
 	it('returns 200 with the user and permissions as JSON', async () => {
 		const response = await getUser();
