@@ -52,11 +52,11 @@ jobs:
 
       - name: Build application
         working-directory: src/apps/backend
-        run: bun run build:handler
+        run: bun run build:production
 
       - name: Build frontend assets
         working-directory: src/apps/frontend
-        run: bun run build
+        run: bun run build:production
 
       - name: Build and synth CDK
         working-directory: cdk

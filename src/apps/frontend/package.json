@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "bun --hot src/index.ts",
 		"build": "bun build ./src/index.html --outdir=dist --sourcemap --target=browser --minify --public-path=/ --define:process.env.NODE_ENV='\"production\"' --env='BUN_PUBLIC_*'",
+		"build:production": "bun build ./src/index.html --outdir=dist --sourcemap=none --target=browser --minify --public-path=/ --production",
 		"start": "NODE_ENV=production bun src/index.ts",
 		"typecheck": "tsc --noEmit",
 		"storybook": "storybook dev -p 6006",
