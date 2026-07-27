@@ -1,4 +1,5 @@
 import { httpLogger } from '@http-logger';
+import cors from 'cors';
 import express, {
 	type Application,
 	type NextFunction,
@@ -13,6 +14,16 @@ import { rootRouter } from './routers/root';
 import { userRouter } from './routers/user';
 
 export const app: Application = express();
+
+app.use(
+	cors({
+		origin: [
+			'https://dispatch.local.dev-gutools.co.uk',
+			'https://dispatch.code.dev-gutools.co.uk',
+			'https://dispatch.gutools.co.uk',
+		],
+	}),
+);
 
 app.disable('x-powered-by');
 
