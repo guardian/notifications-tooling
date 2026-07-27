@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "bun --hot src/index.ts",
+		"dev": "NODE_ENV=development bun --hot src/index.ts",
 		"build": "bun build ./src/index.html --outdir=dist --sourcemap --target=browser --minify --define:process.env.NODE_ENV='\"production\"' --env='BUN_PUBLIC_*'",
 		"start": "NODE_ENV=production bun src/index.ts",
 		"typecheck": "tsc --noEmit",
@@ -16,7 +16,8 @@
 		"@guardian/stand": "0.0.63",
 		"react": "19.2.7",
 		"react-aria-components": "1.19.0",
-		"react-dom": "19.2.7"
+		"react-dom": "19.2.7",
+		"zod": "4.4.3"
 	},
 	"devDependencies": {
 		"@storybook/addon-docs": "10.5.2",

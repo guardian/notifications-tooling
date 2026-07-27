@@ -61,6 +61,7 @@
         "react": "19.2.7",
         "react-aria-components": "1.19.0",
         "react-dom": "19.2.7",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@storybook/addon-docs": "10.5.2",
