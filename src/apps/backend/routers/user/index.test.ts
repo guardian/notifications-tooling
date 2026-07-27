@@ -7,14 +7,10 @@ import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
 	installPandaAuthMock,
+	testUser,
 } from '../../utils/test-utils/panda-auth';
 import type { TestServer } from '../../utils/test-utils/server';
-import {
-	samplePermissions,
-	sampleUser,
-	userHandler,
-	type UserResponse,
-} from './index';
+import { samplePermissions, userHandler, type UserResponse } from './index';
 
 // Stub Panda verification before the app (and its real verifier) is imported.
 installPandaAuthMock();
@@ -25,11 +21,11 @@ describe('user handler', () => {
 		const json = mock<(body: unknown) => void>(() => {});
 		const res = { json } as unknown as ExpressResponse;
 
-		userHandler({ user: sampleUser } as unknown as ExpressRequest, res);
+		userHandler({ user: testUser } as unknown as ExpressRequest, res);
 
 		expect(json).toHaveBeenCalledTimes(1);
 		expect(json.mock.calls[0]?.[0]).toEqual({
-			user: sampleUser,
+			user: testUser,
 			permissions: samplePermissions,
 		});
 	});
@@ -44,7 +40,7 @@ describe('GET /v1/user', () => {
 	let baseUrl: string;
 
 	beforeAll(async () => {
-		authenticateRequests(sampleUser);
+		authenticateRequests(testUser);
 		server = await startTestServer();
 		baseUrl = server.baseUrl;
 	});
@@ -68,7 +64,7 @@ describe('GET /v1/user', () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get('content-type')).toContain('application/json');
 		expect(await response.json()).toEqual({
-			user: sampleUser,
+			user: testUser,
 			permissions: samplePermissions,
 		});
 	});
