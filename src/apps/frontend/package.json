@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "bun --hot src/index.ts",
+		"dev": "bun build --watch src/index.html --public-path=/ --outdir=dist --sourcemap --target=browser",
 		"build": "bun build ./src/index.html --outdir=dist --sourcemap=none --target=browser --minify --public-path=/ --production",
 		"start": "NODE_ENV=production bun src/index.ts",
 		"typecheck": "tsc --noEmit",
