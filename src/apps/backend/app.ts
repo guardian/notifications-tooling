@@ -10,6 +10,7 @@ import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
 import { rootRouter } from './routers/root';
+import { userRouter } from './routers/user';
 
 export const app: Application = express();
 
@@ -23,6 +24,7 @@ app.use('/', rootRouter);
 app.use('/health', healthRouter);
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);
+app.use('/v1/user', userRouter);
 app.use('/docs/api', docsRouter);
 
 app.use((_req: Request, res: Response) => {
