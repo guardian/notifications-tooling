@@ -30,7 +30,7 @@ export const verifyCookieMock = mock<
  * real verifier.
  */
 export const installPandaAuthMock = (): void => {
-	mock.module('../auth/pan-domain-authentication', () => ({
+	void mock.module('../auth/pan-domain-authentication', () => ({
 		verifyCookie: verifyCookieMock,
 	}));
 };
@@ -71,9 +71,15 @@ export const assertUnauthenticatedRequestBlocked = async (
 
 	expect(response.status).toBe(401);
 	expect(response.headers.get('content-type')).toContain('application/json');
-	expect(await response.json()).toEqual({
-		error: 'unauthenticated',
-		message: 'Authentication is required to access this resource.',
-		loginUrl: expect.stringContaining('/login?returnUrl='),
-	});
+
+	const body = (await response.json()) as {
+		error: string;
+		message: string;
+		loginUrl: string;
+	};
+	expect(body.error).toBe('unauthenticated');
+	expect(body.message).toBe(
+		'Authentication is required to access this resource.',
+	);
+	expect(body.loginUrl).toContain('/login?returnUrl=');
 };

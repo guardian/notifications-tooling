@@ -34,7 +34,7 @@ const createMockRequest = (cookieHeader?: string): Request =>
 
 const createMockResponse = () => {
 	const json = mock((body: unknown) => body);
-	const status = mock((_code: number) => ({ json }));
+	const status = mock(() => ({ json }));
 
 	return {
 		status,
@@ -61,13 +61,19 @@ describe('auth-middleware', () => {
 		expect(verifyCookie).toHaveBeenCalledWith(undefined);
 		expect(status).toHaveBeenCalledTimes(1);
 		expect(status).toHaveBeenCalledWith(401);
-		expect(json).toHaveBeenCalledWith({
-			error: 'unauthenticated',
-			message: 'Authentication is required to access this resource.',
-			loginUrl: expect.stringContaining(
-				'/login?returnUrl=https%3A%2F%2Fdispatch.test.dev-gutools.co.uk%2Fv1%2Fnotifications',
-			),
-		});
+
+		const body = json.mock.calls[0]?.[0] as {
+			error: string;
+			message: string;
+			loginUrl: string;
+		};
+		expect(body.error).toBe('unauthenticated');
+		expect(body.message).toBe(
+			'Authentication is required to access this resource.',
+		);
+		expect(body.loginUrl).toContain(
+			'/login?returnUrl=https%3A%2F%2Fdispatch.test.dev-gutools.co.uk%2Fv1%2Fnotifications',
+		);
 		expect(mockNextFunction).not.toHaveBeenCalled();
 	});
 

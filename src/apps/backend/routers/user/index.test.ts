@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import type { Response as ExpressResponse } from 'express';
-import type { AuthenticatedRequest } from '../../middleware/auth-middleware';
+import type {
+	Request as ExpressRequest,
+	Response as ExpressResponse,
+} from 'express';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -23,7 +25,7 @@ describe('user handler', () => {
 		const json = mock<(body: unknown) => void>(() => {});
 		const res = { json } as unknown as ExpressResponse;
 
-		userHandler({ user: sampleUser } as unknown as AuthenticatedRequest, res);
+		userHandler({ user: sampleUser } as unknown as ExpressRequest, res);
 
 		expect(json).toHaveBeenCalledTimes(1);
 		expect(json.mock.calls[0]?.[0]).toEqual({

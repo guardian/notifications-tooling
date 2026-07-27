@@ -1,10 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
-import {
-	authenticated,
-	authMiddleware,
-} from '../../middleware/auth-middleware';
+import { authMiddleware } from '../../middleware/auth-middleware';
 import { dispatchNotification } from '../../notification-channels/dispatch-notification';
 import {
 	type NotificationSendRequest,
@@ -71,20 +68,19 @@ export const createNotificationsRouter = (
 ) => {
 	const notificationsRouter = Router();
 
-	notificationsRouter.use(authMiddleware);
-
 	notificationsRouter.post(
 		'/',
+		authMiddleware,
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
 		}),
-		authenticated(async (req, res) => {
+		async (req, res) => {
 			const body = req.body;
 			await dispatchRequest(body);
 
-			// No persistence layer yet, so mint the id in-process. Once a store exists
-			// this becomes the primary key the channel adapters update.
+			// No persistence layer yet, so mint the id in-process. Once a store
+			// exists this becomes the primary key the channel adapters update.
 			const notificationId = randomUUID();
 			const statusUrl = `/v1/notifications/${notificationId}/status`;
 
@@ -107,7 +103,7 @@ export const createNotificationsRouter = (
 					expiresAt,
 				},
 			});
-		}),
+		},
 	);
 
 	return notificationsRouter;

@@ -1,10 +1,6 @@
-import { type Response, Router } from 'express';
 import type { User } from '@guardian/pan-domain-node';
-import {
-	type AuthenticatedRequest,
-	authenticated,
-	authMiddleware,
-} from '../../middleware/auth-middleware';
+import { type Request, type Response, Router } from 'express';
+import { authMiddleware } from '../../middleware/auth-middleware';
 
 /**
  * The authenticated user, as decoded from the pan-domain (Panda) cookie by
@@ -70,14 +66,14 @@ export const samplePermissions: Permission[] = [
  * from the verified pan-domain cookie; permissions are currently a mock
  * ({@link samplePermissions}) until the permissions store is integrated.
  */
-export const userHandler = (req: AuthenticatedRequest, res: Response) => {
+export const userHandler = (req: Request, res: Response) => {
 	const body: UserResponse = {
-		user: req.user,
+		// Non-null: `/v1/user` is mounted behind `authMiddleware`, which populates
+		// `req.user` (or short-circuits with 401) before this handler runs.
+		user: req.user!,
 		permissions: samplePermissions,
 	};
 	res.json(body);
 };
 
-export const userRouter = Router()
-	.use(authMiddleware)
-	.get('/', authenticated(userHandler));
+export const userRouter = Router().get('/', authMiddleware, userHandler);

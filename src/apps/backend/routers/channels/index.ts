@@ -7,11 +7,8 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import { Router } from 'express';
-import {
-	authenticated,
-	authMiddleware,
-} from '../../middleware/auth-middleware';
+import { type Request, type Response, Router } from 'express';
+import { authMiddleware } from '../../middleware/auth-middleware';
 
 /**
  * The per-channel validation rules the SPA fetches from
@@ -92,16 +89,9 @@ export const channelAudiences = {
  */
 
 export const channelsRouter = Router()
-	.use(authMiddleware)
-	.get(
-		'/constraints',
-		authenticated((_req, res) => {
-			res.json(channelConstraints);
-		}),
-	)
-	.get(
-		'/audiences',
-		authenticated((_req, res) => {
-			res.json(channelAudiences);
-		}),
-	);
+	.get('/constraints', authMiddleware, (_req: Request, res: Response) => {
+		res.json(channelConstraints);
+	})
+	.get('/audiences', authMiddleware, (_req: Request, res: Response) => {
+		res.json(channelAudiences);
+	});
