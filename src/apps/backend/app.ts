@@ -26,6 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
+app.use(express.static(clientAssetsDir, { index: false }));
 
 if (env.NODE_ENV !== 'test') {
 	app.use(authMiddleware);
@@ -35,8 +36,6 @@ if (env.NODE_ENV !== 'test') {
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/docs/api', docsRouter);
-
-app.use(express.static(clientAssetsDir, { index: false }));
 
 app.get('/{*path}', (req, res, next) => {
 	if (!isClientAppRoutePath(req.path)) {
