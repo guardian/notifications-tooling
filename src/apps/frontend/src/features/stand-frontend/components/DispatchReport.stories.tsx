@@ -1,22 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { articleFixture } from '../../../mocks/capi-fixtures';
-import { WithNotificationContext } from '../../../stories/story-helpers';
-import { parseHtml } from '../../../util/html-helpers';
+import { completeEmailParams, WithNotificationContext } from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
-import type { EmailNotification, NotificationState } from '../types';
+import type { NotificationState } from '../types';
 import { DispatchReport } from './DispatchReport';
 
 type StoryArgs = { notificationState: NotificationState };
 type Story = StoryObj<StoryArgs>;
 
-const completeEmailParams: EmailNotification = {
-	type: 'email',
-	kicker: 'exclusive',
-	subject: articleFixture.fields?.headline,
-	preview: parseHtml(articleFixture.fields?.standfirst).textContent,
-	emailDeliveryOption: 'immediate',
-	audienceSegments: ['AU', 'UK'],
-};
 
 const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/DispatchReport',

@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
-import { WithNotificationContext } from '../../../stories/story-helpers';
-import { parseHtml } from '../../../util/html-helpers';
+import { completeEmailParams, WithNotificationContext } from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
-import type { EmailNotification, NotificationState } from '../types';
+import type { NotificationState } from '../types';
 import { CreateNotificationForm } from './CreateNotificationForm';
 
 type StoryArgs = {
@@ -38,15 +37,6 @@ export const Default: Story = {
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
 		await expect(canvas.getByText('Preview text')).toBeInTheDocument();
 	},
-};
-
-const completeEmailParamer: EmailNotification = {
-	type: 'email',
-	kicker: 'exclusive',
-	subject: articleFixture.fields?.headline,
-	preview: parseHtml(articleFixture.fields?.standfirst).textContent,
-	emailDeliveryOption: 'immediate',
-	audienceSegments: ['AU', 'UK'],
 };
 
 export const Empty: Story = {
@@ -85,7 +75,7 @@ export const PopulatedEmail: Story = {
 			articleInputText: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
-			parameters: completeEmailParamer,
+			parameters: completeEmailParams,
 		},
 	},
 };
@@ -97,7 +87,7 @@ export const ConfirmationStep: Story = {
 			articleInputText: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
-			parameters: completeEmailParamer,
+			parameters: completeEmailParams,
 			confirmSendModalOpen: true,
 		},
 	},
@@ -110,7 +100,7 @@ export const SendingEmail: Story = {
 			articleInputText: articleFixture.webUrl,
 			content: articleFixture,
 			fetchedArticleId: articleFixture.webUrl,
-			parameters: completeEmailParamer,
+			parameters: completeEmailParams,
 			confirmSendModalOpen: true,
 			isWaitingForSend: true,
 		},

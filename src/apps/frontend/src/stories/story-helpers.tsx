@@ -5,11 +5,14 @@ import {
 } from '../features/stand-frontend/notification-reducer';
 import { NotificationFormContext } from '../features/stand-frontend/NotificationContext';
 import type {
+	EmailNotification,
 	NotificationAction,
 	NotificationState,
 } from '../features/stand-frontend/types';
 import { mockCapiFetch } from '../mocks/mock-capi-fetch';
 import { mockSendNotification } from '../mocks/mock-send-notification';
+import { articleFixture } from '../mocks/capi-fixtures';
+import { parseHtml } from '../util/html-helpers';
 
 export const WithNotificationContext = (
 	reactNode: ReactNode,
@@ -32,4 +35,13 @@ export const WithNotificationContext = (
 			{reactNode}
 		</NotificationFormContext>
 	);
+};
+
+export const completeEmailParams: EmailNotification = {
+	type: 'email',
+	kicker: 'exclusive',
+	subject: articleFixture.fields?.headline,
+	preview: parseHtml(articleFixture.fields?.standfirst).textContent,
+	emailDeliveryOption: 'immediate',
+	audienceSegments: ['AU', 'UK'],
 };
