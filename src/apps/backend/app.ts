@@ -6,11 +6,7 @@ import express, {
 	type Request,
 	type Response,
 } from 'express';
-import {
-	clientAssetsDir,
-	clientIndexFile,
-	isClientAppRoutePath,
-} from './client-assets';
+import { clientAssetsDir } from './client-assets';
 import { authMiddleware } from './middleware/auth-middleware';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
@@ -26,8 +22,20 @@ app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+
 app.use('/health', healthRouter);
-app.use(express.static(clientAssetsDir, { index: false }));
+app.use(
+	express.static(clientAssetsDir, {
+		maxAge: oneYearInMs,
+		immutable: true,
+		setHeaders: (res, filePath) => {
+			if (filePath.endsWith('index.html')) {
+				res.setHeader('Cache-Control', 'no-cache');
+			}
+		},
+	}),
+);
 
 if (env.NODE_ENV !== 'test') {
 	app.use(authMiddleware);
@@ -38,14 +46,6 @@ app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
 app.use('/docs/api', docsRouter);
-
-app.get('/{*path}', (req, res, next) => {
-	if (!isClientAppRoutePath(req.path)) {
-		return next();
-	}
-
-	res.sendFile(clientIndexFile);
-});
 
 app.use((_req: Request, res: Response) => {
 	res.status(404).json({ error: 'Not Found' });
