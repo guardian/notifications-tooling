@@ -1,53 +1,37 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState } from 'react';
 import { expect, within } from 'storybook/test';
+import { articleFixture } from '../../../mocks/capi-fixtures';
+import {
+	completeEmailParams,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
+import { defaultState } from '../notification-reducer';
+import type { NotificationState } from '../types';
 import { CreateNotificationForm } from './CreateNotificationForm';
 
-const meta = {
+type StoryArgs = {
+	notificationState: NotificationState;
+};
+type Story = StoryObj<StoryArgs>;
+
+const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/CreateNotificationForm',
 	component: CreateNotificationForm,
 	args: {
-		selectedSegments: [],
-		onSelectedSegmentsChange: () => {},
-		selectedChannel: undefined,
-		onSelectedChannelChange: () => {},
-		selectedDeliveryTiming: undefined,
-		onSelectedDeliveryTimingChange: () => {},
+		notificationState: defaultState,
 	},
-	parameters: {
-		docs: {
-			description: {
-				component:
-					'Notification creation form with audience segments, channel, and delivery timing controls.',
-			},
-		},
+	render: (args) => {
+		const { notificationState } = args;
+		return WithNotificationContext(
+			<CreateNotificationForm />,
+			notificationState,
+		);
 	},
-} satisfies Meta<typeof CreateNotificationForm>;
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
 
-const CreateNewNotification = () => {
-	const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
-	const [selectedChannel, setSelectedChannel] = useState<string | undefined>();
-	const [selectedDeliveryTiming, setSelectedDeliveryTiming] = useState<
-		string | undefined
-	>();
-
-	return (
-		<CreateNotificationForm
-			selectedSegments={selectedSegments}
-			onSelectedSegmentsChange={setSelectedSegments}
-			selectedChannel={selectedChannel}
-			onSelectedChannelChange={setSelectedChannel}
-			selectedDeliveryTiming={selectedDeliveryTiming}
-			onSelectedDeliveryTimingChange={setSelectedDeliveryTiming}
-		/>
-	);
-};
 export const Default: Story = {
-	render: () => <CreateNewNotification />,
-
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('Create a Notification')).toBeInTheDocument();
@@ -55,8 +39,73 @@ export const Default: Story = {
 		await expect(canvas.getByText('Kicker')).toBeInTheDocument();
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
 		await expect(canvas.getByText('Preview text')).toBeInTheDocument();
-		await expect(canvas.getByText('Audience Segments')).toBeInTheDocument();
-		await expect(canvas.getByText('Channel')).toBeInTheDocument();
-		await expect(canvas.getByText('Delivery and timing')).toBeInTheDocument();
+	},
+};
+
+export const Empty: Story = {
+	args: {
+		notificationState: {
+			isFetchingContent: false,
+			confirmSendModalOpen: false,
+			isWaitingForSend: false,
+		},
+	},
+};
+
+export const FetchingArticle: Story = {
+	args: {
+		notificationState: {
+			...defaultState,
+			isFetchingContent: true,
+		},
+	},
+};
+
+export const FetchArticleError: Story = {
+	args: {
+		notificationState: {
+			...defaultState,
+			isFetchingContent: false,
+			fetchArticleError: 'Failed to fetch article',
+		},
+	},
+};
+
+export const PopulatedEmail: Story = {
+	args: {
+		notificationState: {
+			...defaultState,
+			articleInputText: articleFixture.webUrl,
+			content: articleFixture,
+			fetchedArticleId: articleFixture.id,
+			parameters: completeEmailParams,
+		},
+	},
+};
+
+export const ConfirmationStep: Story = {
+	args: {
+		notificationState: {
+			...defaultState,
+			articleInputText: articleFixture.webUrl,
+			content: articleFixture,
+			fetchedArticleId: articleFixture.webUrl,
+			parameters: completeEmailParams,
+			confirmSendModalOpen: true,
+		},
+	},
+};
+
+export const SendingEmail: Story = {
+	args: {
+		notificationState: {
+			...defaultState,
+			articleInputText: articleFixture.webUrl,
+			content: articleFixture,
+			fetchedArticleId: articleFixture.webUrl,
+			parameters: completeEmailParams,
+			confirmSendModalOpen: true,
+			isWaitingForSend: true,
+		},
 	},
 };

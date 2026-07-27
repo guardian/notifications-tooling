@@ -43,7 +43,7 @@ export const Empty: Story = {
 export const WithChannel: Story = {
 	args: {
 		selectedSegments: [],
-		selectedChannel: 'Newsletter email',
+		selectedChannel: 'email',
 		selectedDeliveryTiming: undefined,
 	},
 };
@@ -52,7 +52,7 @@ export const WithDeliveryTiming: Story = {
 	args: {
 		selectedSegments: [],
 		selectedChannel: undefined,
-		selectedDeliveryTiming: 'Immediate',
+		selectedDeliveryTiming: 'immediate',
 	},
 };
 
@@ -67,7 +67,7 @@ export const WithSegments: Story = {
 export const FullyPopulated: Story = {
 	args: {
 		selectedSegments: ['UK', 'US', 'AU'],
-		selectedChannel: 'Newsletter email',
-		selectedDeliveryTiming: 'Immediate',
+		selectedChannel: 'email',
+		selectedDeliveryTiming: 'immediate',
 	},
 };

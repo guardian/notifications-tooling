@@ -1,122 +1,48 @@
-import { css } from '@emotion/react';
-import {
-	baseSpacing,
-	semanticColors,
-	semanticRadius,
-	semanticSpacing,
-} from '@guardian/stand';
-import { Button } from '@guardian/stand/Button';
-import { Option, Select } from '@guardian/stand/Select';
-import { TextInput } from '@guardian/stand/TextInput';
+import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-import { AudienceSegments } from './AudienceSegments';
+import { useContext } from 'react';
+import { NotificationFormContext } from '../NotificationContext';
+import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
-import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
+import { EmailFields } from './EmailFields';
+import { SendButton } from './SendButton';
 
-interface CreateNotificationFormProps {
-	selectedSegments: string[];
-	onSelectedSegmentsChange: (selected: string[]) => void;
-	selectedChannel?: string;
-	onSelectedChannelChange: (channel?: string) => void;
-	selectedDeliveryTiming?: string;
-	onSelectedDeliveryTimingChange: (deliveryTiming?: string) => void;
-}
+export const CreateNotificationForm = () => {
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 
-const styles = {
-	customStyles: css({
-		display: 'flex',
-		width: '180px',
-		height: '40px',
-		radius: semanticRadius.cornerSm,
-		justifyContent: 'center',
-		alignItems: 'center',
-		gap: '8px',
-		padding: `${baseSpacing['6Px']} ${baseSpacing['12Px']} 7px ${baseSpacing['12Px']}`,
-		fill: semanticColors.fill.accentStrong,
-	}),
-};
-
-/**
- * This is a non-functional placeholder to demonstrate how content will appear in the layout
- */
-export const CreateNotificationForm = ({
-	selectedSegments,
-	onSelectedSegmentsChange,
-	selectedChannel,
-	onSelectedChannelChange,
-	selectedDeliveryTiming,
-	onSelectedDeliveryTimingChange,
-}: CreateNotificationFormProps) => {
 	return (
 		<>
-			<Typography variant="titleMd" element="h2">
+			<Typography variant="heading2Xl" element="h2">
 				Create a Notification
 			</Typography>
 
 			<div
 				css={{
+					marginTop: semanticSpacing.stackXl,
 					display: 'flex',
 					flexDirection: 'column',
 					gap: semanticSpacing.stackLg,
 				}}
 			>
-				<TextInput
-					label="Article"
-					description="Copy and paste a Guardian URL below"
-				/>
+				<ArticleImportControl />
+
 				<ChannelSelector
-					selectedChannel={selectedChannel}
-					onChange={onSelectedChannelChange}
-				/>
-				<Select
-					label="Kicker"
-					description="Choose the kicker for the email newsletter"
-				>
-					<Option>Breaking News</Option>
-					<Option>Exclusive</Option>
-					<Option>None</Option>
-				</Select>
-
-				<TextInput
-					label="Subject"
-					description="The kicker counts towards the character limit of the subject"
-				/>
-
-				<TextInput
-					label="Preview text"
-					description="Choose the preview text for the email newsletter"
-				/>
-				<AudienceSegments
-					selected={selectedSegments}
-					onChange={onSelectedSegmentsChange}
-				/>
-				<DeliveryAndTimingSelector
-					selectedDeliveryTiming={selectedDeliveryTiming}
-					onChange={onSelectedDeliveryTimingChange}
-				/>
-
-				<div
-					css={{
-						display: 'flex',
-						flexDirection: 'column',
-						gap: semanticSpacing.stackXs,
+					selectedChannel={notification.parameters?.type}
+					onChange={(channel) => {
+						switch (channel) {
+							case 'email':
+							case 'push':
+								updateNotification({ type: 'set-channel', channel });
+								break;
+						}
 					}}
-				>
-					<Typography variant="labelFormMd">Send</Typography>
-					<Typography variant="helpTextFormMd">
-						Before sending, review in the preview on the right
-					</Typography>
-					<Button
-						variant="primary"
-						size="sm"
-						cssOverrides={styles.customStyles}
-						onClick={() => {
-							console.log('Send newsletter email clicked');
-						}}
-					>
-						Send newsletter email
-					</Button>
-				</div>
+				/>
+
+				<EmailFields />
+
+				<SendButton />
 			</div>
 		</>
 	);

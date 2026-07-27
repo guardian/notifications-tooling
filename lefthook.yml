@@ -1,14 +1,24 @@
 pre-push:
+  parallel: true
   commands:
     pinned-deps:
       glob: '**/package.json'
       run: bun run scripts/check-pinned-deps.ts
     lint:
       glob: '*.{js,ts,cjs,mjs,jsx,tsx}'
-      run: bunx eslint --no-warn-ignored {push_files}
+      run: bun run lint --no-warn-ignored {push_files}
     format:
       glob: '*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css,md}'
-      run: bunx prettier --check {push_files}
+      run: bun format:check {push_files}
     typecheck:
       glob: '**/*.{ts,tsx}'
       run: bun run typecheck
+
+# Runs after `git pull`/`git merge`. Tell the user dependencies changed,
+# but only when the merge actually touched the lockfile or a package.json.
+post-merge:
+  commands:
+    install:
+      files: git diff --name-only ORIG_HEAD HEAD
+      glob: '{bun.lock,**/package.json}'
+      run: printf '\033[0;31mDependencies have changed, please run "bun install"\033[0m\n'

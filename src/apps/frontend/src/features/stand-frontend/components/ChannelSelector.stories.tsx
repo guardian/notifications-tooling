@@ -35,7 +35,7 @@ export const Unselected: SelectorStory = {
 
 export const Selected: SelectorStory = {
 	args: {
-		selectedChannel: 'Newsletter email',
+		selectedChannel: 'email',
 		onChange: () => {},
 	},
 };

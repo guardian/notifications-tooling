@@ -22,6 +22,7 @@ export const Unselected: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: undefined,
 		onChange: () => {},
+		channel: 'email',
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -35,8 +36,9 @@ export const Unselected: SelectorStory = {
 
 export const Selected: SelectorStory = {
 	args: {
-		selectedDeliveryTiming: 'Immediate',
+		selectedDeliveryTiming: 'immediate',
 		onChange: () => {},
+		channel: 'email',
 	},
 };
 
@@ -48,18 +50,15 @@ export const PreviewEmpty: SendInfoPreviewPillType = {
 };
 
 export const PreviewChannelOnly: SendInfoPreviewPillType = {
-	render: () => <SendInfoPreviewPill channel="Newsletter email" />,
+	render: () => <SendInfoPreviewPill channel="email" />,
 };
 
 export const PreviewDeliveryTimingOnly: SendInfoPreviewPillType = {
-	render: () => <SendInfoPreviewPill deliveryTiming="Immediate" />,
+	render: () => <SendInfoPreviewPill deliveryTiming="immediate" />,
 };
 
 export const PreviewBoth: SendInfoPreviewPillType = {
 	render: () => (
-		<SendInfoPreviewPill
-			channel="Newsletter email"
-			deliveryTiming="Immediate"
-		/>
+		<SendInfoPreviewPill channel="email" deliveryTiming="immediate" />
 	),
 };

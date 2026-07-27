@@ -1,8 +1,8 @@
 /**
- * Maps public, channel-agnostic segment ids (surfaced to the FE and, in future,
- * served by `GET /v1/audiences`) to the internal downstream addressing the
- * broker resolves them to: Braze campaigns for newsletters, mobile-n10n topics
- * for push. These internals are kept out of the public
+ * Defines public, channel-agnostic segment ids surfaced to the FE and, in future,
+ * served by `GET /v1/audiences`. The backend resolves newsletter segments to
+ * email-rendering newsletter configurations and Braze campaigns, and push
+ * segments to mobile-n10n topics. These internals are kept out of the public
  * `POST /v1/notifications` contract, which references segment ids only.
  * Hard-coded stub until resolved from the downstream services.
  */
@@ -10,20 +10,24 @@
 export interface NewsletterSegment {
 	label: string;
 	brazeCampaignId: string;
+	emailRenderingNewsletterId: string;
 }
 
 export const newsletterSegments = {
-	'morning-briefing': {
-		label: 'Morning briefing',
-		brazeCampaignId: 'morning-briefing',
+	UK: {
+		label: 'UK',
+		brazeCampaignId: 'da019800-869e-4e1d-9c2e-029741829af1',
+		emailRenderingNewsletterId: 'breaking-news-us',
 	},
-	'first-edition': {
-		label: 'First edition',
-		brazeCampaignId: 'first-edition',
+	US: {
+		label: 'US',
+		brazeCampaignId: 'a945e3ae-165b-46d7-b163-0ca1c6beb2f4',
+		emailRenderingNewsletterId: 'breaking-news-us',
 	},
-	'editorial-breaking-news': {
-		label: 'Editorial breaking news',
-		brazeCampaignId: 'editorial-breaking-news',
+	AU: {
+		label: 'AU',
+		brazeCampaignId: '5da1b754-42f4-440d-9eec-0d595190a0f0',
+		emailRenderingNewsletterId: 'breaking-news-us',
 	},
 } as const satisfies Record<string, NewsletterSegment>;
 

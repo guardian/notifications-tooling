@@ -94,12 +94,17 @@ export const channelConstraintsSchema = {
 						},
 						compose: {
 							type: 'object',
-							required: ['minItems', 'subject'],
+							required: ['minItems', 'maxItems', 'subject'],
 							properties: {
 								minItems: {
 									type: 'integer',
 									description:
 										'The minimum number of content items a newsletter plan must compose.',
+								},
+								maxItems: {
+									type: 'integer',
+									description:
+										'The maximum number of content items a newsletter plan may compose.',
 								},
 								subject: maxLengthSchema,
 							},
