@@ -30,10 +30,6 @@ const panda = new PanDomainAuthentication(
 		: fromNodeProviderChain(),
 );
 
-/**
- * The outcome of verifying a Panda cookie: on success the resolved `user` is
- * included; on failure only the discriminant is returned.
- */
 export type CookieVerificationResult =
 	{ success: true; user: User } | { success: false };
 
