@@ -12,6 +12,7 @@ export default [
 			'docker/**',
 			'!docker/docker-compose.local.yml',
 			'**/*.d.ts',
+			'**/storybook-static/**',
 		],
 	},
 	...guardian.configs.recommended,
