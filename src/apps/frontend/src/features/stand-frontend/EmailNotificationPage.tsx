@@ -1,26 +1,44 @@
 import { useEffect, useState } from 'react';
+import type { FrontendConfig } from '../../frontend-config';
+import { frontendConfig } from '../../frontend-config';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
-import type { TabName, UserData } from './types';
+import type { TabName, UserResponse } from './types';
 import { UserContext } from './UserContext';
 
-// TO DO - fetch from backend? inject user details onto page?
-const getUser = (): Promise<UserData> => {
+let config: FrontendConfig | undefined = undefined;
+
+const getAppConfig = async () => {
+	if (config) {
+		return config;
+	}
 	try {
-		return Promise.resolve({
-			firstName: 'John',
-			lastName: 'Doe',
-			email: 'j.Doe@example.com',
-			permissions: {},
-		});
+		const configJson: unknown = await fetch('/config').then((response) =>
+			response.json(),
+		);
+		config = frontendConfig.parse(configJson);
+		return config;
+	} catch (err) {
+		console.error(err);
+		throw new Error('getAppConfig failed');
+	}
+};
+
+const getUser = async (): Promise<UserResponse> => {
+	try {
+		const { backendUrl } = await getAppConfig();
+		const userResponseJson: unknown = await fetch(`${backendUrl}/v1/user`).then(
+			(response) => response.json(),
+		);
+		return Promise.resolve(userResponseJson as UserResponse);
 	} catch (err) {
 		return Promise.reject(err instanceof Error ? err : new Error('UNKNOWN'));
 	}
 };
 
 export const EmailNotificationPage = () => {
-	const [user, setUser] = useState<UserData>();
+	const [user, setUser] = useState<UserResponse>();
 	const [currentTab, setCurrentTab] = useState<TabName>(() => {
 		switch (location.hash) {
 			case '#history':

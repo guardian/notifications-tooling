@@ -2,15 +2,21 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import type { UserData } from '../types';
+import type { UserResponse } from '../types';
 import { UserContext } from '../UserContext';
 import { MainLayout } from './MainLayout';
 
-const storyUser: UserData = {
-	firstName: 'John',
-	lastName: 'Doe',
-	email: 'j.doe@example.com',
-	permissions: {},
+const storyUser: UserResponse = {
+	user: {
+		firstName: 'John',
+		lastName: 'Doe',
+		email: 'j.doe@example.com',
+		authenticatingSystem: '',
+		authenticatedIn: [],
+		expires: 0,
+		multifactor: false,
+	},
+	permissions: [],
 };
 
 const meta = {
