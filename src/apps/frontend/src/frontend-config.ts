@@ -15,7 +15,7 @@ const getBackendUrl = (
 	if (BACKEND_URI) {
 		return BACKEND_URI;
 	}
-    // If BACKEND_URI not configured, derive from the request url
+	// If BACKEND_URI not configured, derive from the request url
 	const url = new URL(reqUrl);
 	url.protocol = 'https:';
 	url.host = url.host.replace('dispatch.', 'dispatch-backend.');
