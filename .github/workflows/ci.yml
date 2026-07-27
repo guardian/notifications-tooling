@@ -52,7 +52,7 @@ jobs:
 
       - name: Build application
         working-directory: src/apps/backend
-        run: bun run build:handler
+        run: bun run build
 
       - name: Build frontend assets
         working-directory: src/apps/frontend

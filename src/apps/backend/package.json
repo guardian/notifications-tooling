@@ -6,8 +6,7 @@
 	"scripts": {
 		"start": "bun run --hot index.ts",
 		"dev": "bun run --hot index.ts",
-		"build": "bun build index.ts --outfile=dist/index.js --target=bun",
-		"build:handler": "bun build handler.ts --outfile=dist/handler.js --target=node --format=cjs",
+		"build": "bun build app.ts --outfile=dist/handler.js --target=node --format=cjs",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit"
 	},

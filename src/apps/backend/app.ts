@@ -1,4 +1,5 @@
 import { env } from '@config';
+import serverlessExpress from '@codegenie/serverless-express';
 import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
@@ -56,3 +57,5 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
 	req.log.error(err);
 	res.status(500).json({ error: 'Internal Server Error' });
 });
+
+export const handler = serverlessExpress({ app });
