@@ -1,6 +1,6 @@
 /**
- * The `202 Accepted` response body returned by `POST /v1/notifications` once a
- * request passes validation and is enqueued for per-channel dispatch.
+ * The `202 Accepted` response body returned by `POST /v1/notifications` after
+ * the current synchronous dispatch completes successfully.
  */
 export const acceptedNotificationSchema = {
 	type: 'object',
@@ -19,13 +19,14 @@ export const acceptedNotificationSchema = {
 		},
 		statusUrl: {
 			type: 'string',
-			description: 'Poll this URL for per-channel delivery status.',
+			description:
+				'Reserved URL for per-channel delivery status. The status endpoint is not implemented yet.',
 			example: '/v1/notifications/<notificationId>/status',
 		},
 		cancellable: {
 			type: 'object',
 			description:
-				'The window during which the notification may still be cancelled.',
+				'Reserved cancellation details. Cancellation is not implemented yet.',
 			required: ['cancelUrl', 'expiresAt'],
 			properties: {
 				cancelUrl: {

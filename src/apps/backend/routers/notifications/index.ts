@@ -1,7 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
-import { notificationSendRequestSchema } from './schemas/notification-send-request';
+import { dispatchNotification } from '../../notification-channels/dispatch-notification';
+import {
+	type NotificationSendRequest,
+	notificationSendRequestSchema,
+} from './schemas/notification-send-request';
 
 /** How long (seconds) an accepted notification may still be cancelled. */
 const CANCELLATION_WINDOW_SECONDS = 5 * 60;
@@ -54,40 +58,53 @@ const handleValidationErrors: ErrorRequestHandler = (errors, req, res) => {
 	});
 };
 
-export const notificationsRouter = Router();
+type DispatchValidatedNotification = (
+	request: NotificationSendRequest,
+) => Promise<unknown>;
 
-notificationsRouter.post(
-	'/',
-	validate({
-		body: notificationSendRequestSchema,
-		handler: handleValidationErrors,
-	}),
-	(req, res) => {
-		const body = req.body;
+export const createNotificationsRouter = (
+	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
+) => {
+	const notificationsRouter = Router();
 
-		// No persistence layer yet, so mint the id in-process. Once a store exists
-		// this becomes the primary key the channel adapters update.
-		const notificationId = randomUUID();
-		const statusUrl = `/v1/notifications/${notificationId}/status`;
+	notificationsRouter.post(
+		'/',
+		validate({
+			body: notificationSendRequestSchema,
+			handler: handleValidationErrors,
+		}),
+		async (req, res) => {
+			const body = req.body;
+			await dispatchRequest(body);
 
-		const plans = Object.keys(body.channels).map((channel) => ({
-			channel,
-			planId: `${notificationId}#${channel}`,
-			status: 'accepted' as const,
-		}));
+			// No persistence layer yet, so mint the id in-process. Once a store exists
+			// this becomes the primary key the channel adapters update.
+			const notificationId = randomUUID();
+			const statusUrl = `/v1/notifications/${notificationId}/status`;
 
-		const expiresAt =
-			Math.floor(Date.now() / 1000) + CANCELLATION_WINDOW_SECONDS;
+			const plans = Object.keys(body.channels).map((channel) => ({
+				channel,
+				planId: `${notificationId}#${channel}`,
+				status: 'accepted' as const,
+			}));
 
-		res.status(202).json({
-			notificationId,
-			status: 'accepted',
-			plans,
-			statusUrl,
-			cancellable: {
-				cancelUrl: `/v1/notifications/${notificationId}/cancel`,
-				expiresAt,
-			},
-		});
-	},
-);
+			const expiresAt =
+				Math.floor(Date.now() / 1000) + CANCELLATION_WINDOW_SECONDS;
+
+			res.status(202).json({
+				notificationId,
+				status: 'accepted',
+				plans,
+				statusUrl,
+				cancellable: {
+					cancelUrl: `/v1/notifications/${notificationId}/cancel`,
+					expiresAt,
+				},
+			});
+		},
+	);
+
+	return notificationsRouter;
+};
+
+export const notificationsRouter = createNotificationsRouter();

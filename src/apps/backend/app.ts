@@ -16,6 +16,7 @@ import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
+import { userRouter } from './routers/user';
 
 export const app: Application = express();
 
@@ -35,6 +36,7 @@ if (env.NODE_ENV !== 'test') {
 // Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);
+app.use('/v1/user', userRouter);
 app.use('/docs/api', docsRouter);
 
 app.get('/{*path}', (req, res, next) => {

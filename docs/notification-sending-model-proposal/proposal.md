@@ -68,8 +68,6 @@ Request:
 // POST /v1/notifications
 {
 	"idempotencyKey": "morning-briefing-2026-07-08", // request-level; see idempotency note below
-	"category": "editorial",
-	"priority": "standard",
 
 	// WHAT — a LIBRARY of reusable, channel-neutral content items
 	// Plans below pick which item(s) to use, so one article can feed push while
