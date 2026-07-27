@@ -1,5 +1,5 @@
-import { env } from '@config';
 import serverlessExpress from '@codegenie/serverless-express';
+import { env } from '@config';
 import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
