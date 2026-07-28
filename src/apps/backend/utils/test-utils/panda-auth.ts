@@ -18,7 +18,7 @@ export const verifyCookieMock = mock<
 >(() => Promise.resolve({ success: false }));
 
 export const installPandaAuthMock = (): void => {
-	void mock.module('../auth/pan-domain-authentication', () => ({
+	mock.module('../auth/pan-domain-authentication', () => ({
 		verifyCookie: verifyCookieMock,
 	}));
 };

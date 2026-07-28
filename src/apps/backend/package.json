@@ -26,7 +26,6 @@
 		"@http-logger": "workspace:*",
 		"@utils": "workspace:*",
 		"express": "5.2.1",
-		"express-rate-limit": "8.6.1",
 		"express-zod-safe": "3.2.1",
 		"swagger-ui-express": "5.0.1",
 		"zod": "4.4.3"

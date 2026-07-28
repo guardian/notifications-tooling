@@ -1,7 +1,6 @@
 import type { User } from '@guardian/pan-domain-node';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
-import { rateLimitMiddleware } from '../../middleware/rate-limit-middleware';
 
 export type { User };
 
@@ -38,9 +37,4 @@ export const userHandler = (req: Request, res: Response) => {
 	res.json(body);
 };
 
-export const userRouter = Router().get(
-	'/',
-	rateLimitMiddleware,
-	authMiddleware,
-	userHandler,
-);
+export const userRouter = Router().get('/', authMiddleware, userHandler);
