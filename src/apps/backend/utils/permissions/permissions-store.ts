@@ -1,5 +1,9 @@
-import { env, isRunningLocally } from '@config';
+import { env, isRunningLocally, USER_PERMISSIONS } from '@config';
 import { init } from '@guardian/permissions-client';
+
+// Only permissions on this whitelist are exposed to users; anything else the
+// store returns is filtered out.
+const whitelistedPermissions = new Set<string>(Object.values(USER_PERMISSIONS));
 
 // The permissions cache is only published to the CODE and PROD buckets; DEV
 // reads the CODE cache.
@@ -18,5 +22,11 @@ const getPermissionsStore = (): ReturnType<typeof init> => {
 	return permissionsStore;
 };
 
-export const listUserPermissions = (userId: string): Promise<string[]> =>
-	getPermissionsStore().listUserPermissions(userId);
+export const listUserPermissions = async (
+	userId: string,
+): Promise<string[]> => {
+	const permissions = await getPermissionsStore().listUserPermissions(userId);
+	return permissions.filter((permission) =>
+		whitelistedPermissions.has(permission),
+	);
+};

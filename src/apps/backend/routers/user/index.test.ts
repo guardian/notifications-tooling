@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { USER_PERMISSIONS } from '@config';
 import type {
 	Request as ExpressRequest,
 	Response as ExpressResponse,
@@ -23,7 +24,7 @@ installPermissionsStoreMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
 const { userHandler } = await import('./index');
 
-const userPermissions = ['DispatchAccess'];
+const userPermissions = [USER_PERMISSIONS.DISPATCH_ACCESS];
 
 describe('user handler', () => {
 	it('responds with the user wrapped under `user` and their permission names', async () => {
@@ -103,7 +104,7 @@ describe('GET /v1/user', () => {
 		const response = await getUser();
 		const { permissions } = (await response.json()) as UserResponse;
 
-		expect(permissions).toContain('DispatchAccess');
+		expect(permissions).toContain(USER_PERMISSIONS.DISPATCH_ACCESS);
 	});
 
 	it('returns an empty list when the store grants the user nothing', async () => {

@@ -39,4 +39,5 @@ export const pandaSettingsFileName = ((): string => {
 
 export * from './audiences';
 export * from './channels';
+export * from './permissions';
 export * from './urls';

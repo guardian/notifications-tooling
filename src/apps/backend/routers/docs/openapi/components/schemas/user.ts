@@ -1,3 +1,5 @@
+import { USER_PERMISSIONS } from '@config';
+
 /**
  * The `200 OK` response body returned by `GET /v1/user`, mirroring the
  * pan-domain-node `User` interface. Referenced via `#/components/schemas/User`.
@@ -65,7 +67,7 @@ export const userResponseSchema = {
 		permissions: {
 			type: 'array',
 			description: 'Names of the permissions currently granted to the user.',
-			items: { type: 'string', example: 'DispatchAccess' },
+			items: { type: 'string', example: USER_PERMISSIONS.DISPATCH_ACCESS },
 		},
 	},
 } as const;
