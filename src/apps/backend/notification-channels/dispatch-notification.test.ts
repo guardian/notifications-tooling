@@ -32,6 +32,7 @@ const createDependencies = () => {
 	const sendBrazeCampaign = mock(() =>
 		Promise.resolve({ message: 'success', dispatch_id: 'dispatch-123' }),
 	);
+	const registerBrazeTestEmailRecipients = mock(() => Promise.resolve());
 	const sendBrazeTestEmail = mock(() =>
 		Promise.resolve({ message: 'success', dispatch_id: 'dispatch-456' }),
 	);
@@ -47,6 +48,7 @@ const createDependencies = () => {
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
+		registerBrazeTestEmailRecipients,
 		sendBrazeTestEmail,
 	};
 
@@ -55,6 +57,7 @@ const createDependencies = () => {
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
+		registerBrazeTestEmailRecipients,
 		sendBrazeTestEmail,
 	};
 };
@@ -196,8 +199,13 @@ describe('dispatchNotification', () => {
 	});
 
 	it('sends each selected rendering directly to the test email recipients', async () => {
-		const { dependencies, renderEmail, sendBrazeCampaign, sendBrazeTestEmail } =
-			createDependencies();
+		const {
+			dependencies,
+			registerBrazeTestEmailRecipients,
+			renderEmail,
+			sendBrazeCampaign,
+			sendBrazeTestEmail,
+		} = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
 			content: { items: { newsletter: newsletterItem } },
@@ -217,6 +225,17 @@ describe('dispatchNotification', () => {
 
 		expect(renderEmail).toHaveBeenCalledTimes(2);
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
+		expect(registerBrazeTestEmailRecipients).toHaveBeenCalledTimes(1);
+		expect(registerBrazeTestEmailRecipients).toHaveBeenCalledWith({
+			apiKey: 'test-api-key',
+			restEndpoint: 'https://rest.example.braze.eu',
+			timeoutMs: 10_000,
+			recipientEmails: [
+				'first.user@guardian.co.uk',
+				'second.user@guardian.co.uk',
+			],
+		});
+		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(2);
 		expect(sendBrazeTestEmail).toHaveBeenNthCalledWith(1, {
 			apiKey: 'test-api-key',
 			restEndpoint: 'https://rest.example.braze.eu',

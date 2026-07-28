@@ -618,7 +618,7 @@ describe('notificationSendRequestSchema', () => {
 	});
 
 	describe('newsletter test email audience', () => {
-		it('accepts test email recipients and the campaigns to test', () => {
+		it('accepts test email recipients and rendering segments', () => {
 			expectValid(
 				newsletterRequestWithPlan(
 					newsletterPlan({
@@ -699,7 +699,26 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/newsletter/audience/items');
 		});
 
-		it('requires at least one campaign segment', () => {
+		it('normalizes recipient addresses before checking uniqueness', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: {
+								type: 'email',
+								items: [
+									'Newsletters.Test@theguardian.com',
+									'newsletters.test@theguardian.com',
+								],
+								segments: ['UK'],
+							},
+						}),
+					),
+				),
+			).toContain('channels/newsletter/audience/items');
+		});
+
+		it('requires at least one rendering segment', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import {
 	MAX_BRAZE_TRIGGER_PROPERTIES_BYTES,
+	registerBrazeTestEmailRecipients,
 	sendBrazeCampaign,
 	sendBrazeTestEmail,
 } from './client';
@@ -97,38 +98,27 @@ describe('sendBrazeCampaign', () => {
 	});
 });
 
-describe('sendBrazeTestEmail', () => {
-	it('creates stable test profiles and sends rendered content directly', () => {
+describe('registerBrazeTestEmailRecipients', () => {
+	it('creates stable test profiles', () => {
 		const timeoutSignal = new AbortController().signal;
 		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
-		const fetcher = spyOn(globalThis, 'fetch')
-			.mockResolvedValueOnce(Response.json({ message: 'success' }))
-			.mockResolvedValueOnce(
-				Response.json({ message: 'success', dispatch_id: 'dispatch-456' }),
-			);
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 'success' }),
+		);
 
 		expect(
-			sendBrazeTestEmail({
+			registerBrazeTestEmailRecipients({
 				apiKey: 'secret-api-key',
 				restEndpoint: 'https://rest.example.braze.eu',
-				appId: 'email-app-id',
-				from: 'The Guardian <newsletters@theguardian.com>',
-				replyTo: 'newsletters@theguardian.com',
-				html: '<html>Test news</html>',
-				subject: 'Test breaking news',
 				timeoutMs: 10_000,
 				recipientEmails: [
 					'first.user@guardian.co.uk',
 					'second.user@guardian.co.uk',
 				],
 			}),
-		).resolves.toEqual({
-			message: 'success',
-			dispatch_id: 'dispatch-456',
-		});
+		).resolves.toBeUndefined();
 
-		expect(fetcher).toHaveBeenNthCalledWith(
-			1,
+		expect(fetcher).toHaveBeenCalledWith(
 			'https://rest.example.braze.eu/users/track',
 			{
 				method: 'POST',
@@ -159,8 +149,69 @@ describe('sendBrazeTestEmail', () => {
 				signal: timeoutSignal,
 			},
 		);
-		expect(fetcher).toHaveBeenNthCalledWith(
-			2,
+	});
+
+	it('does not send when Braze reports a test-profile error', () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 'success', errors: [{ type: 'invalid' }] }),
+		);
+
+		expect(
+			registerBrazeTestEmailRecipients({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				timeoutMs: 10_000,
+				recipientEmails: ['first.user@guardian.co.uk'],
+			}),
+		).rejects.toThrow('Braze test user tracking was not fully successful.');
+		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+
+	it('throws a safe error when Braze rejects test-profile tracking', () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			new Response('sensitive provider response', { status: 401 }),
+		);
+
+		expect(
+			registerBrazeTestEmailRecipients({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				timeoutMs: 10_000,
+				recipientEmails: ['first.user@guardian.co.uk'],
+			}),
+		).rejects.toThrow('Braze test user tracking failed with status 401.');
+		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('sendBrazeTestEmail', () => {
+	it('sends rendered content to stable test aliases', () => {
+		const timeoutSignal = new AbortController().signal;
+		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 'success', dispatch_id: 'dispatch-456' }),
+		);
+
+		expect(
+			sendBrazeTestEmail({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				appId: 'email-app-id',
+				from: 'The Guardian <newsletters@theguardian.com>',
+				replyTo: 'newsletters@theguardian.com',
+				html: '<html>Test news</html>',
+				subject: 'Test breaking news',
+				timeoutMs: 10_000,
+				recipientEmails: [
+					'first.user@guardian.co.uk',
+					'second.user@guardian.co.uk',
+				],
+			}),
+		).resolves.toEqual({
+			message: 'success',
+			dispatch_id: 'dispatch-456',
+		});
+		expect(fetcher).toHaveBeenCalledWith(
 			'https://rest.example.braze.eu/messages/send',
 			{
 				method: 'POST',
@@ -195,54 +246,10 @@ describe('sendBrazeTestEmail', () => {
 		);
 	});
 
-	it('does not send when Braze reports a test-profile error', () => {
-		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
-			Response.json({ message: 'success', errors: [{ type: 'invalid' }] }),
-		);
-
-		expect(
-			sendBrazeTestEmail({
-				apiKey: 'secret-api-key',
-				restEndpoint: 'https://rest.example.braze.eu',
-				appId: 'email-app-id',
-				from: 'The Guardian <newsletters@theguardian.com>',
-				replyTo: 'newsletters@theguardian.com',
-				html: '<html>Test news</html>',
-				subject: 'Test breaking news',
-				timeoutMs: 10_000,
-				recipientEmails: ['first.user@guardian.co.uk'],
-			}),
-		).rejects.toThrow('Braze test user tracking was not fully successful.');
-		expect(fetcher).toHaveBeenCalledTimes(1);
-	});
-
-	it('throws a safe error when Braze rejects test-profile tracking', () => {
-		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
-			new Response('sensitive provider response', { status: 401 }),
-		);
-
-		expect(
-			sendBrazeTestEmail({
-				apiKey: 'secret-api-key',
-				restEndpoint: 'https://rest.example.braze.eu',
-				appId: 'email-app-id',
-				from: 'The Guardian <newsletters@theguardian.com>',
-				replyTo: 'newsletters@theguardian.com',
-				html: '<html>Test news</html>',
-				subject: 'Test breaking news',
-				timeoutMs: 10_000,
-				recipientEmails: ['first.user@guardian.co.uk'],
-			}),
-		).rejects.toThrow('Braze test user tracking failed with status 401.');
-		expect(fetcher).toHaveBeenCalledTimes(1);
-	});
-
 	it('throws a safe error when Braze rejects the test email', () => {
-		const fetcher = spyOn(globalThis, 'fetch')
-			.mockResolvedValueOnce(Response.json({ message: 'success' }))
-			.mockResolvedValueOnce(
-				new Response('sensitive provider response', { status: 400 }),
-			);
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			new Response('sensitive provider response', { status: 400 }),
+		);
 
 		expect(
 			sendBrazeTestEmail({
@@ -257,6 +264,6 @@ describe('sendBrazeTestEmail', () => {
 				recipientEmails: ['first.user@guardian.co.uk'],
 			}),
 		).rejects.toThrow('Braze test email send failed with status 400.');
-		expect(fetcher).toHaveBeenCalledTimes(2);
+		expect(fetcher).toHaveBeenCalledTimes(1);
 	});
 });

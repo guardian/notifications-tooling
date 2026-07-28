@@ -29,10 +29,10 @@ send protection.
 
 Use option 3 for Notifications Tooling test-email audiences:
 
-1. Render the selected newsletter variant in the same way as a production send.
-2. Create or update stable alias-only test profiles through `/users/track`.
-3. Send the rendered HTML through `/messages/send` using the configured Braze app,
-   sender, and reply-to values.
+1. Render the selected newsletter variants in the same way as production sends.
+2. Create or update stable alias-only test profiles once through `/users/track`.
+3. Send each rendered variant through `/messages/send` using the configured Braze
+   app, sender, and reply-to values.
 4. Continue using `/campaigns/trigger/send` with `broadcast: true` for production
    segment audiences.
 
@@ -48,12 +48,13 @@ Dispatch identifies each test profile with this stable Braze alias:
 
 ```text
 alias_label: dispatch-tool-test-email
-alias_name: <recipient email address>
+alias_name: <lowercase recipient email address>
 ```
 
-The `/users/track` request supplies that alias as the primary identifier and the
-recipient email as a profile attribute. Braze does not fall back to matching the
-email when a primary identifier is present.
+Dispatch normalizes recipient addresses to lowercase before checking uniqueness
+or creating aliases. The `/users/track` request supplies that alias as the
+primary identifier and the recipient email as a profile attribute. Braze does
+not fall back to matching the email when a primary identifier is present.
 
 | Existing Braze state                                    | `/users/track` result                                                                              |
 | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |

@@ -23,6 +23,11 @@ type SendBrazeTestEmailRequest = {
 	recipientEmails: string[];
 };
 
+type RegisterBrazeTestEmailRecipientsRequest = Pick<
+	SendBrazeTestEmailRequest,
+	'apiKey' | 'restEndpoint' | 'timeoutMs' | 'recipientEmails'
+>;
+
 export type BrazeCampaignTriggerResponse = {
 	dispatch_id?: string;
 	message: string;
@@ -39,6 +44,11 @@ const brazeUserTrackResponseSchema = z.object({
 });
 
 const testEmailUserAliasLabel = 'dispatch-tool-test-email';
+
+const createTestEmailUserAlias = (email: string) => ({
+	alias_name: email,
+	alias_label: testEmailUserAliasLabel,
+});
 
 type BrazeCampaignTriggerRequest = {
 	broadcast: true;
@@ -97,34 +107,24 @@ export const sendBrazeCampaign = async ({
 	return brazeCampaignTriggerResponseSchema.parse(await response.json());
 };
 
-export const sendBrazeTestEmail = async ({
+export const registerBrazeTestEmailRecipients = async ({
 	apiKey,
 	restEndpoint,
-	appId,
-	from,
-	replyTo,
-	html,
-	subject,
 	timeoutMs,
 	recipientEmails,
-}: SendBrazeTestEmailRequest): Promise<BrazeCampaignTriggerResponse> => {
-	const userAliases = recipientEmails.map((email) => ({
-		alias_name: email,
-		alias_label: testEmailUserAliasLabel,
-	}));
-	const headers = {
-		Authorization: `Bearer ${apiKey}`,
-		'Content-Type': 'application/json',
-	};
+}: RegisterBrazeTestEmailRecipientsRequest): Promise<void> => {
 	const userTrackResponse = await fetch(
 		new URL('/users/track', restEndpoint).toString(),
 		{
 			method: 'POST',
-			headers,
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				'Content-Type': 'application/json',
+			},
 			body: JSON.stringify({
-				attributes: recipientEmails.map((email, index) => ({
+				attributes: recipientEmails.map((email) => ({
 					_update_existing_only: false,
-					user_alias: userAliases[index],
+					user_alias: createTestEmailUserAlias(email),
 					email,
 				})),
 			}),
@@ -144,14 +144,29 @@ export const sendBrazeTestEmail = async ({
 	if (userTrackResult.message !== 'success' || userTrackResult.errors?.length) {
 		throw new Error('Braze test user tracking was not fully successful.');
 	}
+};
 
+export const sendBrazeTestEmail = async ({
+	apiKey,
+	restEndpoint,
+	appId,
+	from,
+	replyTo,
+	html,
+	subject,
+	timeoutMs,
+	recipientEmails,
+}: SendBrazeTestEmailRequest): Promise<BrazeCampaignTriggerResponse> => {
 	const messageResponse = await fetch(
 		new URL('/messages/send', restEndpoint).toString(),
 		{
 			method: 'POST',
-			headers,
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				'Content-Type': 'application/json',
+			},
 			body: JSON.stringify({
-				user_aliases: userAliases,
+				user_aliases: recipientEmails.map(createTestEmailUserAlias),
 				recipient_subscription_state: 'all',
 				messages: {
 					email: {

@@ -79,10 +79,12 @@ curl --include \
 The current email-rendering endpoint supports one article. Test-email audiences
 accept up to 20 email addresses and one or more newsletter segments. Each
 selected segment is rendered and sent through Braze's `/messages/send` endpoint;
-the production campaign is not triggered. The client creates or updates stable
-alias-only test profiles under the `dispatch-tool-test-email` alias label through
-`/users/track` first. Braze matches that alias, not an existing profile's email,
-so a separate same-email test profile may be created intentionally. Braze
+the production campaign is not triggered. Recipient addresses are normalized to
+lowercase. After all selected segments render, the client creates or updates the
+stable alias-only test profiles once under the `dispatch-tool-test-email` alias
+label through `/users/track`, then sends each rendered variant. Braze matches
+that alias, not an existing profile's email, so a separate same-email test
+profile may be created intentionally. Braze
 processes profile updates asynchronously, so the first send to a new address may
 not be delivered until the profile has propagated; subsequent sends reuse the
 same alias. Dispatch intentionally sends immediately without a fixed delay or
@@ -90,7 +92,9 @@ automatic retry. A successful API response confirms Braze accepted the calls,
 not inbox delivery. Check Braze activity before manually retrying a first-time
 recipient to avoid a possible duplicate.
 
-See [Braze test email delivery options](../../../docs/braze-test-email-delivery-options.md)
+See the [Braze test email send flow](../../../docs/braze-test-email-send-flow.md)
+for the runtime sequence and failure behaviour, and
+[Braze test email delivery options](../../../docs/braze-test-email-delivery-options.md)
 for the alternatives and rationale. Scheduled delivery is rejected until its
 downstream contract is implemented. Dry runs are accepted without calling either
 downstream client.

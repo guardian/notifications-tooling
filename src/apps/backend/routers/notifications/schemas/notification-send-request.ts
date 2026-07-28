@@ -150,12 +150,12 @@ const newsletterSegmentAudience = segmentAudience(
 const testEmailAudience = z.strictObject({
 	type: z.literal('email'),
 	items: z
-		.array(z.email())
+		.array(z.email().toLowerCase())
 		.min(1)
 		.max(MAX_TEST_EMAIL_RECIPIENTS)
 		.refine(hasUniqueItems, { message: 'email addresses must be unique.' })
 		.meta({
-			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send rendered test emails to through Braze's direct message API.`,
+			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send rendered test emails to through Braze's direct message API. Addresses are normalized to lowercase.`,
 			example: ['newsletters.test@theguardian.com'],
 		}),
 	segments: z
