@@ -1,3 +1,4 @@
+import type { UserResponse } from '@utils';
 import { useEffect, useReducer, useState } from 'react';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
 import { mockSendNotification } from '../../mocks/mock-send-notification';
@@ -7,12 +8,7 @@ import { MainLayout } from './components/MainLayout';
 import { getUser } from './get-user';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
-import type {
-	NotificationAction,
-	NotificationState,
-	TabName,
-	UserResponse,
-} from './types';
+import type { NotificationAction, NotificationState, TabName } from './types';
 import { UserContext } from './UserContext';
 
 export const EmailNotificationPage = () => {

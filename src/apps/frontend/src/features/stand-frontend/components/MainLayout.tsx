@@ -7,9 +7,10 @@ import {
 	TopBarNavigation,
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
+import type { User } from '@utils';
 import { type ReactNode, useContext } from 'react';
 import { faviconTheme, topBarTheme } from '../themes';
-import type { TabName, User } from '../types';
+import type { TabName } from '../types';
 import { UserContext } from '../UserContext';
 
 interface Props {

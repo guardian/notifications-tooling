@@ -1,4 +1,4 @@
-import type { UserResponse } from './types';
+import type { UserResponse } from '@utils';
 
 export const getUser = async (): Promise<UserResponse> => {
 	const userResponseJson: unknown = await fetch('/v1/user', {

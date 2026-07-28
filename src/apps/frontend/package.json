@@ -16,6 +16,7 @@
 		"@emotion/react": "11.14.0",
 		"@guardian/content-api-models": "47.0.0",
 		"@guardian/stand": "0.0.63",
+		"@utils": "workspace:*",
 		"react": "19.2.7",
 		"react-aria-components": "1.19.0",
 		"react-dom": "19.2.7"

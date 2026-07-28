@@ -1,15 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import type { UserResponse } from '@utils';
 import type {
 	Request as ExpressRequest,
 	Response as ExpressResponse,
 } from 'express';
 import { startTestServer, type TestServer } from '../../test-utils/server';
-import {
-	samplePermissions,
-	sampleUser,
-	userHandler,
-	type UserResponse,
-} from './index';
+import { samplePermissions, sampleUser, userHandler } from './index';
 
 describe('user handler', () => {
 	it('responds with the user wrapped under `user` and their permissions', () => {
