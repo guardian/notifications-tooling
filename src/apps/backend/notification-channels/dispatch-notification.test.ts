@@ -32,15 +32,22 @@ const createDependencies = () => {
 	const sendBrazeCampaign = mock(() =>
 		Promise.resolve({ message: 'success', dispatch_id: 'dispatch-123' }),
 	);
+	const sendBrazeTestEmail = mock(() =>
+		Promise.resolve({ message: 'success', dispatch_id: 'dispatch-456' }),
+	);
 	const dependencies: DispatchNotificationDependencies = {
 		environment: {
 			BRAZE_API_KEY: 'test-api-key',
 			BRAZE_REST_ENDPOINT: 'https://rest.example.braze.eu',
+			BRAZE_APP_ID: 'test-app-id',
+			BRAZE_TEST_EMAIL_FROM: 'The Guardian <newsletters@theguardian.com>',
+			BRAZE_TEST_EMAIL_REPLY_TO: 'newsletters@theguardian.com',
 			EMAIL_RENDERING_ENDPOINT: 'https://email-rendering.example.com',
 		},
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
+		sendBrazeTestEmail,
 	};
 
 	return {
@@ -48,6 +55,7 @@ const createDependencies = () => {
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
+		sendBrazeTestEmail,
 	};
 };
 
@@ -187,44 +195,85 @@ describe('dispatchNotification', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 	});
 
-	it('does not dispatch any channel when a plan is unsupported', async () => {
-		const {
-			dependencies,
-			renderEmail,
-			sendAppNotification,
-			sendBrazeCampaign,
-		} = createDependencies();
+	it('sends each selected rendering directly to the test email recipients', async () => {
+		const { dependencies, renderEmail, sendBrazeCampaign, sendBrazeTestEmail } =
+			createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
-			content: { items: { push: pushItem, newsletter: newsletterItem } },
+			content: { items: { newsletter: newsletterItem } },
 			channels: {
-				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'segment', items: ['breaking-news-uk'] },
-					compose: { use: 'push' },
-				},
 				[NotificationChannel.Newsletter]: {
 					audience: {
 						type: 'email',
-						items: ['test.user@guardian.co.uk'],
+						items: ['first.user@guardian.co.uk', 'second.user@guardian.co.uk'],
+						segments: ['UK', 'US'],
 					},
 					compose: { items: ['newsletter'], subject: 'Test briefing' },
 				},
 			},
 		};
 
-		let dispatchError: unknown;
-		try {
-			await dispatchNotification(request, dependencies);
-		} catch (error) {
-			dispatchError = error;
-		}
+		await dispatchNotification(request, dependencies);
 
-		expect(dispatchError).toEqual(
-			new Error('Sending test emails is not implemented.'),
-		);
-		expect(renderEmail).not.toHaveBeenCalled();
+		expect(renderEmail).toHaveBeenCalledTimes(2);
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
-		expect(sendAppNotification).not.toHaveBeenCalled();
+		expect(sendBrazeTestEmail).toHaveBeenNthCalledWith(1, {
+			apiKey: 'test-api-key',
+			restEndpoint: 'https://rest.example.braze.eu',
+			appId: 'test-app-id',
+			from: 'The Guardian <newsletters@theguardian.com>',
+			replyTo: 'newsletters@theguardian.com',
+			html: '<html>Rendered newsletter</html>',
+			subject: 'Test briefing',
+			timeoutMs: 10_000,
+			recipientEmails: [
+				'first.user@guardian.co.uk',
+				'second.user@guardian.co.uk',
+			],
+		});
+		expect(sendBrazeTestEmail).toHaveBeenNthCalledWith(2, {
+			apiKey: 'test-api-key',
+			restEndpoint: 'https://rest.example.braze.eu',
+			appId: 'test-app-id',
+			from: 'The Guardian <newsletters@theguardian.com>',
+			replyTo: 'newsletters@theguardian.com',
+			html: '<html>Rendered newsletter</html>',
+			subject: 'Test briefing',
+			timeoutMs: 10_000,
+			recipientEmails: [
+				'first.user@guardian.co.uk',
+				'second.user@guardian.co.uk',
+			],
+		});
+	});
+
+	it('uses Dispatch no-reply defaults for test emails', async () => {
+		const { dependencies, sendBrazeTestEmail } = createDependencies();
+		dependencies.environment.BRAZE_TEST_EMAIL_FROM = '';
+		dependencies.environment.BRAZE_TEST_EMAIL_REPLY_TO = '  ';
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { newsletter: newsletterItem } },
+			channels: {
+				[NotificationChannel.Newsletter]: {
+					audience: {
+						type: 'email',
+						items: ['test.user@guardian.co.uk'],
+						segments: ['UK'],
+					},
+					compose: { items: ['newsletter'], subject: 'Test briefing' },
+				},
+			},
+		};
+
+		await dispatchNotification(request, dependencies);
+
+		expect(sendBrazeTestEmail).toHaveBeenCalledWith(
+			expect.objectContaining({
+				from: 'Dispatch <no-reply@theguardian.com>',
+				replyTo: 'NO_REPLY_TO',
+			}),
+		);
 	});
 
 	it('does not call downstream clients for a dry run', async () => {

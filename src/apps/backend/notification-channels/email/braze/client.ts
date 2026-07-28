@@ -11,6 +11,18 @@ type SendBrazeCampaignRequest = {
 	timeoutMs: number;
 };
 
+type SendBrazeTestEmailRequest = {
+	apiKey: string;
+	restEndpoint: string;
+	appId: string;
+	from: string;
+	replyTo: string;
+	html: string;
+	subject: string;
+	timeoutMs: number;
+	recipientEmails: string[];
+};
+
 export type BrazeCampaignTriggerResponse = {
 	dispatch_id?: string;
 	message: string;
@@ -20,6 +32,13 @@ const brazeCampaignTriggerResponseSchema = z.object({
 	dispatch_id: z.string().optional(),
 	message: z.string(),
 });
+
+const brazeUserTrackResponseSchema = z.object({
+	message: z.string(),
+	errors: z.array(z.unknown()).optional(),
+});
+
+const testEmailUserAliasLabel = 'dispatch-tool-test-email';
 
 type BrazeCampaignTriggerRequest = {
 	broadcast: true;
@@ -76,4 +95,83 @@ export const sendBrazeCampaign = async ({
 	}
 
 	return brazeCampaignTriggerResponseSchema.parse(await response.json());
+};
+
+export const sendBrazeTestEmail = async ({
+	apiKey,
+	restEndpoint,
+	appId,
+	from,
+	replyTo,
+	html,
+	subject,
+	timeoutMs,
+	recipientEmails,
+}: SendBrazeTestEmailRequest): Promise<BrazeCampaignTriggerResponse> => {
+	const userAliases = recipientEmails.map((email) => ({
+		alias_name: email,
+		alias_label: testEmailUserAliasLabel,
+	}));
+	const headers = {
+		Authorization: `Bearer ${apiKey}`,
+		'Content-Type': 'application/json',
+	};
+	const userTrackResponse = await fetch(
+		new URL('/users/track', restEndpoint).toString(),
+		{
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				attributes: recipientEmails.map((email, index) => ({
+					_update_existing_only: false,
+					user_alias: userAliases[index],
+					email,
+				})),
+			}),
+			signal: AbortSignal.timeout(timeoutMs),
+		},
+	);
+
+	if (!userTrackResponse.ok) {
+		throw new Error(
+			`Braze test user tracking failed with status ${userTrackResponse.status}.`,
+		);
+	}
+
+	const userTrackResult = brazeUserTrackResponseSchema.parse(
+		await userTrackResponse.json(),
+	);
+	if (userTrackResult.message !== 'success' || userTrackResult.errors?.length) {
+		throw new Error('Braze test user tracking was not fully successful.');
+	}
+
+	const messageResponse = await fetch(
+		new URL('/messages/send', restEndpoint).toString(),
+		{
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				user_aliases: userAliases,
+				recipient_subscription_state: 'all',
+				messages: {
+					email: {
+						app_id: appId,
+						from,
+						reply_to: replyTo,
+						subject,
+						body: html,
+					},
+				},
+			}),
+			signal: AbortSignal.timeout(timeoutMs),
+		},
+	);
+
+	if (!messageResponse.ok) {
+		throw new Error(
+			`Braze test email send failed with status ${messageResponse.status}.`,
+		);
+	}
+
+	return brazeCampaignTriggerResponseSchema.parse(await messageResponse.json());
 };

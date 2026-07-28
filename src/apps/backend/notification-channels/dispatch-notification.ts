@@ -6,7 +6,7 @@ import {
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import { sendAppNotification } from './app-notification/client';
-import { sendBrazeCampaign } from './email/braze/client';
+import { sendBrazeCampaign, sendBrazeTestEmail } from './email/braze/client';
 import { renderEmail } from './email/rendering/client';
 
 const newsletterEnvironmentSchema = z.object({
@@ -20,11 +20,24 @@ const newsletterEnvironmentSchema = z.object({
 		.default(10_000),
 });
 
+const testEmailEnvironmentSchema = z.object({
+	BRAZE_APP_ID: z.string().trim().min(1),
+	BRAZE_TEST_EMAIL_FROM: z.preprocess(
+		(value) => (typeof value === 'string' && !value.trim() ? undefined : value),
+		z.string().trim().min(1).default('Dispatch <no-reply@theguardian.com>'),
+	),
+	BRAZE_TEST_EMAIL_REPLY_TO: z.preprocess(
+		(value) => (typeof value === 'string' && !value.trim() ? undefined : value),
+		z.union([z.email(), z.literal('NO_REPLY_TO')]).default('NO_REPLY_TO'),
+	),
+});
+
 export type DispatchNotificationDependencies = {
 	environment: NodeJS.ProcessEnv;
 	renderEmail: typeof renderEmail;
 	sendAppNotification: typeof sendAppNotification;
 	sendBrazeCampaign: typeof sendBrazeCampaign;
+	sendBrazeTestEmail: typeof sendBrazeTestEmail;
 };
 
 const defaultDependencies: DispatchNotificationDependencies = {
@@ -32,6 +45,7 @@ const defaultDependencies: DispatchNotificationDependencies = {
 	renderEmail,
 	sendAppNotification,
 	sendBrazeCampaign,
+	sendBrazeTestEmail,
 };
 
 const requireContentItem = (
@@ -59,9 +73,6 @@ const resolveNewsletterDispatch = (
 	if (!plan) {
 		return;
 	}
-	if (plan.audience.type !== 'segment') {
-		throw new Error('Sending test emails is not implemented.');
-	}
 	if (plan.compose.items.length !== 1) {
 		throw new Error('Only one newsletter item can be rendered currently.');
 	}
@@ -75,10 +86,19 @@ const resolveNewsletterDispatch = (
 		dependencies.environment,
 	);
 
-	const segments = plan.audience.items.map((segmentId) => {
+	const testEmail =
+		plan.audience.type === 'email'
+			? {
+					recipientEmails: plan.audience.items,
+					configuration: testEmailEnvironmentSchema.parse(
+						dependencies.environment,
+					),
+				}
+			: undefined;
+	const resolveSegment = (segmentId: keyof typeof newsletterSegments) => {
 		const { brazeCampaignId, emailRenderingNewsletterId } =
 			newsletterSegments[segmentId];
-		if (!brazeCampaignId.trim()) {
+		if (plan.audience.type === 'segment' && !brazeCampaignId.trim()) {
 			throw new Error(
 				`No Braze campaign ID is configured for newsletter segment '${segmentId}'.`,
 			);
@@ -90,9 +110,15 @@ const resolveNewsletterDispatch = (
 		}
 
 		return { brazeCampaignId, emailRenderingNewsletterId };
-	});
+	};
+	let segments: Array<ReturnType<typeof resolveSegment>>;
+	if (plan.audience.type === 'segment') {
+		segments = plan.audience.items.map(resolveSegment);
+	} else {
+		segments = plan.audience.segments.map(resolveSegment);
+	}
 
-	return { environment, item, plan, segments };
+	return { environment, item, plan, segments, testEmail };
 };
 
 const dispatchNewsletter = async (
@@ -103,7 +129,7 @@ const dispatchNewsletter = async (
 		return;
 	}
 
-	const { environment, item, plan, segments } = resolvedDispatch;
+	const { environment, item, plan, segments, testEmail } = resolvedDispatch;
 	for (const { brazeCampaignId, emailRenderingNewsletterId } of segments) {
 		// Email-rendering currently derives content from the article URL. Title,
 		// body, and media overrides remain unused until its POST contract exists.
@@ -114,14 +140,28 @@ const dispatchNewsletter = async (
 			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 
-		await dependencies.sendBrazeCampaign({
-			apiKey: environment.BRAZE_API_KEY,
-			restEndpoint: environment.BRAZE_REST_ENDPOINT,
-			campaignId: brazeCampaignId,
-			html,
-			subject: plan.compose.subject,
-			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
-		});
+		if (testEmail) {
+			await dependencies.sendBrazeTestEmail({
+				apiKey: environment.BRAZE_API_KEY,
+				restEndpoint: environment.BRAZE_REST_ENDPOINT,
+				appId: testEmail.configuration.BRAZE_APP_ID,
+				from: testEmail.configuration.BRAZE_TEST_EMAIL_FROM,
+				replyTo: testEmail.configuration.BRAZE_TEST_EMAIL_REPLY_TO,
+				html,
+				subject: plan.compose.subject,
+				timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+				recipientEmails: testEmail.recipientEmails,
+			});
+		} else {
+			await dependencies.sendBrazeCampaign({
+				apiKey: environment.BRAZE_API_KEY,
+				restEndpoint: environment.BRAZE_REST_ENDPOINT,
+				campaignId: brazeCampaignId,
+				html,
+				subject: plan.compose.subject,
+				timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+			});
+		}
 	}
 };
 

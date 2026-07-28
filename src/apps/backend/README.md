@@ -5,8 +5,14 @@
 Copy the variable names from `.env.example` into the ignored `.env.local` file
 and populate them with the environment values.
 
-- `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send` permission.
+- `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send`, `users.track`, and
+  `messages.send` permissions.
 - `BRAZE_REST_ENDPOINT` is the Braze REST instance URL.
+- `BRAZE_APP_ID` identifies the Braze app used for direct test emails.
+- `BRAZE_TEST_EMAIL_FROM` is the approved sender used for direct test emails. It
+  defaults to `Dispatch <no-reply@theguardian.com>`.
+- `BRAZE_TEST_EMAIL_REPLY_TO` is an email address or Braze's `NO_REPLY_TO`
+  sentinel. It defaults to `NO_REPLY_TO`, which omits the Reply-To header.
 - `EMAIL_RENDERING_ENDPOINT` is the base URL of the email-rendering service.
 - `PROVIDER_REQUEST_TIMEOUT_MS` limits each provider request and defaults to 10
   seconds.
@@ -70,7 +76,21 @@ curl --include \
   }'
 ```
 
-The current email-rendering endpoint supports one article.
-Direct test-email audiences, and scheduled delivery are rejected
-until their downstream contracts are implemented. Dry runs are accepted without
-calling either downstream client.
+The current email-rendering endpoint supports one article. Test-email audiences
+accept up to 20 email addresses and one or more newsletter segments. Each
+selected segment is rendered and sent through Braze's `/messages/send` endpoint;
+the production campaign is not triggered. The client creates or updates stable
+alias-only test profiles under the `dispatch-tool-test-email` alias label through
+`/users/track` first. Braze matches that alias, not an existing profile's email,
+so a separate same-email test profile may be created intentionally. Braze
+processes profile updates asynchronously, so the first send to a new address may
+not be delivered until the profile has propagated; subsequent sends reuse the
+same alias. Dispatch intentionally sends immediately without a fixed delay or
+automatic retry. A successful API response confirms Braze accepted the calls,
+not inbox delivery. Check Braze activity before manually retrying a first-time
+recipient to avoid a possible duplicate.
+
+See [Braze test email delivery options](../../../docs/braze-test-email-delivery-options.md)
+for the alternatives and rationale. Scheduled delivery is rejected until its
+downstream contract is implemented. Dry runs are accepted without calling either
+downstream client.

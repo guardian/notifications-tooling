@@ -1,0 +1,99 @@
+# Braze test email delivery options
+
+## Context
+
+Production newsletters use an API-triggered Braze campaign. Notifications
+Tooling supplies the rendered HTML and subject through trigger properties. The
+campaign body is intentionally thin:
+
+```liquid
+{{api_trigger_properties.${body}}}
+```
+
+Supplying explicit `recipients` to `/campaigns/trigger/send` does not bypass the
+campaign audience. A recipient still needs a Braze profile, must match the
+campaign audience, and remains subject to campaign re-eligibility and duplicate
+send protection.
+
+## Options
+
+| Option                                          | Advantage                                                                                                                      | Disadvantage                                                                                                                                                                 |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Production campaign with explicit recipients | Exercises the real campaign configuration.                                                                                     | Testers need Braze profiles and must match the campaign audience. Campaign re-eligibility and duplicate-send protection can block repeated tests.                            |
+| 2. Mirror test campaigns                        | Supports an internal test audience without changing production targeting. Test re-eligibility can be configured independently. | Requires a test campaign for each production campaign. Sender settings, subscription rules, Liquid, and other configuration can drift.                                       |
+| 3. Direct `/messages/send` test emails          | Bypasses campaign audience and campaign duplicate-send protection. It does not duplicate campaigns.                            | Does not execute the campaign. Notifications Tooling must provide sender, reply-to, subject, HTML, app ID, and profile management. A new profile can take time to propagate. |
+| 4. Redesign production targeting                | One campaign could handle production and explicit test recipients.                                                             | Requires broad campaign eligibility and moving production targeting into every API request. This materially increases the risk of an accidental broad send.                  |
+| 5. Manual Braze dashboard test send             | Uses Braze's native test-send workflow and can use Content Test Groups.                                                        | Cannot be initiated by Notifications Tooling through the public campaign-trigger API. Editors must work in Braze.                                                            |
+
+## Proposed Decision
+
+Use option 3 for Notifications Tooling test-email audiences:
+
+1. Render the selected newsletter variant in the same way as a production send.
+2. Create or update stable alias-only test profiles through `/users/track`.
+3. Send the rendered HTML through `/messages/send` using the configured Braze app,
+   sender, and reply-to values.
+4. Continue using `/campaigns/trigger/send` with `broadcast: true` for production
+   segment audiences.
+
+This validates the rendered email rather than the production campaign's delivery
+configuration. Because the campaign template only inserts the supplied body,
+the content is close to production, but campaign-specific tracking, link
+wrapping, Liquid context, frequency caps, eligibility, and analytics are not
+exercised by a direct test send.
+
+## Test profile identity
+
+Dispatch identifies each test profile with this stable Braze alias:
+
+```text
+alias_label: dispatch-tool-test-email
+alias_name: <recipient email address>
+```
+
+The `/users/track` request supplies that alias as the primary identifier and the
+recipient email as a profile attribute. Braze does not fall back to matching the
+email when a primary identifier is present.
+
+| Existing Braze state                                    | `/users/track` result                                                                              |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| A profile has the exact Dispatch alias                  | The profile is updated and reused.                                                                 |
+| A profile has the same email but not the Dispatch alias | That profile is not matched. Braze creates a separate alias-only test profile with the same email. |
+| No profile has that email or alias                      | Braze creates a new alias-only test profile.                                                       |
+
+The separate same-email profile is intentional: test delivery remains isolated
+from reader and staff identities rather than attaching Dispatch state to an
+unrelated profile. It also means Dispatch can add duplicate-email profiles to
+Braze. These profiles should be treated as owned by Dispatch and identified by
+the `dispatch-tool-test-email` alias label.
+
+Test recipients must be approved internal addresses. The current request schema
+accepts any syntactically valid email address and does not yet enforce an
+internal-domain allowlist, so access control and a future recipient allowlist are
+important safeguards. Direct sends use `recipient_subscription_state: "all"`,
+which deliberately bypasses the profile's subscription state for test delivery.
+
+Changing the alias label later creates a new identity namespace. Existing
+profiles under the previous label will not be reused and another same-email
+profile may be created, so the label should now remain stable.
+
+## Profile propagation
+
+Braze processes `/users/track` asynchronously and recommends allowing time for a
+new profile to propagate before calling `/messages/send`. The implementation
+uses stable aliases so existing testers can be sent to immediately.
+
+Dispatch deliberately uses an immediate best-effort policy:
+
+- it calls `/messages/send` as soon as `/users/track` accepts the profile update;
+- it does not add a fixed delay, because Braze provides no propagation-time
+  guarantee and a short delay would not make delivery reliable;
+- it does not retry automatically, because Braze may have accepted the first
+  send and another attempt could produce a duplicate;
+- a successful Dispatch response means Braze accepted both API calls, not that
+  the message reached the recipient's inbox.
+
+The first send to a previously unknown Dispatch alias may therefore not be
+delivered. Check the `dispatch-tool-test-email` profile and Braze message
+activity before manually retrying after the profile has propagated. Later sends
+reuse the stable alias and do not have the profile-creation race.

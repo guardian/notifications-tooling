@@ -618,13 +618,14 @@ describe('notificationSendRequestSchema', () => {
 	});
 
 	describe('newsletter test email audience', () => {
-		it('accepts a list of test email recipients', () => {
+		it('accepts test email recipients and the campaigns to test', () => {
 			expectValid(
 				newsletterRequestWithPlan(
 					newsletterPlan({
 						audience: {
 							type: 'email',
 							items: ['newsletters.test@theguardian.com'],
+							segments: ['UK', 'US'],
 						},
 					}),
 				),
@@ -636,7 +637,11 @@ describe('notificationSendRequestSchema', () => {
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'email', items: ['not-an-email'] },
+							audience: {
+								type: 'email',
+								items: ['not-an-email'],
+								segments: ['UK'],
+							},
 						}),
 					),
 				),
@@ -647,7 +652,9 @@ describe('notificationSendRequestSchema', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'email', items: [] } }),
+						newsletterPlan({
+							audience: { type: 'email', items: [], segments: ['UK'] },
+						}),
 					),
 				),
 			).toContain('channels/newsletter/audience/items');
@@ -661,7 +668,13 @@ describe('notificationSendRequestSchema', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'email', items: emails } }),
+						newsletterPlan({
+							audience: {
+								type: 'email',
+								items: emails,
+								segments: ['UK'],
+							},
+						}),
 					),
 				),
 			).toContain('channels/newsletter/audience/items');
@@ -678,11 +691,28 @@ describe('notificationSendRequestSchema', () => {
 									'newsletters.test@theguardian.com',
 									'newsletters.test@theguardian.com',
 								],
+								segments: ['UK'],
 							},
 						}),
 					),
 				),
 			).toContain('channels/newsletter/audience/items');
+		});
+
+		it('requires at least one campaign segment', () => {
+			expect(
+				pathsOf(
+					newsletterRequestWithPlan(
+						newsletterPlan({
+							audience: {
+								type: 'email',
+								items: ['newsletters.test@theguardian.com'],
+								segments: [],
+							},
+						}),
+					),
+				),
+			).toContain('channels/newsletter/audience/segments');
 		});
 	});
 

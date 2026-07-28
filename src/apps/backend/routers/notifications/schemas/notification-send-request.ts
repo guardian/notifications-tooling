@@ -146,7 +146,7 @@ const newsletterSegmentAudience = segmentAudience(
 	MAX_NEWSLETTER_SEGMENTS,
 );
 
-/** Ad-hoc test recipients addressed by email, bypassing segments. */
+/** Ad-hoc test recipients addressed directly through Braze. */
 const testEmailAudience = z.strictObject({
 	type: z.literal('email'),
 	items: z
@@ -155,12 +155,22 @@ const testEmailAudience = z.strictObject({
 		.max(MAX_TEST_EMAIL_RECIPIENTS)
 		.refine(hasUniqueItems, { message: 'email addresses must be unique.' })
 		.meta({
-			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send a test to.`,
+			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send rendered test emails to through Braze's direct message API.`,
 			example: ['newsletters.test@theguardian.com'],
+		}),
+	segments: z
+		.array(z.enum(newsletterSegmentIds))
+		.min(1)
+		.max(MAX_NEWSLETTER_SEGMENTS)
+		.refine(hasUniqueItems, { message: 'segment ids must be unique.' })
+		.meta({
+			description:
+				'Newsletter segments whose rendering configuration should be used for the direct test send. Production Braze campaigns are not triggered.',
+			example: [newsletterSegmentIds[0]],
 		}),
 });
 
-/** Newsletter audiences may target segments or an ad-hoc list of test emails. */
+/** Newsletter audiences may target segments or ad-hoc test emails. */
 const newsletterAudience = z.discriminatedUnion('type', [
 	newsletterSegmentAudience,
 	testEmailAudience,
