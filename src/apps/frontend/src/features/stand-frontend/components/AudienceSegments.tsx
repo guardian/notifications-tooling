@@ -10,21 +10,22 @@ import {
 import { Button } from '@guardian/stand/Button';
 import { ButtonGroup } from '@guardian/stand/ButtonGroup';
 import { Typography } from '@guardian/stand/Typography';
+import { type AudienceSegment } from '../types';
 
 export interface Segment {
-	code: string;
+	code: AudienceSegment;
 	label: string;
 }
 
 interface AudienceSegmentPickerProps {
 	segments?: Segment[];
-	selected: string[];
-	onChange: (selected: string[]) => void;
+	selected: AudienceSegment[];
+	onChange: (selected: AudienceSegment[]) => void;
 }
 
 interface AudienceSegmentsPreviewPillProps {
 	segments?: Segment[];
-	selected: string[];
+	selected: AudienceSegment[];
 }
 
 export const DEFAULT_SEGMENTS: Segment[] = [
@@ -41,6 +42,14 @@ const styles = {
 			color: isSelected
 				? semanticColors.text.strongerInverse
 				: semanticColors.text.weak,
+			'&:hover': {
+				backgroundColor: isSelected
+					? baseColors.magenta[200]
+					: semanticColors.fill.weakPressed,
+				color: isSelected
+					? semanticColors.text.strongerInverse
+					: semanticColors.text.weak,
+			},
 			padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 			borderRadius: semanticRadius.cornerSm,
 			display: 'flex',
@@ -76,7 +85,7 @@ export const AudienceSegments = ({
 	selected,
 	onChange,
 }: AudienceSegmentPickerProps) => {
-	const onSegmentToggle = (segmentCode: string) => {
+	const onSegmentToggle = (segmentCode: AudienceSegment) => {
 		const next = selected.includes(segmentCode)
 			? selected.filter((code) => code !== segmentCode)
 			: [...selected, segmentCode];
