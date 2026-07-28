@@ -4,7 +4,7 @@ import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
-import { getUser } from './get-config';
+import { getUser } from './get-user';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
 import type {
@@ -31,6 +31,7 @@ export const EmailNotificationPage = () => {
 		void getUser()
 			.then(setUser)
 			.catch((err) => {
+				// TODO - what should the messaging be to users?
 				console.error('failed to read user', err);
 			});
 	}, []);
