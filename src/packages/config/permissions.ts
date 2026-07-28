@@ -1,3 +1,3 @@
-export enum USER_PERMISSIONS {
-	DISPATCH_ACCESS = 'dispatch_access',
+export enum UserPermissions {
+	DispatchAccess = 'dispatch_access',
 }

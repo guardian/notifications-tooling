@@ -1,4 +1,4 @@
-import { USER_PERMISSIONS } from '@config';
+import { UserPermissions } from '@config';
 
 /**
  * The `200 OK` response body returned by `GET /v1/user`, mirroring the
@@ -67,7 +67,7 @@ export const userResponseSchema = {
 		permissions: {
 			type: 'array',
 			description: 'Names of the permissions currently granted to the user.',
-			items: { type: 'string', example: USER_PERMISSIONS.DISPATCH_ACCESS },
+			items: { type: 'string', example: UserPermissions.DispatchAccess },
 		},
 	},
 } as const;

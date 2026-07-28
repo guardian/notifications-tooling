@@ -1,9 +1,9 @@
-import { env, isRunningLocally, USER_PERMISSIONS } from '@config';
+import { env, isRunningLocally, UserPermissions } from '@config';
 import { init } from '@guardian/permissions-client';
 
 // Only permissions on this whitelist are exposed to users; anything else the
 // store returns is filtered out.
-const whitelistedPermissions = new Set<string>(Object.values(USER_PERMISSIONS));
+const whitelistedPermissions = new Set<string>(Object.values(UserPermissions));
 
 // The permissions cache is only published to the CODE and PROD buckets; DEV
 // reads the CODE cache.
