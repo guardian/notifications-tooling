@@ -1,11 +1,10 @@
 import { useEffect, useReducer, useState } from 'react';
-import type { FrontendConfig } from '../../frontend-config';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
 import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
-import { getAppConfig, getUser } from './get-config';
+import { getUser } from './get-config';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
 import type {
@@ -17,7 +16,6 @@ import type {
 import { UserContext } from './UserContext';
 
 export const EmailNotificationPage = () => {
-	const [appConfig, setAppConfig] = useState<FrontendConfig>();
 	const [user, setUser] = useState<UserResponse>();
 	const [currentTab, setCurrentTab] = useState<TabName>(() => {
 		switch (location.hash) {
@@ -30,23 +28,12 @@ export const EmailNotificationPage = () => {
 	});
 
 	useEffect(() => {
-		void getAppConfig()
-			.then(setAppConfig)
-			.catch((err) => {
-				console.error('failed to get config', err);
-			});
-	}, []);
-
-	useEffect(() => {
-		if (!appConfig) {
-			return;
-		}
-		void getUser(appConfig)
+		void getUser()
 			.then(setUser)
 			.catch((err) => {
 				console.error('failed to read user', err);
 			});
-	}, [appConfig]);
+	}, []);
 
 	const [notification, updateNotification] = useReducer<
 		NotificationState,

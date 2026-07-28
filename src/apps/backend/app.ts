@@ -1,7 +1,6 @@
 import serverlessExpress from '@codegenie/serverless-express';
 import { env } from '@config';
 import { httpLogger } from '@http-logger';
-import cors from 'cors';
 import express, {
 	type Application,
 	type NextFunction,
@@ -17,17 +16,6 @@ import { notificationsRouter } from './routers/notifications';
 import { userRouter } from './routers/user';
 
 export const app: Application = express();
-
-app.use(
-	cors({
-		origin: [
-			'https://dispatch.local.dev-gutools.co.uk',
-			'https://dispatch.code.dev-gutools.co.uk',
-			'https://dispatch.gutools.co.uk',
-		],
-		credentials: true,
-	}),
-);
 
 app.disable('x-powered-by');
 
