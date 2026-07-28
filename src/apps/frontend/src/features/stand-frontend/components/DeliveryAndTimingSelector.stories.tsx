@@ -29,7 +29,7 @@ export const Unselected: SelectorStory = {
 		await expect(canvas.getByText('Delivery and timing')).toBeInTheDocument();
 		await expect(canvas.getByText('Immediate')).toBeInTheDocument();
 		await expect(
-			canvas.getByText('Send right now via Braze'),
+			canvas.getByText('Sends right now via Braze'),
 		).toBeInTheDocument();
 	},
 };
