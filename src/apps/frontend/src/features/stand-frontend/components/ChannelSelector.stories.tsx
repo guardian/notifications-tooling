@@ -28,7 +28,7 @@ export const Unselected: SelectorStory = {
 		await expect(canvas.getByText('Channel')).toBeInTheDocument();
 		await expect(canvas.getByText('Newsletter email')).toBeInTheDocument();
 		await expect(
-			canvas.getByText('Sends via the Braze breaking-news campaign'),
+			canvas.getByText('Sends via the braze breaking-news campaign'),
 		).toBeInTheDocument();
 	},
 };
