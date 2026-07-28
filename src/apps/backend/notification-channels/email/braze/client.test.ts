@@ -151,7 +151,7 @@ describe('registerBrazeTestEmailRecipients', () => {
 		);
 	});
 
-	it('does not send when Braze reports a test-profile error', () => {
+	it('rejects a partial test-profile update', () => {
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({ message: 'success', errors: [{ type: 'invalid' }] }),
 		);

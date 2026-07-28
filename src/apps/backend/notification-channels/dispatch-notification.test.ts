@@ -94,6 +94,9 @@ describe('dispatchNotification', () => {
 	it('renders each newsletter segment and sends it through Braze', async () => {
 		const { dependencies, renderEmail, sendBrazeCampaign } =
 			createDependencies();
+		renderEmail
+			.mockResolvedValueOnce('<html>UK rendered newsletter</html>')
+			.mockResolvedValueOnce('<html>US rendered newsletter</html>');
 		const request: NotificationSendRequest = {
 			...baseRequest,
 			content: { items: { lead: newsletterItem } },
@@ -125,7 +128,7 @@ describe('dispatchNotification', () => {
 			apiKey: 'test-api-key',
 			restEndpoint: 'https://rest.example.braze.eu',
 			campaignId: newsletterSegments.UK.brazeCampaignId,
-			html: '<html>Rendered newsletter</html>',
+			html: '<html>UK rendered newsletter</html>',
 			subject: 'Daily briefing',
 			timeoutMs: 10_000,
 		});
@@ -133,7 +136,7 @@ describe('dispatchNotification', () => {
 			apiKey: 'test-api-key',
 			restEndpoint: 'https://rest.example.braze.eu',
 			campaignId: newsletterSegments.US.brazeCampaignId,
-			html: '<html>Rendered newsletter</html>',
+			html: '<html>US rendered newsletter</html>',
 			subject: 'Daily briefing',
 			timeoutMs: 10_000,
 		});
@@ -195,7 +198,12 @@ describe('dispatchNotification', () => {
 
 		expect(dispatchError).toEqual(new Error('Rendering failed'));
 		expect(renderEmail).toHaveBeenCalledTimes(1);
-		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+		expect(sendAppNotification).toHaveBeenCalledWith({
+			topics: [{ type: 'breaking', name: 'uk' }],
+			title: pushItem.title,
+			body: pushItem.body,
+			link: pushItem.link,
+		});
 	});
 
 	it('sends each selected rendering directly to the test email recipients', async () => {
@@ -206,6 +214,9 @@ describe('dispatchNotification', () => {
 			sendBrazeCampaign,
 			sendBrazeTestEmail,
 		} = createDependencies();
+		renderEmail
+			.mockResolvedValueOnce('<html>UK rendered newsletter</html>')
+			.mockResolvedValueOnce('<html>US rendered newsletter</html>');
 		const request: NotificationSendRequest = {
 			...baseRequest,
 			content: { items: { newsletter: newsletterItem } },
@@ -224,6 +235,18 @@ describe('dispatchNotification', () => {
 		await dispatchNotification(request, dependencies);
 
 		expect(renderEmail).toHaveBeenCalledTimes(2);
+		expect(renderEmail).toHaveBeenNthCalledWith(1, {
+			endpoint: 'https://email-rendering.example.com',
+			articleUrl: newsletterItem.link,
+			newsletterId: newsletterSegments.UK.emailRenderingNewsletterId,
+			timeoutMs: 10_000,
+		});
+		expect(renderEmail).toHaveBeenNthCalledWith(2, {
+			endpoint: 'https://email-rendering.example.com',
+			articleUrl: newsletterItem.link,
+			newsletterId: newsletterSegments.US.emailRenderingNewsletterId,
+			timeoutMs: 10_000,
+		});
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
 		expect(registerBrazeTestEmailRecipients).toHaveBeenCalledTimes(1);
 		expect(registerBrazeTestEmailRecipients).toHaveBeenCalledWith({
@@ -242,7 +265,7 @@ describe('dispatchNotification', () => {
 			appId: 'test-app-id',
 			from: 'The Guardian <newsletters@theguardian.com>',
 			replyTo: 'newsletters@theguardian.com',
-			html: '<html>Rendered newsletter</html>',
+			html: '<html>UK rendered newsletter</html>',
 			subject: 'Test briefing',
 			timeoutMs: 10_000,
 			recipientEmails: [
@@ -256,7 +279,7 @@ describe('dispatchNotification', () => {
 			appId: 'test-app-id',
 			from: 'The Guardian <newsletters@theguardian.com>',
 			replyTo: 'newsletters@theguardian.com',
-			html: '<html>Rendered newsletter</html>',
+			html: '<html>US rendered newsletter</html>',
 			subject: 'Test briefing',
 			timeoutMs: 10_000,
 			recipientEmails: [
@@ -298,9 +321,11 @@ describe('dispatchNotification', () => {
 	it('does not call downstream clients for a dry run', async () => {
 		const {
 			dependencies,
+			registerBrazeTestEmailRecipients,
 			renderEmail,
 			sendAppNotification,
 			sendBrazeCampaign,
+			sendBrazeTestEmail,
 		} = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -317,6 +342,8 @@ describe('dispatchNotification', () => {
 		await dispatchNotification(request, dependencies);
 		expect(renderEmail).not.toHaveBeenCalled();
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
+		expect(registerBrazeTestEmailRecipients).not.toHaveBeenCalled();
+		expect(sendBrazeTestEmail).not.toHaveBeenCalled();
 		expect(sendAppNotification).not.toHaveBeenCalled();
 	});
 });
