@@ -53,34 +53,9 @@ export const userSchema = {
 } as const;
 
 /**
- * A permission granted to the user, mirroring the Guardian `permissions` model.
- * Referenced via `#/components/schemas/Permission`.
- */
-export const permissionSchema = {
-	type: 'object',
-	required: ['name', 'description', 'active'],
-	properties: {
-		name: {
-			type: 'string',
-			description: 'The permission name.',
-			example: 'DispatchAccess',
-		},
-		description: {
-			type: 'string',
-			description: 'Human-readable description of what the permission grants.',
-			example: 'Access to Dispatch',
-		},
-		active: {
-			type: 'boolean',
-			description: 'Whether the permission is currently granted to the user.',
-			example: true,
-		},
-	},
-} as const;
-
-/**
  * The `200 OK` response body returned by `GET /v1/user`: the authenticated user
- * and their permissions. Referenced via `#/components/schemas/UserResponse`.
+ * and the names of the permissions granted to them. Referenced via
+ * `#/components/schemas/UserResponse`.
  */
 export const userResponseSchema = {
 	type: 'object',
@@ -89,7 +64,8 @@ export const userResponseSchema = {
 		user: { $ref: '#/components/schemas/User' },
 		permissions: {
 			type: 'array',
-			items: { $ref: '#/components/schemas/Permission' },
+			description: 'Names of the permissions currently granted to the user.',
+			items: { type: 'string', example: 'DispatchAccess' },
 		},
 	},
 } as const;

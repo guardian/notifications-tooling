@@ -1,5 +1,5 @@
 import { fromIni, fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { env } from '@config';
+import { isRunningLocally, pandaSettingsFileName } from '@config';
 import {
 	guardianValidation,
 	PanDomainAuthentication,
@@ -7,25 +7,14 @@ import {
 } from '@guardian/pan-domain-node';
 
 const LOCAL_PROFILE = 'composer';
-const IS_RUNNING_LOCALLY = !process.env.LAMBDA_TASK_ROOT;
-const settingsFileName = () => {
-	switch (env.STAGE) {
-		case 'DEV':
-			return 'local.dev-gutools.co.uk.settings.public';
-		case 'CODE':
-			return 'code.dev-gutools.co.uk.settings.public';
-		case 'PROD':
-			return 'gutools.co.uk.settings.public';
-	}
-};
 
 const panda = new PanDomainAuthentication(
 	'gutoolsAuth-assym', // cookie name
 	'eu-west-1', // AWS region
 	'pan-domain-auth-settings', // Settings bucket
-	settingsFileName(), // Settings files
+	pandaSettingsFileName, // Settings files
 	guardianValidation,
-	IS_RUNNING_LOCALLY
+	isRunningLocally
 		? fromIni({ profile: LOCAL_PROFILE })
 		: fromNodeProviderChain(),
 );

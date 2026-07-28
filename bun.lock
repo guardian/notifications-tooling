@@ -30,9 +30,11 @@
     "src/apps/backend": {
       "name": "backend",
       "dependencies": {
+        "@aws-sdk/client-s3": "3.1093.0",
         "@aws-sdk/credential-providers": "3.1093.0",
         "@config": "workspace:*",
         "@guardian/pan-domain-node": "1.2.5",
+        "@guardian/permissions-client": "0.0.2",
         "@http-logger": "workspace:*",
         "@utils": "workspace:*",
         "express": "5.2.1",
@@ -290,6 +292,8 @@
     "@guardian/eslint-config": ["@guardian/eslint-config@16.0.0", "", { "dependencies": { "@eslint-community/eslint-plugin-eslint-comments": "4.7.1", "@eslint/js": "9.39.1", "@stylistic/eslint-plugin": "5.10.0", "eslint-config-prettier": "10.1.8", "eslint-import-resolver-typescript": "4.4.4", "eslint-plugin-import-x": "4.16.2", "eslint-plugin-jsx-a11y": "6.10.2", "eslint-plugin-react": "7.37.5", "eslint-plugin-react-hooks": "7.1.1", "globals": "17.6.0", "read-package-up": "12.0.0", "typescript-eslint": "8.59.3" }, "peerDependencies": { "eslint": "^9.39.1", "eslint-plugin-storybook": "^10.4.0" }, "optionalPeers": ["eslint-plugin-storybook"] }, "sha512-LTd0evYj9HSj24Z8HBm5Tc4GOlbeY5cRhiyXCSCz5XpdBHjgZSYIXDChqge4hd89iFCWU9ztU1QowD6tqEzM4A=="],
 
     "@guardian/pan-domain-node": ["@guardian/pan-domain-node@1.2.5", "", { "dependencies": { "@aws-sdk/client-s3": "^3.1061.0", "@aws-sdk/credential-providers": "^3.1061.0", "cookie": "^0.4.1", "ini": "6.0.0" } }, "sha512-0gCn3ZQASmhhWWw+zP0/W6KbXPRamnwc/LvG7h5wh2qtFyckxcB9TWAibhOEgdodSsXVin1DuQys4qEfbnKvgg=="],
+
+    "@guardian/permissions-client": ["@guardian/permissions-client@0.0.2", "", { "peerDependencies": { "@aws-sdk/client-s3": "^3.1090.0", "@aws-sdk/credential-providers": "^3.1090.0" } }, "sha512-dDjYocDgjNJ7GKNyLPMZh5OCCX6nDOjw1hQfuAuycmvydbLwiC/5FHhUHwDlUuXHm149NFA2zkg+57okNNwyKQ=="],
 
     "@guardian/prettier": ["@guardian/prettier@11.0.0", "", { "peerDependencies": { "prettier": "^3.7.4", "tslib": "^2.8.1" } }, "sha512-zq3icTMZtkbt7dWSMotYDMSpoXsrf105/EoKC1cNecrFqqY45+R3TBRwGudyA+31eAhR7L6GAyB1qD3074lHYQ=="],
 

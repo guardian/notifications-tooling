@@ -9,24 +9,34 @@ import {
 	installPandaAuthMock,
 	testUser,
 } from '../../utils/test-utils/panda-auth';
+import {
+	grantPermissions,
+	installPermissionsStoreMock,
+} from '../../utils/test-utils/permissions';
 import type { TestServer } from '../../utils/test-utils/server';
-import { samplePermissions, userHandler, type UserResponse } from './index';
+import type { UserResponse } from './index';
 
-// Stub Panda verification before the app (and its real verifier) is imported.
+// Stub Panda verification and the permissions store before the app (and its
+// real clients) are imported.
 installPandaAuthMock();
+installPermissionsStoreMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
+const { userHandler } = await import('./index');
+
+const userPermissions = ['DispatchAccess'];
 
 describe('user handler', () => {
-	it('responds with the user wrapped under `user` and their permissions', () => {
+	it('responds with the user wrapped under `user` and their permission names', async () => {
+		grantPermissions(userPermissions);
 		const json = mock<(body: unknown) => void>(() => {});
 		const res = { json } as unknown as ExpressResponse;
 
-		userHandler({ user: testUser } as unknown as ExpressRequest, res);
+		await userHandler({ user: testUser } as unknown as ExpressRequest, res);
 
 		expect(json).toHaveBeenCalledTimes(1);
 		expect(json.mock.calls[0]?.[0]).toEqual({
 			user: testUser,
-			permissions: samplePermissions,
+			permissions: userPermissions,
 		});
 	});
 });
@@ -41,6 +51,7 @@ describe('GET /v1/user', () => {
 
 	beforeAll(async () => {
 		authenticateRequests(testUser);
+		grantPermissions(userPermissions);
 		server = await startTestServer();
 		baseUrl = server.baseUrl;
 	});
@@ -65,7 +76,7 @@ describe('GET /v1/user', () => {
 		expect(response.headers.get('content-type')).toContain('application/json');
 		expect(await response.json()).toEqual({
 			user: testUser,
-			permissions: samplePermissions,
+			permissions: userPermissions,
 		});
 	});
 
@@ -88,26 +99,32 @@ describe('GET /v1/user', () => {
 		expect(typeof user.multifactor).toBe('boolean');
 	});
 
-	it('includes the DispatchAccess permission from guardian/permissions#400', async () => {
+	it('lists the permissions the store returns for the user', async () => {
 		const response = await getUser();
 		const { permissions } = (await response.json()) as UserResponse;
 
-		expect(permissions).toContainEqual({
-			name: 'DispatchAccess',
-			description: 'Access to Dispatch',
-			active: true,
-		});
+		expect(permissions).toContain('DispatchAccess');
 	});
 
-	it('returns permissions matching the Permission interface shape', async () => {
+	it('returns an empty list when the store grants the user nothing', async () => {
+		grantPermissions([]);
+		try {
+			const response = await getUser();
+			const { permissions } = (await response.json()) as UserResponse;
+
+			expect(permissions).toEqual([]);
+		} finally {
+			grantPermissions(userPermissions);
+		}
+	});
+
+	it('returns permissions as an array of permission-name strings', async () => {
 		const response = await getUser();
 		const { permissions } = (await response.json()) as UserResponse;
 
 		expect(Array.isArray(permissions)).toBe(true);
 		for (const permission of permissions) {
-			expect(typeof permission.name).toBe('string');
-			expect(typeof permission.description).toBe('string');
-			expect(typeof permission.active).toBe('boolean');
+			expect(typeof permission).toBe('string');
 		}
 	});
 });
