@@ -1,3 +1,5 @@
+import serverlessExpress from '@codegenie/serverless-express';
+import { env } from '@config';
 import { httpLogger } from '@http-logger';
 import cors from 'cors';
 import express, {
@@ -6,11 +8,12 @@ import express, {
 	type Request,
 	type Response,
 } from 'express';
+import { clientAssetsDir } from './client-assets';
+import { authMiddleware } from './middleware/auth-middleware';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
-import { rootRouter } from './routers/root';
 import { userRouter } from './routers/user';
 
 export const app: Application = express();
@@ -32,8 +35,27 @@ app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/', rootRouter);
+const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+
 app.use('/health', healthRouter);
+
+if (env.NODE_ENV !== 'test') {
+	app.use(authMiddleware);
+}
+
+app.use(
+	express.static(clientAssetsDir, {
+		maxAge: oneYearInMs,
+		immutable: true,
+		setHeaders: (res, filePath) => {
+			if (filePath.endsWith('index.html')) {
+				res.setHeader('Cache-Control', 'no-cache');
+			}
+		},
+	}),
+);
+
+// Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
@@ -48,3 +70,5 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
 	req.log.error(err);
 	res.status(500).json({ error: 'Internal Server Error' });
 });
+
+export const handler = serverlessExpress({ app });

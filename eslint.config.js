@@ -12,6 +12,7 @@ export default [
 			'docker/**',
 			'!docker/docker-compose.local.yml',
 			'**/*.d.ts',
+			'**/storybook-static/**',
 		],
 	},
 	...guardian.configs.recommended,
@@ -20,7 +21,8 @@ export default [
 	{
 		// Storybook requires a default export here; @guardian/eslint-config's
 		// no-default-export exception only covers .storybook/main.*.
-		files: ['**/.storybook/preview.*'],
+		// vitest.config.* also needs a default export for Vitest to load it.
+		files: ['**/.storybook/preview.*', '**/vitest.config.*'],
 		rules: {
 			'import/no-default-export': 'off',
 		},

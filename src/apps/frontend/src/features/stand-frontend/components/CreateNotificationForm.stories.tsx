@@ -77,7 +77,7 @@ export const PopulatedEmail: Story = {
 			...defaultState,
 			articleInputText: articleFixture.webUrl,
 			content: articleFixture,
-			fetchedArticleId: articleFixture.webUrl,
+			fetchedArticleId: articleFixture.id,
 			parameters: completeEmailParams,
 		},
 	},
