@@ -98,6 +98,9 @@ export const SideNavigationPanel = () => {
 				borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 				minHeight: '72px',
 				width: '280px',
+				position: 'sticky',
+				top: '0px',
+				zIndex: 1,
 			}}
 		>
 			{SIDE_NAVIGATION_PANEL_ITEMS.map((item) => (

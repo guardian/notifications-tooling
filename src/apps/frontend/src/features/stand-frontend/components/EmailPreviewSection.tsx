@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { baseSpacing, semanticColors } from '@guardian/stand';
+import { baseSpacing, semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import type {
@@ -30,10 +30,16 @@ export const EmailPreviewSection = ({
 			css={css({
 				background: semanticColors.bg.raisedLevel1,
 				flexBasis: 474,
-				padding: baseSpacing['16Px'],
 				display: 'flex',
 				flexDirection: 'column',
-				gap: baseSpacing['20Px'],
+				gap: semanticSpacing.stackLg,
+				paddingTop: '48px',
+				paddingLeft: semanticSpacing.stackLg,
+				paddingRight: semanticSpacing.stackLg,
+				paddingBottom: baseSpacing['48Px'],
+				position: 'sticky',
+				top: '0px',
+				zIndex: 1,
 			})}
 		>
 			<header

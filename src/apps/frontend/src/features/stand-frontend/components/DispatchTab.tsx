@@ -55,7 +55,7 @@ export const DispatchTab = () => {
 							<SideNavigationPanel />
 						</Item>
 						<Item
-							size={6}
+							size={'auto'}
 							cssOverrides={css({
 								borderRightWidth: semanticSizing.border.default,
 								borderRightStyle: 'solid',
@@ -67,12 +67,11 @@ export const DispatchTab = () => {
 						<Item
 							size={'auto'}
 							cssOverrides={css({
-								paddingRight: semanticSpacing.stackSm,
-								paddingLeft: semanticSpacing.stackSm,
-								paddingTop: semanticSpacing.stackSm,
 								display: 'flex',
 								justifyContent: 'center',
 								alignItems: 'flex-start',
+								flow: 'vertical',
+								width: '621px',
 							})}
 						>
 							<EmailPreviewSection
