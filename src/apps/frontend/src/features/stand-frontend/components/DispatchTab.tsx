@@ -46,7 +46,7 @@ export const DispatchTab = () => {
 				) : (
 					<>
 						<Item
-							size={2}
+							size={'auto'}
 							cssOverrides={css({
 								border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 								gap: `${baseSpacing['10Px']}`,
@@ -57,13 +57,9 @@ export const DispatchTab = () => {
 						<Item
 							size={6}
 							cssOverrides={css({
-								paddingLeft: '147px',
-								paddingRight: semanticSpacing.stackXl,
 								borderRightWidth: semanticSizing.border.default,
 								borderRightStyle: 'solid',
 								borderRightColor: semanticColors.border.weak,
-								paddingTop: `48px`,
-								width: '720px',
 							})}
 						>
 							<CreateNotificationForm />

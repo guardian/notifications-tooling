@@ -50,7 +50,6 @@ export const EmailPreviewSection = ({
 						alignItems: 'center',
 						gap: 5,
 					}}
-					id={'preview-section'}
 				>
 					<Icon symbol="preview" />
 					<Typography variant="bodyBoldMd">Preview</Typography>

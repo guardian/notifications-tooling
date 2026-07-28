@@ -39,7 +39,7 @@ export const DeliveryAndTimingSelector = ({
 				}}
 			>
 				Choose whether the {channelDescriptions[channel]} is sent immediately or
-				scheduled for a later
+				scheduled for later
 			</Typography>
 
 			{Object.entries(emailDeliveryOptionNameMap).map(

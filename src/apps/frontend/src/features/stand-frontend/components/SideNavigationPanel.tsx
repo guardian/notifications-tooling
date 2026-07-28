@@ -45,7 +45,7 @@ const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 	{
 		tileNumber: 5,
 		title: 'Send',
-		href: '#preview-section',
+		href: '#send-button-section',
 		isSelected: false,
 		onPress: () => {},
 	},
@@ -97,6 +97,7 @@ export const SideNavigationPanel = () => {
 				flexDirection: 'column',
 				borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 				minHeight: '72px',
+				width: '280px',
 			}}
 		>
 			{SIDE_NAVIGATION_PANEL_ITEMS.map((item) => (
@@ -129,6 +130,9 @@ export const SideNavigationPanelTile = ({
 				alignItems: 'center',
 				justifyContent: 'center',
 				minHeight: '72px',
+				backgroundColor: isSelected
+					? semanticColors.bg.raisedLevel1
+					: semanticColors.fill.weak,
 				border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 				padding: '0px 0px',
 			})}
