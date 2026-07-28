@@ -39,7 +39,7 @@ Email delivery currently integrates with [Braze](https://www.braze.com/docs/deve
 
 ### Run locally
 
-Start both frontend and backend:
+Start the service:
 
 ```bash
 ./scripts/start.sh
@@ -48,7 +48,6 @@ Start both frontend and backend:
 Local URLs:
 
 - `https://dispatch.local.dev-gutools.co.uk`
-- `https://dispatch-backend.local.dev-gutools.co.uk/`
 
 This local setup currently depends on a temporary workaround introduced to support local development. Because panda-auth for Node does not generate cookies, you need to run the login tool locally alongside Dispatch.
 
