@@ -79,6 +79,7 @@ export const SendButton = () => {
 								cursor: 'not-allowed',
 							})
 				}
+				id={'send-button-section'}
 			>
 				{buttonText(parameters)}
 			</Button>

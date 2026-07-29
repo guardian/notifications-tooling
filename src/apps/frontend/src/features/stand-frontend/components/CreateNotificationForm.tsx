@@ -13,9 +13,18 @@ export const CreateNotificationForm = () => {
 	);
 
 	return (
-		<>
+		<div
+			css={{
+				marginTop: semanticSpacing.stackXl,
+				display: 'flex',
+				flexDirection: 'column',
+				width: '720px',
+				paddingRight: semanticSpacing.stackSm,
+				paddingLeft: '147px',
+			}}
+		>
 			<Typography variant="heading2Xl" element="h2">
-				Create a Notification
+				Create a notification
 			</Typography>
 
 			<div
@@ -44,6 +53,6 @@ export const CreateNotificationForm = () => {
 
 				<SendButton />
 			</div>
-		</>
+		</div>
 	);
 };

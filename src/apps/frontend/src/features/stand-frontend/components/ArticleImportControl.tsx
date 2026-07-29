@@ -66,6 +66,7 @@ export const ArticleImportControl = () => {
 				onChange={(text) =>
 					updateNotification({ type: 'set-article-id', text })
 				}
+				id="article-section"
 			/>
 			<div
 				css={{

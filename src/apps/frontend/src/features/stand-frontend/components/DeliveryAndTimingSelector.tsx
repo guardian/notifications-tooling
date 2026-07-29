@@ -29,7 +29,9 @@ export const DeliveryAndTimingSelector = ({
 				gap: semanticSpacing.stackXs,
 			}}
 		>
-			<Typography variant="bodyBoldMd">Delivery and timing</Typography>
+			<Typography variant="bodyBoldMd" id="delivery-timing-section">
+				Delivery and timing
+			</Typography>
 			<Typography
 				variant="bodySm"
 				css={{
@@ -37,7 +39,7 @@ export const DeliveryAndTimingSelector = ({
 				}}
 			>
 				Choose whether the {channelDescriptions[channel]} is sent immediately or
-				scheduled for a later
+				scheduled for later
 			</Typography>
 
 			{Object.entries(emailDeliveryOptionNameMap).map(
