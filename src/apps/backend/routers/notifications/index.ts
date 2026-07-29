@@ -7,6 +7,8 @@ import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
 } from './schemas/notification-send-request';
+import { requirePermissions } from '../../middleware/permissions-middleware';
+import { UserPermissions } from '@config';
 
 /** How long (seconds) an accepted notification may still be cancelled. */
 const CANCELLATION_WINDOW_SECONDS = 5 * 60;
@@ -71,6 +73,7 @@ export const createNotificationsRouter = (
 	notificationsRouter.post(
 		'/',
 		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
