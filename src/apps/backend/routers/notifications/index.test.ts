@@ -1,5 +1,5 @@
-import { UserPermissions } from '@config';
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { UserPermissions } from '@config';
 import express from 'express';
 import {
 	assertUnauthenticatedRequestBlocked,

@@ -1,5 +1,5 @@
-import type { User } from '@guardian/pan-domain-node';
 import { expect, mock } from 'bun:test';
+import type { User } from '@guardian/pan-domain-node';
 import type { CookieVerificationResult } from '../auth/pan-domain-authentication';
 
 export const buildTestUser = (overrides: Partial<User> = {}): User => ({

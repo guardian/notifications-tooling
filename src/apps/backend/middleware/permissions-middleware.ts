@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import { UserPermissions } from '@config';
+import type { UserPermissions } from '@config';
+import type { NextFunction, Request, Response } from 'express';
 import { listUserPermissions } from '../utils/permissions/permissions-store';
 
 function respondWithInsufficientPermissions(response: Response) {
