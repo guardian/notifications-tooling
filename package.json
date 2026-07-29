@@ -26,6 +26,8 @@
 		"lint": "bun --bun eslint .",
 		"lint:fix": "bun --bun eslint . --fix",
 		"check:pinned-deps": "bun run scripts/check-pinned-deps.ts",
+		"db:migration:create": "bun run scripts/create-db-migration.ts",
+		"db:migration:apply": "bun --bun x drizzle-kit migrate --config=drizzle.config.ts",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"typecheck": "bun run --filter '*' typecheck",

@@ -7,6 +7,8 @@
 		"start": "bun run --hot index.ts",
 		"dev": "bun run --hot index.ts",
 		"build": "bun build app.ts --minify --outfile=dist/handler.js --target=node --format=cjs -e @aws-sdk/* --production",
+		"db:migration:create": "bun run ../../../scripts/create-db-migration.ts",
+		"db:migration:apply": "bun --bun x drizzle-kit migrate --config=../../../drizzle.config.ts",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit"
 	},

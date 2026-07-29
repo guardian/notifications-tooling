@@ -23,6 +23,34 @@ topic and content request but does not make a network call.
 client. For newsletter segments it renders the selected article through
 email-rendering and triggers the mapped Braze campaign.
 
+## Database migrations
+
+Drizzle schema lives in `src/apps/backend/db/schema.ts`, and generated SQL
+migrations are stored in `src/apps/backend/db/migrations`.
+
+Create a migration from your schema changes from the repo root:
+
+```sh
+bun run db:migration:create add-notification-status
+```
+
+The wrapper passes the supplied name to Drizzle, which prefixes it with its own
+timestamp and creates one directory per migration under
+`src/apps/backend/db/migrations`.
+
+Apply pending migrations from the repo root:
+
+```sh
+bun run db:migration:apply
+```
+
+The same scripts are also available from `src/apps/backend` via:
+
+```sh
+bun run db:migration:create add-notification-status
+bun run db:migration:apply
+```
+
 ## Test the notification endpoint
 
 With the backend running on port 4000 and `.env.local` populated, run the
