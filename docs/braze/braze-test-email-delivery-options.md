@@ -25,14 +25,31 @@ send protection.
 | 4. Redesign production targeting                | One campaign could handle production and explicit test recipients.                                                             | Requires broad campaign eligibility and moving production targeting into every API request. This materially increases the risk of an accidental broad send.                  |
 | 5. Manual Braze dashboard test send             | Uses Braze's native test-send workflow and can use Content Test Groups.                                                        | Cannot be initiated by Notifications Tooling through the public campaign-trigger API. Editors must work in Braze.                                                            |
 
+### What mirroring test campaigns means
+
+Option 2 would duplicate each production newsletter campaign as a test-only
+campaign. For example, Breaking News UK would have both a production campaign
+and a corresponding test campaign. The same pair would be needed for each
+newsletter segment, currently UK, US, and AU.
+
+Each test campaign would target an internal test audience and could use more
+permissive re-eligibility rules for repeated tests. However, its sender,
+reply-to address, subscription rules, Liquid template, tracking settings, and
+other delivery configuration would need to remain aligned with the production
+campaign. Every campaign change would therefore need to be applied and verified
+twice. The direct-send option avoids that maintenance burden, at the cost of not
+exercising the production campaign configuration.
+
 ## Proposed Decision
 
 Use option 3 for Notifications Tooling test-email audiences:
 
 1. Render the selected newsletter variants in the same way as production sends.
-2. Create or update stable alias-only test profiles once through `/users/track`.
-3. Send each rendered variant through `/messages/send` using the configured Braze
-   app, sender, and reply-to values.
+2. Create or update stable alias-only test profiles once per dispatch through
+   Braze's [`/users/track` endpoint](https://www.braze.com/docs/api/endpoints/user_data/post_user_track).
+3. Send each rendered variant through Braze's
+   [`/messages/send` endpoint](https://www.braze.com/docs/api/endpoints/messaging/send_messages/post_send_messages)
+   using the configured app, sender, and reply-to values.
 4. Continue using `/campaigns/trigger/send` with `broadcast: true` for production
    segment audiences.
 
@@ -44,7 +61,9 @@ exercised by a direct test send.
 
 ## Test profile identity
 
-Dispatch identifies each test profile with this stable Braze alias:
+Braze's [user alias object](https://www.braze.com/docs/api/objects_filters/user_alias_object)
+is an alternative user identifier made from an `alias_name` and an
+`alias_label`. Dispatch identifies each test profile with this stable alias:
 
 ```text
 alias_label: dispatch-tool-test-email
@@ -52,9 +71,14 @@ alias_name: <lowercase recipient email address>
 ```
 
 Dispatch normalizes recipient addresses to lowercase before checking uniqueness
-or creating aliases. The `/users/track` request supplies that alias as the
-primary identifier and the recipient email as a profile attribute. Braze does
-not fall back to matching the email when a primary identifier is present.
+or creating aliases. The
+[`/users/track` request](https://www.braze.com/docs/api/endpoints/user_data/post_user_track#identifier-resolution)
+supplies that alias as the primary identifier and the recipient email as a
+profile attribute. Braze does not fall back to matching the email when a primary
+identifier is present. The subsequent
+[`/messages/send` request](https://www.braze.com/docs/api/endpoints/messaging/send_messages/post_send_messages#request-body)
+targets those profiles through its `user_aliases` field rather than using the
+raw email addresses as recipient identifiers.
 
 | Existing Braze state                                    | `/users/track` result                                                                              |
 | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
