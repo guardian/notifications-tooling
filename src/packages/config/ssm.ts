@@ -24,15 +24,15 @@ interface GetParameterResponse {
  * parameter values, avoiding a direct call to SSM on every invocation. The
  * `name` argument is resolved relative to this app's parameter namespace.
  *
- * @param name The parameter name, relative to the app namespace.
+ * @param key The parameter name, relative to the app namespace.
  * @returns The decrypted parameter value.
  */
-export const getSSMParameter = async (name: string): Promise<string> => {
+export const getSSMParameter = async (key: string): Promise<string> => {
 	if (env.STAGE === 'DEV') {
-		const value = process.env[`${name}`];
+		const value = process.env[`${key}`];
 
 		if (!value) {
-			throw new Error(`SSM parameter "${name}" is not set in DEV environment.`);
+			throw new Error(`SSM parameter "${key}" is not set in DEV environment.`);
 		}
 
 		return Promise.resolve(value);
@@ -47,7 +47,7 @@ export const getSSMParameter = async (name: string): Promise<string> => {
 
 	const url = new URL('http://localhost:2773/systemsmanager/parameters/get');
 	url.port = extensionPort;
-	url.searchParams.set('name', `${namespace}${name}`);
+	url.searchParams.set('name', `${namespace}${key}`);
 	url.searchParams.set('withDecryption', 'true');
 
 	const response = await fetch(url, {
@@ -58,7 +58,7 @@ export const getSSMParameter = async (name: string): Promise<string> => {
 
 	if (!response.ok) {
 		throw new Error(
-			`Failed to fetch SSM parameter "${name}": ${response.status} ${response.statusText}`,
+			`Failed to fetch SSM parameter "${key}": ${response.status} ${response.statusText}`,
 		);
 	}
 
