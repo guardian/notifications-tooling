@@ -1,15 +1,29 @@
 import { HtmlPreviewLoader } from '@guardian/stand/HtmlPreviewLoader';
 import { Typography } from '@guardian/stand/Typography';
+import { useCallback, useContext } from 'react';
+import { NotificationFormContext } from '../NotificationContext';
 
-const fetchHtml = () => Promise.resolve(`<div>Preview content</div>`);
+export const HTMLPreview = () => {
+	const {
+		notification: { fetchedArticleId },
+		requestEmailHtml: fetchEmailHtml,
+	} = useContext(NotificationFormContext);
 
-export const HTMLPreview = () => (
-	<HtmlPreviewLoader
-		fetchHtml={fetchHtml}
-		title={
-			<Typography variant="labelFormMd">Newsletter email preview</Typography>
+	const fetchHtml = useCallback(async () => {
+		if (!fetchedArticleId) {
+			return `<div>no article loaded</div>`;
 		}
-		widthOptions={[]}
-		defaultWidth={400}
-	/>
-);
+		return fetchEmailHtml(fetchedArticleId, {});
+	}, [fetchedArticleId, fetchEmailHtml]);
+
+	return (
+		<HtmlPreviewLoader
+			fetchHtml={fetchHtml}
+			title={
+				<Typography variant="labelFormMd">Newsletter email preview</Typography>
+			}
+			widthOptions={[]}
+			defaultWidth={400}
+		/>
+	);
+};

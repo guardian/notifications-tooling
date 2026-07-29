@@ -46,6 +46,10 @@ export type SendingResult = {
 	ok: boolean;
 };
 
+export type RequestEmailHtml = {
+	(articleId: string, options: Record<string, string>): Promise<string>;
+};
+
 export type NotificationAction =
 	| {
 			type: 'set-article-id';
