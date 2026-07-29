@@ -47,7 +47,7 @@ export type SendingResult = {
 };
 
 export type RequestEmailHtml = {
-	(articleId: string, options: Record<string, string>): Promise<string>;
+	(articleId: string, options: { audience: string }): Promise<string>;
 };
 
 export type NotificationAction =

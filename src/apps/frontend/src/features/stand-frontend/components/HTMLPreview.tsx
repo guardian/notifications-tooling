@@ -5,16 +5,18 @@ import { NotificationFormContext } from '../NotificationContext';
 
 export const HTMLPreview = () => {
 	const {
-		notification: { fetchedArticleId },
+		notification: { fetchedArticleId, parameters },
 		requestEmailHtml: fetchEmailHtml,
 	} = useContext(NotificationFormContext);
+
+	const audience = (parameters?.audienceSegments ?? []).join();
 
 	const fetchHtml = useCallback(async () => {
 		if (!fetchedArticleId) {
 			return `<div>no article loaded</div>`;
 		}
-		return fetchEmailHtml(fetchedArticleId, {});
-	}, [fetchedArticleId, fetchEmailHtml]);
+		return fetchEmailHtml(fetchedArticleId, { audience });
+	}, [fetchedArticleId, fetchEmailHtml, audience]);
 
 	return (
 		<HtmlPreviewLoader

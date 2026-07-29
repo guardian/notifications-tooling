@@ -1,6 +1,6 @@
 import type { RequestEmailHtml } from '../features/stand-frontend/types';
 
-export const mockRequestEmailHtml: RequestEmailHtml = (articleId) => {
+export const mockRequestEmailHtml: RequestEmailHtml = (articleId, options) => {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			resolve(`
@@ -14,14 +14,9 @@ export const mockRequestEmailHtml: RequestEmailHtml = (articleId) => {
 <body>
     <table>
         <tbody>
-            <tr>
-                <td><h1>${articleId}</h1></td>
-            </tr>
-            <tr>
-                <td>
-                this is a sample email response for ${articleId}
-                </td>
-            </tr>
+            <tr><td><h1>${articleId}</h1></td></tr>
+            <tr><td>this is a sample email response for ${articleId}</td></tr>
+            <tr><td>${JSON.stringify(options)}</td></tr>
         </tbody>
     </table>
 </body>
