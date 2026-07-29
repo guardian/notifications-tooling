@@ -27,7 +27,7 @@
 		"lint:fix": "bun --bun eslint . --fix",
 		"check:pinned-deps": "bun run scripts/check-pinned-deps.ts",
 		"db:migration:create": "bun run scripts/create-db-migration.ts",
-		"db:migration:apply": "bun --bun x drizzle-kit migrate --config=drizzle.config.ts",
+		"db:migration:apply": "cd src/apps/backend && bun run db:migration:apply",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"typecheck": "bun run --filter '*' typecheck",
@@ -44,8 +44,6 @@
 		"lefthook": "2.1.10",
 		"prettier": "3.9.6",
 		"tslib": "2.8.1",
-		"typescript": "6.0.3",
-		"dotenv": "17.4.2",
-		"drizzle-kit": "1.0.0-rc.4"
+		"typescript": "6.0.3"
 	}
 }

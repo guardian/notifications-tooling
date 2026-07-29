@@ -28,6 +28,8 @@ email-rendering and triggers the mapped Braze campaign.
 Drizzle schema lives in `src/apps/backend/db/schema.ts`, and generated SQL
 migrations are stored in `src/apps/backend/db/migrations`.
 
+The Drizzle config lives in `src/apps/backend/drizzle.config.ts`.
+
 Create a migration from your schema changes from the repo root:
 
 ```sh

@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 
+import { join } from 'node:path';
+
 const printUsage = (): void => {
 	console.error('Usage: bun run db:migration:create <migration-name>');
 	console.error('Example: bun run db:migration:create add_notification_status');
@@ -29,6 +31,8 @@ if (!migrationNamePattern.test(migrationName)) {
 	process.exit(1);
 }
 
+const backendDirectory = join(import.meta.dir, '..', 'src', 'apps', 'backend');
+const drizzleConfigPath = join(backendDirectory, 'drizzle.config.ts');
 const passthroughArgs = rawArgs.slice(1);
 const drizzleProcess = Bun.spawnSync(
 	[
@@ -37,11 +41,12 @@ const drizzleProcess = Bun.spawnSync(
 		'x',
 		'drizzle-kit',
 		'generate',
-		'--config=drizzle.config.ts',
+		`--config=${drizzleConfigPath}`,
 		`--name=${migrationName}`,
 		...passthroughArgs,
 	],
 	{
+		cwd: backendDirectory,
 		stdout: 'inherit',
 		stderr: 'inherit',
 		stdin: 'inherit',

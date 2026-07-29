@@ -8,7 +8,7 @@
 		"dev": "bun run --hot index.ts",
 		"build": "bun build app.ts --minify --outfile=dist/handler.js --target=node --format=cjs -e @aws-sdk/* --production",
 		"db:migration:create": "bun run ../../../scripts/create-db-migration.ts",
-		"db:migration:apply": "bun --bun x drizzle-kit migrate --config=../../../drizzle.config.ts",
+		"db:migration:apply": "bun --bun x drizzle-kit migrate --config=drizzle.config.ts",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit"
 	},
@@ -19,6 +19,7 @@
 		"@types/express": "5.0.6",
 		"@types/pg": "8.20.0",
 		"@types/swagger-ui-express": "4.1.8",
+		"dotenv": "17.4.2",
 		"drizzle-kit": "1.0.0-rc.4"
 	},
 	"dependencies": {
