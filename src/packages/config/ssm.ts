@@ -29,7 +29,13 @@ interface GetParameterResponse {
  */
 export const getSSMParameter = async (name: string): Promise<string> => {
 	if (env.STAGE === 'DEV') {
-		return Promise.resolve(process.env[`${name}`] ?? '');
+		const value = process.env[`${name}`];
+
+		if (!value) {
+			throw new Error(`SSM parameter "${name}" is not set in DEV environment.`);
+		}
+
+		return Promise.resolve(value);
 	}
 
 	const sessionToken = process.env.AWS_SESSION_TOKEN;
