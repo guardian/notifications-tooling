@@ -50,6 +50,7 @@ export const EmailFields = () => {
 				}}
 				selectionMode="single"
 				value={toOptionKey(kicker ?? 'undefined')}
+				id="kicker-section"
 			>
 				<Option id={toOptionKey('breaking-news')}>
 					{kickerNameMap['breaking-news']}
