@@ -56,8 +56,8 @@ const ParameterDisplay = ({
 	return (
 		<div css={styles.parameter}>
 			<Typography variant="bodyBoldMd">{keyName}:</Typography>
-			{keyName !== 'Audience' && <Typography>{value}</Typography>}
-			{keyName === 'Audience' && (
+			{keyName !== 'Audience segment' && <Typography>{value}</Typography>}
+			{keyName === 'Audience segment' && (
 				<AudienceSegmentsPreviewPill
 					segments={DEFAULT_SEGMENTS}
 					selected={value as AudienceSegment[]}
@@ -110,7 +110,7 @@ export const DispatchReport = () => {
 									}
 								/>
 								<ParameterDisplay
-									keyName="Audience"
+									keyName="Audience segment"
 									value={notification.parameters.audienceSegments ?? []}
 								/>
 								<ParameterDisplay

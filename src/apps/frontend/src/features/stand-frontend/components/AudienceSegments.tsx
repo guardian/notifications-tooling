@@ -52,6 +52,7 @@ const styles = {
 					? semanticColors.text.strongerInverse
 					: semanticColors.text.weak,
 			},
+			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 			padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 			borderRadius: semanticRadius.cornerSm,
 			display: 'flex',
@@ -160,7 +161,10 @@ export const AudienceSegmentsPreviewPill = ({
 							key={segmentCode}
 							css={
 								isConfirmation
-									? styles.audienceSegmentButton(false)
+									? {
+											...styles.audienceSegmentButton(false),
+											border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+										}
 									: styles.audienceSegmentButton(true)
 							}
 						>
@@ -170,7 +174,9 @@ export const AudienceSegmentsPreviewPill = ({
 							<Typography
 								variant="bodyBoldSm"
 								cssOverrides={css({
-									color: semanticColors.text.strongerInverse,
+									color: isConfirmation
+										? semanticColors.text.weak
+										: semanticColors.text.strongerInverse,
 								})}
 							>
 								{segmentLabel}
