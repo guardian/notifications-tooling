@@ -6,7 +6,9 @@ import express, {
 	type Request,
 	type Response,
 } from 'express';
-import { staticAssetsMiddleware } from './middleware/static-assets-middleware';
+import { clientAssetsDir } from './client-assets';
+import { authMiddleware } from './middleware/auth-middleware';
+import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
@@ -20,9 +22,27 @@ app.disable('x-powered-by');
 app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(staticAssetsMiddleware);
 
 app.use('/health', healthRouter);
+
+if (process.env.NODE_ENV !== 'test') {
+	app.use(authMiddleware);
+}
+
+const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+
+// Serve index.html with the current user injected as config. Handled before
+// express.static (which has index serving disabled below) so the un-injected
+// file is never served.
+app.get(['/', '/index.html'], serveIndex);
+
+app.use(
+	express.static(clientAssetsDir, {
+		index: false,
+		maxAge: oneYearInMs,
+		immutable: true,
+	}),
+);
 
 // Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
