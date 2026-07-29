@@ -6,7 +6,7 @@ const envSchema = z.object({
 		.default('development'),
 	STAGE: z.enum(['DEV', 'CODE', 'PROD']).default('DEV'),
 	HOST: z.string().default('0.0.0.0'),
-	PORT: z.coerce.number().int().positive().default(4000),
+	PORT: z.coerce.number().int().positive().default(3000),
 	LOG_LEVEL: z
 		.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
 		.optional(),
@@ -36,6 +36,12 @@ export const pandaSettingsFileName = ((): string => {
 			return 'gutools.co.uk.settings.public';
 	}
 })();
+
+/**
+ * The stage whose permissions cache bucket to read. The permissions cache is
+ * only published to the CODE and PROD buckets, so DEV reads the CODE cache.
+ */
+export const permissionsStoreStage = env.STAGE === 'PROD' ? 'PROD' : 'CODE';
 
 export * from './audiences';
 export * from './channels';
