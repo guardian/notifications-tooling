@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
+import { UserPermissions } from '@config';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { authMiddleware } from '../../middleware/auth-middleware';
+import { requirePermissions } from '../../middleware/permissions-middleware';
 import { dispatchNotification } from '../../notification-channels/dispatch-notification';
 import {
 	type NotificationSendRequest,
@@ -71,6 +73,7 @@ export const createNotificationsRouter = (
 	notificationsRouter.post(
 		'/',
 		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,

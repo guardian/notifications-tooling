@@ -28,6 +28,7 @@ export const notificationsPath = {
 				},
 			},
 			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
 			'400': {
 				description:
 					'The request body is structurally malformed (missing/mistyped fields, unknown channel, or unexpected keys).',

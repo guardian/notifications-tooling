@@ -2,6 +2,7 @@ import { acceptedNotificationSchema } from './accepted-notification';
 import { channelAudiencesSchema } from './channel-audiences';
 import { channelConstraintsSchema } from './channel-constraints';
 import { healthStatusSchema } from './health-status';
+import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
@@ -24,4 +25,5 @@ export const schemas = {
 	User: userSchema,
 	UserResponse: userResponseSchema,
 	Unauthenticated: unauthenticatedSchema,
+	InsufficientPermissions: insufficientPermissionsSchema,
 } as const;

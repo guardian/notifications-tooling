@@ -2,7 +2,7 @@ import { expect, mock } from 'bun:test';
 import type { User } from '@guardian/pan-domain-node';
 import type { CookieVerificationResult } from '../auth/pan-domain-authentication';
 
-export const testUser: User = {
+export const buildTestUser = (overrides: Partial<User> = {}): User => ({
 	firstName: 'Ada',
 	lastName: 'Lovelace',
 	email: 'ada.lovelace@guardian.co.uk',
@@ -11,7 +11,10 @@ export const testUser: User = {
 	authenticatedIn: ['notifications-tooling'],
 	expires: Date.now() + 60 * 60 * 1000,
 	multifactor: true,
-};
+	...overrides,
+});
+
+export const testUser: User = buildTestUser();
 
 export const verifyCookieMock = mock<
 	(cookieHeader?: string) => Promise<CookieVerificationResult>
