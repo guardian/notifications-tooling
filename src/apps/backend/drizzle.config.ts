@@ -1,5 +1,4 @@
 import { join } from 'node:path';
-
 import { config as loadDotenv } from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
 
