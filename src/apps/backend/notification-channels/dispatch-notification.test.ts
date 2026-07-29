@@ -289,7 +289,7 @@ describe('dispatchNotification', () => {
 		});
 	});
 
-	it('uses Dispatch no-reply defaults for test emails', async () => {
+	it('uses the configured Braze dev sender defaults for test emails', async () => {
 		const { dependencies, sendBrazeTestEmail } = createDependencies();
 		dependencies.environment.BRAZE_TEST_EMAIL_FROM = '';
 		dependencies.environment.BRAZE_TEST_EMAIL_REPLY_TO = '  ';
@@ -312,8 +312,8 @@ describe('dispatchNotification', () => {
 
 		expect(sendBrazeTestEmail).toHaveBeenCalledWith(
 			expect.objectContaining({
-				from: 'Dispatch <no-reply@theguardian.com>',
-				replyTo: 'NO_REPLY_TO',
+				from: 'dev testing <dev-testing@email.theguardian.com>',
+				replyTo: 'no-reply@editorial.theguardian.com',
 			}),
 		);
 	});

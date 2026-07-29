@@ -10,7 +10,7 @@ and populate them with the environment values.
 - `BRAZE_REST_ENDPOINT` is the Braze REST instance URL.
 - `BRAZE_APP_ID` identifies the Braze app used for direct test emails.
 - `BRAZE_TEST_EMAIL_FROM` is the approved sender used for direct test emails. It
-  defaults to `Dispatch <no-reply@theguardian.com>`.
+  defaults to `dev testing <dev-testing@email.theguardian.com>`.
 - `BRAZE_TEST_EMAIL_REPLY_TO` is an email address or Braze's `NO_REPLY_TO`
   sentinel. It defaults to `NO_REPLY_TO`, which omits the Reply-To header.
 - `EMAIL_RENDERING_ENDPOINT` is the base URL of the email-rendering service.

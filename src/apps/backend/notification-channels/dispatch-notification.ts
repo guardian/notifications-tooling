@@ -28,11 +28,17 @@ const testEmailEnvironmentSchema = z.object({
 	BRAZE_APP_ID: z.string().trim().min(1),
 	BRAZE_TEST_EMAIL_FROM: z.preprocess(
 		(value) => (typeof value === 'string' && !value.trim() ? undefined : value),
-		z.string().trim().min(1).default('Dispatch <no-reply@theguardian.com>'),
+		z
+			.string()
+			.trim()
+			.min(1)
+			.default('dev testing <dev-testing@email.theguardian.com>'),
 	),
 	BRAZE_TEST_EMAIL_REPLY_TO: z.preprocess(
 		(value) => (typeof value === 'string' && !value.trim() ? undefined : value),
-		z.union([z.email(), z.literal('NO_REPLY_TO')]).default('NO_REPLY_TO'),
+		z
+			.union([z.email(), z.literal('NO_REPLY_TO')])
+			.default('no-reply@editorial.theguardian.com'),
 	),
 });
 
