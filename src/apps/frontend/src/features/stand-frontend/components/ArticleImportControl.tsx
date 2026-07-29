@@ -6,6 +6,7 @@ import { TextInput } from '@guardian/stand/TextInput';
 import { useContext } from 'react';
 import { parseArticleUrlInputToContentId } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
+import { ArticlePreviewBox } from './ArticlePreviewBox';
 import { LoadingSpinner } from './LoadingSpinner';
 
 export const ArticleImportControl = () => {
@@ -106,6 +107,10 @@ export const ArticleImportControl = () => {
 					<InlineMessage level="error">{fetchArticleError}</InlineMessage>
 				)}
 			</div>
+
+			{!isFetchingContent &&
+				fetchedArticleId &&
+				fetchedArticleId === articleId && <ArticlePreviewBox />}
 		</div>
 	);
 };

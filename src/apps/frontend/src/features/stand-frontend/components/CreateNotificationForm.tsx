@@ -16,6 +16,7 @@ export const CreateNotificationForm = () => {
 		<div
 			css={{
 				marginTop: semanticSpacing.stackXl,
+				marginBottom: semanticSpacing.stackXl,
 				display: 'flex',
 				flexDirection: 'column',
 				width: '720px',
