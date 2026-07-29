@@ -5,6 +5,9 @@ import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
 import type { EmailNotification } from '../types';
 
+// TO DO - this function will work with the current format of the notifcation emails
+// but we shoudl modidify the template used in email-rendering to include attributes
+// to more robustly identify the elements to update
 const modifyContent = (
 	emailHtml: string,
 	parameters?: EmailNotification,
@@ -19,9 +22,7 @@ const modifyContent = (
 			'div:first-child',
 		);
 	const previewElement =
-		headlineElement?.parentElement?.querySelector<HTMLElement>(
-			'h2~div',
-		);
+		headlineElement?.parentElement?.querySelector<HTMLElement>('h2~div');
 
 	if (subject && headlineElement) {
 		headlineElement.innerText = subject;
@@ -32,6 +33,9 @@ const modifyContent = (
 	if (preview && previewElement) {
 		previewElement.innerText = preview;
 	}
+	Array.from(body.querySelectorAll('a')).forEach((link) =>
+		link.removeAttribute('href'),
+	);
 
 	return body.innerHTML;
 };
