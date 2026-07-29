@@ -6,9 +6,7 @@
 	"scripts": {
 		"start": "bun run --hot index.ts",
 		"dev": "bun run --hot index.ts",
-		"build": "bun build index.ts --outfile=dist/index.js --target=bun",
-		"placeholder": "bun run --hot handler.ts",
-		"build:placeholder": "bun build handler.ts --outfile=dist/handler.js --target=node --format=cjs",
+		"build": "bun build app.ts --minify --outfile=dist/handler.js --target=node --format=cjs -e @aws-sdk/* --production",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit"
 	},
@@ -20,9 +18,11 @@
 		"@types/swagger-ui-express": "4.1.8"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "3.1093.0",
 		"@aws-sdk/credential-providers": "3.1093.0",
 		"@config": "workspace:*",
 		"@guardian/pan-domain-node": "1.2.5",
+		"@guardian/permissions-client": "0.0.2",
 		"@http-logger": "workspace:*",
 		"@utils": "workspace:*",
 		"express": "5.2.1",

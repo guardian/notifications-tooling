@@ -3,7 +3,8 @@ export const userPath = {
 	get: {
 		summary: 'Retrieve the authenticated user',
 		description:
-			'Returns the authenticated user (under `user`) and their permissions. Currently a mock returning a sample user and permissions until pan-domain-node verification and the permissions store are integrated.',
+			'Returns the authenticated user (under `user`), decoded from the pan-domain cookie, and their permissions resolved from the Guardian permissions store.',
+		security: [{ pandaCookie: [] }],
 		responses: {
 			'200': {
 				description: 'The authenticated user and their permissions.',
@@ -13,6 +14,7 @@ export const userPath = {
 					},
 				},
 			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
 		},
 	},
 } as const;

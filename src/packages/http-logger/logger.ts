@@ -2,6 +2,8 @@ import { env } from '@config';
 import pino from 'pino';
 
 const isProduction = env.NODE_ENV === 'production';
+const isRunningInLambda = Boolean(process.env.LAMBDA_TASK_ROOT);
+const usePrettyLogging = !isProduction && !isRunningInLambda;
 
 // Redact secrets from logs. Covers both pino-http's req/res serializer shapes
 // and plain objects.
@@ -35,14 +37,14 @@ export const logger = pino({
 		censor: '[REDACTED]',
 	},
 	// Pretty, colorized output in development; structured JSON in production.
-	transport: isProduction
-		? undefined
-		: {
+	transport: usePrettyLogging
+		? {
 				target: 'pino-pretty',
 				options: {
 					colorize: true,
 					translateTime: 'SYS:HH:MM:ss.l',
 					ignore: 'pid,hostname',
 				},
-			},
+			}
+		: undefined,
 });

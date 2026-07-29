@@ -1,43 +1,64 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { emailDeliveryOptionNameMap } from '../option-values';
+import type { ChannelOption } from '../types';
+import { type EmailDeliveryOption } from '../types';
 import { SelectableTile } from './SelectableTile';
 
 interface DeliveryAndTimingSelectorProps {
-	selectedDeliveryTiming?: string;
-	onChange: (deliveryTiming?: string) => void;
+	selectedDeliveryTiming?: EmailDeliveryOption;
+	onChange: (deliveryTiming?: EmailDeliveryOption) => void;
+	channel: ChannelOption;
 }
+
+const channelDescriptions = {
+	email: 'email newsletter',
+	push: 'app alert',
+};
 
 export const DeliveryAndTimingSelector = ({
 	selectedDeliveryTiming,
 	onChange,
+	channel,
 }: DeliveryAndTimingSelectorProps) => {
 	return (
-		<>
-			<div
+		<div
+			css={{
+				display: 'flex',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackXs,
+			}}
+		>
+			<Typography variant="bodyBoldMd">Delivery and timing</Typography>
+			<Typography
+				variant="bodySm"
 				css={{
-					display: 'flex',
-					flexDirection: 'column',
-					gap: semanticSpacing.stackXs,
+					color: semanticColors.text.weak,
 				}}
 			>
-				<Typography variant="bodyBoldMd">Delivery and timing</Typography>
-				<Typography
-					variant="bodySm"
-					css={{
-						color: semanticColors.text.weak,
-					}}
-				>
-					Choose whether the app alert is sent immediately or scheduled for a
-					later
-				</Typography>
-				<SelectableTile
-					tileLabel={'Immediate'}
-					tileDescription={'Send right now via Braze'}
-					tileSymbol={'bolt'}
-					selectedValue={selectedDeliveryTiming}
-					onChange={onChange}
-				/>
-			</div>
-		</>
+				Choose whether the {channelDescriptions[channel]} is sent immediately or
+				scheduled for a later
+			</Typography>
+
+			{Object.entries(emailDeliveryOptionNameMap).map(
+				([emailDeliveryOption, { name, description, symbol }]) => (
+					<SelectableTile
+						key={emailDeliveryOption}
+						tileLabel={name}
+						tileValue={emailDeliveryOption}
+						tileDescription={description}
+						tileSymbol={symbol}
+						selectedValue={selectedDeliveryTiming}
+						onChange={(selected) => {
+							switch (selected) {
+								case 'immediate':
+									onChange(selected);
+									break;
+							}
+						}}
+					/>
+				),
+			)}
+		</div>
 	);
 };
