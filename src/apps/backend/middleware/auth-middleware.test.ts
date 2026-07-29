@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test';
-import type { User } from '@guardian/pan-domain-node';
 import type { Request, Response } from 'express';
 import type { CookieVerificationResult } from '../utils/auth/pan-domain-authentication';
+import { buildTestUser } from '../utils/test-utils/panda-auth';
 
 const verifyCookie = mock<
 	(cookieHeader?: string) => Promise<CookieVerificationResult>
@@ -13,15 +13,7 @@ await mock.module('../utils/auth/pan-domain-authentication', () => ({
 
 const { authMiddleware } = await import('./auth-middleware');
 
-const sampleUser: User = {
-	firstName: 'Ada',
-	lastName: 'Lovelace',
-	email: 'ada.lovelace@guardian.co.uk',
-	authenticatingSystem: 'notifications-tooling',
-	authenticatedIn: ['notifications-tooling'],
-	expires: Date.now() + 60 * 60 * 1000,
-	multifactor: true,
-};
+const sampleUser = buildTestUser();
 
 const mockNextFunction = mock(() => undefined);
 
