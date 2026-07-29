@@ -50,8 +50,5 @@ export const serveIndex: RequestHandler = (_req: Request, res: Response) => {
 	)};</script>`;
 	const html = readIndexTemplate().replace(configPlaceholder, script);
 
-	res.status(200)
-		.type('html')
-		.set('Cache-Control', 'no-cache')
-		.send(html);
+	res.status(200).type('html').set('Cache-Control', 'no-cache').send(html);
 };

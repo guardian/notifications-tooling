@@ -10,7 +10,7 @@ declare global {
 	}
 }
 
-export const getUser = async (): Promise<UserResponse> => {
+export const getUser = (): UserResponse => {
 	const config = window.__APP_CONFIG__;
 	if (!config) {
 		throw new Error('window.__APP_CONFIG__ was not injected into the page');
