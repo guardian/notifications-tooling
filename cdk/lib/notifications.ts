@@ -7,6 +7,7 @@ import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Architecture, LayerVersion } from 'aws-cdk-lib/aws-lambda';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 const PAN_DOMAIN_AUTH_SETTINGS_BUCKET = 'pan-domain-auth-settings';
@@ -31,6 +32,7 @@ export class DispatchStack extends GuStack {
 					}
 				: { noMonitoring: true },
 			app,
+			architecture: Architecture.ARM_64,
 			api: {
 				id: `${app}-api`,
 				description:
@@ -40,6 +42,14 @@ export class DispatchStack extends GuStack {
 					'app and email notification APIs.',
 			},
 			reservedConcurrentExecutions: 10,
+			layers: [
+				LayerVersion.fromLayerVersionArn(
+					this,
+					'ParametersAndSecretsLayer',
+					// Get the ARN from https://docs.aws.amazon.com/systems-manager/latest/userguide/ps-integration-lambda-extensions.html
+					'arn:aws:lambda:eu-west-1:015030872274:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:96',
+				),
+			],
 		});
 
 		const domain = guApiLambda.api.addDomainName(`${app}-domain`, {
