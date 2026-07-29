@@ -3,11 +3,11 @@ import type { Request, Response } from 'express';
 import { healthHandler } from './index';
 
 describe('health handler', () => {
-	it('responds with status ok and a numeric uptime', () => {
+	it('responds with status ok and a numeric uptime', async () => {
 		const json = mock<(body: unknown) => void>(() => {});
 		const res = { json } as unknown as Response;
 
-		healthHandler({} as Request, res);
+		await healthHandler({} as Request, res);
 
 		expect(json).toHaveBeenCalledTimes(1);
 
