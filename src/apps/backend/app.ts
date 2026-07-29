@@ -9,6 +9,7 @@ import express, {
 } from 'express';
 import { clientAssetsDir } from './client-assets';
 import { authMiddleware } from './middleware/auth-middleware';
+import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
@@ -31,15 +32,16 @@ if (env.NODE_ENV !== 'test') {
 	app.use(authMiddleware);
 }
 
+// Serve index.html with the current user injected as config. Handled before
+// express.static (which has index serving disabled below) so the un-injected
+// file is never served.
+app.get(['/', '/index.html'], serveIndex);
+
 app.use(
 	express.static(clientAssetsDir, {
+		index: false,
 		maxAge: oneYearInMs,
 		immutable: true,
-		setHeaders: (res, filePath) => {
-			if (filePath.endsWith('index.html')) {
-				res.setHeader('Cache-Control', 'no-cache');
-			}
-		},
 	}),
 );
 
