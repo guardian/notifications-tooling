@@ -27,7 +27,11 @@ interface GetParameterResponse {
  * @param name The parameter name, relative to the app namespace.
  * @returns The decrypted parameter value.
  */
-export const getParameter = async (name: string): Promise<string> => {
+export const getSSMParameter = async (name: string): Promise<string> => {
+	if (env.STAGE === 'DEV') {
+		return Promise.resolve(process.env[`${name}`] ?? '');
+	}
+
 	const sessionToken = process.env.AWS_SESSION_TOKEN;
 	if (!sessionToken) {
 		throw new Error(
