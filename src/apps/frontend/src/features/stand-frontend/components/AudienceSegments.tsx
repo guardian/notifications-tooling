@@ -61,10 +61,7 @@ const styles = {
 			height: '32px',
 		}),
 	audienceSegmentIcon: css({
-		borderTop: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
-		borderRight: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
-		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		borderLeft: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 		width: '24px',
 		height: '18px',
 		gap: `${baseSpacing['8Px']}`,
