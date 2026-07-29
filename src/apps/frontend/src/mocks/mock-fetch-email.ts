@@ -14,8 +14,15 @@ export const mockRequestEmailHtml: RequestEmailHtml = (articleId, options) => {
 <body>
     <table>
         <tbody>
-            <tr><td><h1>${articleId}</h1></td></tr>
-            <tr><td>this is a sample email response for ${articleId}</td></tr>
+            <tr><td>
+            <div>
+                <div>kicker</div>
+                <h2>headline</h2>
+                <div>preview text</div>
+            <div>
+            </td></tr>
+            <tr><td><hr/></td></tr>
+            <tr><td>${articleId}</td></tr>
             <tr><td>${JSON.stringify(options)}</td></tr>
         </tbody>
     </table>
