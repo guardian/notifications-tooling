@@ -3,7 +3,10 @@ import { UserPermissions } from '@config';
 import { listUserPermissions } from '../utils/permissions/permissions-store';
 
 function respondWithInsufficientPermissions(response: Response) {
-	return response.status(403).json({ message: 'Insufficient permissions' });
+	return response.status(403).json({
+		error: 'insufficient_permissions',
+		message: 'You do not have permission to access this resource.',
+	});
 }
 
 export const requirePermissions =

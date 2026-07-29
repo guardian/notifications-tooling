@@ -59,7 +59,10 @@ describe('permissions-middleware', () => {
 
 		expect(status).toHaveBeenCalledTimes(1);
 		expect(status).toHaveBeenCalledWith(403);
-		expect(json).toHaveBeenCalledWith({ message: 'Insufficient permissions' });
+		expect(json).toHaveBeenCalledWith({
+			error: 'insufficient_permissions',
+			message: 'You do not have permission to access this resource.',
+		});
 		expect(listUserPermissionsMock).not.toHaveBeenCalled();
 		expect(mockNextFunction).not.toHaveBeenCalled();
 	});
@@ -78,7 +81,10 @@ describe('permissions-middleware', () => {
 		expect(listUserPermissionsMock).toHaveBeenCalledWith(testUser.email);
 		expect(status).toHaveBeenCalledTimes(1);
 		expect(status).toHaveBeenCalledWith(403);
-		expect(json).toHaveBeenCalledWith({ message: 'Insufficient permissions' });
+		expect(json).toHaveBeenCalledWith({
+			error: 'insufficient_permissions',
+			message: 'You do not have permission to access this resource.',
+		});
 		expect(mockNextFunction).not.toHaveBeenCalled();
 	});
 
