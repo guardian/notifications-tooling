@@ -42,12 +42,10 @@ export const assertInsufficientPermissionsRequestBlocked = async (
 	const response = await fetch(`${baseUrl}${path}`, {
 		method,
 		redirect: 'manual',
-		...(body === undefined
-			? {}
-			: {
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify(body),
-				}),
+		...(body ?? {
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify(body),
+		}),
 	});
 
 	expect(response.status).toBe(403);
