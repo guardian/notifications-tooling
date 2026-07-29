@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { UserPermissions } from '@config';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
+import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
 import { dispatchNotification } from '../../notification-channels/dispatch-notification';
@@ -56,11 +57,13 @@ export const handleValidationErrors: ErrorRequestHandler = (
 	);
 
 	res.status(isStructural ? 400 : 422).json({
-		error: isStructural ? 'bad_request' : 'validation_failed',
-		message: isStructural
-			? 'The request body is malformed.'
-			: 'The notification request failed validation. See details.',
-		requestId: (req as { id?: string }).id,
+		...buildErrorEnvelope(
+			req,
+			isStructural ? 'bad_request' : 'validation_failed',
+			isStructural
+				? 'The request body is malformed.'
+				: 'The notification request failed validation. See details.',
+		),
 		details,
 	});
 };
