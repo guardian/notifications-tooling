@@ -1,6 +1,6 @@
 import { env } from '@config';
 import type { NextFunction, Request, Response } from 'express';
-import { isCookieValid } from '../auth/pan-domain-authentication';
+import { verifyCookie } from '../utils/auth/pan-domain-authentication';
 
 const loginHostLookup = () => {
 	switch (env.STAGE) {
@@ -18,13 +18,20 @@ export const authMiddleware = async (
 	response: Response,
 	next: NextFunction,
 ) => {
-	const validCookie = await isCookieValid(request.header('Cookie'));
-	if (validCookie) {
+	const result = await verifyCookie(request.header('Cookie'));
+	if (result.success) {
+		request.user = result.user;
 		return next();
 	}
 
 	const returnUrl = `https://${request.hostname}${request.originalUrl}`;
-	const redirectTo = `https://${loginHostLookup()}/login?returnUrl=${returnUrl}`;
+	const loginUrl = new URL('/login', `https://${loginHostLookup()}`);
 
-	return response.redirect(redirectTo);
+	loginUrl.searchParams.set('returnUrl', returnUrl);
+
+	return response.status(401).json({
+		error: 'unauthenticated',
+		message: 'Authentication is required to access this resource.',
+		loginUrl: loginUrl.toString(),
+	});
 };
