@@ -1,13 +1,13 @@
-import { env, isRunningLocally, UserPermissions } from '@config';
+import {
+	isRunningLocally,
+	permissionsStoreStage,
+	UserPermissions,
+} from '@config';
 import { init } from '@guardian/permissions-client';
 
 // Only permissions on this whitelist are exposed to users; anything else the
 // store returns is filtered out.
 const whitelistedPermissions = new Set<string>(Object.values(UserPermissions));
-
-// The permissions cache is only published to the CODE and PROD buckets; DEV
-// reads the CODE cache.
-const permissionsStoreStage = env.STAGE === 'PROD' ? 'PROD' : 'CODE';
 
 // Constructed lazily so merely importing this module (e.g. when the app is
 // loaded) does not build an S3 client or eagerly fetch the cache — `init`

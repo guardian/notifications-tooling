@@ -37,6 +37,12 @@ export const pandaSettingsFileName = ((): string => {
 	}
 })();
 
+/**
+ * The stage whose permissions cache bucket to read. The permissions cache is
+ * only published to the CODE and PROD buckets, so DEV reads the CODE cache.
+ */
+export const permissionsStoreStage = env.STAGE === 'PROD' ? 'PROD' : 'CODE';
+
 export * from './audiences';
 export * from './channels';
 export * from './permissions';
