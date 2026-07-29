@@ -1,7 +1,11 @@
 import { QueryClient } from '@tanstack/react-query';
 import { ApiError } from './errors';
 
-/** Queries retry network/timeout errors and 5xx responses; everything else (4xx, schema drift) is not transient. */
+/**
+ * Queries retry network/timeout errors and 5xx responses. Everything else —
+ * 4xx, schema drift, and an expired session — is not transient. Keep this a
+ * whitelist: adding a failure variant must not make it retryable by default.
+ */
 const isRetryableQueryFailure = (error: unknown): boolean => {
 	if (!(error instanceof ApiError)) {
 		return false;

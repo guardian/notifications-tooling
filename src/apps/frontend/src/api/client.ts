@@ -1,8 +1,23 @@
 import type { z } from 'zod';
 import { getApiBaseUrl } from './config';
-import { ApiError } from './errors';
+import { ApiError, apiErrorEnvelopeSchema } from './errors';
+import { redirectToLogin } from './redirectToLogin';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+
+/**
+ * Reads the shared error envelope off a non-2xx response, or `undefined` if the
+ * body is missing, unparseable, or some other shape. A failure to understand
+ * the error body must never mask the underlying failure.
+ */
+const readErrorEnvelope = async (response: Response) => {
+	try {
+		const parsed = apiErrorEnvelopeSchema.safeParse(await response.json());
+		return parsed.success ? parsed.data : undefined;
+	} catch {
+		return undefined;
+	}
+};
 
 interface FetchJsonAndParseInit extends RequestInit {
 	/** Overrides the default 10s timeout. Ignored if `signal` is also passed. */
@@ -46,10 +61,52 @@ export async function fetchJsonAndParse<Schema extends z.ZodType>(
 	}
 
 	if (!response.ok) {
+		const envelope = await readErrorEnvelope(response);
+
+		if (response.status === 401) {
+			// The backend tells us where to sign in so the stage-to-login-host
+			// mapping lives in exactly one place.
+			if (envelope?.loginUrl) {
+				redirectToLogin(envelope.loginUrl);
+			}
+			throw new ApiError({
+				message:
+					envelope?.message ?? `Request to ${path} was not authenticated`,
+				failure: 'unauthenticated',
+				status: response.status,
+				requestId: envelope?.requestId,
+			});
+		}
+
+		if (response.status === 403) {
+			// Authenticated but not permitted. Deliberately not a login redirect:
+			// the cookie is valid, so bouncing through login would loop.
+			throw new ApiError({
+				message:
+					envelope?.message ??
+					`Request to ${path} was not permitted for this user`,
+				failure: 'forbidden',
+				status: response.status,
+				requestId: envelope?.requestId,
+			});
+		}
+
+		if (envelope?.details?.length) {
+			// Per-field problems are diagnostic, not user-facing: the backend
+			// validates against the validation cap rather than the editorial
+			// limit, so reaching one means a client bug. Logged loudly here so
+			// it is visible without building a per-field rendering layer.
+			console.error(`Validation details for ${path}:`, envelope.details);
+		}
+
 		throw new ApiError({
-			message: `Request to ${path} responded with ${response.status}`,
+			message:
+				envelope?.message ??
+				`Request to ${path} responded with ${response.status}`,
 			failure: 'non-2xx-response',
 			status: response.status,
+			details: envelope?.details,
+			requestId: envelope?.requestId,
 		});
 	}
 
@@ -67,7 +124,7 @@ export async function fetchJsonAndParse<Schema extends z.ZodType>(
 
 	const result = schema.safeParse(json);
 	if (!result.success) {
-		// Loud early warning of backend contract drift (see Decision 10 in the plan).
+		// Loud early warning of backend contract drift.
 		console.error(`Schema parse failed for ${path}:`, result.error);
 		throw new ApiError({
 			message: `Response from ${path} did not match the expected schema`,
