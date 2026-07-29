@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'bun:test';
 import {
-	previewRequestSchema,
-	previewResponseSchema,
 	type SendNotificationRequest,
 	sendNotificationRequestSchema,
 	sendNotificationResponseSchema,
@@ -9,8 +7,6 @@ import {
 
 const validEnvelope: SendNotificationRequest = {
 	idempotencyKey: '11111111-1111-4111-8111-111111111111',
-	category: 'editorial',
-	priority: 'standard',
 	content: {
 		items: {
 			'lead-story': {
@@ -67,22 +63,5 @@ describe('sendNotificationResponseSchema', () => {
 		};
 
 		expect(sendNotificationResponseSchema.parse(response)).toEqual(response);
-	});
-});
-
-describe('previewRequestSchema / previewResponseSchema', () => {
-	it('parses a preview request and its { html } response', () => {
-		const request = {
-			articleUrl:
-				'https://www.theguardian.com/world/2026/jul/22/example-article',
-			kicker: 'exclusive' as const,
-			subject: 'Subject',
-			previewText: 'Preview',
-		};
-
-		expect(previewRequestSchema.parse(request)).toEqual(request);
-		expect(previewResponseSchema.parse({ html: '<p>Hi</p>' })).toEqual({
-			html: '<p>Hi</p>',
-		});
 	});
 });

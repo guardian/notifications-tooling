@@ -19,7 +19,6 @@
 		"@guardian/stand": "0.0.63",
 		"@models": "workspace:*",
 		"@tanstack/react-query": "5.101.4",
-		"msw": "2.15.0",
 		"react": "19.2.8",
 		"react-aria-components": "1.19.0",
 		"react-dom": "19.2.8",
@@ -36,7 +35,10 @@
 		"storybook": "10.5.4",
 		"vitest": "4.1.10",
 		"playwright": "1.62.0",
+		"@happy-dom/global-registrator": "20.11.1",
 		"@vitest/browser-playwright": "4.1.10",
-		"@vitest/coverage-v8": "4.1.10"
+		"@vitest/coverage-v8": "4.1.10",
+		"msw": "2.15.0",
+		"msw-storybook-addon": "3.0.0"
 	}
 }

@@ -1,20 +1,12 @@
 import { z } from 'zod';
 
 /**
- * Presentation-only kicker choice from `CreateNotificationForm`. Not
- * repurposed as `category` (see Decision 12 in the plan).
+ * Presentation-only kicker choice from `CreateNotificationForm`. The backend
+ * contract has no field to carry it, so the request builder drops it; see
+ * CONTEXT.md.
  */
 export const kickerSchema = z.enum(['breaking-news', 'exclusive', 'none']);
 export type Kicker = z.infer<typeof kickerSchema>;
-
-export const CATEGORY = 'editorial';
-
-const composeSchema = z.object({
-	articleUrl: z.string(),
-	kicker: kickerSchema,
-	subject: z.string(),
-	previewText: z.string(),
-});
 
 const newsletterContentItemSchema = z.strictObject({
 	type: z.literal('newsletter'),
@@ -25,8 +17,6 @@ const newsletterContentItemSchema = z.strictObject({
 
 export const sendNotificationRequestSchema = z.strictObject({
 	idempotencyKey: z.string(),
-	category: z.literal(CATEGORY),
-	priority: z.literal('standard'),
 	content: z.strictObject({
 		items: z.record(z.string(), newsletterContentItemSchema),
 	}),
@@ -52,6 +42,63 @@ export type SendNotificationRequest = z.infer<
 	typeof sendNotificationRequestSchema
 >;
 
+/**
+ * The three limits that apply to one text field. Hand-written to mirror
+ * `@config`'s `ContentFieldLimits` rather than imported from it: the frontend
+ * ships to a browser and must not take a dependency on a backend workspace.
+ * `channels.contract.test.ts` in the backend guards the two against drift.
+ *
+ * The UI drives its counters from `recommended` and `editorialLimit` only.
+ * `validationCap` is the length the broker rejects past — wiring it to a
+ * counter would erase the editorial guidance the counter exists to show.
+ */
+const contentFieldLimitsSchema = z.object({
+	recommended: z.number(),
+	editorialLimit: z.number(),
+	validationCap: z.number(),
+});
+export type ContentFieldLimits = z.infer<typeof contentFieldLimitsSchema>;
+
+const channelContentLimitsSchema = z.object({
+	title: contentFieldLimitsSchema,
+	body: contentFieldLimitsSchema,
+});
+
+/**
+ * `GET /v1/channels/constraints`. Non-strict throughout, so the backend can add
+ * a channel, a field, or an audience cap without breaking a deployed SPA — the
+ * client only fails on something it asked for going missing or changing type.
+ */
+export const channelConstraintsResponseSchema = z.object({
+	channels: z.object({
+		newsletter: z.object({
+			content: channelContentLimitsSchema,
+			compose: z.object({
+				minItems: z.number().int().nonnegative(),
+				maxItems: z.number().int().positive(),
+				subject: contentFieldLimitsSchema,
+			}),
+			audience: z.object({
+				maxSegments: z.number().int().positive(),
+				maxTestRecipients: z.number().int().positive(),
+			}),
+		}),
+		'app-push': z.object({
+			content: channelContentLimitsSchema,
+			compose: z.object({
+				minItems: z.number().int().nonnegative(),
+				maxItems: z.number().int().positive(),
+			}),
+			audience: z.object({
+				maxSegments: z.number().int().positive(),
+			}),
+		}),
+	}),
+});
+export type ChannelConstraintsResponse = z.infer<
+	typeof channelConstraintsResponseSchema
+>;
+
 export const sendNotificationResponseSchema = z.strictObject({
 	notificationId: z.string(),
 	status: z.literal('accepted'),
@@ -71,11 +118,3 @@ export const sendNotificationResponseSchema = z.strictObject({
 export type SendNotificationResponse = z.infer<
 	typeof sendNotificationResponseSchema
 >;
-
-/** Request body for the mocked preview/render endpoint. */
-export const previewRequestSchema = composeSchema;
-export type PreviewRequest = z.infer<typeof previewRequestSchema>;
-
-/** `HtmlPreviewLoader.fetchHtml` expects this shape from the JSON client. */
-export const previewResponseSchema = z.object({ html: z.string() });
-export type PreviewResponse = z.infer<typeof previewResponseSchema>;

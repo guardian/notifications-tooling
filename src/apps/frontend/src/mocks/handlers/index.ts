@@ -1,13 +1,13 @@
 import type { RequestHandler } from 'msw';
+import { channelHandlers } from './channels';
 import { notificationHandlers } from './notifications';
-import { previewHandlers } from './preview';
 
 /**
- * All feature handlers, shared by `browser.ts` and `server.ts` so dev,
- * Storybook and `bun test` mock the same contract; cutover to a real
- * backend is deleting entries here (see docs/frontend-api-layer/plan.md).
+ * All feature handlers, shared by `bun test` (`server.ts`) and Storybook. The
+ * browser worker was removed once the SPA started calling the real backend, so
+ * these mock the contract for tests and stories only.
  */
 export const handlers: RequestHandler[] = [
+	...channelHandlers,
 	...notificationHandlers,
-	...previewHandlers,
 ];
