@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto';
+import { UserPermissions } from '@config';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { authMiddleware } from '../../middleware/auth-middleware';
+import { requirePermissions } from '../../middleware/permissions-middleware';
 import { dispatchNotification } from '../../notification-channels/dispatch-notification';
 import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
 } from './schemas/notification-send-request';
-import { requirePermissions } from '../../middleware/permissions-middleware';
-import { UserPermissions } from '@config';
 
 /** How long (seconds) an accepted notification may still be cancelled. */
 const CANCELLATION_WINDOW_SECONDS = 5 * 60;
