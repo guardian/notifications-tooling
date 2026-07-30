@@ -20,29 +20,6 @@ import {
 	SideNavigationPanel,
 } from './SideNavigationPanel';
 
-const getActiveSideNavHref = (): string => {
-	if (typeof window === 'undefined') {
-		return DEFAULT_SIDE_NAV_HREF;
-	}
-	let activeHref = DEFAULT_SIDE_NAV_HREF;
-
-	for (const item of SIDE_NAVIGATION_PANEL_ITEMS) {
-		const section = document.getElementById(item.trackedSectionId);
-		if (!section) {
-			continue;
-		}
-
-		const activationOffset = Math.min(20, window.innerHeight * 0.2);
-		const triggerLine = window.innerHeight - activationOffset;
-
-		const { top } = section.getBoundingClientRect();
-		if (top <= triggerLine) {
-			activeHref = item.href;
-		}
-	}
-	return activeHref;
-};
-
 export const DispatchTab = () => {
 	const {
 		notification: { sendingResult, parameters },
@@ -55,21 +32,30 @@ export const DispatchTab = () => {
 			return;
 		}
 
-		const updateSelectedHref = () => {
-			setSelectedHref((currentHref) => {
-				const nextHref = getActiveSideNavHref();
-				return nextHref === currentHref ? currentHref : nextHref;
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach((entry) => {
+				const id = entry.target.getAttribute('id');
+				if (entry.isIntersecting && id) {
+					const selectedHref = `#${id}`;
+					if (
+						SIDE_NAVIGATION_PANEL_ITEMS.some(
+							(item) => item.href === selectedHref,
+						)
+					) {
+						setSelectedHref(selectedHref);
+					}
+				}
 			});
-		};
+		});
 
-		updateSelectedHref();
-		window.addEventListener('scroll', updateSelectedHref, { passive: true });
-		window.addEventListener('resize', updateSelectedHref);
+		SIDE_NAVIGATION_PANEL_ITEMS.forEach((item) => {
+			const el = document.getElementById(item.trackedSectionId);
+			if (el) {
+				observer.observe(el);
+			}
+		});
 
-		return () => {
-			window.removeEventListener('scroll', updateSelectedHref);
-			window.removeEventListener('resize', updateSelectedHref);
-		};
+		// return () => observer.disconnect();
 	}, [sendingResult]);
 
 	return (

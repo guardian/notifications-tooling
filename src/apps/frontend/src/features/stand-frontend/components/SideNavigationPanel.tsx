@@ -8,47 +8,51 @@ interface SideNavigationPanelTileProps {
 	title: string;
 	tileNumber: number;
 	href: string;
+	trackedSectionId: string;
 	isSelected: boolean;
 	onPress: () => void;
 }
 
-export interface SideNavigationPanelItem {
-	title: string;
-	tileNumber: number;
-	href: string;
-	trackedSectionId: string;
-}
-
-export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelItem[] = [
+export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 	{
 		tileNumber: 1,
 		title: 'Article and channel',
 		href: '#article-section',
 		trackedSectionId: 'article-section',
+		isSelected: true,
+		onPress: () => {},
 	},
 	{
 		tileNumber: 2,
 		title: 'Content',
 		href: '#kicker-section',
 		trackedSectionId: 'kicker-section',
+		isSelected: false,
+		onPress: () => {},
 	},
 	{
 		tileNumber: 3,
 		title: 'Audience',
 		href: '#audience-section',
 		trackedSectionId: 'audience-section',
+		isSelected: false,
+		onPress: () => {},
 	},
 	{
 		tileNumber: 4,
 		title: 'Timing and Delivery',
 		href: '#delivery-timing-section',
 		trackedSectionId: 'delivery-timing-section',
+		isSelected: false,
+		onPress: () => {},
 	},
 	{
 		tileNumber: 5,
 		title: 'Send',
 		href: '#send-button-section',
 		trackedSectionId: 'send-button-section',
+		isSelected: false,
+		onPress: () => {},
 	},
 ];
 
