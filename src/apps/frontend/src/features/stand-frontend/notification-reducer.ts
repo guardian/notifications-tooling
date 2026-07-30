@@ -63,7 +63,6 @@ export const notificationReducer = (
 		case 'waiting-for-article':
 			return {
 				...state,
-				fetchedArticleId: state.articleInputText,
 				isFetchingContent: true,
 				fetchArticleError: undefined,
 			};
