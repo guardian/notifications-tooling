@@ -4,6 +4,7 @@ import { createContext } from 'react';
 import type {
 	NotificationAction,
 	NotificationState,
+	RequestEmailHtml,
 	SendingResult,
 } from './types';
 
@@ -16,6 +17,7 @@ export const NotificationFormContext = createContext<{
 	sendNotification: {
 		(notification: NotificationState): Promise<SendingResult>;
 	};
+	requestEmailHtml: RequestEmailHtml;
 }>({
 	notification: {
 		isFetchingContent: false,
@@ -27,4 +29,6 @@ export const NotificationFormContext = createContext<{
 		Promise.reject(new Error('no capiFetch implementation provided')),
 	sendNotification: () =>
 		Promise.reject(new Error('no sendNotification implementation provided')),
+	requestEmailHtml: () =>
+		Promise.reject(new Error('no requestEmailHtml implementation provided')),
 });
