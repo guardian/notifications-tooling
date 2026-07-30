@@ -20,6 +20,12 @@ docker compose -f "$compose_file" up -d --wait
 
 echo "Applying migrations..."
 cd "$repo_root/src/apps/backend"
-"$bun_bin" run db:migration:apply
+
+if ! output=$("$bun_bin" run db:migration:apply 2>&1); then
+	echo "$output" >&2
+	fail "Failed to apply database migrations."
+fi
+
+echo "$output"
 
 echo "Done."
