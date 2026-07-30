@@ -13,6 +13,7 @@ import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
+import { ScrollWrapper } from './ScrollWrapper';
 import {
 	DEFAULT_SIDE_NAV_HREF,
 	SIDE_NAVIGATION_PANEL_ITEMS,
@@ -116,7 +117,9 @@ export const DispatchTab = () => {
 								borderRightColor: semanticColors.border.weak,
 							})}
 						>
-							<CreateNotificationForm />
+							<ScrollWrapper>
+								<CreateNotificationForm />
+							</ScrollWrapper>
 						</Item>
 						<Item
 							size={'auto'}
