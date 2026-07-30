@@ -47,8 +47,8 @@ processes profile updates asynchronously, so the first send to a new address may
 not be delivered until the profile has propagated; subsequent sends reuse the
 same alias. Dispatch intentionally sends immediately without a fixed delay or
 automatic retry. A successful API response confirms Braze accepted the calls,
-not inbox delivery. Check Braze activity before manually retrying a first-time
-recipient to avoid a possible duplicate.
+not inbox delivery. If a first send does not arrive, allow time for the new
+profile to propagate before retrying.
 
 See the [Braze test email send flow](../../../docs/braze/braze-test-email-send-flow.md)
 for the runtime sequence and failure behaviour, and
