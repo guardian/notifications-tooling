@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import {
 	baseSpacing,
 	semanticColors,
+	semanticRadius,
 	semanticSizing,
 	semanticSpacing,
 } from '@guardian/stand';
@@ -53,6 +54,7 @@ const styles = {
 	greenCheckIconStyle: css({
 		paddingTop: '2.33px',
 		paddingLeft: '2.33px',
+		color: semanticColors.fill.successStrong,
 	}),
 };
 
@@ -63,6 +65,19 @@ const ParameterDisplay = ({
 	keyName: string;
 	value: string | AudienceSegment[];
 }) => {
+	//This is temporary solution to display the delivery time in the confirmation page.
+	const tempTime = new Date().toLocaleTimeString('en-GB', {
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: true,
+	});
+	const tempDate = new Date().toLocaleDateString('en-GB', {
+		day: '2-digit',
+		month: '2-digit',
+		year: '2-digit',
+	});
+	const temporaryDeliveryTime = `${tempTime} (ET), ${tempDate}`;
+
 	return (
 		<div css={styles.parameter}>
 			<Typography variant="bodyBoldMd">{keyName}:</Typography>
@@ -77,10 +92,35 @@ const ParameterDisplay = ({
 				/>
 			)}
 			{keyName === 'Delivery' && (
-				<SendInfoPreviewPill
-					deliveryTiming={'immediate'}
-					isConfirmation={true}
-				/>
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'row',
+						gap: semanticSpacing.stackSm,
+					}}
+				>
+					<SendInfoPreviewPill
+						deliveryTiming={'immediate'}
+						isConfirmation={true}
+					/>
+					<div
+						css={{
+							display: 'flex',
+							flexDirection: 'row',
+							gap: semanticSpacing.stackSm,
+							alignItems: 'center',
+							height: semanticSizing.height.sm,
+							border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+							borderRadius: semanticRadius.cornerSm,
+							padding: `0 ${semanticSpacing.stackSm}`,
+						}}
+					>
+						<Icon size="md">clock_loader_40</Icon>
+						<Typography variant="bodySm" css={{ height: '18px' }}>
+							{temporaryDeliveryTime}
+						</Typography>
+					</div>
+				</div>
 			)}
 		</div>
 	);
@@ -99,7 +139,6 @@ export const DispatchReport = () => {
 			: 'push notification';
 
 	const wasSuccess = !!sendingResult?.ok;
-
 	return (
 		<section css={styles.container}>
 			{wasSuccess ? (
@@ -112,11 +151,9 @@ export const DispatchReport = () => {
 								gap: semanticSpacing.stackXs,
 							}}
 						>
-							<Icon
-								size="lg"
-								symbol="check_circle"
-								css={styles.greenCheckIconStyle}
-							></Icon>
+							<Icon size="lg" cssOverrides={styles.greenCheckIconStyle}>
+								check_circle
+							</Icon>
 							<Typography
 								variant="heading2Xl"
 								element="h2"
@@ -142,6 +179,7 @@ export const DispatchReport = () => {
 									keyName="Audience segment"
 									value={notification.parameters.audienceSegments ?? []}
 								/>
+								<div></div>
 								<ParameterDisplay
 									keyName="Delivery"
 									value={
