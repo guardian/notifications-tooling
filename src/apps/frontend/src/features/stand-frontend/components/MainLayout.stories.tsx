@@ -14,9 +14,9 @@ const storyUser: AppConfig = {
 		authenticatingSystem: '',
 		authenticatedIn: [],
 		expires: 0,
-		multifactor: false
+		multifactor: false,
 	},
-	permissions: []
+	permissions: [],
 };
 
 const meta = {

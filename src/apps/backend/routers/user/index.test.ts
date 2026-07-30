@@ -1,5 +1,6 @@
-import { UserPermissions } from '@config';
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import type { UserResponse } from '@config';
+import { UserPermissions } from '@config';
 import type {
 	Request as ExpressRequest,
 	Response as ExpressResponse,
@@ -15,7 +16,6 @@ import {
 	installPermissionsStoreMock,
 } from '../../utils/test-utils/permissions';
 import type { TestServer } from '../../utils/test-utils/server';
-import type { UserResponse } from './index';
 
 // Stub Panda verification and the permissions store before the app (and its
 // real clients) are imported.

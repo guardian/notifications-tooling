@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { UserResponse } from '@config';
 import type { Request, RequestHandler, Response } from 'express';
 import { clientAssetsDir } from '../client-assets';
-import type { UserResponse } from '../routers/user';
 import { listUserPermissions } from '../utils/permissions/permissions-store';
 
 const indexHtmlPath = join(clientAssetsDir, 'index.html');
@@ -25,20 +25,24 @@ const readIndexTemplate = (): string => {
 	return cachedTemplate;
 };
 
-
 /**
- * Serves Bun's built `index.html`, injecting the page config 
+ * Serves Bun's built `index.html`, injecting the page config
  * in place of the {@link configPlaceholder} so the SPA can read it
  * synchronously from `window.__APP_CONFIG__` before it mounts.
  */
-export const serveIndex: RequestHandler = async (req: Request, res: Response) => {
-	const permissions = await listUserPermissions(req.user!.email)
+export const serveIndex: RequestHandler = async (
+	req: Request,
+	res: Response,
+) => {
+	const permissions = await listUserPermissions(req.user!.email);
 	const config: UserResponse = {
 		user: req.user!,
 		permissions,
 	};
-	const html = readIndexTemplate()
-		.replace(configPlaceholder, JSON.stringify(config));
+	const html = readIndexTemplate().replace(
+		configPlaceholder,
+		JSON.stringify(config),
+	);
 
 	res.status(200).type('html').set('Cache-Control', 'no-cache').send(html);
 };

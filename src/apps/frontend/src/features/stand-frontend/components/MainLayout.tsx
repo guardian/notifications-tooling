@@ -20,7 +20,7 @@ interface Props {
 	currentTab: TabName;
 }
 
-const getInitials = (user: AppConfig["user"]): string => {
+const getInitials = (user: AppConfig['user']): string => {
 	const firstName = user.firstName[0] ?? '';
 	const lastName = user.lastName[0] ?? '';
 	return `${firstName}${lastName}`.toUpperCase() || 'U';
@@ -36,7 +36,7 @@ const navLinks: Record<TabName, { text: string }> = {
 };
 
 export const MainLayout = ({ children, currentTab, setTab }: Props) => {
-	const userResponse = useContext(UserContext);
+	const { user } = useContext(UserContext) ?? {};
 
 	return (
 		<Layout>
@@ -59,11 +59,11 @@ export const MainLayout = ({ children, currentTab, setTab }: Props) => {
 							/>
 						))}
 					</TopBarContainerLeft>
-					{userResponse && (
+					{user && (
 						<Avatar
-							src={userResponse.user.avatarUrl}
-							alt={`${userResponse.user.firstName} ${userResponse.user.lastName}`.trim() || userResponse.user.email}
-							initials={getInitials(userResponse.user)}
+							src={user.avatarUrl}
+							alt={`${user.firstName} ${user.lastName}`.trim() || user.email}
+							initials={getInitials(user)}
 							size="md"
 						/>
 					)}
