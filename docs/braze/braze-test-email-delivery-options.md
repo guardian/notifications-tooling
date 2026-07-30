@@ -127,4 +127,6 @@ reuse the stable alias and do not have the profile-creation race.
 
 With persistence, registration should move out of the dispatch path. Dispatch
 would store each alias as pending or ready, allow sends only to ready aliases,
-and call `/users/track` once per registration rather than once per dispatch.
+and call `/users/track` once per registration rather than once per dispatch. A
+later profile-management workflow could also list, update, and delete profiles
+owned through the `dispatch-tool-test-email` alias label.
