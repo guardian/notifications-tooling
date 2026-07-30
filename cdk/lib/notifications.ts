@@ -82,7 +82,7 @@ export class DispatchStack extends GuStack {
 				friendlyName: 'Run dispatch locally',
 				statements: [
 					localPandaSettingsPolicyStatement,
-					...localLoginToolPolicyStatements(this),
+					...localDevAccessPolicyStatements(this),
 				],
 				// This allows the local policy to cover the required login tool paths all file paths in the login tool policy statement
 				withoutPolicyChecks: true,
@@ -93,7 +93,7 @@ export class DispatchStack extends GuStack {
 
 // Dispatch redirects unauthenticated users to login.gutools for authentication.
 // We add extra policies so the login tool can be run locally alongside Dispatch.
-const localLoginToolPolicyStatements = (stack: GuStack) => {
+const localDevAccessPolicyStatements = (stack: GuStack) => {
 	const parameterKmsPolicyStatement = new PolicyStatement({
 		effect: Effect.ALLOW,
 		actions: ['kms:Decrypt'],
