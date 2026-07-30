@@ -11,6 +11,7 @@ import type {
 } from '../features/stand-frontend/types';
 import { articleFixture } from '../mocks/capi-fixtures';
 import { mockCapiFetch } from '../mocks/mock-capi-fetch';
+import { mockRequestEmailHtml } from '../mocks/mock-fetch-email';
 import { mockSendNotification } from '../mocks/mock-send-notification';
 import { parseHtml } from '../util/html-helpers';
 
@@ -30,6 +31,7 @@ export const WithNotificationContext = (
 				updateNotification,
 				capiFetch: mockCapiFetch,
 				sendNotification: mockSendNotification,
+				requestEmailHtml: mockRequestEmailHtml,
 			}}
 		>
 			{reactNode}

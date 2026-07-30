@@ -1,5 +1,6 @@
 import { useReducer, useState } from 'react';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
+import { mockRequestEmailHtml } from '../../mocks/mock-fetch-email';
 import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
@@ -35,6 +36,7 @@ export const EmailNotificationPage = () => {
 					updateNotification,
 					capiFetch: hackyClientSideCapiFetch,
 					sendNotification: mockSendNotification,
+					requestEmailHtml: mockRequestEmailHtml,
 				}}
 			>
 				<MainLayout currentTab={currentTab} setTab={setCurrentTab}>

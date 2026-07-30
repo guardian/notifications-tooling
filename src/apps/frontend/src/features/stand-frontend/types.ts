@@ -38,6 +38,10 @@ export type SendingResult = {
 	ok: boolean;
 };
 
+export type RequestEmailHtml = {
+	(articleId: string, options: { audience: string }): Promise<string>;
+};
+
 export type NotificationAction =
 	| {
 			type: 'set-article-id';
