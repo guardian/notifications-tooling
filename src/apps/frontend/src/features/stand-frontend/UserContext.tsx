@@ -1,4 +1,4 @@
 import { createContext } from 'react';
-import type { UserData } from './types';
+import type { UserResponse } from './get-user';
 
-export const UserContext = createContext<UserData | undefined>(undefined);
+export const UserContext = createContext<UserResponse | undefined>(undefined);

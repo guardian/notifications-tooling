@@ -4,32 +4,20 @@ import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
+import type { UserResponse } from './get-user';
+import { getUser } from './get-user';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
 import type {
 	NotificationAction,
 	NotificationState,
 	TabName,
-	UserData,
 } from './types';
 import { UserContext } from './UserContext';
 
-// TO DO - fetch from backend? inject user details onto page?
-const getUser = (): Promise<UserData> => {
-	try {
-		return Promise.resolve({
-			firstName: 'John',
-			lastName: 'Doe',
-			email: 'j.Doe@example.com',
-			permissions: {},
-		});
-	} catch (err) {
-		return Promise.reject(err instanceof Error ? err : new Error('UNKNOWN'));
-	}
-};
 
 export const EmailNotificationPage = () => {
-	const [user, setUser] = useState<UserData>();
+	const [user, setUser] = useState<UserResponse>();
 	const [currentTab, setCurrentTab] = useState<TabName>(() => {
 		switch (location.hash) {
 			case '#history':
