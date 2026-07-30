@@ -2,25 +2,61 @@ import { GuCertificate } from '@guardian/cdk/lib/constructs/acm';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
+import {
+	GuSecurityGroup,
+	GuVpc,
+	SubnetType,
+} from '@guardian/cdk/lib/constructs/ec2';
+import { GuDatabaseInstance } from '@guardian/cdk/lib/constructs/rds';
 import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
+import { Port } from 'aws-cdk-lib/aws-ec2';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, LayerVersion } from 'aws-cdk-lib/aws-lambda';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import {
+	Credentials,
+	DatabaseInstanceEngine,
+	PostgresEngineVersion,
+	SubnetGroup,
+} from 'aws-cdk-lib/aws-rds';
 
 const PAN_DOMAIN_AUTH_SETTINGS_BUCKET = 'pan-domain-auth-settings';
 const LOGIN_GUTOOLS_CONFIG_BUCKET = 'login-gutools-config';
 const PERMISSIONS_CACHE_BUCKET = 'permissions-cache';
+const DB_PORT = 5432;
+
+type DispatchStackProps = GuStackProps & {
+	stage: 'TEST' | 'CODE' | 'PROD';
+};
 
 export class DispatchStack extends GuStack {
-	constructor(scope: App, id: string, props: GuStackProps, app: string) {
+	constructor(scope: App, id: string, props: DispatchStackProps, app: string) {
 		super(scope, id, props);
 
-		const { stage } = props;
+		const { stage, env } = props;
 		const isProd = stage === 'PROD';
 		const domainName = `${app}.${isProd ? '' : 'code.dev-'}gutools.co.uk`;
+		const accountVpc = GuVpc.fromIdParameter(this, 'AccountVPC', {
+			availabilityZones: Fn.getAzs(env?.region),
+			publicSubnetIds: GuVpc.subnetsFromParameter(this, {
+				app,
+				type: SubnetType.PUBLIC,
+			}).map((subnet) => subnet.subnetId),
+		});
+
+		const lambdaSecurityGroup = new GuSecurityGroup(
+			this,
+			'DispatchLambdaSecurityGroup',
+			{
+				app,
+				vpc: accountVpc,
+				allowAllOutbound: true,
+				securityGroupName: `DispatchLambdaSecurityGroup${stage}`,
+			},
+		);
 
 		const guApiLambda = new GuApiLambda(this, `${app}-lambda`, {
 			fileName: `${app}.zip`,
@@ -51,6 +87,9 @@ export class DispatchStack extends GuStack {
 					'arn:aws:lambda:eu-west-1:015030872274:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:96',
 				),
 			],
+			vpc: accountVpc,
+			securityGroups: [lambdaSecurityGroup],
+			allowPublicSubnet: true,
 		});
 
 		const domain = guApiLambda.api.addDomainName(`${app}-domain`, {
@@ -68,22 +107,86 @@ export class DispatchStack extends GuStack {
 			resourceRecord: domain.domainNameAliasDomainName,
 		});
 
-		const pandaSettingsPolicyStatement = new PolicyStatement({
-			effect: Effect.ALLOW,
-			actions: ['s3:GetObject'],
-			resources: [
-				`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/${isProd ? '' : 'code.dev-'}gutools.co.uk.settings.public`,
+		guApiLambda.addToRolePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				actions: ['s3:GetObject'],
+				resources: [
+					`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/${isProd ? '' : 'code.dev-'}gutools.co.uk.settings.public`,
+				],
+			}),
+		);
+
+		const databaseSecurityGroup = new GuSecurityGroup(this, 'DBSecurityGroup', {
+			app,
+			description:
+				'Allow connections from the Dispatch application lambda to the database.',
+			vpc: accountVpc,
+			allowAllOutbound: false,
+			ingresses: [
+				{
+					range: lambdaSecurityGroup,
+					port: Port.tcp(DB_PORT),
+					description:
+						'Allow ingress traffic from the Dispatch application lambda security group.',
+				},
 			],
 		});
 
-		guApiLambda.addToRolePolicy(pandaSettingsPolicyStatement);
+		const dbConfig = {
+			TEST: {
+				allocatedStorage: 5,
+				instanceType: 'db.t4g.micro',
+				multiAz: false,
+				preferredMaintenanceWindow: 'Tue:08:00-Tue:08:30',
+			},
+			CODE: {
+				allocatedStorage: 5,
+				instanceType: 'db.t4g.micro',
+				multiAz: false,
+				preferredMaintenanceWindow: 'Tue:08:00-Tue:08:30',
+			},
+			PROD: {
+				allocatedStorage: 10,
+				instanceType: 'db.t4g.small',
+				multiAz: true,
+				preferredMaintenanceWindow: 'Wed:08:00-Wed:08:30',
+			},
+		};
 
-		const localPandaSettingsPolicyStatement = new PolicyStatement({
-			effect: Effect.ALLOW,
-			actions: ['s3:GetObject'],
-			resources: [
-				`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/local.dev-gutools.co.uk.settings.public`,
-			],
+		new GuDatabaseInstance(this, `DispatchDatabase`, {
+			allocatedStorage: dbConfig[stage].allocatedStorage,
+			allowMajorVersionUpgrade: false,
+			app: `${app}-db`,
+			autoMinorVersionUpgrade: true,
+			credentials: Credentials.fromGeneratedSecret(app, {
+				secretName: `/${stage}/${props.stack}/dispatch/db`,
+			}),
+			databaseName: 'dispatch',
+			devXBackups: { enabled: true },
+			engine: DatabaseInstanceEngine.postgres({
+				version: PostgresEngineVersion.VER_18,
+			}),
+			iamAuthentication: true,
+			instanceIdentifier: `${app}-${props.stage}-db-18`,
+			instanceType: dbConfig[stage].instanceType,
+			multiAz: dbConfig[stage].multiAz,
+			port: DB_PORT,
+			preferredMaintenanceWindow: dbConfig[stage].preferredMaintenanceWindow,
+			publiclyAccessible: false,
+			removalPolicy: RemovalPolicy.RETAIN,
+			securityGroups: [databaseSecurityGroup],
+			storageEncrypted: true,
+			subnetGroup: new SubnetGroup(this, 'DBSubnetGroup', {
+				vpc: accountVpc,
+				vpcSubnets: {
+					subnets: GuVpc.subnetsFromParameter(this, {
+						type: SubnetType.PRIVATE,
+					}),
+				},
+				description: 'Subnet for the Dispatch database',
+			}),
+			vpc: accountVpc,
 		});
 
 		if (!isProd) {
@@ -91,7 +194,13 @@ export class DispatchStack extends GuStack {
 				grantId: 'run-dispatch-locally',
 				friendlyName: 'Run dispatch locally',
 				statements: [
-					localPandaSettingsPolicyStatement,
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['s3:GetObject'],
+						resources: [
+							`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/local.dev-gutools.co.uk.settings.public`,
+						],
+					}),
 					...localDevAccessPolicyStatements(this),
 				],
 				// This allows the local policy to cover the required login tool paths all file paths in the login tool policy statement
