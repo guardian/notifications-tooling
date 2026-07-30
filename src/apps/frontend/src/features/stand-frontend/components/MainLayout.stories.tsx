@@ -2,11 +2,11 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import type { UserResponse } from '../get-user';
+import type { AppConfig } from '../get-config';
 import { UserContext } from '../UserContext';
 import { MainLayout } from './MainLayout';
 
-const storyUser: UserResponse = {
+const storyUser: AppConfig = {
 	user: {
 		firstName: 'John',
 		lastName: 'Doe',
