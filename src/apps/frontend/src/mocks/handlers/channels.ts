@@ -21,7 +21,7 @@ export const channelConstraints: ChannelConstraintsResponse = {
 			},
 			audience: { maxSegments: 20, maxTestRecipients: 20 },
 		},
-		'app-push': {
+		appPush: {
 			content: {
 				title: { recommended: 50, editorialLimit: 50, validationCap: 50 },
 				body: { recommended: 120, editorialLimit: 120, validationCap: 120 },

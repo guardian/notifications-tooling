@@ -7,15 +7,7 @@ import {
 
 /**
  * The limits the UI falls back to when `GET /v1/channels/constraints` cannot be
- * read. They duplicate the newsletter numbers in `@config` on purpose: a failed
- * read must leave the editor with working character counters rather than blank
- * ones, so the counters degrade to the last known-good guidance instead of
- * disappearing.
- *
- * Only the two limits the UI actually renders are duplicated. `validationCap`
- * is deliberately absent — the backend is the only thing that enforces it, and
- * a stale copy here would be a second source of truth for a number the UI never
- * shows.
+ * read.
  */
 export const NEWSLETTER_LIMIT_FALLBACKS = {
 	title: { recommended: 46, editorialLimit: 70 },
@@ -29,9 +21,7 @@ export const channelConstraintsQueryKey = ['channels', 'constraints'] as const;
  * validates sends against, so the UI's guidance cannot drift from the rules.
  *
  * Failure is deliberately not surfaced: callers read
- * {@link NEWSLETTER_LIMIT_FALLBACKS} when `data` is absent. That makes a read
- * failure invisible to the editor, which is the intended trade — see
- * `docs/ADRs/content-limits.md`.
+ * {@link NEWSLETTER_LIMIT_FALLBACKS} when `data` is absent.
  */
 export const useChannelConstraints = () =>
 	useQuery<ChannelConstraintsResponse>({
