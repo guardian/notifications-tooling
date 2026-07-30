@@ -18,6 +18,7 @@ import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,
 } from './AudienceSegments';
+import { scheduleIcon } from './FlagIcons';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const styles = {
@@ -115,7 +116,12 @@ const ParameterDisplay = ({
 							padding: `0 ${semanticSpacing.stackSm}`,
 						}}
 					>
-						<Icon size="md">clock_loader_40</Icon>
+						<Icon
+							size="md"
+							css={{ paddingTop: '1.67px', paddingLeft: '1.67px' }}
+						>
+							{scheduleIcon}
+						</Icon>
 						<Typography variant="bodySm" css={{ height: '18px' }}>
 							{temporaryDeliveryTime}
 						</Typography>
