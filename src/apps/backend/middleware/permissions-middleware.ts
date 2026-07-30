@@ -1,6 +1,6 @@
 import type { UserPermissions } from '@config';
 import type { NextFunction, Request, Response } from 'express';
-import { listUserPermissions } from '../utils/permissions/permissions-store';
+import { checkPermissions } from '../utils/permissions/check-permissions';
 
 function respondWithInsufficientPermissions(response: Response) {
 	return response.status(403).json({
@@ -16,9 +16,9 @@ export const requirePermissions =
 			return respondWithInsufficientPermissions(response);
 		}
 
-		const userPermissions = await listUserPermissions(request.user.email);
-		const hasAllPermissions = requiredPermissions.every((permission) =>
-			userPermissions.includes(permission),
+		const hasAllPermissions = await checkPermissions(
+			request.user.email,
+			requiredPermissions,
 		);
 
 		if (!hasAllPermissions) {

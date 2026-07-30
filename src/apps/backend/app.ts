@@ -1,4 +1,5 @@
 import serverlessExpress from '@codegenie/serverless-express';
+import { UserPermissions } from '@config';
 import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
@@ -6,12 +7,14 @@ import express, {
 	type Request,
 	type Response,
 } from 'express';
+import { loginMiddleware } from './middleware/auth-middleware';
 import { staticAssetsMiddleware } from './middleware/static-assets-middleware';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationsRouter } from './routers/notifications';
 import { userRouter } from './routers/user';
+import { checkPermissions } from './utils/permissions/check-permissions';
 
 export const app: Application = express();
 
@@ -20,7 +23,24 @@ app.disable('x-powered-by');
 app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(staticAssetsMiddleware);
+app.use(
+	loginMiddleware,
+	async (req: Request, res: Response, next: NextFunction) => {
+		const noAccessMessage =
+			'You do not have permission to use Dispatch. If you believe this is a mistake please contact Central Production.';
+
+		const hasAccess = await checkPermissions(req.user!.email, [
+			UserPermissions.DispatchAccess,
+		]);
+
+		if (!hasAccess) {
+			return res.status(403).send(noAccessMessage);
+		}
+
+		return next();
+	},
+	staticAssetsMiddleware,
+);
 
 app.use('/health', healthRouter);
 

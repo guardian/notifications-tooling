@@ -13,25 +13,52 @@ const loginHostLookup = () => {
 	}
 };
 
+const maybePopulateUser = async (request: Request) => {
+	const result = await verifyCookie(request.header('Cookie'));
+
+	if (result.success) {
+		request.user = result.user;
+	}
+};
+
+const createLoginUrl = (request: Request) => {
+	const returnUrl = `https://${request.hostname}${request.originalUrl}`;
+	const loginUrl = new URL('/login', `https://${loginHostLookup()}`);
+	loginUrl.searchParams.set('returnUrl', returnUrl);
+
+	return loginUrl.toString();
+};
+
 export const authMiddleware = async (
 	request: Request,
 	response: Response,
 	next: NextFunction,
 ) => {
-	const result = await verifyCookie(request.header('Cookie'));
-	if (result.success) {
-		request.user = result.user;
+	await maybePopulateUser(request);
+
+	if (request.user) {
 		return next();
 	}
 
-	const returnUrl = `https://${request.hostname}${request.originalUrl}`;
-	const loginUrl = new URL('/login', `https://${loginHostLookup()}`);
-
-	loginUrl.searchParams.set('returnUrl', returnUrl);
+	const loginUrl = createLoginUrl(request);
 
 	return response.status(401).json({
 		error: 'unauthenticated',
 		message: 'Authentication is required to access this resource.',
-		loginUrl: loginUrl.toString(),
+		loginUrl,
 	});
+};
+
+export const loginMiddleware = async (
+	request: Request,
+	response: Response,
+	next: NextFunction,
+) => {
+	await maybePopulateUser(request);
+
+	if (!request.user) {
+		return response.redirect(createLoginUrl(request));
+	}
+
+	next();
 };
