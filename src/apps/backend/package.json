@@ -10,6 +10,8 @@
 		"db:migration:create": "bun run ../../../scripts/create-db-migration.ts",
 		"db:migration:apply": "bun x drizzle-kit migrate --config=drizzle.config.ts",
 		"db:reset": "bash db/scripts/reset-db.sh",
+		"db:start": "docker compose -f ../../../docker/docker-compose.local.yml up -d",
+		"db:stop": "docker compose -f ../../../docker/docker-compose.local.yml down",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit"
 	},
