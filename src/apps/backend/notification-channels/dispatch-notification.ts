@@ -36,9 +36,7 @@ const testEmailEnvironmentSchema = z.object({
 	),
 	BRAZE_TEST_EMAIL_REPLY_TO: z.preprocess(
 		(value) => (typeof value === 'string' && !value.trim() ? undefined : value),
-		z
-			.union([z.email(), z.literal('NO_REPLY_TO')])
-			.default('NO_REPLY_TO'),
+		z.union([z.email(), z.literal('NO_REPLY_TO')]).default('NO_REPLY_TO'),
 	),
 });
 
