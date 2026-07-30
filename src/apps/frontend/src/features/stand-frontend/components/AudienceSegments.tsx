@@ -11,6 +11,7 @@ import { Button } from '@guardian/stand/Button';
 import { ButtonGroup } from '@guardian/stand/ButtonGroup';
 import { Typography } from '@guardian/stand/Typography';
 import { type AudienceSegment } from '../types';
+import { FlagAtom } from './FlagAtom';
 
 export interface Segment {
 	code: AudienceSegment;
@@ -26,6 +27,7 @@ interface AudienceSegmentPickerProps {
 interface AudienceSegmentsPreviewPillProps {
 	segments?: Segment[];
 	selected: AudienceSegment[];
+	isConfirmation?: boolean;
 }
 
 export const DEFAULT_SEGMENTS: Segment[] = [
@@ -50,6 +52,7 @@ const styles = {
 					? semanticColors.text.strongerInverse
 					: semanticColors.text.weak,
 			},
+			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 			padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 			borderRadius: semanticRadius.cornerSm,
 			display: 'flex',
@@ -57,28 +60,23 @@ const styles = {
 			gap: `${baseSpacing['8Px']}`,
 			height: '32px',
 		}),
-	audienceSegmentIcon: (isSelected: boolean) =>
-		css({
-			borderTop: `${semanticSizing.border.default} solid  ${isSelected ? baseColors.magenta[500] : semanticColors.border.weak}`,
-			borderRight: `${semanticSizing.border.default} solid  ${isSelected ? baseColors.magenta[500] : semanticColors.border.weak}`,
-			borderBottom: `${semanticSizing.border.default} solid ${isSelected ? baseColors.magenta[500] : semanticColors.border.weak}`,
-			borderLeft: `${semanticSizing.border.default} solid  ${isSelected ? baseColors.magenta[500] : semanticColors.border.weak}`,
-			padding: `${baseSpacing['2Px']} ${baseSpacing['2Px']}`,
-			gap: `${baseSpacing['8Px']}`,
-			borderRadius: semanticRadius.cornerSm,
-			backgroundColor: isSelected
-				? baseColors.magenta[400]
-				: semanticColors.fill.disabled,
-			color: isSelected
-				? semanticColors.text.strongerInverse
-				: semanticColors.text.weak,
-			height: '20px',
-			width: '26px',
-			fontSize: '12px',
-			lineHeight: ' 16px',
-			fontWeight: 700,
-			textAlign: 'center',
-		}),
+	audienceSegmentIcon: css({
+		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+		width: '24px',
+		height: '18px',
+		gap: `${baseSpacing['8Px']}`,
+	}),
+	isConfirmationStyle: css({
+		backgroundColor: semanticColors.fill.weak,
+		color: semanticColors.text.weak,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		display: 'flex',
+		alignItems: 'center',
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
+	}),
 };
 export const AudienceSegments = ({
 	segments = DEFAULT_SEGMENTS,
@@ -118,8 +116,8 @@ export const AudienceSegments = ({
 							aria-pressed={isSelected}
 							cssOverrides={styles.audienceSegmentButton(isSelected)}
 						>
-							<div css={styles.audienceSegmentIcon(isSelected)}>
-								{segment.code}
+							<div css={styles.audienceSegmentIcon}>
+								<FlagAtom segmentCode={segment.code} />
 							</div>
 							<Typography
 								variant="bodyBoldSm"
@@ -142,6 +140,7 @@ export const AudienceSegments = ({
 export const AudienceSegmentsPreviewPill = ({
 	segments = DEFAULT_SEGMENTS,
 	selected,
+	isConfirmation = false,
 }: AudienceSegmentsPreviewPillProps) => {
 	return (
 		<div
@@ -151,7 +150,9 @@ export const AudienceSegmentsPreviewPill = ({
 				gap: semanticSpacing.stackXs,
 			}}
 		>
-			<Typography variant="bodyBoldMd">Audience Segments</Typography>
+			{!isConfirmation && (
+				<Typography variant="bodyBoldMd">Audience Segments</Typography>
+			)}
 
 			<div
 				css={{
@@ -166,12 +167,23 @@ export const AudienceSegmentsPreviewPill = ({
 					);
 					const segmentLabel = matchingSegment?.label ?? segmentCode;
 					return (
-						<div key={segmentCode} css={styles.audienceSegmentButton(true)}>
-							<div css={styles.audienceSegmentIcon(true)}>{segmentCode}</div>
+						<div
+							key={segmentCode}
+							css={
+								isConfirmation
+									? styles.isConfirmationStyle
+									: styles.audienceSegmentButton(true)
+							}
+						>
+							<div css={styles.audienceSegmentIcon}>
+								<FlagAtom segmentCode={segmentCode} />
+							</div>
 							<Typography
 								variant="bodyBoldSm"
 								cssOverrides={css({
-									color: semanticColors.text.strongerInverse,
+									color: isConfirmation
+										? semanticColors.text.weak
+										: semanticColors.text.strongerInverse,
 								})}
 							>
 								{segmentLabel}
