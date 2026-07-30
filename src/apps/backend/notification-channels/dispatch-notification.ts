@@ -156,6 +156,8 @@ const dispatchNewsletter = async (
 			renderedEmails.push(await renderNewsletter(emailRenderingNewsletterId));
 		}
 
+		// Without persisted alias readiness, registration stays in the send path.
+		// A new alias may not propagate before the immediate message request.
 		await dependencies.registerBrazeTestEmailRecipients({
 			apiKey: environment.BRAZE_API_KEY,
 			restEndpoint: environment.BRAZE_REST_ENDPOINT,

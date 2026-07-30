@@ -124,3 +124,7 @@ The first send to a previously unknown Dispatch alias may therefore not be
 delivered. Check the `dispatch-tool-test-email` profile and Braze message
 activity before manually retrying after the profile has propagated. Later sends
 reuse the stable alias and do not have the profile-creation race.
+
+With persistence, registration should move out of the dispatch path. Dispatch
+would store each alias as pending or ready, allow sends only to ready aliases,
+and call `/users/track` once per registration rather than once per dispatch.
