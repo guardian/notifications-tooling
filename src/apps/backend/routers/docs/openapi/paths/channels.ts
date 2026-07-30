@@ -15,6 +15,7 @@ export const channelsConstraintsPath = {
 				},
 			},
 			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
 		},
 	},
 } as const;
@@ -36,6 +37,7 @@ export const channelsAudiencesPath = {
 				},
 			},
 			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
 		},
 	},
 } as const;

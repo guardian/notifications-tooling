@@ -9,11 +9,12 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
+import { emailDeliveryOptionNameMap, kickerNameMap } from '../option-values';
+import type { AudienceSegment } from '../types';
 import {
-	audienceSegmentNameMap,
-	emailDeliveryOptionNameMap,
-	kickerNameMap,
-} from '../option-values';
+	AudienceSegmentsPreviewPill,
+	DEFAULT_SEGMENTS,
+} from './AudienceSegments';
 
 const styles = {
 	container: css({
@@ -50,12 +51,19 @@ const ParameterDisplay = ({
 	value,
 }: {
 	keyName: string;
-	value: string;
+	value: string | AudienceSegment[];
 }) => {
 	return (
 		<div css={styles.parameter}>
 			<Typography variant="bodyBoldMd">{keyName}:</Typography>
-			<Typography>{value}</Typography>
+			{keyName !== 'Audience segment' && <Typography>{value}</Typography>}
+			{keyName === 'Audience segment' && (
+				<AudienceSegmentsPreviewPill
+					segments={DEFAULT_SEGMENTS}
+					selected={value as AudienceSegment[]}
+					isConfirmation={true}
+				/>
+			)}
 		</div>
 	);
 };
@@ -102,10 +110,8 @@ export const DispatchReport = () => {
 									}
 								/>
 								<ParameterDisplay
-									keyName="Audience"
-									value={(notification.parameters.audienceSegments ?? [])
-										.map((segment) => audienceSegmentNameMap[segment])
-										.join(', ')}
+									keyName="Audience segment"
+									value={notification.parameters.audienceSegments ?? []}
 								/>
 								<ParameterDisplay
 									keyName="Delivery"

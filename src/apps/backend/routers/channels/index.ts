@@ -6,9 +6,11 @@ import {
 	newsletterSegments,
 	NotificationChannel,
 	notificationChannelContentLimits,
+	UserPermissions,
 } from '@config';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
+import { requirePermissions } from '../../middleware/permissions-middleware';
 
 /**
  * The per-channel validation rules the SPA fetches from
@@ -89,9 +91,19 @@ export const channelAudiences = {
  */
 
 export const channelsRouter = Router()
-	.get('/constraints', authMiddleware, (_req: Request, res: Response) => {
-		res.json(channelConstraints);
-	})
-	.get('/audiences', authMiddleware, (_req: Request, res: Response) => {
-		res.json(channelAudiences);
-	});
+	.get(
+		'/constraints',
+		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
+		(_req: Request, res: Response) => {
+			res.json(channelConstraints);
+		},
+	)
+	.get(
+		'/audiences',
+		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
+		(_req: Request, res: Response) => {
+			res.json(channelAudiences);
+		},
+	);
