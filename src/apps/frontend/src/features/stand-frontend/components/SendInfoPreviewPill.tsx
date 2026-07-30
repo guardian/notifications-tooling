@@ -7,6 +7,7 @@ import type { ChannelOption, EmailDeliveryOption } from '../types';
 interface SendInfoPreviewPillProps {
 	channel?: ChannelOption;
 	deliveryTiming?: EmailDeliveryOption;
+	isConfirmation?: boolean;
 }
 
 const getLabel = (value: ChannelOption | EmailDeliveryOption) => {
@@ -14,7 +15,7 @@ const getLabel = (value: ChannelOption | EmailDeliveryOption) => {
 		case 'immediate':
 			return 'Immediate send';
 		case 'email':
-			return 'Email newsletter';
+			return 'Newsletter email';
 		default:
 			return value;
 	}
@@ -34,6 +35,7 @@ const getIcon = (value: ChannelOption | EmailDeliveryOption) => {
 export const SendInfoPreviewPill = ({
 	channel,
 	deliveryTiming,
+	isConfirmation = false,
 }: SendInfoPreviewPillProps) => {
 	const selectedValues = [channel, deliveryTiming].filter(
 		(value): value is ChannelOption | EmailDeliveryOption => Boolean(value),
@@ -47,7 +49,9 @@ export const SendInfoPreviewPill = ({
 				gap: semanticSpacing.stackXs,
 			}}
 		>
-			<Typography variant="bodyBoldMd">Send info</Typography>
+			{!isConfirmation && (
+				<Typography variant="bodyBoldMd">Send info</Typography>
+			)}
 
 			{selectedValues.length > 0 && (
 				<div
@@ -58,14 +62,23 @@ export const SendInfoPreviewPill = ({
 					}}
 				>
 					{selectedValues.map((value) => (
-						<div key={value} css={activePillTheme.activePill}>
+						<div
+							key={value}
+							css={
+								isConfirmation
+									? activePillTheme.isConfirmationStyle
+									: activePillTheme.activePill
+							}
+						>
 							<Icon
 								size="md"
 								symbol={getIcon(value)}
-								alt="send info"
+								alt="send info email icon"
 								cssOverrides={activePillTheme.activePillIcon}
 							/>
-							<Typography variant={'headingCompactSm'}>
+							<Typography
+								variant={isConfirmation ? 'bodySm' : 'headingCompactSm'}
+							>
 								{getLabel(value)}
 							</Typography>
 						</div>
