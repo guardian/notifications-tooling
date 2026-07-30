@@ -120,6 +120,7 @@ export const SideNavigationPanel = ({
 					tileNumber={item.tileNumber}
 					title={item.title}
 					href={item.href}
+					trackedSectionId={item.trackedSectionId}
 					isSelected={selectedHref === item.href}
 					onPress={() => onSelectedHrefChange(item.href)}
 				/>

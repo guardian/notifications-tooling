@@ -7,6 +7,7 @@ interface ScrollWrapperProps {
 	style?: SerializedStyles;
 	height?: CSSProperties['height'];
 	innerProps?: React.ComponentProps<'div'> & Record<`data-${string}`, string>;
+	children?: React.ReactNode;
 }
 
 const outerStyle = (height?: CSSProperties['height']) => css`
