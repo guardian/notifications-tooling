@@ -5,6 +5,7 @@ import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
+import { NoPermissionsTab } from './components/NoPermissionsTab';
 import { type AppConfig, getAppConfig } from './get-config';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
@@ -28,22 +29,30 @@ export const EmailNotificationPage = () => {
 		[NotificationAction]
 	>(notificationReducer, defaultState);
 
+	const hasAccess = user?.permissions.includes('dispatch_access');
+
 	return (
 		<UserContext.Provider value={user}>
-			<NotificationFormContext.Provider
-				value={{
-					notification,
-					updateNotification,
-					capiFetch: hackyClientSideCapiFetch,
-					sendNotification: mockSendNotification,
-					requestEmailHtml: mockRequestEmailHtml,
-				}}
-			>
-				<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
-					{currentTab === 'create' && <DispatchTab />}
-					{currentTab === 'history' && <HistoryTab />}
+			{hasAccess ? (
+				<NotificationFormContext.Provider
+					value={{
+						notification,
+						updateNotification,
+						capiFetch: hackyClientSideCapiFetch,
+						sendNotification: mockSendNotification,
+						requestEmailHtml: mockRequestEmailHtml,
+					}}
+				>
+					<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
+						{currentTab === 'create' && <DispatchTab />}
+						{currentTab === 'history' && <HistoryTab />}
+					</MainLayout>
+				</NotificationFormContext.Provider>
+			) : (
+				<MainLayout currentTab={currentTab} setTab={() => {}}>
+					<NoPermissionsTab />
 				</MainLayout>
-			</NotificationFormContext.Provider>
+			)}
 		</UserContext.Provider>
 	);
 };

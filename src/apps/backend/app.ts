@@ -36,7 +36,6 @@ if (process.env.NODE_ENV === 'test') {
 	app.use(authRedirectMiddleware).get(['/', '/index.html'], serveIndex);
 }
 
-
 app.use(
 	express.static(clientAssetsDir, {
 		index: false,

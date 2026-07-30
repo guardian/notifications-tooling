@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { UserResponse } from '@config';
+import { isRunningLocally } from '@config';
 import type { Request, RequestHandler, Response } from 'express';
 import { clientAssetsDir } from '../client-assets';
 import { listUserPermissions } from '../utils/permissions/permissions-store';
@@ -21,6 +22,9 @@ let cachedTemplate: string | undefined;
  * build time, so there is no need to re-read it per request.
  */
 const readIndexTemplate = (): string => {
+	if (isRunningLocally) {
+		return readFileSync(indexHtmlPath, 'utf8');
+	}
 	cachedTemplate ??= readFileSync(indexHtmlPath, 'utf8');
 	return cachedTemplate;
 };
