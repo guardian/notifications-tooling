@@ -92,11 +92,13 @@ unrelated profile. It also means Dispatch can add duplicate-email profiles to
 Braze. These profiles should be treated as owned by Dispatch and identified by
 the `dispatch-tool-test-email` alias label.
 
-Test recipients must be approved internal addresses. The current request schema
-accepts any syntactically valid email address and does not yet enforce an
-internal-domain allowlist, so access control and a future recipient allowlist are
-important safeguards. Direct sends use `recipient_subscription_state: "all"`,
-which deliberately bypasses the profile's subscription state for test delivery.
+During pre-production testing, recipients are intentionally unrestricted beyond
+email syntax validation and the 20-recipient request limit. Access remains
+protected by Panda authentication and the `dispatch_access` permission. This
+policy must be reviewed before production, including whether to restrict sends
+to the authenticated user or an approved address allowlist. Direct sends use
+`recipient_subscription_state: "all"`, which deliberately bypasses the profile's
+subscription state for test delivery.
 
 Changing the alias label later creates a new identity namespace. Existing
 profiles under the previous label will not be reused and another same-email

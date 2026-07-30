@@ -38,7 +38,7 @@ const testEmailEnvironmentSchema = z.object({
 		(value) => (typeof value === 'string' && !value.trim() ? undefined : value),
 		z
 			.union([z.email(), z.literal('NO_REPLY_TO')])
-			.default('no-reply@editorial.theguardian.com'),
+			.default('NO_REPLY_TO'),
 	),
 });
 

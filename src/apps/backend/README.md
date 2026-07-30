@@ -29,58 +29,16 @@ topic and content request but does not make a network call.
 client. For newsletter segments it renders the selected article through
 email-rendering and triggers the mapped Braze campaign.
 
-## Test the notification endpoint
+## Test email behaviour
 
-With the backend running on port 4000 and `.env.local` populated, run the
-following request to test newsletter rendering and dispatch through the mapped
-UK Braze dev campaign. This uses `dryRun: false`, so it makes real downstream
-requests.
-
-```sh
-curl --include \
-  --silent \
-  --show-error \
-  --fail-with-body \
-  --request POST \
-  'http://localhost:4000/v1/notifications' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "idempotencyKey": "newsletter-live-2026-07-23-oil-price-01",
-    "sender": "manual-e2e-test",
-    "content": {
-      "items": {
-        "lead": {
-          "type": "newsletter",
-          "title": "Oil price test",
-          "body": "Manual end-to-end newsletter test.",
-          "link": "https://www.theguardian.com/business/2026/jul/23/oil-price-passes-100-a-barrel-again-as-middle-east-conflict-escalates"
-        }
-      }
-    },
-    "channels": {
-      "newsletter": {
-        "audience": {
-          "type": "segment",
-          "items": ["UK"]
-        },
-        "compose": {
-          "items": ["lead"],
-          "subject": "[TEST] Oil price newsletter rendering"
-        }
-      }
-    },
-    "options": {
-      "dryRun": false,
-      "scheduledFor": null
-    }
-  }'
-```
-
-The current email-rendering endpoint supports one article. Test-email audiences
-accept up to 20 email addresses and one or more newsletter segments. Each
-selected segment is rendered and sent through Braze's `/messages/send` endpoint;
-the production campaign is not triggered. Recipient addresses are normalized to
-lowercase. After all selected segments render, the client creates or updates the
+The current email-rendering endpoint supports one article. During pre-production
+testing, test-email audiences accept any syntactically valid email address, with
+up to 20 recipients per request, and one or more newsletter segments. Access
+remains protected by Panda authentication and the `dispatch_access` permission;
+the recipient policy must be reviewed before production. Each selected segment
+is rendered and sent through Braze's `/messages/send` endpoint; the production
+campaign is not triggered. Recipient addresses are normalized to lowercase.
+After all selected segments render, the client creates or updates the
 stable alias-only test profiles once under the `dispatch-tool-test-email` alias
 label through `/users/track`, then sends each rendered variant. Braze matches
 that alias, not an existing profile's email, so a separate same-email test
@@ -92,9 +50,9 @@ automatic retry. A successful API response confirms Braze accepted the calls,
 not inbox delivery. Check Braze activity before manually retrying a first-time
 recipient to avoid a possible duplicate.
 
-See the [Braze test email send flow](../../../docs/braze-test-email-send-flow.md)
+See the [Braze test email send flow](../../../docs/braze/braze-test-email-send-flow.md)
 for the runtime sequence and failure behaviour, and
-[Braze test email delivery options](../../../docs/braze-test-email-delivery-options.md)
+[Braze test email delivery options](../../../docs/braze/braze-test-email-delivery-options.md)
 for the alternatives and rationale. Scheduled delivery is rejected until its
 downstream contract is implemented. Dry runs are accepted without calling either
 downstream client.

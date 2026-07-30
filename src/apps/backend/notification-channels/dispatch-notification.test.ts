@@ -313,7 +313,7 @@ describe('dispatchNotification', () => {
 		expect(sendBrazeTestEmail).toHaveBeenCalledWith(
 			expect.objectContaining({
 				from: 'dev testing <dev-testing@email.theguardian.com>',
-				replyTo: 'no-reply@editorial.theguardian.com',
+				replyTo: 'NO_REPLY_TO',
 			}),
 		);
 	});
