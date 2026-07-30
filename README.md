@@ -33,6 +33,15 @@ Email delivery currently integrates with [Braze](https://www.braze.com/docs/deve
 
 ### First-time setup
 
+Install `dev-nginx` before `./scripts/setup.sh` can be run:
+
+```bash
+brew tap guardian/homebrew-devtools
+brew install guardian/devtools/dev-nginx
+```
+
+Then:
+
 ```bash
 ./scripts/setup.sh
 ```
