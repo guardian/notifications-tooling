@@ -1,1 +1,0 @@
-ALTER TABLE "notifications" ALTER COLUMN "sender" SET NOT NULL;

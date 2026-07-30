@@ -26,13 +26,12 @@
 		"lint": "bun --bun eslint .",
 		"lint:fix": "bun --bun eslint . --fix",
 		"check:pinned-deps": "bun run scripts/check-pinned-deps.ts",
-		"db:migration:create": "bun run scripts/create-db-migration.ts",
-		"db:migration:apply": "cd src/apps/backend && bun run db:migration:apply",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"typecheck": "bun run --filter '*' typecheck",
-		"docker:compose:up": "docker compose -f docker/docker-compose.local.yml up -d",
-		"docker:compose:down": "docker compose -f docker/docker-compose.local.yml down"
+		"db:start": "docker compose -f docker/docker-compose.local.yml up -d",
+    	"db:stop": "docker compose -f docker/docker-compose.local.yml down",
+    	"db:reset": "cd src/apps/backend && bun run db:reset"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config": "16.0.0",

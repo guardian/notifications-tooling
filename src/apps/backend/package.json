@@ -8,7 +8,8 @@
 		"dev": "bun run --hot index.ts",
 		"build": "bun build app.ts --minify --outfile=dist/handler.js --target=node --format=cjs -e @aws-sdk/* --production",
 		"db:migration:create": "bun run ../../../scripts/create-db-migration.ts",
-		"db:migration:apply": "bun --bun x drizzle-kit migrate --config=drizzle.config.ts",
+		"db:migration:apply": "bun x drizzle-kit migrate --config=drizzle.config.ts",
+		"db:reset": "bash db/scripts/reset-db.sh",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit"
 	},
@@ -20,7 +21,7 @@
 		"@types/pg": "8.20.0",
 		"@types/swagger-ui-express": "4.1.8",
 		"dotenv": "17.4.2",
-		"drizzle-kit": "1.0.0-rc.4"
+		"drizzle-kit": "0.31.10"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "3.1093.0",
@@ -30,7 +31,7 @@
 		"@guardian/permissions-client": "0.0.2",
 		"@http-logger": "workspace:*",
 		"@utils": "workspace:*",
-		"drizzle-orm": "1.0.0-rc.4",
+		"drizzle-orm": "0.45.2",
 		"express": "5.2.1",
 		"express-zod-safe": "3.2.1",
 		"pg": "8.22.0",

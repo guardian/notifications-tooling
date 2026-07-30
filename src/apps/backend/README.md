@@ -33,7 +33,7 @@ The Drizzle config lives in `src/apps/backend/drizzle.config.ts`.
 Create a migration from your schema changes from the repo root:
 
 ```sh
-bun run db:migration:create add-notification-status
+bun run db:migration:create YOUR_MIGRATION_NAME
 ```
 
 The wrapper passes the supplied name to Drizzle, which prefixes it with its own
@@ -49,7 +49,7 @@ bun run db:migration:apply
 The same scripts are also available from `src/apps/backend` via:
 
 ```sh
-bun run db:migration:create add-notification-status
+bun run db:migration:create YOUR_MIGRATION_NAME
 bun run db:migration:apply
 ```
 
