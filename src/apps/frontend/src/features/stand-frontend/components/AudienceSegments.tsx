@@ -66,6 +66,17 @@ const styles = {
 		height: '18px',
 		gap: `${baseSpacing['8Px']}`,
 	}),
+	isConfirmationStyle: css({
+		backgroundColor: semanticColors.fill.weak,
+		color: semanticColors.text.weak,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		display: 'flex',
+		alignItems: 'center',
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
+	}),
 };
 export const AudienceSegments = ({
 	segments = DEFAULT_SEGMENTS,
@@ -158,10 +169,7 @@ export const AudienceSegmentsPreviewPill = ({
 							key={segmentCode}
 							css={
 								isConfirmation
-									? {
-											...styles.audienceSegmentButton(false),
-											border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
-										}
+									? styles.isConfirmationStyle
 									: styles.audienceSegmentButton(true)
 							}
 						>
