@@ -7,11 +7,6 @@ repo_root="$(cd "$script_dir/../../../../.." && pwd)"
 compose_file="$repo_root/docker/docker-compose.local.yml"
 bun_bin="${BUN_BIN:-$(command -v bun 2>/dev/null || true)}"
 
-if [[ -z "$bun_bin" ]]; then
-	echo "Bun is required to apply database migrations. Install it or run this script via 'bun run db:reset'." >&2
-	exit 1
-fi
-
 cd "$repo_root"
 
 echo "Recreating local database..."
