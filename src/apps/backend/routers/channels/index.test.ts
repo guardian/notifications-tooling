@@ -7,9 +7,26 @@ import {
 	newsletterSegments,
 	NotificationChannel,
 	notificationChannelContentLimits,
+	UserPermissions,
 } from '@config';
-import { startTestServer, type TestServer } from '../../test-utils/server';
+import {
+	assertUnauthenticatedRequestBlocked,
+	authenticateRequests,
+	installPandaAuthMock,
+} from '../../utils/test-utils/panda-auth';
+import {
+	assertInsufficientPermissionsRequestBlocked,
+	grantPermissions,
+	installPermissionsStoreMock,
+} from '../../utils/test-utils/permissions';
+import type { TestServer } from '../../utils/test-utils/server';
 import { channelAudiences, channelConstraints } from './index';
+
+// Stub Panda verification and the permissions store before the app (and its
+// real clients) are imported.
+installPandaAuthMock();
+installPermissionsStoreMock();
+const { startTestServer } = await import('../../utils/test-utils/server');
 
 /**
  * Drives the real Express app over HTTP so the whole `GET
@@ -20,6 +37,8 @@ let server: TestServer;
 let baseUrl: string;
 
 beforeAll(async () => {
+	authenticateRequests();
+	grantPermissions([UserPermissions.DispatchAccess]);
 	server = await startTestServer();
 	baseUrl = server.baseUrl;
 });
@@ -33,6 +52,38 @@ const getConstraints = (): Promise<Response> =>
 
 const getAudiences = (): Promise<Response> =>
 	fetch(`${baseUrl}/v1/channels/audiences`);
+
+describe('/v1/channels authentication', () => {
+	it('blocks unauthenticated GET /v1/channels/constraints', async () => {
+		await assertUnauthenticatedRequestBlocked(baseUrl, {
+			method: 'GET',
+			path: '/v1/channels/constraints',
+		});
+	});
+
+	it('blocks unauthenticated GET /v1/channels/audiences', async () => {
+		await assertUnauthenticatedRequestBlocked(baseUrl, {
+			method: 'GET',
+			path: '/v1/channels/audiences',
+		});
+	});
+});
+
+describe('/v1/channels permissions', () => {
+	it('blocks GET /v1/channels/constraints without the dispatch permission', async () => {
+		await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+			method: 'GET',
+			path: '/v1/channels/constraints',
+		});
+	});
+
+	it('blocks GET /v1/channels/audiences without the dispatch permission', async () => {
+		await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+			method: 'GET',
+			path: '/v1/channels/audiences',
+		});
+	});
+});
 
 describe('GET /v1/channels/constraints', () => {
 	it('returns 200 with the per-channel constraints from config', async () => {

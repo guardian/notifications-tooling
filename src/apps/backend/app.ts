@@ -1,5 +1,4 @@
 import serverlessExpress from '@codegenie/serverless-express';
-import { env } from '@config';
 import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
@@ -7,8 +6,7 @@ import express, {
 	type Request,
 	type Response,
 } from 'express';
-import { clientAssetsDir } from './client-assets';
-import { authMiddleware } from './middleware/auth-middleware';
+import { staticAssetsMiddleware } from './middleware/static-assets-middleware';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
@@ -22,26 +20,9 @@ app.disable('x-powered-by');
 app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+app.use(staticAssetsMiddleware);
 
 app.use('/health', healthRouter);
-
-if (env.NODE_ENV !== 'test') {
-	app.use(authMiddleware);
-}
-
-app.use(
-	express.static(clientAssetsDir, {
-		maxAge: oneYearInMs,
-		immutable: true,
-		setHeaders: (res, filePath) => {
-			if (filePath.endsWith('index.html')) {
-				res.setHeader('Cache-Control', 'no-cache');
-			}
-		},
-	}),
-);
 
 // Private - authenticated routes
 app.use('/v1/channels', channelsRouter);

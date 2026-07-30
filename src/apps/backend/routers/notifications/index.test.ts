@@ -1,7 +1,24 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { UserPermissions } from '@config';
 import express from 'express';
-import { startTestServer, type TestServer } from '../../test-utils/server';
+import {
+	assertUnauthenticatedRequestBlocked,
+	authenticateRequests,
+	installPandaAuthMock,
+} from '../../utils/test-utils/panda-auth';
+import {
+	assertInsufficientPermissionsRequestBlocked,
+	grantPermissions,
+	installPermissionsStoreMock,
+} from '../../utils/test-utils/permissions';
+import type { TestServer } from '../../utils/test-utils/server';
 import { createNotificationsRouter } from '.';
+
+// Stub Panda verification and the permissions store before the app (and its
+// real clients) are imported.
+installPandaAuthMock();
+installPermissionsStoreMock();
+const { startTestServer } = await import('../../utils/test-utils/server');
 
 /**
  * These tests drive the real Express app over HTTP so the whole `POST
@@ -13,6 +30,8 @@ let server: TestServer;
 let baseUrl: string;
 
 beforeAll(async () => {
+	authenticateRequests();
+	grantPermissions([UserPermissions.DispatchAccess]);
 	server = await startTestServer();
 	baseUrl = server.baseUrl;
 });
@@ -51,6 +70,25 @@ const validPushRequest = () => ({
 });
 
 describe('POST /v1/notifications', () => {
+	describe('authentication', () => {
+		it('blocks unauthenticated POST /v1/notifications', async () => {
+			await assertUnauthenticatedRequestBlocked(baseUrl, {
+				method: 'POST',
+				path: '/v1/notifications',
+			});
+		});
+	});
+
+	describe('permissions', () => {
+		it('blocks POST /v1/notifications without the dispatch permission', async () => {
+			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+				method: 'POST',
+				path: '/v1/notifications',
+				body: validPushRequest(),
+			});
+		});
+	});
+
 	describe('happy path', () => {
 		it('dispatches the validated request before accepting it', async () => {
 			const dispatchRequest = mock(() => Promise.resolve());

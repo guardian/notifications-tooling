@@ -1,27 +1,43 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { UserPermissions } from '@config';
 import type {
 	Request as ExpressRequest,
 	Response as ExpressResponse,
 } from 'express';
-import { startTestServer, type TestServer } from '../../test-utils/server';
 import {
-	samplePermissions,
-	sampleUser,
-	userHandler,
-	type UserResponse,
-} from './index';
+	assertUnauthenticatedRequestBlocked,
+	authenticateRequests,
+	installPandaAuthMock,
+	testUser,
+} from '../../utils/test-utils/panda-auth';
+import {
+	grantPermissions,
+	installPermissionsStoreMock,
+} from '../../utils/test-utils/permissions';
+import type { TestServer } from '../../utils/test-utils/server';
+import type { UserResponse } from './index';
+
+// Stub Panda verification and the permissions store before the app (and its
+// real clients) are imported.
+installPandaAuthMock();
+installPermissionsStoreMock();
+const { startTestServer } = await import('../../utils/test-utils/server');
+const { userHandler } = await import('./index');
+
+const userPermissions = [UserPermissions.DispatchAccess];
 
 describe('user handler', () => {
-	it('responds with the user wrapped under `user` and their permissions', () => {
+	it('responds with the user wrapped under `user` and their permission names', async () => {
+		grantPermissions(userPermissions);
 		const json = mock<(body: unknown) => void>(() => {});
 		const res = { json } as unknown as ExpressResponse;
 
-		userHandler({} as ExpressRequest, res);
+		await userHandler({ user: testUser } as unknown as ExpressRequest, res);
 
 		expect(json).toHaveBeenCalledTimes(1);
 		expect(json.mock.calls[0]?.[0]).toEqual({
-			user: sampleUser,
-			permissions: samplePermissions,
+			user: testUser,
+			permissions: userPermissions,
 		});
 	});
 });
@@ -35,6 +51,8 @@ describe('GET /v1/user', () => {
 	let baseUrl: string;
 
 	beforeAll(async () => {
+		authenticateRequests(testUser);
+		grantPermissions(userPermissions);
 		server = await startTestServer();
 		baseUrl = server.baseUrl;
 	});
@@ -45,14 +63,21 @@ describe('GET /v1/user', () => {
 
 	const getUser = (): Promise<Response> => fetch(`${baseUrl}/v1/user`);
 
+	it('blocks unauthenticated GET /v1/user', async () => {
+		await assertUnauthenticatedRequestBlocked(baseUrl, {
+			method: 'GET',
+			path: '/v1/user',
+		});
+	});
+
 	it('returns 200 with the user and permissions as JSON', async () => {
 		const response = await getUser();
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get('content-type')).toContain('application/json');
 		expect(await response.json()).toEqual({
-			user: sampleUser,
-			permissions: samplePermissions,
+			user: testUser,
+			permissions: userPermissions,
 		});
 	});
 
@@ -75,26 +100,32 @@ describe('GET /v1/user', () => {
 		expect(typeof user.multifactor).toBe('boolean');
 	});
 
-	it('includes the DispatchAccess permission from guardian/permissions#400', async () => {
+	it('lists the permissions the store returns for the user', async () => {
 		const response = await getUser();
 		const { permissions } = (await response.json()) as UserResponse;
 
-		expect(permissions).toContainEqual({
-			name: 'DispatchAccess',
-			description: 'Access to Dispatch',
-			active: true,
-		});
+		expect(permissions).toContain(UserPermissions.DispatchAccess);
 	});
 
-	it('returns permissions matching the Permission interface shape', async () => {
+	it('returns an empty list when the store grants the user nothing', async () => {
+		grantPermissions([]);
+		try {
+			const response = await getUser();
+			const { permissions } = (await response.json()) as UserResponse;
+
+			expect(permissions).toEqual([]);
+		} finally {
+			grantPermissions(userPermissions);
+		}
+	});
+
+	it('returns permissions as an array of permission-name strings', async () => {
 		const response = await getUser();
 		const { permissions } = (await response.json()) as UserResponse;
 
 		expect(Array.isArray(permissions)).toBe(true);
 		for (const permission of permissions) {
-			expect(typeof permission.name).toBe('string');
-			expect(typeof permission.description).toBe('string');
-			expect(typeof permission.active).toBe('boolean');
+			expect(typeof permission).toBe('string');
 		}
 	});
 });
