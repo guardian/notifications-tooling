@@ -7,7 +7,7 @@ import express, {
 	type Response,
 } from 'express';
 import { clientAssetsDir } from './client-assets';
-import { authMiddleware } from './middleware/auth-middleware';
+import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
@@ -25,16 +25,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
 
-if (process.env.NODE_ENV !== 'test') {
-	app.use(authMiddleware);
-}
-
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 
 // Serve index.html with the current user injected as config. Handled before
 // express.static (which has index serving disabled below) so the un-injected
 // file is never served.
-app.get(['/', '/index.html'], serveIndex);
+if (process.env.NODE_ENV === 'test') {
+	app.get(['/', '/index.html'], serveIndex);
+} else {
+	app.use(authRedirectMiddleware).get(['/', '/index.html'], serveIndex);
+}
+
 
 app.use(
 	express.static(clientAssetsDir, {
