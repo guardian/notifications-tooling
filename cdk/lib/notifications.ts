@@ -11,6 +11,7 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 const PAN_DOMAIN_AUTH_SETTINGS_BUCKET = 'pan-domain-auth-settings';
 const LOGIN_GUTOOLS_CONFIG_BUCKET = 'login-gutools-config';
+const PERMISSIONS_CACHE_BUCKET = 'permissions-cache';
 
 export class DispatchStack extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps, app: string) {
@@ -111,6 +112,8 @@ const localLoginToolPolicyStatements = (stack: GuStack) => {
 		resources: [
 			`arn:aws:s3:::${LOGIN_GUTOOLS_CONFIG_BUCKET}/DEV/*`,
 			`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/*`,
+			// Local dev reads the CODE permissions cache
+			`arn:aws:s3:::${PERMISSIONS_CACHE_BUCKET}/CODE/*`,
 		],
 	});
 	return [
