@@ -13,7 +13,6 @@ configuration, and package-level database scripts.
 
 The Drizzle config loads `DATABASE_URL` from `.env` in this package directory.
 
-
 ## Database migrations
 
 Run the following commands from `src/packages/database`.

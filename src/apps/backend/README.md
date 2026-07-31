@@ -23,7 +23,6 @@ topic and content request but does not make a network call.
 client. For newsletter segments it renders the selected article through
 email-rendering and triggers the mapped Braze campaign.
 
-
 ## Test the notification endpoint
 
 With the backend running on port 4000 and `.env.local` populated, run the
