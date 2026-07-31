@@ -3,9 +3,9 @@ services:
     image: postgres:18.4-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-notifications}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-notifications}
-      POSTGRES_DB: ${POSTGRES_DB:-notifications}
+      POSTGRES_USER: ${POSTGRES_USER:-dispatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dispatch}
+      POSTGRES_DB: ${POSTGRES_DB:-dispatch}
     ports:
       - '5432:5432'
     volumes:
@@ -14,7 +14,7 @@ services:
       test:
         [
           'CMD-SHELL',
-          'pg_isready -U ${POSTGRES_USER:-notifications} -d ${POSTGRES_DB:-notifications}',
+          'pg_isready -U ${POSTGRES_USER:-dispatch} -d ${POSTGRES_DB:-dispatch}',
         ]
       interval: 10s
       timeout: 5s

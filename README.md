@@ -72,13 +72,18 @@ cd src/apps/backend
 bun run dev
 ```
 
-### Optional local Postgres
+### Local Postgres DB
 
-Should Postgres be required, there is a minimal working ./docker/docker-compose.local.yml file and two helper scripts to start & stop docker services.
+Spin a new docker container running Postgres with
 
 ```bash
-bun run docker:compose:up
-bun run docker:compose:down
+bun run db:start
+```
+
+And stop it with
+
+```sh
+bun run db:stop
 ```
 
 ### Tests, linting, formatting, and type checks
