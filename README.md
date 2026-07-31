@@ -122,6 +122,8 @@ Git hooks are managed with `lefthook` and installed automatically via `bun insta
 - `src/apps/backend`: API and channel request generation.
 - `src/packages`: shared packages.
 - `cdk`: infrastructure stack and deployment definitions.
+- `containers/database-migrations`: Dockerfile and runner script for the migration Fargate task.
+- `scripts`: helper scripts including the migration artifact builder.
 
 ### Infrastructure model
 
@@ -143,6 +145,9 @@ flowchart LR
             subgraph SG2[Database security group]
                 RDS[(RDS PostgreSQL 18\ndispatch DB)]
             end
+            subgraph SG3[Migration task security group]
+                MigTask[ECS Fargate task\ndrizzle-kit migrate]
+            end
         end
     end
 
@@ -150,7 +155,56 @@ flowchart LR
     Lambda -. planned .-> N10N[mobile-n10n notifications API\napp push channel]
 
     Lambda -->|TCP 5432| RDS
+    MigTask -->|TCP 5432| RDS
 ```
+
+### Database migrations
+
+Migrations are managed with [Drizzle Kit](https://orm.drizzle.team/docs/kit-overview) under `src/packages/database`.
+
+#### Creating a new migration
+
+```bash
+cd src/packages/database
+bun run db:migration:create
+```
+
+#### Applying migrations locally
+
+```bash
+cd src/packages/database
+bun run db:migration:apply
+```
+
+#### Deploy-time migration behaviour
+
+On every Riff-Raff deployment, a one-shot ECS Fargate task applies any pending Drizzle migrations:
+
+1. **CloudFormation** — infrastructure stack is deployed/updated.
+2. **Migration artifact upload** (`dispatch-database-migrations`, S3) — CI uploads a zip containing the Drizzle SQL files and their dependencies. This step depends on CloudFormation so the ECS task definition and EventBridge rule already exist.
+3. **EventBridge fires** — the S3 Object Created event triggers the Fargate migration task in a private subnet with access to the RDS instance.
+4. **`drizzle-kit migrate` runs** — the task applies pending migrations and exits 0. When no migrations are pending it is a safe no-op. A PostgreSQL advisory lock serialises concurrent attempts.
+5. **Lambda update** — the application Lambda is updated (depends only on CloudFormation, not on migration completion).
+
+> **⚠️ Async ordering**: Riff-Raff considers the S3 upload complete as soon as the object lands in S3. The Fargate task runs **asynchronously**. The Lambda update in step 5 is NOT blocked on the migration task finishing.
+
+#### Expand/contract migrations
+
+Because migration completion is not synchronous with the Lambda deployment, always write **backward-compatible (expand/contract)** migrations:
+
+1. **Expand**: add columns/tables in one release. The running Lambda is unaffected.
+2. **Use**: ship the code that uses the new schema in the same or a subsequent release.
+3. **Contract**: in a later release, remove obsolete columns after all instances use the new schema.
+
+Never drop a column in the same deployment as the code that stops using it.
+
+#### Failure visibility
+
+Migration task logs are written to CloudWatch Logs under the log group `{stack}/{stage}/dispatch-database-migrations`. A failed migration exits non-zero; the ECS task is marked `STOPPED` with a non-zero exit code. Set up a CloudWatch alarm on the log group or ECS task stop reason to be alerted on failures.
+
+#### Concurrent execution
+
+Concurrent migration tasks acquire a PostgreSQL advisory lock (`pg_advisory_lock(7461849)`) before calling `drizzle-kit migrate`. If two tasks start simultaneously the second will wait for the first to release the lock, then find all migrations already applied (Drizzle records applied migrations in `__drizzle_migrations`) and exit cleanly.
 
 ## 4. Useful Links
 

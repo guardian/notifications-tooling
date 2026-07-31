@@ -61,6 +61,9 @@ jobs:
         working-directory: cdk
         run: bun synth
 
+      - name: Build database migration artifact
+        run: ./scripts/create-database-migrations-artifact.sh
+
       - name: Combine application and CDK into dist
         run: |
           mkdir -p dist/frontend
@@ -81,6 +84,8 @@ jobs:
               - cdk/cdk.out
             dispatch:
               - dist/dispatch.zip
+            database-migrations:
+              - dist/database-migrations.zip
 
   storybook-tests:
     name: Storybook interaction tests

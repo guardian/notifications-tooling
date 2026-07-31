@@ -9,7 +9,9 @@ export default [
 	{
 		ignores: [
 			'**/dist/**',
+			'**/cdk.out/**',
 			'docker/**',
+			'containers/**',
 			'!docker/docker-compose.local.yml',
 			'**/*.d.ts',
 			'**/storybook-static/**',

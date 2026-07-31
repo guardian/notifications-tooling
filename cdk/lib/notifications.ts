@@ -22,6 +22,7 @@ import {
 	PostgresEngineVersion,
 	SubnetGroup,
 } from 'aws-cdk-lib/aws-rds';
+import { addDrizzleMigrateTask } from './database-migrations-task';
 
 const PAN_DOMAIN_AUTH_SETTINGS_BUCKET = 'pan-domain-auth-settings';
 const LOGIN_GUTOOLS_CONFIG_BUCKET = 'login-gutools-config';
@@ -117,10 +118,25 @@ export class DispatchStack extends GuStack {
 			}),
 		);
 
+		// Dedicated security group for the one-shot Fargate migration task.
+		// Created before databaseSecurityGroup so it can be listed as an ingress source below.
+		const migrationSecurityGroup = new GuSecurityGroup(
+			this,
+			'DispatchMigrationSecurityGroup',
+			{
+				app: `${app}-database-migrations`,
+				description:
+					'Security group for the Dispatch database migration Fargate task.',
+				vpc: accountVpc,
+				allowAllOutbound: true,
+				securityGroupName: `DispatchMigrationSecurityGroup${stage}`,
+			},
+		);
+
 		const databaseSecurityGroup = new GuSecurityGroup(this, 'DBSecurityGroup', {
 			app,
 			description:
-				'Allow connections from the Dispatch application lambda to the database.',
+				'Allow connections from the Dispatch application lambda and the migration task to the database.',
 			vpc: accountVpc,
 			allowAllOutbound: false,
 			ingresses: [
@@ -129,6 +145,12 @@ export class DispatchStack extends GuStack {
 					port: Port.tcp(DB_PORT),
 					description:
 						'Allow ingress traffic from the Dispatch application lambda security group.',
+				},
+				{
+					range: migrationSecurityGroup,
+					port: Port.tcp(DB_PORT),
+					description:
+						'Allow ingress traffic from the Dispatch database migration task security group.',
 				},
 			],
 		});
@@ -151,7 +173,8 @@ export class DispatchStack extends GuStack {
 			},
 		};
 
-		new GuDatabaseInstance(this, `DispatchDatabase`, {
+		// Store the database instance reference so it can be passed to the migration construct.
+		const database = new GuDatabaseInstance(this, `DispatchDatabase`, {
 			allocatedStorage: 20,
 			allowMajorVersionUpgrade: false,
 			app: `${app}-db`,
@@ -183,6 +206,14 @@ export class DispatchStack extends GuStack {
 				},
 				description: 'Subnet for the Dispatch database',
 			}),
+			vpc: accountVpc,
+		});
+
+		// One-shot Fargate task that applies Drizzle migrations on each deployment.
+		// Triggered automatically by the S3 upload of the migration artifact in Riff-Raff.
+		addDrizzleMigrateTask(this, {
+			database,
+			migrationSecurityGroup,
 			vpc: accountVpc,
 		});
 

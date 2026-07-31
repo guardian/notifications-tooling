@@ -1,0 +1,9 @@
+{
+	"name": "database-migrations-runner",
+	"type": "module",
+	"private": true,
+	"dependencies": {
+		"@aws-sdk/client-s3": "3.1093.0",
+		"pg": "8.22.0"
+	}
+}
