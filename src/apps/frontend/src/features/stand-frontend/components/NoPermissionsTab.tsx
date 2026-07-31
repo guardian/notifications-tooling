@@ -1,10 +1,27 @@
+import { semanticSpacing } from '@guardian/stand';
 import { Layout } from '@guardian/stand/Layout';
-import { layoutMainTheme } from '../themes';
+import { Typography } from '@guardian/stand/Typography';
 
 export const NoPermissionsTab = () => {
 	return (
-		<Layout.Main theme={layoutMainTheme}>
-			<p>You do not have permissions to use dispatch</p>
+		<Layout.Main>
+			<div
+				css={{
+					paddingLeft: semanticSpacing.stackLg,
+					paddingRight: semanticSpacing.stackLg,
+				}}
+			>
+				<Typography variant="heading2Xl" element="h2">
+					Unauthorised
+				</Typography>
+				<Typography>
+					You don&apos;t have permission to access this page, please{' '}
+					<a href="mailto:central.production@guardian.co.uk">
+						contact central production
+					</a>{' '}
+					if you require access.
+				</Typography>
+			</div>
 		</Layout.Main>
 	);
 };

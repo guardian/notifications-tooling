@@ -29,3 +29,19 @@ export const NotificationsPage: Story = {
 		await expect(CreateNotificationHeading).toBeInTheDocument();
 	},
 };
+
+export const NotificationsPageWithoutPermission: Story = {
+	beforeEach() {
+		window.__APP_CONFIG__ = { ...mockAppConfig, permissions: [] };
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const CreateNotificationHeading = canvas.getByText(
+			'contact central production',
+			{
+				selector: 'a',
+			},
+		);
+		await expect(CreateNotificationHeading).toBeInTheDocument();
+	},
+};
