@@ -17,6 +17,13 @@ interface GetParameterResponse {
 }
 
 /**
+ * Convert an `UPPER_SNAKE_CASE` parameter key into the `kebab-case` form used
+ * for parameter names stored in SSM.
+ */
+const toKebabCase = (key: string): string =>
+	key.toLowerCase().replaceAll('_', '-');
+
+/**
  * Fetch an SSM parameter value via the AWS Parameters and Secrets Lambda
  * Extension.
  *
@@ -47,7 +54,9 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 
 	const url = new URL('http://localhost:2773/systemsmanager/parameters/get');
 	url.port = extensionPort;
-	url.searchParams.set('name', `${namespace}${key}`);
+	// SSM parameters are stored in kebab-case, but callers pass the
+	// UPPER_SNAKE_CASE env-var key, so convert it to match the stored name.
+	url.searchParams.set('name', `${namespace}${toKebabCase(key)}`);
 	url.searchParams.set('withDecryption', 'true');
 
 	const response = await fetch(url, {
