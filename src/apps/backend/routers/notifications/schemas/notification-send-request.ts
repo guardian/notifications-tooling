@@ -146,18 +146,9 @@ const newsletterSegmentAudience = segmentAudience(
 	MAX_NEWSLETTER_SEGMENTS,
 );
 
-/** Ad-hoc test recipients addressed directly through Braze. */
+/** Ad-hoc test recipients addressed by email, bypassing segments. */
 const testEmailAudience = z.strictObject({
 	type: z.literal('email'),
-	items: z
-		.array(z.email().toLowerCase())
-		.min(1)
-		.max(MAX_TEST_EMAIL_RECIPIENTS)
-		.refine(hasUniqueItems, { message: 'email addresses must be unique.' })
-		.meta({
-			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send rendered test emails to through Braze's direct message API. Addresses are normalized to lowercase.`,
-			example: ['newsletters.test@theguardian.com'],
-		}),
 	segments: z
 		.array(z.enum(newsletterSegmentIds))
 		.min(1)
@@ -165,16 +156,19 @@ const testEmailAudience = z.strictObject({
 		.refine(hasUniqueItems, { message: 'segment ids must be unique.' })
 		.meta({
 			description:
-				'Newsletter segments whose rendering configuration should be used for the direct test send. Production Braze campaigns are not triggered.',
+				'Newsletter segments whose rendering configuration should be used. These segments are not recipients and their production campaigns are not triggered.',
 			example: [newsletterSegmentIds[0]],
 		}),
+	items: z
+		.array(z.email())
+		.min(1)
+		.max(MAX_TEST_EMAIL_RECIPIENTS)
+		.refine(hasUniqueItems, { message: 'email addresses must be unique.' })
+		.meta({
+			description: `Up to ${MAX_TEST_EMAIL_RECIPIENTS} email addresses to send a test to.`,
+			example: ['newsletters.test@theguardian.com'],
+		}),
 });
-
-/** Newsletter audiences may target segments or ad-hoc test emails. */
-const newsletterAudience = z.discriminatedUnion('type', [
-	newsletterSegmentAudience,
-	testEmailAudience,
-]);
 
 /** Push takes a single content item. */
 const appPushCompose = z.strictObject({
@@ -204,7 +198,13 @@ const newsletterCompose = z.strictObject({
 
 /** A newsletter delivery plan: who to target and which items to assemble. */
 const newsletterPlan = z.strictObject({
-	audience: newsletterAudience,
+	audience: newsletterSegmentAudience,
+	compose: newsletterCompose,
+});
+
+/** A test newsletter plan targets explicit email addresses only. */
+const newsletterTestPlan = z.strictObject({
+	audience: testEmailAudience,
 	compose: newsletterCompose,
 });
 
@@ -229,6 +229,15 @@ const channelsSchema = z
 	.meta({
 		description:
 			'Delivery plans keyed by channel. A channel may appear at most once; provide at least one.',
+	});
+
+const testChannelsSchema = z
+	.strictObject({
+		[NotificationChannel.Newsletter]: newsletterTestPlan,
+	})
+	.meta({
+		description:
+			'Test delivery plans keyed by channel. Test sends currently support newsletter email recipients only.',
 	});
 
 /**
@@ -347,4 +356,92 @@ export const notificationSendRequestSchema = z
 
 export type NotificationSendRequest = z.infer<
 	typeof notificationSendRequestSchema
+>;
+
+/** The `POST /v1/notification-tests` request body. Test sends are immediate. */
+export const notificationTestSendRequestSchema = z
+	.strictObject({
+		idempotencyKey: z.string().min(1).meta({
+			description:
+				'Client-generated unique key so retries are not delivered twice.',
+			example: 'test-2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
+		}),
+		content: contentSchema,
+		channels: testChannelsSchema,
+		sender: z.string().min(1).meta({
+			description: 'Identifier of the team or system sending the test.',
+			example: 'notifications-tooling-spa/v1',
+		}),
+		options: z
+			.strictObject({
+				dryRun: z.boolean().default(false).meta({
+					description:
+						'When true, content is validated and rendered but no recipients are registered and no messages are sent.',
+					example: false,
+				}),
+			})
+			.default({ dryRun: false }),
+	})
+	.superRefine((value, ctx) => {
+		const newsletter = value.channels[NotificationChannel.Newsletter];
+
+		newsletter.compose.items.forEach((key, index) => {
+			const item = value.content.items[key];
+			const path = [
+				'channels',
+				NotificationChannel.Newsletter,
+				'compose',
+				'items',
+				index,
+			];
+
+			if (!item) {
+				ctx.addIssue({
+					code: 'custom',
+					path,
+					message: `compose references content item '${key}' which is not defined in content.items.`,
+				});
+			} else if (item.type !== NotificationChannel.Newsletter) {
+				ctx.addIssue({
+					code: 'custom',
+					path,
+					message: `content item '${key}' has type '${item.type}' but is composed into a '${NotificationChannel.Newsletter}' plan.`,
+				});
+			}
+		});
+	})
+	.meta({
+		description: 'The POST /v1/notification-tests request body.',
+		example: {
+			idempotencyKey: 'test-2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
+			content: {
+				items: {
+					'lead-story': {
+						type: NotificationChannel.Newsletter,
+						title: 'Your morning briefing',
+						body: 'The three stories shaping the day.',
+						link: 'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
+					},
+				},
+			},
+			channels: {
+				[NotificationChannel.Newsletter]: {
+					audience: {
+						type: 'email',
+						segments: [newsletterSegmentIds[0]],
+						items: ['newsletters.test@theguardian.com'],
+					},
+					compose: {
+						items: ['lead-story'],
+						subject: '[TEST] Your morning briefing',
+					},
+				},
+			},
+			sender: 'notifications-tooling-spa/v1',
+			options: { dryRun: false },
+		},
+	});
+
+export type NotificationTestSendRequest = z.infer<
+	typeof notificationTestSendRequestSchema
 >;

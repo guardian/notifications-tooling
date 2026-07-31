@@ -24,6 +24,7 @@
 - `GET /v1/channels/constraints` - Retrieves per-channel validation rules/constrains
 - `GET /v1/notifications` - Retrieves a list of already enqueued notifications
 - `POST /v1/notifications` - Validate and enqueue notification to be pushed out to every requested channel
+- `POST /v1/notification-tests` - Validate and immediately send a notification to explicit test recipients
 - `GET /v1/notifications/abc123.../status` - Returns enqueued notification status having delivery statuses exposed for each supported channel
 
 ## Suggested backend architecture to support the model
@@ -214,21 +215,42 @@ Note: We'll need to keep a list of emails somewhere attached as a list of recipi
 
 Note: The emails persisted in the allow-list will have to be pre-validated so only internal Guardian user emails can be used.
 
+`POST /v1/notification-tests` mirrors the production content and composition
+shape, but accepts direct email recipients and rejects production segment
+audiences. `audience.segments` selects the rendering configuration only; those
+segments are never used as recipients and their campaigns are not triggered.
+Test sends are immediate and cannot be scheduled. They accept
+`options.dryRun`, defaulting to `false`; a dry run validates and renders content
+without registering recipients or sending messages.
+
 ```jsonc
 {
-	"channel": "newsletter",
-	"audience": {
-		"type": "test",
-		"recipients": [
-			{ "email": "editor@guardian.co.uk" },
-			{ "email": "qa@guardian.co.uk" },
-		],
+	"idempotencyKey": "test-morning-briefing-2026-07-08",
+	"sender": "notifications-tooling-spa/v1",
+	"content": {
+		"items": {
+			"lead": {
+				"type": "newsletter",
+				"title": "Ukraine summit begins",
+				"body": "World leaders gather in Geneva as talks open...",
+				"link": "https://www.theguardian.com/world/2026/jul/08/ukraine-summit",
+			},
+		},
 	},
-	"compose": {
-		"layout": "digest",
-		"items": ["lead", "secondary", "opinion"],
-		"subject": "[TEST] Your morning briefing: Ukraine summit",
+	"channels": {
+		"newsletter": {
+			"audience": {
+				"type": "email",
+				"segments": ["UK"],
+				"items": ["editor@guardian.co.uk", "qa@guardian.co.uk"],
+			},
+			"compose": {
+				"items": ["lead"],
+				"subject": "[TEST] Your morning briefing: Ukraine summit",
+			},
+		},
 	},
+	"options": { "dryRun": false },
 }
 ```
 

@@ -4,7 +4,10 @@ import {
 	NotificationChannel,
 } from '@config';
 import { z } from 'zod';
-import type { NotificationSendRequest } from '../routers/notifications/schemas/notification-send-request';
+import type {
+	NotificationSendRequest,
+	NotificationTestSendRequest,
+} from '../routers/notifications/schemas/notification-send-request';
 import { sendAppNotification } from './app-notification/client';
 import {
 	registerBrazeTestEmailRecipients,
@@ -59,7 +62,7 @@ const defaultDependencies: DispatchNotificationDependencies = {
 };
 
 const requireContentItem = (
-	request: NotificationSendRequest,
+	request: NotificationSendRequest | NotificationTestSendRequest,
 	itemId: string,
 	channel: NotificationChannel,
 ) => {
@@ -96,19 +99,10 @@ const resolveNewsletterDispatch = (
 		dependencies.environment,
 	);
 
-	const testEmail =
-		plan.audience.type === 'email'
-			? {
-					recipientEmails: plan.audience.items,
-					configuration: testEmailEnvironmentSchema.parse(
-						dependencies.environment,
-					),
-				}
-			: undefined;
-	const resolveSegment = (segmentId: keyof typeof newsletterSegments) => {
+	const segments = plan.audience.items.map((segmentId) => {
 		const { brazeCampaignId, emailRenderingNewsletterId } =
 			newsletterSegments[segmentId];
-		if (plan.audience.type === 'segment' && !brazeCampaignId.trim()) {
+		if (!brazeCampaignId.trim()) {
 			throw new Error(
 				`No Braze campaign ID is configured for newsletter segment '${segmentId}'.`,
 			);
@@ -120,15 +114,9 @@ const resolveNewsletterDispatch = (
 		}
 
 		return { brazeCampaignId, emailRenderingNewsletterId };
-	};
-	let segments: Array<ReturnType<typeof resolveSegment>>;
-	if (plan.audience.type === 'segment') {
-		segments = plan.audience.items.map(resolveSegment);
-	} else {
-		segments = plan.audience.segments.map(resolveSegment);
-	}
+	});
 
-	return { environment, item, plan, segments, testEmail };
+	return { environment, item, plan, segments };
 };
 
 const dispatchNewsletter = async (
@@ -139,50 +127,17 @@ const dispatchNewsletter = async (
 		return;
 	}
 
-	const { environment, item, plan, segments, testEmail } = resolvedDispatch;
-	const renderNewsletter = (emailRenderingNewsletterId: string) =>
+	const { environment, item, plan, segments } = resolvedDispatch;
+	for (const { brazeCampaignId, emailRenderingNewsletterId } of segments) {
 		// Email-rendering currently derives content from the article URL. Title,
 		// body, and media overrides remain unused until its POST contract exists.
-		dependencies.renderEmail({
+		const html = await dependencies.renderEmail({
 			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 			articleUrl: item.link,
 			newsletterId: emailRenderingNewsletterId,
 			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 
-	if (testEmail) {
-		const renderedEmails = [];
-		for (const { emailRenderingNewsletterId } of segments) {
-			renderedEmails.push(await renderNewsletter(emailRenderingNewsletterId));
-		}
-
-		// Without persisted alias readiness, registration stays in the send path.
-		// A new alias may not propagate before the immediate message request.
-		await dependencies.registerBrazeTestEmailRecipients({
-			apiKey: environment.BRAZE_API_KEY,
-			restEndpoint: environment.BRAZE_REST_ENDPOINT,
-			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
-			recipientEmails: testEmail.recipientEmails,
-		});
-
-		for (const html of renderedEmails) {
-			await dependencies.sendBrazeTestEmail({
-				apiKey: environment.BRAZE_API_KEY,
-				restEndpoint: environment.BRAZE_REST_ENDPOINT,
-				appId: testEmail.configuration.BRAZE_APP_ID,
-				from: testEmail.configuration.BRAZE_TEST_EMAIL_FROM,
-				replyTo: testEmail.configuration.BRAZE_TEST_EMAIL_REPLY_TO,
-				html,
-				subject: plan.compose.subject,
-				timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
-				recipientEmails: testEmail.recipientEmails,
-			});
-		}
-		return;
-	}
-
-	for (const { brazeCampaignId, emailRenderingNewsletterId } of segments) {
-		const html = await renderNewsletter(emailRenderingNewsletterId);
 		await dependencies.sendBrazeCampaign({
 			apiKey: environment.BRAZE_API_KEY,
 			restEndpoint: environment.BRAZE_REST_ENDPOINT,
@@ -254,4 +209,64 @@ export const dispatchNotification = async (
 		dispatchNewsletter(newsletterDispatch, dependencies),
 		dispatchAppPush(appPushDispatch, dependencies),
 	]);
+};
+
+export const dispatchNotificationTest = async (
+	request: NotificationTestSendRequest,
+	dependencies: DispatchNotificationDependencies = defaultDependencies,
+): Promise<void> => {
+	const plan = request.channels[NotificationChannel.Newsletter];
+	if (plan.compose.items.length !== 1) {
+		throw new Error('Only one newsletter item can be rendered currently.');
+	}
+
+	const item = requireContentItem(
+		request,
+		plan.compose.items[0]!,
+		NotificationChannel.Newsletter,
+	);
+	const environment = newsletterEnvironmentSchema.parse(
+		dependencies.environment,
+	);
+	const configuration = testEmailEnvironmentSchema.parse(
+		dependencies.environment,
+	);
+	const recipientEmails = plan.audience.items.map((email) =>
+		email.toLowerCase(),
+	);
+	const renderedVariants = [];
+	for (const segmentId of plan.audience.segments) {
+		renderedVariants.push({
+			html: await dependencies.renderEmail({
+				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
+				articleUrl: item.link,
+				newsletterId: newsletterSegments[segmentId].emailRenderingNewsletterId,
+				timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+			}),
+		});
+	}
+	if (request.options.dryRun) {
+		return;
+	}
+
+	await dependencies.registerBrazeTestEmailRecipients({
+		apiKey: environment.BRAZE_API_KEY,
+		restEndpoint: environment.BRAZE_REST_ENDPOINT,
+		recipientEmails,
+		timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+	});
+
+	for (const { html } of renderedVariants) {
+		await dependencies.sendBrazeTestEmail({
+			apiKey: environment.BRAZE_API_KEY,
+			restEndpoint: environment.BRAZE_REST_ENDPOINT,
+			appId: configuration.BRAZE_APP_ID,
+			from: configuration.BRAZE_TEST_EMAIL_FROM,
+			replyTo: configuration.BRAZE_TEST_EMAIL_REPLY_TO,
+			recipientEmails,
+			html,
+			subject: plan.compose.subject,
+			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+		});
+	}
 };

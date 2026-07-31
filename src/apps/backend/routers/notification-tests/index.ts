@@ -1,0 +1,44 @@
+import { randomUUID } from 'node:crypto';
+import { Router } from 'express';
+import validate from 'express-zod-safe';
+import { authMiddleware } from '../../middleware/auth-middleware';
+import { dispatchNotificationTest } from '../../notification-channels/dispatch-notification';
+import { handleValidationErrors } from '../notifications';
+import {
+	type NotificationTestSendRequest,
+	notificationTestSendRequestSchema,
+} from '../notifications/schemas/notification-send-request';
+
+type DispatchValidatedNotificationTest = (
+	request: NotificationTestSendRequest,
+) => Promise<unknown>;
+
+export const createNotificationTestsRouter = (
+	dispatchRequest: DispatchValidatedNotificationTest = dispatchNotificationTest,
+) =>
+	Router().post(
+		'/',
+		authMiddleware,
+		validate({
+			body: notificationTestSendRequestSchema,
+			handler: handleValidationErrors,
+		}),
+		async (req, res) => {
+			const body = req.body;
+			await dispatchRequest(body);
+
+			const testId = randomUUID();
+			res.status(202).json({
+				testId,
+				status: 'accepted',
+				plans: Object.keys(body.channels).map((channel) => ({
+					channel,
+					planId: `${testId}#${channel}`,
+					status: 'accepted',
+				})),
+				statusUrl: `/v1/notification-tests/${testId}/status`,
+			});
+		},
+	);
+
+export const notificationTestsRouter = createNotificationTestsRouter();

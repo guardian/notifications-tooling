@@ -31,13 +31,14 @@ email-rendering and triggers the mapped Braze campaign.
 
 ## Test email behaviour
 
-The current email-rendering endpoint supports one article. During pre-production
-testing, test-email audiences accept any syntactically valid email address, with
-up to 20 recipients per request, and one or more newsletter segments. Access
-remains protected by Panda authentication and the `dispatch_access` permission;
-the recipient policy must be reviewed before production. Each selected segment
-is rendered and sent through Braze's `/messages/send` endpoint; the production
-campaign is not triggered. Recipient addresses are normalized to lowercase.
+`POST /v1/notification-tests` accepts any syntactically valid email address,
+with up to 20 recipients per request, and one or more newsletter segments that
+select rendering variants rather than recipients. The current email-rendering
+endpoint supports one article. Access remains protected by Panda authentication
+and the `dispatch_access` permission; the recipient policy must be reviewed
+before production. Each selected segment is rendered and sent through Braze's
+`/messages/send` endpoint; the production campaign is not triggered. Recipient
+addresses are normalized to lowercase.
 After all selected segments render, the client creates or updates the
 stable alias-only test profiles once under the `dispatch-tool-test-email` alias
 label through `/users/track`, then sends each rendered variant. Braze matches
@@ -53,6 +54,6 @@ profile to propagate before retrying.
 See the [Braze test email send flow](../../../docs/braze/braze-test-email-send-flow.md)
 for the runtime sequence and failure behaviour, and
 [Braze test email delivery options](../../../docs/braze/braze-test-email-delivery-options.md)
-for the alternatives and rationale. Scheduled delivery is rejected until its
-downstream contract is implemented. Dry runs are accepted without calling either
-downstream client.
+for the alternatives and rationale. Scheduled delivery is not accepted by the
+test endpoint. A dry run renders every selected variant without registering
+recipients or sending messages through Braze.

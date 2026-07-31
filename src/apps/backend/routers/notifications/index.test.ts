@@ -191,6 +191,32 @@ describe('POST /v1/notifications', () => {
 			const body = (await response.json()) as { error: string };
 			expect(body.error).toBe('bad_request');
 		});
+
+		it('rejects direct email audiences', async () => {
+			const request = validPushRequest() as unknown as {
+				content: { items: Record<string, unknown> };
+				channels: Record<string, unknown>;
+			};
+			request.content.items.lead = {
+				type: 'newsletter',
+				title: 'Morning briefing',
+				body: "Today's lead story.",
+				link: 'https://www.theguardian.com/world/2026/jul/31/morning-briefing',
+			};
+			request.channels = {
+				newsletter: {
+					audience: {
+						type: 'email',
+						segments: ['UK'],
+						items: ['editor@theguardian.com'],
+					},
+					compose: { items: ['lead'], subject: '[TEST] Morning briefing' },
+				},
+			};
+
+			const response = await postNotification(request);
+			expect(response.status).toBe(400);
+		});
 	});
 
 	describe('422 validation_failed (semantic/business failures)', () => {
