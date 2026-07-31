@@ -36,11 +36,11 @@ export class DispatchStack extends GuStack {
 	constructor(scope: App, id: string, props: DispatchStackProps, app: string) {
 		super(scope, id, props);
 
-		const { stage, env } = props;
+		const { stage } = props;
 		const isProd = stage === 'PROD';
 		const domainName = `${app}.${isProd ? '' : 'code.dev-'}gutools.co.uk`;
 		const accountVpc = GuVpc.fromIdParameter(this, 'AccountVPC', {
-			availabilityZones: Fn.getAzs(env?.region),
+			availabilityZones: Fn.getAzs(this.region),
 			publicSubnetIds: GuVpc.subnetsFromParameter(this, {
 				app,
 				type: SubnetType.PUBLIC,
