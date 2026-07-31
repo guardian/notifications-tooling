@@ -27,7 +27,7 @@ const getInitials = (user: UserData): string => {
 
 const navLinks: Record<TabName, { text: string }> = {
 	create: {
-		text: 'Create notification',
+		text: 'Create',
 	},
 	history: {
 		text: 'History',
@@ -42,7 +42,7 @@ export const MainLayout = ({ children, currentTab, setTab }: Props) => {
 			<Layout.TopBar>
 				<TopBar theme={topBarTheme}>
 					<TopBarToolName
-						name="Notifications"
+						name="Dispatch"
 						favicon={{
 							icon: <Favicon icon="notifications" theme={faviconTheme} />,
 						}}

@@ -24,7 +24,7 @@ export const CreateNotificationForm = () => {
 			}}
 		>
 			<Typography variant="heading2Xl" element="h2">
-				Create a notification
+				Create newsletter email
 			</Typography>
 
 			<div

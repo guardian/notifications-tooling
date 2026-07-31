@@ -7,6 +7,7 @@ import { useContext } from 'react';
 import { parseArticleUrlInputToContentId } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { LoadingSpinner } from './LoadingSpinner';
+import { Typography } from '@guardian/stand/Typography';
 
 export const ArticleImportControl = () => {
 	const { notification, updateNotification, capiFetch } = useContext(
@@ -53,35 +54,46 @@ export const ArticleImportControl = () => {
 			css={{
 				display: 'flex',
 				flexDirection: 'column',
-				gap: semanticSpacing.stackXs,
 			}}
 		>
-			<TextInput
-				isInvalid={!!failure}
-				error={failure}
-				label="Article"
-				value={notification.articleInputText ?? ''}
-				isDisabled={isFetchingContent}
-				description="Copy and paste a Guardian URL below"
-				onChange={(text) =>
-					updateNotification({ type: 'set-article-id', text })
-				}
-				id="article-section"
-			/>
 			<div
+				id="article-section"
 				css={{
 					display: 'flex',
+					flexDirection: 'row',
 					gap: semanticSpacing.stackSm,
-					alignItems: 'center',
+					alignItems: 'flex-end',
 				}}
 			>
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: semanticSpacing.stackSm,
+					}}
+				>
+					<Typography variant="bodyBoldMd" element="label" id="article-section">
+						Article
+					</Typography>
+					<TextInput
+						isInvalid={!!failure}
+						error={failure}
+						size="sm"
+						value={notification.articleInputText ?? ''}
+						isDisabled={isFetchingContent}
+						description="Copy and paste a Guardian article URL and fetch"
+						onChange={(text) =>
+							updateNotification({ type: 'set-article-id', text })
+						}
+						cssOverrides={{ width: '356px' }}
+					/>
+				</div>
 				<Button
 					isDisabled={disableFetchButton}
 					icon="upload"
 					size="sm"
 					variant="secondary"
 					onClick={fetchArticle}
-					// TO DO - check why disabled styling not being applied by stand
 					cssOverrides={
 						disableFetchButton
 							? css({
@@ -91,9 +103,16 @@ export const ArticleImportControl = () => {
 							: undefined
 					}
 				>
-					Fetch Article
+					Fetch
 				</Button>
-
+			</div>
+			<div
+				css={{
+					display: 'flex',
+					gap: semanticSpacing.stackSm,
+					alignItems: 'left',
+				}}
+			>
 				{isFetchingContent && <LoadingSpinner />}
 
 				{!isFetchingContent &&
