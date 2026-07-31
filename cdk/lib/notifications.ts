@@ -159,7 +159,7 @@ export class DispatchStack extends GuStack {
 			allowMajorVersionUpgrade: false,
 			app: `${app}-db`,
 			autoMinorVersionUpgrade: true,
-			credentials: Credentials.fromGeneratedSecret(app, {
+			credentials: Credentials.fromGeneratedSecret(`${app}user`, {
 				secretName: `/${stage}/${props.stack}/dispatch/db`,
 			}),
 			databaseName: 'dispatchdb',

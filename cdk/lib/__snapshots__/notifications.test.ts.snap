@@ -235,7 +235,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             ],
           ],
         },
-        "MasterUsername": "dispatch",
+        "MasterUsername": "dispatchuser",
         "MultiAZ": false,
         "Port": "5432",
         "PreferredMaintenanceWindow": "Tue:08:00-Tue:08:30",
@@ -310,7 +310,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           "ExcludeCharacters": " %+~\`#$&*()|[]{}:;<>?!'/@"\\",
           "GenerateStringKey": "password",
           "PasswordLength": 30,
-          "SecretStringTemplate": "{"username":"dispatch"}",
+          "SecretStringTemplate": "{"username":"dispatchuser"}",
         },
         "Name": "/TEST/notifications/dispatch/db",
         "Tags": [
