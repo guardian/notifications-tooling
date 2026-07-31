@@ -11,7 +11,10 @@ configuration, and package-level database scripts.
 
 ## Environment
 
-The Drizzle config loads `DATABASE_URL` from `.env` in this package directory.
+Bun loads `DATABASE_URL` from `.env` in this package directory when these
+package scripts are run from `src/packages/database` or via Bun workspace
+filtering from the repository root.(e.g running the `db:reset` command from root would be
+`bun run --filter @database db:reset`)
 
 ## Database migrations
 
