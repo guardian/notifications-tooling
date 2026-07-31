@@ -23,55 +23,6 @@ topic and content request but does not make a network call.
 client. For newsletter segments it renders the selected article through
 email-rendering and triggers the mapped Braze campaign.
 
-### Local Postgres DB
-
-Spin a new docker container running Postgres with
-
-```bash
-bun run db:start
-```
-
-And stop it with
-
-```sh
-bun run db:stop
-```
-
-## Database migrations
-
-Drizzle schema lives in `src/apps/backend/db/schema.ts`, and generated SQL
-migrations are stored in `src/apps/backend/db/migrations`.
-
-The Drizzle config lives in `src/apps/backend/drizzle.config.ts`.
-
-Create a migration from your schema changes from the repo root:
-
-```sh
-bun run db:migration:create YOUR_MIGRATION_NAME
-```
-
-The wrapper passes the supplied name to Drizzle, which prefixes it with its own
-timestamp and creates one directory per migration under
-`src/apps/backend/db/migrations`.
-
-Apply pending migrations from the repo root:
-
-```sh
-bun run db:migration:apply
-```
-
-The same scripts are also available from `src/apps/backend` via:
-
-```sh
-bun run db:migration:create YOUR_MIGRATION_NAME
-bun run db:migration:apply
-```
-
-To reset the db:
-
-```sh
-bun run db:reset
-```
 
 ## Test the notification endpoint
 

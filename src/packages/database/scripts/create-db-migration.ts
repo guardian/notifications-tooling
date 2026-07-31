@@ -31,8 +31,8 @@ if (!migrationNamePattern.test(migrationName)) {
 	process.exit(1);
 }
 
-const backendDirectory = join(import.meta.dir, '..', 'src', 'apps', 'backend');
-const drizzleConfigPath = join(backendDirectory, 'drizzle.config.ts');
+const databaseDirectory = join(import.meta.dir, '..');
+const drizzleConfigPath = join(databaseDirectory, 'drizzle.config.ts');
 const passthroughArgs = rawArgs.slice(1);
 const drizzleProcess = Bun.spawnSync(
 	[
@@ -46,7 +46,7 @@ const drizzleProcess = Bun.spawnSync(
 		...passthroughArgs,
 	],
 	{
-		cwd: backendDirectory,
+		cwd: databaseDirectory,
 		stdout: 'inherit',
 		stderr: 'inherit',
 		stdin: 'inherit',

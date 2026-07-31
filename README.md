@@ -77,12 +77,6 @@ And stop it with
 bun run db:stop
 ```
 
-To reset the db:
-
-```bash
-bun run db:reset
-```
-
 ### Tests, linting, formatting, and type checks
 
 Run from the repo root:

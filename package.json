@@ -30,8 +30,7 @@
 		"format:check": "prettier --check .",
 		"typecheck": "bun run --filter '*' typecheck",
 		"db:start": "docker compose -f docker/docker-compose.local.yml up -d",
-		"db:stop": "docker compose -f docker/docker-compose.local.yml down",
-		"db:reset": "bash src/apps/backend/db/scripts/reset-db.sh"
+		"db:stop": "docker compose -f docker/docker-compose.local.yml down"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config": "16.0.0",

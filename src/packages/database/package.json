@@ -1,0 +1,21 @@
+{
+	"name": "@database",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"db:migration:create": "bun run scripts/create-db-migration.ts",
+		"db:migration:apply": "bun x drizzle-kit migrate --config=drizzle.config.ts",
+		"db:reset": "bash scripts/reset-db.sh"
+	},
+	"devDependencies": {
+		"@types/pg": "8.20.0",
+		"dotenv": "17.4.2",
+		"drizzle-kit": "0.31.10"
+	},
+	"dependencies": {
+		"drizzle-orm": "0.45.2",
+		"pg": "8.22.0"
+	}
+}
