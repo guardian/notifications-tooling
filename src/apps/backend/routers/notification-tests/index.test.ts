@@ -1,14 +1,21 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { UserPermissions } from '@config';
 import express from 'express';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
 	installPandaAuthMock,
 } from '../../utils/test-utils/panda-auth';
+import {
+	assertInsufficientPermissionsRequestBlocked,
+	grantPermissions,
+	installPermissionsStoreMock,
+} from '../../utils/test-utils/permissions';
 import type { TestServer } from '../../utils/test-utils/server';
 import { createNotificationTestsRouter } from '.';
 
 installPandaAuthMock();
+installPermissionsStoreMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
 
 let server: TestServer;
@@ -41,6 +48,7 @@ const validTestRequest = () => ({
 
 beforeAll(async () => {
 	authenticateRequests();
+	grantPermissions([UserPermissions.DispatchAccess]);
 	const app = express();
 	app.use(express.json());
 	app.use(
@@ -67,6 +75,14 @@ describe('POST /v1/notification-tests', () => {
 		await assertUnauthenticatedRequestBlocked(baseUrl, {
 			method: 'POST',
 			path: '/v1/notification-tests',
+		});
+	});
+
+	it('blocks requests without the dispatch permission', async () => {
+		await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+			method: 'POST',
+			path: '/v1/notification-tests',
+			body: validTestRequest(),
 		});
 	});
 
