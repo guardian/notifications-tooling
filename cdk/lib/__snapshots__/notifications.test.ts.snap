@@ -214,7 +214,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "CopyTagsToSnapshot": true,
         "DBInstanceClass": "db.t4g.micro",
         "DBInstanceIdentifier": "dispatch-test-db-18",
-        "DBName": "dispatch",
+        "DBName": "dispatchdb",
         "DBSubnetGroupName": {
           "Ref": "DBSubnetGroup",
         },

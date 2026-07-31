@@ -162,7 +162,7 @@ export class DispatchStack extends GuStack {
 			credentials: Credentials.fromGeneratedSecret(app, {
 				secretName: `/${stage}/${props.stack}/dispatch/db`,
 			}),
-			databaseName: 'dispatch',
+			databaseName: 'dispatchdb',
 			devXBackups: { enabled: true },
 			engine: DatabaseInstanceEngine.postgres({
 				version: PostgresEngineVersion.VER_18,
