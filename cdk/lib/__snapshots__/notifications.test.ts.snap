@@ -208,7 +208,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     "DispatchDatabaseDispatchdbCB51798D": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "AllocatedStorage": "5",
+        "AllocatedStorage": "20",
         "AllowMajorVersionUpgrade": false,
         "AutoMinorVersionUpgrade": true,
         "CopyTagsToSnapshot": true,

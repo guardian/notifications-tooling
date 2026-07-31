@@ -135,19 +135,16 @@ export class DispatchStack extends GuStack {
 
 		const dbConfig = {
 			TEST: {
-				allocatedStorage: 5,
 				instanceType: 'db.t4g.micro',
 				multiAz: false,
 				preferredMaintenanceWindow: 'Tue:08:00-Tue:08:30',
 			},
 			CODE: {
-				allocatedStorage: 5,
 				instanceType: 'db.t4g.micro',
 				multiAz: false,
 				preferredMaintenanceWindow: 'Tue:08:00-Tue:08:30',
 			},
 			PROD: {
-				allocatedStorage: 10,
 				instanceType: 'db.t4g.small',
 				multiAz: true,
 				preferredMaintenanceWindow: 'Wed:08:00-Wed:08:30',
@@ -155,7 +152,7 @@ export class DispatchStack extends GuStack {
 		};
 
 		new GuDatabaseInstance(this, `DispatchDatabase`, {
-			allocatedStorage: dbConfig[stage].allocatedStorage,
+			allocatedStorage: 20,
 			allowMajorVersionUpgrade: false,
 			app: `${app}-db`,
 			autoMinorVersionUpgrade: true,
