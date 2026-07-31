@@ -2,22 +2,9 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import type { AppConfig } from '../get-config';
+import { mockAppConfig } from '../../../mocks/app-config';
 import { UserContext } from '../UserContext';
 import { MainLayout } from './MainLayout';
-
-const storyUser: AppConfig = {
-	user: {
-		firstName: 'John',
-		lastName: 'Doe',
-		email: 'j.doe@example.com',
-		authenticatingSystem: '',
-		authenticatedIn: [],
-		expires: 0,
-		multifactor: false,
-	},
-	permissions: [],
-};
 
 const meta = {
 	title: 'Stand Frontend/MainLayout',
@@ -33,7 +20,7 @@ const meta = {
 	},
 	decorators: [
 		(Story) => (
-			<UserContext.Provider value={storyUser}>
+			<UserContext.Provider value={mockAppConfig}>
 				<Story />
 			</UserContext.Provider>
 		),

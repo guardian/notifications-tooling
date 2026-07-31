@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import { mockAppConfig } from '../mocks/app-config';
 import { Page } from './Page';
 
 const meta = {
@@ -7,6 +8,9 @@ const meta = {
 	component: Page,
 	parameters: {
 		layout: 'fullscreen',
+	},
+	beforeEach() {
+		window.__APP_CONFIG__ = mockAppConfig;
 	},
 } satisfies Meta<typeof Page>;
 
