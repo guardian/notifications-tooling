@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { UserResponse } from '@config';
 import { isRunningLocally } from '@config';
@@ -21,11 +21,11 @@ let cachedTemplate: string | undefined;
  * Reads Bun's built `index.html` once and caches it. The file only changes at
  * build time, so there is no need to re-read it per request.
  */
-const readIndexTemplate = (): string => {
+const readIndexTemplate = async (): Promise<string> => {
 	if (isRunningLocally) {
-		return readFileSync(indexHtmlPath, 'utf8');
+		return readFile(indexHtmlPath, 'utf8');
 	}
-	cachedTemplate ??= readFileSync(indexHtmlPath, 'utf8');
+	cachedTemplate ??= await readFile(indexHtmlPath, 'utf8');
 	return cachedTemplate;
 };
 
@@ -43,7 +43,7 @@ export const serveIndex: RequestHandler = async (
 		user: req.user!,
 		permissions,
 	};
-	const html = readIndexTemplate().replace(
+	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,
 		JSON.stringify(config),
 	);
