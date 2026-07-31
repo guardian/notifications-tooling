@@ -125,15 +125,31 @@ Git hooks are managed with `lefthook` and installed automatically via `bun insta
 
 ### Infrastructure model
 
-This is deployed using AWS API Gateway + Lambda.
+This is deployed on AWS with API Gateway, Lambda, using an RDS database.
 
 ```mermaid
 flowchart LR
-    Editor[Editorial user] --> APIGW[API Gateway\ndispatch.gutools.co.uk]
-    APIGW --> Lambda[Lambda\nNode.js 24.x\nExpress app via serverless adapter]
+	Editor[Editorial user] --> APIGW[API Gateway custom domain\ndispatch.gutools.co.uk]
+    APIGW --> Lambda
+
+    subgraph VPC[Account VPC]
+        subgraph SUBNET1[PUBLIC subnet]
+            subgraph SG1[Lambda security group]
+                Lambda[Lambda\nNode.js 24.x\nExpress app via serverless adapter]
+            end
+        end
+
+        subgraph SUBNET2[PRIVATE subnet]
+            subgraph SG2[Database security group]
+                RDS[(RDS PostgreSQL 18\ndispatch DB)]
+            end
+        end
+    end
 
     Lambda --> Braze[Braze API\nemail channel]
     Lambda -. planned .-> N10N[mobile-n10n notifications API\napp push channel]
+
+    Lambda -->|TCP 5432| RDS
 ```
 
 ## 4. Useful Links
