@@ -24,6 +24,13 @@ const baseRequest = {
 	options: { dryRun: false, scheduledFor: null },
 } as const;
 
+const ssmParameters: Record<string, string> = {
+	BRAZE_API_KEY: 'test-api-key',
+	BRAZE_REST_ENDPOINT: 'https://rest.example.braze.eu',
+	EMAIL_RENDERING_ENDPOINT: 'https://email-rendering.example.com',
+	PROVIDER_REQUEST_TIMEOUT_MS: '10000',
+};
+
 const createDependencies = () => {
 	const sendAppNotification = mock(() => Promise.resolve());
 	const renderEmail = mock(() =>
@@ -32,12 +39,11 @@ const createDependencies = () => {
 	const sendBrazeCampaign = mock(() =>
 		Promise.resolve({ message: 'success', dispatch_id: 'dispatch-123' }),
 	);
+	const getSSMParameter = mock((key: string) =>
+		Promise.resolve(ssmParameters[key] ?? ''),
+	);
 	const dependencies: DispatchNotificationDependencies = {
-		environment: {
-			BRAZE_API_KEY: 'test-api-key',
-			BRAZE_REST_ENDPOINT: 'https://rest.example.braze.eu',
-			EMAIL_RENDERING_ENDPOINT: 'https://email-rendering.example.com',
-		},
+		getSSMParameter,
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
@@ -45,6 +51,7 @@ const createDependencies = () => {
 
 	return {
 		dependencies,
+		getSSMParameter,
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,

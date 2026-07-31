@@ -3,6 +3,7 @@ import {
 	newsletterSegments,
 	NotificationChannel,
 } from '@config';
+import { getSSMParameter } from '@config/ssm';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import { sendAppNotification } from './app-notification/client';
@@ -21,14 +22,14 @@ const newsletterEnvironmentSchema = z.object({
 });
 
 export type DispatchNotificationDependencies = {
-	environment: NodeJS.ProcessEnv;
+	getSSMParameter: typeof getSSMParameter;
 	renderEmail: typeof renderEmail;
 	sendAppNotification: typeof sendAppNotification;
 	sendBrazeCampaign: typeof sendBrazeCampaign;
 };
 
 const defaultDependencies: DispatchNotificationDependencies = {
-	environment: process.env,
+	getSSMParameter,
 	renderEmail,
 	sendAppNotification,
 	sendBrazeCampaign,
@@ -50,10 +51,7 @@ const requireContentItem = (
 	return item;
 };
 
-const resolveNewsletterDispatch = (
-	request: NotificationSendRequest,
-	dependencies: DispatchNotificationDependencies,
-) => {
+const resolveNewsletterDispatch = (request: NotificationSendRequest) => {
 	const plan = request.channels[NotificationChannel.Newsletter];
 
 	if (!plan) {
@@ -70,9 +68,6 @@ const resolveNewsletterDispatch = (
 		request,
 		plan.compose.items[0]!,
 		NotificationChannel.Newsletter,
-	);
-	const environment = newsletterEnvironmentSchema.parse(
-		dependencies.environment,
 	);
 
 	const segments = plan.audience.items.map((segmentId) => {
@@ -92,7 +87,7 @@ const resolveNewsletterDispatch = (
 		return { brazeCampaignId, emailRenderingNewsletterId };
 	});
 
-	return { environment, item, plan, segments };
+	return { item, plan, segments };
 };
 
 const dispatchNewsletter = async (
@@ -103,7 +98,27 @@ const dispatchNewsletter = async (
 		return;
 	}
 
-	const { environment, item, plan, segments } = resolvedDispatch;
+	const { item, plan, segments } = resolvedDispatch;
+
+	const [
+		brazeApiKey,
+		brazeRestEndpoint,
+		emailRenderingEndpoint,
+		providerRequestTimeoutMs,
+	] = await Promise.all([
+		dependencies.getSSMParameter('BRAZE_API_KEY'),
+		dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
+		dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
+		dependencies.getSSMParameter('PROVIDER_REQUEST_TIMEOUT_MS'),
+	]);
+
+	const environment = newsletterEnvironmentSchema.parse({
+		BRAZE_API_KEY: brazeApiKey,
+		BRAZE_REST_ENDPOINT: brazeRestEndpoint,
+		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
+		PROVIDER_REQUEST_TIMEOUT_MS: providerRequestTimeoutMs,
+	});
+
 	for (const { brazeCampaignId, emailRenderingNewsletterId } of segments) {
 		// Email-rendering currently derives content from the article URL. Title,
 		// body, and media overrides remain unused until its POST contract exists.
@@ -175,7 +190,7 @@ export const dispatchNotification = async (
 		throw new Error('Scheduled delivery is not implemented.');
 	}
 
-	const newsletterDispatch = resolveNewsletterDispatch(request, dependencies);
+	const newsletterDispatch = resolveNewsletterDispatch(request);
 	const appPushDispatch = resolveAppPushDispatch(request);
 
 	// Delivery outcomes are not persisted yet. Retrying after a partial failure
