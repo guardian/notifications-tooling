@@ -207,9 +207,9 @@ describe('POST /v1/notifications', () => {
 				newsletter: {
 					audience: {
 						type: 'email',
-						segments: ['UK'],
 						items: ['editor@theguardian.com'],
 					},
+					variants: ['UK'],
 					compose: { items: ['lead'], subject: '[TEST] Morning briefing' },
 				},
 			};

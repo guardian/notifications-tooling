@@ -235,7 +235,7 @@ export const dispatchNotificationTest = async (
 		email.toLowerCase(),
 	);
 	const renderedVariants = [];
-	for (const segmentId of plan.audience.segments) {
+	for (const segmentId of plan.variants) {
 		renderedVariants.push({
 			html: await dependencies.renderEmail({
 				endpoint: environment.EMAIL_RENDERING_ENDPOINT,

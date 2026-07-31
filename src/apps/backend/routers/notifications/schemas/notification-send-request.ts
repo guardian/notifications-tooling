@@ -146,19 +146,9 @@ const newsletterSegmentAudience = segmentAudience(
 	MAX_NEWSLETTER_SEGMENTS,
 );
 
-/** Ad-hoc test recipients addressed by email, bypassing segments. */
+/** Ad-hoc test recipients addressed by email. */
 const testEmailAudience = z.strictObject({
 	type: z.literal('email'),
-	segments: z
-		.array(z.enum(newsletterSegmentIds))
-		.min(1)
-		.max(MAX_NEWSLETTER_SEGMENTS)
-		.refine(hasUniqueItems, { message: 'segment ids must be unique.' })
-		.meta({
-			description:
-				'Newsletter segments whose rendering configuration should be used. These segments are not recipients and their production campaigns are not triggered.',
-			example: [newsletterSegmentIds[0]],
-		}),
 	items: z
 		.array(z.email())
 		.min(1)
@@ -205,6 +195,16 @@ const newsletterPlan = z.strictObject({
 /** A test newsletter plan targets explicit email addresses only. */
 const newsletterTestPlan = z.strictObject({
 	audience: testEmailAudience,
+	variants: z
+		.array(z.enum(newsletterSegmentIds))
+		.min(1)
+		.max(MAX_NEWSLETTER_SEGMENTS)
+		.refine(hasUniqueItems, { message: 'variant ids must be unique.' })
+		.meta({
+			description:
+				'Newsletter variants whose rendering configuration should be used. Their production campaigns are not triggered.',
+			example: [newsletterSegmentIds[0]],
+		}),
 	compose: newsletterCompose,
 });
 
@@ -240,23 +240,64 @@ const testChannelsSchema = z
 			'Test delivery plans keyed by channel. Test sends currently support newsletter email recipients only.',
 	});
 
+const requestBaseShape = {
+	idempotencyKey: z.string().min(1).meta({
+		description:
+			'Client-generated unique key so retries are not delivered twice.',
+		example: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
+	}),
+	content: contentSchema,
+	sender: z.string().min(1).meta({
+		description: 'Identifier of the team or system making the request.',
+		example: 'notifications-tooling-spa/v1',
+	}),
+};
+
+type ComposeReference = {
+	channel: NotificationChannel;
+	key: string;
+	path: PropertyKey[];
+};
+
+const composeReferenceIssues = (
+	items: z.infer<typeof contentSchema>['items'],
+	references: ComposeReference[],
+) =>
+	references.flatMap(({ channel, key, path }) => {
+		const item = items[key];
+		const issuePath = ['channels', channel, ...path];
+
+		if (!item) {
+			return [
+				{
+					code: 'custom' as const,
+					path: issuePath,
+					message: `compose references content item '${key}' which is not defined in content.items.`,
+				},
+			];
+		}
+
+		if (item.type !== channel) {
+			return [
+				{
+					code: 'custom' as const,
+					path: issuePath,
+					message: `content item '${key}' has type '${item.type}' but is composed into a '${channel}' plan.`,
+				},
+			];
+		}
+
+		return [];
+	});
+
 /**
  * The `POST /v1/notifications` request body. NOTE: `idempotencyKey` is required
  * but, without a persistence layer, not yet stored or deduplicated against.
  */
 export const notificationSendRequestSchema = z
 	.strictObject({
-		idempotencyKey: z.string().min(1).meta({
-			description:
-				'Client-generated unique key so retries are not delivered twice.',
-			example: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-		}),
-		content: contentSchema,
+		...requestBaseShape,
 		channels: channelsSchema,
-		sender: z.string().min(1).meta({
-			description: 'Identifier of the team or system sending the notification.',
-			example: 'editorial-breaking-news',
-		}),
 		options: z
 			.strictObject({
 				dryRun: z.boolean().default(false).meta({
@@ -278,11 +319,7 @@ export const notificationSendRequestSchema = z
 
 		// Cross-field rule: `compose` may only reference existing content items
 		// whose type matches the channel it is composed into.
-		const composeRefs: Array<{
-			channel: NotificationChannel;
-			key: string;
-			path: PropertyKey[];
-		}> = [];
+		const composeRefs: ComposeReference[] = [];
 
 		const appPush = channels[NotificationChannel.AppPushNotification];
 		if (appPush) {
@@ -304,23 +341,8 @@ export const notificationSendRequestSchema = z
 			});
 		}
 
-		for (const { channel, key, path } of composeRefs) {
-			const item = items[key];
-			const issuePath = ['channels', channel, ...path];
-
-			if (!item) {
-				ctx.addIssue({
-					code: 'custom',
-					path: issuePath,
-					message: `compose references content item '${key}' which is not defined in content.items.`,
-				});
-			} else if (item.type !== channel) {
-				ctx.addIssue({
-					code: 'custom',
-					path: issuePath,
-					message: `content item '${key}' has type '${item.type}' but is composed into a '${channel}' plan.`,
-				});
-			}
+		for (const issue of composeReferenceIssues(items, composeRefs)) {
+			ctx.addIssue(issue);
 		}
 	})
 	.meta({
@@ -361,17 +383,8 @@ export type NotificationSendRequest = z.infer<
 /** The `POST /v1/notification-tests` request body. Test sends are immediate. */
 export const notificationTestSendRequestSchema = z
 	.strictObject({
-		idempotencyKey: z.string().min(1).meta({
-			description:
-				'Client-generated unique key so retries are not delivered twice.',
-			example: 'test-2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-		}),
-		content: contentSchema,
+		...requestBaseShape,
 		channels: testChannelsSchema,
-		sender: z.string().min(1).meta({
-			description: 'Identifier of the team or system sending the test.',
-			example: 'notifications-tooling-spa/v1',
-		}),
 		options: z
 			.strictObject({
 				dryRun: z.boolean().default(false).meta({
@@ -384,31 +397,18 @@ export const notificationTestSendRequestSchema = z
 	})
 	.superRefine((value, ctx) => {
 		const newsletter = value.channels[NotificationChannel.Newsletter];
+		const composeRefs = newsletter.compose.items.map((key, index) => ({
+			channel: NotificationChannel.Newsletter,
+			key,
+			path: ['compose', 'items', index],
+		}));
 
-		newsletter.compose.items.forEach((key, index) => {
-			const item = value.content.items[key];
-			const path = [
-				'channels',
-				NotificationChannel.Newsletter,
-				'compose',
-				'items',
-				index,
-			];
-
-			if (!item) {
-				ctx.addIssue({
-					code: 'custom',
-					path,
-					message: `compose references content item '${key}' which is not defined in content.items.`,
-				});
-			} else if (item.type !== NotificationChannel.Newsletter) {
-				ctx.addIssue({
-					code: 'custom',
-					path,
-					message: `content item '${key}' has type '${item.type}' but is composed into a '${NotificationChannel.Newsletter}' plan.`,
-				});
-			}
-		});
+		for (const issue of composeReferenceIssues(
+			value.content.items,
+			composeRefs,
+		)) {
+			ctx.addIssue(issue);
+		}
 	})
 	.meta({
 		description: 'The POST /v1/notification-tests request body.',
@@ -428,9 +428,9 @@ export const notificationTestSendRequestSchema = z
 				[NotificationChannel.Newsletter]: {
 					audience: {
 						type: 'email',
-						segments: [newsletterSegmentIds[0]],
 						items: ['newsletters.test@theguardian.com'],
 					},
+					variants: [newsletterSegmentIds[0]],
 					compose: {
 						items: ['lead-story'],
 						subject: '[TEST] Your morning briefing',

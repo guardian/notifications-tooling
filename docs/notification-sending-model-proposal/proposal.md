@@ -217,8 +217,9 @@ Note: The emails persisted in the allow-list will have to be pre-validated so on
 
 `POST /v1/notification-tests` mirrors the production content and composition
 shape, but accepts direct email recipients and rejects production segment
-audiences. `audience.segments` selects the rendering configuration only; those
-segments are never used as recipients and their campaigns are not triggered.
+audiences. The plan's `variants` field selects rendering configurations only;
+those variants are never used as recipients and their campaigns are not
+triggered.
 Test sends are immediate and cannot be scheduled. They accept
 `options.dryRun`, defaulting to `false`; a dry run validates and renders content
 without registering recipients or sending messages.
@@ -241,9 +242,9 @@ without registering recipients or sending messages.
 		"newsletter": {
 			"audience": {
 				"type": "email",
-				"segments": ["UK"],
 				"items": ["editor@guardian.co.uk", "qa@guardian.co.uk"],
 			},
+			"variants": ["UK"],
 			"compose": {
 				"items": ["lead"],
 				"subject": "[TEST] Your morning briefing: Ukraine summit",

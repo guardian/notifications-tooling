@@ -38,9 +38,9 @@ const validTestRequest = () => ({
 		newsletter: {
 			audience: {
 				type: 'email',
-				segments: ['UK'],
 				items: ['editor@theguardian.com'],
 			},
+			variants: ['UK'],
 			compose: { items: ['lead'], subject: '[TEST] Morning briefing' },
 		},
 	},
@@ -138,7 +138,7 @@ describe('POST /v1/notification-tests', () => {
 		request.channels.newsletter.audience = {
 			type: 'segment',
 			items: ['UK'],
-		} as unknown as typeof request.channels.newsletter.audience;
+		};
 
 		const response = await postTest(request);
 		expect(response.status).toBe(400);

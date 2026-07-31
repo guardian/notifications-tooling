@@ -58,7 +58,7 @@ sequenceDiagram
 - All selected variants are rendered before any Braze request. A rendering
   failure therefore creates no profiles and sends no emails.
 - `/users/track` is called once per dispatch, regardless of the number of
-  rendering segments.
+  rendering variants.
 - `/messages/send` is called once per rendered variant and targets every test
   recipient in the request.
 - Direct sends use `recipient_subscription_state: "all"` and do not trigger a

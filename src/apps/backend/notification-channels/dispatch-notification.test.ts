@@ -221,9 +221,9 @@ describe('dispatchNotification', () => {
 				[NotificationChannel.Newsletter]: {
 					audience: {
 						type: 'email',
-						segments: ['UK', 'US'],
 						items: ['Test.User@guardian.co.uk'],
 					},
+					variants: ['UK', 'US'],
 					compose: { items: ['newsletter'], subject: 'Test briefing' },
 				},
 			},
@@ -269,9 +269,9 @@ describe('dispatchNotification', () => {
 				[NotificationChannel.Newsletter]: {
 					audience: {
 						type: 'email',
-						segments: ['UK', 'US'],
 						items: ['test.user@guardian.co.uk'],
 					},
+					variants: ['UK', 'US'],
 					compose: { items: ['newsletter'], subject: 'Test briefing' },
 				},
 			},

@@ -32,14 +32,14 @@ email-rendering and triggers the mapped Braze campaign.
 ## Test email behaviour
 
 `POST /v1/notification-tests` accepts any syntactically valid email address,
-with up to 20 recipients per request, and one or more newsletter segments that
-select rendering variants rather than recipients. The current email-rendering
+with up to 20 recipients per request. The plan's `variants` field selects one or
+more newsletter rendering configurations. The current email-rendering
 endpoint supports one article. Access remains protected by Panda authentication
 and the `dispatch_access` permission; the recipient policy must be reviewed
-before production. Each selected segment is rendered and sent through Braze's
+before production. Each selected variant is rendered and sent through Braze's
 `/messages/send` endpoint; the production campaign is not triggered. Recipient
 addresses are normalized to lowercase.
-After all selected segments render, the client creates or updates the
+After all selected variants render, the client creates or updates the
 stable alias-only test profiles once under the `dispatch-tool-test-email` alias
 label through `/users/track`, then sends each rendered variant. Braze matches
 that alias, not an existing profile's email, so a separate same-email test

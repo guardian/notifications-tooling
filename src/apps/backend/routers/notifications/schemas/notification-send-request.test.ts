@@ -110,13 +110,14 @@ const newsletterTestRequest = (overrides: Record<string, unknown> = {}) => ({
 	sender: 'notifications-tooling-spa/v1',
 	content: { items: { lead: newsletterItem() } },
 	channels: {
-		[NotificationChannel.Newsletter]: newsletterPlan({
+		[NotificationChannel.Newsletter]: {
 			audience: {
 				type: 'email',
-				segments: ['UK'],
 				items: ['newsletters.test@theguardian.com'],
 			},
-		}),
+			variants: ['UK'],
+			compose: { items: ['lead'], subject: 'Your morning briefing' },
+		},
 	},
 	...overrides,
 });
@@ -976,7 +977,7 @@ describe('notificationTestSendRequestSchema', () => {
 			: result.error.issues.map((issue) => issue.path.join('/'));
 	};
 
-	it('accepts explicit email recipients and rendering segments', () => {
+	it('accepts explicit email recipients and rendering variants', () => {
 		const result = notificationTestSendRequestSchema.safeParse(
 			newsletterTestRequest(),
 		);
@@ -999,6 +1000,45 @@ describe('notificationTestSendRequestSchema', () => {
 		request.channels.newsletter.audience.items = ['not-an-email'];
 		expect(testPathsOf(request)).toContain(
 			'channels/newsletter/audience/items/0',
+		);
+	});
+
+	it('rejects rendering segments inside the email audience', () => {
+		const request = newsletterTestRequest();
+		const audience = request.channels.newsletter.audience as Record<
+			string,
+			unknown
+		>;
+		audience.segments = ['UK'];
+
+		expect(testPathsOf(request)).toContain('channels/newsletter/audience');
+	});
+
+	it('requires at least one rendering variant', () => {
+		const request = newsletterTestRequest();
+		request.channels.newsletter.variants = [];
+		expect(testPathsOf(request)).toContain('channels/newsletter/variants');
+	});
+
+	it('rejects duplicate rendering variants', () => {
+		const request = newsletterTestRequest();
+		request.channels.newsletter.variants = ['UK', 'UK'];
+		expect(testPathsOf(request)).toContain('channels/newsletter/variants');
+	});
+
+	it('rejects a compose reference to a missing item', () => {
+		const request = newsletterTestRequest();
+		request.channels.newsletter.compose.items = ['missing'];
+		expect(testPathsOf(request)).toContain(
+			'channels/newsletter/compose/items/0',
+		);
+	});
+
+	it('rejects a compose reference to the wrong channel type', () => {
+		const request = newsletterTestRequest();
+		request.content.items.lead = pushItem();
+		expect(testPathsOf(request)).toContain(
+			'channels/newsletter/compose/items/0',
 		);
 	});
 
