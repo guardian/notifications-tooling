@@ -148,6 +148,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               "Resource": [
                 "arn:aws:s3:::login-gutools-config/DEV/*",
                 "arn:aws:s3:::pan-domain-auth-settings/*",
+                "arn:aws:s3:::permissions-cache/CODE/*",
               ],
             },
           ],
@@ -162,6 +163,9 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "dispatchlambdaServiceRole973DFF82",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
@@ -176,6 +180,9 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
         },
         "Handler": "handler.handler",
+        "Layers": [
+          "arn:aws:lambda:eu-west-1:015030872274:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:96",
+        ],
         "LoggingConfig": {
           "LogFormat": "JSON",
         },
