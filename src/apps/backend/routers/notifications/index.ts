@@ -1,11 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { UserPermissions } from '@config';
+import { logger } from '@http-logger';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
 import { dispatchNotification } from '../../notification-channels/dispatch-notification';
+import { initialiseDbConnection } from '../../utils/database';
 import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
@@ -88,6 +90,15 @@ export const createNotificationsRouter = (
 		async (req, res) => {
 			const body = req.body;
 			await dispatchRequest(body);
+
+			// Testing database connection
+			try {
+				const conn = await initialiseDbConnection();
+				logger.info('Database connection test successful');
+				await conn.closeDbConnection();
+			} catch (error) {
+				logger.error(error, 'Database connection test failed');
+			}
 
 			// No persistence layer yet, so mint the id in-process. Once a store
 			// exists this becomes the primary key the channel adapters update.
