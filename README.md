@@ -55,7 +55,7 @@ than `401`/`403`:
 
 1. **Authentication** — a valid pan-domain cookie (`gutoolsAuth-assym`) for the
    `local.dev-gutools.co.uk` domain. panda-auth for Node cannot mint this cookie
-   itself, so you must run the [login](https://github.com/guardian/login) tool
+   itself, so you must run the [login](https://github.com/guardian/login.gutools) tool
    locally to sign in and issue it.
 2. **Authorisation** — your user must hold the `dispatch_access` permission. The
    permissions store is read from the CODE bucket using the `composer` AWS
@@ -75,7 +75,7 @@ this profile to be present, so grab them before starting either service.
 
 #### 2. Start the login tool
 
-Clone and start the [login](https://github.com/guardian/login) tool in a
+Clone and start the [login](https://github.com/guardian/login.gutools) tool in a
 separate checkout so it is available alongside Dispatch:
 
 ```bash
