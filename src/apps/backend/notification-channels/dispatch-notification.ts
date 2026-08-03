@@ -19,7 +19,7 @@ import { renderEmail } from './email/rendering/client';
 
 // Each provider request shares a fixed timeout; it is not configurable per
 // environment.
-const providerRequestTimeoutMs = 10_000;
+const PROVIDER_REQUEST_TIMEOUT_MS = 10_000;
 
 const newsletterEnvironmentSchema = z.object({
 	BRAZE_API_KEY: z.string().trim().min(1),
@@ -143,7 +143,7 @@ const dispatchNewsletter = async (
 			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 			articleUrl: item.link,
 			newsletterId: emailRenderingNewsletterId,
-			timeoutMs: providerRequestTimeoutMs,
+			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 
 		await dependencies.sendBrazeCampaign({
@@ -152,7 +152,7 @@ const dispatchNewsletter = async (
 			campaignId: brazeCampaignId,
 			html,
 			subject: plan.compose.subject,
-			timeoutMs: providerRequestTimeoutMs,
+			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 	}
 };
@@ -269,7 +269,7 @@ export const dispatchNotificationTest = async (
 				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 				articleUrl: item.link,
 				newsletterId: newsletterSegments[segmentId].emailRenderingNewsletterId,
-				timeoutMs: providerRequestTimeoutMs,
+				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 			}),
 		});
 	}
@@ -281,7 +281,7 @@ export const dispatchNotificationTest = async (
 		apiKey: environment.BRAZE_API_KEY,
 		restEndpoint: environment.BRAZE_REST_ENDPOINT,
 		recipientEmails,
-		timeoutMs: providerRequestTimeoutMs,
+		timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 	});
 
 	for (const { html } of renderedVariants) {
@@ -294,7 +294,7 @@ export const dispatchNotificationTest = async (
 			recipientEmails,
 			html,
 			subject: plan.compose.subject,
-			timeoutMs: providerRequestTimeoutMs,
+			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 	}
 };
