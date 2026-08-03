@@ -1,5 +1,6 @@
 import type { Content } from '@guardian/content-api-models/v1/content';
 import { Typography } from '@guardian/stand/Typography';
+import { getPillarColor } from '../pillar-colors';
 import { articlePreviewCardTheme } from '../themes';
 
 interface ArticlePreviewCardProps {
@@ -7,15 +8,18 @@ interface ArticlePreviewCardProps {
 }
 
 export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
-	const { sectionName, pillarName, webTitle, fields } = content;
+	const { sectionName, pillarId, pillarName, webTitle, fields } = content;
 	const headline = fields?.headline ?? webTitle;
 	const thumbnail = fields?.thumbnail;
+	const pillarColor = getPillarColor(pillarId);
 
 	return (
 		<div css={articlePreviewCardTheme.card}>
 			<div css={articlePreviewCardTheme.details}>
 				{(sectionName ?? pillarName) && (
-					<Typography cssOverrides={articlePreviewCardTheme.sectionLabel}>
+					<Typography
+						cssOverrides={articlePreviewCardTheme.sectionLabel(pillarColor)}
+					>
 						{sectionName && (
 							<Typography variant="bodyBoldXs">{sectionName}</Typography>
 						)}

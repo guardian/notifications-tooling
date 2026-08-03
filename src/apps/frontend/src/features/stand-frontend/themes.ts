@@ -152,10 +152,11 @@ export const articlePreviewCardTheme = {
 		flexDirection: 'column',
 		gap: semanticSpacing.stackXxs,
 	}),
-	sectionLabel: css({
-		fontSize: '12px',
-		color: semanticColors.text.strong,
-	}),
+	sectionLabel: (color: string) =>
+		css({
+			fontSize: '12px',
+			color,
+		}),
 	headline: css({
 		fontSize: '12px',
 		color: semanticColors.text.strong,
