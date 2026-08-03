@@ -18,8 +18,6 @@ and populate them with the environment values.
 - `BRAZE_TEST_EMAIL_REPLY_TO` is an email address or Braze's `NO_REPLY_TO`
   sentinel. It defaults to `NO_REPLY_TO`, which omits the Reply-To header.
 - `EMAIL_RENDERING_ENDPOINT` is the base URL of the email-rendering service.
-- `PROVIDER_REQUEST_TIMEOUT_MS` limits each provider request and defaults to 10
-  seconds.
 
 UK, US, and AU newsletter labels, email-rendering newsletter IDs, and Braze
 campaign IDs are configured in `src/packages/config/audiences.ts`. The public
