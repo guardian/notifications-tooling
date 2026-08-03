@@ -7,7 +7,7 @@ import {
 import { baseSpacing } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
@@ -26,17 +26,28 @@ export const DispatchTab = () => {
 	} = useContext(NotificationFormContext);
 
 	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
+	const isClickLockedRef = useRef(false);
+
+	const handleTileClick = (href: string) => {
+		setSelectedHref(href);
+		isClickLockedRef.current = true;
+
+		// Unlock scroll updates after anchor navigation settles
+		window.setTimeout(() => {
+			isClickLockedRef.current = false;
+		}, 500);
+	};
 
 	useEffect(() => {
 		if (sendingResult) {
 			return;
 		}
 
-		const observer = new IntersectionObserver((entries) => {
-			entries.forEach(
-				(entry) => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
 					const id = entry.target.getAttribute('id');
-					if (entry.isIntersecting && id) {
+					if (entry.isIntersecting && id && !isClickLockedRef.current) {
 						const selectedHref = `#${id}`;
 						if (
 							SIDE_NAVIGATION_PANEL_ITEMS.some(
@@ -46,10 +57,10 @@ export const DispatchTab = () => {
 							setSelectedHref(selectedHref);
 						}
 					}
-				},
-				{ rootMargin: '28%px 0px -8% 0px' },
-			);
-		});
+				});
+			},
+			{ rootMargin: '-30% 0px -30% 0px' },
+		);
 
 		SIDE_NAVIGATION_PANEL_ITEMS.forEach((item) => {
 			const el = document.getElementById(item.trackedSectionId);
@@ -95,7 +106,7 @@ export const DispatchTab = () => {
 						>
 							<SideNavigationPanel
 								selectedHref={selectedHref}
-								onSelectedHrefChange={setSelectedHref}
+								onSelectedHrefChange={handleTileClick}
 							/>
 						</Item>
 						<Item
