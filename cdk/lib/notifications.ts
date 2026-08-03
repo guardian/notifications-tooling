@@ -209,8 +209,7 @@ export class DispatchStack extends GuStack {
 			vpc: accountVpc,
 		});
 
-		// One-shot Fargate task that applies Drizzle migrations on each deployment.
-		// Triggered automatically by the S3 upload of the migration artifact in Riff-Raff.
+		// One-shot Fargate task that blocks deployment while it applies Drizzle migrations.
 		addDrizzleMigrateTask(this, {
 			database,
 			migrationSecurityGroup,

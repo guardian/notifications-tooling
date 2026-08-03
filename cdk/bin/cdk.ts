@@ -21,18 +21,10 @@ new DispatchStack(
 // Drizzle migration artifact.
 //
 // Deployment ordering:
-//   1. lambda-upload-eu-west-1-notifications-dispatch   — upload Lambda zip
-//   2. cfn-eu-west-1-notifications-dispatch-stack       — deploy CloudFormation (depends on 1)
-//   3. dispatch-database-migrations                     — upload migration artifact to S3 (depends on 2)
-//       → EventBridge fires → Fargate task runs drizzle-kit migrate (ASYNCHRONOUS — see below)
-//   4. lambda-update-eu-west-1-notifications-dispatch   — update Lambda function (depends on 2)
-//
-// ASYNC ORDERING NOTE: The migration ECS task is triggered by the S3 upload in step 3 via an
-// EventBridge rule.  Riff-Raff considers step 3 complete as soon as the object is in S3; it
-// does NOT wait for the Fargate task to finish.  The Lambda update in step 4 is therefore NOT
-// blocked on migration completion.  To keep deployments safe, always use expand/contract
-// (backward-compatible) migrations: deploy additive schema changes before the code that uses
-// them, and remove obsolete columns in a later release.
+//   1. Upload the Lambda and migration artifacts in parallel.
+//   2. Deploy CloudFormation after both uploads. A custom resource starts the migration task,
+//      waits for it to stop, and fails CloudFormation if the migration container exits non-zero.
+//   3. Update the Lambda only after CloudFormation, including the migration, succeeds.
 
 const riffRaff = new RiffRaffYamlFile(app);
 
@@ -52,18 +44,21 @@ const { deployments } = projectConfig;
 const cloudFormationDeploymentName =
 	'cfn-eu-west-1-notifications-dispatch-stack';
 
-if (!deployments.has(cloudFormationDeploymentName)) {
+const cloudFormationDeployment = deployments.get(cloudFormationDeploymentName);
+
+if (!cloudFormationDeployment) {
 	throw new Error(
 		`Expected a CloudFormation deployment named '${cloudFormationDeploymentName}' but it was not found. ` +
 			`Has the CDK deployment name changed? Check cdk/cdk.out/riff-raff.yaml.`,
 	);
 }
 
-// Add the migration artifact S3 deployment.
-// This deployment uploads the migration zip and triggers the EventBridge → ECS chain.
-deployments.set('dispatch-database-migrations', {
+const databaseMigrationsDeploymentName = 'dispatch-database-migrations';
+
+// Upload the migration artifact before CloudFormation starts the blocking Fargate task.
+deployments.set(databaseMigrationsDeploymentName, {
 	type: 'aws-s3',
-	app: 'dispatch-database-migrations',
+	app: databaseMigrationsDeploymentName,
 	contentDirectory: 'database-migrations',
 	regions: new Set(['eu-west-1']),
 	stacks: new Set(['notifications']),
@@ -72,8 +67,11 @@ deployments.set('dispatch-database-migrations', {
 		cacheControl: 'no-store',
 		publicReadAcl: false,
 	},
-	// Run only after CloudFormation so the ECS task definition and EventBridge rule exist.
-	dependencies: [cloudFormationDeploymentName],
 });
+
+cloudFormationDeployment.dependencies = [
+	...(cloudFormationDeployment.dependencies ?? []),
+	databaseMigrationsDeploymentName,
+];
 
 riffRaff.synth();

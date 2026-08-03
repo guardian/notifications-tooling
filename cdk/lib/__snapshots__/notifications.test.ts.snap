@@ -45,6 +45,9 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     },
   },
   "Parameters": {
+    "BuildId": {
+      "Type": "String",
+    },
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
@@ -220,38 +223,101 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::RDS::DBSubnetGroup",
     },
+    "DatabaseMigration": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BuildId": {
+          "Ref": "BuildId",
+        },
+        "Cluster": {
+          "Fn::GetAtt": [
+            "DatabaseMigrationsCluster7837A4C6",
+            "Arn",
+          ],
+        },
+        "ContainerName": "DatabaseMigrationsContainer",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "DispatchMigrationSecurityGroupDispatchdatabasemigrationsBBC6B62E",
+              "GroupId",
+            ],
+          },
+        ],
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "RunDatabaseMigrationTask1A731004",
+            "Arn",
+          ],
+        },
+        "Subnets": {
+          "Ref": "dispatchdatabasemigrationsPrivateSubnets",
+        },
+        "TaskDefinition": {
+          "Ref": "DatabaseMigrationTaskDefinition26A0E625",
+        },
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
     "DatabaseMigrationTaskDefinition26A0E625": {
       "Properties": {
         "ContainerDefinitions": [
           {
-            "Environment": [
+            "Command": [
+              "s3",
+              "cp",
               {
-                "Name": "ARTIFACT_BUCKET",
-                "Value": {
-                  "Ref": "SsmParameterValueaccountservicesartifactbucketC96584B6F00A464EAD1953AFF4B05118Parameter",
-                },
+                "Fn::Join": [
+                  "",
+                  [
+                    "s3://",
+                    {
+                      "Ref": "SsmParameterValueaccountservicesartifactbucketC96584B6F00A464EAD1953AFF4B05118Parameter",
+                    },
+                    "/notifications/TEST/dispatch-database-migrations/database-migrations.tar.gz",
+                  ],
+                ],
               },
+              "/artifact/database-migrations.tar.gz",
+            ],
+            "Essential": false,
+            "Image": "public.ecr.aws/aws-cli/aws-cli:2.27.49",
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "DatabaseMigrationTaskDefinitionDatabaseMigrationsArtifactDownloaderLogGroup2E9647FC",
+                },
+                "awslogs-region": "eu-west-1",
+                "awslogs-stream-prefix": "notifications/TEST/dispatch-database-migrations-download",
+              },
+            },
+            "MountPoints": [
               {
-                "Name": "ARTIFACT_KEY",
-                "Value": "notifications/TEST/dispatch-database-migrations/database-migrations.zip",
+                "ContainerPath": "/artifact",
+                "ReadOnly": false,
+                "SourceVolume": "DatabaseMigrationsArtifactVolume",
               },
             ],
+            "Name": "DatabaseMigrationsArtifactDownloader",
+          },
+          {
+            "Command": [
+              "mkdir -p /tmp/dispatch-migrations && tar -xzf /artifact/database-migrations.tar.gz -C /tmp/dispatch-migrations && cd /tmp/dispatch-migrations && timeout 12m node run-migrations.mjs",
+            ],
+            "DependsOn": [
+              {
+                "Condition": "SUCCESS",
+                "ContainerName": "DatabaseMigrationsArtifactDownloader",
+              },
+            ],
+            "EntryPoint": [
+              "/bin/sh",
+              "-c",
+            ],
             "Essential": true,
-            "Image": {
-              "Fn::Join": [
-                "",
-                [
-                  {
-                    "Ref": "AWS::AccountId",
-                  },
-                  ".dkr.ecr.eu-west-1.",
-                  {
-                    "Ref": "AWS::URLSuffix",
-                  },
-                  "/aws-cdk/assets:4d850c4f98a87a2ca62dd97d8b9bd97a2b443c7bf0dd8d38163a8ed05aa2d134",
-                ],
-              ],
-            },
+            "Image": "public.ecr.aws/docker/library/node:22-alpine",
             "LogConfiguration": {
               "LogDriver": "awslogs",
               "Options": {
@@ -262,6 +328,13 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 "awslogs-stream-prefix": "notifications/TEST/dispatch-database-migrations",
               },
             },
+            "MountPoints": [
+              {
+                "ContainerPath": "/artifact",
+                "ReadOnly": true,
+                "SourceVolume": "DatabaseMigrationsArtifactVolume",
+              },
+            ],
             "Name": "DatabaseMigrationsContainer",
             "Secrets": [
               {
@@ -346,8 +419,39 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
+        "Volumes": [
+          {
+            "Name": "DatabaseMigrationsArtifactVolume",
+          },
+        ],
       },
       "Type": "AWS::ECS::TaskDefinition",
+    },
+    "DatabaseMigrationTaskDefinitionDatabaseMigrationsArtifactDownloaderLogGroup2E9647FC": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "RetentionInDays": 30,
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
     },
     "DatabaseMigrationTaskDefinitionDatabaseMigrationsContainerLogGroup935428DE": {
       "DeletionPolicy": "Retain",
@@ -374,114 +478,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
-    },
-    "DatabaseMigrationTaskDefinitionEventsRoleB5AB361A": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "events.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "64.1.0",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/notifications-tooling",
-          },
-          {
-            "Key": "Stack",
-            "Value": "notifications",
-          },
-          {
-            "Key": "Stage",
-            "Value": "TEST",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "DatabaseMigrationTaskDefinitionEventsRoleDefaultPolicyCFAB7FF1": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "ecs:RunTask",
-              "Condition": {
-                "ArnEquals": {
-                  "ecs:cluster": {
-                    "Fn::GetAtt": [
-                      "DatabaseMigrationsCluster7837A4C6",
-                      "Arn",
-                    ],
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Resource": {
-                "Ref": "DatabaseMigrationTaskDefinition26A0E625",
-              },
-            },
-            {
-              "Action": "ecs:TagResource",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition",
-                    },
-                    ":ecs:eu-west-1:*:task/",
-                    {
-                      "Ref": "DatabaseMigrationsCluster7837A4C6",
-                    },
-                    "/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": "iam:PassRole",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "DatabaseMigrationTaskDefinitionExecutionRole73DE5852",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": "iam:PassRole",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "DatabaseMigrationsTaskRoleB2027760",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "DatabaseMigrationTaskDefinitionEventsRoleDefaultPolicyCFAB7FF1",
-        "Roles": [
-          {
-            "Ref": "DatabaseMigrationTaskDefinitionEventsRoleB5AB361A",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "DatabaseMigrationTaskDefinitionExecutionRole73DE5852": {
       "Properties": {
@@ -524,32 +520,16 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           "Statement": [
             {
               "Action": [
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition",
-                    },
-                    ":ecr:eu-west-1:",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":repository/aws-cdk/assets",
-                  ],
+                "Fn::GetAtt": [
+                  "DatabaseMigrationTaskDefinitionDatabaseMigrationsArtifactDownloaderLogGroup2E9647FC",
+                  "Arn",
                 ],
               },
-            },
-            {
-              "Action": "ecr:GetAuthorizationToken",
-              "Effect": "Allow",
-              "Resource": "*",
             },
             {
               "Action": [
@@ -585,95 +565,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "DatabaseMigrationsArtifactRuleB5858FC0": {
-      "Properties": {
-        "Description": "Trigger the Dispatch database migration task when notifications/TEST/dispatch-database-migrations/database-migrations.zip is uploaded",
-        "EventPattern": {
-          "detail": {
-            "bucket": {
-              "name": [
-                {
-                  "Ref": "SsmParameterValueaccountservicesartifactbucketC96584B6F00A464EAD1953AFF4B05118Parameter",
-                },
-              ],
-            },
-            "object": {
-              "key": [
-                "notifications/TEST/dispatch-database-migrations/database-migrations.zip",
-              ],
-            },
-          },
-          "detail-type": [
-            "Object Created",
-          ],
-          "source": [
-            "aws.s3",
-          ],
-        },
-        "State": "ENABLED",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "64.1.0",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/notifications-tooling",
-          },
-          {
-            "Key": "Stack",
-            "Value": "notifications",
-          },
-          {
-            "Key": "Stage",
-            "Value": "TEST",
-          },
-        ],
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "DatabaseMigrationsCluster7837A4C6",
-                "Arn",
-              ],
-            },
-            "EcsParameters": {
-              "LaunchType": "FARGATE",
-              "NetworkConfiguration": {
-                "AwsVpcConfiguration": {
-                  "AssignPublicIp": "DISABLED",
-                  "SecurityGroups": [
-                    {
-                      "Fn::GetAtt": [
-                        "DispatchMigrationSecurityGroupDispatchdatabasemigrationsBBC6B62E",
-                        "GroupId",
-                      ],
-                    },
-                  ],
-                  "Subnets": {
-                    "Ref": "dispatchdatabasemigrationsPrivateSubnets",
-                  },
-                },
-              },
-              "PropagateTags": "TASK_DEFINITION",
-              "TaskCount": 1,
-              "TaskDefinitionArn": {
-                "Ref": "DatabaseMigrationTaskDefinition26A0E625",
-              },
-            },
-            "Id": "Target0",
-            "Input": "{}",
-            "RoleArn": {
-              "Fn::GetAtt": [
-                "DatabaseMigrationTaskDefinitionEventsRoleB5AB361A",
-                "Arn",
-              ],
-            },
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
     },
     "DatabaseMigrationsCluster34EA7F0E": {
       "Properties": {
@@ -786,20 +677,11 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                       {
                         "Ref": "SsmParameterValueaccountservicesartifactbucketC96584B6F00A464EAD1953AFF4B05118Parameter",
                       },
-                      "/notifications/TEST/dispatch-database-migrations/database-migrations.zip",
+                      "/notifications/TEST/dispatch-database-migrations/database-migrations.tar.gz",
                     ],
                   ],
                 },
               ],
-            },
-            {
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -1106,6 +988,307 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
+    },
+    "RunDatabaseMigrationTask1A731004": {
+      "DependsOn": [
+        "RunDatabaseMigrationTaskServiceRoleDefaultPolicy0189E490",
+        "RunDatabaseMigrationTaskServiceRoleA113B4F8",
+      ],
+      "Properties": {
+        "Code": {
+          "ZipFile": 
+"
+const {
+	DescribeTasksCommand,
+	ECSClient,
+	RunTaskCommand,
+	StopTaskCommand,
+} = require('@aws-sdk/client-ecs');
+const https = require('node:https');
+const client = new ECSClient({});
+
+const sleep = (milliseconds) => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+const sendResponse = (event, context, status, physicalResourceId, reason) => {
+	const body = JSON.stringify({
+		Status: status,
+		Reason: reason || 'See CloudWatch logs: ' + context.logStreamName,
+		PhysicalResourceId: physicalResourceId,
+		StackId: event.StackId,
+		RequestId: event.RequestId,
+		LogicalResourceId: event.LogicalResourceId,
+		NoEcho: false,
+		Data: {},
+	});
+
+	return new Promise((resolve, reject) => {
+		const request = https.request(event.ResponseURL, {
+			method: 'PUT',
+			headers: {
+				'content-type': '',
+				'content-length': Buffer.byteLength(body),
+			},
+		}, response => {
+			response.resume();
+			response.on('end', resolve);
+		});
+		request.on('error', reject);
+		request.end(body);
+	});
+};
+
+exports.handler = async (event, context) => {
+	let physicalResourceId = event.PhysicalResourceId || 'database-migration';
+	let taskArn;
+
+	try {
+		if (event.RequestType === 'Delete') {
+			await sendResponse(event, context, 'SUCCESS', physicalResourceId);
+			return;
+		}
+
+		const props = event.ResourceProperties;
+		const runResponse = await client.send(new RunTaskCommand({
+			cluster: props.Cluster,
+			taskDefinition: props.TaskDefinition,
+			launchType: 'FARGATE',
+			count: 1,
+			propagateTags: 'TASK_DEFINITION',
+			networkConfiguration: {
+				awsvpcConfiguration: {
+					assignPublicIp: 'DISABLED',
+					subnets: props.Subnets,
+					securityGroups: props.SecurityGroups,
+				},
+			},
+		}));
+
+		if (runResponse.failures && runResponse.failures.length > 0) {
+			throw new Error('ECS failed to start the migration task: ' + JSON.stringify(runResponse.failures));
+		}
+
+		taskArn = runResponse.tasks && runResponse.tasks[0] && runResponse.tasks[0].taskArn;
+		if (!taskArn) {
+			throw new Error('ECS did not return an ARN for the migration task');
+		}
+		physicalResourceId = taskArn;
+
+		const deadline = Date.now() + context.getRemainingTimeInMillis() - 30000;
+		while (Date.now() < deadline) {
+			const describeResponse = await client.send(new DescribeTasksCommand({
+				cluster: props.Cluster,
+				tasks: [taskArn],
+			}));
+
+			if (describeResponse.failures && describeResponse.failures.length > 0) {
+				throw new Error('ECS could not describe the migration task: ' + JSON.stringify(describeResponse.failures));
+			}
+
+			const task = describeResponse.tasks && describeResponse.tasks[0];
+			if (task && task.lastStatus === 'STOPPED') {
+				const container = (task.containers || []).find(
+					candidate => candidate.name === props.ContainerName,
+				);
+				if (!container || container.exitCode !== 0) {
+					const taskReason = (container && container.reason) || task.stoppedReason || task.stopCode || 'unknown reason';
+					const exitCode = container && container.exitCode;
+					throw new Error('Database migration failed with exit code ' + exitCode + ': ' + taskReason);
+				}
+
+				await sendResponse(event, context, 'SUCCESS', physicalResourceId);
+				return;
+			}
+
+			await sleep(10000);
+		}
+
+		await client.send(new StopTaskCommand({
+			cluster: props.Cluster,
+			task: taskArn,
+			reason: 'Database migration exceeded the CloudFormation deployment timeout',
+		}));
+		throw new Error('Database migration timed out');
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		await sendResponse(event, context, 'FAILED', physicalResourceId, reason);
+	}
+};
+"
+,
+        },
+        "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogGroup": {
+            "Ref": "RunDatabaseMigrationTaskLogGroup44EF250A",
+          },
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "RunDatabaseMigrationTaskServiceRoleA113B4F8",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "Timeout": 840,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "RunDatabaseMigrationTaskLogGroup44EF250A": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "RetentionInDays": 30,
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RunDatabaseMigrationTaskServiceRoleA113B4F8": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.1.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "RunDatabaseMigrationTaskServiceRoleDefaultPolicy0189E490": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "iam:PassRole",
+              "Condition": {
+                "StringLike": {
+                  "iam:PassedToService": "ecs-tasks.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "DatabaseMigrationsTaskRoleB2027760",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::GetAtt": [
+                    "DatabaseMigrationTaskDefinitionExecutionRole73DE5852",
+                    "Arn",
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ecs:RunTask",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "DatabaseMigrationTaskDefinition26A0E625",
+              },
+            },
+            {
+              "Action": [
+                "ecs:DescribeTasks",
+                "ecs:StopTask",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "ecs:TagResource",
+              "Condition": {
+                "StringEquals": {
+                  "ecs:CreateAction": "RunTask",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RunDatabaseMigrationTaskServiceRoleDefaultPolicy0189E490",
+        "Roles": [
+          {
+            "Ref": "RunDatabaseMigrationTaskServiceRoleA113B4F8",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "dispatchlambdaEBD865CC": {
       "DependsOn": [

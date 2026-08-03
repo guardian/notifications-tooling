@@ -2,14 +2,15 @@
 
 # Creates the database migration artifact for Riff-Raff deployment.
 #
-# The artifact is a zip file containing:
+# The artifact is a tar.gz file containing:
 #   - migrations/   — Drizzle SQL migration files and journal metadata
 #   - drizzle.config.mjs — Plain-JS Drizzle config (no TypeScript compilation needed at deploy time)
+#   - run-migrations.mjs — Migration entrypoint run by the Fargate task
 #   - package.json  — Minimal package manifest for drizzle-kit
 #   - node_modules/ — Pre-installed drizzle-kit, drizzle-orm, pg
 #                     (dependencies are baked in during CI, not installed at deployment time)
 #
-# The artifact is placed at dist/database-migrations.zip and must be listed under the
+# The artifact is placed at dist/database-migrations.tar.gz and must be listed under the
 # 'database-migrations' contentDirectory in the Riff-Raff upload step (see .github/workflows/ci.yml).
 
 set -euo pipefail
@@ -18,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(realpath "${SCRIPT_DIR}/..")"
 DATABASE_DIR="${ROOT_DIR}/src/packages/database"
 OUTPUT_DIR="${ROOT_DIR}/dist/database-migrations"
-OUTPUT_ZIP="${ROOT_DIR}/dist/database-migrations.zip"
+OUTPUT_ARCHIVE="${ROOT_DIR}/dist/database-migrations.tar.gz"
 
 echo "Creating database migration artifact..."
 
@@ -27,6 +28,7 @@ mkdir -p "${OUTPUT_DIR}"
 
 # Copy Drizzle migration files (SQL + journal metadata)
 cp -r "${DATABASE_DIR}/migrations" "${OUTPUT_DIR}/migrations"
+cp "${ROOT_DIR}/scripts/run-database-migrations.mjs" "${OUTPUT_DIR}/run-migrations.mjs"
 
 # Write a plain-JS Drizzle config so the artifact can run under Node.js without TypeScript.
 # DATABASE_URL is injected at runtime from Secrets Manager via ECS task secrets.
@@ -67,11 +69,9 @@ echo "Installing dependencies into artifact (drizzle-kit ${DRIZZLE_KIT_VERSION},
 	npm install --omit=dev --quiet
 )
 
-# Create the zip artifact
-rm -f "${OUTPUT_ZIP}"
-(
-	cd "${OUTPUT_DIR}"
-	zip -qr "${OUTPUT_ZIP}" .
-)
+# Create the compressed tar artifact. BusyBox tar in the stock Node Alpine image extracts it.
+rm -f "${OUTPUT_ARCHIVE}"
+tar -czf "${OUTPUT_ARCHIVE}" -C "${OUTPUT_DIR}" .
+rm -rf "${OUTPUT_DIR}"
 
-echo "Created: ${OUTPUT_ZIP} ($(du -sh "${OUTPUT_ZIP}" | cut -f1))"
+echo "Created: ${OUTPUT_ARCHIVE} ($(du -sh "${OUTPUT_ARCHIVE}" | cut -f1))"

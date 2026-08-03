@@ -61,9 +61,6 @@ jobs:
         working-directory: cdk
         run: bun synth
 
-      - name: Build database migration artifact
-        run: ./scripts/create-database-migrations-artifact.sh
-
       - name: Combine application and CDK into dist
         run: |
           mkdir -p dist/frontend
@@ -71,6 +68,9 @@ jobs:
           cp -Rv src/apps/frontend/dist/. dist/frontend/
           cd dist
           zip -r dispatch.zip .
+
+      - name: Build database migration artifact
+        run: ./scripts/create-database-migrations-artifact.sh
 
       - name: Upload to riff-raff
         uses: guardian/actions-riff-raff@ab360a150e2540439f7f675c37d170a2fd6c8604
@@ -85,7 +85,7 @@ jobs:
             dispatch:
               - dist/dispatch.zip
             database-migrations:
-              - dist/database-migrations.zip
+              - dist/database-migrations.tar.gz
 
   storybook-tests:
     name: Storybook interaction tests
