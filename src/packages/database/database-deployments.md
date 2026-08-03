@@ -12,6 +12,7 @@
 - [Other options explored: CloudFormation hooks](#cloudformation-hooks)
 
 <a id="local-development"></a>
+
 ## 1. Local Development
 
 Locally, we use Drizzle to manage database schema changes and migrations.
@@ -40,11 +41,13 @@ bun run db:migration:apply
 ```
 
 <a id="deployment-to-code-prod"></a>
+
 ## 2. Deployment to CODE/PROD
 
 There are currently no consistent standards across Guardian repositories for how database migrations are handled during deployment. The current practical recommendation is to start with a manual, process-first approach, and only introduce a programmatic deployment-time mechanism if that proves necessary.
 
 <a id="manual-deployments-through-ec2-jump-host"></a>
+
 ### 1. Manual deployments through EC2 jump host
 
 DevX advised that, before implementing a programmatic solution, we should first make process changes, such as splitting database and application changes across independent PRs, to reduce the surface area of the problem.
@@ -62,6 +65,7 @@ We can take a look at how Pinboard does this: https://github.com/guardian/pinboa
 5. Clean up the access path afterward.
 
 #### Pros
+
 1. We avoid changing Riff-Raff or coupling migrations to CloudFormation. Riff-Raff will also be removed in the future.
 2. It keeps database access inside controlled infrastructure.
 3. It supports a process-first approach.
@@ -73,6 +77,7 @@ We can take a look at how Pinboard does this: https://github.com/guardian/pinboa
 3. It is a manual approach that requires developer intervention.
 
 <a id="lambda-backed-custom-resources"></a>
+
 ### 2. Lambda-backed custom resources
 
 #### What is it?
@@ -152,6 +157,7 @@ Keep migrations forward-safe:
 4. Concurrency control remains our responsibility. If overlapping deploys happen, we need a locking mechanism so only one migration runner mutates the database at a time.
 
 <a id="ecs-fargate-custom-resource"></a>
+
 ### 3. ECS Fargate task orchestrated by a CloudFormation custom resource
 
 This approach is similar to [Lambda-backed custom resources](#lambda-backed-custom-resources), but instead of running the migrations directly in the Lambda handler, it starts an ECS Fargate task to perform the migrations. This approach is likely to work best when the migrations need more packaging flexibility or runtime headroom than Lambda can provide.
@@ -192,6 +198,7 @@ flowchart TD
 4. It introduces another artifact and another runtime surface area to build, package, and maintain.
 
 <a id="cloudformation-hooks"></a>
+
 ### 4. Other options explored: CloudFormation hooks
 
 CloudFormation hooks were also considered. They are a separate extension point that can inspect or block resource changes during a stack update, but they are more naturally suited to validation and policy enforcement than to running database migrations as a dedicated step.
