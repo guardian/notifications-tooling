@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import {
 	MAX_BRAZE_TRIGGER_PROPERTIES_BYTES,
+	registerBrazeTestEmailRecipients,
 	sendBrazeCampaign,
+	sendBrazeTestEmail,
 } from './client';
 
 afterEach(() => {
@@ -93,5 +95,175 @@ describe('sendBrazeCampaign', () => {
 		expect(sendBrazeCampaign(request)).rejects.toThrow(
 			'Braze campaign trigger failed with status 401.',
 		);
+	});
+});
+
+describe('registerBrazeTestEmailRecipients', () => {
+	it('creates stable test profiles', () => {
+		const timeoutSignal = new AbortController().signal;
+		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 'success' }),
+		);
+
+		expect(
+			registerBrazeTestEmailRecipients({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				timeoutMs: 10_000,
+				recipientEmails: [
+					'first.user@guardian.co.uk',
+					'second.user@guardian.co.uk',
+				],
+			}),
+		).resolves.toBeUndefined();
+
+		expect(fetcher).toHaveBeenCalledWith(
+			'https://rest.example.braze.eu/users/track',
+			{
+				method: 'POST',
+				headers: {
+					Authorization: 'Bearer secret-api-key',
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					attributes: [
+						{
+							_update_existing_only: false,
+							user_alias: {
+								alias_name: 'first.user@guardian.co.uk',
+								alias_label: 'dispatch-tool-test-email',
+							},
+							email: 'first.user@guardian.co.uk',
+						},
+						{
+							_update_existing_only: false,
+							user_alias: {
+								alias_name: 'second.user@guardian.co.uk',
+								alias_label: 'dispatch-tool-test-email',
+							},
+							email: 'second.user@guardian.co.uk',
+						},
+					],
+				}),
+				signal: timeoutSignal,
+			},
+		);
+	});
+
+	it('rejects a partial test-profile update', () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 'success', errors: [{ type: 'invalid' }] }),
+		);
+
+		expect(
+			registerBrazeTestEmailRecipients({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				timeoutMs: 10_000,
+				recipientEmails: ['first.user@guardian.co.uk'],
+			}),
+		).rejects.toThrow('Braze test user tracking was not fully successful.');
+		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+
+	it('throws a safe error when Braze rejects test-profile tracking', () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			new Response('sensitive provider response', { status: 401 }),
+		);
+
+		expect(
+			registerBrazeTestEmailRecipients({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				timeoutMs: 10_000,
+				recipientEmails: ['first.user@guardian.co.uk'],
+			}),
+		).rejects.toThrow('Braze test user tracking failed with status 401.');
+		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('sendBrazeTestEmail', () => {
+	it('sends rendered content to stable test aliases', () => {
+		const timeoutSignal = new AbortController().signal;
+		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 'success', dispatch_id: 'dispatch-456' }),
+		);
+
+		expect(
+			sendBrazeTestEmail({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				appId: 'email-app-id',
+				from: 'The Guardian <newsletters@theguardian.com>',
+				replyTo: 'newsletters@theguardian.com',
+				html: '<html>Test news</html>',
+				subject: 'Test breaking news',
+				timeoutMs: 10_000,
+				recipientEmails: [
+					'first.user@guardian.co.uk',
+					'second.user@guardian.co.uk',
+				],
+			}),
+		).resolves.toEqual({
+			message: 'success',
+			dispatch_id: 'dispatch-456',
+		});
+		expect(fetcher).toHaveBeenCalledWith(
+			'https://rest.example.braze.eu/messages/send',
+			{
+				method: 'POST',
+				headers: {
+					Authorization: 'Bearer secret-api-key',
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					user_aliases: [
+						{
+							alias_name: 'first.user@guardian.co.uk',
+							alias_label: 'dispatch-tool-test-email',
+						},
+						{
+							alias_name: 'second.user@guardian.co.uk',
+							alias_label: 'dispatch-tool-test-email',
+						},
+					],
+					recipient_subscription_state: 'all',
+					messages: {
+						email: {
+							app_id: 'email-app-id',
+							from: 'The Guardian <newsletters@theguardian.com>',
+							reply_to: 'newsletters@theguardian.com',
+							subject: 'Test breaking news',
+							body: '<html>Test news</html>',
+						},
+					},
+				}),
+				signal: timeoutSignal,
+			},
+		);
+	});
+
+	it('throws a safe error when Braze rejects the test email', () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			new Response('sensitive provider response', { status: 400 }),
+		);
+
+		expect(
+			sendBrazeTestEmail({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				appId: 'email-app-id',
+				from: 'The Guardian <newsletters@theguardian.com>',
+				replyTo: 'newsletters@theguardian.com',
+				html: '<html>Test news</html>',
+				subject: 'Test breaking news',
+				timeoutMs: 10_000,
+				recipientEmails: ['first.user@guardian.co.uk'],
+			}),
+		).rejects.toThrow('Braze test email send failed with status 400.');
+		expect(fetcher).toHaveBeenCalledTimes(1);
 	});
 });

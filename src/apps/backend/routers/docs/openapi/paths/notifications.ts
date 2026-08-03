@@ -8,6 +8,8 @@
 export const notificationsPath = {
 	post: {
 		summary: 'Validate and enqueue a notification',
+		description:
+			'Production notification endpoint. Audiences must reference configured segments; direct email recipients are not accepted.',
 		security: [{ pandaCookie: [] }],
 		requestBody: {
 			required: true,

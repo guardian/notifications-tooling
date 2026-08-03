@@ -10,6 +10,7 @@ import { staticAssetsMiddleware } from './middleware/static-assets-middleware';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
+import { notificationTestsRouter } from './routers/notification-tests';
 import { notificationsRouter } from './routers/notifications';
 import { userRouter } from './routers/user';
 
@@ -26,6 +27,7 @@ app.use('/health', healthRouter);
 
 // Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
+app.use('/v1/notification-tests', notificationTestsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
 app.use('/docs/api', docsRouter);
