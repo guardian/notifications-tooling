@@ -2,6 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
+	mockSendFailingNotification
+} from '../../../mocks/mock-send-notification';
+import {
 	completeEmailParams,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -107,5 +110,29 @@ export const SendingEmail: Story = {
 			confirmSendModalOpen: true,
 			isWaitingForSend: true,
 		},
+	},
+};
+
+export const SendEmailFail: Story = {
+	args: {
+		notificationState: {
+			...defaultState,
+			articleInputText: articleFixture.webUrl,
+			content: articleFixture,
+			fetchedArticleId: articleFixture.webUrl,
+			parameters: completeEmailParams,
+			isWaitingForSend: false,
+			sendingResult: { ok: false },
+		},
+	},
+	render: (args) => {
+		const { notificationState } = args;
+		return WithNotificationContext(
+			<CreateNotificationForm />,
+			notificationState,
+			{
+				sendNotification: mockSendFailingNotification,
+			},
+		);
 	},
 };

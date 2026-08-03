@@ -7,3 +7,11 @@ export const mockSendNotification = () => {
 		}, 500);
 	});
 };
+
+export const mockSendFailingNotification = () => {
+	return new Promise<SendingResult>((resolve) => {
+		setTimeout(() => {
+			resolve({ ok: false });
+		}, 500);
+	});
+};

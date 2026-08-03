@@ -3,7 +3,11 @@ import {
 	defaultState,
 	notificationReducer,
 } from '../features/stand-frontend/notification-reducer';
-import { NotificationFormContext } from '../features/stand-frontend/NotificationContext';
+import type {
+	NotificationFormContextProps} from '../features/stand-frontend/NotificationContext';
+import {
+	NotificationFormContext
+} from '../features/stand-frontend/NotificationContext';
 import type {
 	EmailNotification,
 	NotificationAction,
@@ -18,20 +22,29 @@ import { parseHtml } from '../util/html-helpers';
 export const WithNotificationContext = (
 	reactNode: ReactNode,
 	notificationState: NotificationState = defaultState,
+	functions: Partial<
+		Omit<NotificationFormContextProps, 'notification' | 'updateNotification'>
+	> = {},
 ) => {
 	const [notification, updateNotification] = useReducer<
 		NotificationState,
 		[NotificationAction]
 	>(notificationReducer, notificationState);
 
+	const {
+		capiFetch = mockCapiFetch,
+		sendNotification = mockSendNotification,
+		requestEmailHtml = mockRequestEmailHtml,
+	} = functions;
+
 	return (
 		<NotificationFormContext
 			value={{
 				notification,
 				updateNotification,
-				capiFetch: mockCapiFetch,
-				sendNotification: mockSendNotification,
-				requestEmailHtml: mockRequestEmailHtml,
+				capiFetch,
+				sendNotification,
+				requestEmailHtml,
 			}}
 		>
 			{reactNode}
