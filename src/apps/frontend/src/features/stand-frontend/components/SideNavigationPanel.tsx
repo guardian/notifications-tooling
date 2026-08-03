@@ -25,8 +25,8 @@ export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 	{
 		tileNumber: 2,
 		title: 'Content',
-		href: '#kicker-section',
-		trackedSectionId: 'kicker-section',
+		href: '#content-section',
+		trackedSectionId: 'content-section',
 		isSelected: false,
 		onPress: () => {},
 	},

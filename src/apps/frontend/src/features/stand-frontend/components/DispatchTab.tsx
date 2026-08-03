@@ -33,19 +33,22 @@ export const DispatchTab = () => {
 		}
 
 		const observer = new IntersectionObserver((entries) => {
-			entries.forEach((entry) => {
-				const id = entry.target.getAttribute('id');
-				if (entry.isIntersecting && id) {
-					const selectedHref = `#${id}`;
-					if (
-						SIDE_NAVIGATION_PANEL_ITEMS.some(
-							(item) => item.href === selectedHref,
-						)
-					) {
-						setSelectedHref(selectedHref);
+			entries.forEach(
+				(entry) => {
+					const id = entry.target.getAttribute('id');
+					if (entry.isIntersecting && id) {
+						const selectedHref = `#${id}`;
+						if (
+							SIDE_NAVIGATION_PANEL_ITEMS.some(
+								(item) => item.href === selectedHref,
+							)
+						) {
+							setSelectedHref(selectedHref);
+						}
 					}
-				}
-			});
+				},
+				{ rootMargin: '28%px 0px -8% 0px' },
+			);
 		});
 
 		SIDE_NAVIGATION_PANEL_ITEMS.forEach((item) => {
@@ -55,7 +58,7 @@ export const DispatchTab = () => {
 			}
 		});
 
-		// return () => observer.disconnect();
+		return () => observer.disconnect();
 	}, [sendingResult]);
 
 	return (
