@@ -9,6 +9,7 @@ export default [
 	{
 		ignores: [
 			'**/dist/**',
+			'cdk/cdk.out/**',
 			'docker/**',
 			'!docker/docker-compose.local.yml',
 			'**/*.d.ts',

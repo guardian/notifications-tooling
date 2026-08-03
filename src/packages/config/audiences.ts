@@ -52,12 +52,14 @@ const newsletterSegmentsByStage = {
 	},
 } as const satisfies Record<'CODE' | 'PROD', Record<string, NewsletterSegment>>;
 
-export const getNewsletterSegments = (stage: Env['STAGE']) =>
+export type NewsletterSegmentId = keyof typeof newsletterSegmentsByStage.CODE;
+
+export const getNewsletterSegments = (
+	stage: Env['STAGE'],
+): Record<NewsletterSegmentId, NewsletterSegment> =>
 	newsletterSegmentsByStage[stage === 'PROD' ? 'PROD' : 'CODE'];
 
 export const newsletterSegments = getNewsletterSegments(env.STAGE);
-
-export type NewsletterSegmentId = keyof typeof newsletterSegments;
 
 export interface MobileN10nTopic {
 	type: string;
