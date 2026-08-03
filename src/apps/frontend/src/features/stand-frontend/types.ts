@@ -78,5 +78,8 @@ export type NotificationAction =
 			result: SendingResult;
 	  }
 	| {
+			type: 'dismiss-send-error';
+	  }
+	| {
 			type: 'reset';
 	  };
