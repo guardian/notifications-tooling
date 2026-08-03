@@ -14,7 +14,7 @@ export const mockCapiFetch = (articleId: string): Promise<Content> => {
 };
 
 const baseUrl = 'https://content.guardianapis.com';
-const params = 'api-key=test&show-fields=headline,standfirst';
+const params = 'api-key=test&show-fields=headline,standfirst,thumbnail';
 
 /**
  * TO DO - this is not intended for production use, just to demo.
