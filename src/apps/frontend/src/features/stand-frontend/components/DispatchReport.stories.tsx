@@ -39,14 +39,3 @@ export default meta;
 
 export const EmailSuccess: Story = {};
 
-export const EmailFail: Story = {
-	args: {
-		notificationState: {
-			...defaultState,
-			parameters: completeEmailParams,
-			sendingResult: {
-				ok: false,
-			},
-		},
-	},
-};

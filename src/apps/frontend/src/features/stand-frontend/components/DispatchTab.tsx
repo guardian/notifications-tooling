@@ -32,7 +32,7 @@ export const DispatchTab = () => {
 					lg: { gap: '0px', padding: `0px 0px 0px` },
 				}}
 			>
-				{sendingResult ? (
+				{sendingResult?.ok === true ? (
 					<Item
 						size={12}
 						cssOverrides={css({
