@@ -1,14 +1,7 @@
-import type { User } from '@guardian/pan-domain-node';
+import type { UserResponse } from '@config';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { listUserPermissions } from '../../utils/permissions/permissions-store';
-
-export type { User };
-
-export interface UserResponse {
-	user: User;
-	permissions: string[];
-}
 
 export const userHandler = async (req: Request, res: Response) => {
 	const user = req.user!;

@@ -48,19 +48,68 @@ Then:
 
 ### Run locally
 
-Start the service:
+Dispatch protects its endpoints with two independent checks, and both must be
+satisfied before authorised endpoints (for example `GET /v1/user`,
+`POST /v1/notifications`, `POST /v1/notification-tests`) return anything other
+than `401`/`403`:
+
+1. **Authentication** — a valid pan-domain cookie (`gutoolsAuth-assym`) for the
+   `local.dev-gutools.co.uk` domain. panda-auth for Node cannot mint this cookie
+   itself, so you must run the [login](https://github.com/guardian/login) tool
+   locally to sign in and issue it.
+2. **Authorisation** — your user must hold the `dispatch_access` permission. The
+   permissions store is read from the CODE bucket using the `composer` AWS
+   profile. Grant yourself the permission via the CODE permissions admin UI at
+   [permissions.code.dev-gutools.co.uk/admin](https://permissions.code.dev-gutools.co.uk/admin):
+   find your user and enable `dispatch_access`.
+
+Both the login tool and Dispatch read from the same **Composer** AWS account, so
+a single set of Janus credentials under the `composer` profile satisfies cookie
+issuance and the permissions lookup at once.
+
+#### 1. Get Composer credentials
+
+Fetch fresh [Janus](https://janus.gutools.co.uk/) credentials for the Composer
+account into the `composer` profile (Janus -> Composer -> Run dispatch locally). Both the login tool and Dispatch expect
+this profile to be present, so grab them before starting either service.
+
+#### 2. Start the login tool
+
+Clone and start the [login](https://github.com/guardian/login) tool in a
+separate checkout so it is available alongside Dispatch:
+
+```bash
+# in your local checkout of guardian/login
+./scripts/start.sh
+```
+
+This serves `https://login.local.dev-gutools.co.uk`, which Dispatch redirects to
+when you are unauthenticated.
+
+#### 3. Start Dispatch
 
 ```bash
 ./scripts/start.sh
 ```
 
-Local URLs:
+Local URL:
 
 - `https://dispatch.local.dev-gutools.co.uk`
 
-This local setup currently depends on a temporary workaround introduced to support local development. Because panda-auth for Node does not generate cookies, you need to run the login tool locally alongside Dispatch.
+#### 4. Sign in
 
-This is implemented using the [new developer policies](https://github.com/guardian/janus/blob/main/docs/developer-policies.md#gucdk). We considered adding these policies to login directly, but both login and Dispatch use the same Composer AWS profile, so only one policy context can be active at a time.
+Open `https://dispatch.local.dev-gutools.co.uk`. When unauthenticated you are
+redirected to `login.local.dev-gutools.co.uk`; sign in there to mint the
+`gutoolsAuth-assym` cookie, then you are returned to Dispatch. With the cookie
+present, authorised endpoints resolve successfully.
+
+> This local setup currently depends on a temporary workaround. Because
+> panda-auth for Node does not generate cookies, you need to run the login tool
+> locally alongside Dispatch. This is implemented using the
+> [new developer policies](https://github.com/guardian/janus/blob/main/docs/developer-policies.md#gucdk).
+> We considered adding these policies to login directly, but both login and
+> Dispatch use the same Composer AWS profile, so only one policy context can be
+> active at a time.
 
 Run apps separately if needed:
 
