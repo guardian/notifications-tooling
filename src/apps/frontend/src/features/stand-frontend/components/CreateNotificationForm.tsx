@@ -6,6 +6,7 @@ import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
 import { EmailFields } from './EmailFields';
 import { SendButton } from './SendButton';
+import { SendNotificationModal } from './SendNotificationModal';
 
 export const CreateNotificationForm = () => {
 	const { notification, updateNotification } = useContext(
@@ -52,6 +53,8 @@ export const CreateNotificationForm = () => {
 				<EmailFields />
 
 				<SendButton />
+				<SendNotificationModal />
+				
 			</div>
 		</div>
 	);
