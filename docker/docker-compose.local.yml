@@ -1,4 +1,5 @@
 name: dispatch
+name: dispatch
 services:
   postgres:
     image: postgres:18.4-alpine
