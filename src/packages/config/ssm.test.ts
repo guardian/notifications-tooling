@@ -62,6 +62,19 @@ describe('getSSMParameter in production', () => {
 		expect(calledUrl.searchParams.get('withDecryption')).toBe('true');
 	});
 
+	it('converts an UPPER_SNAKE_CASE key to kebab-case in the parameter name', async () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ Parameter: { Value: 'secret-value' } }),
+		);
+
+		await getSSMParameter('BRAZE_API_KEY');
+
+		const calledUrl = fetcher.mock.calls[0]?.[0] as URL;
+		expect(calledUrl.searchParams.get('name')).toBe(
+			'/CODE/notifications/dispatch/braze-api-key',
+		);
+	});
+
 	it('throws when AWS_SESSION_TOKEN is not present', () => {
 		delete process.env.AWS_SESSION_TOKEN;
 		const fetcher = spyOn(globalThis, 'fetch');

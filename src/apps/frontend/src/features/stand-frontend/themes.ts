@@ -105,14 +105,10 @@ export const selectableTileTheme = {
 
 export const activePillTheme = {
 	activePill: css({
-		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 		backgroundColor: baseColors.magenta[900],
 		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 		borderRadius: semanticRadius.cornerSm,
-		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 		height: '36px',
 		display: 'flex',
 		flexDirection: 'row',
@@ -124,5 +120,51 @@ export const activePillTheme = {
 		height: '20px',
 		width: '20px',
 		gap: '10px',
+	}),
+	isConfirmationStyle: css({
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+		borderRadius: semanticRadius.cornerXs,
+		height: semanticSizing.height.sm,
+		fontSize: '14px',
+		display: 'flex',
+		flexDirection: 'row',
+		gap: semanticSpacing.stackXs,
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+	}),
+};
+
+export const articlePreviewCardTheme = {
+	card: css({
+		display: 'flex',
+		flexDirection: 'row',
+		alignItems: 'flex-start',
+		justifyContent: 'space-between',
+		gap: semanticSpacing.stackMd,
+		padding: semanticSpacing.stackSm,
+		borderRadius: semanticRadius.cornerSm,
+		backgroundColor: baseColors.neutral[850],
+		width: '341px',
+	}),
+	details: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXxs,
+	}),
+	sectionLabel: (color: string) =>
+		css({
+			fontSize: '12px',
+			color,
+		}),
+	headline: css({
+		fontSize: '12px',
+		color: semanticColors.text.strong,
+	}),
+	thumbnail: css({
+		width: '120px',
+		borderRadius: semanticRadius.cornerXs,
+		objectFit: 'cover',
+		flexShrink: 0,
 	}),
 };

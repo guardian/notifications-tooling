@@ -38,7 +38,11 @@ const toJsonPointer = (path: readonly PropertyKey[]): string =>
  * `{ error, message, requestId, details[] }` envelope and returns 400 for
  * structural failures or 422 for semantic/business failures.
  */
-const handleValidationErrors: ErrorRequestHandler = (errors, req, res) => {
+export const handleValidationErrors: ErrorRequestHandler = (
+	errors,
+	req,
+	res,
+) => {
 	const details = errors.flatMap((item) =>
 		item.errors.issues.map((issue) => ({
 			code: issue.code,
