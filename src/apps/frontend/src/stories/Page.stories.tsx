@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import { mockAppConfig } from '../mocks/app-config';
 import { Page } from './Page';
 
 const meta = {
@@ -7,6 +8,9 @@ const meta = {
 	component: Page,
 	parameters: {
 		layout: 'fullscreen',
+	},
+	beforeEach() {
+		window.__APP_CONFIG__ = mockAppConfig;
 	},
 } satisfies Meta<typeof Page>;
 
@@ -20,6 +24,22 @@ export const NotificationsPage: Story = {
 			'Create a notification',
 			{
 				selector: 'h2',
+			},
+		);
+		await expect(CreateNotificationHeading).toBeInTheDocument();
+	},
+};
+
+export const NotificationsPageWithoutPermission: Story = {
+	beforeEach() {
+		window.__APP_CONFIG__ = { ...mockAppConfig, permissions: [] };
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const CreateNotificationHeading = canvas.getByText(
+			'contact central production',
+			{
+				selector: 'a',
 			},
 		);
 		await expect(CreateNotificationHeading).toBeInTheDocument();
