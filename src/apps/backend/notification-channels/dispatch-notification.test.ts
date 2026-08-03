@@ -33,11 +33,16 @@ const baseRequest = {
 const ssmParameters: Record<string, string> = {
 	BRAZE_API_KEY: 'test-api-key',
 	BRAZE_REST_ENDPOINT: 'https://rest.example.braze.eu',
+	BRAZE_APP_ID: 'test-app-id',
+	BRAZE_TEST_EMAIL_FROM: 'dev testing <dev-testing@email.theguardian.com>',
+	BRAZE_TEST_EMAIL_REPLY_TO: 'NO_REPLY_TO',
 	EMAIL_RENDERING_ENDPOINT: 'https://email-rendering.example.com',
-	PROVIDER_REQUEST_TIMEOUT_MS: '10000',
 };
 
 const createDependencies = () => {
+	const getSSMParameter = mock((key: string) =>
+		Promise.resolve(ssmParameters[key] ?? ''),
+	);
 	const sendAppNotification = mock(() => Promise.resolve());
 	const renderEmail = mock(() =>
 		Promise.resolve('<html>Rendered newsletter</html>'),
@@ -50,14 +55,7 @@ const createDependencies = () => {
 		Promise.resolve({ message: 'success', dispatch_id: 'test-dispatch-123' }),
 	);
 	const dependencies: DispatchNotificationDependencies = {
-		environment: {
-			BRAZE_API_KEY: 'test-api-key',
-			BRAZE_REST_ENDPOINT: 'https://rest.example.braze.eu',
-			BRAZE_APP_ID: 'test-app-id',
-			BRAZE_TEST_EMAIL_FROM: 'dev testing <dev-testing@email.theguardian.com>',
-			BRAZE_TEST_EMAIL_REPLY_TO: 'NO_REPLY_TO',
-			EMAIL_RENDERING_ENDPOINT: 'https://email-rendering.example.com',
-		},
+		getSSMParameter,
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,

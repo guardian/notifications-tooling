@@ -17,15 +17,14 @@ import {
 } from './email/braze/client';
 import { renderEmail } from './email/rendering/client';
 
+// Each provider request shares a fixed timeout; it is not configurable per
+// environment.
+const providerRequestTimeoutMs = 10_000;
+
 const newsletterEnvironmentSchema = z.object({
 	BRAZE_API_KEY: z.string().trim().min(1),
 	BRAZE_REST_ENDPOINT: z.url(),
 	EMAIL_RENDERING_ENDPOINT: z.url(),
-	PROVIDER_REQUEST_TIMEOUT_MS: z.coerce
-		.number()
-		.int()
-		.positive()
-		.default(10_000),
 });
 
 const testEmailEnvironmentSchema = z.object({
@@ -124,23 +123,17 @@ const dispatchNewsletter = async (
 
 	const { item, plan, segments } = resolvedDispatch;
 
-	const [
-		brazeApiKey,
-		brazeRestEndpoint,
-		emailRenderingEndpoint,
-		providerRequestTimeoutMs,
-	] = await Promise.all([
-		dependencies.getSSMParameter('BRAZE_API_KEY'),
-		dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
-		dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
-		dependencies.getSSMParameter('PROVIDER_REQUEST_TIMEOUT_MS'),
-	]);
+	const [brazeApiKey, brazeRestEndpoint, emailRenderingEndpoint] =
+		await Promise.all([
+			dependencies.getSSMParameter('BRAZE_API_KEY'),
+			dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
+			dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
+		]);
 
 	const environment = newsletterEnvironmentSchema.parse({
 		BRAZE_API_KEY: brazeApiKey,
 		BRAZE_REST_ENDPOINT: brazeRestEndpoint,
 		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
-		PROVIDER_REQUEST_TIMEOUT_MS: providerRequestTimeoutMs,
 	});
 
 	for (const { brazeCampaignId, emailRenderingNewsletterId } of segments) {
@@ -150,7 +143,7 @@ const dispatchNewsletter = async (
 			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 			articleUrl: item.link,
 			newsletterId: emailRenderingNewsletterId,
-			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+			timeoutMs: providerRequestTimeoutMs,
 		});
 
 		await dependencies.sendBrazeCampaign({
@@ -159,7 +152,7 @@ const dispatchNewsletter = async (
 			campaignId: brazeCampaignId,
 			html,
 			subject: plan.compose.subject,
-			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+			timeoutMs: providerRequestTimeoutMs,
 		});
 	}
 };
@@ -240,12 +233,32 @@ export const dispatchNotificationTest = async (
 		plan.compose.items[0]!,
 		NotificationChannel.Newsletter,
 	);
-	const environment = newsletterEnvironmentSchema.parse(
-		dependencies.environment,
-	);
-	const configuration = testEmailEnvironmentSchema.parse(
-		dependencies.environment,
-	);
+	const [
+		brazeApiKey,
+		brazeRestEndpoint,
+		emailRenderingEndpoint,
+		brazeAppId,
+		brazeTestEmailFrom,
+		brazeTestEmailReplyTo,
+	] = await Promise.all([
+		dependencies.getSSMParameter('BRAZE_API_KEY'),
+		dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
+		dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
+		dependencies.getSSMParameter('BRAZE_APP_ID'),
+		dependencies.getSSMParameter('BRAZE_TEST_EMAIL_FROM'),
+		dependencies.getSSMParameter('BRAZE_TEST_EMAIL_REPLY_TO'),
+	]);
+
+	const environment = newsletterEnvironmentSchema.parse({
+		BRAZE_API_KEY: brazeApiKey,
+		BRAZE_REST_ENDPOINT: brazeRestEndpoint,
+		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
+	});
+	const configuration = testEmailEnvironmentSchema.parse({
+		BRAZE_APP_ID: brazeAppId,
+		BRAZE_TEST_EMAIL_FROM: brazeTestEmailFrom,
+		BRAZE_TEST_EMAIL_REPLY_TO: brazeTestEmailReplyTo,
+	});
 	const recipientEmails = plan.audience.items.map((email) =>
 		email.toLowerCase(),
 	);
@@ -256,7 +269,7 @@ export const dispatchNotificationTest = async (
 				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 				articleUrl: item.link,
 				newsletterId: newsletterSegments[segmentId].emailRenderingNewsletterId,
-				timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+				timeoutMs: providerRequestTimeoutMs,
 			}),
 		});
 	}
@@ -268,7 +281,7 @@ export const dispatchNotificationTest = async (
 		apiKey: environment.BRAZE_API_KEY,
 		restEndpoint: environment.BRAZE_REST_ENDPOINT,
 		recipientEmails,
-		timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+		timeoutMs: providerRequestTimeoutMs,
 	});
 
 	for (const { html } of renderedVariants) {
@@ -281,7 +294,7 @@ export const dispatchNotificationTest = async (
 			recipientEmails,
 			html,
 			subject: plan.compose.subject,
-			timeoutMs: environment.PROVIDER_REQUEST_TIMEOUT_MS,
+			timeoutMs: providerRequestTimeoutMs,
 		});
 	}
 };
