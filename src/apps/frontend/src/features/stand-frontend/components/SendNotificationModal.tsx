@@ -4,18 +4,11 @@ import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
-
-
 export const SendNotificationModal = () => {
 	const { notification, updateNotification, sendNotification } = useContext(
 		NotificationFormContext,
 	);
-	const {
-		confirmSendModalOpen,
-		isWaitingForSend,
-	} = notification;
-
-
+	const { confirmSendModalOpen, isWaitingForSend } = notification;
 
 	const handleSending = () => {
 		updateNotification({ type: 'waiting-for-send' });
@@ -27,7 +20,10 @@ export const SendNotificationModal = () => {
 				console.error(err);
 				updateNotification({
 					type: 'receive-send-result',
-					result: { ok: false },
+					result: {
+						ok: false,
+						requestFailed: true,
+					},
 				});
 			});
 	};

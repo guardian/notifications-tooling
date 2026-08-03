@@ -3,11 +3,8 @@ import {
 	defaultState,
 	notificationReducer,
 } from '../features/stand-frontend/notification-reducer';
-import type {
-	NotificationFormContextProps} from '../features/stand-frontend/NotificationContext';
-import {
-	NotificationFormContext
-} from '../features/stand-frontend/NotificationContext';
+import type { NotificationFormContextProps } from '../features/stand-frontend/NotificationContext';
+import { NotificationFormContext } from '../features/stand-frontend/NotificationContext';
 import type {
 	EmailNotification,
 	NotificationAction,

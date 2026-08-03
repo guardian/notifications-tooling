@@ -27,6 +27,9 @@ const meta: Meta<StoryArgs> = {
 			parameters: completeEmailParams,
 			sendingResult: {
 				ok: true,
+				response: {
+					status: 'accepted',
+				},
 			},
 		},
 	},
@@ -38,4 +41,3 @@ const meta: Meta<StoryArgs> = {
 export default meta;
 
 export const EmailSuccess: Story = {};
-

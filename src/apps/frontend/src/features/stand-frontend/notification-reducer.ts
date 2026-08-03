@@ -109,7 +109,6 @@ export const notificationReducer = (
 			return {
 				...state,
 				isWaitingForSend: true,
-				sendingResult: undefined,
 			};
 		}
 
@@ -117,6 +116,7 @@ export const notificationReducer = (
 			return {
 				...state,
 				isWaitingForSend: false,
+				confirmSendModalOpen: false,
 				sendingResult: action.result,
 			};
 		}

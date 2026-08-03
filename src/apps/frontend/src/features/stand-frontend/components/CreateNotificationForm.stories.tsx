@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
-	mockSendFailingNotification
+	mockSendFailingRequest,
+	mockSendRejectedNotification,
 } from '../../../mocks/mock-send-notification';
 import {
 	completeEmailParams,
@@ -33,6 +34,14 @@ const meta: Meta<StoryArgs> = {
 };
 
 export default meta;
+
+const populatedEmailState = {
+	...defaultState,
+	articleInputText: articleFixture.webUrl,
+	content: articleFixture,
+	fetchedArticleId: articleFixture.id,
+	parameters: completeEmailParams,
+};
 
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
@@ -76,24 +85,14 @@ export const FetchArticleError: Story = {
 
 export const PopulatedEmail: Story = {
 	args: {
-		notificationState: {
-			...defaultState,
-			articleInputText: articleFixture.webUrl,
-			content: articleFixture,
-			fetchedArticleId: articleFixture.id,
-			parameters: completeEmailParams,
-		},
+		notificationState: populatedEmailState,
 	},
 };
 
 export const ConfirmationStep: Story = {
 	args: {
 		notificationState: {
-			...defaultState,
-			articleInputText: articleFixture.webUrl,
-			content: articleFixture,
-			fetchedArticleId: articleFixture.webUrl,
-			parameters: completeEmailParams,
+			...populatedEmailState,
 			confirmSendModalOpen: true,
 		},
 	},
@@ -102,11 +101,7 @@ export const ConfirmationStep: Story = {
 export const SendingEmail: Story = {
 	args: {
 		notificationState: {
-			...defaultState,
-			articleInputText: articleFixture.webUrl,
-			content: articleFixture,
-			fetchedArticleId: articleFixture.webUrl,
-			parameters: completeEmailParams,
+			...populatedEmailState,
 			confirmSendModalOpen: true,
 			isWaitingForSend: true,
 		},
@@ -116,13 +111,12 @@ export const SendingEmail: Story = {
 export const SendEmailFail: Story = {
 	args: {
 		notificationState: {
-			...defaultState,
-			articleInputText: articleFixture.webUrl,
-			content: articleFixture,
-			fetchedArticleId: articleFixture.webUrl,
-			parameters: completeEmailParams,
+			...populatedEmailState,
 			isWaitingForSend: false,
-			sendingResult: { ok: false },
+			sendingResult: {
+				ok: false,
+				requestFailed: true,
+			},
 		},
 	},
 	render: (args) => {
@@ -131,7 +125,33 @@ export const SendEmailFail: Story = {
 			<CreateNotificationForm />,
 			notificationState,
 			{
-				sendNotification: mockSendFailingNotification,
+				sendNotification: mockSendFailingRequest,
+			},
+		);
+	},
+};
+
+export const SendEmailRejected: Story = {
+	args: {
+		notificationState: {
+			...populatedEmailState,
+			isWaitingForSend: false,
+			sendingResult: {
+				ok: false,
+				response: {
+					error: 'unauthenticated',
+					message: 'Authentication is required to access this resource.',
+				},
+			},
+		},
+	},
+	render: (args) => {
+		const { notificationState } = args;
+		return WithNotificationContext(
+			<CreateNotificationForm />,
+			notificationState,
+			{
+				sendNotification: mockSendRejectedNotification,
 			},
 		);
 	},

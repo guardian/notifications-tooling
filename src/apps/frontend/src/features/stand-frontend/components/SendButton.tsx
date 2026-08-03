@@ -26,11 +26,7 @@ export const SendButton = () => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	const {
-		parameters,
-		confirmSendModalOpen,
-		isFetchingContent,
-	} = notification;
+	const { parameters, confirmSendModalOpen, isFetchingContent } = notification;
 
 	if (!parameters) {
 		return null;

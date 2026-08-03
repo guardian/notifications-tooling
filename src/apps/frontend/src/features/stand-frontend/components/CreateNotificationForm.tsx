@@ -6,6 +6,7 @@ import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
 import { EmailFields } from './EmailFields';
 import { SendButton } from './SendButton';
+import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
 
 export const CreateNotificationForm = () => {
@@ -54,7 +55,7 @@ export const CreateNotificationForm = () => {
 
 				<SendButton />
 				<SendNotificationModal />
-				
+				<SendFailedModal />
 			</div>
 		</div>
 	);

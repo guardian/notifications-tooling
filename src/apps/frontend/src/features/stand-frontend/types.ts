@@ -33,10 +33,32 @@ export type NotificationState = {
 	sendingResult?: SendingResult;
 };
 
+export type SendError =
+	| 'insufficient_permissions'
+	| 'bad_request'
+	| 'validation_failed'
+	| 'unauthenticated';
 // TO DO - get shape form backend project when ready
-export type SendingResult = {
-	ok: boolean;
-};
+export type SendingResult =
+	| {
+			ok: true;
+			response: {
+				status: 'accepted';
+			};
+	  }
+	| {
+			ok: false;
+			response: {
+				error: SendError;
+				message: string;
+			};
+			requestFailed?: false;
+	  }
+	| {
+			ok: false;
+			requestFailed: true;
+			response?: undefined;
+	  };
 
 export type RequestEmailHtml = {
 	(articleId: string, options: { audience: string }): Promise<string>;
