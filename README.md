@@ -59,7 +59,9 @@ than `401`/`403`:
    locally to sign in and issue it.
 2. **Authorisation** — your user must hold the `dispatch_access` permission. The
    permissions store is read from the CODE bucket using the `composer` AWS
-   profile.
+   profile. Grant yourself the permission via the CODE permissions admin UI at
+   [permissions.code.dev-gutools.co.uk/admin](https://permissions.code.dev-gutools.co.uk/admin):
+   find your user and enable `dispatch_access`.
 
 Both the login tool and Dispatch read from the same **Composer** AWS account, so
 a single set of Janus credentials under the `composer` profile satisfies cookie
@@ -99,8 +101,7 @@ Local URL:
 Open `https://dispatch.local.dev-gutools.co.uk`. When unauthenticated you are
 redirected to `login.local.dev-gutools.co.uk`; sign in there to mint the
 `gutoolsAuth-assym` cookie, then you are returned to Dispatch. With the cookie
-present and your user holding `dispatch_access`, authorised endpoints resolve
-successfully.
+present, authorised endpoints resolve successfully.
 
 > This local setup currently depends on a temporary workaround. Because
 > panda-auth for Node does not generate cookies, you need to run the login tool
