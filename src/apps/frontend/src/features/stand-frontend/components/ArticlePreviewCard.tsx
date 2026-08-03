@@ -28,7 +28,11 @@ export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
 					</Typography>
 				)}
 
-				<Typography variant="bodyLg" element="h3" cssOverrides={articlePreviewCardTheme.headline}>
+				<Typography
+					variant="bodyLg"
+					element="h3"
+					cssOverrides={articlePreviewCardTheme.headline}
+				>
 					{headline}
 				</Typography>
 			</div>
