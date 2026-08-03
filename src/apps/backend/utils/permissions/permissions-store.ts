@@ -16,6 +16,7 @@ let permissionsStore: ReturnType<typeof init> | undefined;
 
 const getPermissionsStore = (): ReturnType<typeof init> => {
 	permissionsStore ??= init({
+		...(isRunningLocally ? { localProfile: 'composer' } : {}),
 		stage: permissionsStoreStage,
 		isRunningLocally,
 	});

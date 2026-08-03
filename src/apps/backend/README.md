@@ -1,5 +1,9 @@
 # Backend
 
+See the [root README](../../../README.md#run-locally) for how to run this app
+locally, including the login tool and permissions setup required for authorised
+endpoints.
+
 ## Notification channel configuration
 
 Copy the variable names from `.env.example` into the ignored `.env.local` file

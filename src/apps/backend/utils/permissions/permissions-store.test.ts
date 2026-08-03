@@ -32,6 +32,7 @@ describe('listUserPermissions', () => {
 
 		expect(init).toHaveBeenCalledTimes(1);
 		expect(init).toHaveBeenCalledWith({
+			localProfile: 'composer',
 			stage: 'CODE',
 			isRunningLocally: true,
 		});
