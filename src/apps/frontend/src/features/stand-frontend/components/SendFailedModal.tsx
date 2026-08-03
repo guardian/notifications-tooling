@@ -4,6 +4,7 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import { getChannelDescription } from '../../../util/display-text-helpers';
 import { NotificationFormContext } from '../NotificationContext';
 import type { NotificationState } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -77,7 +78,8 @@ export const SendFailedModal = () => {
 								variant="headingLg"
 								theme={{ color: semanticColors.text.error }}
 							>
-								The newsletter email couldn’t be sent
+								The {getChannelDescription(notification.parameters?.type)}{' '}
+								couldn’t be sent
 							</Typography>
 						</InlineMessage>
 					</Dialog.Header>

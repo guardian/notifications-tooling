@@ -10,6 +10,10 @@ import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import {
+	capitalise,
+	getChannelDescription,
+} from '../../../util/display-text-helpers';
 import { NotificationFormContext } from '../NotificationContext';
 import { emailDeliveryOptionNameMap } from '../option-values';
 import type { AudienceSegment } from '../types';
@@ -141,8 +145,9 @@ export const DispatchReport = () => {
 		return null;
 	}
 
-	const notificationDescription =
-		parameters?.type === 'email' ? 'Email newsletter' : 'App notification';
+	const notificationDescription = capitalise(
+		getChannelDescription(parameters?.type),
+	);
 
 	return (
 		<section css={styles.container}>
@@ -211,12 +216,14 @@ export const DispatchReport = () => {
 				>
 					Done
 				</Button>
-				<Button
-					variant="tertiary"
-					onClick={() => console.log('Copy to App alert')}
-				>
-					Copy to App alert
-				</Button>
+				{parameters?.type === 'email' && (
+					<Button
+						variant="tertiary"
+						onClick={() => console.log('Copy to App alert')}
+					>
+						Copy to App alert
+					</Button>
+				)}
 			</div>
 		</section>
 	);
