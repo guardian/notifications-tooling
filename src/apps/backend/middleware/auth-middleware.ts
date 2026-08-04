@@ -43,7 +43,12 @@ export const authRedirectMiddleware = async (
 	response: Response,
 	next: NextFunction,
 ) => {
+	console.log('Before verifyCookie');
+
 	const result = await verifyCookie(request.header('Cookie'));
+
+	console.log('After verifyCookie');
+
 	if (result.success) {
 		request.user = result.user;
 		return next();
