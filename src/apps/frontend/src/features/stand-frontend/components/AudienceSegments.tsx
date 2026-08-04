@@ -137,11 +137,7 @@ export const AudienceSegments = ({
 				})}
 			</ButtonGroup>
 
-			{error && (
-				<InlineMessage level="error">
-					Please select an audience segment
-				</InlineMessage>
-			)}
+			{error && <InlineMessage level="error">{error}</InlineMessage>}
 		</div>
 	);
 };

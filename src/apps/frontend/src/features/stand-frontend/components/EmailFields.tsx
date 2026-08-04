@@ -110,7 +110,7 @@ export const EmailFields = () => {
 				selected={audienceSegments}
 				error={
 					shouldShowErrors && requiredFieldErrors.audienceSegments
-						? 'Select at least one audience segment'
+						? 'Please select an audience segment'
 						: undefined
 				}
 				onChange={(audienceSegments) => {
