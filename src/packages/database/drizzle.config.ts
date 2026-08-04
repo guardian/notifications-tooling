@@ -7,6 +7,6 @@ export default defineConfig({
 	schema: './schema.ts',
 	dialect: 'postgresql',
 	dbCredentials: {
-		url: await getConnectionString(),
+		url: (await getConnectionString()) ?? '',
 	},
 });
