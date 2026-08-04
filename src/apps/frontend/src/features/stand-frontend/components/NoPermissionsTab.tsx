@@ -41,11 +41,10 @@ const getMessaging = (userLoaded: boolean, userLoadingError?: Error) => {
 				</Typography>
 			</>
 		);
-
 	}
 
 	// no user, no error, so still loading.
-	return null
+	return null;
 };
 
 export const NoPermissionsTab = ({ userLoaded, userLoadingError }: Props) => {

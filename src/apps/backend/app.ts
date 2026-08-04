@@ -25,7 +25,6 @@ app.use(staticAssetsMiddleware);
 
 app.use('/health', healthRouter);
 
-
 // Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/notification-tests', notificationTestsRouter);

@@ -12,7 +12,6 @@ import { NotificationFormContext } from './NotificationContext';
 import type { NotificationAction, NotificationState, TabName } from './types';
 import { UserContext } from './UserContext';
 
-
 // The `presetUser` prop is only to support the Page story with the test user populated
 // it would be preferable to mock the `get-config` module, but there seems to be some
 // difficulty doing storybook mocks in bun.
