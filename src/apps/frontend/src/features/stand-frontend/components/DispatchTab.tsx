@@ -59,7 +59,7 @@ export const DispatchTab = () => {
 					}
 				});
 			},
-			{ rootMargin: '-30% 0px -30% 0px' },
+			{ rootMargin: '-30% 0px -8% 0px' },
 		);
 
 		SIDE_NAVIGATION_PANEL_ITEMS.forEach((item) => {
