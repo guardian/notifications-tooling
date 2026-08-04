@@ -12,7 +12,10 @@ import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 const baseEnv = { STACK: 'notifications', APP: 'dispatch' };
 
 const getSSMParameter = async (key: string, stage: string = 'CODE') => {
-	await mock.module('./env', () => ({ env: { ...baseEnv, STAGE: stage } }));
+	await mock.module('./env', () => ({
+		configurationStage: stage === 'PROD' ? 'PROD' : 'CODE',
+		env: { ...baseEnv, STAGE: stage },
+	}));
 	const { getSSMParameter } = await import('./ssm');
 	return getSSMParameter(key);
 };
