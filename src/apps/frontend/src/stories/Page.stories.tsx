@@ -31,6 +31,9 @@ export const NotificationsPage: Story = {
 };
 
 export const NotificationsPageWithoutPermission: Story = {
+	args: {
+		presetUser: { ...mockUserResponse, permissions: [] },
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const CreateNotificationHeading = canvas.getByText(
