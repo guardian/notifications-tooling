@@ -7,7 +7,7 @@ import express, {
 	type Response,
 } from 'express';
 import { clientAssetsDir } from './client-assets';
-import { authRedirectMiddleware } from './middleware/auth-middleware';
+// import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
