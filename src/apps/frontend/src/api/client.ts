@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { getApiBaseUrl } from './config';
 import { ApiError, apiErrorEnvelopeSchema } from './errors';
 import { redirectToLogin } from './redirectToLogin';
@@ -124,13 +124,14 @@ export async function fetchJsonAndParse<Schema extends z.ZodType>(
 
 	const result = schema.safeParse(json);
 	if (!result.success) {
+		const prettyError = z.prettifyError(result.error);
 		// Loud early warning of backend contract drift.
-		console.error(`Schema parse failed for ${path}:`, result.error);
+		console.error(`Schema parse failed for ${path}:`, prettyError);
 		throw new ApiError({
 			message: `Response from ${path} did not match the expected schema`,
 			failure: 'schema-parse-fail',
 			status: response.status,
-			cause: result.error,
+			cause: prettyError,
 		});
 	}
 
