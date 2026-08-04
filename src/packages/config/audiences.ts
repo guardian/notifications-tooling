@@ -15,6 +15,7 @@ export interface NewsletterSegment {
 	emailRenderingNewsletterId: string;
 }
 
+// TODO: Move this configuration into settings backed by JSON in S3 or RDS.
 const newsletterSegmentsByStage = {
 	CODE: {
 		UK: {
