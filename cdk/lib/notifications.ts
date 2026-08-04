@@ -87,9 +87,9 @@ export class DispatchStack extends GuStack {
 					'arn:aws:lambda:eu-west-1:015030872274:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:96',
 				),
 			],
-			vpc: accountVpc,
-			securityGroups: [lambdaSecurityGroup],
-			allowPublicSubnet: true,
+			// vpc: accountVpc,
+			// securityGroups: [lambdaSecurityGroup],
+			// allowPublicSubnet: true,
 		});
 
 		const domain = guApiLambda.api.addDomainName(`${app}-domain`, {

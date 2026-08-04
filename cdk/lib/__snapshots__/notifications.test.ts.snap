@@ -504,19 +504,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
         ],
         "Timeout": 30,
-        "VpcConfig": {
-          "SecurityGroupIds": [
-            {
-              "Fn::GetAtt": [
-                "DispatchLambdaSecurityGroupDispatchDC5B2093",
-                "GroupId",
-              ],
-            },
-          ],
-          "SubnetIds": {
-            "Ref": "dispatchPublicSubnets",
-          },
-        },
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -544,18 +531,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                   "Ref": "AWS::Partition",
                 },
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
               ],
             ],
           },
