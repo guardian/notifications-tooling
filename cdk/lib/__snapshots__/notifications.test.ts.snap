@@ -5,6 +5,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuSubnetListParameter",
+      "GuSubnetListParameter",
       "GuVpcParameter",
       "GuSecurityGroup",
       "GuDistributionBucketParameter",
@@ -57,6 +58,11 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Default": "/account/vpc/primary/id",
       "Description": "Virtual Private Cloud to run EC2 instances within. Should NOT be the account default VPC.",
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>",
+    },
+    "dispatchPrivateSubnets": {
+      "Default": "/account/vpc/primary/subnets/private",
+      "Description": "A list of private subnets",
+      "Type": "AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>",
     },
     "dispatchPublicSubnets": {
       "Default": "/account/vpc/primary/subnets/public",
@@ -504,6 +510,19 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
         ],
         "Timeout": 30,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "DispatchLambdaSecurityGroupDispatchDC5B2093",
+                "GroupId",
+              ],
+            },
+          ],
+          "SubnetIds": {
+            "Ref": "dispatchPrivateSubnets",
+          },
+        },
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -531,6 +550,18 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                   "Ref": "AWS::Partition",
                 },
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
               ],
             ],
           },

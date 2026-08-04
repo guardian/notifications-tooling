@@ -45,7 +45,12 @@ export class DispatchStack extends GuStack {
 				app,
 				type: SubnetType.PUBLIC,
 			}).map((subnet) => subnet.subnetId),
-		});
+			privateSubnetIds: GuVpc.subnetsFromParameter(this, {
+				app,
+				type: SubnetType.PRIVATE,
+			}).map((subnet) => subnet.subnetId),
+		},	
+	)
 
 		const lambdaSecurityGroup = new GuSecurityGroup(
 			this,
@@ -87,9 +92,9 @@ export class DispatchStack extends GuStack {
 					'arn:aws:lambda:eu-west-1:015030872274:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:96',
 				),
 			],
-			// vpc: accountVpc,
-			// securityGroups: [lambdaSecurityGroup],
-			// allowPublicSubnet: true,
+			vpc: accountVpc,
+			securityGroups: [lambdaSecurityGroup],
+			allowPublicSubnet: true,
 		});
 
 		const domain = guApiLambda.api.addDomainName(`${app}-domain`, {
