@@ -35,7 +35,10 @@ export const checkIfReadyToSend = (
 
 	if (parameters?.type === 'email') {
 		const errors = validateNotificationForm(notification);
-		return Object.values(errors).every((isMissing) => !isMissing);
+		return (
+			Object.values(errors).length === 0 ||
+			Object.values(errors).every((error) => error === false)
+		);
 	}
 	if (parameters?.type === 'push') {
 		return false;
