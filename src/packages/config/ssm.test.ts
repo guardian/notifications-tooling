@@ -15,6 +15,7 @@ const getSSMParameter = async (key: string, stage: string = 'CODE') => {
 	await mock.module('./env', () => ({
 		configurationStage: stage === 'PROD' ? 'PROD' : 'CODE',
 		env: { ...baseEnv, STAGE: stage },
+		localAwsConfig: { profile: 'composer', region: 'eu-west-1' },
 	}));
 	const { getSSMParameter } = await import('./ssm');
 	return getSSMParameter(key);

@@ -1,10 +1,8 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { fromIni } from '@aws-sdk/credential-providers';
-import { configurationStage, env } from './env';
+import { configurationStage, env, localAwsConfig } from './env';
 
 const namespace = `/${configurationStage}/${env.STACK}/${env.APP}/`;
-const localProfile = 'composer';
-const region = 'eu-west-1';
 
 /**
  * The local HTTP port exposed by the AWS Parameters and Secrets Lambda
@@ -34,8 +32,8 @@ let localClient: SSMClient | undefined;
 
 const getLocalClient = (): SSMClient => {
 	localClient ??= new SSMClient({
-		region,
-		credentials: fromIni({ profile: localProfile }),
+		region: localAwsConfig.region,
+		credentials: fromIni({ profile: localAwsConfig.profile }),
 	});
 	return localClient;
 };
