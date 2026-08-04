@@ -1,6 +1,6 @@
-import type { AppConfig } from '../features/stand-frontend/get-config';
+import type { UserResponse } from '../features/stand-frontend/get-config';
 
-export const mockAppConfig: AppConfig = {
+export const mockUserResponse: UserResponse = {
 	user: {
 		firstName: 'John',
 		lastName: 'Doe',

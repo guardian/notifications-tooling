@@ -2,7 +2,7 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { mockAppConfig } from '../../../mocks/app-config';
+import { mockUserResponse } from '../../../mocks/app-config';
 import { UserContext } from '../UserContext';
 import { MainLayout } from './MainLayout';
 
@@ -20,7 +20,7 @@ const meta = {
 	},
 	decorators: [
 		(Story) => (
-			<UserContext.Provider value={mockAppConfig}>
+			<UserContext.Provider value={mockUserResponse}>
 				<Story />
 			</UserContext.Provider>
 		),

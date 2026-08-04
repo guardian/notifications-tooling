@@ -8,7 +8,7 @@ import {
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
 import { type ReactNode, useContext } from 'react';
-import type { AppConfig } from '../get-config';
+import type { UserResponse } from '../get-config';
 import { faviconTheme, topBarTheme } from '../themes';
 import type { TabName } from '../types';
 import { UserContext } from '../UserContext';
@@ -20,7 +20,7 @@ interface Props {
 	currentTab: TabName;
 }
 
-const getInitials = (user: AppConfig['user']): string => {
+const getInitials = (user: UserResponse['user']): string => {
 	const firstName = user.firstName[0] ?? '';
 	const lastName = user.lastName[0] ?? '';
 	return `${firstName}${lastName}`.toUpperCase() || 'U';

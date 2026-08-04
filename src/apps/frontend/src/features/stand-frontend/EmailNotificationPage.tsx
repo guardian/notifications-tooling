@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../../mocks/mock-fetch-email';
 import { mockSendNotification } from '../../mocks/mock-send-notification';
@@ -6,20 +6,29 @@ import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
 import { NoPermissionsTab } from './components/NoPermissionsTab';
-import { type AppConfig, getAppConfig } from './get-config';
+import { getAppConfig, type UserResponse } from './get-config';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
 import type { NotificationAction, NotificationState, TabName } from './types';
 import { UserContext } from './UserContext';
 
 export const EmailNotificationPage = () => {
-	const [user, setUser] = useState<AppConfig | undefined>(undefined);
+	const [user, setUser] = useState<UserResponse | undefined>(undefined);
+	const [userLoadingError, setUserLoadingError] = useState<Error>();
+	const hasStartedUserFetch = useRef(false);
 
 	useEffect(() => {
+		if (hasStartedUserFetch.current) {
+			return;
+		}
+		hasStartedUserFetch.current = true;
 		getAppConfig()
 			.then(setUser)
 			.catch((err) => {
-				console.error("failed to get config", err)
+				console.error('failed to get user details', err);
+				setUserLoadingError(
+					err instanceof Error ? err : new Error('Unknown get user Error'),
+				);
 			});
 	}, []);
 
@@ -59,7 +68,10 @@ export const EmailNotificationPage = () => {
 				</NotificationFormContext.Provider>
 			) : (
 				<MainLayout currentTab={currentTab} setTab={() => {}}>
-					<NoPermissionsTab />
+					<NoPermissionsTab
+						userLoaded={!!user}
+						userLoadingError={userLoadingError}
+					/>
 				</MainLayout>
 			)}
 		</UserContext.Provider>
