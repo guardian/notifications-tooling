@@ -35,7 +35,7 @@ const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 if (process.env.NODE_ENV === 'test') {
 	app.get(['/', '/index.html'], serveIndex);
 } else {
-	app.use(authRedirectMiddleware).get(['/', '/index.html'], serveIndex);
+	app.get(['/', '/index.html'], authRedirectMiddleware, serveIndex);
 }
 
 app.use(
