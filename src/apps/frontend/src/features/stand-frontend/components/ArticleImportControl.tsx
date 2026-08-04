@@ -3,12 +3,12 @@ import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
+import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { parseArticleUrlInputToContentId } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
-import { Typography } from '@guardian/stand/Typography';
 
 export const ArticleImportControl = () => {
 	const { notification, updateNotification, capiFetch } = useContext(
@@ -48,9 +48,6 @@ export const ArticleImportControl = () => {
 			});
 	};
 
-	const disableFetchButton =
-		!articleId || !!isFetchingContent || articleId === fetchedArticleId;
-
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
 
@@ -77,7 +74,7 @@ export const ArticleImportControl = () => {
 						gap: semanticSpacing.stackSm,
 					}}
 				>
-					<Typography variant="bodyBoldMd" element="label" id="article-section">
+					<Typography variant="bodyBoldMd" element="h3" id="article-section">
 						Article
 					</Typography>
 					<TextInput
@@ -90,17 +87,17 @@ export const ArticleImportControl = () => {
 						onChange={(text) =>
 							updateNotification({ type: 'set-article-id', text })
 						}
-						cssOverrides={{ width: '356px' }}
+						cssOverrides={css({ width: '356px' })}
 					/>
 				</div>
 				<Button
-					isDisabled={disableFetchButton}
+					isDisabled={isFetchingContent}
 					icon="upload"
 					size="sm"
 					variant="secondary"
 					onClick={fetchArticle}
 					cssOverrides={
-						disableFetchButton
+						isFetchingContent
 							? css({
 									backgroundColor: semanticColors.fill.disabled,
 									cursor: 'not-allowed',
@@ -108,7 +105,7 @@ export const ArticleImportControl = () => {
 							: undefined
 					}
 				>
-					Fetch
+					{showImportedArticle ? 'Replace' : 'Fetch'}
 				</Button>
 			</div>
 			<div

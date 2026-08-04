@@ -105,8 +105,8 @@ export const selectableTileTheme = {
 
 export const activePillTheme = {
 	activePill: css({
-		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		backgroundColor: baseColors.magenta[900],
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+		backgroundColor: semanticColors.bg.base,
 		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 		borderRadius: semanticRadius.cornerSm,
 		height: '36px',

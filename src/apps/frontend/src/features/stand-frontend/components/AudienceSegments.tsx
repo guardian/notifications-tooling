@@ -172,7 +172,7 @@ export const AudienceSegmentsPreviewPill = ({
 							css={
 								isConfirmation
 									? styles.isConfirmationStyle
-									: styles.audienceSegmentButton(true)
+									: styles.audienceSegmentButton(false)
 							}
 						>
 							<div css={styles.audienceSegmentIcon}>
@@ -181,9 +181,7 @@ export const AudienceSegmentsPreviewPill = ({
 							<Typography
 								variant="bodyBoldSm"
 								cssOverrides={css({
-									color: isConfirmation
-										? semanticColors.text.weak
-										: semanticColors.text.strongerInverse,
+									color: semanticColors.text.weak,
 								})}
 							>
 								{segmentLabel}

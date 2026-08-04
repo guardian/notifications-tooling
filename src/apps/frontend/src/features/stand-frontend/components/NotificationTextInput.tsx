@@ -6,6 +6,7 @@ import { CharacterCount } from './CharacterCount';
 type Props = {
 	label: string;
 	description: string;
+	placeholder?: string;
 	value: string;
 	update: { (value: string): void };
 	hardLimit?: number;
@@ -17,6 +18,7 @@ type Props = {
 export const NotificationTextInput = ({
 	label,
 	description,
+	placeholder,
 	value,
 	update,
 	hardLimit,
@@ -29,6 +31,7 @@ export const NotificationTextInput = ({
 			<TextArea
 				label={label}
 				description={description}
+				placeholder={placeholder}
 				value={value}
 				isDisabled={isDisabled}
 				theme={{

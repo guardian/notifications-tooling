@@ -76,11 +76,7 @@ export const SendInfoPreviewPill = ({
 								alt="send info email icon"
 								cssOverrides={activePillTheme.activePillIcon}
 							/>
-							<Typography
-								variant={isConfirmation ? 'bodySm' : 'headingCompactSm'}
-							>
-								{getLabel(value)}
-							</Typography>
+							<Typography variant={'bodySm'}>{getLabel(value)}</Typography>
 						</div>
 					))}
 				</div>

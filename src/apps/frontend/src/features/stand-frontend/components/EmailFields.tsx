@@ -65,7 +65,8 @@ export const EmailFields = () => {
 
 			<NotificationTextInput
 				label="Subject"
-				description="Choose the subject line for the email newsletter"
+				description="Choose the subject line (kicker included in character count)"
+				placeholder="Enter a subject line here..."
 				value={subject}
 				update={(subject) =>
 					updateNotification({
@@ -80,6 +81,7 @@ export const EmailFields = () => {
 			<NotificationTextInput
 				label="Preview text"
 				description="Choose the preview text for the email newsletter"
+				placeholder="Enter preview text here..."
 				value={preview}
 				update={(preview) =>
 					updateNotification({
