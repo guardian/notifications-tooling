@@ -12,13 +12,21 @@ import { NotificationFormContext } from './NotificationContext';
 import type { NotificationAction, NotificationState, TabName } from './types';
 import { UserContext } from './UserContext';
 
-export const EmailNotificationPage = () => {
-	const [user, setUser] = useState<UserResponse | undefined>(undefined);
+
+// The `presetUser` prop is only to support the Page story with the test user populated
+// it would be preferable to mock the `get-config` module, but there seems to be some
+// difficulty doing storybook mocks in bun.
+export const EmailNotificationPage = ({
+	presetUser,
+}: {
+	presetUser?: UserResponse | undefined;
+}) => {
+	const [user, setUser] = useState<UserResponse | undefined>(presetUser);
 	const [userLoadingError, setUserLoadingError] = useState<Error>();
 	const hasStartedUserFetch = useRef(false);
 
 	useEffect(() => {
-		if (hasStartedUserFetch.current) {
+		if (presetUser || hasStartedUserFetch.current) {
 			return;
 		}
 		hasStartedUserFetch.current = true;
@@ -30,7 +38,7 @@ export const EmailNotificationPage = () => {
 					err instanceof Error ? err : new Error('Unknown get user Error'),
 				);
 			});
-	}, []);
+	}, [presetUser]);
 
 	const [currentTab, setCurrentTab] = useState<TabName>(() => {
 		switch (location.hash) {

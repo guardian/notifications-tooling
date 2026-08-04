@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { mockAppConfig } from '../mocks/app-config';
+import { mockUserResponse } from '../mocks/app-config';
 import { Page } from './Page';
 
 const meta = {
@@ -9,15 +9,15 @@ const meta = {
 	parameters: {
 		layout: 'fullscreen',
 	},
-	beforeEach() {
-		window.__APP_CONFIG__ = mockAppConfig;
-	},
 } satisfies Meta<typeof Page>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const NotificationsPage: Story = {
+	args: {
+		presetUser: mockUserResponse,
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const CreateNotificationHeading = canvas.getByText(
@@ -31,9 +31,6 @@ export const NotificationsPage: Story = {
 };
 
 export const NotificationsPageWithoutPermission: Story = {
-	beforeEach() {
-		window.__APP_CONFIG__ = { ...mockAppConfig, permissions: [] };
-	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const CreateNotificationHeading = canvas.getByText(
