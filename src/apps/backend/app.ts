@@ -7,7 +7,6 @@ import express, {
 	type Response,
 } from 'express';
 import { clientAssetsDir } from './client-assets';
-// import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
@@ -15,14 +14,9 @@ import { healthRouter } from './routers/health';
 import { notificationTestsRouter } from './routers/notification-tests';
 import { notificationsRouter } from './routers/notifications';
 import { userRouter } from './routers/user';
+import { authRedirectMiddleware } from './middleware/auth-middleware';
 
 export const app: Application = express();
-
-app.use((req, _res, next) => {
-	console.log('Incoming request');
-	console.log(req.method, req.originalUrl);
-	next();
-});
 
 app.disable('x-powered-by');
 
@@ -44,10 +38,11 @@ app.use('/v1/channels', channelsRouter);
 if (process.env.NODE_ENV === 'test') {
 	app.get(['/', '/index.html'], serveIndex);
 } else {
-	app.get('/', (_req, res) => {
-		console.log('ROOT HANDLER');
-		res.send('OK');
-	});
+
+app.get("/", authRedirectMiddleware, (_req, res) => {
+  console.log("after auth");
+  res.send("OK");
+});
 	// app.get(['/', '/index.html'], authRedirectMiddleware, serveIndex);
 }
 
