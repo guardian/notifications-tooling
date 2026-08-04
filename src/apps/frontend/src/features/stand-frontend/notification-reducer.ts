@@ -19,6 +19,7 @@ export const defaultPushParams: PushNotification = {
 export const defaultState: NotificationState = {
 	isFetchingContent: false,
 	isWaitingForSend: false,
+	hasAttemptedSend: false,
 	confirmSendModalOpen: false,
 	parameters: defaultEmailParams,
 };
@@ -48,11 +49,13 @@ export const notificationReducer = (
 				case 'email':
 					return {
 						...state,
+						hasAttemptedSend: false,
 						parameters: defaultEmailParams,
 					};
 				case 'push': {
 					return {
 						...state,
+						hasAttemptedSend: false,
 						parameters: defaultPushParams,
 					};
 				}
@@ -60,6 +63,13 @@ export const notificationReducer = (
 		}
 
 		// eslint-disable-next-line no-fallthrough -- previous case has exhaustive switch
+		case 'set-attempted-send': {
+			return {
+				...state,
+				hasAttemptedSend: action.hasAttemptedSend,
+			};
+		}
+
 		case 'waiting-for-article':
 			return {
 				...state,
@@ -109,6 +119,7 @@ export const notificationReducer = (
 			return {
 				...state,
 				isWaitingForSend: true,
+				hasAttemptedSend: false,
 				sendingResult: undefined,
 			};
 		}

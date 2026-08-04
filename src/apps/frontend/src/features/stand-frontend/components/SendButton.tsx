@@ -1,4 +1,3 @@
-import { css } from '@emotion/react';
 import {
 	semanticColors,
 	semanticSizing,
@@ -28,12 +27,7 @@ export const SendButton = () => {
 	const { notification, updateNotification, sendNotification } = useContext(
 		NotificationFormContext,
 	);
-	const {
-		parameters,
-		confirmSendModalOpen,
-		isFetchingContent,
-		isWaitingForSend,
-	} = notification;
+	const { parameters, confirmSendModalOpen, isWaitingForSend } = notification;
 
 	if (!parameters) {
 		return null;
@@ -67,18 +61,22 @@ export const SendButton = () => {
 			</Typography>
 			<Button
 				onClick={() => {
-					updateNotification({ type: 'set-show-confirm-send', isOpen: true });
+					if (isReady) {
+						updateNotification({
+							type: 'set-attempted-send',
+							hasAttemptedSend: false,
+						});
+						updateNotification({ type: 'set-show-confirm-send', isOpen: true });
+						return;
+					}
+
+					updateNotification({
+						type: 'set-attempted-send',
+						hasAttemptedSend: true,
+					});
+					updateNotification({ type: 'set-show-confirm-send', isOpen: false });
 				}}
-				isDisabled={!isReady || !!confirmSendModalOpen || isFetchingContent}
 				variant="primary"
-				cssOverrides={
-					isReady
-						? undefined
-						: css({
-								backgroundColor: semanticColors.fill.disabledInverse,
-								cursor: 'not-allowed',
-							})
-				}
 				id={'send-button-section'}
 			>
 				{buttonText(parameters)}

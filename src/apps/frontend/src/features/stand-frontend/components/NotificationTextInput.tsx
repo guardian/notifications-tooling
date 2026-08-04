@@ -13,6 +13,7 @@ type Props = {
 	softLimit: number;
 	allowLineBreak?: boolean;
 	isDisabled?: boolean;
+	error?: string;
 };
 
 export const NotificationTextInput = ({
@@ -25,6 +26,7 @@ export const NotificationTextInput = ({
 	softLimit,
 	allowLineBreak,
 	isDisabled,
+	error,
 }: Props) => {
 	return (
 		<div>
@@ -33,6 +35,8 @@ export const NotificationTextInput = ({
 				description={description}
 				placeholder={placeholder}
 				value={value}
+				isInvalid={!!error}
+				error={error}
 				isDisabled={isDisabled}
 				theme={{
 					shared: {

@@ -28,6 +28,7 @@ export type NotificationState = {
 	fetchArticleError?: string;
 	content?: Content;
 	parameters?: EmailNotification | PushNotification;
+	hasAttemptedSend: boolean;
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
 	sendingResult?: SendingResult;
@@ -69,6 +70,10 @@ export type NotificationAction =
 	| {
 			type: 'set-show-confirm-send';
 			isOpen: boolean;
+	  }
+	| {
+			type: 'set-attempted-send';
+			hasAttemptedSend: boolean;
 	  }
 	| {
 			type: 'waiting-for-send';

@@ -1,25 +1,41 @@
 import type { NotificationState } from './types';
 
+export interface NotificationFormErrors {
+	subject: boolean;
+	preview: boolean;
+	audienceSegments: boolean;
+}
+
+export const validateNotificationForm = (
+	notification: NotificationState,
+): NotificationFormErrors => {
+	const { parameters } = notification;
+
+	if (parameters?.type !== 'email') {
+		return {
+			subject: false,
+			preview: false,
+			audienceSegments: false,
+		};
+	}
+
+	const { subject = '', preview = '', audienceSegments = [] } = parameters;
+
+	return {
+		subject: subject.trim().length === 0,
+		preview: preview.trim().length === 0,
+		audienceSegments: audienceSegments.length === 0,
+	};
+};
+
 export const checkIfReadyToSend = (
 	notification: NotificationState,
 ): boolean => {
-	const { parameters, fetchedArticleId } = notification;
+	const { parameters } = notification;
 
 	if (parameters?.type === 'email') {
-		// TO DO - validate in full
-		const {
-			subject = '',
-			preview = '',
-			emailDeliveryOption,
-			audienceSegments = [],
-		} = parameters;
-		return (
-			!!fetchedArticleId &&
-			subject.length > 0 &&
-			preview.length > 0 &&
-			audienceSegments.length > 0 &&
-			!!emailDeliveryOption
-		);
+		const errors = validateNotificationForm(notification);
+		return Object.values(errors).every((isMissing) => !isMissing);
 	}
 	if (parameters?.type === 'push') {
 		return false;
