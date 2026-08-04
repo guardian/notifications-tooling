@@ -6,7 +6,7 @@ import { TextInput } from '@guardian/stand/TextInput';
 import { useContext } from 'react';
 import { parseArticleUrlInputToContentId } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
-import { ArticlePreviewBox } from './ArticlePreviewBox';
+import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
 
 export const ArticleImportControl = () => {
@@ -19,6 +19,7 @@ export const ArticleImportControl = () => {
 		fetchedArticleId,
 		isFetchingContent,
 		fetchArticleError,
+		content,
 	} = notification;
 
 	const { articleId, failure } =
@@ -48,6 +49,9 @@ export const ArticleImportControl = () => {
 
 	const disableFetchButton =
 		!articleId || !!isFetchingContent || articleId === fetchedArticleId;
+
+	const showImportedArticle =
+		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
 
 	return (
 		<div
@@ -97,20 +101,18 @@ export const ArticleImportControl = () => {
 
 				{isFetchingContent && <LoadingSpinner />}
 
-				{!isFetchingContent &&
-					fetchedArticleId &&
-					fetchedArticleId === articleId && (
-						<InlineMessage level="success">Article Imported</InlineMessage>
-					)}
+				{showImportedArticle && (
+					<InlineMessage level="success">Article Imported</InlineMessage>
+				)}
 
 				{fetchArticleError && (
 					<InlineMessage level="error">{fetchArticleError}</InlineMessage>
 				)}
 			</div>
 
-			{!isFetchingContent &&
-				fetchedArticleId &&
-				fetchedArticleId === articleId && <ArticlePreviewBox />}
+			{showImportedArticle && content && (
+				<ArticlePreviewCard content={content} />
+			)}
 		</div>
 	);
 };

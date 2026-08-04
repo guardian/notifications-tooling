@@ -1,36 +1,19 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useReducer, useState } from 'react';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../../mocks/mock-fetch-email';
 import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
+import { NoPermissionsTab } from './components/NoPermissionsTab';
+import { type AppConfig, getAppConfig } from './get-config';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
-import type {
-	NotificationAction,
-	NotificationState,
-	TabName,
-	UserData,
-} from './types';
+import type { NotificationAction, NotificationState, TabName } from './types';
 import { UserContext } from './UserContext';
 
-// TO DO - fetch from backend? inject user details onto page?
-const getUser = (): Promise<UserData> => {
-	try {
-		return Promise.resolve({
-			firstName: 'John',
-			lastName: 'Doe',
-			email: 'j.Doe@example.com',
-			permissions: {},
-		});
-	} catch (err) {
-		return Promise.reject(err instanceof Error ? err : new Error('UNKNOWN'));
-	}
-};
-
 export const EmailNotificationPage = () => {
-	const [user, setUser] = useState<UserData>();
+	const [user] = useState<AppConfig | undefined>(getAppConfig());
 	const [currentTab, setCurrentTab] = useState<TabName>(() => {
 		switch (location.hash) {
 			case '#history':
@@ -40,35 +23,36 @@ export const EmailNotificationPage = () => {
 				return 'create';
 		}
 	});
-	useEffect(() => {
-		void getUser()
-			.then(setUser)
-			.catch((err) => {
-				console.error('failed to read user', err);
-			});
-	}, []);
 
 	const [notification, updateNotification] = useReducer<
 		NotificationState,
 		[NotificationAction]
 	>(notificationReducer, defaultState);
 
+	const hasAccess = user?.permissions.includes('dispatch_access');
+
 	return (
 		<UserContext.Provider value={user}>
-			<NotificationFormContext.Provider
-				value={{
-					notification,
-					updateNotification,
-					capiFetch: hackyClientSideCapiFetch,
-					sendNotification: mockSendNotification,
-					requestEmailHtml: mockRequestEmailHtml,
-				}}
-			>
-				<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
-					{currentTab === 'create' && <DispatchTab />}
-					{currentTab === 'history' && <HistoryTab />}
+			{hasAccess ? (
+				<NotificationFormContext.Provider
+					value={{
+						notification,
+						updateNotification,
+						capiFetch: hackyClientSideCapiFetch,
+						sendNotification: mockSendNotification,
+						requestEmailHtml: mockRequestEmailHtml,
+					}}
+				>
+					<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
+						{currentTab === 'create' && <DispatchTab />}
+						{currentTab === 'history' && <HistoryTab />}
+					</MainLayout>
+				</NotificationFormContext.Provider>
+			) : (
+				<MainLayout currentTab={currentTab} setTab={() => {}}>
+					<NoPermissionsTab />
 				</MainLayout>
-			</NotificationFormContext.Provider>
+			)}
 		</UserContext.Provider>
 	);
 };

@@ -8,7 +8,10 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import { notificationSendRequestSchema } from './notification-send-request';
+import {
+	notificationSendRequestSchema,
+	notificationTestSendRequestSchema,
+} from './notification-send-request';
 
 const pushLimits =
 	notificationChannelContentLimits[NotificationChannel.AppPushNotification];
@@ -101,6 +104,23 @@ const newsletterRequestWithPlan = (plan: Record<string, unknown>) =>
 	newsletterRequest({
 		channels: { [NotificationChannel.Newsletter]: plan },
 	});
+
+const newsletterTestRequest = (overrides: Record<string, unknown> = {}) => ({
+	idempotencyKey: 'test-mb-2026-07-08',
+	sender: 'notifications-tooling-spa/v1',
+	content: { items: { lead: newsletterItem() } },
+	channels: {
+		[NotificationChannel.Newsletter]: {
+			audience: {
+				type: 'email',
+				items: ['newsletters.test@theguardian.com'],
+			},
+			variants: ['UK'],
+			compose: { items: ['lead'], subject: 'Your morning briefing' },
+		},
+	},
+	...overrides,
+});
 
 // --- Assertion helpers ---
 
@@ -618,71 +638,12 @@ describe('notificationSendRequestSchema', () => {
 	});
 
 	describe('newsletter test email audience', () => {
-		it('accepts a list of test email recipients', () => {
-			expectValid(
-				newsletterRequestWithPlan(
-					newsletterPlan({
-						audience: {
-							type: 'email',
-							items: ['newsletters.test@theguardian.com'],
-						},
-					}),
-				),
-			);
-		});
-
-		it('rejects an invalid email address', () => {
+		it('rejects test email recipients on the production endpoint', () => {
 			expect(
-				pathsOf(
-					newsletterRequestWithPlan(
-						newsletterPlan({
-							audience: { type: 'email', items: ['not-an-email'] },
-						}),
-					),
+				pathsOf(newsletterTestRequest()).some((path) =>
+					path.startsWith('channels/newsletter/audience'),
 				),
-			).toContain('channels/newsletter/audience/items/0');
-		});
-
-		it('requires at least one recipient', () => {
-			expect(
-				pathsOf(
-					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'email', items: [] } }),
-					),
-				),
-			).toContain('channels/newsletter/audience/items');
-		});
-
-		it(`rejects more than ${MAX_TEST_EMAIL_RECIPIENTS} recipients`, () => {
-			const emails = Array.from(
-				{ length: MAX_TEST_EMAIL_RECIPIENTS + 1 },
-				(_, index) => `test-${index}@theguardian.com`,
-			);
-			expect(
-				pathsOf(
-					newsletterRequestWithPlan(
-						newsletterPlan({ audience: { type: 'email', items: emails } }),
-					),
-				),
-			).toContain('channels/newsletter/audience/items');
-		});
-
-		it('rejects duplicate recipients', () => {
-			expect(
-				pathsOf(
-					newsletterRequestWithPlan(
-						newsletterPlan({
-							audience: {
-								type: 'email',
-								items: [
-									'newsletters.test@theguardian.com',
-									'newsletters.test@theguardian.com',
-								],
-							},
-						}),
-					),
-				),
-			).toContain('channels/newsletter/audience/items');
+			).toBe(true);
 		});
 	});
 
@@ -1004,5 +965,111 @@ describe('notificationSendRequestSchema', () => {
 				),
 			).toContain('options');
 		});
+	});
+});
+
+describe('notificationTestSendRequestSchema', () => {
+	const testPathsOf = (input: unknown) => {
+		const result = notificationTestSendRequestSchema.safeParse(input);
+		expect(result.success).toBe(false);
+		return result.success
+			? []
+			: result.error.issues.map((issue) => issue.path.join('/'));
+	};
+
+	it('accepts explicit email recipients and rendering variants', () => {
+		const result = notificationTestSendRequestSchema.safeParse(
+			newsletterTestRequest(),
+		);
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data.options).toEqual({ dryRun: false });
+		}
+	});
+
+	it('rejects a segment audience', () => {
+		expect(
+			testPathsOf(newsletterRequest()).some((path) =>
+				path.startsWith('channels/newsletter/audience'),
+			),
+		).toBe(true);
+	});
+
+	it('rejects an invalid email address', () => {
+		const request = newsletterTestRequest();
+		request.channels.newsletter.audience.items = ['not-an-email'];
+		expect(testPathsOf(request)).toContain(
+			'channels/newsletter/audience/items/0',
+		);
+	});
+
+	it('rejects rendering segments inside the email audience', () => {
+		const request = newsletterTestRequest();
+		const audience = request.channels.newsletter.audience as Record<
+			string,
+			unknown
+		>;
+		audience.segments = ['UK'];
+
+		expect(testPathsOf(request)).toContain('channels/newsletter/audience');
+	});
+
+	it('requires at least one rendering variant', () => {
+		const request = newsletterTestRequest();
+		request.channels.newsletter.variants = [];
+		expect(testPathsOf(request)).toContain('channels/newsletter/variants');
+	});
+
+	it('rejects duplicate rendering variants', () => {
+		const request = newsletterTestRequest();
+		request.channels.newsletter.variants = ['UK', 'UK'];
+		expect(testPathsOf(request)).toContain('channels/newsletter/variants');
+	});
+
+	it('rejects a compose reference to a missing item', () => {
+		const request = newsletterTestRequest();
+		request.channels.newsletter.compose.items = ['missing'];
+		expect(testPathsOf(request)).toContain(
+			'channels/newsletter/compose/items/0',
+		);
+	});
+
+	it('rejects a compose reference to the wrong channel type', () => {
+		const request = newsletterTestRequest();
+		request.content.items.lead = pushItem();
+		expect(testPathsOf(request)).toContain(
+			'channels/newsletter/compose/items/0',
+		);
+	});
+
+	it(`rejects more than ${MAX_TEST_EMAIL_RECIPIENTS} recipients`, () => {
+		const request = newsletterTestRequest();
+		request.channels.newsletter.audience.items = Array.from(
+			{ length: MAX_TEST_EMAIL_RECIPIENTS + 1 },
+			(_, index) => `test-${index}@theguardian.com`,
+		);
+		expect(testPathsOf(request)).toContain(
+			'channels/newsletter/audience/items',
+		);
+	});
+
+	it('accepts a dry run', () => {
+		const result = notificationTestSendRequestSchema.safeParse({
+			...newsletterTestRequest(),
+			options: { dryRun: true },
+		});
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data.options).toEqual({ dryRun: true });
+		}
+	});
+
+	it('rejects scheduling', () => {
+		expect(
+			testPathsOf({
+				...newsletterTestRequest(),
+				options: { dryRun: true, scheduledFor: null },
+			}),
+		).toContain('options');
 	});
 });

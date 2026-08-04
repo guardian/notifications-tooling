@@ -8,6 +8,7 @@
 	},
 	"dependencies": {
 		"@guardian/content-api-models": "47.0.0",
+		"@guardian/pan-domain-node": "1.2.5",
 		"zod": "4.4.3"
 	}
 }
