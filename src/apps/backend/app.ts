@@ -38,11 +38,10 @@ app.use('/v1/channels', channelsRouter);
 if (process.env.NODE_ENV === 'test') {
 	app.get(['/', '/index.html'], serveIndex);
 } else {
-
-app.get("/", authRedirectMiddleware, (_req, res) => {
-  console.log("after auth");
-  res.send("OK");
-});
+	app.get('/', authRedirectMiddleware, (_req, res) => {
+		console.log('after auth');
+		res.send('OK');
+	});
 	// app.get(['/', '/index.html'], authRedirectMiddleware, serveIndex);
 }
 
