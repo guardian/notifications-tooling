@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../../mocks/mock-fetch-email';
 import { mockSendNotification } from '../../mocks/mock-send-notification';
@@ -13,7 +13,16 @@ import type { NotificationAction, NotificationState, TabName } from './types';
 import { UserContext } from './UserContext';
 
 export const EmailNotificationPage = () => {
-	const [user] = useState<AppConfig | undefined>(getAppConfig());
+	const [user, setUser] = useState<AppConfig | undefined>(undefined);
+
+	useEffect(() => {
+		getAppConfig()
+			.then(setUser)
+			.catch((err) => {
+				console.error("failed to get config", err)
+			});
+	}, []);
+
 	const [currentTab, setCurrentTab] = useState<TabName>(() => {
 		switch (location.hash) {
 			case '#history':

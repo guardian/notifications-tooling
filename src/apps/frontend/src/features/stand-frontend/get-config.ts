@@ -15,6 +15,11 @@ declare global {
 	}
 }
 
-export const getAppConfig = (): AppConfig | undefined => {
-	return window.__APP_CONFIG__;
+export const getAppConfig = (): Promise<AppConfig | undefined> => {
+	return fetch('/v1/user')
+		.then((r) => r.json())
+		.then((data) => {
+			console.log(data);
+			return data as AppConfig;
+		});
 };
