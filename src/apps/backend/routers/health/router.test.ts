@@ -1,6 +1,10 @@
 import { describe, expect, it, mock } from 'bun:test';
 import type { Request, Response } from 'express';
-import { healthHandler } from './index';
+import { installDatabaseMock } from '../../utils/test-utils/database';
+
+installDatabaseMock();
+
+const { healthHandler } = await import('./index');
 
 describe('health handler', () => {
 	it('responds with status ok and a numeric uptime', () => {

@@ -5,6 +5,7 @@ import type {
 	Request as ExpressRequest,
 	Response as ExpressResponse,
 } from 'express';
+import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -21,6 +22,7 @@ import type { TestServer } from '../../utils/test-utils/server';
 // real clients) are imported.
 installPandaAuthMock();
 installPermissionsStoreMock();
+installDatabaseMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
 const { userHandler } = await import('./index');
 

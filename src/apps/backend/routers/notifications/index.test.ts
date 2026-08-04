@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
 import express from 'express';
+import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -18,6 +19,7 @@ import { createNotificationsRouter } from '.';
 // real clients) are imported.
 installPandaAuthMock();
 installPermissionsStoreMock();
+installDatabaseMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
 
 /**
