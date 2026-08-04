@@ -29,6 +29,9 @@ app.use('/docs/api', docsRouter);
 
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 
+// Private - authenticated routes
+app.use('/v1/channels', channelsRouter);
+
 // Serve index.html with the current user injected as config. Handled before
 // express.static (which has index serving disabled below) so the un-injected
 // file is never served.
@@ -47,7 +50,6 @@ app.use(
 );
 
 // Private - authenticated routes
-app.use('/v1/channels', channelsRouter);
 app.use('/v1/notification-tests', notificationTestsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
