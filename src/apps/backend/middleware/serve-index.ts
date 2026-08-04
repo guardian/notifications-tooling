@@ -4,7 +4,7 @@ import type { UserResponse } from '@config';
 import { isRunningLocally } from '@config';
 import type { Request, RequestHandler, Response } from 'express';
 import { clientAssetsDir } from '../client-assets';
-import { listUserPermissions } from '../utils/permissions/permissions-store';
+// import { listUserPermissions } from '../utils/permissions/permissions-store';
 
 const indexHtmlPath = join(clientAssetsDir, 'index.html');
 
@@ -38,10 +38,10 @@ export const serveIndex: RequestHandler = async (
 	req: Request,
 	res: Response,
 ) => {
-	const permissions = await listUserPermissions(req.user!.email);
+	// const permissions = await listUserPermissions(req.user!.email);
 	const config: UserResponse = {
 		user: req.user!,
-		permissions,
+		permissions: [],
 	};
 	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,
