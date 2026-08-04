@@ -19,3 +19,8 @@ const envSchema = z
 export const env = envSchema.parse(process.env);
 
 export type Env = z.infer<typeof envSchema>;
+
+export type ConfigurationStage = Exclude<Env['STAGE'], 'DEV'>;
+
+export const configurationStage: ConfigurationStage =
+	env.STAGE === 'PROD' ? 'PROD' : 'CODE';

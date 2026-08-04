@@ -7,7 +7,7 @@
  * Hard-coded stub until resolved from the downstream services.
  */
 
-import { env, type Env } from './env';
+import { configurationStage, type Env } from './env';
 
 export interface NewsletterSegment {
 	label: string;
@@ -60,7 +60,7 @@ export const getNewsletterSegments = (
 ): Record<NewsletterSegmentId, NewsletterSegment> =>
 	newsletterSegmentsByStage[stage === 'PROD' ? 'PROD' : 'CODE'];
 
-export const newsletterSegments = getNewsletterSegments(env.STAGE);
+export const newsletterSegments = getNewsletterSegments(configurationStage);
 
 export interface MobileN10nTopic {
 	type: string;
