@@ -20,8 +20,8 @@ export const app: Application = express();
 
 app.use((req, _res, next) => {
 	console.log('Incoming request');
-  console.log(req.method, req.originalUrl);
-  next();
+	console.log(req.method, req.originalUrl);
+	next();
 });
 
 app.disable('x-powered-by');
