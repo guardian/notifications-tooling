@@ -44,7 +44,11 @@ app.use('/v1/channels', channelsRouter);
 if (process.env.NODE_ENV === 'test') {
 	app.get(['/', '/index.html'], serveIndex);
 } else {
-	app.get(['/', '/index.html'], authRedirectMiddleware, serveIndex);
+	app.get('/', (_req, res) => {
+		console.log('ROOT HANDLER');
+		res.send('OK');
+	});
+	// app.get(['/', '/index.html'], authRedirectMiddleware, serveIndex);
 }
 
 app.use(
