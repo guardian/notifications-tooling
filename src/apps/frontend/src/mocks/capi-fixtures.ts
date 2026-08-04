@@ -22,6 +22,8 @@ export const articleFixture: Content = {
 			'\u003Cp\u003EThe new normal | Cool school | Italian idiom | Word Wheel | Covid failings\u003C/p\u003E',
 		trailText:
 			'\u003Cstrong\u003EBrief letters: \u003C/strong\u003EThe new normal | Cool school | Italian idiom | Word Wheel | Covid failings',
+		thumbnail:
+			'https://media.guim.co.uk/5f2a9721082c580c1696cd5bb8e2ca0d711bf608/361_0_1440_1152/500.jpg',
 	},
 	isHosted: false,
 	pillarId: 'pillar/news',
