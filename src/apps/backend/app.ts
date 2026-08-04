@@ -25,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
+app.use('/docs/api', docsRouter);
 
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 
@@ -50,7 +51,6 @@ app.use('/v1/channels', channelsRouter);
 app.use('/v1/notification-tests', notificationTestsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
-app.use('/docs/api', docsRouter);
 
 app.use((_req: Request, res: Response) => {
 	res.status(404).json({ error: 'Not Found' });
