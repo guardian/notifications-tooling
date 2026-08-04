@@ -12,8 +12,8 @@ const dbHealthHandler = async (_req: Request, res: Response) => {
 	try {
 		const client = await getDb();
 		await client.execute('select 1');
-		logger.info('Database connection test successful');
 
+		logger.info('Database connection test successful');
 		res.json({ status: 'ok' });
 	} catch (error) {
 		logger.error(error, 'Database connection test failed');

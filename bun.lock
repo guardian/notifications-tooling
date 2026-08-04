@@ -33,6 +33,7 @@
         "@aws-sdk/client-s3": "3.1095.0",
         "@aws-sdk/credential-providers": "3.1095.0",
         "@config": "workspace:*",
+        "@database": "workspace:*",
         "@guardian/pan-domain-node": "1.2.5",
         "@guardian/permissions-client": "0.0.3",
         "@http-logger": "workspace:*",
@@ -95,8 +96,10 @@
     "src/packages/database": {
       "name": "@database",
       "dependencies": {
+        "@config": "workspace:*",
         "drizzle-orm": "0.45.2",
         "pg": "8.22.0",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@types/pg": "8.20.0",
