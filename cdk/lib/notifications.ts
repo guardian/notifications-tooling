@@ -49,8 +49,7 @@ export class DispatchStack extends GuStack {
 				app,
 				type: SubnetType.PRIVATE,
 			}).map((subnet) => subnet.subnetId),
-		},	
-	)
+		});
 
 		const lambdaSecurityGroup = new GuSecurityGroup(
 			this,
