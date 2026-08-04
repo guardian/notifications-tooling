@@ -27,6 +27,8 @@ export const verifyCookie = async (
 ): Promise<CookieVerificationResult> => {
 	const result = await panda.verify(cookieHeader);
 
+	console.log('verifyCookie result:', result);
+
 	if (result.success) {
 		return { success: true, user: result.user };
 	}
