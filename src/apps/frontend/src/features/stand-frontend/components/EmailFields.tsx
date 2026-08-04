@@ -1,10 +1,7 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
-import {
-	NEWSLETTER_LIMIT_FALLBACKS,
-	useChannelConstraints,
-} from '../api/useChannelConstraints';
-import { validateNotificationForm } from '../form-validation';
+import type { useChannelConstraints } from '../api/useChannelConstraints';
+import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
 import { AudienceSegments } from './AudienceSegments';
@@ -13,12 +10,14 @@ import { NotificationTextInput } from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
 
-export const EmailFields = () => {
+interface EmailFieldsProps {
+	constraints?: ReturnType<typeof useChannelConstraints>['data'];
+}
+
+export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	// Called before the early return: hooks cannot sit behind a conditional.
-	const { data: constraints } = useChannelConstraints();
 
 	if (notification.parameters?.type !== 'email') {
 		return null;
