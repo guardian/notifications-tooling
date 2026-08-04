@@ -39,6 +39,7 @@ export const serveIndex: RequestHandler = async (
 	res: Response,
 ) => {
 	// const permissions = await listUserPermissions(req.user!.email);
+	console.log('serveIndex', req.user);
 	const config: UserResponse = {
 		user: req.user!,
 		permissions: [],
