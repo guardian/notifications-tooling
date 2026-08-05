@@ -1,6 +1,7 @@
 import type { NotificationState } from './types';
 
 export interface NotificationFormErrors {
+	article: boolean;
 	subject: boolean;
 	preview: boolean;
 	audienceSegments: boolean;
@@ -9,10 +10,11 @@ export interface NotificationFormErrors {
 export const validateNotificationForm = (
 	notification: NotificationState,
 ): NotificationFormErrors => {
-	const { parameters } = notification;
+	const { content, parameters } = notification;
 
 	if (parameters?.type !== 'email') {
 		return {
+			article: false,
 			subject: false,
 			preview: false,
 			audienceSegments: false,
@@ -22,6 +24,7 @@ export const validateNotificationForm = (
 	const { subject = '', preview = '', audienceSegments = [] } = parameters;
 
 	return {
+		article: content?.id === undefined,
 		subject: subject.trim().length === 0,
 		preview: preview.trim().length === 0,
 		audienceSegments: audienceSegments.length === 0,

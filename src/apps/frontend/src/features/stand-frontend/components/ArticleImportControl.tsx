@@ -5,7 +5,10 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
-import { parseArticleUrlInputToContentId } from '../form-validation';
+import {
+	parseArticleUrlInputToContentId,
+	validateNotificationForm,
+} from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -20,6 +23,7 @@ export const ArticleImportControl = () => {
 		fetchedArticleId,
 		isFetchingContent,
 		fetchArticleError,
+		hasAttemptedSend,
 		content,
 	} = notification;
 
@@ -27,6 +31,14 @@ export const ArticleImportControl = () => {
 		parseArticleUrlInputToContentId(articleInputText);
 
 	const fetchArticle = () => {
+		if (articleInputText === '') {
+			updateNotification({
+				type: 'report-article-error',
+				errorMessage: 'Paste a URL to fetch an article',
+			});
+			return;
+		}
+
 		if (!articleId) {
 			return;
 		}
@@ -50,6 +62,13 @@ export const ArticleImportControl = () => {
 
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
+
+	const requiredFieldErrors = validateNotificationForm(notification);
+	const showFieldErrors =
+		failure ??
+		(requiredFieldErrors.article && hasAttemptedSend
+			? 'Paste a URL to fetch an article'
+			: undefined);
 
 	return (
 		<div
@@ -78,8 +97,7 @@ export const ArticleImportControl = () => {
 						Article
 					</Typography>
 					<TextInput
-						isInvalid={!!failure}
-						error={failure}
+						isInvalid={!!showFieldErrors}
 						size="sm"
 						value={notification.articleInputText ?? ''}
 						isDisabled={isFetchingContent}
@@ -123,6 +141,10 @@ export const ArticleImportControl = () => {
 
 				{fetchArticleError && (
 					<InlineMessage level="error">{fetchArticleError}</InlineMessage>
+				)}
+
+				{showFieldErrors && (
+					<InlineMessage level="error">{showFieldErrors}</InlineMessage>
 				)}
 			</div>
 
