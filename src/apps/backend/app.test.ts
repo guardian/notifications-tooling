@@ -1,8 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import type { NextFunction, Request } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import type { ErrorEnvelope } from './error-envelope';
 import { errorMiddleware } from './middleware/error-middleware';
-import { createMockResponse } from './utils/test-utils/mock-response';
 import { installPandaAuthMock } from './utils/test-utils/panda-auth';
 
 // Stub Panda verification before the app (and its real verifier) is imported.
@@ -17,6 +16,19 @@ const createMockRequest = () =>
 		id: 'req-test-id',
 		log: { error: mock(() => undefined) },
 	}) as unknown as Request;
+
+const createMockResponse = () => {
+	const json = mock((body: unknown) => body);
+	const status = mock(() => ({ json }));
+
+	return {
+		status,
+		response: {
+			status,
+		} as unknown as Response,
+		envelope: () => json.mock.calls[0]?.[0] as ErrorEnvelope,
+	};
+};
 
 /**
  * Both handlers emit the same `{ error, message, requestId }` envelope the
