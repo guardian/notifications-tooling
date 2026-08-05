@@ -1,6 +1,8 @@
-import { env } from './env';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { fromIni } from '@aws-sdk/credential-providers';
+import { configurationStage, env, localAwsConfig } from './env';
 
-const namespace = `/${env.STAGE}/${env.STACK}/${env.APP}/`;
+const namespace = `/${configurationStage}/${env.STACK}/${env.APP}/`;
 
 /**
  * The local HTTP port exposed by the AWS Parameters and Secrets Lambda
@@ -23,26 +25,55 @@ interface GetParameterResponse {
 const toKebabCase = (key: string): string =>
 	key.toLowerCase().replaceAll('_', '-');
 
+const parameterName = (key: string): string =>
+	`${namespace}${toKebabCase(key)}`;
+
+let localClient: SSMClient | undefined;
+
+const getLocalClient = (): SSMClient => {
+	localClient ??= new SSMClient({
+		region: localAwsConfig.region,
+		credentials: fromIni({ profile: localAwsConfig.profile }),
+	});
+	return localClient;
+};
+
+const getLocalSSMParameter = async (key: string): Promise<string> => {
+	const response = await getLocalClient().send(
+		new GetParameterCommand({
+			Name: parameterName(key),
+			WithDecryption: true,
+		}),
+	);
+	const value = response.Parameter?.Value;
+
+	if (!value) {
+		throw new Error(`SSM parameter "${key}" has no value.`);
+	}
+
+	return value;
+};
+
 /**
- * Fetch an SSM parameter value via the AWS Parameters and Secrets Lambda
- * Extension.
+ * Fetch an SSM parameter value. DEV uses an environment override when present,
+ * otherwise it reads the CODE parameter directly using the Composer profile.
+ * Deployed stages use the AWS Parameters and Secrets Lambda Extension.
  *
  * The extension runs a local HTTP server (default port 2773) that caches
  * parameter values, avoiding a direct call to SSM on every invocation. The
- * `name` argument is resolved relative to this app's parameter namespace.
+ * `key` argument is resolved relative to this app's parameter namespace.
  *
  * @param key The parameter name, relative to the app namespace.
  * @returns The decrypted parameter value.
  */
 export const getSSMParameter = async (key: string): Promise<string> => {
 	if (env.STAGE === 'DEV') {
-		const value = process.env[`${key}`];
-
-		if (!value) {
-			throw new Error(`SSM parameter "${key}" is not set in DEV environment.`);
+		const override = process.env[key];
+		if (override) {
+			return override;
 		}
 
-		return Promise.resolve(value);
+		return getLocalSSMParameter(key);
 	}
 
 	const sessionToken = process.env.AWS_SESSION_TOKEN;
@@ -56,7 +87,7 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 	url.port = extensionPort;
 	// SSM parameters are stored in kebab-case, but callers pass the
 	// UPPER_SNAKE_CASE env-var key, so convert it to match the stored name.
-	url.searchParams.set('name', `${namespace}${toKebabCase(key)}`);
+	url.searchParams.set('name', parameterName(key));
 	url.searchParams.set('withDecryption', 'true');
 
 	const response = await fetch(url, {

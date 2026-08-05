@@ -7,11 +7,16 @@ import {
 	mock,
 	spyOn,
 } from 'bun:test';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 const baseEnv = { STACK: 'notifications', APP: 'dispatch' };
 
 const getSSMParameter = async (key: string, stage: string = 'CODE') => {
-	await mock.module('./env', () => ({ env: { ...baseEnv, STAGE: stage } }));
+	await mock.module('./env', () => ({
+		configurationStage: stage === 'PROD' ? 'PROD' : 'CODE',
+		env: { ...baseEnv, STAGE: stage },
+		localAwsConfig: { profile: 'composer', region: 'eu-west-1' },
+	}));
 	const { getSSMParameter } = await import('./ssm');
 	return getSSMParameter(key);
 };
@@ -97,25 +102,45 @@ describe('getSSMParameter in production', () => {
 });
 
 describe('getSSMParameter in DEV', () => {
-	// In DEV there is no extension layer, so values are read straight from
-	// `process.env` instead of being fetched over HTTP.
-	it('returns the value from process.env without calling the extension', async () => {
+	it('returns a process.env override without calling SSM', async () => {
 		process.env.MY_PARAM = 'local-value';
 		const fetcher = spyOn(globalThis, 'fetch');
+		const send = spyOn(SSMClient.prototype, 'send');
 
 		const value = await getSSMParameter('MY_PARAM', 'DEV');
 
 		expect(value).toBe('local-value');
 		expect(fetcher).not.toHaveBeenCalled();
+		expect(send).not.toHaveBeenCalled();
 	});
 
-	it('throws when the environment variable is not set', () => {
+	it('fetches CODE parameters directly from SSM when no override is set', async () => {
 		delete process.env.MY_PARAM;
 		const fetcher = spyOn(globalThis, 'fetch');
+		const send = spyOn(SSMClient.prototype, 'send').mockResolvedValue({
+			Parameter: { Value: 'code-value' },
+		} as never);
+
+		const value = await getSSMParameter('MY_PARAM', 'DEV');
+
+		expect(value).toBe('code-value');
+		expect(send).toHaveBeenCalledTimes(1);
+		expect(send.mock.calls[0]?.[0]).toBeInstanceOf(GetParameterCommand);
+		expect((send.mock.calls[0]?.[0] as GetParameterCommand).input).toEqual({
+			Name: '/CODE/notifications/dispatch/my-param',
+			WithDecryption: true,
+		});
+		expect(fetcher).not.toHaveBeenCalled();
+	});
+
+	it('throws when SSM returns no parameter value', () => {
+		delete process.env.MY_PARAM;
+		spyOn(SSMClient.prototype, 'send').mockResolvedValue({
+			Parameter: {},
+		} as never);
 
 		expect(getSSMParameter('MY_PARAM', 'DEV')).rejects.toThrow(
-			'SSM parameter "MY_PARAM" is not set in DEV environment.',
+			'SSM parameter "MY_PARAM" has no value.',
 		);
-		expect(fetcher).not.toHaveBeenCalled();
 	});
 });

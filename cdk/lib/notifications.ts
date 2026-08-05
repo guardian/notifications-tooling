@@ -227,6 +227,13 @@ const localDevAccessPolicyStatements = (stack: GuStack) => {
 			`arn:aws:ssm:${stack.region}:${stack.account}:parameter/flexible/login/DEV/*`,
 		],
 	});
+	const dispatchParameterPolicyStatement = new PolicyStatement({
+		effect: Effect.ALLOW,
+		actions: ['ssm:GetParameter'],
+		resources: [
+			`arn:aws:ssm:${stack.region}:${stack.account}:parameter/CODE/notifications/dispatch/*`,
+		],
+	});
 	const s3PolicyStatement = new PolicyStatement({
 		effect: Effect.ALLOW,
 		actions: ['s3:GetObject'],
@@ -240,6 +247,7 @@ const localDevAccessPolicyStatements = (stack: GuStack) => {
 	return [
 		parameterKmsPolicyStatement,
 		parameterPolicyStatement,
+		dispatchParameterPolicyStatement,
 		s3PolicyStatement,
 	];
 };

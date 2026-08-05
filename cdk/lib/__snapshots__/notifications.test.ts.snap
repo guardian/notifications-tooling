@@ -435,6 +435,22 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               },
             },
             {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/notifications/dispatch/*",
+                  ],
+                ],
+              },
+            },
+            {
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": [
