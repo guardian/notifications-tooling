@@ -1,7 +1,10 @@
 import { acceptedNotificationSchema } from './accepted-notification';
 import { acceptedTestNotificationSchema } from './accepted-test-notification';
+import { articleSummarySchema } from './article-summary';
 import { channelAudiencesSchema } from './channel-audiences';
 import { channelConstraintsSchema } from './channel-constraints';
+import { contentLinkErrorSchema } from './content-link-error';
+import { contentLinkParseRequestSchema } from './content-link-parse-request';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
@@ -32,6 +35,9 @@ export const schemas = {
 	NotificationProviderError: notificationProviderErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
+	ContentLinkParseRequest: contentLinkParseRequestSchema,
+	ArticleSummary: articleSummarySchema,
+	ContentLinkError: contentLinkErrorSchema,
 	User: userSchema,
 	UserResponse: userResponseSchema,
 	Unauthenticated: unauthenticatedSchema,
