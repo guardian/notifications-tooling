@@ -45,6 +45,10 @@ export class DispatchStack extends GuStack {
 				app,
 				type: SubnetType.PUBLIC,
 			}).map((subnet) => subnet.subnetId),
+			privateSubnetIds: GuVpc.subnetsFromParameter(this, {
+				app,
+				type: SubnetType.PRIVATE,
+			}).map((subnet) => subnet.subnetId),
 		});
 
 		const lambdaSecurityGroup = new GuSecurityGroup(
@@ -113,6 +117,7 @@ export class DispatchStack extends GuStack {
 				actions: ['s3:GetObject'],
 				resources: [
 					`arn:aws:s3:::${PAN_DOMAIN_AUTH_SETTINGS_BUCKET}/${isProd ? '' : 'code.dev-'}gutools.co.uk.settings.public`,
+					`arn:aws:s3:::${PERMISSIONS_CACHE_BUCKET}/${stage}/permissions.json`,
 				],
 			}),
 		);
