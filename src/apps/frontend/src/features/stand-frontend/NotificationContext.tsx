@@ -8,7 +8,7 @@ import type {
 	SendingResult,
 } from './types';
 
-export const NotificationFormContext = createContext<{
+export interface NotificationFormContextProps {
 	notification: NotificationState;
 	updateNotification: ActionDispatch<[NotificationAction]>;
 	// TO DO - get the required payload from the backend
@@ -18,17 +18,20 @@ export const NotificationFormContext = createContext<{
 		(notification: NotificationState): Promise<SendingResult>;
 	};
 	requestEmailHtml: RequestEmailHtml;
-}>({
-	notification: {
-		isFetchingContent: false,
-		isWaitingForSend: false,
-		confirmSendModalOpen: false,
-	},
-	updateNotification: () => {},
-	capiFetch: () =>
-		Promise.reject(new Error('no capiFetch implementation provided')),
-	sendNotification: () =>
-		Promise.reject(new Error('no sendNotification implementation provided')),
-	requestEmailHtml: () =>
-		Promise.reject(new Error('no requestEmailHtml implementation provided')),
-});
+}
+
+export const NotificationFormContext =
+	createContext<NotificationFormContextProps>({
+		notification: {
+			isFetchingContent: false,
+			isWaitingForSend: false,
+			confirmSendModalOpen: false,
+		},
+		updateNotification: () => {},
+		capiFetch: () =>
+			Promise.reject(new Error('no capiFetch implementation provided')),
+		sendNotification: () =>
+			Promise.reject(new Error('no sendNotification implementation provided')),
+		requestEmailHtml: () =>
+			Promise.reject(new Error('no requestEmailHtml implementation provided')),
+	});

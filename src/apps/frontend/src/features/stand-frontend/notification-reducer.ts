@@ -109,7 +109,6 @@ export const notificationReducer = (
 			return {
 				...state,
 				isWaitingForSend: true,
-				sendingResult: undefined,
 			};
 		}
 
@@ -117,6 +116,7 @@ export const notificationReducer = (
 			return {
 				...state,
 				isWaitingForSend: false,
+				confirmSendModalOpen: false,
 				sendingResult: action.result,
 			};
 		}
@@ -126,6 +126,16 @@ export const notificationReducer = (
 				return state;
 			}
 			return structuredClone(defaultState);
+		}
+
+		case 'dismiss-send-error': {
+			if (state.sendingResult?.ok !== false) {
+				return state;
+			}
+			return {
+				...state,
+				sendingResult: undefined,
+			};
 		}
 	}
 };

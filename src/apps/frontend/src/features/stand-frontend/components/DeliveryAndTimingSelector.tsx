@@ -1,5 +1,6 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { getChannelDescription } from '../../../util/display-text-helpers';
 import { emailDeliveryOptionNameMap } from '../option-values';
 import type { ChannelOption } from '../types';
 import { type EmailDeliveryOption } from '../types';
@@ -10,11 +11,6 @@ interface DeliveryAndTimingSelectorProps {
 	onChange: (deliveryTiming?: EmailDeliveryOption) => void;
 	channel: ChannelOption;
 }
-
-const channelDescriptions = {
-	email: 'email newsletter',
-	push: 'app alert',
-};
 
 export const DeliveryAndTimingSelector = ({
 	selectedDeliveryTiming,
@@ -38,8 +34,8 @@ export const DeliveryAndTimingSelector = ({
 					color: semanticColors.text.weak,
 				}}
 			>
-				Choose whether the {channelDescriptions[channel]} is sent immediately or
-				scheduled for later
+				Choose whether the {getChannelDescription(channel)} is sent immediately
+				or scheduled for later
 			</Typography>
 
 			{Object.entries(emailDeliveryOptionNameMap).map(
