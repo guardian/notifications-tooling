@@ -2,6 +2,7 @@ import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
+import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
 import { AudienceSegments } from './AudienceSegments';
