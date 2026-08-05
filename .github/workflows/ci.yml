@@ -70,7 +70,7 @@ jobs:
           zip -r dispatch.zip .
 
       - name: Upload to riff-raff
-        uses: guardian/actions-riff-raff@ab360a150e2540439f7f675c37d170a2fd6c8604
+        uses: guardian/actions-riff-raff@66d370310110786ae95856240dbb0a725e9d11c3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
