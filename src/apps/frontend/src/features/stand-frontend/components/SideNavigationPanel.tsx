@@ -10,7 +10,7 @@ interface SideNavigationPanelTileProps {
 	href: string;
 	trackedSectionId: string;
 	isSelected: boolean;
-	onPress: () => void;
+	onPress?: () => void;
 }
 
 export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
@@ -20,7 +20,6 @@ export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 		href: '#article-section',
 		trackedSectionId: 'article-section',
 		isSelected: true,
-		onPress: () => {},
 	},
 	{
 		tileNumber: 2,
@@ -28,7 +27,6 @@ export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 		href: '#content-section',
 		trackedSectionId: 'content-section',
 		isSelected: false,
-		onPress: () => {},
 	},
 	{
 		tileNumber: 3,
@@ -36,7 +34,6 @@ export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 		href: '#audience-section',
 		trackedSectionId: 'audience-section',
 		isSelected: false,
-		onPress: () => {},
 	},
 	{
 		tileNumber: 4,
@@ -44,7 +41,6 @@ export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 		href: '#delivery-timing-section',
 		trackedSectionId: 'delivery-timing-section',
 		isSelected: false,
-		onPress: () => {},
 	},
 	{
 		tileNumber: 5,
@@ -52,7 +48,6 @@ export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 		href: '#send-button-section',
 		trackedSectionId: 'send-button-section',
 		isSelected: false,
-		onPress: () => {},
 	},
 ];
 
