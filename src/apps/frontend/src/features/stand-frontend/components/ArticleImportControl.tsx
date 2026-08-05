@@ -60,6 +60,7 @@ export const ArticleImportControl = () => {
 				flexDirection: 'column',
 				gap: semanticSpacing.stackXs,
 			}}
+			id="article-section"
 		>
 			<TextInput
 				isInvalid={!!failure}
@@ -71,7 +72,6 @@ export const ArticleImportControl = () => {
 				onChange={(text) =>
 					updateNotification({ type: 'set-article-id', text })
 				}
-				id="article-section"
 			/>
 			<div
 				css={{

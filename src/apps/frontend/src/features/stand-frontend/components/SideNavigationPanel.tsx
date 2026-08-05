@@ -3,53 +3,55 @@ import { baseColors, semanticColors, semanticSizing } from '@guardian/stand';
 import { baseSpacing } from '@guardian/stand';
 import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
-import { useState } from 'react';
 
 interface SideNavigationPanelTileProps {
 	title: string;
 	tileNumber: number;
 	href: string;
+	trackedSectionId: string;
 	isSelected: boolean;
-	onPress: () => void;
+	onPress?: () => void;
 }
 
-const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
+export const SIDE_NAVIGATION_PANEL_ITEMS: SideNavigationPanelTileProps[] = [
 	{
 		tileNumber: 1,
 		title: 'Article and channel',
 		href: '#article-section',
+		trackedSectionId: 'article-section',
 		isSelected: true,
-		onPress: () => {},
 	},
 	{
 		tileNumber: 2,
 		title: 'Content',
-		href: '#kicker-section',
+		href: '#content-section',
+		trackedSectionId: 'content-section',
 		isSelected: false,
-		onPress: () => {},
 	},
 	{
 		tileNumber: 3,
 		title: 'Audience',
 		href: '#audience-section',
+		trackedSectionId: 'audience-section',
 		isSelected: false,
-		onPress: () => {},
 	},
 	{
 		tileNumber: 4,
 		title: 'Timing and Delivery',
 		href: '#delivery-timing-section',
+		trackedSectionId: 'delivery-timing-section',
 		isSelected: false,
-		onPress: () => {},
 	},
 	{
 		tileNumber: 5,
 		title: 'Send',
 		href: '#send-button-section',
+		trackedSectionId: 'send-button-section',
 		isSelected: false,
-		onPress: () => {},
 	},
 ];
+
+export const DEFAULT_SIDE_NAV_HREF = SIDE_NAVIGATION_PANEL_ITEMS[0]?.href ?? '';
 
 const sideNavigationPanelTileStyle = {
 	tileNumberStyle: (isSelected: boolean, isSend: boolean) =>
@@ -85,11 +87,15 @@ const sideNavigationPanelTileStyle = {
 		}),
 };
 
-export const SideNavigationPanel = () => {
-	const [selectedHref, setSelectedHref] = useState<string>(
-		SIDE_NAVIGATION_PANEL_ITEMS[0]?.href ?? '',
-	);
+interface SideNavigationPanelProps {
+	selectedHref: string;
+	onSelectedHrefChange: (href: string) => void;
+}
 
+export const SideNavigationPanel = ({
+	selectedHref,
+	onSelectedHrefChange,
+}: SideNavigationPanelProps) => {
 	return (
 		<div
 			css={{
@@ -98,6 +104,9 @@ export const SideNavigationPanel = () => {
 				borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 				minHeight: '72px',
 				width: '280px',
+				position: 'sticky',
+				top: '0px',
+				zIndex: 1,
 			}}
 		>
 			{SIDE_NAVIGATION_PANEL_ITEMS.map((item) => (
@@ -106,8 +115,9 @@ export const SideNavigationPanel = () => {
 					tileNumber={item.tileNumber}
 					title={item.title}
 					href={item.href}
+					trackedSectionId={item.trackedSectionId}
 					isSelected={selectedHref === item.href}
-					onPress={() => setSelectedHref(item.href)}
+					onPress={() => onSelectedHrefChange(item.href)}
 				/>
 			))}
 		</div>

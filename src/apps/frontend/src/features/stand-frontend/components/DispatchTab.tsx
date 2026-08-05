@@ -7,18 +7,70 @@ import {
 import { baseSpacing } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
-import { useContext } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
-import { SideNavigationPanel } from './SideNavigationPanel';
+import { ScrollWrapper } from './ScrollWrapper';
+import {
+	DEFAULT_SIDE_NAV_HREF,
+	SIDE_NAVIGATION_PANEL_ITEMS,
+	SideNavigationPanel,
+} from './SideNavigationPanel';
 
 export const DispatchTab = () => {
 	const {
 		notification: { sendingResult, parameters },
 	} = useContext(NotificationFormContext);
+
+	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
+	const isClickLockedRef = useRef(false);
+
+	const handleTileClick = (href: string) => {
+		setSelectedHref(href);
+		isClickLockedRef.current = true;
+
+		// Unlock scroll updates after anchor navigation settles
+		window.setTimeout(() => {
+			isClickLockedRef.current = false;
+		}, 500);
+	};
+
+	useEffect(() => {
+		if (sendingResult) {
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					const id = entry.target.getAttribute('id');
+					if (entry.isIntersecting && id && !isClickLockedRef.current) {
+						const selectedHref = `#${id}`;
+						if (
+							SIDE_NAVIGATION_PANEL_ITEMS.some(
+								(item) => item.href === selectedHref,
+							)
+						) {
+							setSelectedHref(selectedHref);
+						}
+					}
+				});
+			},
+			{ rootMargin: '-30% 0px -8% 0px' },
+		);
+
+		SIDE_NAVIGATION_PANEL_ITEMS.forEach((item) => {
+			const el = document.getElementById(item.trackedSectionId);
+			if (el) {
+				observer.observe(el);
+			}
+		});
+
+		return () => observer.disconnect();
+	}, [sendingResult]);
 
 	return (
 		<Layout.Main theme={layoutMainTheme}>
@@ -52,27 +104,31 @@ export const DispatchTab = () => {
 								gap: `${baseSpacing['10Px']}`,
 							})}
 						>
-							<SideNavigationPanel />
+							<SideNavigationPanel
+								selectedHref={selectedHref}
+								onSelectedHrefChange={handleTileClick}
+							/>
 						</Item>
 						<Item
-							size={6}
+							size={'auto'}
 							cssOverrides={css({
 								borderRightWidth: semanticSizing.border.default,
 								borderRightStyle: 'solid',
 								borderRightColor: semanticColors.border.weak,
 							})}
 						>
-							<CreateNotificationForm />
+							<ScrollWrapper>
+								<CreateNotificationForm />
+							</ScrollWrapper>
 						</Item>
 						<Item
 							size={'auto'}
 							cssOverrides={css({
-								paddingRight: semanticSpacing.stackSm,
-								paddingLeft: semanticSpacing.stackSm,
-								paddingTop: semanticSpacing.stackSm,
 								display: 'flex',
 								justifyContent: 'center',
 								alignItems: 'flex-start',
+								flow: 'vertical',
+								width: '621px',
 							})}
 						>
 							<EmailPreviewSection

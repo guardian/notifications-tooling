@@ -28,6 +28,7 @@ export const EmailFields = () => {
 	return (
 		<>
 			<Select
+				id="content-section"
 				name="kicker"
 				label="Kicker"
 				description="Choose the kicker for the email newsletter"
@@ -50,7 +51,6 @@ export const EmailFields = () => {
 				}}
 				selectionMode="single"
 				value={toOptionKey(kicker ?? 'undefined')}
-				id="kicker-section"
 			>
 				<Option id={toOptionKey('breaking-news')}>
 					{kickerNameMap['breaking-news']}
