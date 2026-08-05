@@ -42,7 +42,14 @@ item.
 **Kicker**:
 An editorial label shown on a notification, such as Breaking News or Exclusive.
 Currently presentational only — the request contract has no field to carry it, so
-it does not reach any downstream service.
+it does not reach any downstream service, and the preview displays it regardless.
+
+**Preview**:
+The rendered approximation of a notification shown to an editor while composing.
+It is assembled in the browser, so it can show choices — the kicker among them —
+that no downstream service receives, and it is not a guarantee of what a reader
+will see.
+_Avoid_: proof, render, draft
 
 ### Delivery
 

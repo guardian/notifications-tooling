@@ -1,7 +1,7 @@
 # ADR: The login URL is owned by both services, deliberately
 
 **Date:** 2026-08-05
-**Status:** Accepted
+**Status:** Proposed
 
 ## Context
 

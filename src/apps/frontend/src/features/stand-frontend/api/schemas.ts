@@ -1,9 +1,11 @@
 import { z } from 'zod';
 
 /**
- * Presentation-only kicker choice from `CreateNotificationForm`. The backend
- * contract has no field to carry it, so the request builder drops it; see
- * CONTEXT.md.
+ * Presentation-only kicker choice from `CreateNotificationForm`. It drives the
+ * local HTML preview only: no request builder exists yet, and the backend
+ * contract has no field to carry it, so nothing sends it downstream. Whoever
+ * wires the send will need a backend field before this can be represented.
+ * See CONTEXT.md.
  */
 export const kickerSchema = z.enum(['breaking-news', 'exclusive', 'none']);
 export type Kicker = z.infer<typeof kickerSchema>;

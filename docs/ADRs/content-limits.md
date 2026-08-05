@@ -1,7 +1,7 @@
 # ADR: Three named content limits
 
 **Date:** 2026-07-29
-**Status:** Proposed
+**Status:** Accepted
 
 ## Context
 

@@ -1,7 +1,7 @@
 # ADR: Reads use TanStack Query; the send is a plain function
 
 **Date:** 2026-07-29
-**Status:** Proposed
+**Status:** Accepted
 
 ## Context
 
@@ -46,3 +46,10 @@ layer would be built for a case that should never reach a user.
   fire twice.
 - `details` are available on `ApiError` if per-field rendering is ever wanted, so
   that remains an additive change.
+
+## Still open
+
+How the send is expressed remains reviewable once it is wired to the real API
+rather than a stub. Marked Accepted rather than Proposed because the reads,
+the shared `queryClient` and its retry policy are shipped and tested; the ADR
+describes live behaviour.
