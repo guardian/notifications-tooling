@@ -1,0 +1,12 @@
+{
+	"name": "@models",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@guardian/pan-domain-node": "1.2.5"
+	}
+}
