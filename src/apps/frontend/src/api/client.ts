@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { getApiBaseUrl } from './config';
 import { ApiError, apiErrorEnvelopeSchema } from './errors';
-import { redirectToLogin } from './redirectToLogin';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -64,17 +63,18 @@ export async function fetchJsonAndParse<Schema extends z.ZodType>(
 		const envelope = await readErrorEnvelope(response);
 
 		if (response.status === 401) {
-			// The backend tells us where to sign in so the stage-to-login-host
-			// mapping lives in exactly one place.
-			if (envelope?.loginUrl) {
-				redirectToLogin(envelope.loginUrl);
-			}
+			// Deliberately does not redirect. Navigating away from inside the
+			// shared fetch helper would silently discard whatever the user was
+			// doing, and a future caller (the send) would inherit that without
+			// asking for it. The login URL is carried on the error instead, so
+			// each call site decides. See docs/ADRs/login-redirect-ownership.md.
 			throw new ApiError({
 				message:
 					envelope?.message ?? `Request to ${path} was not authenticated`,
 				failure: 'unauthenticated',
 				status: response.status,
 				requestId: envelope?.requestId,
+				loginUrl: envelope?.loginUrl,
 			});
 		}
 

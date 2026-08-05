@@ -30,6 +30,7 @@ interface ApiErrorParams {
 	status?: number;
 	details?: ApiErrorDetail[];
 	requestId?: string;
+	loginUrl?: string;
 	cause?: unknown;
 }
 
@@ -49,6 +50,12 @@ export class ApiError extends Error {
 	readonly details?: ApiErrorDetail[];
 	/** Correlates a user-visible failure with the backend logs. */
 	readonly requestId?: string;
+	/**
+	 * Where to sign in again, present only on `unauthenticated`. Carried rather
+	 * than acted on: redirecting is the call site's decision, since only it
+	 * knows whether there is unsaved work to lose.
+	 */
+	readonly loginUrl?: string;
 
 	constructor({
 		message,
@@ -56,6 +63,7 @@ export class ApiError extends Error {
 		status,
 		details,
 		requestId,
+		loginUrl,
 		cause,
 	}: ApiErrorParams) {
 		super(message, { cause });
@@ -64,6 +72,7 @@ export class ApiError extends Error {
 		this.status = status;
 		this.details = details;
 		this.requestId = requestId;
+		this.loginUrl = loginUrl;
 	}
 }
 

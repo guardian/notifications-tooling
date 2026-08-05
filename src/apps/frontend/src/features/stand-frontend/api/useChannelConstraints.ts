@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../../../api/client';
+import { ApiError } from '../../../api/errors';
+import { redirectToLogin } from '../../../api/redirectToLogin';
 import {
 	type ChannelConstraintsResponse,
 	channelConstraintsResponseSchema,
@@ -26,11 +28,29 @@ export const channelConstraintsQueryKey = ['channels', 'constraints'] as const;
 export const useChannelConstraints = () =>
 	useQuery<ChannelConstraintsResponse>({
 		queryKey: channelConstraintsQueryKey,
-		queryFn: () =>
-			fetchJsonAndParse(
-				channelConstraintsResponseSchema,
-				'/v1/channels/constraints',
-			),
+		queryFn: async () => {
+			try {
+				return await fetchJsonAndParse(
+					channelConstraintsResponseSchema,
+					'/v1/channels/constraints',
+				);
+			} catch (error) {
+				// This read runs at mount, before an editor has composed
+				// anything, so bouncing straight to login costs no work. The
+				// redirect lives here rather than in `fetchJsonAndParse` so that
+				// call sites which *do* hold unsaved work — the send, once it is
+				// wired up — cannot inherit it by accident.
+				// See docs/ADRs/login-redirect-ownership.md.
+				if (
+					error instanceof ApiError &&
+					error.failure === 'unauthenticated' &&
+					error.loginUrl
+				) {
+					redirectToLogin(error.loginUrl);
+				}
+				throw error;
+			}
+		},
 		// Limits are editorial config that changes on a deploy cadence, not per
 		// session, so refetching them on every mount is pure noise.
 		staleTime: Infinity,

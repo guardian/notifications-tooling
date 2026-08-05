@@ -60,5 +60,7 @@ export const assertUnauthenticatedRequestBlocked = async (
 	expect(body.message).toBe(
 		'Authentication is required to access this resource.',
 	);
-	expect(body.loginUrl).toContain('/login?returnUrl=');
+
+	expect(body.loginUrl).toContain('/login');
+	expect(body.loginUrl).not.toContain('returnUrl');
 };
