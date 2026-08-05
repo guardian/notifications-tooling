@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import type { UserResponse } from '@config';
+import type { UserResponse } from '@models';
 import { UserPermissions } from '@config';
 import type {
 	Request as ExpressRequest,
