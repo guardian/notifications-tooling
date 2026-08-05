@@ -4,13 +4,11 @@ import {
 	semanticSpacing,
 } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
-import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { checkIfReadyToSend } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import type { NotificationState } from '../types';
-import { LoadingSpinner } from './LoadingSpinner';
 
 const buttonText = (
 	parameters: Required<NotificationState>['parameters'],
@@ -24,26 +22,15 @@ const buttonText = (
 };
 
 export const SendButton = () => {
-	const { notification, updateNotification, sendNotification } = useContext(
+	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	const { parameters, confirmSendModalOpen, isWaitingForSend } = notification;
+	const { parameters } = notification;
 
 	if (!parameters) {
 		return null;
 	}
 	const isReady = checkIfReadyToSend(notification);
-
-	const handleSending = () => {
-		updateNotification({ type: 'waiting-for-send' });
-		sendNotification(notification)
-			.then((result) => {
-				updateNotification({ type: 'receive-send-result', result });
-			})
-			.catch((err) => {
-				console.error(err);
-			});
-	};
 
 	return (
 		<div
@@ -81,52 +68,6 @@ export const SendButton = () => {
 			>
 				{buttonText(parameters)}
 			</Button>
-
-			<Modal
-				isOpen={confirmSendModalOpen}
-				onOpenChange={(isOpen) => {
-					if (isWaitingForSend) {
-						return;
-					}
-					updateNotification({ type: 'set-show-confirm-send', isOpen });
-				}}
-				theme={{
-					overlay: {
-						position: 'fixed',
-					},
-				}}
-			>
-				<Dialog aria-label="confirm notification send">
-					<Dialog.Dismiss ariaLabel="Close Modal" />
-					<Dialog.Header>
-						Are you sure you want to send the newsletter email?
-					</Dialog.Header>
-					<Dialog.Content>
-						Sent newsletter emails cannot be undone
-					</Dialog.Content>
-					<Dialog.Buttons theme={{ flexDirection: 'row' }}>
-						<Button
-							isDisabled={isWaitingForSend}
-							variant="tertiary"
-							onPress={() => {
-								updateNotification({
-									type: 'set-show-confirm-send',
-									isOpen: false,
-								});
-							}}
-						>
-							Cancel
-						</Button>
-						<Button
-							isDisabled={isWaitingForSend}
-							icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
-							onPress={handleSending}
-						>
-							Confirm send
-						</Button>
-					</Dialog.Buttons>
-				</Dialog>
-			</Modal>
 		</div>
 	);
 };

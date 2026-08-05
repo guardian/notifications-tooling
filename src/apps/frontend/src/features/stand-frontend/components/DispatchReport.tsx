@@ -8,9 +8,12 @@ import {
 } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
-import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import {
+	capitalise,
+	getChannelDescription,
+} from '../../../util/display-text-helpers';
 import { NotificationFormContext } from '../NotificationContext';
 import { emailDeliveryOptionNameMap } from '../option-values';
 import type { AudienceSegment } from '../types';
@@ -136,114 +139,92 @@ export const DispatchReport = () => {
 	const { updateNotification, notification } = useContext(
 		NotificationFormContext,
 	);
+	const { sendingResult, parameters } = notification;
 
-	const { sendingResult } = notification;
+	if (!sendingResult?.ok) {
+		return null;
+	}
 
-	const notificationDescription =
-		notification.parameters?.type === 'email'
-			? 'email newsletter'
-			: 'push notification';
+	const notificationDescription = capitalise(
+		getChannelDescription(parameters?.type),
+	);
 
-	const wasSuccess = !!sendingResult?.ok;
 	return (
 		<section css={styles.container}>
-			{wasSuccess ? (
-				<>
-					<div>
-						<div
-							css={{
-								display: 'flex',
-								flexDirection: 'row',
-								gap: semanticSpacing.stackXs,
-							}}
-						>
-							<Icon size="lg" cssOverrides={styles.greenCheckIconStyle}>
-								check_circle
-							</Icon>
-							<Typography
-								variant="heading2Xl"
-								element="h2"
-								css={{ fontSize: '24px' }}
-							>
-								Email newsletter sent
-							</Typography>
-						</div>
-						<Typography variant="bodyMd" css={{ fontSize: '16px' }}>
-							Notification confirmation details below
-						</Typography>
-					</div>
-
-					<div css={styles.detailsBox}>
-						<header>
-							<Typography variant="headingMd">Details</Typography>
-						</header>
-
-						{notification.parameters?.type === 'email' && (
-							<section>
-								<ParameterDisplay keyName="Channel" value="Email Newsletter" />
-								<ParameterDisplay
-									keyName="Audience segment"
-									value={notification.parameters.audienceSegments ?? []}
-								/>
-								<div></div>
-								<ParameterDisplay
-									keyName="Delivery"
-									value={
-										notification.parameters.emailDeliveryOption
-											? emailDeliveryOptionNameMap[
-													notification.parameters.emailDeliveryOption
-												].name
-											: ''
-									}
-								/>
-							</section>
-						)}
-					</div>
-					<div
-						css={{
-							display: 'flex',
-							flexDirection: 'row',
-							flow: 'horizontal',
-							gap: semanticSpacing.stackMd,
-							width: '720px',
-							height: '40px',
-						}}
+			<div>
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'row',
+						gap: semanticSpacing.stackXs,
+					}}
+				>
+					<Icon size="lg" cssOverrides={styles.greenCheckIconStyle}>
+						check_circle
+					</Icon>
+					<Typography
+						variant="heading2Xl"
+						element="h2"
+						css={{ fontSize: '24px' }}
 					>
-						<Button
-							variant="primary"
-							onClick={() => updateNotification({ type: 'reset' })}
-						>
-							Done
-						</Button>
-						<Button
-							variant="tertiary"
-							onClick={() => console.log('Copy to App alert')}
-						>
-							Copy to App alert
-						</Button>
-					</div>
-				</>
-			) : (
-				<>
-					<div>
-						<Typography variant="heading2Xl" element="h2">
-							Send Failed
-						</Typography>
-						<InlineMessage level="error">
-							The {notificationDescription} failed to send
-						</InlineMessage>
-					</div>
-					<div css={styles.detailsBox}>
-						<header>
-							<Typography variant="headingMd">Details</Typography>
-						</header>
+						{notificationDescription} sent
+					</Typography>
+				</div>
+				<Typography variant="bodyMd" css={{ fontSize: '16px' }}>
+					Notification confirmation details below
+				</Typography>
+			</div>
 
-						<section>
-							<ParameterDisplay keyName="Reason" value="UNKNOWN" />
-						</section>
-					</div>
-				</>
-			)}
+			<div css={styles.detailsBox}>
+				<header>
+					<Typography variant="headingMd">Details</Typography>
+				</header>
+
+				{parameters?.type === 'email' && (
+					<section>
+						<ParameterDisplay keyName="Channel" value="Email Newsletter" />
+						<ParameterDisplay
+							keyName="Audience segment"
+							value={parameters.audienceSegments ?? []}
+						/>
+						<div></div>
+						<ParameterDisplay
+							keyName="Delivery"
+							value={
+								parameters.emailDeliveryOption
+									? emailDeliveryOptionNameMap[parameters.emailDeliveryOption]
+											.name
+									: ''
+							}
+						/>
+					</section>
+				)}
+			</div>
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'row',
+					flow: 'horizontal',
+					gap: semanticSpacing.stackMd,
+					width: '720px',
+					height: '40px',
+				}}
+			>
+				<Button
+					variant="primary"
+					onClick={() => updateNotification({ type: 'reset' })}
+				>
+					Done
+				</Button>
+				{parameters?.type === 'email' && (
+					<Button
+						variant="tertiary"
+						onClick={() => console.log('Copy to App alert')}
+					>
+						Copy to App alert
+					</Button>
+				)}
+			</div>
 		</section>
 	);
 };
