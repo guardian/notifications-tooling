@@ -28,6 +28,7 @@ export const notificationTestsPath = {
 				},
 			},
 			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
 			'400': {
 				description:
 					'The request body is structurally malformed or uses a production segment audience.',
@@ -41,11 +42,32 @@ export const notificationTestsPath = {
 			},
 			'422': {
 				description:
-					'The request body is well-formed but failed semantic validation.',
+					'The request body failed semantic validation or the article could not be rendered.',
 				content: {
 					'application/json': {
 						schema: {
-							$ref: '#/components/schemas/NotificationValidationError',
+							$ref: '#/components/schemas/NotificationUnprocessableError',
+						},
+					},
+				},
+			},
+			'502': {
+				description:
+					'Braze or email rendering rejected the request or returned an invalid response.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/NotificationProviderError',
+						},
+					},
+				},
+			},
+			'504': {
+				description: 'Braze or email rendering timed out.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/NotificationProviderError',
 						},
 					},
 				},
