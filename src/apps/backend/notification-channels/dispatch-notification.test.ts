@@ -1,5 +1,5 @@
-import { newsletterSegments, NotificationChannel } from '@config';
 import { describe, expect, it, mock } from 'bun:test';
+import { newsletterSegments, NotificationChannel } from '@config';
 import type {
 	NotificationSendRequest,
 	NotificationTestSendRequest,
