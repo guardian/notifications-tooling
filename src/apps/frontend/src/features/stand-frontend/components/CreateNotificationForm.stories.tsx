@@ -46,7 +46,9 @@ const populatedEmailState = {
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Create a notification')).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Create newsletter email'),
+		).toBeInTheDocument();
 		await expect(canvas.getByText('Article')).toBeInTheDocument();
 		await expect(canvas.getByText('Kicker')).toBeInTheDocument();
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
@@ -60,6 +62,7 @@ export const Empty: Story = {
 			isFetchingContent: false,
 			confirmSendModalOpen: false,
 			isWaitingForSend: false,
+			hasAttemptedSend: false,
 		},
 	},
 };

@@ -3,8 +3,12 @@ import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
+import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
-import { parseArticleUrlInputToContentId } from '../form-validation';
+import {
+	parseArticleUrlInputToContentId,
+	validateNotificationForm,
+} from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -19,6 +23,7 @@ export const ArticleImportControl = () => {
 		fetchedArticleId,
 		isFetchingContent,
 		fetchArticleError,
+		hasAttemptedSend,
 		content,
 	} = notification;
 
@@ -26,6 +31,14 @@ export const ArticleImportControl = () => {
 		parseArticleUrlInputToContentId(articleInputText);
 
 	const fetchArticle = () => {
+		if (articleInputText === '') {
+			updateNotification({
+				type: 'report-article-error',
+				errorMessage: 'Paste a URL to fetch an article',
+			});
+			return;
+		}
+
 		if (!articleId) {
 			return;
 		}
@@ -47,48 +60,62 @@ export const ArticleImportControl = () => {
 			});
 	};
 
-	const disableFetchButton =
-		!articleId || !!isFetchingContent || articleId === fetchedArticleId;
-
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
+
+	const requiredFieldErrors = validateNotificationForm(notification);
+	const showFieldErrors =
+		failure ??
+		(requiredFieldErrors.includes('article') && hasAttemptedSend
+			? 'Paste a URL to fetch an article'
+			: undefined);
 
 	return (
 		<div
 			css={{
 				display: 'flex',
 				flexDirection: 'column',
-				gap: semanticSpacing.stackXs,
 			}}
-			id="article-section"
 		>
-			<TextInput
-				isInvalid={!!failure}
-				error={failure}
-				label="Article"
-				value={notification.articleInputText ?? ''}
-				isDisabled={isFetchingContent}
-				description="Copy and paste a Guardian URL below"
-				onChange={(text) =>
-					updateNotification({ type: 'set-article-id', text })
-				}
-			/>
 			<div
+				id="article-section"
 				css={{
 					display: 'flex',
+					flexDirection: 'row',
 					gap: semanticSpacing.stackSm,
-					alignItems: 'center',
+					alignItems: 'flex-end',
 				}}
 			>
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: semanticSpacing.stackSm,
+					}}
+				>
+					<Typography variant="bodyBoldMd" element="h3" id="article-section">
+						Article
+					</Typography>
+					<TextInput
+						isInvalid={!!showFieldErrors}
+						size="sm"
+						value={notification.articleInputText ?? ''}
+						isDisabled={isFetchingContent}
+						description="Copy and paste a Guardian article URL and fetch"
+						onChange={(text) =>
+							updateNotification({ type: 'set-article-id', text })
+						}
+						cssOverrides={css({ width: '356px' })}
+					/>
+				</div>
 				<Button
-					isDisabled={disableFetchButton}
+					isDisabled={isFetchingContent}
 					icon="upload"
 					size="sm"
 					variant="secondary"
 					onClick={fetchArticle}
-					// TO DO - check why disabled styling not being applied by stand
 					cssOverrides={
-						disableFetchButton
+						isFetchingContent
 							? css({
 									backgroundColor: semanticColors.fill.disabled,
 									cursor: 'not-allowed',
@@ -96,9 +123,16 @@ export const ArticleImportControl = () => {
 							: undefined
 					}
 				>
-					Fetch Article
+					{showImportedArticle ? 'Replace' : 'Fetch'}
 				</Button>
-
+			</div>
+			<div
+				css={{
+					display: 'flex',
+					gap: semanticSpacing.stackSm,
+					alignItems: 'left',
+				}}
+			>
 				{isFetchingContent && <LoadingSpinner />}
 
 				{showImportedArticle && (
@@ -107,6 +141,10 @@ export const ArticleImportControl = () => {
 
 				{fetchArticleError && (
 					<InlineMessage level="error">{fetchArticleError}</InlineMessage>
+				)}
+
+				{showFieldErrors && (
+					<InlineMessage level="error">{showFieldErrors}</InlineMessage>
 				)}
 			</div>
 

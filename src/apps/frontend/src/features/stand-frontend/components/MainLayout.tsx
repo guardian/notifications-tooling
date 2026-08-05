@@ -29,7 +29,7 @@ const getInitials = (user: AppConfig['user']): string => {
 
 const navLinks: Record<TabName, { text: string }> = {
 	create: {
-		text: 'Create notification',
+		text: 'Create',
 	},
 	history: {
 		text: 'History',
@@ -47,7 +47,7 @@ export const MainLayout = ({ children, currentTab, setTab }: Props) => {
 					cssOverrides={css({ position: 'sticky', top: '0px', zIndex: 1 })}
 				>
 					<TopBarToolName
-						name="Notifications"
+						name="Dispatch"
 						favicon={{
 							icon: <Favicon icon="notifications" theme={faviconTheme} />,
 						}}

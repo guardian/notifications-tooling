@@ -25,6 +25,7 @@ export const NotificationFormContext =
 		notification: {
 			isFetchingContent: false,
 			isWaitingForSend: false,
+			hasAttemptedSend: false,
 			confirmSendModalOpen: false,
 		},
 		updateNotification: () => {},

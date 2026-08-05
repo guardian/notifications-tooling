@@ -1,25 +1,46 @@
 import type { NotificationState } from './types';
 
+export type NotificationFormErrorField =
+	'article' | 'subject' | 'preview' | 'audienceSegments';
+
+export type NotificationFormErrors = NotificationFormErrorField[];
+
+export const validateNotificationForm = (
+	notification: NotificationState,
+): NotificationFormErrors => {
+	const { content, parameters } = notification;
+
+	if (parameters?.type !== 'email') {
+		return [];
+	}
+
+	const { subject = '', preview = '', audienceSegments = [] } = parameters;
+	const errors: NotificationFormErrors = [];
+
+	if (content?.id === undefined) {
+		errors.push('article');
+	}
+	if (subject.trim().length === 0) {
+		errors.push('subject');
+	}
+	if (preview.trim().length === 0) {
+		errors.push('preview');
+	}
+	if (audienceSegments.length === 0) {
+		errors.push('audienceSegments');
+	}
+
+	return errors;
+};
+
 export const checkIfReadyToSend = (
 	notification: NotificationState,
 ): boolean => {
-	const { parameters, fetchedArticleId } = notification;
+	const { parameters } = notification;
 
 	if (parameters?.type === 'email') {
-		// TO DO - validate in full
-		const {
-			subject = '',
-			preview = '',
-			emailDeliveryOption,
-			audienceSegments = [],
-		} = parameters;
-		return (
-			!!fetchedArticleId &&
-			subject.length > 0 &&
-			preview.length > 0 &&
-			audienceSegments.length > 0 &&
-			!!emailDeliveryOption
-		);
+		const errors = validateNotificationForm(notification);
+		return errors.length === 0;
 	}
 	if (parameters?.type === 'push') {
 		return false;

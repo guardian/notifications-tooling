@@ -21,7 +21,7 @@ export const NotificationsPage: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const CreateNotificationHeading = canvas.getByText(
-			'Create a notification',
+			'Create newsletter email',
 			{
 				selector: 'h2',
 			},

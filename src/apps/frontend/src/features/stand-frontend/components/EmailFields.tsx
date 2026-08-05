@@ -1,5 +1,6 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
+import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
 import { AudienceSegments } from './AudienceSegments';
@@ -24,6 +25,8 @@ export const EmailFields = () => {
 		audienceSegments = [],
 		emailDeliveryOption,
 	} = notification.parameters;
+	const requiredFieldErrors = validateNotificationForm(notification);
+	const shouldShowErrors = notification.hasAttemptedSend;
 
 	return (
 		<>
@@ -65,7 +68,8 @@ export const EmailFields = () => {
 
 			<NotificationTextInput
 				label="Subject"
-				description="Choose the subject line for the email newsletter"
+				description="Choose the subject line (kicker included in character count)"
+				placeholder="Enter a subject line here..."
 				value={subject}
 				update={(subject) =>
 					updateNotification({
@@ -75,11 +79,17 @@ export const EmailFields = () => {
 				}
 				softLimit={46}
 				hardLimit={70}
+				error={
+					shouldShowErrors && requiredFieldErrors.includes('subject')
+						? 'Subject is required'
+						: undefined
+				}
 			/>
 
 			<NotificationTextInput
 				label="Preview text"
 				description="Choose the preview text for the email newsletter"
+				placeholder="Enter preview text here..."
 				value={preview}
 				update={(preview) =>
 					updateNotification({
@@ -89,10 +99,20 @@ export const EmailFields = () => {
 				}
 				softLimit={85}
 				hardLimit={140}
+				error={
+					shouldShowErrors && requiredFieldErrors.includes('preview')
+						? 'Preview text is required'
+						: undefined
+				}
 			/>
 
 			<AudienceSegments
 				selected={audienceSegments}
+				error={
+					shouldShowErrors && requiredFieldErrors.includes('audienceSegments')
+						? 'Please select an audience segment'
+						: undefined
+				}
 				onChange={(audienceSegments) => {
 					updateNotification({
 						type: 'modify-email-parameters',

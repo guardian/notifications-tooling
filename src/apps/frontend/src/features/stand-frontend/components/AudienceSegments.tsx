@@ -9,6 +9,7 @@ import {
 } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { ButtonGroup } from '@guardian/stand/ButtonGroup';
+import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { type AudienceSegment } from '../types';
 import { FlagAtom } from './FlagAtom';
@@ -22,6 +23,7 @@ interface AudienceSegmentPickerProps {
 	segments?: Segment[];
 	selected: AudienceSegment[];
 	onChange: (selected: AudienceSegment[]) => void;
+	error?: string;
 }
 
 interface AudienceSegmentsPreviewPillProps {
@@ -82,6 +84,7 @@ export const AudienceSegments = ({
 	segments = DEFAULT_SEGMENTS,
 	selected,
 	onChange,
+	error,
 }: AudienceSegmentPickerProps) => {
 	const onSegmentToggle = (segmentCode: AudienceSegment) => {
 		const next = selected.includes(segmentCode)
@@ -133,6 +136,8 @@ export const AudienceSegments = ({
 					);
 				})}
 			</ButtonGroup>
+
+			{error && <InlineMessage level="error">{error}</InlineMessage>}
 		</div>
 	);
 };
@@ -172,7 +177,7 @@ export const AudienceSegmentsPreviewPill = ({
 							css={
 								isConfirmation
 									? styles.isConfirmationStyle
-									: styles.audienceSegmentButton(true)
+									: styles.audienceSegmentButton(false)
 							}
 						>
 							<div css={styles.audienceSegmentIcon}>
@@ -181,9 +186,7 @@ export const AudienceSegmentsPreviewPill = ({
 							<Typography
 								variant="bodyBoldSm"
 								cssOverrides={css({
-									color: isConfirmation
-										? semanticColors.text.weak
-										: semanticColors.text.strongerInverse,
+									color: semanticColors.text.weak,
 								})}
 							>
 								{segmentLabel}
