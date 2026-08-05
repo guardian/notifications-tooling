@@ -108,5 +108,5 @@ We should revisit DynamoDB only if:
 - `POST /v1/notifications` can save validated requests durably and enforce `idempotencyKey` uniqueness.
 - Scheduled sends can be stored and processed later.
 - Recovery from partial failures becomes safer because each attempt is recorded.
-- The backend will need migration tooling, secrets management, and Lambda-to-RDS connection handling.
+- The backend will need migration tooling, secrets management, and Lambda-to-RDS connection handling. Migration rollout is covered separately in `docs/ADRs/database-migrations.md`.
 - If some high-volume event workloads appear later, those could still move to DynamoDB without replacing PostgreSQL as the main store.
