@@ -16,11 +16,13 @@ export const CreateNotificationForm = () => {
 		<div
 			css={{
 				marginTop: semanticSpacing.stackXl,
+				marginBottom: semanticSpacing.stackXl,
 				display: 'flex',
 				flexDirection: 'column',
 				width: '720px',
 				paddingRight: semanticSpacing.stackSm,
 				paddingLeft: '147px',
+				gap: semanticSpacing.stackXl,
 			}}
 		>
 			<Typography variant="heading2Xl" element="h2">
@@ -29,10 +31,10 @@ export const CreateNotificationForm = () => {
 
 			<div
 				css={{
-					marginTop: semanticSpacing.stackXl,
 					display: 'flex',
 					flexDirection: 'column',
 					gap: semanticSpacing.stackLg,
+					width: '476px',
 				}}
 			>
 				<ArticleImportControl />

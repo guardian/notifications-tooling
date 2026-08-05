@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 import { Avatar } from '@guardian/stand/Avatar';
 import { Favicon } from '@guardian/stand/Favicon';
 import { Layout } from '@guardian/stand/Layout';
@@ -41,7 +42,10 @@ export const MainLayout = ({ children, currentTab, setTab }: Props) => {
 	return (
 		<Layout>
 			<Layout.TopBar>
-				<TopBar theme={topBarTheme}>
+				<TopBar
+					theme={topBarTheme}
+					cssOverrides={css({ position: 'sticky', top: '0px', zIndex: 1 })}
+				>
 					<TopBarToolName
 						name="Dispatch"
 						favicon={{

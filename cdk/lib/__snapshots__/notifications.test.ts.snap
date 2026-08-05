@@ -5,6 +5,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuSubnetListParameter",
+      "GuSubnetListParameter",
       "GuVpcParameter",
       "GuSecurityGroup",
       "GuDistributionBucketParameter",
@@ -57,6 +58,11 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Default": "/account/vpc/primary/id",
       "Description": "Virtual Private Cloud to run EC2 instances within. Should NOT be the account default VPC.",
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>",
+    },
+    "dispatchPrivateSubnets": {
+      "Default": "/account/vpc/primary/subnets/private",
+      "Description": "A list of private subnets",
+      "Type": "AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>",
     },
     "dispatchPublicSubnets": {
       "Default": "/account/vpc/primary/subnets/public",
@@ -429,6 +435,22 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               },
             },
             {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/notifications/dispatch/*",
+                  ],
+                ],
+              },
+            },
+            {
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": [
@@ -514,7 +536,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             },
           ],
           "SubnetIds": {
-            "Ref": "dispatchPublicSubnets",
+            "Ref": "dispatchPrivateSubnets",
           },
         },
       },
@@ -668,7 +690,10 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::pan-domain-auth-settings/code.dev-gutools.co.uk.settings.public",
+              "Resource": [
+                "arn:aws:s3:::pan-domain-auth-settings/code.dev-gutools.co.uk.settings.public",
+                "arn:aws:s3:::permissions-cache/TEST/permissions.json",
+              ],
             },
           ],
           "Version": "2012-10-17",
