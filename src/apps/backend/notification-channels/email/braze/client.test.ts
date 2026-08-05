@@ -96,6 +96,57 @@ describe('sendBrazeCampaign', () => {
 			'Braze campaign trigger failed with status 401.',
 		);
 	});
+
+	it('classifies Braze timeouts', async () => {
+		const timeoutError = new Error('request timed out');
+		timeoutError.name = 'TimeoutError';
+		spyOn(globalThis, 'fetch').mockRejectedValue(timeoutError);
+
+		try {
+			await sendBrazeCampaign(request);
+			expect.unreachable();
+		} catch (error) {
+			expect(error).toMatchObject({
+				name: 'BrazeApiError',
+				operation: 'campaign trigger',
+				reason: 'timeout',
+			});
+		}
+	});
+
+	it('classifies malformed Braze responses', async () => {
+		spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 123 }),
+		);
+
+		try {
+			await sendBrazeCampaign(request);
+			expect.unreachable();
+		} catch (error) {
+			expect(error).toMatchObject({
+				name: 'BrazeApiError',
+				operation: 'campaign trigger',
+				reason: 'invalid_response',
+			});
+		}
+	});
+
+	it('rejects a non-success Braze response', async () => {
+		spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 'queued' }),
+		);
+
+		try {
+			await sendBrazeCampaign(request);
+			expect.unreachable();
+		} catch (error) {
+			expect(error).toMatchObject({
+				name: 'BrazeApiError',
+				operation: 'campaign trigger',
+				reason: 'invalid_response',
+			});
+		}
+	});
 });
 
 describe('registerBrazeTestEmailRecipients', () => {

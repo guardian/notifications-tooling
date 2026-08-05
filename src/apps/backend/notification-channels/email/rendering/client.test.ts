@@ -60,4 +60,48 @@ describe('renderEmail', () => {
 			}),
 		).rejects.toThrow('Email rendering failed with status 500.');
 	});
+
+	it('classifies rendering timeouts', async () => {
+		const timeoutError = new Error('request timed out');
+		timeoutError.name = 'TimeoutError';
+		spyOn(globalThis, 'fetch').mockRejectedValue(timeoutError);
+
+		try {
+			await renderEmail({
+				endpoint: 'https://email-rendering.example.com',
+				articleUrl: 'https://www.theguardian.com/world/example-story',
+				newsletterId: 'breaking-news-uk',
+				headlineOverride: 'Breaking news headline',
+				previewText: 'A summary of the breaking news.',
+				timeoutMs: 10_000,
+			});
+			expect.unreachable();
+		} catch (error) {
+			expect(error).toMatchObject({
+				name: 'EmailRenderingError',
+				reason: 'timeout',
+			});
+		}
+	});
+
+	it('classifies malformed rendering responses', async () => {
+		spyOn(globalThis, 'fetch').mockResolvedValue(Response.json({ body: '' }));
+
+		try {
+			await renderEmail({
+				endpoint: 'https://email-rendering.example.com',
+				articleUrl: 'https://www.theguardian.com/world/example-story',
+				newsletterId: 'breaking-news-uk',
+				headlineOverride: 'Breaking news headline',
+				previewText: 'A summary of the breaking news.',
+				timeoutMs: 10_000,
+			});
+			expect.unreachable();
+		} catch (error) {
+			expect(error).toMatchObject({
+				name: 'EmailRenderingError',
+				reason: 'invalid_response',
+			});
+		}
+	});
 });
