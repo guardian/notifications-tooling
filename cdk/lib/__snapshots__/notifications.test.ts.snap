@@ -674,7 +674,10 @@ exports[`The Notifications stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::pan-domain-auth-settings/code.dev-gutools.co.uk.settings.public",
+              "Resource": [
+                "arn:aws:s3:::pan-domain-auth-settings/code.dev-gutools.co.uk.settings.public",
+                "arn:aws:s3:::permissions-cache/TEST/permissions.json",
+              ],
             },
           ],
           "Version": "2012-10-17",
