@@ -8,6 +8,8 @@ type RenderEmailRequest = {
 	endpoint: string;
 	articleUrl: string;
 	newsletterId: string;
+	headlineOverride: string;
+	previewText: string;
 	timeoutMs: number;
 };
 
@@ -25,6 +27,8 @@ export const renderEmail = async ({
 	endpoint,
 	articleUrl,
 	newsletterId,
+	headlineOverride,
+	previewText,
 	timeoutMs,
 }: RenderEmailRequest): Promise<string> => {
 	const articleId = articleIdFromUrl(articleUrl)
@@ -32,9 +36,11 @@ export const renderEmail = async ({
 		.map(encodeURIComponent)
 		.join('/');
 	const renderUrl = new URL(`/notification/${articleId}.json`, endpoint);
-	renderUrl.searchParams.set('newsletter-id', newsletterId);
 
 	const response = await fetch(renderUrl, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ newsletterId, headlineOverride, previewText }),
 		signal: AbortSignal.timeout(timeoutMs),
 	});
 
