@@ -1,9 +1,10 @@
 import type { Content } from '@guardian/content-api-models/v1/content';
+import type { AudienceSegment, SendingResult } from '@models';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
 export type KickerId = 'breaking-news' | 'exclusive';
-export type AudienceSegment = 'UK' | 'US' | 'AU';
+export type { AudienceSegment };
 export type EmailDeliveryOption = 'immediate';
 
 export type EmailNotification = {
@@ -33,33 +34,6 @@ export type NotificationState = {
 	isWaitingForSend: boolean;
 	sendingResult?: SendingResult;
 };
-
-export type SendError =
-	| 'insufficient_permissions'
-	| 'bad_request'
-	| 'validation_failed'
-	| 'unauthenticated';
-// TO DO - get shape form backend project when ready
-export type SendingResult =
-	| {
-			ok: true;
-			response: {
-				status: 'accepted';
-			};
-	  }
-	| {
-			ok: false;
-			response: {
-				error: SendError;
-				message: string;
-			};
-			requestFailed?: false;
-	  }
-	| {
-			ok: false;
-			requestFailed: true;
-			response?: undefined;
-	  };
 
 export type RequestEmailHtml = {
 	(articleId: string, options: { audience: string }): Promise<string>;

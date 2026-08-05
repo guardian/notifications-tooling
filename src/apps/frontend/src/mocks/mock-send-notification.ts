@@ -1,4 +1,4 @@
-import type { SendingResult } from '../features/stand-frontend/types';
+import type { SendingResult } from '@models';
 
 export const mockSendNotification = () => {
 	return new Promise<SendingResult>((resolve) => {

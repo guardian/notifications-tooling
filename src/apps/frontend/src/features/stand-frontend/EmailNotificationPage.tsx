@@ -1,7 +1,6 @@
 import { useReducer, useState } from 'react';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../../mocks/mock-fetch-email';
-import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
@@ -9,7 +8,12 @@ import { NoPermissionsTab } from './components/NoPermissionsTab';
 import { type AppConfig, getAppConfig } from './get-config';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
-import type { NotificationAction, NotificationState, TabName } from './types';
+import { sendNotification } from './send-notification';
+import type {
+	NotificationAction,
+	NotificationState,
+	TabName
+} from './types';
 import { UserContext } from './UserContext';
 
 export const EmailNotificationPage = () => {
@@ -39,7 +43,7 @@ export const EmailNotificationPage = () => {
 						notification,
 						updateNotification,
 						capiFetch: hackyClientSideCapiFetch,
-						sendNotification: mockSendNotification,
+						sendNotification: sendNotification,
 						requestEmailHtml: mockRequestEmailHtml,
 					}}
 				>
