@@ -84,7 +84,6 @@
         "@aws-sdk/client-ssm": "3.1095.0",
         "@aws-sdk/credential-providers": "3.1095.0",
         "@guardian/content-api-models": "47.0.0",
-        "@guardian/pan-domain-node": "1.2.5",
         "zod": "4.4.3",
       },
     },
