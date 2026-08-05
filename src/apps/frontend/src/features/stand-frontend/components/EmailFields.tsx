@@ -80,7 +80,7 @@ export const EmailFields = () => {
 				softLimit={46}
 				hardLimit={70}
 				error={
-					shouldShowErrors && requiredFieldErrors.subject
+					shouldShowErrors && requiredFieldErrors.includes('subject')
 						? 'Subject is required'
 						: undefined
 				}
@@ -100,7 +100,7 @@ export const EmailFields = () => {
 				softLimit={85}
 				hardLimit={140}
 				error={
-					shouldShowErrors && requiredFieldErrors.preview
+					shouldShowErrors && requiredFieldErrors.includes('preview')
 						? 'Preview text is required'
 						: undefined
 				}
@@ -109,7 +109,7 @@ export const EmailFields = () => {
 			<AudienceSegments
 				selected={audienceSegments}
 				error={
-					shouldShowErrors && requiredFieldErrors.audienceSegments
+					shouldShowErrors && requiredFieldErrors.includes('audienceSegments')
 						? 'Please select an audience segment'
 						: undefined
 				}

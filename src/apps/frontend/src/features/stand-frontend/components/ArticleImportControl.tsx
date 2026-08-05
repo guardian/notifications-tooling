@@ -66,7 +66,7 @@ export const ArticleImportControl = () => {
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const showFieldErrors =
 		failure ??
-		(requiredFieldErrors.article && hasAttemptedSend
+		(requiredFieldErrors.includes('article') && hasAttemptedSend
 			? 'Paste a URL to fetch an article'
 			: undefined);
 

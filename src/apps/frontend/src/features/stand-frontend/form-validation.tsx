@@ -1,11 +1,9 @@
 import type { NotificationState } from './types';
 
-export interface NotificationFormErrors {
-	article: boolean;
-	subject: boolean;
-	preview: boolean;
-	audienceSegments: boolean;
-}
+export type NotificationFormErrorField =
+	'article' | 'subject' | 'preview' | 'audienceSegments';
+
+export type NotificationFormErrors = NotificationFormErrorField[];
 
 export const validateNotificationForm = (
 	notification: NotificationState,
@@ -13,22 +11,26 @@ export const validateNotificationForm = (
 	const { content, parameters } = notification;
 
 	if (parameters?.type !== 'email') {
-		return {
-			article: false,
-			subject: false,
-			preview: false,
-			audienceSegments: false,
-		};
+		return [];
 	}
 
 	const { subject = '', preview = '', audienceSegments = [] } = parameters;
+	const errors: NotificationFormErrors = [];
 
-	return {
-		article: content?.id === undefined,
-		subject: subject.trim().length === 0,
-		preview: preview.trim().length === 0,
-		audienceSegments: audienceSegments.length === 0,
-	};
+	if (content?.id === undefined) {
+		errors.push('article');
+	}
+	if (subject.trim().length === 0) {
+		errors.push('subject');
+	}
+	if (preview.trim().length === 0) {
+		errors.push('preview');
+	}
+	if (audienceSegments.length === 0) {
+		errors.push('audienceSegments');
+	}
+
+	return errors;
 };
 
 export const checkIfReadyToSend = (
@@ -38,10 +40,7 @@ export const checkIfReadyToSend = (
 
 	if (parameters?.type === 'email') {
 		const errors = validateNotificationForm(notification);
-		return (
-			Object.values(errors).length === 0 ||
-			Object.values(errors).every((error) => error === false)
-		);
+		return errors.length === 0;
 	}
 	if (parameters?.type === 'push') {
 		return false;
