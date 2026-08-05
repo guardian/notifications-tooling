@@ -1,5 +1,6 @@
 import { UserPermissions } from '@config';
 import { getSSMParameter } from '@config/ssm';
+import { type ArticleSummary, CapiError, fetchArticleSummary } from '@services';
 import { guardianArticleIdFromUrl } from '@utils';
 import { type Request, type Response, Router } from 'express';
 import validate from 'express-zod-safe';
@@ -7,11 +8,6 @@ import { z } from 'zod';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
 import { handleValidationErrors } from '../notifications';
-import {
-	type ArticleSummary,
-	CapiError,
-	fetchArticleSummary,
-} from './capi-client';
 
 /** CAPI is given a fixed request timeout; it is not configurable per stage. */
 const CAPI_REQUEST_TIMEOUT_MS = 10_000;

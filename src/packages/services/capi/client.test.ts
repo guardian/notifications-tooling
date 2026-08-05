@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
-import { CapiError, fetchArticleSummary } from './capi-client';
+import { CapiError, fetchArticleSummary } from './client';
 
 afterEach(() => {
 	mock.restore();

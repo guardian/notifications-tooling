@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
+import { CapiError } from '@services';
 import express from 'express';
 import {
 	assertUnauthenticatedRequestBlocked,
@@ -12,7 +13,6 @@ import {
 	installPermissionsStoreMock,
 } from '../../utils/test-utils/permissions';
 import type { TestServer } from '../../utils/test-utils/server';
-import { CapiError } from './capi-client';
 import { createContentRouter } from '.';
 
 // Stub Panda verification and the permissions store before the app (and its
