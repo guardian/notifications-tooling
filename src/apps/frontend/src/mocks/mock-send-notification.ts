@@ -1,13 +1,15 @@
 import type { SendingResult } from '../features/stand-frontend/types';
+import {
+	acceptedEmailSendResponse,
+	unauthenticatedError,
+} from './api-fixtures';
 
 export const mockSendNotification = () => {
 	return new Promise<SendingResult>((resolve) => {
 		setTimeout(() => {
 			resolve({
 				ok: true,
-				response: {
-					status: 'accepted',
-				},
+				response: acceptedEmailSendResponse,
 			});
 		}, 500);
 	});
@@ -18,10 +20,7 @@ export const mockSendRejectedNotification = () => {
 		setTimeout(() => {
 			resolve({
 				ok: false,
-				response: {
-					error: 'unauthenticated',
-					message: 'Authentication is required to access this resource.',
-				},
+				response: unauthenticatedError,
 			});
 		}, 500);
 	});

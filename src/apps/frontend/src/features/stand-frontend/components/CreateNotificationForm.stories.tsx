@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import { unauthenticatedError } from '../../../mocks/api-fixtures';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
 	mockSendFailingRequest,
@@ -141,10 +142,7 @@ export const SendEmailRejected: Story = {
 			isWaitingForSend: false,
 			sendingResult: {
 				ok: false,
-				response: {
-					error: 'unauthenticated',
-					message: 'Authentication is required to access this resource.',
-				},
+				response: unauthenticatedError,
 			},
 		},
 	},

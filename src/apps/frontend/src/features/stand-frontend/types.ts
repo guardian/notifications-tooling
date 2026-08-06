@@ -1,4 +1,6 @@
 import type { Content } from '@guardian/content-api-models/v1/content';
+import type { ApiError } from '../../api/errors';
+import type { SendNotificationResponse } from './api/schemas';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
@@ -6,28 +8,14 @@ export type KickerId = 'breaking-news' | 'exclusive';
 export type EmailDeliveryOption = 'immediate';
 export type AudienceSegment = 'UK' | 'US' | 'AU';
 
-export type SendError =
-	| 'json-parse-fail'
-	| 'schema-parse-fail'
-	| 'non-2xx-response'
-	| 'timeout'
-	| 'unauthenticated'
-	| 'forbidden';
-
-// TO DO - match the actual full backend response
 export type SendingResult =
 	| {
 			ok: true;
-			response: {
-				status: 'accepted';
-			};
+			response: SendNotificationResponse;
 	  }
 	| {
 			ok: false;
-			response: {
-				error: SendError;
-				message: string;
-			};
+			response: ApiError;
 			requestFailed?: false;
 	  }
 	| {

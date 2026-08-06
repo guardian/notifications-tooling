@@ -1,5 +1,5 @@
 import { fetchJsonAndParse } from '../../../api/client';
-import { ApiError } from '../../../api/errors';
+import type { ApiError } from '../../../api/errors';
 import type { NotificationState, SendingResult } from '../types';
 import type {
 	SendNotificationRequest,
@@ -70,40 +70,29 @@ export const sendNotification = async (
 			ok: true,
 			response: confirmation,
 		};
-	} catch (err) {
-		if (err instanceof ApiError) {
-			if (err.failure === 'fetch-fail') {
-				return {
-					ok: false,
-					requestFailed: true,
-					response: undefined,
-				};
-			}
+	} catch (err: unknown) {
+		const apiError = err as ApiError; // fetchJsonAndParse only throws ApiError
 
-			if (
-				err.failure === 'json-parse-fail' ||
-				err.failure === 'schema-parse-fail'
-			) {
-				// TO DO - this indicate the response was ok but the JSON payload could not be
-				// parsed. Need to allow for this on the modelling?
-			}
-
-			// TO DO - change state modeling to use the api models
+		if (apiError.failure === 'fetch-fail') {
 			return {
 				ok: false,
-				response: {
-					error: err.failure,
-					message: err.message,
-				},
+				requestFailed: true,
+				response: undefined,
 			};
 		}
 
-		console.warn('fetch fail', err);
+		if (
+			apiError.failure === 'json-parse-fail' ||
+			apiError.failure === 'schema-parse-fail'
+		) {
+			// TO DO - this indicate the response was ok (IE message sent?)
+			// but the JSON payload could not be parsed.
+			// This should be treated as an application failure, not a send failure
+		}
 
 		return {
 			ok: false,
-			requestFailed: true,
-			response: undefined,
+			response: apiError,
 		};
 	}
 };

@@ -5,13 +5,14 @@ import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useContext } from 'react';
+import type { ApiErrorFailure } from '../../../api/errors';
 import { getChannelDescription } from '../../../util/display-text-helpers';
 import { NotificationFormContext } from '../NotificationContext';
-import type { NotificationState, SendError } from '../types';
+import type { NotificationState } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 
 const deriveUserFacingMessage = (
-	error: SendError,
+	error: ApiErrorFailure,
 	messageFromApi: string,
 	channelDescription: string,
 ): ReactNode => {
@@ -42,10 +43,10 @@ const getFailure = (notification: NotificationState) => {
 			canRetry: true,
 		};
 	}
-	const { message, error } = sendingResult.response;
+	const { message, failure } = sendingResult.response;
 	return {
 		title: `The ${channelDescription} couldn't be sent`,
-		message: deriveUserFacingMessage(error, message, channelDescription),
+		message: deriveUserFacingMessage(failure, message, channelDescription),
 		canRetry: false,
 	};
 };
