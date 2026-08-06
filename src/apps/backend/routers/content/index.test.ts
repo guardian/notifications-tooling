@@ -1,6 +1,6 @@
+import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
 import { CapiError } from '@services';
-import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import express from 'express';
 import {
 	assertUnauthenticatedRequestBlocked,
