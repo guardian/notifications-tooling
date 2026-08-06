@@ -137,7 +137,7 @@ export class DispatchStack extends GuStack {
 				effect: Effect.ALLOW,
 				actions: ['secretsmanager:GetSecretValue'],
 				resources: [
-					`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${stage}/notifications/dispatch/db*`,
+					`arn:aws:secretsmanager:${this.region}:${this.account}:secret:/${stage}/notifications/dispatch/db*`,
 				],
 			}),
 		);
