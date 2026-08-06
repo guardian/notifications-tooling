@@ -15,7 +15,8 @@ export const contentLinkParsePath = {
 		},
 		responses: {
 			'200': {
-				description: 'The article was found. Returns its summary fields.',
+				description:
+					'The article was found. Returns the requested CAPI `show-fields` under `article`.',
 				content: {
 					'application/json': {
 						schema: {
