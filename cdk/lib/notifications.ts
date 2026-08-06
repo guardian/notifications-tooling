@@ -122,6 +122,26 @@ export class DispatchStack extends GuStack {
 			}),
 		);
 
+		guApiLambda.addToRolePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				actions: ['ssm:GetParameter', 'ssm:GetParameters'],
+				resources: [
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/${stage}/notifications/dispatch/*`,
+				],
+			}),
+		);
+
+			guApiLambda.addToRolePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				actions: ['secretsmanager:GetSecretValue'],
+				resources: [
+					`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${stage}/notifications/dispatch/db*`,
+				],
+			}),
+		);
+
 		const databaseSecurityGroup = new GuSecurityGroup(this, 'DBSecurityGroup', {
 			app,
 			description:
