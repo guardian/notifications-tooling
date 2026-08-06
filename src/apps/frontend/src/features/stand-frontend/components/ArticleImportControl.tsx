@@ -26,7 +26,6 @@ export const ArticleImportControl = () => {
 		content,
 	} = notification;
 
-	
 	const [articleInputText, setArticleInputText] = useState(
 		() => content?.webUrl ?? '',
 	);
