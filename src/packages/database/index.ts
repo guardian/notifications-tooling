@@ -1,1 +1,1 @@
-export { db, pool } from './client';
+export { db } from './client';
