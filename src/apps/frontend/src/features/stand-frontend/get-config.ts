@@ -1,4 +1,4 @@
-import type { User } from '@config';
+import type { User } from '@models';
 
 export interface AppConfig {
 	user: User;

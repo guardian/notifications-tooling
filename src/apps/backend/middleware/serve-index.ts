@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { UserResponse } from '@config';
 import { isRunningLocally } from '@config';
+import type { UserResponse } from '@models';
 import type { Request, RequestHandler, Response } from 'express';
 import { clientAssetsDir } from '../client-assets';
 import { listUserPermissions } from '../utils/permissions/permissions-store';

@@ -1,4 +1,4 @@
-import type { UserResponse } from '@config';
+import type { UserResponse } from '@models';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { listUserPermissions } from '../../utils/permissions/permissions-store';

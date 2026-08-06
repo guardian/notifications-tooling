@@ -32,4 +32,3 @@ export * from './audiences';
 export * from './channels';
 export * from './permissions';
 export * from './urls';
-export * from './user';

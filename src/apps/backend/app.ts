@@ -2,12 +2,12 @@ import serverlessExpress from '@codegenie/serverless-express';
 import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
-	type NextFunction,
 	type Request,
 	type Response,
 } from 'express';
 import { clientAssetsDir } from './client-assets';
 import { authRedirectMiddleware } from './middleware/auth-middleware';
+import { errorMiddleware } from './middleware/error-middleware';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
@@ -56,10 +56,6 @@ app.use((_req: Request, res: Response) => {
 	res.status(404).json({ error: 'Not Found' });
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express detects error middleware by its 4-arg signature
-app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
-	req.log.error(err);
-	res.status(500).json({ error: 'Internal Server Error' });
-});
+app.use(errorMiddleware);
 
 export const handler = serverlessExpress({ app });
