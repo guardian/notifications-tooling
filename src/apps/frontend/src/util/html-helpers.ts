@@ -4,6 +4,22 @@ export const htmlToTextContent = (html: string): string => {
 	return div.textContent;
 };
 
+export const htmlToSingleLineText = (html?: string): string => {
+	if (!html) {
+		return '';
+	}
+
+	const div = document.createElement('div');
+	div.innerHTML = html;
+
+	div.querySelectorAll('br').forEach((element) => element.replaceWith(' '));
+	div
+		.querySelectorAll('p, div, li, blockquote, h1, h2, h3, h4, h5, h6')
+		.forEach((element) => element.append(' '));
+
+	return div.textContent.replace(/\s+/g, ' ').trim();
+};
+
 export const parseHtml = (
 	html?: string,
 ): {
