@@ -1,7 +1,6 @@
-import type { SendingResult } from '@models';
 import { fetchJsonAndParse } from '../../../api/client';
 import { ApiError } from '../../../api/errors';
-import type { NotificationState } from '../types';
+import type { NotificationState, SendingResult } from '../types';
 import type {
 	SendNotificationRequest,
 	SendNotificationResponse,

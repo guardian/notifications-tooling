@@ -17,10 +17,9 @@ const deriveUserFacingMessage = (
 ): ReactNode => {
 	switch (error) {
 		case 'unauthenticated':
-		case 'insufficient_permissions':
+		case 'forbidden':
 			return `You don't have the correct authorisation to send ${channelDescription}s}`;
-		case 'validation_failed': // should only occur if the frontend isnt enforcing the constraints and validation before allowing a send
-		case 'bad_request': // should only occur if there is a bug in constructing the payload to the backend
+		default:
 			return messageFromApi; // TO DO - we don't have user-facing messaging for these cases
 	}
 };

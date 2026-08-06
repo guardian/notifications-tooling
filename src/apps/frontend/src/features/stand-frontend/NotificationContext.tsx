@@ -1,11 +1,11 @@
 import type { Content } from '@guardian/content-api-models/v1/content';
-import type { SendingResult } from '@models';
 import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
 import type {
 	NotificationAction,
 	NotificationState,
 	RequestEmailHtml,
+	SendingResult,
 } from './types';
 
 export interface NotificationFormContextProps {
