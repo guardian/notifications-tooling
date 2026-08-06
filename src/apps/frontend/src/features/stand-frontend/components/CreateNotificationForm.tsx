@@ -27,7 +27,6 @@ export const CreateNotificationForm = () => {
 				borderRightWidth: semanticSizing.border.default,
 				borderRightStyle: 'solid',
 				borderRightColor: semanticColors.border.weak,
-
 				marginTop: semanticSpacing.stackXl,
 				marginBottom: semanticSpacing.stackXl,
 				display: 'flex',
@@ -35,7 +34,7 @@ export const CreateNotificationForm = () => {
 				paddingRight: semanticSpacing.stackSm,
 				paddingLeft: '147px',
 				gap: semanticSpacing.stackXl,
-			}}
+			})}
 		>
 			<Typography variant="heading2Xl" element="h2">
 				Create newsletter email

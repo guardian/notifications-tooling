@@ -103,11 +103,13 @@ export const DispatchTab = () => {
 								gap: `${baseSpacing['10Px']}`,
 							})}
 						>
-							<Grid theme={{
-								sm: { gap: '0px', padding: `0px 0px 0px` },
-								md: { gap: '0px', padding: `0px 0px 0px` },
-								lg: { gap: '0px', padding: `0px 0px 0px` },
-							}}>
+							<Grid
+								theme={{
+									sm: { gap: '0px', padding: `0px 0px 0px` },
+									md: { gap: '0px', padding: `0px 0px 0px` },
+									lg: { gap: '0px', padding: `0px 0px 0px` },
+								}}
+							>
 								<SideNavigationPanel
 									selectedHref={selectedHref}
 									onSelectedHrefChange={handleTileClick}

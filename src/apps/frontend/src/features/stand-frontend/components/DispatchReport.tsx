@@ -193,7 +193,7 @@ export const DispatchReport = () => {
 							value={
 								parameters.emailDeliveryOption
 									? emailDeliveryOptionNameMap[parameters.emailDeliveryOption]
-										.name
+											.name
 									: ''
 							}
 						/>
