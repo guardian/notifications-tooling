@@ -64,7 +64,6 @@ export const SendButton = () => {
 					updateNotification({ type: 'set-show-confirm-send', isOpen: false });
 				}}
 				variant="primary"
-				id={'send-button-section'}
 			>
 				{buttonText(parameters)}
 			</Button>

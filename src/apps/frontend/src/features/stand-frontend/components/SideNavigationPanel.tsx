@@ -3,6 +3,8 @@ import { baseColors, semanticColors, semanticSizing } from '@guardian/stand';
 import { baseSpacing } from '@guardian/stand';
 import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
+import { useContext } from 'react';
+import { NotificationFormContext } from '../NotificationContext';
 
 interface SideNavigationPanelTileProps {
 	title: string;
@@ -96,6 +98,9 @@ export const SideNavigationPanel = ({
 	selectedHref,
 	onSelectedHrefChange,
 }: SideNavigationPanelProps) => {
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 	return (
 		<div
 			css={{
@@ -117,7 +122,10 @@ export const SideNavigationPanel = ({
 					href={item.href}
 					trackedSectionId={item.trackedSectionId}
 					isSelected={selectedHref === item.href}
-					onPress={() => onSelectedHrefChange(item.href)}
+					onPress={() => {
+						onSelectedHrefChange(item.href);
+						updateNotification({ type: 'set-active-section', text: item.href });
+					}}
 				/>
 			))}
 		</div>

@@ -23,6 +23,7 @@ import {
 export const DispatchTab = () => {
 	const {
 		notification: { sendingResult, parameters },
+		updateNotification,
 	} = useContext(NotificationFormContext);
 
 	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
@@ -55,11 +56,15 @@ export const DispatchTab = () => {
 							)
 						) {
 							setSelectedHref(selectedHref);
+							updateNotification({
+								type: 'set-active-section',
+								text: selectedHref,
+							});
 						}
 					}
 				});
 			},
-			{ rootMargin: '-30% 0px -8% 0px' },
+			{ rootMargin: '-8% 0px -8% 0px' },
 		);
 
 		SIDE_NAVIGATION_PANEL_ITEMS.forEach((item) => {

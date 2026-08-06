@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { DispatchTab } from './DispatchTab';
+import { defaultState } from '../notification-reducer';
 
 const meta = {
 	title: 'Stand Frontend/DispatchTab',

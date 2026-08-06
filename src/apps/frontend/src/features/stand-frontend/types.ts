@@ -31,6 +31,12 @@ export type NotificationState = {
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
 	sendingResult?: SendingResult;
+	activeSection?:
+		| '#article-section'
+		| '#content-section'
+		| '#audience-section'
+		| '#delivery-timing-section'
+		| '#send-button-section';
 };
 
 export type SendError =
@@ -101,6 +107,10 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'dismiss-send-error';
+	  }
+	| {
+			type: 'set-active-section';
+			text: NotificationState['activeSection'];
 	  }
 	| {
 			type: 'reset';

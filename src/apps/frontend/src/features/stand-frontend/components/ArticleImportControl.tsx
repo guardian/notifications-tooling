@@ -81,7 +81,6 @@ export const ArticleImportControl = () => {
 			}}
 		>
 			<div
-				id="article-section"
 				css={{
 					display: 'flex',
 					flexDirection: 'row',
@@ -96,7 +95,7 @@ export const ArticleImportControl = () => {
 						gap: semanticSpacing.stackSm,
 					}}
 				>
-					<Typography variant="bodyBoldMd" element="h3" id="article-section">
+					<Typography variant="bodyBoldMd" element="h3">
 						Article
 					</Typography>
 					<TextInput

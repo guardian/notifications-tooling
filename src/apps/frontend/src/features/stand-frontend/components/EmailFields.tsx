@@ -5,8 +5,6 @@ import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
-import { AudienceSegments } from './AudienceSegments';
-import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { NotificationTextInput } from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
@@ -47,7 +45,6 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 	return (
 		<>
 			<Select
-				id="content-section"
 				name="kicker"
 				label="Kicker"
 				description="Choose the kicker for the email newsletter"
@@ -120,32 +117,6 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 						? 'Preview text is required'
 						: undefined
 				}
-			/>
-
-			<AudienceSegments
-				selected={audienceSegments}
-				error={
-					shouldShowErrors && requiredFieldErrors.includes('audienceSegments')
-						? 'Please select an audience segment'
-						: undefined
-				}
-				onChange={(audienceSegments) => {
-					updateNotification({
-						type: 'modify-email-parameters',
-						mod: { audienceSegments },
-					});
-				}}
-			/>
-
-			<DeliveryAndTimingSelector
-				selectedDeliveryTiming={emailDeliveryOption}
-				channel={notification.parameters.type}
-				onChange={(emailDeliveryOption) => {
-					updateNotification({
-						type: 'modify-email-parameters',
-						mod: { emailDeliveryOption },
-					});
-				}}
 			/>
 		</>
 	);
