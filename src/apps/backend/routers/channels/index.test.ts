@@ -126,9 +126,8 @@ describe('GET /v1/channels/constraints', () => {
 		expect(newsletter.content).toEqual(
 			notificationChannelContentLimits[NotificationChannel.Newsletter],
 		);
-		expect(newsletter.compose.subject.maxLength).toBe(
-			notificationChannelContentLimits[NotificationChannel.Newsletter].title
-				.maxLength,
+		expect(newsletter.compose.subject).toEqual(
+			notificationChannelContentLimits[NotificationChannel.Newsletter].title,
 		);
 		expect(newsletter.compose.minItems).toBe(1);
 		expect(newsletter.compose.maxItems).toBe(1);

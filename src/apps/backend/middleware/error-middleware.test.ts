@@ -111,6 +111,10 @@ describe('errorMiddleware', () => {
 		);
 
 		expect(status).toHaveBeenCalledWith(500);
-		expect(json).toHaveBeenCalledWith({ error: 'Internal Server Error' });
+		expect(json).toHaveBeenCalledWith({
+			error: 'internal_error',
+			message: 'The request could not be completed.',
+			requestId: undefined,
+		});
 	});
 });

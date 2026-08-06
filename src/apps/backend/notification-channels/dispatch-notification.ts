@@ -137,12 +137,12 @@ const dispatchNewsletter = async (
 	});
 
 	for (const { brazeCampaignId, emailRenderingNewsletterId } of segments) {
-		// Email-rendering currently derives content from the article URL. Title,
-		// body, and media overrides remain unused until its POST contract exists.
 		const html = await dependencies.renderEmail({
 			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 			articleUrl: item.link,
 			newsletterId: emailRenderingNewsletterId,
+			headlineOverride: item.title,
+			previewText: item.body,
 			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 		});
 
@@ -269,6 +269,8 @@ export const dispatchNotificationTest = async (
 				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 				articleUrl: item.link,
 				newsletterId: newsletterSegments[segmentId].emailRenderingNewsletterId,
+				headlineOverride: item.title,
+				previewText: item.body,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 			}),
 		});
