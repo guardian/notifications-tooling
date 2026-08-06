@@ -177,5 +177,18 @@ describe('POST /v1/notification-tests', () => {
 
 		const response = await postTest(request);
 		expect(response.status).toBe(400);
+
+		const body = (await response.json()) as {
+			error: string;
+			message: string;
+			details: Array<{ code: string; path: string; message: string }>;
+		};
+		expect(body.error).toBe('bad_request');
+		expect(body.message).toBe('The request body is malformed.');
+		expect(body.details.length).toBeGreaterThan(0);
+		const [firstDetail] = body.details;
+		expect(typeof firstDetail?.code).toBe('string');
+		expect(typeof firstDetail?.path).toBe('string');
+		expect(typeof firstDetail?.message).toBe('string');
 	});
 });

@@ -1,13 +1,13 @@
 /** The `/v1/channels/constraints` path item. */
 export const channelsConstraintsPath = {
 	get: {
-		summary: 'Retrieve per-channel validation rules',
+		summary: 'Retrieve per-channel content limits and caps',
 		description:
-			'Returns the per-channel content limits, compose shape and audience caps the SPA uses to drive its UI (character counters, item and segment limits).',
+			'Returns the per-channel content limits, compose shape and audience caps the SPA uses to drive its UI. Each text field carries three limits: `recommended` and `editorialLimit` are editorial guidance the SPA renders and this service does not enforce; only `validationCap` is enforced, on POST /v1/notifications.',
 		security: [{ pandaCookie: [] }],
 		responses: {
 			'200': {
-				description: 'The per-channel validation rules.',
+				description: 'The per-channel limits and caps.',
 				content: {
 					'application/json': {
 						schema: { $ref: '#/components/schemas/ChannelConstraints' },

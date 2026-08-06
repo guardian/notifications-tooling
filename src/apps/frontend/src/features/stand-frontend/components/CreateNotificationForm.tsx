@@ -1,6 +1,7 @@
 import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import { useChannelConstraints } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
@@ -13,7 +14,8 @@ export const CreateNotificationForm = () => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-
+	// Called before the early return: hooks cannot sit behind a conditional.
+	const { data: constraints } = useChannelConstraints();
 	return (
 		<div
 			css={{
@@ -53,7 +55,7 @@ export const CreateNotificationForm = () => {
 					}}
 				/>
 
-				<EmailFields />
+				<EmailFields constraints={constraints} />
 
 				<SendButton />
 				<SendNotificationModal />
