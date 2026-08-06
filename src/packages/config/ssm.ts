@@ -101,16 +101,16 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 	});
 
 	console.log(`Fetching SSM parameter "${key}" from ${url.toString()}`);
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Response.json() is untyped here and we cast it to the expected SSM response shape.
-	const body = await response.json();
-	console.log('SSM response body', body);
 
 	if (!response.ok) {
+		console.log('SSM response body', await response.text());
 		throw new Error(
 			`Failed to fetch SSM parameter "${key}": ${response.status} ${response.statusText}`,
 		);
 	}
 
-	const { Parameter } = (await response.json()) as GetParameterResponse;
+	const body: unknown = await response.json();
+	console.log('SSM response body', body);
+	const { Parameter } = body as GetParameterResponse;
 	return Parameter.Value;
 };
