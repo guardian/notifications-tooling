@@ -20,6 +20,7 @@ const createNotificationFormStyles = {
 		css({
 			display: 'flex',
 			flexDirection: 'column',
+			gap: semanticSpacing.stackMd,
 			borderLeft: activeSectionStyle,
 			paddingLeft: semanticSpacing.stackMd,
 		}),
@@ -46,7 +47,7 @@ export const CreateNotificationForm = () => {
 
 	const getSectionBorder = (sectionId: ActiveSection) =>
 		activeSection === sectionId
-			? `${semanticSizing.border.default} solid ${baseColors.magenta[200]}`
+			? `${semanticSizing.border.md} solid ${baseColors.magenta[200]}`
 			: undefined;
 
 	return (
