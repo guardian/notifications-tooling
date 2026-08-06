@@ -80,7 +80,7 @@ separate checkout so it is available alongside Dispatch:
 
 ```bash
 # in your local checkout of guardian/login
-./scripts/start.sh
+./script/start
 ```
 
 This serves `https://login.local.dev-gutools.co.uk`, which Dispatch redirects to
