@@ -13,6 +13,8 @@ const dbConfigSchema = z.object({
 });
 type DBConfigSchema = z.infer<typeof dbConfigSchema>;
 
+const isRunningInLambda = !!process.env.LAMBDA_TASK_ROOT;
+
 const getDbConfig = async () => {
 	try {
 		const result = await getSSMParameter('db', true);
@@ -32,7 +34,8 @@ const getDbConfig = async () => {
 	}
 };
 
-const getLocalDbConfig = (): DBConfigSchema => {
+const getDbConfigFromEnvironment = (): DBConfigSchema => {
+	
 	const { DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD } = process.env;
 
 	if (!DB_HOST || !DB_PORT || !DB_NAME || !DB_USERNAME || !DB_PASSWORD) {
@@ -56,9 +59,7 @@ const getLocalDbConfig = (): DBConfigSchema => {
 };
 
 export const getConnectionString = async () => {
-	const config: DBConfigSchema = isRunningLocally
-		? getLocalDbConfig()
-		: await getDbConfig();
+	const config: DBConfigSchema = isRunningInLambda ? await getDbConfig() : getDbConfigFromEnvironment();
 
 	const { host, port, dbname, username, password } = config;
 
