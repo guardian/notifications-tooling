@@ -1,5 +1,5 @@
-/** The `/v1/content/link/resolve` path item. */
-export const contentLinkParsePath = {
+/** The `/v1/content/articles/resolve` path item. */
+export const resolveArticlePath = {
 	post: {
 		summary: 'Resolve a Guardian article link or id',
 		description:
@@ -9,7 +9,7 @@ export const contentLinkParsePath = {
 			required: true,
 			content: {
 				'application/json': {
-					schema: { $ref: '#/components/schemas/ContentLinkParseRequest' },
+					schema: { $ref: '#/components/schemas/ResolveArticleRequest' },
 				},
 			},
 		},
@@ -23,7 +23,7 @@ export const contentLinkParsePath = {
 							type: 'object',
 							required: ['article'],
 							properties: {
-								article: { $ref: '#/components/schemas/Article' },
+								article: { $ref: '#/components/schemas/ResolvedArticle' },
 							},
 						},
 					},
@@ -44,13 +44,13 @@ export const contentLinkParsePath = {
 			},
 			'422': {
 				description:
-					'The body failed semantic validation, or the link is not a Guardian article URL or id (`invalid_url`).',
+					'The body failed semantic validation, or the article reference is not a Guardian article URL or id (`invalid_article_reference`).',
 				content: {
 					'application/json': {
 						schema: {
 							oneOf: [
 								{ $ref: '#/components/schemas/NotificationValidationError' },
-								{ $ref: '#/components/schemas/ContentLinkError' },
+								{ $ref: '#/components/schemas/ArticleResolutionError' },
 							],
 						},
 					},
@@ -58,10 +58,10 @@ export const contentLinkParsePath = {
 			},
 			'404': {
 				description:
-					'No Guardian article was found for the link (`article_not_found`).',
+					'No Guardian article was found for the reference (`article_not_found`).',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/ContentLinkError' },
+						schema: { $ref: '#/components/schemas/ArticleResolutionError' },
 					},
 				},
 			},
@@ -70,7 +70,7 @@ export const contentLinkParsePath = {
 					'The Content API could not be reached or returned an invalid response (`capi_unavailable`).',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/ContentLinkError' },
+						schema: { $ref: '#/components/schemas/ArticleResolutionError' },
 					},
 				},
 			},

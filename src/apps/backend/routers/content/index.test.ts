@@ -22,18 +22,21 @@ installPermissionsStoreMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
 
 /**
- * Drives the real Express app over HTTP so the full `POST /v1/content/link/resolve`
- * chain runs: `express.json()` -> auth -> permissions -> the `express-zod-safe`
- * `validate` middleware -> the handler. The CAPI resolver is only exercised via
- * the injected mock in the dedicated app below, so no network call is made.
+ * Drives the real Express app over HTTP so the full
+ * `POST /v1/content/articles/resolve` chain runs: `express.json()` -> auth ->
+ * permissions -> the `express-zod-safe` `validate` middleware -> the handler.
+ * The CAPI resolver is only exercised via the injected mock, so no network call
+ * is made.
  */
+
+const ROUTE = '/v1/content/articles/resolve';
 
 let server: TestServer;
 let baseUrl: string;
 
-const fields = ['headline', 'thumbnail'];
+const showFields = ['headline', 'thumbnail'];
 
-const articleSummary = {
+const resolvedArticle = {
 	articleId: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 	url: 'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 	fields: {
@@ -50,7 +53,7 @@ beforeAll(async () => {
 	grantPermissions([UserPermissions.DispatchAccess]);
 	// The default router resolves an article that is always found, so the
 	// auth/permission/validation cases below never hit the network.
-	const resolveArticle = mock(() => Promise.resolve(articleSummary));
+	const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 	server = await startTestServer(
 		express()
 			.use(express.json())
@@ -63,8 +66,8 @@ afterAll(async () => {
 	await server.close();
 });
 
-const parseLink = (body: unknown): Promise<Response> =>
-	fetch(`${baseUrl}/v1/content/link/resolve`, {
+const resolveRequest = (body: unknown): Promise<Response> =>
+	fetch(`${baseUrl}${ROUTE}`, {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(body),
@@ -74,8 +77,8 @@ const parseLink = (body: unknown): Promise<Response> =>
 const withResolver = async (
 	resolveArticle: (
 		articleId: string,
-		fields: string[],
-	) => Promise<typeof articleSummary>,
+		showFields: string[],
+	) => Promise<typeof resolvedArticle>,
 	run: (baseUrl: string) => Promise<void>,
 ): Promise<void> => {
 	const testServer = await startTestServer(
@@ -90,12 +93,12 @@ const withResolver = async (
 	}
 };
 
-describe('POST /v1/content/link/resolve', () => {
+describe('POST /v1/content/articles/resolve', () => {
 	describe('authentication', () => {
 		it('blocks unauthenticated requests', async () => {
 			await assertUnauthenticatedRequestBlocked(baseUrl, {
 				method: 'POST',
-				path: '/v1/content/link/resolve',
+				path: ROUTE,
 			});
 		});
 	});
@@ -104,89 +107,92 @@ describe('POST /v1/content/link/resolve', () => {
 		it('blocks requests without the dispatch permission', async () => {
 			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
 				method: 'POST',
-				path: '/v1/content/link/resolve',
-				body: { link: { url: validUrl } },
+				path: ROUTE,
+				body: { article: validUrl, showFields },
 			});
 		});
 	});
 
 	describe('happy path', () => {
-		it('resolves the article via CAPI and returns 200 with the summary', async () => {
-			const resolveArticle = mock(() => Promise.resolve(articleSummary));
+		it('resolves an article URL via CAPI and returns 200 with { id, url, fields }', async () => {
+			const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/resolve`, {
+				const response = await fetch(`${url}${ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ link: { url: validUrl }, fields }),
+					body: JSON.stringify({ article: validUrl, showFields }),
 				});
 
 				expect(response.status).toBe(200);
 				expect(await response.json()).toEqual({
-					article: articleSummary.fields,
+					article: {
+						id: resolvedArticle.articleId,
+						url: resolvedArticle.url,
+						fields: resolvedArticle.fields,
+					},
 				});
 				expect(resolveArticle).toHaveBeenCalledWith(
 					'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-					fields,
+					showFields,
 				);
 			});
 		});
 
 		it('accepts a bare article id and resolves it via CAPI', async () => {
-			const resolveArticle = mock(() => Promise.resolve(articleSummary));
+			const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/resolve`, {
+				const response = await fetch(`${url}${ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
-						link: {
-							url: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-						},
-						fields,
+						article:
+							'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+						showFields,
 					}),
 				});
 
 				expect(response.status).toBe(200);
 				expect(resolveArticle).toHaveBeenCalledWith(
 					'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-					fields,
+					showFields,
 				);
 			});
 		});
 	});
 
-	describe('invalid_url', () => {
+	describe('invalid_article_reference', () => {
 		it('rejects a non-Guardian URL with 422 without calling CAPI', async () => {
-			const resolveArticle = mock(() => Promise.resolve(articleSummary));
+			const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/resolve`, {
+				const response = await fetch(`${url}${ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
-						link: { url: 'https://evil.example.com/story' },
-						fields,
+						article: 'https://evil.example.com/story',
+						showFields,
 					}),
 				});
 
 				expect(response.status).toBe(422);
 				expect(((await response.json()) as { error: string }).error).toBe(
-					'invalid_url',
+					'invalid_article_reference',
 				);
 				expect(resolveArticle).not.toHaveBeenCalled();
 			});
 		});
 
 		it('rejects a Guardian URL that is not an article with 422', async () => {
-			const response = await parseLink({
-				link: { url: 'https://www.theguardian.com/uk' },
-				fields,
+			const response = await resolveRequest({
+				article: 'https://www.theguardian.com/uk',
+				showFields,
 			});
 
 			expect(response.status).toBe(422);
 			expect(((await response.json()) as { error: string }).error).toBe(
-				'invalid_url',
+				'invalid_article_reference',
 			);
 		});
 	});
@@ -198,10 +204,10 @@ describe('POST /v1/content/link/resolve', () => {
 			);
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/resolve`, {
+				const response = await fetch(`${url}${ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ link: { url: validUrl }, fields }),
+					body: JSON.stringify({ article: validUrl, showFields }),
 				});
 
 				expect(response.status).toBe(404);
@@ -219,10 +225,10 @@ describe('POST /v1/content/link/resolve', () => {
 			);
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/resolve`, {
+				const response = await fetch(`${url}${ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ link: { url: validUrl }, fields }),
+					body: JSON.stringify({ article: validUrl, showFields }),
 				});
 
 				expect(response.status).toBe(502);
@@ -234,8 +240,8 @@ describe('POST /v1/content/link/resolve', () => {
 	});
 
 	describe('invalid payload', () => {
-		it('rejects a body missing the link object', async () => {
-			const response = await parseLink({});
+		it('rejects a body missing the article reference', async () => {
+			const response = await resolveRequest({ showFields });
 
 			expect(response.status).toBe(400);
 			expect(((await response.json()) as { error: string }).error).toBe(
@@ -244,9 +250,9 @@ describe('POST /v1/content/link/resolve', () => {
 		});
 
 		it('rejects unknown keys in the payload', async () => {
-			const response = await parseLink({
-				link: { url: validUrl },
-				fields,
+			const response = await resolveRequest({
+				article: validUrl,
+				showFields,
 				extra: true,
 			});
 
