@@ -1,12 +1,5 @@
 import { z } from 'zod';
 
-/** A Guardian article resolved from CAPI, with the requested show-fields. */
-export type ResolvedArticle = {
-	articleId: string;
-	url: string;
-	fields: Record<string, string>;
-};
-
 export type CapiFailureReason =
 	'not_found' | 'unavailable' | 'invalid_response';
 
@@ -33,17 +26,19 @@ export class CapiError extends Error {
 }
 
 /**
- * The JSON REST shape of a single CAPI content item. `fields` holds whatever
- * show-fields were requested (all serialised as strings by the JSON API).
+ * A single CAPI content item, passed through verbatim. Only `id` is asserted;
+ * every other field the JSON API returns (type, section, webUrl, webTitle,
+ * publication date, tags, and the requested `fields`) is preserved.
  */
+const capiContentSchema = z.looseObject({ id: z.string() });
+
+/** The full CAPI content item for the resolved article. */
+export type ResolvedArticle = z.infer<typeof capiContentSchema>;
+
 const capiResponseSchema = z.object({
 	response: z.object({
 		status: z.string(),
-		content: z.object({
-			id: z.string(),
-			webUrl: z.url(),
-			fields: z.record(z.string(), z.string()).optional(),
-		}),
+		content: capiContentSchema,
 	}),
 });
 
@@ -51,28 +46,24 @@ type FetchArticleRequest = {
 	endpoint: string;
 	apiKey: string;
 	articleId: string;
-	fields: string[];
 	timeoutMs: number;
 };
 
 /**
- * Resolves a Guardian article id against the Content API, returning its id, web
- * URL and the requested `show-fields`. Throws a {@link CapiError} classifying
- * the failure (`not_found`, `unavailable`, `invalid_response`).
+ * Resolves a Guardian article id against the Content API, returning the full
+ * CAPI content item (with all `show-fields`). Throws a {@link CapiError}
+ * classifying the failure (`not_found`, `unavailable`, `invalid_response`).
  */
 export const fetchArticle = async ({
 	endpoint,
 	apiKey,
 	articleId,
-	fields,
 	timeoutMs,
 }: FetchArticleRequest): Promise<ResolvedArticle> => {
 	const encodedId = articleId.split('/').map(encodeURIComponent).join('/');
 	const url = new URL(`/${encodedId}`, endpoint);
 	url.searchParams.set('api-key', apiKey);
-	if (fields.length > 0) {
-		url.searchParams.set('show-fields', fields.join(','));
-	}
+	url.searchParams.set('show-fields', 'all');
 
 	let response: Response;
 	try {
@@ -95,10 +86,5 @@ export const fetchArticle = async ({
 		throw new CapiError('invalid_response', { cause: error });
 	}
 
-	const { content } = parsed.response;
-	return {
-		articleId: content.id,
-		url: content.webUrl,
-		fields: content.fields ?? {},
-	};
+	return parsed.response.content;
 };

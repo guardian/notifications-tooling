@@ -34,11 +34,13 @@ const ROUTE = '/v1/content/articles/resolve';
 let server: TestServer;
 let baseUrl: string;
 
-const showFields = ['headline', 'thumbnail'];
-
 const resolvedArticle = {
-	articleId: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-	url: 'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+	id: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+	type: 'article',
+	sectionName: 'Environment',
+	webUrl:
+		'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+	webTitle: 'A rhyme to recall rising temperatures',
 	fields: {
 		headline: 'A rhyme to recall rising temperatures',
 		thumbnail: 'https://media.guim.co.uk/abc/500.jpg',
@@ -75,10 +77,7 @@ const resolveRequest = (body: unknown): Promise<Response> =>
 
 /** Spins up the content router with an injected resolver for a single test. */
 const withResolver = async (
-	resolveArticle: (
-		articleId: string,
-		showFields: string[],
-	) => Promise<typeof resolvedArticle>,
+	resolveArticle: (articleId: string) => Promise<typeof resolvedArticle>,
 	run: (baseUrl: string) => Promise<void>,
 ): Promise<void> => {
 	const testServer = await startTestServer(
@@ -108,33 +107,26 @@ describe('POST /v1/content/articles/resolve', () => {
 			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
 				method: 'POST',
 				path: ROUTE,
-				body: { article: validUrl, showFields },
+				body: { article: validUrl },
 			});
 		});
 	});
 
 	describe('happy path', () => {
-		it('resolves an article URL via CAPI and returns 200 with { id, url, fields }', async () => {
+		it('resolves an article URL via CAPI and returns 200 with the content item', async () => {
 			const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 
 			await withResolver(resolveArticle, async (url) => {
 				const response = await fetch(`${url}${ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ article: validUrl, showFields }),
+					body: JSON.stringify({ article: validUrl }),
 				});
 
 				expect(response.status).toBe(200);
-				expect(await response.json()).toEqual({
-					article: {
-						id: resolvedArticle.articleId,
-						url: resolvedArticle.url,
-						fields: resolvedArticle.fields,
-					},
-				});
+				expect(await response.json()).toEqual({ article: resolvedArticle });
 				expect(resolveArticle).toHaveBeenCalledWith(
 					'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-					showFields,
 				);
 			});
 		});
@@ -149,14 +141,12 @@ describe('POST /v1/content/articles/resolve', () => {
 					body: JSON.stringify({
 						article:
 							'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-						showFields,
 					}),
 				});
 
 				expect(response.status).toBe(200);
 				expect(resolveArticle).toHaveBeenCalledWith(
 					'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-					showFields,
 				);
 			});
 		});
@@ -172,7 +162,6 @@ describe('POST /v1/content/articles/resolve', () => {
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
 						article: 'https://evil.example.com/story',
-						showFields,
 					}),
 				});
 
@@ -187,7 +176,6 @@ describe('POST /v1/content/articles/resolve', () => {
 		it('rejects a Guardian URL that is not an article with 422', async () => {
 			const response = await resolveRequest({
 				article: 'https://www.theguardian.com/uk',
-				showFields,
 			});
 
 			expect(response.status).toBe(422);
@@ -207,7 +195,7 @@ describe('POST /v1/content/articles/resolve', () => {
 				const response = await fetch(`${url}${ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ article: validUrl, showFields }),
+					body: JSON.stringify({ article: validUrl }),
 				});
 
 				expect(response.status).toBe(404);
@@ -228,7 +216,7 @@ describe('POST /v1/content/articles/resolve', () => {
 				const response = await fetch(`${url}${ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ article: validUrl, showFields }),
+					body: JSON.stringify({ article: validUrl }),
 				});
 
 				expect(response.status).toBe(502);
@@ -241,7 +229,7 @@ describe('POST /v1/content/articles/resolve', () => {
 
 	describe('invalid payload', () => {
 		it('rejects a body missing the article reference', async () => {
-			const response = await resolveRequest({ showFields });
+			const response = await resolveRequest({});
 
 			expect(response.status).toBe(400);
 			expect(((await response.json()) as { error: string }).error).toBe(
@@ -252,7 +240,6 @@ describe('POST /v1/content/articles/resolve', () => {
 		it('rejects unknown keys in the payload', async () => {
 			const response = await resolveRequest({
 				article: validUrl,
-				showFields,
 				extra: true,
 			});
 

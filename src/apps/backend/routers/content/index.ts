@@ -14,8 +14,8 @@ import { handleValidationErrors } from '../notifications';
 const CAPI_REQUEST_TIMEOUT_MS = 10_000;
 
 /**
- * Body for `POST /v1/content/articles/resolve`: an article reference (a bare
- * article id or any Guardian article URL) and the CAPI `show-fields` to return.
+ * Body for `POST /v1/content/articles/resolve`: an article reference — a bare
+ * article id or any Guardian article URL.
  */
 export const resolveArticleRequestSchema = z.strictObject({
 	article: z.string().trim().min(1).meta({
@@ -23,35 +23,16 @@ export const resolveArticleRequestSchema = z.strictObject({
 			'The article to resolve, as either a bare CAPI content id (e.g. `environment/2026/jul/19/a-headline`) or any Guardian article URL: a public front-end link (`www.`/`amp.`/`m.theguardian.com`, `gu.com`) or an internal gutools preview/viewer link. The id is taken from the URL path, so the host, query string and fragment are ignored.',
 		example: 'https://www.theguardian.com/environment/2026/jul/19/a-headline',
 	}),
-	showFields: z
-		.array(
-			z
-				.string()
-				.trim()
-				.min(1)
-				.regex(/^[a-zA-Z]+$/),
-		)
-		.meta({
-			description:
-				'CAPI `show-fields` names to return for the article (letters only, e.g. `headline`, `standfirst`, `thumbnail`, `trailText`). Only the requested fields are returned, under `article.fields`.',
-			example: ['headline', 'thumbnail', 'trailText'],
-		}),
 });
 
-type ResolveArticle = (
-	articleId: string,
-	showFields: string[],
-) => Promise<ResolvedArticle>;
+type ResolveArticle = (articleId: string) => Promise<ResolvedArticle>;
 
 /**
  * Default resolver: reads the CAPI endpoint and key from SSM, then looks the
  * article up. Injectable so handler tests can drive the outcomes without a
  * network call or credentials.
  */
-const resolveArticleFromCapi: ResolveArticle = async (
-	articleId,
-	showFields,
-) => {
+const resolveArticleFromCapi: ResolveArticle = async (articleId) => {
 	const [endpoint, apiKey] = await Promise.all([
 		getSSMParameter('CAPI_ENDPOINT'),
 		getSSMParameter('CAPI_API_KEY'),
@@ -61,7 +42,6 @@ const resolveArticleFromCapi: ResolveArticle = async (
 		endpoint,
 		apiKey,
 		articleId,
-		fields: showFields,
 		timeoutMs: CAPI_REQUEST_TIMEOUT_MS,
 	});
 };
@@ -78,7 +58,7 @@ export const createContentRouter = (
 			handler: handleValidationErrors,
 		}),
 		async (req: Request, res: Response) => {
-			const { article, showFields } = req.body as z.infer<
+			const { article } = req.body as z.infer<
 				typeof resolveArticleRequestSchema
 			>;
 			const articleId = determineArticleId(article);
@@ -95,14 +75,8 @@ export const createContentRouter = (
 			}
 
 			try {
-				const resolved = await resolveArticle(articleId, showFields);
-				return res.status(200).json({
-					article: {
-						id: resolved.articleId,
-						url: resolved.url,
-						fields: resolved.fields,
-					},
-				});
+				const article = await resolveArticle(articleId);
+				return res.status(200).json({ article });
 			} catch (error) {
 				if (error instanceof CapiError && error.reason === 'not_found') {
 					return res

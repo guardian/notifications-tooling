@@ -10,6 +10,11 @@ const capiPayload = {
 		status: 'ok',
 		content: {
 			id: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+			type: 'article',
+			sectionId: 'environment',
+			sectionName: 'Environment',
+			webPublicationDate: '2026-07-19T15:37:18Z',
+			webTitle: 'A rhyme to recall rising temperatures',
 			webUrl:
 				'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 			fields: {
@@ -21,7 +26,7 @@ const capiPayload = {
 };
 
 describe('fetchArticle', () => {
-	it('resolves the id, url and requested show-fields', async () => {
+	it('returns the full CAPI content item verbatim', async () => {
 		const timeoutSignal = new AbortController().signal;
 		const timeout = spyOn(AbortSignal, 'timeout').mockReturnValue(
 			timeoutSignal,
@@ -35,59 +40,42 @@ describe('fetchArticle', () => {
 			apiKey: 'test-key',
 			articleId:
 				'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-			fields: ['headline', 'thumbnail'],
 			timeoutMs: 10_000,
 		});
 
-		expect(article).toEqual({
-			articleId:
-				'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-			url: 'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-			fields: {
-				headline: 'A rhyme to recall rising temperatures',
-				thumbnail: 'https://media.guim.co.uk/abc/500.jpg',
-			},
-		});
+		expect(article).toEqual(capiPayload.response.content);
 		expect(timeout).toHaveBeenCalledWith(10_000);
 		expect(fetcher).toHaveBeenCalledWith(
 			new URL(
-				'https://content.guardianapis.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures?api-key=test-key&show-fields=headline%2Cthumbnail',
+				'https://content.guardianapis.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures?api-key=test-key&show-fields=all',
 			),
 			{ signal: timeoutSignal },
 		);
 	});
 
-	it('omits show-fields and returns empty fields when none are requested', async () => {
+	it('encodes the article id path segments in the CAPI request', async () => {
 		const timeoutSignal = new AbortController().signal;
 		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+		const content = {
+			id: 'world/2026/jul/08/summit',
+			type: 'article',
+			webUrl: 'https://www.theguardian.com/world/2026/jul/08/summit',
+		};
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
-			Response.json({
-				response: {
-					status: 'ok',
-					content: {
-						id: 'world/2026/jul/08/summit',
-						webUrl: 'https://www.theguardian.com/world/2026/jul/08/summit',
-					},
-				},
-			}),
+			Response.json({ response: { status: 'ok', content } }),
 		);
 
 		const article = await fetchArticle({
 			endpoint: 'https://content.guardianapis.com',
 			apiKey: 'test-key',
 			articleId: 'world/2026/jul/08/summit',
-			fields: [],
 			timeoutMs: 10_000,
 		});
 
-		expect(article).toEqual({
-			articleId: 'world/2026/jul/08/summit',
-			url: 'https://www.theguardian.com/world/2026/jul/08/summit',
-			fields: {},
-		});
+		expect(article).toEqual(content);
 		expect(fetcher).toHaveBeenCalledWith(
 			new URL(
-				'https://content.guardianapis.com/world/2026/jul/08/summit?api-key=test-key',
+				'https://content.guardianapis.com/world/2026/jul/08/summit?api-key=test-key&show-fields=all',
 			),
 			{ signal: timeoutSignal },
 		);
@@ -103,7 +91,6 @@ describe('fetchArticle', () => {
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
 				articleId: 'world/2026/jul/08/missing',
-				fields: [],
 				timeoutMs: 10_000,
 			}),
 		).rejects.toMatchObject({ name: 'CapiError', reason: 'not_found' });
@@ -119,7 +106,6 @@ describe('fetchArticle', () => {
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
 				articleId: 'world/2026/jul/08/summit',
-				fields: [],
 				timeoutMs: 10_000,
 			}),
 		).rejects.toMatchObject({ name: 'CapiError', reason: 'unavailable' });
@@ -135,7 +121,6 @@ describe('fetchArticle', () => {
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
 				articleId: 'world/2026/jul/08/summit',
-				fields: [],
 				timeoutMs: 10_000,
 			}),
 		).rejects.toBeInstanceOf(CapiError);
@@ -151,7 +136,6 @@ describe('fetchArticle', () => {
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
 				articleId: 'world/2026/jul/08/summit',
-				fields: [],
 				timeoutMs: 10_000,
 			}),
 		).rejects.toMatchObject({ name: 'CapiError', reason: 'invalid_response' });
