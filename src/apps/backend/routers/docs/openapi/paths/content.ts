@@ -1,4 +1,4 @@
-/** The `/v1/content/link/parse` path item. */
+/** The `/v1/content/link/resolve` path item. */
 export const contentLinkParsePath = {
 	post: {
 		summary: 'Resolve a Guardian article link',

@@ -22,7 +22,7 @@ installPermissionsStoreMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
 
 /**
- * Drives the real Express app over HTTP so the full `POST /v1/content/link/parse`
+ * Drives the real Express app over HTTP so the full `POST /v1/content/link/resolve`
  * chain runs: `express.json()` -> auth -> permissions -> the `express-zod-safe`
  * `validate` middleware -> the handler. The CAPI resolver is only exercised via
  * the injected mock in the dedicated app below, so no network call is made.
@@ -60,7 +60,7 @@ afterAll(async () => {
 });
 
 const parseLink = (body: unknown): Promise<Response> =>
-	fetch(`${baseUrl}/v1/content/link/parse`, {
+	fetch(`${baseUrl}/v1/content/link/resolve`, {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(body),
@@ -83,12 +83,12 @@ const withResolver = async (
 	}
 };
 
-describe('POST /v1/content/link/parse', () => {
+describe('POST /v1/content/link/resolve', () => {
 	describe('authentication', () => {
 		it('blocks unauthenticated requests', async () => {
 			await assertUnauthenticatedRequestBlocked(baseUrl, {
 				method: 'POST',
-				path: '/v1/content/link/parse',
+				path: '/v1/content/link/resolve',
 			});
 		});
 	});
@@ -97,7 +97,7 @@ describe('POST /v1/content/link/parse', () => {
 		it('blocks requests without the dispatch permission', async () => {
 			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
 				method: 'POST',
-				path: '/v1/content/link/parse',
+				path: '/v1/content/link/resolve',
 				body: { link: { url: validUrl } },
 			});
 		});
@@ -108,7 +108,7 @@ describe('POST /v1/content/link/parse', () => {
 			const resolveArticle = mock(() => Promise.resolve(articleSummary));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/parse`, {
+				const response = await fetch(`${url}/v1/content/link/resolve`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ link: { url: validUrl } }),
@@ -128,7 +128,7 @@ describe('POST /v1/content/link/parse', () => {
 			const resolveArticle = mock(() => Promise.resolve(articleSummary));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/parse`, {
+				const response = await fetch(`${url}/v1/content/link/resolve`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
@@ -163,7 +163,7 @@ describe('POST /v1/content/link/parse', () => {
 			);
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/parse`, {
+				const response = await fetch(`${url}/v1/content/link/resolve`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ link: { url: validUrl } }),
@@ -184,7 +184,7 @@ describe('POST /v1/content/link/parse', () => {
 			);
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}/v1/content/link/parse`, {
+				const response = await fetch(`${url}/v1/content/link/resolve`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ link: { url: validUrl } }),

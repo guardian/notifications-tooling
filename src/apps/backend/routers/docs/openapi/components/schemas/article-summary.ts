@@ -1,5 +1,5 @@
 /**
- * The `POST /v1/content/link/parse` success body: the summary fields resolved
+ * The `POST /v1/content/link/resolve` success body: the summary fields resolved
  * from CAPI that the SPA uses to preview a Guardian article link.
  */
 export const articleSummarySchema = {

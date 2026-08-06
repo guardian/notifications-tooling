@@ -1,4 +1,4 @@
-/** The `POST /v1/content/link/parse` request body: a single Guardian article URL. */
+/** The `POST /v1/content/link/resolve` request body: a single Guardian article URL. */
 export const contentLinkParseRequestSchema = {
 	type: 'object',
 	additionalProperties: false,

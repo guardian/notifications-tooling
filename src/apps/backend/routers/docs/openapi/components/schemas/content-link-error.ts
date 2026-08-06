@@ -1,5 +1,5 @@
 /**
- * The error envelope returned by `POST /v1/content/link/parse` for the
+ * The error envelope returned by `POST /v1/content/link/resolve` for the
  * content-specific failures: an unparseable link (`invalid_url`), a missing
  * article (`article_not_found`), or an unreachable Content API
  * (`capi_unavailable`).

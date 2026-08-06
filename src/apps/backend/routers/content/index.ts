@@ -12,7 +12,7 @@ import { handleValidationErrors } from '../notifications';
 /** CAPI is given a fixed request timeout; it is not configurable per stage. */
 const CAPI_REQUEST_TIMEOUT_MS = 10_000;
 
-/** Body for `POST /v1/content/link/parse`: a single Guardian article URL. */
+/** Body for `POST /v1/content/link/resolve`: a single Guardian article URL. */
 export const parseLinkRequestSchema = z.strictObject({
 	link: z.strictObject({
 		url: z.string().trim().min(1).meta({
@@ -50,7 +50,7 @@ export const createContentRouter = (
 	resolveArticle: ResolveArticle = resolveArticleFromCapi,
 ) =>
 	Router().post(
-		'/link/parse',
+		'/link/resolve',
 		authMiddleware,
 		requirePermissions([UserPermissions.DispatchAccess]),
 		validate({
