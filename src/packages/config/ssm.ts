@@ -18,6 +18,10 @@ interface GetParameterResponse {
 	};
 }
 
+interface GetSecretValueResponse {
+	SecretString?: string;
+}
+
 /**
  * Convert an `UPPER_SNAKE_CASE` parameter key into the `kebab-case` form used
  * for parameter names stored in SSM.
@@ -27,6 +31,14 @@ const toKebabCase = (key: string): string =>
 
 const parameterName = (key: string): string =>
 	`${namespace}${toKebabCase(key)}`;
+
+const parseSecretString = (secretString: string): unknown => {
+	try {
+		return JSON.parse(secretString) as unknown;
+	} catch {
+		return secretString;
+	}
+};
 
 let localClient: SSMClient | undefined;
 
@@ -91,8 +103,11 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 	url.port = extensionPort;
 	// SSM parameters are stored in kebab-case, but callers pass the
 	// UPPER_SNAKE_CASE env-var key, so convert it to match the stored name.
-	url.searchParams.set('name', parameterName(key));
-	url.searchParams.set('withDecryption', 'true');
+	const param = secretManager ? 'secretId' : 'name';
+	url.searchParams.set(param, `${namespace}${toKebabCase(key)}`);
+	if (!secretManager) {
+		url.searchParams.set('withDecryption', 'true');
+	}
 
 	const response = await fetch(url, {
 		headers: {
@@ -111,6 +126,16 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 
 	const body: unknown = await response.json();
 	console.log('SSM response body', body);
+
+	if (secretManager) {
+		const { SecretString } = body as GetSecretValueResponse;
+		if (!SecretString) {
+			throw new Error(`Secrets Manager secret "${key}" has no SecretString.`);
+		}
+
+		return parseSecretString(SecretString);
+	}
+
 	const { Parameter } = body as GetParameterResponse;
 	return Parameter.Value;
 };
