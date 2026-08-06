@@ -22,15 +22,6 @@ export const isGuardianUrl = (value: string): boolean => {
 /** A single path segment of a CAPI content id: word chars and hyphens. */
 const articleIdSegment = /^[\w-]+$/;
 
-/** A CAPI content id is two or more such segments joined by `/`. */
-const isArticleIdShape = (candidate: string): boolean => {
-	const segments = candidate.split('/').filter(Boolean);
-	return (
-		segments.length >= 2 &&
-		segments.every((segment) => articleIdSegment.test(segment))
-	);
-};
-
 /**
  * Determines the CAPI content id from user input that is either a bare article
  * id (`section/2026/jul/19/slug`) or any Guardian-family URL — a public
@@ -58,6 +49,15 @@ export const determineArticleId = (input: string): string | undefined => {
 		// Not a URL: treat the whole input as a bare article id / path.
 	}
 
-	const articleId = candidate.replace(/^\/+|\/+$/g, '');
-	return isArticleIdShape(articleId) ? articleId : undefined;
+	// Split on `/` (dropping empty segments from leading/trailing/double slashes)
+	// rather than trimming with a regex, which CodeQL flags as ReDoS-prone.
+	const segments = candidate.split('/').filter(Boolean);
+	if (
+		segments.length < 2 ||
+		!segments.every((segment) => articleIdSegment.test(segment))
+	) {
+		return undefined;
+	}
+
+	return segments.join('/');
 };
