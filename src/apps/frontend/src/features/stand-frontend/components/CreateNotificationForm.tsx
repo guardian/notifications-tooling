@@ -1,9 +1,11 @@
+import { css } from '@emotion/react';
 import { baseColors, semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
+import type { ActiveSection } from '../NotificationContext';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
@@ -13,6 +15,15 @@ import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
 
+const createNotificationFormStyles = {
+	sectionStyle: (activeSectionStyle: boolean) =>
+		css({
+			display: 'flex',
+			flexDirection: 'column',
+			borderLeft: activeSectionStyle,
+			paddingLeft: semanticSpacing.stackMd,
+		}),
+};
 export const CreateNotificationForm = () => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
@@ -32,7 +43,8 @@ export const CreateNotificationForm = () => {
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
 	const activeSection = notification.activeSection;
-	const getSectionBorder = (sectionId: NonNullable<typeof activeSection>) =>
+
+	const getSectionBorder = (sectionId: ActiveSection) =>
 		activeSection === sectionId
 			? `${semanticSizing.border.default} solid ${baseColors.magenta[200]}`
 			: undefined;
@@ -64,12 +76,9 @@ export const CreateNotificationForm = () => {
 			>
 				<section
 					id="article-section"
-					css={{
-						display: 'flex',
-						flexDirection: 'column',
-						borderLeft: getSectionBorder('#article-section'),
-						paddingLeft: semanticSpacing.stackMd,
-					}}
+					css={createNotificationFormStyles.sectionStyle(
+						getSectionBorder('#article-section'),
+					)}
 				>
 					<ArticleImportControl />
 
@@ -87,23 +96,17 @@ export const CreateNotificationForm = () => {
 				</section>
 				<section
 					id="content-section"
-					css={{
-						display: 'flex',
-						flexDirection: 'column',
-						borderLeft: getSectionBorder('#content-section'),
-						paddingLeft: semanticSpacing.stackMd,
-					}}
+					css={createNotificationFormStyles.sectionStyle(
+						getSectionBorder('#content-section'),
+					)}
 				>
 					<EmailFields constraints={constraints} />
 				</section>
 				<section
 					id="audience-section"
-					css={{
-						display: 'flex',
-						flexDirection: 'column',
-						borderLeft: getSectionBorder('#audience-section'),
-						paddingLeft: semanticSpacing.stackMd,
-					}}
+					css={createNotificationFormStyles.sectionStyle(
+						getSectionBorder('#audience-section'),
+					)}
 				>
 					<AudienceSegments
 						selected={audienceSegments}
@@ -123,12 +126,9 @@ export const CreateNotificationForm = () => {
 				</section>
 				<section
 					id="delivery-timing-section"
-					css={{
-						display: 'flex',
-						flexDirection: 'column',
-						borderLeft: getSectionBorder('#delivery-timing-section'),
-						paddingLeft: semanticSpacing.stackMd,
-					}}
+					css={createNotificationFormStyles.sectionStyle(
+						getSectionBorder('#delivery-timing-section'),
+					)}
 				>
 					<DeliveryAndTimingSelector
 						selectedDeliveryTiming={emailDeliveryOption}
@@ -143,12 +143,9 @@ export const CreateNotificationForm = () => {
 				</section>
 				<section
 					id="send-button-section"
-					css={{
-						display: 'flex',
-						flexDirection: 'column',
-						borderLeft: getSectionBorder('#send-button-section'),
-						paddingLeft: semanticSpacing.stackMd,
-					}}
+					css={createNotificationFormStyles.sectionStyle(
+						getSectionBorder('#send-button-section'),
+					)}
 				>
 					<SendButton />
 				</section>

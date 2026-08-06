@@ -21,6 +21,13 @@ export type PushNotification = {
 	audienceSegments?: AudienceSegment[];
 };
 
+export type ActiveSection =
+	| '#article-section'
+	| '#content-section'
+	| '#audience-section'
+	| '#delivery-timing-section'
+	| '#send-button-section';
+
 export type NotificationState = {
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
@@ -31,12 +38,7 @@ export type NotificationState = {
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
 	sendingResult?: SendingResult;
-	activeSection?:
-		| '#article-section'
-		| '#content-section'
-		| '#audience-section'
-		| '#delivery-timing-section'
-		| '#send-button-section';
+	activeSection?: ActiveSection;
 };
 
 export type SendError =

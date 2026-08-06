@@ -32,11 +32,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 	const previewLimits =
 		newsletter?.content.body ?? NEWSLETTER_LIMIT_FALLBACKS.body;
 
-	const {
-		kicker,
-		subject = '',
-		preview = '',
-	} = notification.parameters;
+	const { kicker, subject = '', preview = '' } = notification.parameters;
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
 
