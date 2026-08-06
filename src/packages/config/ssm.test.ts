@@ -11,14 +11,18 @@ import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 const baseEnv = { STACK: 'notifications', APP: 'dispatch' };
 
-const getSSMParameter = async (key: string, stage: string = 'CODE') => {
+const getSSMParameter = async (
+	key: string,
+	stage: string = 'CODE',
+	secretManager: boolean = false,
+) => {
 	await mock.module('./env', () => ({
 		configurationStage: stage === 'PROD' ? 'PROD' : 'CODE',
 		env: { ...baseEnv, STAGE: stage },
 		localAwsConfig: { profile: 'composer', region: 'eu-west-1' },
 	}));
 	const { getSSMParameter } = await import('./ssm');
-	return getSSMParameter(key);
+	return getSSMParameter(key, secretManager);
 };
 
 const SESSION_TOKEN = 'test-session-token';
@@ -98,6 +102,32 @@ describe('getSSMParameter in production', () => {
 		expect(getSSMParameter('my-param')).rejects.toThrow(
 			'Failed to fetch SSM parameter "my-param": 404 Not Found',
 		);
+	});
+
+	it('fetches Secrets Manager secrets via the extension and parses SecretString JSON', async () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({
+				SecretString:
+					'{"host":"db.example","port":5432,"dbname":"dispatchdb","username":"dispatch","password":"secret"}',
+			}),
+		);
+
+		const secret = await getSSMParameter('db', 'CODE', true);
+
+		expect(secret).toEqual({
+			host: 'db.example',
+			port: 5432,
+			dbname: 'dispatchdb',
+			username: 'dispatch',
+			password: 'secret',
+		});
+
+		const calledUrl = fetcher.mock.calls[0]?.[0] as URL;
+		expect(calledUrl.toString()).toEqual(
+			'http://localhost:2773/secretsmanager/get' +
+				'?secretId=%2FCODE%2Fnotifications%2Fdispatch%2Fdb',
+		);
+		expect(calledUrl.searchParams.get('withDecryption')).toBeNull();
 	});
 });
 
