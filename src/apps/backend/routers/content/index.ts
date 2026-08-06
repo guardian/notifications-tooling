@@ -5,6 +5,7 @@ import { determineArticleId } from '@utils';
 import { type Request, type Response, Router } from 'express';
 import validate from 'express-zod-safe';
 import { z } from 'zod';
+import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
 import { handleValidationErrors } from '../notifications';
@@ -64,9 +65,6 @@ const resolveArticleFromCapi: ResolveArticle = async (articleId, fields) => {
 	});
 };
 
-const requestId = (req: Request): string | undefined =>
-	(req as { id?: string }).id;
-
 export const createContentRouter = (
 	resolveArticle: ResolveArticle = resolveArticleFromCapi,
 ) =>
@@ -84,11 +82,15 @@ export const createContentRouter = (
 			>;
 			const articleId = determineArticleId(link.url);
 			if (!articleId) {
-				return res.status(422).json({
-					error: 'invalid_url',
-					message: 'The link must be a Guardian article URL or article id.',
-					requestId: requestId(req),
-				});
+				return res
+					.status(422)
+					.json(
+						buildErrorEnvelope(
+							req,
+							'invalid_url',
+							'The link must be a Guardian article URL or article id.',
+						),
+					);
 			}
 
 			try {
@@ -96,18 +98,26 @@ export const createContentRouter = (
 				return res.status(200).json({ article: resolved.fields });
 			} catch (error) {
 				if (error instanceof CapiError && error.reason === 'not_found') {
-					return res.status(404).json({
-						error: 'article_not_found',
-						message: 'No Guardian article was found for that link.',
-						requestId: requestId(req),
-					});
+					return res
+						.status(404)
+						.json(
+							buildErrorEnvelope(
+								req,
+								'article_not_found',
+								'No Guardian article was found for that link.',
+							),
+						);
 				}
 
-				return res.status(502).json({
-					error: 'capi_unavailable',
-					message: 'The Content API could not be reached. Please try again.',
-					requestId: requestId(req),
-				});
+				return res
+					.status(502)
+					.json(
+						buildErrorEnvelope(
+							req,
+							'capi_unavailable',
+							'The Content API could not be reached. Please try again.',
+						),
+					);
 			}
 		},
 	);

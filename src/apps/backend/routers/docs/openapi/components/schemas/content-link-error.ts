@@ -6,7 +6,6 @@
  */
 export const contentLinkErrorSchema = {
 	type: 'object',
-	additionalProperties: false,
 	required: ['error', 'message'],
 	properties: {
 		error: {
