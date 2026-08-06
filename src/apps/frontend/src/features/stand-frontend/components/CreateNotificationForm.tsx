@@ -1,4 +1,9 @@
-import { semanticSpacing } from '@guardian/stand';
+import { css } from '@emotion/react';
+import {
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
@@ -18,12 +23,15 @@ export const CreateNotificationForm = () => {
 	const { data: constraints } = useChannelConstraints();
 	return (
 		<div
-			css={{
+			css={css({
+				borderRightWidth: semanticSizing.border.default,
+				borderRightStyle: 'solid',
+				borderRightColor: semanticColors.border.weak,
+
 				marginTop: semanticSpacing.stackXl,
 				marginBottom: semanticSpacing.stackXl,
 				display: 'flex',
 				flexDirection: 'column',
-				width: '720px',
 				paddingRight: semanticSpacing.stackSm,
 				paddingLeft: '147px',
 				gap: semanticSpacing.stackXl,

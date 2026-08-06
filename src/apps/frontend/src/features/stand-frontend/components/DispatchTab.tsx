@@ -13,7 +13,6 @@ import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
-import { ScrollWrapper } from './ScrollWrapper';
 import {
 	DEFAULT_SIDE_NAV_HREF,
 	SIDE_NAVIGATION_PANEL_ITEMS,
@@ -104,22 +103,18 @@ export const DispatchTab = () => {
 								gap: `${baseSpacing['10Px']}`,
 							})}
 						>
-							<SideNavigationPanel
-								selectedHref={selectedHref}
-								onSelectedHrefChange={handleTileClick}
-							/>
-						</Item>
-						<Item
-							size={'auto'}
-							cssOverrides={css({
-								borderRightWidth: semanticSizing.border.default,
-								borderRightStyle: 'solid',
-								borderRightColor: semanticColors.border.weak,
-							})}
-						>
-							<ScrollWrapper>
+							<Grid theme={{
+								sm: { gap: '0px', padding: `0px 0px 0px` },
+								md: { gap: '0px', padding: `0px 0px 0px` },
+								lg: { gap: '0px', padding: `0px 0px 0px` },
+							}}>
+								<SideNavigationPanel
+									selectedHref={selectedHref}
+									onSelectedHrefChange={handleTileClick}
+								/>
+
 								<CreateNotificationForm />
-							</ScrollWrapper>
+							</Grid>
 						</Item>
 						<Item
 							size={'auto'}
