@@ -7,10 +7,19 @@ type Db = ReturnType<typeof drizzle>;
 let poolPromise: Promise<Pool> | undefined;
 let dbPromise: Promise<Db> | undefined;
 
+const isRunningInLambda = !!process.env.LAMBDA_TASK_ROOT;
+
 const getPool = async (): Promise<Pool> => {
 	poolPromise ??= (async () => {
 		const connectionString = await getConnectionString();
-		return new Pool({ connectionString });
+		return new Pool({
+			connectionString,
+			ssl: isRunningInLambda
+				? {
+						rejectUnauthorized: false,
+					}
+				: false,
+		});
 	})();
 
 	return poolPromise;

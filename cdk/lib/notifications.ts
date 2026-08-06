@@ -122,16 +122,6 @@ export class DispatchStack extends GuStack {
 			}),
 		);
 
-		// guApiLambda.addToRolePolicy(
-		// 	new PolicyStatement({
-		// 		effect: Effect.ALLOW,
-		// 		actions: ['ssm:GetParameter', 'ssm:GetParameters'],
-		// 		resources: [
-		// 			`arn:aws:ssm:${this.region}:${this.account}:parameter/${stage}/notifications/dispatch/*`,
-		// 		],
-		// 	}),
-		// );
-
 		guApiLambda.addToRolePolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,
