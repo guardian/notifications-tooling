@@ -1,3 +1,5 @@
+import {  getDb } from '@database';
+import { logger } from '@http-logger';
 import { type Request, type Response, Router } from 'express';
 
 export const healthHandler = (_req: Request, res: Response) => {
@@ -7,7 +9,8 @@ export const healthHandler = (_req: Request, res: Response) => {
 const dbHealthHandler = async (_req: Request, res: Response) => {
 	// Testing database connection
 	try {
-		await db.execute('select 1');
+		const client = await getDb();
+		await client.execute('select 1');
 		logger.info('Database connection test successful');
 
 		res.json({ status: 'ok' });

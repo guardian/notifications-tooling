@@ -1,23 +1,26 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { getConnectionString } from './config-loader';
+type Db = ReturnType<typeof drizzle>;
 
-const getConnectionString = () => {
-	const { DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD } = process.env;
+let poolPromise: Promise<Pool> | undefined;
+let dbPromise: Promise<Db> | undefined;
 
-	if (!DB_HOST || !DB_PORT || !DB_NAME || !DB_USERNAME || !DB_PASSWORD) {
-		throw new Error(
-			'Missing required database environment variables for local development.',
-		);
-	}
 
-	return `postgresql://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+ const getPool = async (): Promise<Pool> => {
+	poolPromise ??= (async () => {
+		const connectionString = await getConnectionString();
+		return new Pool({ connectionString });
+	})();
+
+	return poolPromise;
 };
 
-const connectionString = getConnectionString();
+export const getDb = async (): Promise<Db> => {
+	dbPromise ??= (async () => {
+		const pool = await getPool();
+		return drizzle({ client: pool });
+	})();
 
-const pool = new Pool({
-	connectionString,
-});
-
-export const db = drizzle({ client: pool });
-export { connectionString, pool };
+	return dbPromise;
+};
