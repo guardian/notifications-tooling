@@ -75,7 +75,7 @@ export const DispatchTab = () => {
 		});
 
 		return () => observer.disconnect();
-	}, [sendingResult]);
+	}, [sendingResult, updateNotification]);
 
 	return (
 		<Layout.Main theme={layoutMainTheme}>

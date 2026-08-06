@@ -74,7 +74,7 @@ export const CreateNotificationForm = () => {
 					<ArticleImportControl />
 
 					<ChannelSelector
-						selectedChannel={notification.parameters?.type}
+						selectedChannel={notification.parameters.type}
 						onChange={(channel) => {
 							switch (channel) {
 								case 'email':

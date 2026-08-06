@@ -98,9 +98,7 @@ export const SideNavigationPanel = ({
 	selectedHref,
 	onSelectedHrefChange,
 }: SideNavigationPanelProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
+	const { updateNotification } = useContext(NotificationFormContext);
 	return (
 		<div
 			css={{

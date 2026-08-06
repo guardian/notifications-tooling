@@ -36,8 +36,6 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 		kicker,
 		subject = '',
 		preview = '',
-		audienceSegments = [],
-		emailDeliveryOption,
 	} = notification.parameters;
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;

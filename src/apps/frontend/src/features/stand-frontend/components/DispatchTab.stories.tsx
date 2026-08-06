@@ -1,24 +1,37 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { DispatchTab } from './DispatchTab';
+import { WithNotificationContext } from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
+import type { NotificationState } from '../types';
+import { DispatchTab } from './DispatchTab';
 
-const meta = {
+type StoryArgs = {
+	notificationState: NotificationState;
+};
+
+const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/DispatchTab',
 	component: DispatchTab,
+	args: {
+		notificationState: defaultState,
+	},
 	parameters: {
 		layout: 'fullscreen',
 		docs: {
 			description: {
 				component:
-					'Dispatch tab combining the notification creation form and  preview with selected audience, channel, and delivery timing.',
+					'Dispatch tab combining the notification creation form and preview with selected audience, channel, and delivery timing.',
 			},
 		},
 	},
-} satisfies Meta<typeof DispatchTab>;
+	render: (args) => {
+		const { notificationState } = args;
+		return WithNotificationContext(<DispatchTab />, notificationState);
+	},
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<StoryArgs>;
 
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
