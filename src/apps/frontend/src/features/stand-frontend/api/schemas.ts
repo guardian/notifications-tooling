@@ -36,7 +36,7 @@ export const sendNotificationRequestSchema = z.strictObject({
 	}),
 	sender: z.string(),
 	options: z.strictObject({
-		dryRun: z.literal(true),
+		dryRun: z.boolean(),
 		scheduledFor: z.null(),
 	}),
 });
