@@ -83,7 +83,11 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 		);
 	}
 
-	const url = new URL('http://localhost:2773/systemsmanager/parameters/get');
+	const path = secretManager
+		? '/secretsmanager/get'
+		: '/systemsmanager/parameters/get';
+
+	const url = new URL(`http://localhost:${extensionPort}${path}`);
 	url.port = extensionPort;
 	// SSM parameters are stored in kebab-case, but callers pass the
 	// UPPER_SNAKE_CASE env-var key, so convert it to match the stored name.
@@ -96,6 +100,7 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 		},
 	});
 
+	console.log(response);
 	if (!response.ok) {
 		throw new Error(
 			`Failed to fetch SSM parameter "${key}": ${response.status} ${response.statusText}`,
