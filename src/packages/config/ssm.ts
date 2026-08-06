@@ -100,7 +100,10 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 		},
 	});
 
-	console.log(response);
+	console.log(`Fetching SSM parameter "${key}" from ${url.toString()}`);
+	const body = await response.json();
+	console.log('SSM response body', body);
+
 	if (!response.ok) {
 		throw new Error(
 			`Failed to fetch SSM parameter "${key}": ${response.status} ${response.statusText}`,
