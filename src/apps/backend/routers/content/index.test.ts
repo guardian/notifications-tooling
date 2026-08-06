@@ -131,6 +131,29 @@ describe('POST /v1/content/link/resolve', () => {
 				);
 			});
 		});
+
+		it('accepts a bare article id and resolves it via CAPI', async () => {
+			const resolveArticle = mock(() => Promise.resolve(articleSummary));
+
+			await withResolver(resolveArticle, async (url) => {
+				const response = await fetch(`${url}/v1/content/link/resolve`, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						link: {
+							url: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+						},
+						fields,
+					}),
+				});
+
+				expect(response.status).toBe(200);
+				expect(resolveArticle).toHaveBeenCalledWith(
+					'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+					fields,
+				);
+			});
+		});
 	});
 
 	describe('invalid_url', () => {

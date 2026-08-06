@@ -1,9 +1,9 @@
 /** The `/v1/content/link/resolve` path item. */
 export const contentLinkParsePath = {
 	post: {
-		summary: 'Resolve a Guardian article link',
+		summary: 'Resolve a Guardian article link or id',
 		description:
-			'Parses the article id from a Guardian article URL and resolves it against the Content API, returning the summary fields (category, publication date, thumbnail) the SPA uses to preview the link.',
+			'Determines the CAPI content id from the input — a bare article id or any Guardian article URL (public front-end or internal gutools preview/viewer link) — and resolves it against the Content API. Returns only the requested CAPI `show-fields`, under `article`.',
 		security: [{ pandaCookie: [] }],
 		requestBody: {
 			required: true,
@@ -43,7 +43,7 @@ export const contentLinkParsePath = {
 			},
 			'422': {
 				description:
-					'The body failed semantic validation, or the link is not a Guardian article URL (`invalid_url`).',
+					'The body failed semantic validation, or the link is not a Guardian article URL or id (`invalid_url`).',
 				content: {
 					'application/json': {
 						schema: {

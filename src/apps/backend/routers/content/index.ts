@@ -1,7 +1,7 @@
 import { UserPermissions } from '@config';
 import { getSSMParameter } from '@config/ssm';
 import { CapiError, fetchArticle, type ResolvedArticle } from '@services';
-import { guardianArticleIdFromUrl } from '@utils';
+import { determineArticleId } from '@utils';
 import { type Request, type Response, Router } from 'express';
 import validate from 'express-zod-safe';
 import { z } from 'zod';
@@ -13,13 +13,14 @@ import { handleValidationErrors } from '../notifications';
 const CAPI_REQUEST_TIMEOUT_MS = 10_000;
 
 /**
- * Body for `POST /v1/content/link/resolve`: a Guardian article URL and the CAPI
- * `show-fields` to return for it.
+ * Body for `POST /v1/content/link/resolve`: a Guardian article link (or a bare
+ * article id) and the CAPI `show-fields` to return for it.
  */
 export const parseLinkRequestSchema = z.strictObject({
 	link: z.strictObject({
 		url: z.string().trim().min(1).meta({
-			description: 'A Guardian article URL to resolve against the Content API.',
+			description:
+				'The article to resolve, as either a bare CAPI content id (e.g. `environment/2026/jul/19/a-headline`) or any Guardian article URL: a public front-end link (`www.`/`amp.`/`m.theguardian.com`, `gu.com`) or an internal gutools preview/viewer link. The id is taken from the URL path, so the host, query string and fragment are ignored.',
 			example: 'https://www.theguardian.com/environment/2026/jul/19/a-headline',
 		}),
 	}),
@@ -32,7 +33,8 @@ export const parseLinkRequestSchema = z.strictObject({
 				.regex(/^[a-zA-Z]+$/),
 		)
 		.meta({
-			description: 'CAPI show-fields to include in the resolved article.',
+			description:
+				'CAPI `show-fields` names to return for the article (letters only, e.g. `headline`, `standfirst`, `thumbnail`, `trailText`). Only the requested fields are returned, under `article`.',
 			example: ['headline', 'thumbnail', 'trailText'],
 		}),
 });
@@ -80,11 +82,11 @@ export const createContentRouter = (
 			const { link, fields } = req.body as z.infer<
 				typeof parseLinkRequestSchema
 			>;
-			const articleId = guardianArticleIdFromUrl(link.url);
+			const articleId = determineArticleId(link.url);
 			if (!articleId) {
 				return res.status(422).json({
 					error: 'invalid_url',
-					message: 'The link must be a Guardian article URL.',
+					message: 'The link must be a Guardian article URL or article id.',
 					requestId: requestId(req),
 				});
 			}
