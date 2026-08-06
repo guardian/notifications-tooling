@@ -4,12 +4,19 @@
  */
 export const articleSummarySchema = {
 	type: 'object',
-	required: ['articleId', 'publishedAt'],
+	required: ['articleId', 'url', 'publishedAt'],
 	properties: {
 		articleId: {
 			type: 'string',
 			description: 'The CAPI content id (the article URL pathname).',
 			example: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+		},
+		url: {
+			type: 'string',
+			format: 'uri',
+			description: 'The canonical Guardian article URL, from CAPI.',
+			example:
+				'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 		},
 		category: {
 			type: 'string',

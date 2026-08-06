@@ -18,7 +18,13 @@ export const contentLinkParsePath = {
 				description: 'The article was found. Returns its summary fields.',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/ArticleSummary' },
+						schema: {
+							type: 'object',
+							required: ['link'],
+							properties: {
+								link: { $ref: '#/components/schemas/ArticleSummary' },
+							},
+						},
 					},
 				},
 			},

@@ -10,6 +10,8 @@ const capiPayload = {
 		status: 'ok',
 		content: {
 			id: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+			webUrl:
+				'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 			sectionName: 'Environment',
 			webPublicationDate: '2026-07-19T15:37:18Z',
 			fields: {
@@ -40,6 +42,7 @@ describe('fetchArticleSummary', () => {
 		expect(summary).toEqual({
 			articleId:
 				'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+			url: 'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 			category: 'Environment',
 			publishedAt: '2026-07-19T15:37:18Z',
 			thumbnailUrl: 'https://media.guim.co.uk/abc/500.jpg',
@@ -60,6 +63,7 @@ describe('fetchArticleSummary', () => {
 					status: 'ok',
 					content: {
 						id: 'world/2026/jul/08/summit',
+						webUrl: 'https://www.theguardian.com/world/2026/jul/08/summit',
 						webPublicationDate: '2026-07-08T09:00:00Z',
 					},
 				},
@@ -75,6 +79,7 @@ describe('fetchArticleSummary', () => {
 
 		expect(summary).toEqual({
 			articleId: 'world/2026/jul/08/summit',
+			url: 'https://www.theguardian.com/world/2026/jul/08/summit',
 			category: undefined,
 			publishedAt: '2026-07-08T09:00:00Z',
 			thumbnailUrl: undefined,

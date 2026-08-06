@@ -3,6 +3,7 @@ import { z } from 'zod';
 /** The subset of a resolved Guardian article the SPA needs to preview a link. */
 export type ArticleSummary = {
 	articleId: string;
+	url: string;
 	category?: string;
 	publishedAt: string;
 	thumbnailUrl?: string;
@@ -43,6 +44,7 @@ const capiResponseSchema = z.object({
 		status: z.string(),
 		content: z.object({
 			id: z.string(),
+			webUrl: z.url(),
 			sectionName: z.string().optional(),
 			webPublicationDate: z.string(),
 			fields: z.object({ thumbnail: z.url() }).partial().optional(),
@@ -97,6 +99,7 @@ export const fetchArticleSummary = async ({
 	const { content } = parsed.response;
 	return {
 		articleId: content.id,
+		url: content.webUrl,
 		category: content.sectionName,
 		publishedAt: content.webPublicationDate,
 		thumbnailUrl: content.fields?.thumbnail,

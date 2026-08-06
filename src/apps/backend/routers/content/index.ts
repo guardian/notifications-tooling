@@ -70,7 +70,7 @@ export const createContentRouter = (
 
 			try {
 				const article = await resolveArticle(articleId);
-				return res.status(200).json(article);
+				return res.status(200).json({ link: article });
 			} catch (error) {
 				if (error instanceof CapiError && error.reason === 'not_found') {
 					return res.status(404).json({

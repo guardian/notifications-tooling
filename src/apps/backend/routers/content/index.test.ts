@@ -33,6 +33,7 @@ let baseUrl: string;
 
 const articleSummary = {
 	articleId: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+	url: 'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 	category: 'Environment',
 	publishedAt: '2026-07-19T15:37:18Z',
 	thumbnailUrl: 'https://media.guim.co.uk/abc/500.jpg',
@@ -115,7 +116,7 @@ describe('POST /v1/content/link/resolve', () => {
 				});
 
 				expect(response.status).toBe(200);
-				expect(await response.json()).toEqual(articleSummary);
+				expect(await response.json()).toEqual({ link: articleSummary });
 				expect(resolveArticle).toHaveBeenCalledWith(
 					'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 				);
