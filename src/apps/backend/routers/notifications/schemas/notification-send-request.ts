@@ -52,17 +52,17 @@ const appPushContentItem = z.strictObject({
 	title: z
 		.string()
 		.min(1)
-		.max(pushLimits.title.validationCap)
+		.max(pushLimits.title.maxLength)
 		.meta({
-			description: `Short push alert title (1-${pushLimits.title.validationCap} characters).`,
+			description: `Short push alert title (1-${pushLimits.title.maxLength} characters).`,
 			example: 'Breaking news',
 		}),
 	body: z
 		.string()
 		.min(1)
-		.max(pushLimits.body.validationCap)
+		.max(pushLimits.body.maxLength)
 		.meta({
-			description: `Push alert body (1-${pushLimits.body.validationCap} characters).`,
+			description: `Push alert body (1-${pushLimits.body.maxLength} characters).`,
 			example: 'Historic global climate deal reached at the COP summit',
 		}),
 	link: guardianArticleLink,
@@ -75,17 +75,17 @@ const newsletterContentItem = z.strictObject({
 	title: z
 		.string()
 		.min(1)
-		.max(newsletterLimits.title.validationCap)
+		.max(newsletterLimits.title.maxLength)
 		.meta({
-			description: `Headline shown in the email (1-${newsletterLimits.title.validationCap} characters).`,
+			description: `Headline shown in the email (1-${newsletterLimits.title.maxLength} characters).`,
 			example: 'Your morning briefing',
 		}),
 	body: z
 		.string()
 		.min(1)
-		.max(newsletterLimits.body.validationCap)
+		.max(newsletterLimits.body.maxLength)
 		.meta({
-			description: `Email body copy (1-${newsletterLimits.body.validationCap} characters).`,
+			description: `Email body copy (1-${newsletterLimits.body.maxLength} characters).`,
 			example:
 				'The three stories shaping the day, plus what to keep an eye on.',
 		}),
@@ -180,7 +180,7 @@ const newsletterCompose = z.strictObject({
 				'Id of the single content item (from `content.items`) to include, provided as a one-element array.',
 			example: ['lead-story'],
 		}),
-	subject: z.string().min(1).max(newsletterLimits.title.validationCap).meta({
+	subject: z.string().min(1).max(newsletterLimits.title.maxLength).meta({
 		description: 'The email subject line.',
 		example: 'Your morning briefing',
 	}),

@@ -1,5 +1,4 @@
 import type { ErrorRequestHandler } from 'express';
-import { buildErrorEnvelope } from '../error-envelope';
 import { BrazeApiError } from '../notification-channels/email/braze/client';
 import { EmailRenderingError } from '../notification-channels/email/rendering/client';
 
@@ -31,13 +30,5 @@ export const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
 		return;
 	}
 
-	res
-		.status(500)
-		.json(
-			buildErrorEnvelope(
-				req,
-				'internal_error',
-				'The request could not be completed.',
-			),
-		);
+	res.status(500).json({ error: 'Internal Server Error' });
 };

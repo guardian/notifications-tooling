@@ -364,7 +364,7 @@ describe('notificationSendRequestSchema', () => {
 		it('accepts a title at the limit', () => {
 			expectValid(
 				pushRequestWithItem(
-					pushItem({ title: repeat(pushLimits.title.validationCap) }),
+					pushItem({ title: repeat(pushLimits.title.maxLength) }),
 				),
 			);
 		});
@@ -373,7 +373,7 @@ describe('notificationSendRequestSchema', () => {
 			expect(
 				pathsOf(
 					pushRequestWithItem(
-						pushItem({ title: repeat(pushLimits.title.validationCap + 1) }),
+						pushItem({ title: repeat(pushLimits.title.maxLength + 1) }),
 					),
 				),
 			).toContain('content/items/lead/title');
@@ -388,7 +388,7 @@ describe('notificationSendRequestSchema', () => {
 		it('accepts a body at the limit', () => {
 			expectValid(
 				pushRequestWithItem(
-					pushItem({ body: repeat(pushLimits.body.validationCap) }),
+					pushItem({ body: repeat(pushLimits.body.maxLength) }),
 				),
 			);
 		});
@@ -397,7 +397,7 @@ describe('notificationSendRequestSchema', () => {
 			expect(
 				pathsOf(
 					pushRequestWithItem(
-						pushItem({ body: repeat(pushLimits.body.validationCap + 1) }),
+						pushItem({ body: repeat(pushLimits.body.maxLength + 1) }),
 					),
 				),
 			).toContain('content/items/lead/body');
@@ -444,9 +444,7 @@ describe('notificationSendRequestSchema', () => {
 		it('accepts a title at the limit', () => {
 			expectValid(
 				newsletterRequestWithItem(
-					newsletterItem({
-						title: repeat(newsletterLimits.title.validationCap),
-					}),
+					newsletterItem({ title: repeat(newsletterLimits.title.maxLength) }),
 				),
 			);
 		});
@@ -456,7 +454,7 @@ describe('notificationSendRequestSchema', () => {
 				pathsOf(
 					newsletterRequestWithItem(
 						newsletterItem({
-							title: repeat(newsletterLimits.title.validationCap + 1),
+							title: repeat(newsletterLimits.title.maxLength + 1),
 						}),
 					),
 				),
@@ -466,7 +464,7 @@ describe('notificationSendRequestSchema', () => {
 		it('accepts a body at the limit', () => {
 			expectValid(
 				newsletterRequestWithItem(
-					newsletterItem({ body: repeat(newsletterLimits.body.validationCap) }),
+					newsletterItem({ body: repeat(newsletterLimits.body.maxLength) }),
 				),
 			);
 		});
@@ -476,7 +474,7 @@ describe('notificationSendRequestSchema', () => {
 				pathsOf(
 					newsletterRequestWithItem(
 						newsletterItem({
-							body: repeat(newsletterLimits.body.validationCap + 1),
+							body: repeat(newsletterLimits.body.maxLength + 1),
 						}),
 					),
 				),
@@ -487,32 +485,7 @@ describe('notificationSendRequestSchema', () => {
 			// A title longer than the push limit but within the newsletter limit.
 			expectValid(
 				newsletterRequestWithItem(
-					newsletterItem({
-						title: repeat(pushLimits.title.validationCap + 10),
-					}),
-				),
-			);
-		});
-
-		it('accepts a title past the editorial limit but within the cap', () => {
-			// The UI deliberately badges the editorial limit without blocking, so
-			// the broker must not reject what an editor is allowed to type. Only
-			// absurd input is rejected.
-			expectValid(
-				newsletterRequestWithItem(
-					newsletterItem({
-						title: repeat(newsletterLimits.title.editorialLimit + 1),
-					}),
-				),
-			);
-		});
-
-		it('accepts a body past the editorial limit but within the cap', () => {
-			expectValid(
-				newsletterRequestWithItem(
-					newsletterItem({
-						body: repeat(newsletterLimits.body.editorialLimit + 1),
-					}),
+					newsletterItem({ title: repeat(pushLimits.title.maxLength + 10) }),
 				),
 			);
 		});
@@ -803,7 +776,7 @@ describe('notificationSendRequestSchema', () => {
 						newsletterPlan({
 							compose: {
 								items: ['lead'],
-								subject: repeat(newsletterLimits.title.validationCap + 1),
+								subject: repeat(newsletterLimits.title.maxLength + 1),
 							},
 						}),
 					),

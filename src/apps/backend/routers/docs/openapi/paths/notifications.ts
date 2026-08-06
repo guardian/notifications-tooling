@@ -44,7 +44,7 @@ export const notificationsPath = {
 			},
 			'422': {
 				description:
-					'The request body is well-formed but failed semantic validation (content past the validation cap, unknown references, or cross-field rules), or the article could not be rendered.',
+					'The request body failed semantic validation or the article could not be rendered.',
 				content: {
 					'application/json': {
 						schema: {

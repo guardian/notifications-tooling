@@ -1,8 +1,8 @@
 /**
  * The `401 Unauthorized` response body returned by `authMiddleware` when a
- * request lacks a valid pan-domain cookie. Shares the
- * `{ error, message, requestId }` envelope used across the API, plus an
- * actionable `loginUrl`. Referenced via `#/components/schemas/Unauthenticated`.
+ * request lacks a valid pan-domain cookie. Shares the `{ error, message }`
+ * envelope used across the API, plus an actionable `loginUrl`. Referenced via
+ * `#/components/schemas/Unauthenticated`.
  */
 export const unauthenticatedSchema = {
 	type: 'object',
@@ -18,16 +18,13 @@ export const unauthenticatedSchema = {
 			description: 'Human-readable summary of the failure.',
 			example: 'Authentication is required to access this resource.',
 		},
-		requestId: {
-			type: 'string',
-			description: 'Correlates this failure with the backend log record of it.',
-		},
 		loginUrl: {
 			type: 'string',
 			format: 'uri',
 			description:
-				'The pan-domain login URL to redirect the user to. It deliberately carries no `returnUrl`: this response is consumed by the SPA, and only the browser knows which page the user is on, so the client appends its own. See docs/ADRs/login-redirect-ownership.md.',
-			example: 'https://login.gutools.co.uk/login',
+				'The pan-domain login URL to redirect the user to, carrying a `returnUrl` back to the originally requested resource.',
+			example:
+				'https://login.gutools.co.uk/login?returnUrl=https%3A%2F%2Fdispatch.gutools.co.uk%2Fv1%2Fuser',
 		},
 	},
 } as const;

@@ -8,7 +8,6 @@
 		"build": "bun build ./src/index.html --outdir=dist --sourcemap=none --target=browser --minify --public-path=/ --production",
 		"start": "NODE_ENV=production bun src/index.ts",
 		"typecheck": "tsc --noEmit",
-		"test": "bun test",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
 		"test-storybook": "vitest run"
@@ -18,11 +17,9 @@
 		"@guardian/content-api-models": "47.0.0",
 		"@guardian/stand": "0.0.63",
 		"@models": "workspace:*",
-		"@tanstack/react-query": "5.101.4",
 		"react": "19.2.8",
 		"react-aria-components": "1.19.0",
-		"react-dom": "19.2.8",
-		"zod": "4.4.3"
+		"react-dom": "19.2.8"
 	},
 	"devDependencies": {
 		"@storybook/addon-docs": "10.5.4",
@@ -35,10 +32,7 @@
 		"storybook": "10.5.4",
 		"vitest": "4.1.10",
 		"playwright": "1.62.0",
-		"@happy-dom/global-registrator": "20.11.1",
 		"@vitest/browser-playwright": "4.1.10",
-		"@vitest/coverage-v8": "4.1.10",
-		"msw": "2.15.0",
-		"msw-storybook-addon": "3.0.0"
+		"@vitest/coverage-v8": "4.1.10"
 	}
 }

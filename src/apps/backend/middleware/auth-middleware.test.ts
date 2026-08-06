@@ -11,8 +11,7 @@ await mock.module('../utils/auth/pan-domain-authentication', () => ({
 	verifyCookie,
 }));
 
-const { authMiddleware, authRedirectMiddleware } =
-	await import('./auth-middleware');
+const { authMiddleware } = await import('./auth-middleware');
 
 const sampleUser = buildTestUser();
 
@@ -45,7 +44,7 @@ describe('auth-middleware', () => {
 		verifyCookie.mockImplementation(() => Promise.resolve({ success: false }));
 	});
 
-	it('should respond with 401 and a login url carrying no returnUrl', async () => {
+	it('should respond with 401 and login url where no cookie is provided', async () => {
 		const mockRequest = createMockRequest();
 		const { status, json, response } = createMockResponse();
 
@@ -64,11 +63,9 @@ describe('auth-middleware', () => {
 		expect(body.message).toBe(
 			'Authentication is required to access this resource.',
 		);
-		// `originalUrl` here is an API path, so returning a logged-in user to it
-		// would land them on raw JSON rather than the SPA. The browser appends
-		// its own. See docs/ADRs/login-redirect-ownership.md.
-		expect(body.loginUrl).toContain('/login');
-		expect(body.loginUrl).not.toContain('returnUrl');
+		expect(body.loginUrl).toContain(
+			'/login?returnUrl=https%3A%2F%2Fdispatch.test.dev-gutools.co.uk%2Fv1%2Fnotifications',
+		);
 		expect(mockNextFunction).not.toHaveBeenCalled();
 	});
 
@@ -100,38 +97,5 @@ describe('auth-middleware', () => {
 		expect(mockRequest.user).toEqual(sampleUser);
 		expect(status).not.toHaveBeenCalled();
 		expect(mockNextFunction).toHaveBeenCalledTimes(1);
-	});
-});
-
-describe('authRedirectMiddleware', () => {
-	afterEach(() => {
-		mockNextFunction.mockReset();
-		verifyCookie.mockReset();
-		verifyCookie.mockImplementation(() => Promise.resolve({ success: false }));
-	});
-
-	/**
-	 * The counterpart to the `authMiddleware` case above: this middleware guards
-	 * a document navigation, so `originalUrl` *is* the page the user asked for
-	 * and the returnUrl must be kept. The two callers share `getLoginUrl` and
-	 * need opposite things from it, so this pins the asymmetry.
-	 */
-	it('redirects to a login url that returns the user to the requested page', async () => {
-		const mockRequest = {
-			header: () => undefined,
-			hostname: 'dispatch.test.dev-gutools.co.uk',
-			originalUrl: '/',
-		} as unknown as Request;
-		const redirect = mock((url: string) => url);
-		const response = { redirect } as unknown as Response;
-
-		await authRedirectMiddleware(mockRequest, response, mockNextFunction);
-
-		expect(redirect).toHaveBeenCalledTimes(1);
-		const redirectUrl = redirect.mock.calls[0]?.[0] as string;
-		expect(redirectUrl).toContain(
-			'returnUrl=https%3A%2F%2Fdispatch.test.dev-gutools.co.uk%2F',
-		);
-		expect(mockNextFunction).not.toHaveBeenCalled();
 	});
 });

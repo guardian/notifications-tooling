@@ -67,7 +67,7 @@ jobs:
         run: bun typecheck
 
       - name: Test
-        run: bun run test
+        run: bun test
 
       - name: Build application
         working-directory: src/apps/backend

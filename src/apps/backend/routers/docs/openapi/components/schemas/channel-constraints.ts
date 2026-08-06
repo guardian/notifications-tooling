@@ -6,29 +6,14 @@ const pushConstraints =
 const newsletterConstraints =
 	channelConstraints.channels[NotificationChannel.Newsletter];
 
-/**
- * The three limits applied to a single text field. Only `validationCap` is
- * enforced by this service; the other two are editorial guidance the SPA
- * renders.
- */
-const contentFieldLimitsSchema = {
+/** A `{ maxLength }` limit applied to a single text field. */
+const maxLengthSchema = {
 	type: 'object',
-	required: ['recommended', 'editorialLimit', 'validationCap'],
+	required: ['maxLength'],
 	properties: {
-		recommended: {
+		maxLength: {
 			type: 'integer',
-			description:
-				"Editorial's preferred length. The SPA warns past this, but the value is not enforced.",
-		},
-		editorialLimit: {
-			type: 'integer',
-			description:
-				"Editorial's stated maximum. The SPA badges it as reached, but deliberately does not block, and this service does not enforce it.",
-		},
-		validationCap: {
-			type: 'integer',
-			description:
-				'The maximum number of characters this service accepts. Past this the request is rejected with a 422. Guards against absurd input rather than expressing editorial preference.',
+			description: 'The maximum number of characters allowed.',
 		},
 	},
 } as const;
@@ -58,8 +43,8 @@ export const channelConstraintsSchema = {
 							type: 'object',
 							required: ['title', 'body'],
 							properties: {
-								title: contentFieldLimitsSchema,
-								body: contentFieldLimitsSchema,
+								title: maxLengthSchema,
+								body: maxLengthSchema,
 							},
 							example: pushConstraints.content,
 						},
@@ -102,8 +87,8 @@ export const channelConstraintsSchema = {
 							type: 'object',
 							required: ['title', 'body'],
 							properties: {
-								title: contentFieldLimitsSchema,
-								body: contentFieldLimitsSchema,
+								title: maxLengthSchema,
+								body: maxLengthSchema,
 							},
 							example: newsletterConstraints.content,
 						},
@@ -121,7 +106,7 @@ export const channelConstraintsSchema = {
 									description:
 										'The maximum number of content items a newsletter plan may compose.',
 								},
-								subject: contentFieldLimitsSchema,
+								subject: maxLengthSchema,
 							},
 							example: newsletterConstraints.compose,
 						},
