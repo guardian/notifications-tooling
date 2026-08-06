@@ -125,12 +125,16 @@ describe('dispatchNotification', () => {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
 			newsletterId: newsletterSegments.UK.emailRenderingNewsletterId,
+			headlineOverride: newsletterItem.title,
+			previewText: newsletterItem.body,
 			timeoutMs: 10_000,
 		});
 		expect(renderEmail).toHaveBeenNthCalledWith(2, {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
 			newsletterId: newsletterSegments.US.emailRenderingNewsletterId,
+			headlineOverride: newsletterItem.title,
+			previewText: newsletterItem.body,
 			timeoutMs: 10_000,
 		});
 		expect(sendBrazeCampaign).toHaveBeenNthCalledWith(1, {
@@ -237,7 +241,22 @@ describe('dispatchNotification', () => {
 
 		await dispatchNotificationTest(request, dependencies);
 
-		expect(renderEmail).toHaveBeenCalledTimes(2);
+		expect(renderEmail).toHaveBeenNthCalledWith(1, {
+			endpoint: 'https://email-rendering.example.com',
+			articleUrl: newsletterItem.link,
+			newsletterId: newsletterSegments.UK.emailRenderingNewsletterId,
+			headlineOverride: newsletterItem.title,
+			previewText: newsletterItem.body,
+			timeoutMs: 10_000,
+		});
+		expect(renderEmail).toHaveBeenNthCalledWith(2, {
+			endpoint: 'https://email-rendering.example.com',
+			articleUrl: newsletterItem.link,
+			newsletterId: newsletterSegments.US.emailRenderingNewsletterId,
+			headlineOverride: newsletterItem.title,
+			previewText: newsletterItem.body,
+			timeoutMs: 10_000,
+		});
 		expect(registerBrazeTestEmailRecipients).toHaveBeenCalledWith({
 			apiKey: 'test-api-key',
 			restEndpoint: 'https://rest.example.braze.eu',
