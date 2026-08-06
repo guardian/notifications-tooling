@@ -1,4 +1,3 @@
-import { isRunningLocally } from '@config';
 import { getSSMParameter } from '@config/ssm';
 import { logger } from '@http-logger';
 import { z } from 'zod';
@@ -35,7 +34,6 @@ const getDbConfig = async () => {
 };
 
 const getDbConfigFromEnvironment = (): DBConfigSchema => {
-	
 	const { DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD } = process.env;
 
 	if (!DB_HOST || !DB_PORT || !DB_NAME || !DB_USERNAME || !DB_PASSWORD) {
@@ -59,7 +57,9 @@ const getDbConfigFromEnvironment = (): DBConfigSchema => {
 };
 
 export const getConnectionString = async () => {
-	const config: DBConfigSchema = isRunningInLambda ? await getDbConfig() : getDbConfigFromEnvironment();
+	const config: DBConfigSchema = isRunningInLambda
+		? await getDbConfig()
+		: getDbConfigFromEnvironment();
 
 	const { host, port, dbname, username, password } = config;
 

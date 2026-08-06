@@ -1,4 +1,4 @@
-import {  getDb } from '@database';
+import { getDb } from '@database';
 import { logger } from '@http-logger';
 import { type Request, type Response, Router } from 'express';
 
