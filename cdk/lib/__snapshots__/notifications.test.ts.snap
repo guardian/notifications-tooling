@@ -706,7 +706,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:TEST/notifications/dispatch/db*",
+                    ":secret:/TEST/notifications/dispatch/db*",
                   ],
                 ],
               },
