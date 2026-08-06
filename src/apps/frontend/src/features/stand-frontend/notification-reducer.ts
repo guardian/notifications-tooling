@@ -30,10 +30,6 @@ export const notificationReducer = (
 ): NotificationState => {
 	const state = structuredClone(prevState);
 	switch (action.type) {
-		case 'set-article-id': {
-			return { ...state, articleInputText: action.text };
-		}
-
 		case 'modify-email-parameters': {
 			if (state.parameters?.type !== 'email') {
 				return state;
