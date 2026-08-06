@@ -1,6 +1,6 @@
 import { acceptedNotificationSchema } from './accepted-notification';
 import { acceptedTestNotificationSchema } from './accepted-test-notification';
-import { articleSummarySchema } from './article-summary';
+import { articleSchema } from './article';
 import { channelAudiencesSchema } from './channel-audiences';
 import { channelConstraintsSchema } from './channel-constraints';
 import { contentLinkErrorSchema } from './content-link-error';
@@ -36,7 +36,7 @@ export const schemas = {
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
 	ContentLinkParseRequest: contentLinkParseRequestSchema,
-	ArticleSummary: articleSummarySchema,
+	Article: articleSchema,
 	ContentLinkError: contentLinkErrorSchema,
 	User: userSchema,
 	UserResponse: userResponseSchema,

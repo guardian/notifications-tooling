@@ -1,12 +1,10 @@
 import { z } from 'zod';
 
-/** The subset of a resolved Guardian article the SPA needs to preview a link. */
-export type ArticleSummary = {
+/** A Guardian article resolved from CAPI, with the requested show-fields. */
+export type ResolvedArticle = {
 	articleId: string;
 	url: string;
-	category?: string;
-	publishedAt: string;
-	thumbnailUrl?: string;
+	fields: Record<string, string>;
 };
 
 export type CapiFailureReason =
@@ -35,9 +33,8 @@ export class CapiError extends Error {
 }
 
 /**
- * The JSON REST shape of a single CAPI content item. This differs from the
- * thrift `Content` model (`@guardian/content-api-models`): the JSON API returns
- * `webPublicationDate` as an ISO string rather than a `CapiDateTime` object.
+ * The JSON REST shape of a single CAPI content item. `fields` holds whatever
+ * show-fields were requested (all serialised as strings by the JSON API).
  */
 const capiResponseSchema = z.object({
 	response: z.object({
@@ -45,9 +42,7 @@ const capiResponseSchema = z.object({
 		content: z.object({
 			id: z.string(),
 			webUrl: z.url(),
-			sectionName: z.string().optional(),
-			webPublicationDate: z.string(),
-			fields: z.object({ thumbnail: z.url() }).partial().optional(),
+			fields: z.record(z.string(), z.string()).optional(),
 		}),
 	}),
 });
@@ -56,24 +51,28 @@ type FetchArticleRequest = {
 	endpoint: string;
 	apiKey: string;
 	articleId: string;
+	fields: string[];
 	timeoutMs: number;
 };
 
 /**
- * Resolves a Guardian article id against the Content API, returning the summary
- * fields needed to preview a link. Throws a {@link CapiError} classifying the
- * failure (`not_found`, `unavailable`, `invalid_response`).
+ * Resolves a Guardian article id against the Content API, returning its id, web
+ * URL and the requested `show-fields`. Throws a {@link CapiError} classifying
+ * the failure (`not_found`, `unavailable`, `invalid_response`).
  */
-export const fetchArticleSummary = async ({
+export const fetchArticle = async ({
 	endpoint,
 	apiKey,
 	articleId,
+	fields,
 	timeoutMs,
-}: FetchArticleRequest): Promise<ArticleSummary> => {
+}: FetchArticleRequest): Promise<ResolvedArticle> => {
 	const encodedId = articleId.split('/').map(encodeURIComponent).join('/');
 	const url = new URL(`/${encodedId}`, endpoint);
 	url.searchParams.set('api-key', apiKey);
-	url.searchParams.set('show-fields', 'thumbnail');
+	if (fields.length > 0) {
+		url.searchParams.set('show-fields', fields.join(','));
+	}
 
 	let response: Response;
 	try {
@@ -100,8 +99,6 @@ export const fetchArticleSummary = async ({
 	return {
 		articleId: content.id,
 		url: content.webUrl,
-		category: content.sectionName,
-		publishedAt: content.webPublicationDate,
-		thumbnailUrl: content.fields?.thumbnail,
+		fields: content.fields ?? {},
 	};
 };

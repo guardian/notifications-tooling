@@ -31,12 +31,15 @@ const { startTestServer } = await import('../../utils/test-utils/server');
 let server: TestServer;
 let baseUrl: string;
 
+const fields = ['headline', 'thumbnail'];
+
 const articleSummary = {
 	articleId: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 	url: 'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
-	category: 'Environment',
-	publishedAt: '2026-07-19T15:37:18Z',
-	thumbnailUrl: 'https://media.guim.co.uk/abc/500.jpg',
+	fields: {
+		headline: 'A rhyme to recall rising temperatures',
+		thumbnail: 'https://media.guim.co.uk/abc/500.jpg',
+	},
 };
 
 const validUrl =
@@ -69,7 +72,10 @@ const parseLink = (body: unknown): Promise<Response> =>
 
 /** Spins up the content router with an injected resolver for a single test. */
 const withResolver = async (
-	resolveArticle: (articleId: string) => Promise<typeof articleSummary>,
+	resolveArticle: (
+		articleId: string,
+		fields: string[],
+	) => Promise<typeof articleSummary>,
 	run: (baseUrl: string) => Promise<void>,
 ): Promise<void> => {
 	const testServer = await startTestServer(
@@ -112,13 +118,16 @@ describe('POST /v1/content/link/resolve', () => {
 				const response = await fetch(`${url}/v1/content/link/resolve`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ link: { url: validUrl } }),
+					body: JSON.stringify({ link: { url: validUrl }, fields }),
 				});
 
 				expect(response.status).toBe(200);
-				expect(await response.json()).toEqual({ link: articleSummary });
+				expect(await response.json()).toEqual({
+					article: articleSummary.fields,
+				});
 				expect(resolveArticle).toHaveBeenCalledWith(
 					'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
+					fields,
 				);
 			});
 		});
@@ -134,6 +143,7 @@ describe('POST /v1/content/link/resolve', () => {
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
 						link: { url: 'https://evil.example.com/story' },
+						fields,
 					}),
 				});
 
@@ -148,6 +158,7 @@ describe('POST /v1/content/link/resolve', () => {
 		it('rejects a Guardian URL that is not an article with 422', async () => {
 			const response = await parseLink({
 				link: { url: 'https://www.theguardian.com/uk' },
+				fields,
 			});
 
 			expect(response.status).toBe(422);
@@ -167,7 +178,7 @@ describe('POST /v1/content/link/resolve', () => {
 				const response = await fetch(`${url}/v1/content/link/resolve`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ link: { url: validUrl } }),
+					body: JSON.stringify({ link: { url: validUrl }, fields }),
 				});
 
 				expect(response.status).toBe(404);
@@ -188,7 +199,7 @@ describe('POST /v1/content/link/resolve', () => {
 				const response = await fetch(`${url}/v1/content/link/resolve`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ link: { url: validUrl } }),
+					body: JSON.stringify({ link: { url: validUrl }, fields }),
 				});
 
 				expect(response.status).toBe(502);
@@ -212,6 +223,7 @@ describe('POST /v1/content/link/resolve', () => {
 		it('rejects unknown keys in the payload', async () => {
 			const response = await parseLink({
 				link: { url: validUrl },
+				fields,
 				extra: true,
 			});
 

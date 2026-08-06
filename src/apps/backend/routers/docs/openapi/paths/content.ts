@@ -20,9 +20,9 @@ export const contentLinkParsePath = {
 					'application/json': {
 						schema: {
 							type: 'object',
-							required: ['link'],
+							required: ['article'],
 							properties: {
-								link: { $ref: '#/components/schemas/ArticleSummary' },
+								article: { $ref: '#/components/schemas/Article' },
 							},
 						},
 					},
