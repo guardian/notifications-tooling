@@ -34,6 +34,7 @@ export const createNotificationTestsRouter = (
 			res.status(202).json({
 				testId,
 				status: 'accepted',
+				dryRun: body.options.dryRun,
 				plans: Object.keys(body.channels).map((channel) => ({
 					channel,
 					planId: `${testId}#${channel}`,

@@ -108,11 +108,13 @@ describe('POST /v1/notification-tests', () => {
 			const body = (await response.json()) as {
 				testId: string;
 				status: string;
+				dryRun: boolean;
 				plans: Array<{ channel: string; planId: string; status: string }>;
 				statusUrl: string;
 			};
 
 			expect(response.status).toBe(202);
+			expect(body.dryRun).toBe(false);
 			expect(dispatchRequest).toHaveBeenCalledWith({
 				...validTestRequest(),
 				options: { dryRun: false },
@@ -133,6 +135,39 @@ describe('POST /v1/notification-tests', () => {
 		}
 	});
 
+	it('preserves dry-run mode in dispatch and the acceptance response', async () => {
+		const dispatchRequest = mock(() => Promise.resolve());
+		const app = express();
+		app.use(express.json());
+		app.use(
+			'/v1/notification-tests',
+			createNotificationTestsRouter(dispatchRequest),
+		);
+		const dispatchServer = await startTestServer(app);
+
+		try {
+			const request = {
+				...validTestRequest(),
+				options: { dryRun: true },
+			};
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notification-tests`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(request),
+				},
+			);
+			const body = (await response.json()) as { dryRun: boolean };
+
+			expect(response.status).toBe(202);
+			expect(dispatchRequest).toHaveBeenCalledWith(request);
+			expect(body.dryRun).toBe(true);
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
 	it('rejects segment audiences', async () => {
 		const request = validTestRequest();
 		request.channels.newsletter.audience = {
@@ -142,5 +177,18 @@ describe('POST /v1/notification-tests', () => {
 
 		const response = await postTest(request);
 		expect(response.status).toBe(400);
+
+		const body = (await response.json()) as {
+			error: string;
+			message: string;
+			details: Array<{ code: string; path: string; message: string }>;
+		};
+		expect(body.error).toBe('bad_request');
+		expect(body.message).toBe('The request body is malformed.');
+		expect(body.details.length).toBeGreaterThan(0);
+		const [firstDetail] = body.details;
+		expect(typeof firstDetail?.code).toBe('string');
+		expect(typeof firstDetail?.path).toBe('string');
+		expect(typeof firstDetail?.message).toBe('string');
 	});
 });

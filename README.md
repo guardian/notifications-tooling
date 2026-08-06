@@ -211,6 +211,6 @@ flowchart LR
 
 ## 5. Terminology
 
-- **Segment**: A target audience group (`UK`, `US`, `AU`, `EU`, `ALL`).
-- **Delivery mode**: The notification timing strategy (`immediate`, `scheduled`, `intelligent`).
-- **Channel**: A delivery destination such as `email` or `app-notification`.
+See [CONTEXT.md](./CONTEXT.md) for the project glossary — the canonical name for
+each domain concept, and the near-synonyms to avoid. It is the single source; do
+not restate definitions here.

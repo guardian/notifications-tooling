@@ -2,12 +2,15 @@ import { acceptedNotificationSchema } from './accepted-notification';
 import { acceptedTestNotificationSchema } from './accepted-test-notification';
 import { channelAudiencesSchema } from './channel-audiences';
 import { channelConstraintsSchema } from './channel-constraints';
+import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
+import { notificationProviderErrorSchema } from './notification-provider-error';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
+import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
 import { notificationValidationErrorSchema } from './notification-validation-error';
 import { notificationValidationIssueSchema } from './notification-validation-issue';
 import { unauthenticatedSchema } from './unauthenticated';
@@ -24,6 +27,9 @@ export const schemas = {
 	AcceptedTestNotification: acceptedTestNotificationSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,
 	NotificationValidationError: notificationValidationErrorSchema,
+	EmailRenderingContentError: emailRenderingContentErrorSchema,
+	NotificationUnprocessableError: notificationUnprocessableErrorSchema,
+	NotificationProviderError: notificationProviderErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
 	User: userSchema,

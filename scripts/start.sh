@@ -3,6 +3,8 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR=$DIR/..
+
 PIDS=()
 
 runNginx() {
@@ -16,7 +18,7 @@ runNginx() {
 
 start_frontend() {
   echo "Starting frontend..."
-  pushd ./src/apps/frontend
+  pushd $ROOT_DIR/src/apps/frontend
   bun run dev &
   PIDS+=($!)
   popd
@@ -24,7 +26,7 @@ start_frontend() {
 
 start_backend() {
   echo "Starting backend..."
-  pushd ./src/apps/backend
+  pushd $ROOT_DIR/src/apps/backend
   bun run dev &
   PIDS+=($!)
   popd
@@ -34,6 +36,11 @@ start_backend() {
 runNginx
 start_frontend
 start_backend
+
+echo ""
+echo "Running dispatch at:"
+printf '\033[32mhttps://dispatch.local.dev-gutools.co.uk\033[0m\n'
+echo ""
 
 trap "exit" INT TERM
 trap 'kill ${PIDS[*]}' EXIT

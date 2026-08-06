@@ -33,9 +33,48 @@ export type BrazeCampaignTriggerResponse = {
 	message: string;
 };
 
+export type BrazeOperation =
+	'campaign trigger' | 'test user tracking' | 'test email send';
+
+export type BrazeFailureReason =
+	| 'http_error'
+	| 'timeout'
+	| 'network_error'
+	| 'invalid_response'
+	| 'partial_failure';
+
+export class BrazeApiError extends Error {
+	constructor(
+		readonly operation: BrazeOperation,
+		readonly reason: BrazeFailureReason,
+		readonly status?: number,
+		options?: ErrorOptions,
+	) {
+		const message = (() => {
+			switch (reason) {
+				case 'http_error':
+					return status === undefined
+						? `Braze ${operation} failed.`
+						: `Braze ${operation} failed with status ${status}.`;
+				case 'timeout':
+					return `Braze ${operation} timed out.`;
+				case 'network_error':
+					return `Braze ${operation} failed.`;
+				case 'invalid_response':
+					return `Braze ${operation} returned an invalid response.`;
+				case 'partial_failure':
+					return `Braze ${operation} was not fully successful.`;
+			}
+		})();
+
+		super(message, options);
+		this.name = 'BrazeApiError';
+	}
+}
+
 const brazeCampaignTriggerResponseSchema = z.object({
 	dispatch_id: z.string().optional(),
-	message: z.string(),
+	message: z.literal('success'),
 });
 
 const brazeUserTrackResponseSchema = z.object({
@@ -44,6 +83,48 @@ const brazeUserTrackResponseSchema = z.object({
 });
 
 const testEmailUserAliasLabel = 'dispatch-tool-test-email';
+
+const isTimeoutError = (error: unknown): boolean =>
+	error instanceof Error &&
+	(error.name === 'AbortError' || error.name === 'TimeoutError');
+
+const requestBraze = async (
+	url: string,
+	init: RequestInit,
+	operation: BrazeOperation,
+): Promise<Response> => {
+	let response: Response;
+	try {
+		response = await fetch(url, init);
+	} catch (error) {
+		throw new BrazeApiError(
+			operation,
+			isTimeoutError(error) ? 'timeout' : 'network_error',
+			undefined,
+			{ cause: error },
+		);
+	}
+
+	if (!response.ok) {
+		throw new BrazeApiError(operation, 'http_error', response.status);
+	}
+
+	return response;
+};
+
+const parseBrazeResponse = async <Schema extends z.ZodType>(
+	response: Response,
+	schema: Schema,
+	operation: BrazeOperation,
+): Promise<z.output<Schema>> => {
+	try {
+		return schema.parse(await response.json());
+	} catch (error) {
+		throw new BrazeApiError(operation, 'invalid_response', response.status, {
+			cause: error,
+		});
+	}
+};
 
 const createTestEmailUserAlias = (email: string) => ({
 	alias_name: email,
@@ -88,23 +169,25 @@ export const sendBrazeCampaign = async ({
 		restEndpoint,
 	).toString();
 
-	const response = await fetch(campaignTriggerUrl, {
-		method: 'POST',
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
-			'Content-Type': 'application/json',
+	const response = await requestBraze(
+		campaignTriggerUrl,
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(request),
+			signal: AbortSignal.timeout(timeoutMs),
 		},
-		body: JSON.stringify(request),
-		signal: AbortSignal.timeout(timeoutMs),
-	});
+		'campaign trigger',
+	);
 
-	if (!response.ok) {
-		throw new Error(
-			`Braze campaign trigger failed with status ${response.status}.`,
-		);
-	}
-
-	return brazeCampaignTriggerResponseSchema.parse(await response.json());
+	return parseBrazeResponse(
+		response,
+		brazeCampaignTriggerResponseSchema,
+		'campaign trigger',
+	);
 };
 
 export const registerBrazeTestEmailRecipients = async ({
@@ -113,7 +196,7 @@ export const registerBrazeTestEmailRecipients = async ({
 	timeoutMs,
 	recipientEmails,
 }: RegisterBrazeTestEmailRecipientsRequest): Promise<void> => {
-	const userTrackResponse = await fetch(
+	const userTrackResponse = await requestBraze(
 		new URL('/users/track', restEndpoint).toString(),
 		{
 			method: 'POST',
@@ -130,19 +213,16 @@ export const registerBrazeTestEmailRecipients = async ({
 			}),
 			signal: AbortSignal.timeout(timeoutMs),
 		},
+		'test user tracking',
 	);
 
-	if (!userTrackResponse.ok) {
-		throw new Error(
-			`Braze test user tracking failed with status ${userTrackResponse.status}.`,
-		);
-	}
-
-	const userTrackResult = brazeUserTrackResponseSchema.parse(
-		await userTrackResponse.json(),
+	const userTrackResult = await parseBrazeResponse(
+		userTrackResponse,
+		brazeUserTrackResponseSchema,
+		'test user tracking',
 	);
 	if (userTrackResult.message !== 'success' || userTrackResult.errors?.length) {
-		throw new Error('Braze test user tracking was not fully successful.');
+		throw new BrazeApiError('test user tracking', 'partial_failure');
 	}
 };
 
@@ -157,7 +237,7 @@ export const sendBrazeTestEmail = async ({
 	timeoutMs,
 	recipientEmails,
 }: SendBrazeTestEmailRequest): Promise<BrazeCampaignTriggerResponse> => {
-	const messageResponse = await fetch(
+	const messageResponse = await requestBraze(
 		new URL('/messages/send', restEndpoint).toString(),
 		{
 			method: 'POST',
@@ -180,13 +260,12 @@ export const sendBrazeTestEmail = async ({
 			}),
 			signal: AbortSignal.timeout(timeoutMs),
 		},
+		'test email send',
 	);
 
-	if (!messageResponse.ok) {
-		throw new Error(
-			`Braze test email send failed with status ${messageResponse.status}.`,
-		);
-	}
-
-	return brazeCampaignTriggerResponseSchema.parse(await messageResponse.json());
+	return parseBrazeResponse(
+		messageResponse,
+		brazeCampaignTriggerResponseSchema,
+		'test email send',
+	);
 };

@@ -11,6 +11,39 @@ type RenderEmailRequest = {
 	timeoutMs: number;
 };
 
+export type EmailRenderingFailureReason =
+	'http_error' | 'timeout' | 'network_error' | 'invalid_response';
+
+export class EmailRenderingError extends Error {
+	constructor(
+		readonly status?: number,
+		readonly reason: EmailRenderingFailureReason = 'http_error',
+		options?: ErrorOptions,
+	) {
+		const message = (() => {
+			switch (reason) {
+				case 'http_error':
+					return status === undefined
+						? 'Email rendering failed.'
+						: `Email rendering failed with status ${status}.`;
+				case 'timeout':
+					return 'Email rendering timed out.';
+				case 'network_error':
+					return 'Email rendering failed.';
+				case 'invalid_response':
+					return 'Email rendering returned an invalid response.';
+			}
+		})();
+
+		super(message, options);
+		this.name = 'EmailRenderingError';
+	}
+}
+
+const isTimeoutError = (error: unknown): boolean =>
+	error instanceof Error &&
+	(error.name === 'AbortError' || error.name === 'TimeoutError');
+
 const articleIdFromUrl = (articleUrl: string): string => {
 	const articleId = new URL(articleUrl).pathname.replace(/^\/+/, '');
 
@@ -34,13 +67,28 @@ export const renderEmail = async ({
 	const renderUrl = new URL(`/notification/${articleId}.json`, endpoint);
 	renderUrl.searchParams.set('newsletter-id', newsletterId);
 
-	const response = await fetch(renderUrl, {
-		signal: AbortSignal.timeout(timeoutMs),
-	});
-
-	if (!response.ok) {
-		throw new Error(`Email rendering failed with status ${response.status}.`);
+	let response: Response;
+	try {
+		response = await fetch(renderUrl, {
+			signal: AbortSignal.timeout(timeoutMs),
+		});
+	} catch (error) {
+		throw new EmailRenderingError(
+			undefined,
+			isTimeoutError(error) ? 'timeout' : 'network_error',
+			{ cause: error },
+		);
 	}
 
-	return renderedNotificationSchema.parse(await response.json()).body;
+	if (!response.ok) {
+		throw new EmailRenderingError(response.status);
+	}
+
+	try {
+		return renderedNotificationSchema.parse(await response.json()).body;
+	} catch (error) {
+		throw new EmailRenderingError(response.status, 'invalid_response', {
+			cause: error,
+		});
+	}
 };

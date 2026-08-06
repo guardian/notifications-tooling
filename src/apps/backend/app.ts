@@ -2,12 +2,13 @@ import serverlessExpress from '@codegenie/serverless-express';
 import { httpLogger } from '@http-logger';
 import express, {
 	type Application,
-	type NextFunction,
 	type Request,
 	type Response,
 } from 'express';
 import { clientAssetsDir } from './client-assets';
+import { buildErrorEnvelope } from './error-envelope';
 import { authRedirectMiddleware } from './middleware/auth-middleware';
+import { errorMiddleware } from './middleware/error-middleware';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { docsRouter } from './routers/docs';
@@ -52,14 +53,24 @@ app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
 app.use('/docs/api', docsRouter);
 
-app.use((_req: Request, res: Response) => {
-	res.status(404).json({ error: 'Not Found' });
-});
+/**
+ * The catch-all 404 and 500 responses use the same
+ * `{ error, message, requestId }` envelope as the notifications router's
+ * 400/422, so a client only ever parses one error shape.
+ */
+export const notFoundHandler = (req: Request, res: Response) => {
+	res
+		.status(404)
+		.json(
+			buildErrorEnvelope(
+				req,
+				'not_found',
+				'The requested resource does not exist.',
+			),
+		);
+};
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express detects error middleware by its 4-arg signature
-app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
-	req.log.error(err);
-	res.status(500).json({ error: 'Internal Server Error' });
-});
+app.use(notFoundHandler);
+app.use(errorMiddleware);
 
 export const handler = serverlessExpress({ app });
