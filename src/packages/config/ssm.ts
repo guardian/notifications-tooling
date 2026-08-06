@@ -77,13 +77,8 @@ const getLocalSSMParameter = async (key: string): Promise<string> => {
  *
  * @param key The parameter name, relative to the app namespace.
  * @param secretManager The parameter originates in Secrets Manager (default: false). If true, the parameter is fetched from Secrets Manager instead of SSM Parameter Store.
- * @param secretManager The parameter originates in Secrets Manager (default: false). If true, the parameter is fetched from Secrets Manager instead of SSM Parameter Store.
  * @returns The decrypted parameter value.
  */
-export const getSSMParameter = async (
-	key: string,
-	secretManager: boolean = false,
-): Promise<unknown> => {
 export const getSSMParameter = async (
 	key: string,
 	secretManager: boolean = false,
