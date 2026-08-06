@@ -58,6 +58,8 @@ describe('fetchArticle', () => {
 	});
 
 	it('omits show-fields and returns empty fields when none are requested', async () => {
+		const timeoutSignal = new AbortController().signal;
+		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({
 				response: {
@@ -87,7 +89,7 @@ describe('fetchArticle', () => {
 			new URL(
 				'https://content.guardianapis.com/world/2026/jul/08/summit?api-key=test-key',
 			),
-			{ signal: expect.anything() },
+			{ signal: timeoutSignal },
 		);
 	});
 
