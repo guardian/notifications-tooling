@@ -101,6 +101,7 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 	});
 
 	console.log(`Fetching SSM parameter "${key}" from ${url.toString()}`);
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Response.json() is untyped here and we cast it to the expected SSM response shape.
 	const body = await response.json();
 	console.log('SSM response body', body);
 
