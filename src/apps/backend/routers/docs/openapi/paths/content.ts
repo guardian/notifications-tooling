@@ -3,7 +3,7 @@ export const resolveArticlePath = {
 	post: {
 		summary: 'Resolve a Guardian article link or id',
 		description:
-			'Determines the CAPI content id from the input — a bare article id or any Guardian article URL (public front-end or internal gutools preview/viewer link) — and resolves it against the Content API. Returns only the requested CAPI `show-fields`, under `article`.',
+			'Determines the CAPI content id from the input — a bare article id or any Guardian article URL (public front-end or internal gutools preview/viewer link) — and resolves it against the Content API. Returns the full CAPI content item, under `article`.',
 		security: [{ pandaCookie: [] }],
 		requestBody: {
 			required: true,
@@ -16,7 +16,7 @@ export const resolveArticlePath = {
 		responses: {
 			'200': {
 				description:
-					'The article was found. Returns the requested CAPI `show-fields` under `article`.',
+					'The article was found. Returns the full CAPI content item under `article`.',
 				content: {
 					'application/json': {
 						schema: {
@@ -53,6 +53,12 @@ export const resolveArticlePath = {
 								{ $ref: '#/components/schemas/ArticleResolutionError' },
 							],
 						},
+						example: {
+							error: 'invalid_article_reference',
+							message:
+								'The article must be a Guardian article URL or content id.',
+							requestId: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
+						},
 					},
 				},
 			},
@@ -62,6 +68,11 @@ export const resolveArticlePath = {
 				content: {
 					'application/json': {
 						schema: { $ref: '#/components/schemas/ArticleResolutionError' },
+						example: {
+							error: 'article_not_found',
+							message: 'No Guardian article was found for that link.',
+							requestId: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
+						},
 					},
 				},
 			},
@@ -71,6 +82,12 @@ export const resolveArticlePath = {
 				content: {
 					'application/json': {
 						schema: { $ref: '#/components/schemas/ArticleResolutionError' },
+						example: {
+							error: 'capi_unavailable',
+							message:
+								'The Content API could not be reached. Please try again.',
+							requestId: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
+						},
 					},
 				},
 			},

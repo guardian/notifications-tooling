@@ -28,7 +28,7 @@ export const resolvedArticleSchema = {
 		},
 		webTitle: {
 			type: 'string',
-			description: 'The article headline.',
+			description: "The article's web title (typically the headline).",
 			example: 'A rhyme to recall rising temperatures',
 		},
 		webPublicationDate: {
@@ -49,10 +49,15 @@ export const resolvedArticleSchema = {
 		fields: {
 			type: 'object',
 			additionalProperties: { type: 'string' },
-			description: 'The CAPI show-fields, as a name/value map.',
+			description:
+				'The CAPI content fields, as a name/value map. The endpoint requests `show-fields=all`, so every field CAPI has for the article is returned; the exact keys vary by content.',
 			example: {
 				headline: 'A rhyme to recall rising temperatures',
+				standfirst: 'Readers respond to the week in climate news',
+				byline: 'Guardian readers',
 				thumbnail: 'https://media.guim.co.uk/abc/500.jpg',
+				lastModified: '2026-07-19T15:40:02Z',
+				wordcount: '420',
 			},
 		},
 	},
