@@ -1,6 +1,7 @@
 import { getDb } from '@database';
 import { logger } from '@http-logger';
 import { type Request, type Response, Router } from 'express';
+import { authMiddleware } from '../../middleware/auth-middleware';
 
 export const healthHandler = (_req: Request, res: Response) => {
 	res.json({ status: 'ok', uptime: process.uptime() });
