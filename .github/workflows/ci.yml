@@ -66,9 +66,6 @@ jobs:
       - name: Typecheck
         run: bun typecheck
 
-      - name: Apply database migrations
-        run: bun run --filter @database db:migration:apply
-
       - name: Test
         run: bun run test
 
