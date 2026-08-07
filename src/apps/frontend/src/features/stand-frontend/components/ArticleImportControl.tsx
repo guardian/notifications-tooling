@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import {
 	parseArticleUrlInputToContentId,
 	validateNotificationForm,
@@ -19,13 +19,16 @@ export const ArticleImportControl = () => {
 	);
 
 	const {
-		articleInputText = '',
 		fetchedArticleId,
 		isFetchingContent,
 		fetchArticleError,
 		hasAttemptedSend,
 		content,
 	} = notification;
+
+	const [articleInputText, setArticleInputText] = useState(
+		() => content?.webUrl ?? '',
+	);
 
 	const { articleId, failure } =
 		parseArticleUrlInputToContentId(articleInputText);
@@ -99,12 +102,10 @@ export const ArticleImportControl = () => {
 					<TextInput
 						isInvalid={!!showFieldErrors}
 						size="sm"
-						value={notification.articleInputText ?? ''}
+						value={articleInputText}
 						isDisabled={isFetchingContent}
 						description="Copy and paste a Guardian article URL and fetch"
-						onChange={(text) =>
-							updateNotification({ type: 'set-article-id', text })
-						}
+						onChange={setArticleInputText}
 						cssOverrides={css({ width: '356px' })}
 					/>
 				</div>

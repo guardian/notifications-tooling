@@ -1,5 +1,7 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
+import type { useChannelConstraints } from '../api/useChannelConstraints';
+import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
@@ -9,7 +11,11 @@ import { NotificationTextInput } from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
 
-export const EmailFields = () => {
+interface EmailFieldsProps {
+	constraints?: ReturnType<typeof useChannelConstraints>['data'];
+}
+
+export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
@@ -17,6 +23,16 @@ export const EmailFields = () => {
 	if (notification.parameters?.type !== 'email') {
 		return null;
 	}
+
+	// A failed read leaves the counters on the last known-good guidance rather
+	// than blank. `validationCap` is deliberately not consulted — it is the
+	// broker's absurd-input guard, not editorial guidance, and rendering it
+	// would erase the advice these counters exist to give.
+	const newsletter = constraints?.channels.newsletter;
+	const subjectLimits =
+		newsletter?.compose.subject ?? NEWSLETTER_LIMIT_FALLBACKS.title;
+	const previewLimits =
+		newsletter?.content.body ?? NEWSLETTER_LIMIT_FALLBACKS.body;
 
 	const {
 		kicker,
@@ -77,8 +93,8 @@ export const EmailFields = () => {
 						mod: { subject },
 					})
 				}
-				softLimit={46}
-				hardLimit={70}
+				softLimit={subjectLimits.recommended}
+				hardLimit={subjectLimits.editorialLimit}
 				error={
 					shouldShowErrors && requiredFieldErrors.includes('subject')
 						? 'Subject is required'
@@ -97,8 +113,8 @@ export const EmailFields = () => {
 						mod: { preview },
 					})
 				}
-				softLimit={85}
-				hardLimit={140}
+				softLimit={previewLimits.recommended}
+				hardLimit={previewLimits.editorialLimit}
 				error={
 					shouldShowErrors && requiredFieldErrors.includes('preview')
 						? 'Preview text is required'
