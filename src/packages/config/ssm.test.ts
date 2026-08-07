@@ -101,7 +101,7 @@ describe('getManagedConfigValue in production', () => {
 		);
 
 		return expect(getManagedConfigValue('my-param')).rejects.toThrow(
-			'Failed to fetch SSM parameter "my-param": 404 Not Found',
+			'Failed to fetch config value from ssm for key: "my-param": 404 Not Found',
 		);
 	});
 

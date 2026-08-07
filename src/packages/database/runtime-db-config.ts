@@ -30,7 +30,7 @@ const getLambdaDbConfig = async () => {
 	} catch (error) {
 		logger.error(
 			{ error },
-			'Error fetching database config from SSM parameter',
+			'Error fetching database config from Secrets Manager secret',
 		);
 
 		throw error;
