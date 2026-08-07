@@ -69,9 +69,9 @@ jobs:
       - name: Test
         run: bun run test
 
-      - name: Test migrations can be applied
+      - name: Check migrations
         working-directory: src/packages/database
-        run: bun run db:migration:test
+        run: bun run db:migration:check
 
       - name: Apply migrations
         working-directory: src/packages/database

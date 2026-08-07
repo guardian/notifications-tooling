@@ -20,5 +20,5 @@ export const getEnvConnectionString = (): string => {
 	const { DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD } =
 		parsedEnvironment.data;
 
-	return `postgresql://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+	return `postgresql://${encodeURIComponent(DB_USERNAME)}:${encodeURIComponent(DB_PASSWORD)}@${DB_HOST}:${DB_PORT}/${encodeURIComponent(DB_NAME)}`;
 };
