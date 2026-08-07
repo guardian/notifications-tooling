@@ -37,7 +37,6 @@ export default meta;
 
 const populatedEmailState = {
 	...defaultState,
-	articleInputText: articleFixture.webUrl,
 	content: articleFixture,
 	fetchedArticleId: articleFixture.id,
 	parameters: completeEmailParams,
