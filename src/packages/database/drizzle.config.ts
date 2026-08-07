@@ -1,5 +1,5 @@
 import { defineConfig } from 'drizzle-kit';
-import { getConnectionString } from './config-loader';
+import { getEnvConnectionString } from './env-connection-string';
 
 /* eslint-disable-next-line import/no-default-export -- Drizzle Kit requires the configuration to be the default export. */
 export default defineConfig({
@@ -7,6 +7,6 @@ export default defineConfig({
 	schema: './schema.ts',
 	dialect: 'postgresql',
 	dbCredentials: {
-		url: await getConnectionString(),
+		url: getEnvConnectionString(),
 	},
 });

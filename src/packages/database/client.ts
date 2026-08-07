@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { getConnectionString } from './config-loader';
+import { getRuntimeConnectionString } from './runtime-db-config';
 
 type Db = ReturnType<typeof drizzle>;
 
@@ -11,7 +11,7 @@ const isRunningInLambda = !!process.env.LAMBDA_TASK_ROOT;
 
 const getPool = async (): Promise<Pool> => {
 	poolPromise ??= (async () => {
-		const connectionString = await getConnectionString();
+		const connectionString = await getRuntimeConnectionString();
 		return new Pool({
 			connectionString,
 			ssl: isRunningInLambda
