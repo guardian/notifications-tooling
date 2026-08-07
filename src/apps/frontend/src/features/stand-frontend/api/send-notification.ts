@@ -1,6 +1,6 @@
 import { fetchJsonAndParse } from '../../../api/client';
 import type { ApiError } from '../../../api/errors';
-import type { NotificationState, SendingResult } from '../types';
+import type { SendingResult } from '../types';
 import type {
 	SendNotificationRequest,
 	SendNotificationResponse,
@@ -8,50 +8,8 @@ import type {
 import { sendNotificationResponseSchema } from './schemas';
 
 export const sendNotification = async (
-	notification: NotificationState,
+	sendNotificationRequest: SendNotificationRequest,
 ): Promise<SendingResult> => {
-	const { parameters, content } = notification;
-	if (!content || parameters?.type !== 'email') {
-		throw new Error('incomplete');
-	}
-
-	const { subject, preview, audienceSegments } = parameters;
-	if (!subject || !preview || !audienceSegments) {
-		throw new Error('incomplete');
-	}
-	const idempotencyKey = `email-notification:${content.id}`;
-
-	const payload: SendNotificationRequest = {
-		idempotencyKey,
-		content: {
-			items: {
-				'lead-story': {
-					type: 'newsletter',
-					title: subject,
-					body: preview,
-					link: content.webUrl,
-				},
-			},
-		},
-		channels: {
-			newsletter: {
-				audience: {
-					type: 'segment',
-					items: audienceSegments,
-				},
-				compose: {
-					items: ['lead-story'],
-					subject: subject,
-				},
-			},
-		},
-		sender: 'editorial-newsletters',
-		options: {
-			dryRun: false,
-			scheduledFor: null,
-		},
-	};
-
 	const headers = new Headers();
 	headers.append('Content-Type', 'application/json');
 
@@ -62,7 +20,7 @@ export const sendNotification = async (
 			{
 				method: 'POST',
 				headers,
-				body: JSON.stringify(payload),
+				body: JSON.stringify(sendNotificationRequest),
 				credentials: 'include',
 			},
 		);

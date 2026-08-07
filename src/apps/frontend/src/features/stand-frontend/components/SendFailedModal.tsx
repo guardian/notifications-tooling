@@ -7,6 +7,8 @@ import type { ReactNode } from 'react';
 import { useContext } from 'react';
 import type { ApiErrorFailure } from '../../../api/errors';
 import { getChannelDescription } from '../../../util/display-text-helpers';
+import type { SendNotificationRequest } from '../api/schemas';
+import { buildRequest } from '../build-request-payloads';
 import { NotificationFormContext } from '../NotificationContext';
 import type { NotificationState } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -58,24 +60,26 @@ export const SendFailedModal = () => {
 
 	const { isWaitingForSend } = notification;
 	const failure = getFailure(notification);
+	const sendNotificationRequest = buildRequest(notification);
 
-	const handleRetry = () => {
-		updateNotification({ type: 'waiting-for-send' });
-		sendNotification(notification)
-			.then((result) => {
-				updateNotification({ type: 'receive-send-result', result });
-			})
-			.catch((err) => {
-				console.error(err);
-				updateNotification({
-					type: 'receive-send-result',
-					result: {
-						ok: false,
-						requestFailed: true,
-					},
+	const handleRetry =
+		(sendNotificationRequest: SendNotificationRequest) => () => {
+			updateNotification({ type: 'waiting-for-send' });
+			sendNotification(sendNotificationRequest)
+				.then((result) => {
+					updateNotification({ type: 'receive-send-result', result });
+				})
+				.catch((err) => {
+					console.error(err);
+					updateNotification({
+						type: 'receive-send-result',
+						result: {
+							ok: false,
+							requestFailed: true,
+						},
+					});
 				});
-			});
-	};
+		};
 
 	return (
 		<Modal
@@ -108,10 +112,10 @@ export const SendFailedModal = () => {
 					</Dialog.Header>
 					<Dialog.Content>{failure.message}</Dialog.Content>
 					<Dialog.Buttons theme={{ flexDirection: 'row' }}>
-						{failure.canRetry ? (
+						{failure.canRetry && !!sendNotificationRequest ? (
 							<Button
 								isDisabled={isWaitingForSend}
-								onPress={handleRetry}
+								onPress={handleRetry(sendNotificationRequest)}
 								icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
 							>
 								Try Again
