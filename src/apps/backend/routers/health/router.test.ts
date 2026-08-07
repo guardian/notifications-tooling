@@ -1,8 +1,5 @@
 import { describe, expect, it, mock } from 'bun:test';
 import type { Request, Response } from 'express';
-import { installDatabaseMock } from '../../utils/test-utils/database';
-
-installDatabaseMock();
 
 const { healthHandler } = await import('./index');
 
