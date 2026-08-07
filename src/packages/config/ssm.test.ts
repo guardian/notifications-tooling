@@ -85,11 +85,14 @@ describe('getManagedConfigValue in production', () => {
 	});
 
 	it('throws when AWS_SESSION_TOKEN is not present', () => {
+		const fetcher = spyOn(globalThis, 'fetch');
 		delete process.env.AWS_SESSION_TOKEN;
 
-		return expect(getManagedConfigValue('my-param')).rejects.toThrow(
+		expect(getManagedConfigValue('my-param')).rejects.toThrow(
 			'AWS_SESSION_TOKEN is not set',
 		);
+
+		expect(fetcher).not.toHaveBeenCalled();
 	});
 
 	it('throws when the extension responds with a non-ok status', () => {

@@ -110,7 +110,7 @@ const fetchManagedConfigValueFromExtension = async (
 
 	if (!response.ok) {
 		throw new Error(
-			`Failed to fetch SSM parameter "${key}": ${response.status} ${response.statusText}`,
+			`Failed to fetch config value from ${source} for key: "${key}": ${response.status} ${response.statusText}`,
 		);
 	}
 
