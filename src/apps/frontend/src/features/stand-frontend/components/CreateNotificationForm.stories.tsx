@@ -1,6 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { unauthenticatedError } from '../../../mocks/api-fixtures';
+import type { ApiError } from '../../../api/errors';
+import {
+	badRequestError,
+	internalError,
+	noPermissionError,
+	unauthenticatedError,
+} from '../../../mocks/api-fixtures';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
 	mockSendFailingRequest,
@@ -135,14 +141,14 @@ export const SendEmailFail: Story = {
 	},
 };
 
-export const SendEmailRejected: Story = {
+const buildErrorStory = (error: ApiError): Story => ({
 	args: {
 		notificationState: {
 			...populatedEmailState,
 			isWaitingForSend: false,
 			sendingResult: {
 				ok: false,
-				response: unauthenticatedError,
+				response: error,
 			},
 		},
 	},
@@ -152,8 +158,13 @@ export const SendEmailRejected: Story = {
 			<CreateNotificationForm />,
 			notificationState,
 			{
-				sendNotification: mockSendRejectedNotification,
+				sendNotification: mockSendRejectedNotification(error),
 			},
 		);
 	},
-};
+});
+
+export const Unauthenticated: Story = buildErrorStory(unauthenticatedError);
+export const BadRequest: Story = buildErrorStory(badRequestError);
+export const InternalError: Story = buildErrorStory(internalError);
+export const NoPermission: Story = buildErrorStory(noPermissionError);

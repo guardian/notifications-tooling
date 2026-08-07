@@ -12,6 +12,7 @@ export type SendingResult =
 	| {
 			ok: true;
 			response: SendNotificationResponse;
+			requestFailed?: false;
 	  }
 	| {
 			ok: false;

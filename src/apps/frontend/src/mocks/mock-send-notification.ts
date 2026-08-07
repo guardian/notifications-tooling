@@ -1,3 +1,4 @@
+import type { ApiError } from '../api/errors';
 import type { SendingResult } from '../features/stand-frontend/types';
 import {
 	acceptedEmailSendResponse,
@@ -15,12 +16,12 @@ export const mockSendNotification = () => {
 	});
 };
 
-export const mockSendRejectedNotification = () => {
+export const mockSendRejectedNotification = (apiError: ApiError) => () => {
 	return new Promise<SendingResult>((resolve) => {
 		setTimeout(() => {
 			resolve({
 				ok: false,
-				response: unauthenticatedError,
+				response: apiError,
 			});
 		}, 500);
 	});
