@@ -21,7 +21,9 @@ const getLambdaDbConfig = async () => {
 		const parsed = dbConfigSchema.safeParse(result);
 
 		if (!parsed.success) {
-			throw new Error('Could not parse database config from Secrets Manager secret');
+			throw new Error(
+				'Could not parse database config from Secrets Manager secret',
+			);
 		}
 
 		return parsed.data;
