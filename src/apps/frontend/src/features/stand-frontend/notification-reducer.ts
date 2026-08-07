@@ -1,4 +1,4 @@
-import { parseHtml } from '../../util/html-helpers';
+import { htmlToSingleLineText } from '../../util/html-helpers';
 import type {
 	EmailNotification,
 	NotificationAction,
@@ -78,13 +78,8 @@ export const notificationReducer = (
 			const { headline, standfirst } = action.content.fields ?? {};
 
 			if (parameters?.type === 'email') {
-				const standfirstParse = parseHtml(standfirst);
-				const shouldUseStandFirst =
-					standfirstParse.textContent.length > 0 &&
-					!standfirstParse.containsLinks;
-				parameters.preview = shouldUseStandFirst
-					? standfirstParse.textContent
-					: parameters.preview;
+				const standfirstText = htmlToSingleLineText(standfirst);
+				parameters.preview = standfirstText || parameters.preview;
 				parameters.subject = headline ?? parameters.subject;
 			}
 
