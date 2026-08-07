@@ -1,9 +1,6 @@
 import type { ApiError } from '../api/errors';
 import type { SendingResult } from '../features/stand-frontend/types';
-import {
-	acceptedEmailSendResponse,
-	unauthenticatedError,
-} from './api-fixtures';
+import { acceptedEmailSendResponse } from './api-fixtures';
 
 export const mockSendNotification = () => {
 	return new Promise<SendingResult>((resolve) => {
