@@ -36,6 +36,20 @@ export const internalError = new ApiError({
 	requestId: '1234-abcd',
 });
 
+export const jsonParseFailure = new ApiError({
+	status: 202,
+	failure: 'json-parse-fail',
+	message: 'Response from /api/v1/notifications was not valid JSON',
+	requestId: '1234-abcd',
+	cause: new Error('some parse error'),
+});
+
+export const fetchFailError = new ApiError({
+	status: undefined,
+	failure: 'fetch-fail',
+	message: 'Network request to /api/v1/notifications failed',
+});
+
 export const acceptedEmailSendResponse: SendNotificationResponse = {
 	status: 'accepted',
 	notificationId: 'email-1234-abcd',

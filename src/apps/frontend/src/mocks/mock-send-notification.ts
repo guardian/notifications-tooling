@@ -23,14 +23,3 @@ export const mockSendRejectedNotification = (apiError: ApiError) => () => {
 		}, 500);
 	});
 };
-
-export const mockSendFailingRequest = () => {
-	return new Promise<SendingResult>((resolve) => {
-		setTimeout(() => {
-			resolve({
-				ok: false,
-				requestFailed: true,
-			});
-		}, 500);
-	});
-};

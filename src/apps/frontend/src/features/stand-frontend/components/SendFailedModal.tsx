@@ -31,19 +31,44 @@ const deriveUserFacingMessage = (
 					to refresh your credentials, then try again
 				</Typography>
 			);
-		case 'non-2xx-response': // TO DO - parse the details array to return more specific info
-		case 'fetch-fail':
 		case 'json-parse-fail':
 		case 'schema-parse-fail':
+			return (
+				<>
+					<Typography element="p">
+						Could not understand the response:
+					</Typography>
+					<Typography element="p" variant="bodyBoldSm">
+						{apiError.message}
+					</Typography>
+				</>
+			);
+		case 'non-2xx-response': // TO DO - parse the details array to return more specific info
+		case 'fetch-fail':
 		case 'timeout':
 		default:
 			return checkIfCanRetry(apiError) ? (
 				<Typography>
-					The newsletter email could not be sent at this time. Try again.
+					The {channelDescription} could not be sent at this time. Try again.
 				</Typography>
 			) : (
-				<Typography>The newsletter email could not be sent.</Typography>
+				<Typography>The {channelDescription} could not be sent.</Typography>
 			);
+	}
+};
+
+const deriveErrorTitle = (apiError: ApiError, channelDescription: string) => {
+	switch (apiError.failure) {
+		case 'fetch-fail':
+			return 'There was a problem';
+		case 'json-parse-fail':
+		case 'schema-parse-fail':
+			return 'Communication Failure';
+		case 'non-2xx-response':
+		case 'timeout':
+		case 'unauthenticated':
+		case 'forbidden':
+			return `The ${channelDescription} couldn't be sent`;
 	}
 };
 
@@ -77,19 +102,9 @@ const getFailure = (notification: NotificationState) => {
 		notification.parameters?.type,
 	);
 
-	if (sendingResult.requestFailed) {
-		return {
-			title: 'There was a problem',
-			message:
-				'The newsletter email could not be sent at this time. Try again.',
-			canRetry: true,
-			loginUrl: undefined,
-			details: undefined,
-		};
-	}
 	const { loginUrl, details } = sendingResult.response;
 	return {
-		title: `The ${channelDescription} couldn't be sent`,
+		title: deriveErrorTitle(sendingResult.response, channelDescription),
 		message: deriveUserFacingMessage(
 			sendingResult.response,
 			channelDescription,
@@ -112,20 +127,9 @@ export const SendFailedModal = () => {
 	const handleRetry =
 		(sendNotificationRequest: SendNotificationRequest) => () => {
 			updateNotification({ type: 'waiting-for-send' });
-			sendNotification(sendNotificationRequest)
-				.then((result) => {
-					updateNotification({ type: 'receive-send-result', result });
-				})
-				.catch((err) => {
-					console.error(err);
-					updateNotification({
-						type: 'receive-send-result',
-						result: {
-							ok: false,
-							requestFailed: true,
-						},
-					});
-				});
+			void sendNotification(sendNotificationRequest).then((result) => {
+				updateNotification({ type: 'receive-send-result', result });
+			});
 		};
 
 	return (

@@ -3,15 +3,14 @@ import { expect, within } from 'storybook/test';
 import type { ApiError } from '../../../api/errors';
 import {
 	badRequestError,
+	fetchFailError,
 	internalError,
+	jsonParseFailure,
 	noPermissionError,
 	unauthenticatedError,
 } from '../../../mocks/api-fixtures';
 import { articleFixture } from '../../../mocks/capi-fixtures';
-import {
-	mockSendFailingRequest,
-	mockSendRejectedNotification,
-} from '../../../mocks/mock-send-notification';
+import { mockSendRejectedNotification } from '../../../mocks/mock-send-notification';
 import {
 	completeEmailParams,
 	WithNotificationContext,
@@ -118,29 +117,6 @@ export const SendingEmail: Story = {
 	},
 };
 
-export const SendEmailFail: Story = {
-	args: {
-		notificationState: {
-			...populatedEmailState,
-			isWaitingForSend: false,
-			sendingResult: {
-				ok: false,
-				requestFailed: true,
-			},
-		},
-	},
-	render: (args) => {
-		const { notificationState } = args;
-		return WithNotificationContext(
-			<CreateNotificationForm />,
-			notificationState,
-			{
-				sendNotification: mockSendFailingRequest,
-			},
-		);
-	},
-};
-
 const buildErrorStory = (error: ApiError): Story => ({
 	args: {
 		notificationState: {
@@ -168,3 +144,5 @@ export const Unauthenticated: Story = buildErrorStory(unauthenticatedError);
 export const BadRequest: Story = buildErrorStory(badRequestError);
 export const InternalError: Story = buildErrorStory(internalError);
 export const NoPermission: Story = buildErrorStory(noPermissionError);
+export const UnparsableResponse: Story = buildErrorStory(jsonParseFailure);
+export const FetchFailError: Story = buildErrorStory(fetchFailError);

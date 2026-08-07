@@ -12,17 +12,10 @@ export type SendingResult =
 	| {
 			ok: true;
 			response: SendNotificationResponse;
-			requestFailed?: false;
 	  }
 	| {
 			ok: false;
 			response: ApiError;
-			requestFailed?: false;
-	  }
-	| {
-			ok: false;
-			requestFailed: true;
-			response?: undefined;
 	  };
 
 export type EmailNotification = {

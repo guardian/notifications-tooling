@@ -16,20 +16,9 @@ export const SendNotificationModal = () => {
 	const handleSending =
 		(sendNotificationRequest: SendNotificationRequest) => () => {
 			updateNotification({ type: 'waiting-for-send' });
-			sendNotification(sendNotificationRequest)
-				.then((result) => {
-					updateNotification({ type: 'receive-send-result', result });
-				})
-				.catch((err) => {
-					console.error(err);
-					updateNotification({
-						type: 'receive-send-result',
-						result: {
-							ok: false,
-							requestFailed: true,
-						},
-					});
-				});
+			void sendNotification(sendNotificationRequest).then((result) => {
+				updateNotification({ type: 'receive-send-result', result });
+			});
 		};
 
 	return (
