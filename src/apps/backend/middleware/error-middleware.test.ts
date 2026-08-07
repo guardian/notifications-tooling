@@ -1,7 +1,6 @@
 import { describe, expect, it, mock } from 'bun:test';
+import { BrazeApiError, EmailRenderingError } from '@services';
 import type { Request, Response } from 'express';
-import { BrazeApiError } from '../notification-channels/email/braze/client';
-import { EmailRenderingError } from '../notification-channels/email/rendering/client';
 import { errorMiddleware } from './error-middleware';
 
 const createResponse = () => {
