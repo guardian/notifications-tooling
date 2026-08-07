@@ -1,4 +1,4 @@
-import { getSSMParameter } from '@config/ssm';
+import { getManagedConfigValue } from '@config/ssm';
 import { logger } from '@http-logger';
 import { z } from 'zod';
 import { getEnvConnectionString } from './env-connection-string';
@@ -17,7 +17,7 @@ const isRunningInLambda = !!process.env.LAMBDA_TASK_ROOT;
 
 const getLambdaDbConfig = async () => {
 	try {
-		const result = await getSSMParameter('db', true);
+		const result = await getManagedConfigValue('db', 'secretsManager');
 		const parsed = dbConfigSchema.safeParse(result);
 
 		if (!parsed.success) {

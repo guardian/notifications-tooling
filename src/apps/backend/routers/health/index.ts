@@ -17,7 +17,6 @@ const dbHealthHandler = async (_req: Request, res: Response) => {
 		res.json({ status: 'ok' });
 	} catch (error) {
 		logger.error(error, 'Database connection test failed');
-
 		res.json({ status: 'unhealthy' });
 	}
 };

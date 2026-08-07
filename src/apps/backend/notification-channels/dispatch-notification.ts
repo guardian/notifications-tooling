@@ -3,7 +3,7 @@ import {
 	newsletterSegments,
 	NotificationChannel,
 } from '@config';
-import { getSSMParameter } from '@config/ssm';
+import { getManagedConfigValue } from '@config/ssm';
 import { z } from 'zod';
 import type {
 	NotificationSendRequest,
@@ -44,7 +44,7 @@ const testEmailEnvironmentSchema = z.object({
 });
 
 export type DispatchNotificationDependencies = {
-	getSSMParameter: typeof getSSMParameter;
+	getManagedConfigValue: typeof getManagedConfigValue;
 	renderEmail: typeof renderEmail;
 	sendAppNotification: typeof sendAppNotification;
 	sendBrazeCampaign: typeof sendBrazeCampaign;
@@ -53,7 +53,7 @@ export type DispatchNotificationDependencies = {
 };
 
 const defaultDependencies: DispatchNotificationDependencies = {
-	getSSMParameter,
+	getManagedConfigValue,
 	renderEmail,
 	sendAppNotification,
 	sendBrazeCampaign,
@@ -125,9 +125,9 @@ const dispatchNewsletter = async (
 
 	const [brazeApiKey, brazeRestEndpoint, emailRenderingEndpoint] =
 		await Promise.all([
-			dependencies.getSSMParameter('BRAZE_API_KEY'),
-			dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
-			dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
+			dependencies.getManagedConfigValue('BRAZE_API_KEY'),
+			dependencies.getManagedConfigValue('BRAZE_REST_ENDPOINT'),
+			dependencies.getManagedConfigValue('EMAIL_RENDERING_ENDPOINT'),
 		]);
 
 	const environment = newsletterEnvironmentSchema.parse({
@@ -241,12 +241,12 @@ export const dispatchNotificationTest = async (
 		brazeTestEmailFrom,
 		brazeTestEmailReplyTo,
 	] = await Promise.all([
-		dependencies.getSSMParameter('BRAZE_API_KEY'),
-		dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
-		dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
-		dependencies.getSSMParameter('BRAZE_APP_ID'),
-		dependencies.getSSMParameter('BRAZE_TEST_EMAIL_FROM'),
-		dependencies.getSSMParameter('BRAZE_TEST_EMAIL_REPLY_TO'),
+		dependencies.getManagedConfigValue('BRAZE_API_KEY'),
+		dependencies.getManagedConfigValue('BRAZE_REST_ENDPOINT'),
+		dependencies.getManagedConfigValue('EMAIL_RENDERING_ENDPOINT'),
+		dependencies.getManagedConfigValue('BRAZE_APP_ID'),
+		dependencies.getManagedConfigValue('BRAZE_TEST_EMAIL_FROM'),
+		dependencies.getManagedConfigValue('BRAZE_TEST_EMAIL_REPLY_TO'),
 	]);
 
 	const environment = newsletterEnvironmentSchema.parse({

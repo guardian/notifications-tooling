@@ -13,14 +13,16 @@ const extensionPort =
 	process.env.PARAMETERS_SECRETS_EXTENSION_HTTP_PORT ?? '2773';
 
 interface GetParameterResponse {
-	Parameter: {
-		Value: string;
+	Parameter?: {
+		Value?: string;
 	};
 }
 
 interface GetSecretValueResponse {
 	SecretString?: string;
 }
+
+type ManagedConfigSource = 'ssm' | 'secretsManager';
 
 /**
  * Convert an `UPPER_SNAKE_CASE` parameter key into the `kebab-case` form used
@@ -66,6 +68,93 @@ const getLocalSSMParameter = async (key: string): Promise<string> => {
 	return value;
 };
 
+const getLocalManagedConfigValue = async (key: string): Promise<string> => {
+	const override = process.env[key];
+	if (override) {
+		return override;
+	}
+
+	return getLocalSSMParameter(key);
+};
+
+const fetchManagedConfigValueFromExtension = async (
+	key: string,
+	source: ManagedConfigSource,
+): Promise<unknown> => {
+	const sessionToken = process.env.AWS_SESSION_TOKEN;
+	if (!sessionToken) {
+		throw new Error(
+			'AWS_SESSION_TOKEN is not set; the AWS Parameters and Secrets Lambda Extension is only available in the Lambda runtime.',
+		);
+	}
+
+	const path =
+		source === 'secretsManager'
+			? '/secretsmanager/get'
+			: '/systemsmanager/parameters/get';
+
+	const url = new URL(`http://localhost:${extensionPort}${path}`);
+	url.port = extensionPort;
+	const parameterName = source === 'secretsManager' ? 'secretId' : 'name';
+	url.searchParams.set(parameterName, `${namespace}${toKebabCase(key)}`);
+
+	if (source === 'ssm') {
+		url.searchParams.set('withDecryption', 'true');
+	}
+
+	const response = await fetch(url, {
+		headers: {
+			'X-Aws-Parameters-Secrets-Token': sessionToken,
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error(
+			`Failed to fetch SSM parameter "${key}": ${response.status} ${response.statusText}`,
+		);
+	}
+
+	return response.json();
+};
+
+const getSSMParameterValue = async (key: string): Promise<string> => {
+	if (env.STAGE === 'DEV') {
+		return getLocalManagedConfigValue(key);
+	}
+
+	const body = (await fetchManagedConfigValueFromExtension(
+		key,
+		'ssm',
+	)) as GetParameterResponse;
+
+	const value = body.Parameter?.Value;
+
+	if (!value) {
+		throw new Error(`SSM parameter "${key}" has no value.`);
+	}
+
+	return value;
+};
+
+const getSecretsManagerValue = async (key: string): Promise<unknown> => {
+	if (env.STAGE === 'DEV') {
+		return getLocalManagedConfigValue(key);
+	}
+
+	const body = (await fetchManagedConfigValueFromExtension(
+		key,
+		'secretsManager',
+	)) as GetSecretValueResponse;
+
+	const { SecretString } = body;
+
+	if (!SecretString) {
+		throw new Error(`Secrets Manager secret "${key}" has no SecretString.`);
+	}
+
+	return parseSecretString(SecretString);
+};
+
 /**
  * Fetch an SSM parameter value. DEV uses an environment override when present,
  * otherwise it reads the CODE parameter directly using the Composer profile.
@@ -76,70 +165,15 @@ const getLocalSSMParameter = async (key: string): Promise<string> => {
  * `key` argument is resolved relative to this app's parameter namespace.
  *
  * @param key The parameter name, relative to the app namespace.
- * @param secretManager The parameter originates in Secrets Manager (default: false). If true, the parameter is fetched from Secrets Manager instead of SSM Parameter Store.
+ * @source The source of the parameter value, either SSM or Secrets Manager.
  * @returns The decrypted parameter value.
  */
-export const getSSMParameter = async (
+
+export const getManagedConfigValue = async (
 	key: string,
-	secretManager: boolean = false,
+	source: ManagedConfigSource = 'ssm',
 ): Promise<unknown> => {
-	if (env.STAGE === 'DEV') {
-		const override = process.env[key];
-		if (override) {
-			return override;
-		}
-
-		return getLocalSSMParameter(key);
-	}
-
-	const sessionToken = process.env.AWS_SESSION_TOKEN;
-	if (!sessionToken) {
-		throw new Error(
-			'AWS_SESSION_TOKEN is not set; the AWS Parameters and Secrets Lambda Extension is only available in the Lambda runtime.',
-		);
-	}
-
-	const path = secretManager
-		? '/secretsmanager/get'
-		: '/systemsmanager/parameters/get';
-
-	const url = new URL(`http://localhost:${extensionPort}${path}`);
-	url.port = extensionPort;
-	// SSM parameters are stored in kebab-case, but callers pass the
-	// UPPER_SNAKE_CASE env-var key, so convert it to match the stored name.
-	const param = secretManager ? 'secretId' : 'name';
-	url.searchParams.set(param, `${namespace}${toKebabCase(key)}`);
-	if (!secretManager) {
-		url.searchParams.set('withDecryption', 'true');
-	}
-
-	const response = await fetch(url, {
-		headers: {
-			'X-Aws-Parameters-Secrets-Token': sessionToken,
-		},
-	});
-
-	console.log(`Fetching SSM parameter "${key}" from ${url.toString()}`);
-
-	if (!response.ok) {
-		console.log('SSM response body', await response.text());
-		throw new Error(
-			`Failed to fetch SSM parameter "${key}": ${response.status} ${response.statusText}`,
-		);
-	}
-
-	const body: unknown = await response.json();
-	console.log('SSM response body', body);
-
-	if (secretManager) {
-		const { SecretString } = body as GetSecretValueResponse;
-		if (!SecretString) {
-			throw new Error(`Secrets Manager secret "${key}" has no SecretString.`);
-		}
-
-		return parseSecretString(SecretString);
-	}
-
-	const { Parameter } = body as GetParameterResponse;
-	return Parameter.Value;
+	return source === 'secretsManager'
+		? getSecretsManagerValue(key)
+		: getSSMParameterValue(key);
 };

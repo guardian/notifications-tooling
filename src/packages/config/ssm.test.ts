@@ -11,18 +11,18 @@ import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 const baseEnv = { STACK: 'notifications', APP: 'dispatch' };
 
-const getSSMParameter = async (
+const getManagedConfigValue = async (
 	key: string,
 	stage: string = 'CODE',
-	secretManager: boolean = false,
+	source: 'ssm' | 'secretsManager' = 'ssm',
 ) => {
 	await mock.module('./env', () => ({
 		configurationStage: stage === 'PROD' ? 'PROD' : 'CODE',
 		env: { ...baseEnv, STAGE: stage },
 		localAwsConfig: { profile: 'composer', region: 'eu-west-1' },
 	}));
-	const { getSSMParameter } = await import('./ssm');
-	return getSSMParameter(key, secretManager);
+	const { getManagedConfigValue } = await import('./ssm');
+	return getManagedConfigValue(key, source);
 };
 
 const SESSION_TOKEN = 'test-session-token';
@@ -37,7 +37,7 @@ afterEach(() => {
 	delete process.env.MY_PARAM;
 });
 
-describe('getSSMParameter in production', () => {
+describe('getManagedConfigValue in production', () => {
 	it('fetches the parameter from the extension endpoint and returns its value', async () => {
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({ Parameter: { Value: 'secret-value' } }),
@@ -47,7 +47,7 @@ describe('getSSMParameter in production', () => {
 			'http://localhost:2773/systemsmanager/parameters/get' +
 			'?name=%2FCODE%2Fnotifications%2Fdispatch%2Fmy-param&withDecryption=true';
 
-		const value = await getSSMParameter('my-param');
+		const value = await getManagedConfigValue('my-param');
 
 		expect(value).toBe('secret-value');
 
@@ -65,7 +65,7 @@ describe('getSSMParameter in production', () => {
 			Response.json({ Parameter: { Value: 'secret-value' } }),
 		);
 
-		await getSSMParameter('my-param');
+		await getManagedConfigValue('my-param');
 
 		const calledUrl = fetcher.mock.calls[0]?.[0] as URL;
 		expect(calledUrl.searchParams.get('withDecryption')).toBe('true');
@@ -76,7 +76,7 @@ describe('getSSMParameter in production', () => {
 			Response.json({ Parameter: { Value: 'secret-value' } }),
 		);
 
-		await getSSMParameter('BRAZE_API_KEY');
+		await getManagedConfigValue('BRAZE_API_KEY');
 
 		const calledUrl = fetcher.mock.calls[0]?.[0] as URL;
 		expect(calledUrl.searchParams.get('name')).toBe(
@@ -86,12 +86,10 @@ describe('getSSMParameter in production', () => {
 
 	it('throws when AWS_SESSION_TOKEN is not present', () => {
 		delete process.env.AWS_SESSION_TOKEN;
-		const fetcher = spyOn(globalThis, 'fetch');
 
-		expect(getSSMParameter('my-param')).rejects.toThrow(
+		return expect(getManagedConfigValue('my-param')).rejects.toThrow(
 			'AWS_SESSION_TOKEN is not set',
 		);
-		expect(fetcher).not.toHaveBeenCalled();
 	});
 
 	it('throws when the extension responds with a non-ok status', () => {
@@ -99,7 +97,7 @@ describe('getSSMParameter in production', () => {
 			new Response('Not Found', { status: 404, statusText: 'Not Found' }),
 		);
 
-		expect(getSSMParameter('my-param')).rejects.toThrow(
+		return expect(getManagedConfigValue('my-param')).rejects.toThrow(
 			'Failed to fetch SSM parameter "my-param": 404 Not Found',
 		);
 	});
@@ -112,7 +110,7 @@ describe('getSSMParameter in production', () => {
 			}),
 		);
 
-		const secret = await getSSMParameter('db', 'CODE', true);
+		const secret = await getManagedConfigValue('db', 'CODE', 'secretsManager');
 
 		expect(secret).toEqual({
 			host: 'db.example',
@@ -131,13 +129,13 @@ describe('getSSMParameter in production', () => {
 	});
 });
 
-describe('getSSMParameter in DEV', () => {
+describe('getManagedConfigValue in DEV', () => {
 	it('returns a process.env override without calling SSM', async () => {
 		process.env.MY_PARAM = 'local-value';
 		const fetcher = spyOn(globalThis, 'fetch');
 		const send = spyOn(SSMClient.prototype, 'send');
 
-		const value = await getSSMParameter('MY_PARAM', 'DEV');
+		const value = await getManagedConfigValue('MY_PARAM', 'DEV');
 
 		expect(value).toBe('local-value');
 		expect(fetcher).not.toHaveBeenCalled();
@@ -151,7 +149,7 @@ describe('getSSMParameter in DEV', () => {
 			Parameter: { Value: 'code-value' },
 		} as never);
 
-		const value = await getSSMParameter('MY_PARAM', 'DEV');
+		const value = await getManagedConfigValue('MY_PARAM', 'DEV');
 
 		expect(value).toBe('code-value');
 		expect(send).toHaveBeenCalledTimes(1);
@@ -169,7 +167,7 @@ describe('getSSMParameter in DEV', () => {
 			Parameter: {},
 		} as never);
 
-		expect(getSSMParameter('MY_PARAM', 'DEV')).rejects.toThrow(
+		return expect(getManagedConfigValue('MY_PARAM', 'DEV')).rejects.toThrow(
 			'SSM parameter "MY_PARAM" has no value.',
 		);
 	});

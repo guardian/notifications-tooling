@@ -40,7 +40,7 @@ const ssmParameters: Record<string, string> = {
 };
 
 const createDependencies = () => {
-	const getSSMParameter = mock((key: string) =>
+	const getManagedConfigValue = mock((key: string) =>
 		Promise.resolve(ssmParameters[key] ?? ''),
 	);
 	const sendAppNotification = mock(() => Promise.resolve());
@@ -55,7 +55,7 @@ const createDependencies = () => {
 		Promise.resolve({ message: 'success', dispatch_id: 'test-dispatch-123' }),
 	);
 	const dependencies: DispatchNotificationDependencies = {
-		getSSMParameter,
+		getManagedConfigValue,
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
@@ -65,7 +65,7 @@ const createDependencies = () => {
 
 	return {
 		dependencies,
-		getSSMParameter,
+		getManagedConfigValue,
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
