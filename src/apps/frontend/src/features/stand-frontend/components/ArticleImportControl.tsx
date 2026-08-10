@@ -108,6 +108,7 @@ export const ArticleImportControl = () => {
 						isInvalid={!!showFieldErrors}
 						size="sm"
 						value={articleInputText}
+						placeholder="https://www.theguardian.com/..."
 						isDisabled={isFetchingContent || lockArticleInputText}
 						description="Copy and paste a Guardian article URL and fetch"
 						onChange={setArticleInputText}
@@ -135,7 +136,7 @@ export const ArticleImportControl = () => {
 				)}
 				{lockArticleInputText && (
 					<Button
-						icon="upload"
+						icon="refresh"
 						size="sm"
 						variant="secondary"
 						onClick={() => {
