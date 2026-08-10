@@ -118,9 +118,9 @@ export const ArticleImportControl = () => {
 					cssOverrides={
 						isFetchingContent
 							? css({
-								backgroundColor: semanticColors.fill.disabled,
-								cursor: 'not-allowed',
-							})
+									backgroundColor: semanticColors.fill.disabled,
+									cursor: 'not-allowed',
+								})
 							: undefined
 					}
 				>
