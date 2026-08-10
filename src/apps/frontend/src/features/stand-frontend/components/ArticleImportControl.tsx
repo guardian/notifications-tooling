@@ -132,12 +132,14 @@ export const ArticleImportControl = () => {
 					display: 'flex',
 					gap: semanticSpacing.stackSm,
 					alignItems: 'left',
+					paddingTop: semanticSpacing.stackXs,
+					paddingBottom: semanticSpacing.stackXs,
 				}}
 			>
 				{isFetchingContent && <LoadingSpinner />}
 
 				{showImportedArticle && (
-					<InlineMessage level="success">Article Imported</InlineMessage>
+					<InlineMessage level="success">Article imported</InlineMessage>
 				)}
 
 				{fetchArticleError && (
