@@ -23,9 +23,7 @@ export const CreateNotificationForm = () => {
 				marginBottom: semanticSpacing.stackXl,
 				display: 'flex',
 				flexDirection: 'column',
-				width: '720px',
 				paddingRight: semanticSpacing.stackSm,
-				paddingLeft: '147px',
 				gap: semanticSpacing.stackXl,
 			}}
 		>

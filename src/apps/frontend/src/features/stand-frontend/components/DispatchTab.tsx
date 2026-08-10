@@ -110,11 +110,10 @@ export const DispatchTab = () => {
 							/>
 						</Item>
 						<Item
-							size={'auto'}
+							size={'grow'}
 							cssOverrides={css({
-								borderRightWidth: semanticSizing.border.default,
-								borderRightStyle: 'solid',
-								borderRightColor: semanticColors.border.weak,
+								paddingLeft: '9rem',
+								maxWidth: '826px'
 							})}
 						>
 							<ScrollWrapper>
@@ -122,13 +121,12 @@ export const DispatchTab = () => {
 							</ScrollWrapper>
 						</Item>
 						<Item
-							size={'auto'}
+							size={'grow'}
 							cssOverrides={css({
 								display: 'flex',
 								justifyContent: 'center',
 								alignItems: 'flex-start',
 								flow: 'vertical',
-								width: '621px',
 							})}
 						>
 							<EmailPreviewSection
