@@ -3,6 +3,7 @@ import { acceptedTestNotificationSchema } from './accepted-test-notification';
 import { articleResolutionErrorSchema } from './article-resolution-error';
 import { channelAudiencesSchema } from './channel-audiences';
 import { channelConstraintsSchema } from './channel-constraints';
+import { emailPreviewErrorSchema } from './email-preview-error';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
@@ -42,4 +43,5 @@ export const schemas = {
 	UserResponse: userResponseSchema,
 	Unauthenticated: unauthenticatedSchema,
 	InsufficientPermissions: insufficientPermissionsSchema,
+	EmailPreviewErrorSchema: emailPreviewErrorSchema,
 } as const;
