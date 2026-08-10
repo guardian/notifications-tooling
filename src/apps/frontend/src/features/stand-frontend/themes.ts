@@ -145,7 +145,7 @@ export const articlePreviewCardTheme = {
 		padding: semanticSpacing.stackSm,
 		borderRadius: semanticRadius.cornerSm,
 		backgroundColor: baseColors.neutral[850],
-		width: '341px',
+		width: '450px',
 	}),
 	details: css({
 		display: 'flex',
@@ -160,6 +160,19 @@ export const articlePreviewCardTheme = {
 	headline: css({
 		fontSize: '12px',
 		color: semanticColors.text.strong,
+	}),
+	published: css({
+		fontSize: '12px',
+		color: semanticColors.text.weak,
+		margin: 0,
+	}),
+	publishedRelative: css({
+		fontWeight: 700,
+		color: semanticColors.text.strong,
+	}),
+	url: css({
+		fontSize: '12px',
+		color: semanticColors.text.link,
 	}),
 	thumbnail: css({
 		width: '120px',
