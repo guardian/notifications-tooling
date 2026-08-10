@@ -1,5 +1,6 @@
 import { acceptedNotificationSchema } from './accepted-notification';
 import { acceptedTestNotificationSchema } from './accepted-test-notification';
+import { articleResolutionErrorSchema } from './article-resolution-error';
 import { channelAudiencesSchema } from './channel-audiences';
 import { channelConstraintsSchema } from './channel-constraints';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
@@ -13,6 +14,8 @@ import { notificationTestSendRequestJsonSchema } from './notification-test-send-
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
 import { notificationValidationErrorSchema } from './notification-validation-error';
 import { notificationValidationIssueSchema } from './notification-validation-issue';
+import { resolveArticleRequestSchema } from './resolve-article-request';
+import { resolvedArticleSchema } from './resolved-article';
 import { unauthenticatedSchema } from './unauthenticated';
 import { userResponseSchema, userSchema } from './user';
 
@@ -32,6 +35,9 @@ export const schemas = {
 	NotificationProviderError: notificationProviderErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
+	ResolveArticleRequest: resolveArticleRequestSchema,
+	ResolvedArticle: resolvedArticleSchema,
+	ArticleResolutionError: articleResolutionErrorSchema,
 	User: userSchema,
 	UserResponse: userResponseSchema,
 	Unauthenticated: unauthenticatedSchema,

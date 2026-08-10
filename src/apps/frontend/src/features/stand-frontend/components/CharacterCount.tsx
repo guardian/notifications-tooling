@@ -1,12 +1,11 @@
 import { css } from '@emotion/react';
 import {
-	baseSpacing,
 	semanticColors,
 	semanticSizing,
 	semanticSpacing,
 } from '@guardian/stand';
+import { Badge } from '@guardian/stand/Badge';
 import { Typography } from '@guardian/stand/Typography';
-import type { ReactNode } from 'react';
 
 interface Props {
 	count: number;
@@ -62,39 +61,6 @@ const styles = {
 	},
 };
 
-// TODO - replace with Stand/Badge when released
-const Badge = ({
-	children,
-	color,
-}: {
-	children: ReactNode;
-	color: 'green' | 'yellow' | 'red';
-}) => {
-	const getBackgroundColor = (color: 'green' | 'yellow' | 'red') => {
-		switch (color) {
-			case 'green':
-				return semanticColors.fill.greenWeak;
-			case 'yellow':
-				return semanticColors.fill.yellowWeak;
-			case 'red':
-				return semanticColors.fill.redWeak;
-		}
-	};
-	return (
-		<div
-			css={{
-				display: 'inline-block',
-				paddingLeft: baseSpacing['4Px'],
-				paddingRight: baseSpacing['4Px'],
-				lineHeight: 1,
-				backgroundColor: getBackgroundColor(color),
-			}}
-		>
-			<Typography variant="bodyXs">{children}</Typography>
-		</div>
-	);
-};
-
 export const CharacterCount = ({
 	count,
 	hardLimit = Infinity,
@@ -107,9 +73,21 @@ export const CharacterCount = ({
 	return (
 		<div css={styles.container}>
 			<div css={styles.badgeAndText}>
-				{!warningLevel && <Badge color="green">Recommended</Badge>}
-				{warningLevel === 'warn' && <Badge color="yellow">Warning</Badge>}
-				{warningLevel === 'error' && <Badge color="red">Limit Reached</Badge>}
+				{!warningLevel && (
+					<Badge size="xs" weight="light" color="green">
+						Recommended
+					</Badge>
+				)}
+				{warningLevel === 'warn' && (
+					<Badge size="xs" weight="light" color="yellow">
+						Warning
+					</Badge>
+				)}
+				{warningLevel === 'error' && (
+					<Badge size="xs" weight="light" color="red">
+						Limit Reached
+					</Badge>
+				)}
 				<Typography variant="bodySm">
 					{softLimit} characters or fewer preferred
 				</Typography>
