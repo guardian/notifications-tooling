@@ -18,6 +18,11 @@ filtering from the repository root.(e.g running the `db:reset` command from root
 
 If this file is not defined, the setup script will try to create it by copying `.env.example`.
 
+Runtime and tooling load database configuration differently:
+
+- The application runtime uses `runtime-db-config.ts`. In Lambda it fetches managed database credentials from Secrets Manager; outside Lambda it falls back to the local `DB_*` environment variables.
+- Drizzle CLI tooling uses `drizzle.config.ts`, which always reads the local `DB_*` environment variables synchronously. This keeps migration commands compatible with Drizzle's config loader in local development and CI.
+
 ## Database migrations
 
 Run the following commands from `src/packages/database`.

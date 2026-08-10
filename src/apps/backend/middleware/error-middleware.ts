@@ -1,7 +1,6 @@
+import { BrazeApiError, EmailRenderingError } from '@services';
 import type { ErrorRequestHandler } from 'express';
 import { buildErrorEnvelope } from '../error-envelope';
-import { BrazeApiError } from '../notification-channels/email/braze/client';
-import { EmailRenderingError } from '../notification-channels/email/rendering/client';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express detects error middleware by its 4-arg signature
 export const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {

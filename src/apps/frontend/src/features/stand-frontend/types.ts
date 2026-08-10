@@ -34,7 +34,6 @@ export type PushNotification = {
 };
 
 export type NotificationState = {
-	articleInputText?: string;
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
@@ -51,10 +50,6 @@ export type RequestEmailHtml = {
 };
 
 export type NotificationAction =
-	| {
-			type: 'set-article-id';
-			text: string;
-	  }
 	| {
 			type: 'set-channel';
 			channel: ChannelOption;

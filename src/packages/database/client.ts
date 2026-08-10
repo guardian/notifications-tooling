@@ -1,23 +1,35 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { getRuntimeConnectionString } from './runtime-db-config';
 
-const getConnectionString = () => {
-	const { DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD } = process.env;
+type Db = ReturnType<typeof drizzle>;
 
-	if (!DB_HOST || !DB_PORT || !DB_NAME || !DB_USERNAME || !DB_PASSWORD) {
-		throw new Error(
-			'Missing required database environment variables for local development.',
-		);
-	}
+let poolPromise: Promise<Pool> | undefined;
+let dbPromise: Promise<Db> | undefined;
 
-	return `postgresql://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+const isRunningInLambda = !!process.env.LAMBDA_TASK_ROOT;
+
+const getPool = async (): Promise<Pool> => {
+	poolPromise ??= (async () => {
+		const connectionString = await getRuntimeConnectionString();
+		return new Pool({
+			connectionString,
+			ssl: isRunningInLambda
+				? {
+						rejectUnauthorized: false,
+					}
+				: false,
+		});
+	})();
+
+	return poolPromise;
 };
 
-const connectionString = getConnectionString();
+export const getDb = async (): Promise<Db> => {
+	dbPromise ??= (async () => {
+		const pool = await getPool();
+		return drizzle({ client: pool });
+	})();
 
-const pool = new Pool({
-	connectionString,
-});
-
-export const db = drizzle({ client: pool });
-export { connectionString, pool };
+	return dbPromise;
+};

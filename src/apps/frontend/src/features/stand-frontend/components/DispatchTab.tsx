@@ -7,12 +7,14 @@ import {
 import { baseSpacing } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
+import { from } from '@guardian/stand/utils';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
+import { PreviewToggle } from './PreviewToggle';
 import { ScrollWrapper } from './ScrollWrapper';
 import {
 	DEFAULT_SIDE_NAV_HREF,
@@ -102,6 +104,10 @@ export const DispatchTab = () => {
 							cssOverrides={css({
 								border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 								gap: `${baseSpacing['10Px']}`,
+								display: 'none',
+								[from.md]: {
+									display: 'block',
+								},
 							})}
 						>
 							<SideNavigationPanel
@@ -110,25 +116,34 @@ export const DispatchTab = () => {
 							/>
 						</Item>
 						<Item
-							size={'auto'}
+							size={'grow'}
 							cssOverrides={css({
-								borderRightWidth: semanticSizing.border.default,
-								borderRightStyle: 'solid',
-								borderRightColor: semanticColors.border.weak,
+								maxWidth: '826px',
 							})}
 						>
-							<ScrollWrapper>
+							<PreviewToggle />
+							<ScrollWrapper
+								style={css({
+									paddingLeft: semanticSpacing.stackMd,
+									[from.md]: { paddingLeft: semanticSpacing.stackXl },
+									'@media (min-width: 1500px)': {
+										paddingLeft: '147px',
+									},
+								})}
+							>
 								<CreateNotificationForm />
 							</ScrollWrapper>
 						</Item>
 						<Item
-							size={'auto'}
+							size={'grow'}
 							cssOverrides={css({
-								display: 'flex',
+								display: 'none',
 								justifyContent: 'center',
 								alignItems: 'flex-start',
 								flow: 'vertical',
-								width: '621px',
+								['@media (min-width: 1280px)']: {
+									display: 'flex',
+								},
 							})}
 						>
 							<EmailPreviewSection
