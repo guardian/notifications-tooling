@@ -11,6 +11,7 @@ import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { errorMiddleware } from './middleware/error-middleware';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
+import { contentRouter } from './routers/content';
 import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationTestsRouter } from './routers/notification-tests';
@@ -48,6 +49,7 @@ app.use(
 
 // Private - authenticated routes
 app.use('/v1/channels', channelsRouter);
+app.use('/v1/content', contentRouter);
 app.use('/v1/notification-tests', notificationTestsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);

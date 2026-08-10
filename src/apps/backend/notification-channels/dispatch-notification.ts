@@ -4,18 +4,18 @@ import {
 	NotificationChannel,
 } from '@config';
 import { getManagedConfigValue } from '@config/ssm';
+import {
+	registerBrazeTestEmailRecipients,
+	renderEmail,
+	sendAppNotification,
+	sendBrazeCampaign,
+	sendBrazeTestEmail,
+} from '@services';
 import { z } from 'zod';
 import type {
 	NotificationSendRequest,
 	NotificationTestSendRequest,
 } from '../routers/notifications/schemas/notification-send-request';
-import { sendAppNotification } from './app-notification/client';
-import {
-	registerBrazeTestEmailRecipients,
-	sendBrazeCampaign,
-	sendBrazeTestEmail,
-} from './email/braze/client';
-import { renderEmail } from './email/rendering/client';
 
 // Each provider request shares a fixed timeout; it is not configurable per
 // environment.
