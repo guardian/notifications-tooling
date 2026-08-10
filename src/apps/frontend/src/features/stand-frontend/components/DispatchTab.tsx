@@ -112,7 +112,7 @@ export const DispatchTab = () => {
 						<Item
 							size={'grow'}
 							cssOverrides={css({
-								paddingLeft: '9rem',
+								paddingLeft: '147px',
 								maxWidth: '826px',
 							})}
 						>
