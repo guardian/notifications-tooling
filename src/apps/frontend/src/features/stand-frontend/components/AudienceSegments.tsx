@@ -147,54 +147,59 @@ export const AudienceSegmentsPreviewPill = ({
 	selected,
 	isConfirmation = false,
 }: AudienceSegmentsPreviewPillProps) => {
-	return (
-		<div
-			css={{
-				display: 'flex',
-				flexDirection: 'column',
-				gap: semanticSpacing.stackXs,
-			}}
-		>
-			{!isConfirmation && (
-				<Typography variant="bodyBoldMd">Audience Segments</Typography>
-			)}
 
-			<div
-				css={{
-					display: 'flex',
-					flexDirection: 'row',
-					gap: semanticSpacing.stackXs,
-				}}
-			>
-				{selected.map((segmentCode) => {
-					const matchingSegment = segments.find(
-						(segment) => segment.code === segmentCode,
-					);
-					const segmentLabel = matchingSegment?.label ?? segmentCode;
-					return (
-						<div
-							key={segmentCode}
-							css={
-								isConfirmation
-									? styles.isConfirmationStyle
-									: styles.audienceSegmentButton(false)
-							}
-						>
-							<div css={styles.audienceSegmentIcon}>
-								<FlagAtom segmentCode={segmentCode} />
-							</div>
-							<Typography
-								variant="bodyBoldSm"
-								cssOverrides={css({
-									color: semanticColors.text.weak,
-								})}
-							>
-								{segmentLabel}
-							</Typography>
-						</div>
-					);
-				})}
-			</div>
-		</div>
+	return (
+		<>
+			{selected.length !== 0 && (
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: semanticSpacing.stackXs,
+					}}
+				>
+					{!isConfirmation && (
+						<Typography variant="bodyBoldMd">Audience Segments</Typography>
+					)}
+
+					<div
+						css={{
+							display: 'flex',
+							flexDirection: 'row',
+							gap: semanticSpacing.stackXs,
+						}}
+					>
+						{selected.map((segmentCode) => {
+							const matchingSegment = segments.find(
+								(segment) => segment.code === segmentCode,
+							);
+							const segmentLabel = matchingSegment?.label ?? segmentCode;
+							return (
+								<div
+									key={segmentCode}
+									css={
+										isConfirmation
+											? styles.isConfirmationStyle
+											: styles.audienceSegmentButton(false)
+									}
+								>
+									<div css={styles.audienceSegmentIcon}>
+										<FlagAtom segmentCode={segmentCode} />
+									</div>
+									<Typography
+										variant="bodyBoldSm"
+										cssOverrides={css({
+											color: semanticColors.text.weak,
+										})}
+									>
+										{segmentLabel}
+									</Typography>
+								</div>
+							);
+						})}
+					</div>
+				</div>
+			)}
+		</>
 	);
 };
