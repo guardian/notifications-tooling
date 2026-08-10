@@ -30,6 +30,9 @@ const fetchEmailPreview: FetchEmailPreview = async (articleUrl, segment) => {
 		articleUrl,
 		newsletterId: segment.emailRenderingNewsletterId,
 		timeoutMs: EMAIL_RENDERING_REQUEST_TIMEOUT_MS,
+		// send a non-empty string so that the preview text element will be rendered
+		// and the frontend back add the text content client-side
+		previewText: ' ',
 	});
 };
 
