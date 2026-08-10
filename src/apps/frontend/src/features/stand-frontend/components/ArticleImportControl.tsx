@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { semanticColors, semanticSpacing } from '@guardian/stand';
+import { semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
@@ -41,7 +41,6 @@ export const ArticleImportControl = () => {
 				type: 'report-article-error',
 				errorMessage: 'Paste a URL to fetch an article',
 			});
-			setLockArticleInputText(false);
 			return;
 		}
 
@@ -64,7 +63,6 @@ export const ArticleImportControl = () => {
 					type: 'report-article-error',
 					errorMessage: err instanceof Error ? err.message : 'UNKNOWN ERROR',
 				});
-				setLockArticleInputText(false);
 			});
 	};
 
@@ -101,7 +99,7 @@ export const ArticleImportControl = () => {
 						gap: semanticSpacing.stackSm,
 					}}
 				>
-					<Typography variant="bodyBoldMd" element="h3" id="article-section">
+					<Typography variant="bodyBoldMd" element="h3">
 						Article
 					</Typography>
 					<TextInput
@@ -122,20 +120,13 @@ export const ArticleImportControl = () => {
 						size="sm"
 						variant="secondary"
 						onClick={fetchArticle}
-						cssOverrides={
-							isFetchingContent
-								? css({
-										backgroundColor: semanticColors.fill.disabled,
-										cursor: 'not-allowed',
-									})
-								: undefined
-						}
 					>
 						Fetch
 					</Button>
 				)}
 				{lockArticleInputText && (
 					<Button
+						isDisabled={isFetchingContent}
 						icon="refresh"
 						size="sm"
 						variant="secondary"
@@ -146,14 +137,6 @@ export const ArticleImportControl = () => {
 								type: 'reset',
 							});
 						}}
-						cssOverrides={
-							isFetchingContent
-								? css({
-										backgroundColor: semanticColors.fill.disabled,
-										cursor: 'not-allowed',
-									})
-								: undefined
-						}
 					>
 						Replace
 					</Button>
