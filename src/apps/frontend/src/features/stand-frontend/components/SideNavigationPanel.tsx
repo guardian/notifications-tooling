@@ -5,6 +5,7 @@ import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
+import type { ActiveSection } from '../types';
 
 interface SideNavigationPanelTileProps {
 	title: string;
@@ -122,7 +123,10 @@ export const SideNavigationPanel = ({
 					isSelected={selectedHref === item.href}
 					onPress={() => {
 						onSelectedHrefChange(item.href);
-						updateNotification({ type: 'set-active-section', text: item.href });
+						updateNotification({
+							type: 'set-active-section',
+							text: item.href as ActiveSection,
+						});
 					}}
 				/>
 			))}

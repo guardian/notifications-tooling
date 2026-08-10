@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
-import type { ActiveSection } from '../NotificationContext';
+import type { ActiveSection } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
@@ -16,7 +16,7 @@ import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
 
 const createNotificationFormStyles = {
-	sectionStyle: (activeSectionStyle: boolean) =>
+	sectionStyle: (activeSectionStyle: string | undefined) =>
 		css({
 			display: 'flex',
 			flexDirection: 'column',

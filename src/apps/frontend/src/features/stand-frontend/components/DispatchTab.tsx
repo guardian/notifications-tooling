@@ -10,6 +10,7 @@ import { Layout } from '@guardian/stand/Layout';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
+import type { ActiveSection } from '../types';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
@@ -58,7 +59,7 @@ export const DispatchTab = () => {
 							setSelectedHref(selectedHref);
 							updateNotification({
 								type: 'set-active-section',
-								text: selectedHref,
+								text: selectedHref as ActiveSection,
 							});
 						}
 					}
