@@ -7,14 +7,18 @@
 		"typecheck": "tsc --noEmit",
 		"db:migration:create": "bun run scripts/create-db-migration.ts",
 		"db:migration:apply": "bun x drizzle-kit migrate --config=drizzle.config.ts",
-		"db:reset": "bash scripts/reset-db.sh"
+		"db:reset": "bash scripts/reset-db.sh",
+		"db:migration:check": "bun x drizzle-kit check --config=drizzle.config.ts"
 	},
 	"devDependencies": {
 		"@types/pg": "8.20.0",
 		"drizzle-kit": "0.31.10"
 	},
 	"dependencies": {
+		"@config": "workspace:*",
+		"@http-logger": "workspace:*",
 		"drizzle-orm": "0.45.2",
-		"pg": "8.22.0"
+		"pg": "8.22.0",
+		"zod": "4.4.3"
 	}
 }

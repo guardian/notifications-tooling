@@ -695,6 +695,22 @@ exports[`The Notifications stack matches the snapshot 1`] = `
                 "arn:aws:s3:::permissions-cache/TEST/permissions.json",
               ],
             },
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:/TEST/notifications/dispatch/db*",
+                  ],
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },

@@ -11,10 +11,30 @@ jobs:
   build:
     name: Build and upload to riff-raff
     runs-on: ubuntu-latest
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: dispatchdb
+      DB_USERNAME: dispatchuser
+      DB_PASSWORD: dispatchpw
     permissions:
       id-token: write
       contents: read
       pull-requests: write
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: dispatchuser
+          POSTGRES_PASSWORD: dispatchpw
+          POSTGRES_DB: dispatchdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dispatchuser -d dispatchdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -48,6 +68,14 @@ jobs:
 
       - name: Test
         run: bun run test
+
+      - name: Check migrations
+        working-directory: src/packages/database
+        run: bun run db:migration:check
+
+      - name: Apply migrations
+        working-directory: src/packages/database
+        run: bun run db:migration:apply
 
       - name: Build application
         working-directory: src/apps/backend
