@@ -30,6 +30,8 @@ export const ArticleImportControl = () => {
 		() => content?.webUrl ?? '',
 	);
 
+	const [lockArticleInputText, setLockArticleInputText] = useState(false);
+
 	const { articleId, failure } =
 		parseArticleUrlInputToContentId(articleInputText);
 
@@ -39,6 +41,7 @@ export const ArticleImportControl = () => {
 				type: 'report-article-error',
 				errorMessage: 'Paste a URL to fetch an article',
 			});
+			setLockArticleInputText(false);
 			return;
 		}
 
@@ -53,6 +56,7 @@ export const ArticleImportControl = () => {
 					type: 'receive-article',
 					content,
 				});
+				setLockArticleInputText(true);
 			})
 			.catch((err) => {
 				// TO DO - error reporting/telemetry
@@ -60,6 +64,7 @@ export const ArticleImportControl = () => {
 					type: 'report-article-error',
 					errorMessage: err instanceof Error ? err.message : 'UNKNOWN ERROR',
 				});
+				setLockArticleInputText(false);
 			});
 	};
 
@@ -103,29 +108,55 @@ export const ArticleImportControl = () => {
 						isInvalid={!!showFieldErrors}
 						size="sm"
 						value={articleInputText}
-						isDisabled={isFetchingContent}
+						isDisabled={isFetchingContent || lockArticleInputText}
 						description="Copy and paste a Guardian article URL and fetch"
 						onChange={setArticleInputText}
 						cssOverrides={css({ width: '356px' })}
 					/>
 				</div>
-				<Button
-					isDisabled={isFetchingContent}
-					icon="upload"
-					size="sm"
-					variant="secondary"
-					onClick={fetchArticle}
-					cssOverrides={
-						isFetchingContent
-							? css({
-									backgroundColor: semanticColors.fill.disabled,
-									cursor: 'not-allowed',
-								})
-							: undefined
-					}
-				>
-					{showImportedArticle ? 'Replace' : 'Fetch'}
-				</Button>
+				{!lockArticleInputText && (
+					<Button
+						isDisabled={isFetchingContent}
+						icon="upload"
+						size="sm"
+						variant="secondary"
+						onClick={fetchArticle}
+						cssOverrides={
+							isFetchingContent
+								? css({
+										backgroundColor: semanticColors.fill.disabled,
+										cursor: 'not-allowed',
+									})
+								: undefined
+						}
+					>
+						Fetch
+					</Button>
+				)}
+				{lockArticleInputText && (
+					<Button
+						icon="upload"
+						size="sm"
+						variant="secondary"
+						onClick={() => {
+							setLockArticleInputText(false);
+							setArticleInputText('');
+							updateNotification({
+								type: 'reset',
+							});
+						}}
+						cssOverrides={
+							isFetchingContent
+								? css({
+										backgroundColor: semanticColors.fill.disabled,
+										cursor: 'not-allowed',
+									})
+								: undefined
+						}
+					>
+						Replace
+					</Button>
+				)}
 			</div>
 			<div
 				css={{
