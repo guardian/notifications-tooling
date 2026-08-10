@@ -127,7 +127,7 @@ export const DispatchTab = () => {
 									paddingLeft: semanticSpacing.stackMd,
 									[from.md]: { paddingLeft: semanticSpacing.stackXl },
 									'@media (min-width: 1500px)': {
-										paddingLeft: '9rem',
+										paddingLeft: '147px',
 									},
 								})}
 							>
