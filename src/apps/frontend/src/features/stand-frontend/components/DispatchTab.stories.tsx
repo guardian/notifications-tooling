@@ -25,6 +25,10 @@ export const Default: Story = {
 		await expect(
 			canvas.getByText('Create newsletter email'),
 		).toBeInTheDocument();
-		await expect(canvas.getByText('Preview')).toBeInTheDocument();
+		await expect(
+			canvas.getByText(
+				'The preview for the newsletter email and/or the app alert notification will be shown below.',
+			),
+		).toBeInTheDocument();
 	},
 };

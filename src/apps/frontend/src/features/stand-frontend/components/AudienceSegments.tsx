@@ -102,7 +102,7 @@ export const AudienceSegments = ({
 			}}
 		>
 			<Typography variant="bodyBoldMd" id="audience-section">
-				Audience Segments
+				Audience segments
 			</Typography>
 			<Typography variant="bodyCompactSm">
 				Choose the audience the email notification will be sent to
@@ -156,7 +156,7 @@ export const AudienceSegmentsPreviewPill = ({
 			}}
 		>
 			{!isConfirmation && (
-				<Typography variant="bodyBoldMd">Audience Segments</Typography>
+				<Typography variant="bodyBoldMd">Audience segments</Typography>
 			)}
 
 			<div

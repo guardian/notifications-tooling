@@ -9,6 +9,7 @@ import {
 	notificationChannelContentLimits,
 	UserPermissions,
 } from '@config';
+import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -26,6 +27,7 @@ import { channelAudiences, channelConstraints } from './index';
 // real clients) are imported.
 installPandaAuthMock();
 installPermissionsStoreMock();
+installDatabaseMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
 
 /**

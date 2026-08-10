@@ -11,14 +11,27 @@ import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 const baseEnv = { STACK: 'notifications', APP: 'dispatch' };
 
-const getSSMParameter = async (key: string, stage: string = 'CODE') => {
+const importSsmModule = async (stage: string) => {
 	await mock.module('./env', () => ({
 		configurationStage: stage === 'PROD' ? 'PROD' : 'CODE',
 		env: { ...baseEnv, STAGE: stage },
 		localAwsConfig: { profile: 'composer', region: 'eu-west-1' },
 	}));
-	const { getSSMParameter } = await import('./ssm');
+	return import('./ssm');
+};
+
+const getSSMParameter = async (key: string, stage: string = 'CODE') => {
+	const { getSSMParameter } = await importSsmModule(stage);
 	return getSSMParameter(key);
+};
+
+const getSecretValue = async <T>(
+	key: string,
+	parse: (value: unknown) => T,
+	stage: string = 'CODE',
+) => {
+	const { getSecretValue } = await importSsmModule(stage);
+	return getSecretValue(key, parse);
 };
 
 const SESSION_TOKEN = 'test-session-token';
@@ -81,12 +94,13 @@ describe('getSSMParameter in production', () => {
 	});
 
 	it('throws when AWS_SESSION_TOKEN is not present', () => {
-		delete process.env.AWS_SESSION_TOKEN;
 		const fetcher = spyOn(globalThis, 'fetch');
+		delete process.env.AWS_SESSION_TOKEN;
 
 		expect(getSSMParameter('my-param')).rejects.toThrow(
 			'AWS_SESSION_TOKEN is not set',
 		);
+
 		expect(fetcher).not.toHaveBeenCalled();
 	});
 
@@ -95,9 +109,37 @@ describe('getSSMParameter in production', () => {
 			new Response('Not Found', { status: 404, statusText: 'Not Found' }),
 		);
 
-		expect(getSSMParameter('my-param')).rejects.toThrow(
-			'Failed to fetch SSM parameter "my-param": 404 Not Found',
+		return expect(getSSMParameter('my-param')).rejects.toThrow(
+			'Failed to fetch config value for key: "my-param": 404 Not Found',
 		);
+	});
+});
+
+describe('getSecretValue in production', () => {
+	it('fetches Secrets Manager secrets via the extension and parses SecretString JSON', async () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({
+				SecretString:
+					'{"host":"db.example","port":5432,"dbname":"dispatchdb","username":"dispatch","password":"secret"}',
+			}),
+		);
+
+		const secret = await getSecretValue('db', (value) => value, 'CODE');
+
+		expect(secret).toEqual({
+			host: 'db.example',
+			port: 5432,
+			dbname: 'dispatchdb',
+			username: 'dispatch',
+			password: 'secret',
+		});
+
+		const calledUrl = fetcher.mock.calls[0]?.[0] as URL;
+		expect(calledUrl.toString()).toEqual(
+			'http://localhost:2773/secretsmanager/get' +
+				'?secretId=%2FCODE%2Fnotifications%2Fdispatch%2Fdb',
+		);
+		expect(calledUrl.searchParams.get('withDecryption')).toBeNull();
 	});
 });
 
@@ -139,8 +181,22 @@ describe('getSSMParameter in DEV', () => {
 			Parameter: {},
 		} as never);
 
-		expect(getSSMParameter('MY_PARAM', 'DEV')).rejects.toThrow(
+		return expect(getSSMParameter('MY_PARAM', 'DEV')).rejects.toThrow(
 			'SSM parameter "MY_PARAM" has no value.',
 		);
+	});
+});
+
+describe('getSecretValue in DEV', () => {
+	it('parses a local secret value before returning it', async () => {
+		process.env.DB = '{"host":"db.example","port":5432}';
+
+		const value = await getSecretValue(
+			'DB',
+			(raw) => raw as { host: string; port: number },
+			'DEV',
+		);
+
+		expect(value).toEqual({ host: 'db.example', port: 5432 });
 	});
 });
