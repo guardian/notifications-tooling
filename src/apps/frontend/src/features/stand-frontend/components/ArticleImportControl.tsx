@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { semanticColors, semanticSpacing } from '@guardian/stand';
+import { semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
@@ -30,6 +30,8 @@ export const ArticleImportControl = () => {
 		() => content?.webUrl ?? '',
 	);
 
+	const [lockArticleInputText, setLockArticleInputText] = useState(false);
+
 	const { articleId, failure } =
 		parseArticleUrlInputToContentId(articleInputText);
 
@@ -53,6 +55,7 @@ export const ArticleImportControl = () => {
 					type: 'receive-article',
 					content,
 				});
+				setLockArticleInputText(true);
 			})
 			.catch((err) => {
 				// TO DO - error reporting/telemetry
@@ -96,36 +99,44 @@ export const ArticleImportControl = () => {
 						gap: semanticSpacing.stackSm,
 					}}
 				>
-					<Typography variant="bodyBoldMd" element="h3" id="article-section">
+					<Typography variant="bodyBoldMd" element="h3">
 						Article
 					</Typography>
 					<TextInput
 						isInvalid={!!showFieldErrors}
 						size="sm"
 						value={articleInputText}
-						isDisabled={isFetchingContent}
+						placeholder="https://www.theguardian.com/..."
+						isDisabled={isFetchingContent || lockArticleInputText}
 						description="Copy and paste a Guardian article URL and fetch"
 						onChange={setArticleInputText}
 						cssOverrides={css({ width: '356px' })}
 					/>
 				</div>
-				<Button
-					isDisabled={isFetchingContent}
-					icon="upload"
-					size="sm"
-					variant="secondary"
-					onClick={fetchArticle}
-					cssOverrides={
-						isFetchingContent
-							? css({
-									backgroundColor: semanticColors.fill.disabled,
-									cursor: 'not-allowed',
-								})
-							: undefined
-					}
-				>
-					{showImportedArticle ? 'Replace' : 'Fetch'}
-				</Button>
+				{!lockArticleInputText && (
+					<Button
+						isDisabled={isFetchingContent}
+						icon="upload"
+						size="sm"
+						variant="secondary"
+						onClick={fetchArticle}
+					>
+						Fetch
+					</Button>
+				)}
+				{lockArticleInputText && (
+					<Button
+						isDisabled={isFetchingContent}
+						icon="refresh"
+						size="sm"
+						variant="secondary"
+						onClick={() => {
+							setLockArticleInputText(false);
+						}}
+					>
+						Replace
+					</Button>
+				)}
 			</div>
 			<div
 				css={{
