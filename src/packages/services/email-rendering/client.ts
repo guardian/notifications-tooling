@@ -8,8 +8,8 @@ type RenderEmailRequest = {
 	endpoint: string;
 	articleUrl: string;
 	newsletterId: string;
-	headlineOverride: string;
-	previewText: string;
+	headlineOverride?: string;
+	previewText?: string;
 	timeoutMs: number;
 };
 
