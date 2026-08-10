@@ -10,16 +10,11 @@ interface ScrollWrapperProps {
 	children?: React.ReactNode;
 }
 
-const outerStyle = (height?: CSSProperties['height']) => css`
-	overflow-y: hidden;
+const scrollStyle = (height?: CSSProperties['height']) => css`
+	overflow-y: auto;
 	height: ${height ?? '100%'};
 	position: relative;
-`;
-
-const innerStyle = css`
-	overflow-y: auto;
-	height: 100%;
-	position: relative;
+	display: flex;
 `;
 
 export const ScrollWrapper: React.FunctionComponent<ScrollWrapperProps> = ({
@@ -29,10 +24,8 @@ export const ScrollWrapper: React.FunctionComponent<ScrollWrapperProps> = ({
 	innerProps,
 }) => {
 	return (
-		<div css={[outerStyle(height), style]}>
-			<div css={innerStyle} {...innerProps}>
-				{children}
-			</div>
+		<div css={[scrollStyle(height), style]} {...innerProps}>
+			{children}
 		</div>
 	);
 };
