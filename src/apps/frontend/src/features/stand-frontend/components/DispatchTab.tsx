@@ -113,7 +113,7 @@ export const DispatchTab = () => {
 							size={'grow'}
 							cssOverrides={css({
 								paddingLeft: '9rem',
-								maxWidth: '826px'
+								maxWidth: '826px',
 							})}
 						>
 							<ScrollWrapper>
