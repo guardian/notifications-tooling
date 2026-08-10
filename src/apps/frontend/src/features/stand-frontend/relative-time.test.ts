@@ -14,9 +14,9 @@ const daysAgo = (days: number) => hoursAgo(days * 24);
 describe('formatRelativeTime', () => {
 	it('describes the last minute as "just now"', () => {
 		expect(formatRelativeTime(minutesAgo(0), TEST_DATE)).toBe('just now');
-		expect(formatRelativeTime(new Date(TEST_DATE.getTime() - 59_000), TEST_DATE)).toBe(
-			'just now',
-		);
+		expect(
+			formatRelativeTime(new Date(TEST_DATE.getTime() - 59_000), TEST_DATE),
+		).toBe('just now');
 	});
 
 	it('counts whole minutes', () => {
