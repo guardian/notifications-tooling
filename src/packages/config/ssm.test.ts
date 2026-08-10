@@ -11,18 +11,27 @@ import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 const baseEnv = { STACK: 'notifications', APP: 'dispatch' };
 
-const getManagedConfigValue = async (
-	key: string,
-	stage: string = 'CODE',
-	source: 'ssm' | 'secretsManager' = 'ssm',
-) => {
+const importSsmModule = async (stage: string) => {
 	await mock.module('./env', () => ({
 		configurationStage: stage === 'PROD' ? 'PROD' : 'CODE',
 		env: { ...baseEnv, STAGE: stage },
 		localAwsConfig: { profile: 'composer', region: 'eu-west-1' },
 	}));
-	const { getManagedConfigValue } = await import('./ssm');
-	return getManagedConfigValue(key, source);
+	return import('./ssm');
+};
+
+const getSSMParameter = async (key: string, stage: string = 'CODE') => {
+	const { getSSMParameter } = await importSsmModule(stage);
+	return getSSMParameter(key);
+};
+
+const getSecretValue = async <T>(
+	key: string,
+	parse: (value: unknown) => T,
+	stage: string = 'CODE',
+) => {
+	const { getSecretValue } = await importSsmModule(stage);
+	return getSecretValue(key, parse);
 };
 
 const SESSION_TOKEN = 'test-session-token';
@@ -37,7 +46,7 @@ afterEach(() => {
 	delete process.env.MY_PARAM;
 });
 
-describe('getManagedConfigValue in production', () => {
+describe('getSSMParameter in production', () => {
 	it('fetches the parameter from the extension endpoint and returns its value', async () => {
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({ Parameter: { Value: 'secret-value' } }),
@@ -47,7 +56,7 @@ describe('getManagedConfigValue in production', () => {
 			'http://localhost:2773/systemsmanager/parameters/get' +
 			'?name=%2FCODE%2Fnotifications%2Fdispatch%2Fmy-param&withDecryption=true';
 
-		const value = await getManagedConfigValue('my-param');
+		const value = await getSSMParameter('my-param');
 
 		expect(value).toBe('secret-value');
 
@@ -65,7 +74,7 @@ describe('getManagedConfigValue in production', () => {
 			Response.json({ Parameter: { Value: 'secret-value' } }),
 		);
 
-		await getManagedConfigValue('my-param');
+		await getSSMParameter('my-param');
 
 		const calledUrl = fetcher.mock.calls[0]?.[0] as URL;
 		expect(calledUrl.searchParams.get('withDecryption')).toBe('true');
@@ -76,7 +85,7 @@ describe('getManagedConfigValue in production', () => {
 			Response.json({ Parameter: { Value: 'secret-value' } }),
 		);
 
-		await getManagedConfigValue('BRAZE_API_KEY');
+		await getSSMParameter('BRAZE_API_KEY');
 
 		const calledUrl = fetcher.mock.calls[0]?.[0] as URL;
 		expect(calledUrl.searchParams.get('name')).toBe(
@@ -88,7 +97,7 @@ describe('getManagedConfigValue in production', () => {
 		const fetcher = spyOn(globalThis, 'fetch');
 		delete process.env.AWS_SESSION_TOKEN;
 
-		expect(getManagedConfigValue('my-param')).rejects.toThrow(
+		expect(getSSMParameter('my-param')).rejects.toThrow(
 			'AWS_SESSION_TOKEN is not set',
 		);
 
@@ -100,11 +109,13 @@ describe('getManagedConfigValue in production', () => {
 			new Response('Not Found', { status: 404, statusText: 'Not Found' }),
 		);
 
-		return expect(getManagedConfigValue('my-param')).rejects.toThrow(
-			'Failed to fetch config value from ssm for key: "my-param": 404 Not Found',
+		return expect(getSSMParameter('my-param')).rejects.toThrow(
+			'Failed to fetch config value for key: "my-param": 404 Not Found',
 		);
 	});
+});
 
+describe('getSecretValue in production', () => {
 	it('fetches Secrets Manager secrets via the extension and parses SecretString JSON', async () => {
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({
@@ -113,7 +124,7 @@ describe('getManagedConfigValue in production', () => {
 			}),
 		);
 
-		const secret = await getManagedConfigValue('db', 'CODE', 'secretsManager');
+		const secret = await getSecretValue('db', (value) => value, 'CODE');
 
 		expect(secret).toEqual({
 			host: 'db.example',
@@ -132,13 +143,13 @@ describe('getManagedConfigValue in production', () => {
 	});
 });
 
-describe('getManagedConfigValue in DEV', () => {
+describe('getSSMParameter in DEV', () => {
 	it('returns a process.env override without calling SSM', async () => {
 		process.env.MY_PARAM = 'local-value';
 		const fetcher = spyOn(globalThis, 'fetch');
 		const send = spyOn(SSMClient.prototype, 'send');
 
-		const value = await getManagedConfigValue('MY_PARAM', 'DEV');
+		const value = await getSSMParameter('MY_PARAM', 'DEV');
 
 		expect(value).toBe('local-value');
 		expect(fetcher).not.toHaveBeenCalled();
@@ -152,7 +163,7 @@ describe('getManagedConfigValue in DEV', () => {
 			Parameter: { Value: 'code-value' },
 		} as never);
 
-		const value = await getManagedConfigValue('MY_PARAM', 'DEV');
+		const value = await getSSMParameter('MY_PARAM', 'DEV');
 
 		expect(value).toBe('code-value');
 		expect(send).toHaveBeenCalledTimes(1);
@@ -170,8 +181,22 @@ describe('getManagedConfigValue in DEV', () => {
 			Parameter: {},
 		} as never);
 
-		return expect(getManagedConfigValue('MY_PARAM', 'DEV')).rejects.toThrow(
+		return expect(getSSMParameter('MY_PARAM', 'DEV')).rejects.toThrow(
 			'SSM parameter "MY_PARAM" has no value.',
 		);
+	});
+});
+
+describe('getSecretValue in DEV', () => {
+	it('parses a local secret value before returning it', async () => {
+		process.env.DB = '{"host":"db.example","port":5432}';
+
+		const value = await getSecretValue(
+			'DB',
+			(raw) => raw as { host: string; port: number },
+			'DEV',
+		);
+
+		expect(value).toEqual({ host: 'db.example', port: 5432 });
 	});
 });
