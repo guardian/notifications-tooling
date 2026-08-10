@@ -132,10 +132,6 @@ export const ArticleImportControl = () => {
 						variant="secondary"
 						onClick={() => {
 							setLockArticleInputText(false);
-							setArticleInputText('');
-							updateNotification({
-								type: 'reset',
-							});
 						}}
 					>
 						Replace
