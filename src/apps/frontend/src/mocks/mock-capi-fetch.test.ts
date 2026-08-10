@@ -1,5 +1,9 @@
-import { describe, expect, it, spyOn } from 'bun:test';
+import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import { hackyClientSideCapiFetch } from './mock-capi-fetch';
+
+afterEach(() => {
+	mock.restore();
+});
 
 const capiPayload = (content: Record<string, unknown>) => ({
 	response: { status: 'ok', total: 1, content },
