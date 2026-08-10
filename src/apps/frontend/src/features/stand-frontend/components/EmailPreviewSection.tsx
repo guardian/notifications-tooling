@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import { baseSpacing, semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import { from } from '@guardian/stand/utils';
 import type {
 	AudienceSegment,
 	ChannelOption,
@@ -29,17 +30,27 @@ export const EmailPreviewSection = ({
 		<section
 			css={css({
 				background: semanticColors.bg.raisedLevel1,
-				flexBasis: 474,
+				boxSizing: 'border-box',
 				display: 'flex',
 				flexDirection: 'column',
 				gap: semanticSpacing.stackLg,
-				paddingTop: '48px',
-				paddingLeft: semanticSpacing.stackLg,
-				paddingRight: semanticSpacing.stackLg,
+				paddingTop: semanticSpacing.stackMd,
+				paddingLeft: semanticSpacing.stackMd,
+				paddingRight: semanticSpacing.stackMd,
 				paddingBottom: baseSpacing['48Px'],
-				position: 'sticky',
-				top: '0px',
-				zIndex: 1,
+				width: '100%',
+				[from.md]: {
+					paddingLeft: semanticSpacing.stackLg,
+					paddingRight: semanticSpacing.stackLg,
+					paddingTop: semanticSpacing.stackLg,
+				},
+				[from.lg]: {
+					flexBasis: 474,
+					paddingTop: '48px',
+					position: 'sticky',
+					top: '0px',
+					zIndex: 1,
+				},
 			})}
 		>
 			<header
