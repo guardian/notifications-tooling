@@ -7,6 +7,7 @@ import {
 import { baseSpacing } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
+import { from } from '@guardian/stand/utils';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
@@ -112,8 +113,11 @@ export const DispatchTab = () => {
 						<Item
 							size={'grow'}
 							cssOverrides={css({
-								paddingLeft: '147px',
+								paddingLeft: semanticSpacing.stackXl,
 								maxWidth: '826px',
+								'@media (min-width: 1500px)': {
+									paddingLeft: '9rem',
+								},
 							})}
 						>
 							<ScrollWrapper>
@@ -123,10 +127,13 @@ export const DispatchTab = () => {
 						<Item
 							size={'grow'}
 							cssOverrides={css({
-								display: 'flex',
+								display: 'none',
 								justifyContent: 'center',
 								alignItems: 'flex-start',
 								flow: 'vertical',
+								[from.lg]: {
+									display: 'flex',
+								},
 							})}
 						>
 							<EmailPreviewSection

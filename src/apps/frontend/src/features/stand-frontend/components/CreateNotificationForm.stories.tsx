@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
 	mockSendFailingRequest,
@@ -88,6 +88,33 @@ export const FetchArticleError: Story = {
 export const PopulatedEmail: Story = {
 	args: {
 		notificationState: populatedEmailState,
+	},
+};
+
+export const MobilePreview: Story = {
+	args: {
+		notificationState: populatedEmailState,
+	},
+	parameters: {
+		viewport: {
+			defaultViewport: 'mobile2',
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const toggle = canvas.getByRole('button', { name: 'Preview' });
+
+		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+		await userEvent.click(toggle);
+		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+		await expect(
+			canvas.getByText(
+				'The preview for the newsletter email and/or the app alert notification will be shown below.',
+			),
+		).toBeInTheDocument();
+
+		await userEvent.click(toggle);
+		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 	},
 };
 

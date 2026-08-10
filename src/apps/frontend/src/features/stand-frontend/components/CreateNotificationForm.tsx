@@ -1,11 +1,13 @@
 import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
 import { EmailFields } from './EmailFields';
+import { PreviewToggle } from './PreviewToggle';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
@@ -27,6 +29,16 @@ export const CreateNotificationForm = () => {
 				gap: semanticSpacing.stackXl,
 			}}
 		>
+			<PreviewToggle
+				selectedSegments={notification.parameters?.audienceSegments ?? []}
+				selectedChannel={notification.parameters?.type}
+				selectedDeliveryTiming={
+					notification.parameters?.type === 'email'
+						? notification.parameters.emailDeliveryOption
+						: undefined
+				}
+			/>
+
 			<Typography variant="heading2Xl" element="h2">
 				Create newsletter email
 			</Typography>
@@ -36,7 +48,10 @@ export const CreateNotificationForm = () => {
 					display: 'flex',
 					flexDirection: 'column',
 					gap: semanticSpacing.stackLg,
-					width: '476px',
+					width: '100%',
+					[from.md]: {
+						width: '476px',
+					},
 				}}
 			>
 				<ArticleImportControl />
