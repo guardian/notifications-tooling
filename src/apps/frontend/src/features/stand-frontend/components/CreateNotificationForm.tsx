@@ -7,7 +7,6 @@ import { NotificationFormContext } from '../NotificationContext';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
 import { EmailFields } from './EmailFields';
-import { PreviewToggle } from './PreviewToggle';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
@@ -29,16 +28,6 @@ export const CreateNotificationForm = () => {
 				gap: semanticSpacing.stackXl,
 			}}
 		>
-			<PreviewToggle
-				selectedSegments={notification.parameters?.audienceSegments ?? []}
-				selectedChannel={notification.parameters?.type}
-				selectedDeliveryTiming={
-					notification.parameters?.type === 'email'
-						? notification.parameters.emailDeliveryOption
-						: undefined
-				}
-			/>
-
 			<Typography variant="heading2Xl" element="h2">
 				Create newsletter email
 			</Typography>

@@ -14,6 +14,7 @@ import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
+import { PreviewToggle } from './PreviewToggle';
 import { ScrollWrapper } from './ScrollWrapper';
 import {
 	DEFAULT_SIDE_NAV_HREF,
@@ -103,6 +104,10 @@ export const DispatchTab = () => {
 							cssOverrides={css({
 								border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 								gap: `${baseSpacing['10Px']}`,
+								display: 'none',
+								[from.md]: {
+									display: 'block',
+								},
 							})}
 						>
 							<SideNavigationPanel
@@ -113,14 +118,19 @@ export const DispatchTab = () => {
 						<Item
 							size={'grow'}
 							cssOverrides={css({
-								paddingLeft: semanticSpacing.stackXl,
 								maxWidth: '826px',
-								'@media (min-width: 1500px)': {
-									paddingLeft: '9rem',
-								},
 							})}
 						>
-							<ScrollWrapper>
+							<PreviewToggle />
+							<ScrollWrapper
+								style={css({
+									paddingLeft: semanticSpacing.stackMd,
+									[from.md]: { paddingLeft: semanticSpacing.stackXl },
+									'@media (min-width: 1500px)': {
+										paddingLeft: '9rem',
+									},
+								})}
+							>
 								<CreateNotificationForm />
 							</ScrollWrapper>
 						</Item>
@@ -131,7 +141,7 @@ export const DispatchTab = () => {
 								justifyContent: 'center',
 								alignItems: 'flex-start',
 								flow: 'vertical',
-								[from.lg]: {
+								['@media (min-width: 1280px)']: {
 									display: 'flex',
 								},
 							})}
