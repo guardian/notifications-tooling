@@ -1,25 +1,17 @@
-import { type EmailPreviewRequest, emailPreviewResponseSchema } from '@models';
+import { emailPreviewResponseSchema } from '@models';
 import { fetchJsonAndParse } from '../../../api/client';
 import type { RequestEmailHtml } from '../types';
 
-export const requestEmailHtml: RequestEmailHtml = async (
-	articleId,
-	options,
-) => {
-	const payload: EmailPreviewRequest = {
-		article: `https://www.theguardian.com/${articleId}`,
-		audience: options.audience.split(','),
-	};
-
+export const requestEmailHtml: RequestEmailHtml = async (request) => {
 	const data = await fetchJsonAndParse(
 		emailPreviewResponseSchema,
 		'/v1/preview/email',
 		{
 			method: 'POST',
-			body: JSON.stringify(payload),
+			body: JSON.stringify(request),
 			headers: { 'Content-Type': 'application/json' },
 		},
 	);
 
-	return data.html;
+	return data;
 };

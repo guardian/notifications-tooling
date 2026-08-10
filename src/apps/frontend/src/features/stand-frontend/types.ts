@@ -1,4 +1,5 @@
 import type { Content } from '@guardian/content-api-models/v1/content';
+import type { EmailPreviewRequest, EmailPreviewResponse } from '@models';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
@@ -61,7 +62,7 @@ export type SendingResult =
 	  };
 
 export type RequestEmailHtml = {
-	(articleId: string, options: { audience: string }): Promise<string>;
+	(request: EmailPreviewRequest): Promise<EmailPreviewResponse>;
 };
 
 export type NotificationAction =

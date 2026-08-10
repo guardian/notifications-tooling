@@ -42,22 +42,35 @@ const modifyContent = (
 
 export const HTMLPreview = () => {
 	const {
-		notification: { fetchedArticleId, parameters },
-		requestEmailHtml: fetchEmailHtml,
+		notification: { parameters, content },
+		requestEmailHtml,
 	} = useContext(NotificationFormContext);
 	const [emailHtml, setEmailHtml] = useState<string>();
 	const [errorMessage, setErrorMessage] = useState<string>();
 	const [isLoading, setIsLoading] = useState(false);
 
-	const audience = (parameters?.audienceSegments ?? []).join();
+	const stringifiedAudience = (parameters?.audienceSegments ?? []).join();
+	const { webUrl } = content ?? {};
 	const emailParameters = parameters?.type === 'email' ? parameters : undefined;
 
 	const fetchHtml = useCallback(async () => {
-		if (!fetchedArticleId) {
+		if (!webUrl) {
 			return `<div>no article loaded</div>`;
 		}
-		return fetchEmailHtml(fetchedArticleId, { audience });
-	}, [fetchedArticleId, fetchEmailHtml, audience]);
+		const audience = stringifiedAudience
+			.split(',')
+			.map((item) => item.trim())
+			.filter((item) => item.length > 0);
+
+		if (audience.length === 0) {
+			return `<div>no audience</div>`;
+		}
+		const response = await requestEmailHtml({
+			article: webUrl,
+			audience: audience,
+		});
+		return response.html;
+	}, [webUrl, requestEmailHtml, stringifiedAudience]);
 
 	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect -- ok
