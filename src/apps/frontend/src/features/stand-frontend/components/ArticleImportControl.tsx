@@ -32,7 +32,7 @@ export const ArticleImportControl = () => {
 
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
-	const { articleId, failure } =
+	const { failure, webUrl, articleId } =
 		parseArticleUrlInputToContentId(articleInputText);
 
 	const fetchArticle = () => {
@@ -44,16 +44,18 @@ export const ArticleImportControl = () => {
 			return;
 		}
 
-		if (!articleId) {
+		if (!webUrl) {
 			return;
 		}
 
 		updateNotification({ type: 'waiting-for-article' });
-		capiFetch(articleId)
-			.then((content) => {
+		capiFetch({
+			article: webUrl,
+		})
+			.then((responseBody) => {
 				updateNotification({
 					type: 'receive-article',
-					content,
+					content: responseBody.article,
 				});
 				setLockArticleInputText(true);
 			})

@@ -1,14 +1,12 @@
-import type { ResolvedArticle } from '@models';
+import type { ResolveArticleResponse } from '@models';
 import { articleFixture } from './capi-fixtures';
 
-export const mockCapiFetch = (articleId: string): Promise<ResolvedArticle> => {
-	return new Promise<ResolvedArticle>((resolve, reject) => {
+export const mockCapiFetch = (): Promise<ResolveArticleResponse> => {
+	return new Promise<ResolveArticleResponse>((resolve) => {
 		setTimeout(() => {
-			if (articleId === '/') {
-				reject(new Error(`Could not load article with id ${articleId}`));
-			} else {
-				resolve({ ...articleFixture, id: articleId });
-			}
+			resolve({
+				article: { ...articleFixture },
+			});
 		}, 500);
 	});
 };
