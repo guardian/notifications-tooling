@@ -1,3 +1,4 @@
+import type { ResolvedArticle } from '@models';
 import { CapiError } from '@models';
 import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import { fetchArticle } from './client';
@@ -57,10 +58,14 @@ describe('fetchArticle', () => {
 	it('encodes the article id path segments in the CAPI request', async () => {
 		const timeoutSignal = new AbortController().signal;
 		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
-		const content = {
+		const content: ResolvedArticle = {
 			id: 'world/2026/jul/08/summit',
 			type: 'article',
 			webUrl: 'https://www.theguardian.com/world/2026/jul/08/summit',
+			webTitle: 'summit happen',
+			fields: {
+				headline: 'summit happen',
+			},
 		};
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({ response: { status: 'ok', content } }),
