@@ -57,6 +57,7 @@ const capiContentSchema = z.looseObject({
 	pillarId: z.string().optional(),
 	pillarName: z.string().optional(),
 	webTitle: z.string(),
+	webUrl: z.string(),
 	webPublicationDate: z.string().optional(),
 	fields: z.record(z.string(), z.string()).optional(),
 });

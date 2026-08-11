@@ -1,9 +1,8 @@
-import type { CapiDateTime } from '@guardian/content-api-models/v1/capiDateTime';
-import type { Content } from '@guardian/content-api-models/v1/content';
+import type { ResolvedArticle } from '@models';
 import { articleFixture } from './capi-fixtures';
 
-export const mockCapiFetch = (articleId: string): Promise<Content> => {
-	return new Promise<Content>((resolve, reject) => {
+export const mockCapiFetch = (articleId: string): Promise<ResolvedArticle> => {
+	return new Promise<ResolvedArticle>((resolve, reject) => {
 		setTimeout(() => {
 			if (articleId === '/') {
 				reject(new Error(`Could not load article with id ${articleId}`));
@@ -19,35 +18,10 @@ const params = 'api-key=test&show-fields=headline,standfirst,thumbnail';
 
 /**
  * TO DO - this is not intended for production use, just to demo.
- *
- * The JSON API returns `webPublicationDate` as a bare ISO-8601 string, whereas
- * the thrift `Content` model types it as a {@link CapiDateTime} object. Without
- * this, `content.webPublicationDate.iso8601` is `undefined` at runtime and the
- * publication date silently disappears from the UI.
- */
-
-const toCapiDateTime = (
-	webPublicationDate: unknown,
-): CapiDateTime | undefined => {
-	if (typeof webPublicationDate !== 'string') {
-		return undefined;
-	}
-	return {
-		dateTime: {} as CapiDateTime['dateTime'],
-		iso8601: webPublicationDate,
-	};
-};
-
-/**
- * TO DO - this is not intended for production use, just to demo.
- *
- * Fetching the JSON client side does not return data in the
- * same format as the thrift Content model described by content-api-models,
- * but it is similar enough for use to extract the fields we need.
  */
 export const hackyClientSideCapiFetch = async (
 	articleId: string,
-): Promise<Content> => {
+): Promise<ResolvedArticle> => {
 	const url = `${baseUrl}/${articleId}?${params}`;
 	const response = await fetch(url);
 	if (!response.ok) {
@@ -58,7 +32,7 @@ export const hackyClientSideCapiFetch = async (
 	try {
 		const castJson = json as {
 			response: {
-				content: unknown;
+				content: ResolvedArticle;
 				status: string;
 				total: number;
 			};
@@ -66,11 +40,7 @@ export const hackyClientSideCapiFetch = async (
 		if (castJson.response.status !== 'ok') {
 			throw new Error(`CAPI returned ${castJson.response.status} response`);
 		}
-		const content = castJson.response.content as Content;
-		return {
-			...content,
-			webPublicationDate: toCapiDateTime(content.webPublicationDate),
-		};
+		return castJson.response.content;
 	} catch {
 		throw new Error('Could not parse CAPI json');
 	}

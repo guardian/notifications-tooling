@@ -1,4 +1,4 @@
-import type { Content } from '@guardian/content-api-models/v1/content';
+import type { ResolvedArticle } from '@models';
 import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
 import type {
@@ -12,7 +12,7 @@ export interface NotificationFormContextProps {
 	notification: NotificationState;
 	updateNotification: ActionDispatch<[NotificationAction]>;
 	// TO DO - get the required payload from the backend
-	capiFetch: { (articleId: string): Promise<Content> };
+	capiFetch: { (articleId: string): Promise<ResolvedArticle> };
 	// TO DO - get the required payload from the backend
 	sendNotification: {
 		(notification: NotificationState): Promise<SendingResult>;

@@ -1,4 +1,4 @@
-import type { Content } from '@guardian/content-api-models/v1/content';
+import type { ResolvedArticle } from '@models';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
@@ -25,7 +25,7 @@ export type NotificationState = {
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
-	content?: Content;
+	content?: ResolvedArticle;
 	parameters?: EmailNotification | PushNotification;
 	hasAttemptedSend: boolean;
 	confirmSendModalOpen: boolean;
@@ -78,7 +78,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'receive-article';
-			content: Content;
+			content: ResolvedArticle;
 	  }
 	| {
 			type: 'report-article-error';
