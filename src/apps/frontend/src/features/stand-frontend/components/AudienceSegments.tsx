@@ -8,6 +8,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { audienceSegmentStyles } from '../themes';
 import { type AudienceSegment } from '../types';
 import { FlagAtom } from './FlagAtom';
+import { checkboxIcon, selectedCheckboxIcon } from './FlagIcons';
 
 export interface Segment {
 	code: AudienceSegment;
@@ -61,7 +62,17 @@ export const AudienceSegments = ({
 				Choose the audience the email notification will be sent to
 			</Typography>
 
-			<Grid>
+			<Grid
+				cssOverrides={css({
+					height: '100%',
+					maxWidth: '450px',
+				})}
+				theme={{
+					sm: { gap: '12px', padding: `0px 0px 0px 0px` },
+					md: { gap: '12px', padding: `0px 0px 0px 0px` },
+					lg: { gap: '12px', padding: `0px 0px 0px 0px` },
+				}}
+			>
 				{segments.map((segment) => {
 					const isSelected = selected.includes(segment.code);
 					return (
@@ -71,20 +82,26 @@ export const AudienceSegments = ({
 								variant="tertiary"
 								onClick={() => onSegmentToggle(segment.code)}
 								aria-pressed={isSelected}
-								cssOverrides={audienceSegmentStyles.audienceSegmentCheckBoxTile(
-									isSelected,
-								)}
+								cssOverrides={css([
+									audienceSegmentStyles.audienceSegmentCheckBoxTile(isSelected),
+									{ alignItems: 'flex-start', justifyItems: 'flex-start' },
+								])}
 							>
 								<div
 									css={css({
 										display: 'flex',
 										flexDirection: 'column',
+										width: '100%',
+										alignItems: 'flex-start',
 									})}
 								>
 									<div
 										css={css({
 											display: 'flex',
 											flexDirection: 'row',
+											justifyContent: 'space-between',
+											alignItems: 'center',
+											width: '100%',
 											paddingTop: `${baseSpacing['6Px']}`,
 										})}
 									>
@@ -93,22 +110,26 @@ export const AudienceSegments = ({
 										</div>
 										<div
 											css={css({
+												display: 'flex',
 												height: '16px',
 												width: '16px',
 												alignItems: 'center',
-												justifyContent: 'left',
+												justifyContent: 'center',
 											})}
 										>
 											<Icon
-												symbol={isSelected ? 'select_check_box' : 'check_box'}
+												symbol={
+													isSelected ? selectedCheckboxIcon : checkboxIcon
+												}
 												alt={`${segment.label}`}
 											/>
 										</div>
 									</div>
 									<Typography
-										variant="bodyBoldSm"
+										variant="headingXs"
 										cssOverrides={css({
 											color: semanticColors.text.strong,
+											padding: `${baseSpacing['4Px']} ${baseSpacing['8Px']} ${baseSpacing['6Px']} 0`,
 										})}
 									>
 										{segment.label}
@@ -162,7 +183,7 @@ export const AudienceSegmentsPreviewPill = ({
 									css={
 										isConfirmation
 											? audienceSegmentStyles.isConfirmationStyle
-											: audienceSegmentStyles.audienceSegmentButton(false)
+											: audienceSegmentStyles.audienceSegmentButton
 									}
 								>
 									<div css={audienceSegmentStyles.audienceSegmentIcon}>

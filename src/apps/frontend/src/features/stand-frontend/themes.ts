@@ -190,25 +190,15 @@ export const audienceSegmentStyles = {
 			height: '56px',
 			width: '100%',
 		}),
-	audienceSegmentButton: (isSelected: boolean) =>
-		css({
-			backgroundColor: isSelected
-				? baseColors.magenta[900]
-				: semanticColors.fill.weak,
-			color: semanticColors.text.strong,
-			'&:hover': {
-				backgroundColor: isSelected
-					? baseColors.magenta[900]
-					: semanticColors.fill.weakPressed,
-			},
-			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-			padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
-			borderRadius: semanticRadius.cornerSm,
-			display: 'flex',
-			alignItems: 'center',
-			gap: `${baseSpacing['8Px']}`,
-			height: '56px',
-		}),
+	audienceSegmentButton: css({
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		display: 'flex',
+		alignItems: 'center',
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
+	}),
 	audienceSegmentIcon: css({
 		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 		width: '24px',
