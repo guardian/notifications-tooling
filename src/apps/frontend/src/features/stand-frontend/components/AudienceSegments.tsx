@@ -93,6 +93,7 @@ export const AudienceSegments = ({
 										flexDirection: 'column',
 										width: '100%',
 										alignItems: 'flex-start',
+										gap: semanticSpacing.stackXxs,
 									})}
 								>
 									<div
@@ -102,7 +103,6 @@ export const AudienceSegments = ({
 											justifyContent: 'space-between',
 											alignItems: 'center',
 											width: '100%',
-											paddingTop: `${baseSpacing['6Px']}`,
 										})}
 									>
 										<div css={audienceSegmentStyles.audienceSegmentIcon}>
