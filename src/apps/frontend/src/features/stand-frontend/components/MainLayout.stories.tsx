@@ -1,6 +1,7 @@
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { MemoryRouter } from 'react-router-dom';
 import { expect, within } from 'storybook/test';
 import { mockAppConfig } from '../../../mocks/app-config';
 import { UserContext } from '../UserContext';
@@ -20,14 +21,14 @@ const meta = {
 	},
 	decorators: [
 		(Story) => (
-			<UserContext.Provider value={mockAppConfig}>
-				<Story />
-			</UserContext.Provider>
+			<MemoryRouter initialEntries={['/create']}>
+				<UserContext.Provider value={mockAppConfig}>
+					<Story />
+				</UserContext.Provider>
+			</MemoryRouter>
 		),
 	],
 	args: {
-		currentTab: 'create',
-		setTab: () => {},
 		children: (
 			<Layout.Main>
 				<Typography variant="bodyMd">Page content goes here</Typography>

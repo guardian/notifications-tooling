@@ -9,16 +9,14 @@ import {
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
 import { type ReactNode, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { AppConfig } from '../get-config';
 import { faviconTheme, topBarTheme } from '../themes';
-import type { TabName } from '../types';
 import { UserContext } from '../UserContext';
 
 interface Props {
 	children: ReactNode;
 	contentId?: string;
-	setTab: { (tab: TabName): void };
-	currentTab: TabName;
 }
 
 const getInitials = (user: AppConfig['user']): string => {
@@ -27,17 +25,14 @@ const getInitials = (user: AppConfig['user']): string => {
 	return `${firstName}${lastName}`.toUpperCase() || 'U';
 };
 
-const navLinks: Record<TabName, { text: string }> = {
-	create: {
-		text: 'Create',
-	},
-	history: {
-		text: 'History',
-	},
-};
+const navLinks = [
+	{ text: 'Create', path: '/create' },
+	{ text: 'History', path: '/history' },
+] as const;
 
-export const MainLayout = ({ children, currentTab, setTab }: Props) => {
+export const MainLayout = ({ children }: Props) => {
 	const { user } = useContext(UserContext) ?? {};
+	const { pathname } = useLocation();
 
 	return (
 		<Layout>
@@ -53,13 +48,12 @@ export const MainLayout = ({ children, currentTab, setTab }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{Object.entries(navLinks).map(([tabName, { text }]) => (
+						{navLinks.map(({ text, path }) => (
 							<TopBarNavigation
-								key={tabName}
+								key={path}
 								text={text}
-								isSelected={currentTab === tabName}
-								onPress={() => setTab(tabName as TabName)}
-								href={`#${tabName}`}
+								isSelected={pathname === path}
+								href={path}
 							/>
 						))}
 					</TopBarContainerLeft>
