@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import {
 	AudienceSegments,
 	AudienceSegmentsPreviewPill,
@@ -28,7 +28,7 @@ type AudienceSegmentsPreviewPillStory = StoryObj<
 export const NoSelection: Story = {
 	args: {
 		selected: [],
-		onChange: () => {},
+		onChange: fn(),
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -36,27 +36,32 @@ export const NoSelection: Story = {
 		await expect(canvas.getByText('United Kingdom')).toBeInTheDocument();
 		await expect(canvas.getByText('United States')).toBeInTheDocument();
 		await expect(canvas.getByText('Australia')).toBeInTheDocument();
+
+		await userEvent.click(
+			canvas.getByRole('checkbox', { name: 'United Kingdom' }),
+		);
+		await expect(NoSelection.args?.onChange).toHaveBeenCalledWith(['UK']);
 	},
 };
 
 export const SingleSelection: Story = {
 	args: {
 		selected: ['UK'],
-		onChange: () => {},
+		onChange: () => { },
 	},
 };
 
 export const MultipleSelection: Story = {
 	args: {
 		selected: ['UK', 'US'],
-		onChange: () => {},
+		onChange: () => { },
 	},
 };
 
 export const AllSelected: Story = {
 	args: {
 		selected: ['UK', 'US', 'AU'],
-		onChange: () => {},
+		onChange: () => { },
 	},
 };
 

@@ -7,8 +7,7 @@ import {
 	semanticSizing,
 	semanticSpacing,
 } from '@guardian/stand';
-import { Button } from '@guardian/stand/Button';
-import { ButtonGroup } from '@guardian/stand/ButtonGroup';
+import { Checkbox } from '@guardian/stand/Checkbox';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { type AudienceSegment } from '../types';
@@ -38,35 +37,54 @@ export const DEFAULT_SEGMENTS: Segment[] = [
 	{ code: 'AU', label: 'Australia' },
 ];
 const styles = {
-	audienceSegmentButton: (isSelected: boolean) =>
-		css({
-			backgroundColor: isSelected
-				? baseColors.magenta[200]
-				: semanticColors.fill.weak,
-			color: isSelected
-				? semanticColors.text.strongerInverse
-				: semanticColors.text.weak,
-			'&:hover': {
-				backgroundColor: isSelected
-					? baseColors.magenta[200]
-					: semanticColors.fill.weakPressed,
-				color: isSelected
-					? semanticColors.text.strongerInverse
-					: semanticColors.text.weak,
-			},
-			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-			padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
-			borderRadius: semanticRadius.cornerSm,
-			display: 'flex',
-			alignItems: 'center',
-			gap: `${baseSpacing['8Px']}`,
-			height: '32px',
-		}),
-	audienceSegmentIcon: css({
-		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
-		width: '24px',
-		height: '18px',
+	audienceSegmentCheckbox: css({
+		backgroundColor: semanticColors.fill.weak,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		borderRadius: semanticRadius.cornerSm,
+		boxSizing: 'border-box',
+		display: 'grid',
+		gridTemplateColumns: '1fr auto',
+		gridTemplateRows: 'auto auto',
+		gap: baseSpacing['8Px'],
+		minHeight: '64px',
+		minWidth: '144px',
+		padding: baseSpacing['8Px'],
+		'&[data-selected="true"]': {
+			backgroundColor: baseColors.magenta['900'],
+			borderColor: semanticColors.border.strong,
+		},
+		'&[data-selected] > .checkbox-indicator': {
+			backgroundColor: baseColors.magenta['200'],
+			borderColor: baseColors.magenta['200'],
+		},
+		'& > .checkbox-indicator': {
+			alignSelf: 'start',
+			gridColumn: 2,
+			gridRow: 1,
+			justifySelf: 'end',
+		},
+		'&:hover': {
+			backgroundColor: semanticColors.fill.weakPressed,
+		},
+	}),
+	audienceSegmentPill: css({
+		backgroundColor: semanticColors.fill.weak,
+		color: semanticColors.text.weak,
+		'&:hover': {
+			backgroundColor: semanticColors.fill.weakPressed,
+			color: semanticColors.text.weak,
+		},
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		display: 'flex',
+		alignItems: 'center',
 		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
+	}),
+	audienceSegmentIcon: css({
+		width: '24px',
+		height: '24px',
 	}),
 	isConfirmationStyle: css({
 		backgroundColor: semanticColors.fill.weak,
@@ -108,34 +126,50 @@ export const AudienceSegments = ({
 				Choose the audience the email notification will be sent to
 			</Typography>
 
-			<ButtonGroup size="lg">
+			<div
+				css={{
+					display: 'flex',
+					flexWrap: 'wrap',
+					gap: semanticSpacing.stackXs,
+				}}
+			>
 				{segments.map((segment) => {
 					const isSelected = selected.includes(segment.code);
 					return (
-						<Button
+						<Checkbox
 							key={segment.code}
-							variant="tertiary"
-							onClick={() => onSegmentToggle(segment.code)}
-							aria-pressed={isSelected}
-							cssOverrides={styles.audienceSegmentButton(isSelected)}
+							isSelected={isSelected}
+							onChange={() => onSegmentToggle(segment.code)}
+							cssOverrides={styles.audienceSegmentCheckbox}
 						>
-							<div css={styles.audienceSegmentIcon}>
-								<FlagAtom segmentCode={segment.code} />
-							</div>
-							<Typography
-								variant="bodyBoldSm"
-								cssOverrides={css({
-									color: isSelected
-										? semanticColors.text.strongerInverse
-										: semanticColors.text.weak,
-								})}
+							<div
+								css={{
+									display: 'contents',
+								}}
 							>
-								{segment.label}
-							</Typography>
-						</Button>
+								<div
+									css={[
+										styles.audienceSegmentIcon,
+										css({ gridColumn: 1, gridRow: 1 }),
+									]}
+								>
+									<FlagAtom segmentCode={segment.code} />
+								</div>
+								<Typography
+									variant="bodyBoldSm"
+									cssOverrides={css({
+										color: semanticColors.text.weak,
+										gridColumn: '1 / -1',
+										gridRow: 2,
+									})}
+								>
+									{segment.label}
+								</Typography>
+							</div>
+						</Checkbox>
 					);
 				})}
-			</ButtonGroup>
+			</div>
 
 			{error && <InlineMessage level="error">{error}</InlineMessage>}
 		</div>
@@ -177,7 +211,7 @@ export const AudienceSegmentsPreviewPill = ({
 							css={
 								isConfirmation
 									? styles.isConfirmationStyle
-									: styles.audienceSegmentButton(false)
+									: styles.audienceSegmentPill
 							}
 						>
 							<div css={styles.audienceSegmentIcon}>
