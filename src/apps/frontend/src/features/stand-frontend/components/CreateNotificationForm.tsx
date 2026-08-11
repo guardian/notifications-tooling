@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import { baseColors, semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
@@ -57,9 +58,7 @@ export const CreateNotificationForm = () => {
 				marginBottom: semanticSpacing.stackXl,
 				display: 'flex',
 				flexDirection: 'column',
-				width: '720px',
 				paddingRight: semanticSpacing.stackSm,
-				paddingLeft: '147px',
 				gap: semanticSpacing.stackXl,
 			}}
 		>
@@ -72,7 +71,10 @@ export const CreateNotificationForm = () => {
 					display: 'flex',
 					flexDirection: 'column',
 					gap: semanticSpacing.stackLg,
-					width: '476px',
+					width: '100%',
+					[from.md]: {
+						width: '476px',
+					},
 				}}
 			>
 				<section

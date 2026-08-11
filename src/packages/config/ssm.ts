@@ -13,9 +13,13 @@ const extensionPort =
 	process.env.PARAMETERS_SECRETS_EXTENSION_HTTP_PORT ?? '2773';
 
 interface GetParameterResponse {
-	Parameter: {
-		Value: string;
+	Parameter?: {
+		Value?: string;
 	};
+}
+
+interface GetSecretValueResponse {
+	SecretString?: string;
 }
 
 /**
@@ -27,6 +31,14 @@ const toKebabCase = (key: string): string =>
 
 const parameterName = (key: string): string =>
 	`${namespace}${toKebabCase(key)}`;
+
+const parseSecretString = (secretString: string): unknown => {
+	try {
+		return JSON.parse(secretString) as unknown;
+	} catch {
+		return secretString;
+	}
+};
 
 let localClient: SSMClient | undefined;
 
@@ -54,41 +66,25 @@ const getLocalSSMParameter = async (key: string): Promise<string> => {
 	return value;
 };
 
-/**
- * Fetch an SSM parameter value. DEV uses an environment override when present,
- * otherwise it reads the CODE parameter directly using the Composer profile.
- * Deployed stages use the AWS Parameters and Secrets Lambda Extension.
- *
- * The extension runs a local HTTP server (default port 2773) that caches
- * parameter values, avoiding a direct call to SSM on every invocation. The
- * `key` argument is resolved relative to this app's parameter namespace.
- *
- * @param key The parameter name, relative to the app namespace.
- * @returns The decrypted parameter value.
- */
-export const getSSMParameter = async (key: string): Promise<string> => {
-	if (env.STAGE === 'DEV') {
-		const override = process.env[key];
-		if (override) {
-			return override;
-		}
-
-		return getLocalSSMParameter(key);
+const getLocalManagedConfigValue = async (key: string): Promise<string> => {
+	const override = process.env[key];
+	if (override) {
+		return override;
 	}
 
+	return getLocalSSMParameter(key);
+};
+
+const fetchExtensionResponse = async (
+	key: string,
+	url: URL,
+): Promise<unknown> => {
 	const sessionToken = process.env.AWS_SESSION_TOKEN;
 	if (!sessionToken) {
 		throw new Error(
 			'AWS_SESSION_TOKEN is not set; the AWS Parameters and Secrets Lambda Extension is only available in the Lambda runtime.',
 		);
 	}
-
-	const url = new URL('http://localhost:2773/systemsmanager/parameters/get');
-	url.port = extensionPort;
-	// SSM parameters are stored in kebab-case, but callers pass the
-	// UPPER_SNAKE_CASE env-var key, so convert it to match the stored name.
-	url.searchParams.set('name', parameterName(key));
-	url.searchParams.set('withDecryption', 'true');
 
 	const response = await fetch(url, {
 		headers: {
@@ -98,10 +94,83 @@ export const getSSMParameter = async (key: string): Promise<string> => {
 
 	if (!response.ok) {
 		throw new Error(
-			`Failed to fetch SSM parameter "${key}": ${response.status} ${response.statusText}`,
+			`Failed to fetch config value for key: "${key}": ${response.status} ${response.statusText}`,
 		);
 	}
 
-	const { Parameter } = (await response.json()) as GetParameterResponse;
-	return Parameter.Value;
+	return response.json();
+};
+
+const fetchSSMParameterFromExtension = async (
+	key: string,
+): Promise<GetParameterResponse> => {
+	const url = new URL(
+		`http://localhost:${extensionPort}/systemsmanager/parameters/get`,
+	);
+	url.port = extensionPort;
+	url.searchParams.set('name', `${namespace}${toKebabCase(key)}`);
+	url.searchParams.set('withDecryption', 'true');
+
+	return fetchExtensionResponse(key, url) as Promise<GetParameterResponse>;
+};
+
+const fetchSecretValueFromExtension = async (
+	key: string,
+): Promise<GetSecretValueResponse> => {
+	const url = new URL(`http://localhost:${extensionPort}/secretsmanager/get`);
+	url.port = extensionPort;
+	url.searchParams.set('secretId', `${namespace}${toKebabCase(key)}`);
+
+	return fetchExtensionResponse(key, url) as Promise<GetSecretValueResponse>;
+};
+
+/**
+ * Fetch a decrypted SSM parameter from this app's namespace.
+ *
+ * In deployed stages it calls the AWS Parameters and Secrets Lambda
+ * Extension running on localhost.
+ */
+export const getSSMParameter = async (key: string): Promise<string> => {
+	if (env.STAGE === 'DEV') {
+		return getLocalManagedConfigValue(key);
+	}
+
+	const body = await fetchSSMParameterFromExtension(key);
+
+	const value = body.Parameter?.Value;
+
+	if (!value) {
+		throw new Error(`SSM parameter "${key}" has no value.`);
+	}
+
+	return value;
+};
+
+/**
+ * Fetch a secret from this app's namespace and parse it into the caller's
+ * expected shape.
+ *
+ * In DEV this first checks for a matching environment-variable override and
+ * otherwise reads the CODE value directly using the local Composer AWS profile.
+ * In deployed stages it calls the AWS Parameters and Secrets Lambda Extension
+ * running on localhost. The returned secret string is JSON-parsed when
+ * possible, then passed to `parse` so the caller can validate and narrow it.
+ */
+export const getSecretValue = async <T>(
+	key: string,
+	parse: (value: unknown) => T,
+): Promise<T> => {
+	if (env.STAGE === 'DEV') {
+		return parse(parseSecretString(await getLocalManagedConfigValue(key)));
+	}
+
+	const body = await fetchSecretValueFromExtension(key);
+
+	const { SecretString } = body;
+
+	if (!SecretString) {
+		throw new Error(`Secrets Manager secret "${key}" has no SecretString.`);
+	}
+
+	return parse(parseSecretString(SecretString));
 };
