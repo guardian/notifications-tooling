@@ -24,10 +24,6 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 		return null;
 	}
 
-	// A failed read leaves the counters on the last known-good guidance rather
-	// than blank. `validationCap` is deliberately not consulted — it is the
-	// broker's absurd-input guard, not editorial guidance, and rendering it
-	// would erase the advice these counters exist to give.
 	const newsletter = constraints?.channels.newsletter;
 	const subjectLimits =
 		newsletter?.compose.subject ?? NEWSLETTER_LIMIT_FALLBACKS.title;

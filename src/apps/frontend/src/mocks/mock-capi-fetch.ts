@@ -1,3 +1,4 @@
+import type { CapiDateTime } from '@guardian/content-api-models/v1/capiDateTime';
 import type { Content } from '@guardian/content-api-models/v1/content';
 import { articleFixture } from './capi-fixtures';
 
@@ -15,6 +16,27 @@ export const mockCapiFetch = (articleId: string): Promise<Content> => {
 
 const baseUrl = 'https://content.guardianapis.com';
 const params = 'api-key=test&show-fields=headline,standfirst,thumbnail';
+
+/**
+ * TO DO - this is not intended for production use, just to demo.
+ *
+ * The JSON API returns `webPublicationDate` as a bare ISO-8601 string, whereas
+ * the thrift `Content` model types it as a {@link CapiDateTime} object. Without
+ * this, `content.webPublicationDate.iso8601` is `undefined` at runtime and the
+ * publication date silently disappears from the UI.
+ */
+
+const toCapiDateTime = (
+	webPublicationDate: unknown,
+): CapiDateTime | undefined => {
+	if (typeof webPublicationDate !== 'string') {
+		return undefined;
+	}
+	return {
+		dateTime: {} as CapiDateTime['dateTime'],
+		iso8601: webPublicationDate,
+	};
+};
 
 /**
  * TO DO - this is not intended for production use, just to demo.
@@ -44,7 +66,11 @@ export const hackyClientSideCapiFetch = async (
 		if (castJson.response.status !== 'ok') {
 			throw new Error(`CAPI returned ${castJson.response.status} response`);
 		}
-		return castJson.response.content as Content;
+		const content = castJson.response.content as Content;
+		return {
+			...content,
+			webPublicationDate: toCapiDateTime(content.webPublicationDate),
+		};
 	} catch {
 		throw new Error('Could not parse CAPI json');
 	}
