@@ -62,7 +62,7 @@ const serverRoutePrefixes = ['/health', '/v1', '/docs/api'];
  * must first receive the SPA document. Skip server-owned namespaces so missing
  * backend routes still receive the normal error envelope.
  */
-export const spaFallback: express.RequestHandler = (req, res, next) => {
+const spaFallback: express.RequestHandler = (req, res, next) => {
 	const isServerRoute = serverRoutePrefixes.some(
 		(prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`),
 	);
