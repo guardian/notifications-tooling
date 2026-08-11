@@ -11,9 +11,9 @@
 	},
 	"devDependencies": {
 		"@guardian/cdk": "64.3.0",
-		"aws-cdk": "2.1134.0",
-		"aws-cdk-lib": "2.262.2",
-		"constructs": "10.7.2"
+		"aws-cdk": "2.1135.0",
+		"aws-cdk-lib": "2.263.0",
+		"constructs": "10.8.1"
 	},
 	"prettier": "@guardian/prettier",
 	"allowScripts": {
