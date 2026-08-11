@@ -56,7 +56,7 @@ export const AudienceSegments = ({
 			}}
 		>
 			<Typography variant="bodyBoldMd" id="audience-section">
-				Audience Segments
+				Audience segments
 			</Typography>
 			<Typography variant="bodyCompactSm">
 				Choose the audience the email notification will be sent to
@@ -118,11 +118,12 @@ export const AudienceSegments = ({
 											})}
 										>
 											<Icon
-												symbol={
-													isSelected ? selectedCheckboxIcon : checkboxIcon
-												}
-												alt={`${segment.label}`}
-											/>
+												alt={`${segment.label} selection box`}
+												size="sm"
+												aria-label={`${segment.label} selection box`}
+											>
+												{isSelected ? selectedCheckboxIcon : checkboxIcon}
+											</Icon>
 										</div>
 									</div>
 									<Typography
@@ -162,7 +163,7 @@ export const AudienceSegmentsPreviewPill = ({
 					}}
 				>
 					{!isConfirmation && (
-						<Typography variant="bodyBoldMd">Audience Segments</Typography>
+						<Typography variant="bodyBoldMd">Audience segments</Typography>
 					)}
 
 					<div
