@@ -1,6 +1,6 @@
+import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import type { ResolvedArticle } from '@models';
 import { CapiError } from '@models';
-import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import { fetchArticle } from './client';
 
 afterEach(() => {

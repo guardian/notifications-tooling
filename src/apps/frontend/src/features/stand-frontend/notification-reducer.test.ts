@@ -1,5 +1,5 @@
-import type { ResolvedArticle } from '@models';
 import { describe, expect, it } from 'bun:test';
+import type { ResolvedArticle } from '@models';
 import '../../../happydom-setup';
 import { articleFixture } from '../../mocks/capi-fixtures';
 import { defaultState, notificationReducer } from './notification-reducer';
