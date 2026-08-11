@@ -98,10 +98,17 @@ export const AudienceSegments = ({
 								)}
 							>
 								<Checkbox
-									size="sm"
 									theme={customTheme}
+									size="sm"
 									isSelected={isSelected}
 									onChange={() => onSegmentToggle(segment.code)}
+									aria-label={`Select ${segment.label} audience segment`}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											onSegmentToggle(segment.code);
+										}
+									}}
 									cssOverrides={css({
 										width: '100%',
 										flexDirection: 'row-reverse',
@@ -186,9 +193,9 @@ export const AudienceSegmentsPreviewPill = ({
 										<FlagAtom segmentCode={segmentCode} />
 									</div>
 									<Typography
-										variant="bodyBoldSm"
+										variant="bodySm"
 										cssOverrides={css({
-											color: semanticColors.text.weak,
+											color: semanticColors.text.strong,
 										})}
 									>
 										{segmentLabel}

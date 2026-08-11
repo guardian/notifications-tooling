@@ -182,7 +182,7 @@ export const audienceSegmentStyles = {
 					: semanticColors.fill.weakPressed,
 			},
 			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-			padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+			padding: `${baseSpacing['6Px']} ${baseSpacing['6Px']}`,
 			borderRadius: semanticRadius.cornerSm,
 			display: 'flex',
 			flexDirection: 'column',
