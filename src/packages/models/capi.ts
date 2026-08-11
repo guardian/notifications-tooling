@@ -40,11 +40,26 @@ export class CapiError extends Error {
 }
 
 /**
- * A single CAPI content item, passed through verbatim. Only `id` is asserted;
- * every other field the JSON API returns (type, section, webUrl, webTitle,
- * publication date, tags, and the requested `fields`) is preserved.
+ * A single CAPI content item.
+ *
+ * Only a subset of fields are asserted; other fields the JSON API can return
+ * (`tags`, `section`, `blocks`  etc) are preserved and passed through verbatim.
+ *
+ * `fields` is optional to reflect the CAPI model, but in practise, it will be present
+ *  if the request to CAPI specified the "show-fields" search param.
+ *
+ * see https://open-platform.theguardian.com/documentation/item for the model
  */
-const capiContentSchema = z.looseObject({ id: z.string() });
+const capiContentSchema = z.looseObject({
+	id: z.string(),
+	type: z.string(),
+	sectionName: z.string().optional(),
+	pillarId: z.string().optional(),
+	pillarName: z.string().optional(),
+	webTitle: z.string(),
+	webPublicationDate: z.string().optional(),
+	fields: z.record(z.string(), z.string()).optional(),
+});
 
 /** The full CAPI content item for the resolved article. */
 export type ResolvedArticle = z.infer<typeof capiContentSchema>;
@@ -55,6 +70,7 @@ export const capiResponseSchema = z.object({
 		content: capiContentSchema,
 	}),
 });
+export type CapiResponse = z.infer<typeof capiResponseSchema>;
 
 export const resolveArticleResponseSchema = z.object({
 	article: capiContentSchema,

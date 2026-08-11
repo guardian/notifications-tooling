@@ -1,5 +1,5 @@
-import { CapiError, capiResponseSchema, type ResolvedArticle } from '@models';
-import type { z } from 'zod';
+import type { CapiResponse, ResolvedArticle } from '@models';
+import { CapiError, capiResponseSchema } from '@models';
 
 type FetchArticleRequest = {
 	endpoint: string;
@@ -38,7 +38,7 @@ export const fetchArticle = async ({
 		throw new CapiError('unavailable');
 	}
 
-	let parsed: z.infer<typeof capiResponseSchema>;
+	let parsed: CapiResponse;
 	try {
 		parsed = capiResponseSchema.parse(await response.json());
 	} catch (error) {
