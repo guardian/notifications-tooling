@@ -8,6 +8,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@models": "workspace:*",
 		"zod": "4.4.3"
 	}
 }

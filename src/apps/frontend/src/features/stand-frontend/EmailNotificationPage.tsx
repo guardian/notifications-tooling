@@ -1,7 +1,7 @@
 import { useReducer, useState } from 'react';
-import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../../mocks/mock-fetch-email';
 import { mockSendNotification } from '../../mocks/mock-send-notification';
+import { fetchCapiDataFromApi } from './api/fetch-capi-content';
 import { DispatchTab } from './components/DispatchTab';
 import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
@@ -38,7 +38,7 @@ export const EmailNotificationPage = () => {
 					value={{
 						notification,
 						updateNotification,
-						capiFetch: hackyClientSideCapiFetch,
+						capiFetch: fetchCapiDataFromApi,
 						sendNotification: mockSendNotification,
 						requestEmailHtml: mockRequestEmailHtml,
 					}}

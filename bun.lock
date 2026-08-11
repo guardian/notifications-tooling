@@ -123,11 +123,13 @@
       "name": "@models",
       "dependencies": {
         "@guardian/pan-domain-node": "1.2.5",
+        "zod": "4.4.3",
       },
     },
     "src/packages/services": {
       "name": "@services",
       "dependencies": {
+        "@models": "workspace:*",
         "zod": "4.4.3",
       },
     },
