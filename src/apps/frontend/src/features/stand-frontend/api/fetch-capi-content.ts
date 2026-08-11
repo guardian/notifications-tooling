@@ -1,3 +1,4 @@
+import type { CapiDateTime } from '@guardian/content-api-models/v1/capiDateTime';
 import type { Content } from '@guardian/content-api-models/v1/content';
 import {
 	type ResolveArticleRequest,
@@ -6,6 +7,20 @@ import {
 import { fetchJsonAndParse } from '../../../api/client';
 
 const baseUrl = 'https://content.guardianapis.com';
+
+// TO DO - either change the backend to fetch the thrift model
+// or do not use @guardian/content-api-models on the frontend
+const toCapiDateTime = (
+	webPublicationDate: unknown,
+): CapiDateTime | undefined => {
+	if (typeof webPublicationDate !== 'string') {
+		return undefined;
+	}
+	return {
+		dateTime: {} as CapiDateTime['dateTime'],
+		iso8601: webPublicationDate,
+	};
+};
 
 export const fetchCapiDataFromApi = async (
 	articleId: string,
@@ -24,5 +39,8 @@ export const fetchCapiDataFromApi = async (
 		},
 	);
 
-	return data.article as unknown as Content;
+	return {
+		...data.article,
+		webPublicationDate: toCapiDateTime(data.article['webPublicationDate']),
+	} as unknown as Content;
 };
