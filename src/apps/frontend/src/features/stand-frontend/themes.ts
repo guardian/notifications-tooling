@@ -185,6 +185,7 @@ export const audienceSegmentStyles = {
 			padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 			borderRadius: semanticRadius.cornerSm,
 			display: 'flex',
+			flexDirection: 'column',
 			alignItems: 'flex-start',
 			gap: `${baseSpacing['8Px']}`,
 			height: '56px',

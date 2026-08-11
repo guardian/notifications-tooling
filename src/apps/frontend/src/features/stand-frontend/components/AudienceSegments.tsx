@@ -1,14 +1,13 @@
 import { css } from '@emotion/react';
-import { baseSpacing, semanticColors, semanticSpacing } from '@guardian/stand';
-import { Button } from '@guardian/stand/Button';
+import { baseColors, semanticColors, semanticSpacing } from '@guardian/stand';
+import { Checkbox } from '@guardian/stand/Checkbox';
+import type { CheckboxTheme } from '@guardian/stand/Checkbox';
 import { Grid, Item } from '@guardian/stand/Grid';
-import { Icon } from '@guardian/stand/Icon';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { audienceSegmentStyles } from '../themes';
 import { type AudienceSegment } from '../types';
 import { FlagAtom } from './FlagAtom';
-import { checkboxIcon, selectedCheckboxIcon } from './FlagIcons';
 
 export interface Segment {
 	code: AudienceSegment;
@@ -33,6 +32,22 @@ export const DEFAULT_SEGMENTS: Segment[] = [
 	{ code: 'US', label: 'United States' },
 	{ code: 'AU', label: 'Australia' },
 ];
+
+const customTheme: CheckboxTheme = {
+	input: {
+		shared: {
+			indicator: {
+				selected: {
+					backgroundColor: baseColors.magenta[200],
+				},
+				check: {
+					height: '18px',
+					width: '24px',
+				},
+			},
+		},
+	},
+};
 
 export const AudienceSegments = ({
 	segments = DEFAULT_SEGMENTS,
@@ -77,66 +92,46 @@ export const AudienceSegments = ({
 					const isSelected = selected.includes(segment.code);
 					return (
 						<Item size={4} key={segment.code}>
-							<Button
-								key={segment.code}
-								variant="tertiary"
-								onClick={() => onSegmentToggle(segment.code)}
-								aria-pressed={isSelected}
-								cssOverrides={css([
-									audienceSegmentStyles.audienceSegmentCheckBoxTile(isSelected),
-									{ alignItems: 'flex-start', justifyItems: 'flex-start' },
-								])}
+							<div
+								css={audienceSegmentStyles.audienceSegmentCheckBoxTile(
+									isSelected,
+								)}
 							>
-								<div
-									css={css({
-										display: 'flex',
-										flexDirection: 'column',
+								<Checkbox
+									size="sm"
+									theme={customTheme}
+									isSelected={isSelected}
+									onChange={() => onSegmentToggle(segment.code)}
+									cssOverrides={css({
 										width: '100%',
+										flexDirection: 'row-reverse',
+										justifyContent: 'space-between',
 										alignItems: 'flex-start',
-										gap: semanticSpacing.stackXxs,
 									})}
 								>
 									<div
 										css={css({
 											display: 'flex',
-											flexDirection: 'row',
-											justifyContent: 'space-between',
-											alignItems: 'center',
-											width: '100%',
+											flexDirection: 'column',
+											gap: semanticSpacing.stackXs,
 										})}
 									>
 										<div css={audienceSegmentStyles.audienceSegmentIcon}>
 											<FlagAtom segmentCode={segment.code} />
 										</div>
-										<div
-											css={css({
-												display: 'flex',
-												height: '16px',
-												width: '16px',
-												alignItems: 'center',
-												justifyContent: 'center',
+										<Typography
+											variant="headingXs"
+											cssOverrides={css({
+												color: semanticColors.text.strong,
+												marginBottom: '0px',
+												height: '24px',
 											})}
 										>
-											<Icon
-												alt={`${segment.label} selection box`}
-												size="sm"
-												aria-label={`${segment.label} selection box`}
-											>
-												{isSelected ? selectedCheckboxIcon : checkboxIcon}
-											</Icon>
-										</div>
+											{segment.label}
+										</Typography>
 									</div>
-									<Typography
-										variant="headingXs"
-										cssOverrides={css({
-											color: semanticColors.text.strong,
-											padding: `${baseSpacing['4Px']} ${baseSpacing['8Px']} ${baseSpacing['6Px']} 0`,
-										})}
-									>
-										{segment.label}
-									</Typography>
-								</div>
-							</Button>
+								</Checkbox>
+							</div>
 						</Item>
 					);
 				})}
