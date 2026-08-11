@@ -22,8 +22,6 @@ export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
 	const pillarColor = getPillarColor(pillarId);
 	const publishedAt = useRelativeTime(webPublicationDate?.iso8601);
 
-	console.log('since published', publishedAt);
-
 	return (
 		<div css={articlePreviewCardTheme.card}>
 			<div css={articlePreviewCardTheme.details}>
