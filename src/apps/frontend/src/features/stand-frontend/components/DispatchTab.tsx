@@ -67,13 +67,15 @@ export const DispatchTab = () => {
 
 	return (
 		<>
-			<Layout.Sidebar layoutSmBreakpoint="above-grid">
-				<SideNavigationPanel
-					selectedHref={selectedHref}
-					setSelectedHref={setSelectedHref}
-					isClickLockedRef={isClickLockedRef}
-				/>
-			</Layout.Sidebar>
+			{!sendingResult?.ok && (
+				<Layout.Sidebar layoutSmBreakpoint="above-grid">
+					<SideNavigationPanel
+						selectedHref={selectedHref}
+						setSelectedHref={setSelectedHref}
+						isClickLockedRef={isClickLockedRef}
+					/>
+				</Layout.Sidebar>
+			)}
 			<Layout.Main theme={layoutMainTheme}>
 				<Grid
 					cssOverrides={css({

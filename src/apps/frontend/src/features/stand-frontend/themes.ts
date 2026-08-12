@@ -206,6 +206,7 @@ export const audienceSegmentStyles = {
 		}),
 	audienceSegmentButton: css({
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		backgroundColor: semanticColors.fill.weak,
 		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 		borderRadius: semanticRadius.cornerSm,
 		display: 'flex',
