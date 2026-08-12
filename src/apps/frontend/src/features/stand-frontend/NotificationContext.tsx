@@ -1,6 +1,7 @@
 import type { Content } from '@guardian/content-api-models/v1/content';
 import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
+import type { SendNotificationRequest } from './api/schemas';
 import type {
 	NotificationAction,
 	NotificationState,
@@ -15,7 +16,7 @@ export interface NotificationFormContextProps {
 	capiFetch: { (articleId: string): Promise<Content> };
 	// TO DO - get the required payload from the backend
 	sendNotification: {
-		(notification: NotificationState): Promise<SendingResult>;
+		(sendNotificationRequest: SendNotificationRequest): Promise<SendingResult>;
 	};
 	requestEmailHtml: RequestEmailHtml;
 }
