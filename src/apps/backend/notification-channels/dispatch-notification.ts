@@ -181,6 +181,7 @@ const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 	const pushesByTopicType = new Map<
 		string,
 		{
+			topicType: string;
 			importance: AppNotificationImportance;
 			topics: Array<{ type: string; name: string }>;
 		}
@@ -193,6 +194,7 @@ const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 			);
 		}
 		const push = pushesByTopicType.get(type) ?? {
+			topicType: type,
 			importance:
 				resolved.importance === AppPushImportance.Major ? 'Major' : 'Minor',
 			topics: [],
@@ -210,6 +212,7 @@ const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 
 const dispatchAppPush = async (
 	resolvedDispatch: ReturnType<typeof resolveAppPushDispatch>,
+	notificationId: string,
 	dependencies: DispatchNotificationDependencies,
 ): Promise<void> => {
 	if (!resolvedDispatch) {
@@ -234,6 +237,9 @@ const dispatchAppPush = async (
 				endpoint: environment.MOBILE_N10N_ENDPOINT,
 				apiKey: environment.MOBILE_N10N_API_KEY,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+				// Deterministic per-group id (`<notificationId>#<topicType>`) so a
+				// re-send of the same request can be deduplicated downstream.
+				id: `${notificationId}#${push.topicType}`,
 				sender,
 				title: item.title,
 				body: item.body,
@@ -248,6 +254,7 @@ const dispatchAppPush = async (
 
 export const dispatchNotification = async (
 	request: NotificationSendRequest,
+	notificationId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
 ): Promise<void> => {
 	if (request.options.dryRun) {
@@ -266,7 +273,7 @@ export const dispatchNotification = async (
 	// automatically until partial-delivery recovery is implemented.
 	await Promise.all([
 		dispatchNewsletter(newsletterDispatch, dependencies),
-		dispatchAppPush(appPushDispatch, dependencies),
+		dispatchAppPush(appPushDispatch, notificationId, dependencies),
 	]);
 };
 

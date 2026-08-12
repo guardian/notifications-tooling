@@ -116,10 +116,13 @@ describe('POST /v1/notifications', () => {
 				);
 
 				expect(response.status).toBe(202);
-				expect(dispatchRequest).toHaveBeenCalledWith({
-					...validPushRequest(),
-					options: { dryRun: false, scheduledFor: null },
-				});
+				expect(dispatchRequest).toHaveBeenCalledWith(
+					{
+						...validPushRequest(),
+						options: { dryRun: false, scheduledFor: null },
+					},
+					expect.any(String),
+				);
 			} finally {
 				await dispatchServer.close();
 			}

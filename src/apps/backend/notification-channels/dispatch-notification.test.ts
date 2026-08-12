@@ -30,6 +30,8 @@ const baseRequest = {
 	options: { dryRun: false, scheduledFor: null },
 } as const;
 
+const notificationId = 'notif-2f1c9a7e';
+
 const ssmParameters: Record<string, string> = {
 	BRAZE_API_KEY: 'test-api-key',
 	BRAZE_REST_ENDPOINT: 'https://rest.example.braze.eu',
@@ -45,7 +47,7 @@ const createDependencies = () => {
 	const getSSMParameter = mock((key: string) =>
 		Promise.resolve(ssmParameters[key] ?? ''),
 	);
-	const sendAppNotification = mock(() => Promise.resolve());
+	const sendAppNotification = mock(() => Promise.resolve({ id: 'n10n-id' }));
 	const renderEmail = mock(() =>
 		Promise.resolve('<html>Rendered newsletter</html>'),
 	);
@@ -96,12 +98,13 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, dependencies);
+		await dispatchNotification(request, notificationId, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 		expect(sendAppNotification).toHaveBeenCalledWith({
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
+			id: `${notificationId}#breaking-news`,
 			sender: baseRequest.sender,
 			title: pushItem.title,
 			body: pushItem.body,
@@ -134,16 +137,18 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, dependencies);
+		await dispatchNotification(request, notificationId, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
+				id: `${notificationId}#breaking-news`,
 				importance: 'Major',
 				topics: [{ type: 'breaking', name: 'uk' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
+				id: `${notificationId}#newsstand`,
 				importance: 'Minor',
 				topics: [{ type: 'newsstand', name: 'newsstandIos' }],
 			}),
@@ -166,9 +171,10 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, dependencies);
+		await dispatchNotification(request, notificationId, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
+				id: `${notificationId}#sport`,
 				importance: 'Minor',
 				topics: [{ type: 'breaking', name: 'uk-sport' }],
 			}),
@@ -196,11 +202,12 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, dependencies);
+		await dispatchNotification(request, notificationId, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledWith({
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
+			id: `${notificationId}#breaking-news`,
 			sender: baseRequest.sender,
 			title: pushItem.title,
 			body: pushItem.body,
@@ -229,7 +236,7 @@ describe('dispatchNotification', () => {
 
 		let dispatchError: unknown;
 		try {
-			await dispatchNotification(request, dependencies);
+			await dispatchNotification(request, notificationId, dependencies);
 		} catch (error) {
 			dispatchError = error;
 		}
@@ -259,7 +266,7 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, dependencies);
+		await dispatchNotification(request, notificationId, dependencies);
 		expect(renderEmail).toHaveBeenNthCalledWith(1, {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
@@ -319,7 +326,7 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, dependencies);
+		await dispatchNotification(request, notificationId, dependencies);
 		expect(renderEmail).toHaveBeenCalledTimes(1);
 		expect(sendBrazeCampaign).toHaveBeenCalledTimes(1);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
@@ -349,7 +356,7 @@ describe('dispatchNotification', () => {
 
 		let dispatchError: unknown;
 		try {
-			await dispatchNotification(request, dependencies);
+			await dispatchNotification(request, notificationId, dependencies);
 		} catch (error) {
 			dispatchError = error;
 		}
@@ -476,7 +483,7 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, dependencies);
+		await dispatchNotification(request, notificationId, dependencies);
 		expect(renderEmail).not.toHaveBeenCalled();
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
 		expect(sendAppNotification).not.toHaveBeenCalled();

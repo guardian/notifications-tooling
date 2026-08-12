@@ -70,6 +70,7 @@ export const handleValidationErrors: ErrorRequestHandler = (
 
 type DispatchValidatedNotification = (
 	request: NotificationSendRequest,
+	notificationId: string,
 ) => Promise<unknown>;
 
 export const createNotificationsRouter = (
@@ -87,11 +88,12 @@ export const createNotificationsRouter = (
 		}),
 		async (req, res) => {
 			const body = req.body;
-			await dispatchRequest(body);
 
-			// No persistence layer yet, so mint the id in-process. Once a store
-			// exists this becomes the primary key the channel adapters update.
+			// Mint the id before dispatch so each channel adapter can tag its
+			// downstream calls with it. Becomes the store's primary key later.
 			const notificationId = randomUUID();
+			await dispatchRequest(body, notificationId);
+
 			const statusUrl = `/v1/notifications/${notificationId}/status`;
 
 			const plans = Object.keys(body.channels).map((channel) => ({
