@@ -1,9 +1,6 @@
 import type { RequestEmailHtml } from '../features/stand-frontend/types';
 
-export const mockRequestEmailHtml: RequestEmailHtml = (articleId, options) => {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve(`
+const buildHtml = (audience: string[]) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,13 +10,13 @@ export const mockRequestEmailHtml: RequestEmailHtml = (articleId, options) => {
 <body>
 <table role="presentation" width="100%">
     <tbody>
-        <tr><td>${JSON.stringify(options)}</td></tr>
+        <tr><td>${audience.join('; ')}</td></tr>
         <tr><td valign="top">
             <table role="presentation" width="100%" cellpadding="0">
                 <tbody>
                 <tr><td valign="top">
                     <a 
-                        href="https://www.theguardian.com/https://www.theguardian.com/technology/2026/jul/28/apple-second-ever-5tn-company-as-investors-flee-ai-stocks?{{url_parameters_unstripped}}" 
+                        href="https://www.theguardian.com/technology/2026/jul/28/apple-second-ever-5tn-company-as-investors-flee-ai-stocks?{{url_parameters_unstripped}}" 
                         style="color: #0077B6; text-decoration: none; display: inline-block; line-height: 0; width: 100%; height: 100%;">
                             <div style="border-top:1px solid #BABABA;padding-top:8px">
                                 <div style="color:#052962;font-size:14px;font-weight:normal;margin:4px 0;font-family:Arial, sans-serif;line-height:1">
@@ -38,14 +35,24 @@ export const mockRequestEmailHtml: RequestEmailHtml = (articleId, options) => {
             </table>
         </td></tr>
         <tr><td style="padding-bottom:11px">
-            <a href="https://www.theguardian.com/https://www.theguardian.com/technology/2026/jul/28/apple-second-ever-5tn-company-as-investors-flee-ai-stocks?{{url_parameters_unstripped}}" style="color: #0077B6; text-decoration: none; display: inline-block; line-height: 0; width: 100%; height: 100%;"><img src="https://i.guim.co.uk/img/media/16f725106781e4a9f75422731c886be80c8894aa/1152_0_5758_4606/master/5758.jpg?quality=85&amp;dpr=2&amp;width=650&amp;s=03f0baa983d6bbc6c3fd96cf0c952335" alt="A large white Apple logo is illuminated against a dark background and shadowed windows on the front of a store in Munich." width="100%" style="width:100%">
+            <a href="https://www.theguardian.com/technology/2026/jul/28/apple-second-ever-5tn-company-as-investors-flee-ai-stocks?{{url_parameters_unstripped}}" style="color: #0077B6; text-decoration: none; display: inline-block; line-height: 0; width: 100%; height: 100%;"><img src="https://i.guim.co.uk/img/media/16f725106781e4a9f75422731c886be80c8894aa/1152_0_5758_4606/master/5758.jpg?quality=85&amp;dpr=2&amp;width=650&amp;s=03f0baa983d6bbc6c3fd96cf0c952335" alt="A large white Apple logo is illuminated against a dark background and shadowed windows on the front of a store in Munich." width="100%" style="width:100%">
             </a>
         </td></tr>
     </tbody>
 </table>
 </body>
 </html>                
-                `);
+`;
+
+export const mockRequestEmailHtml: RequestEmailHtml = (request) => {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve({
+				html: buildHtml(request.audience),
+				articleId:
+					'technology/2026/jul/28/apple-second-ever-5tn-company-as-investors-flee-ai-stocks',
+				newsletterId: 'some-newsletter',
+			});
 		}, 500);
 	});
 };

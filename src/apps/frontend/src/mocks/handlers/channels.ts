@@ -27,7 +27,7 @@ export const channelConstraints: ChannelConstraintsResponse = {
 				body: { recommended: 120, editorialLimit: 120, validationCap: 120 },
 			},
 			compose: { minItems: 1, maxItems: 1 },
-			audience: { maxSegments: 20 },
+			audience: { maxTopics: 20 },
 		},
 	},
 };

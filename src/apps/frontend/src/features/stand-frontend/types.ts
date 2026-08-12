@@ -1,10 +1,26 @@
-import type { Content } from '@guardian/content-api-models/v1/content';
+import type {
+	EmailPreviewRequest,
+	EmailPreviewResponse,
+	ResolvedArticle,
+} from '@models';
+import type { ApiError } from '../../api/errors';
+import type { SendNotificationResponse } from './api/schemas';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
 export type KickerId = 'breaking-news' | 'exclusive';
-export type AudienceSegment = 'UK' | 'US' | 'AU';
 export type EmailDeliveryOption = 'immediate';
+export type AudienceSegment = 'UK' | 'US' | 'AU';
+
+export type SendingResult =
+	| {
+			ok: true;
+			response: SendNotificationResponse;
+	  }
+	| {
+			ok: false;
+			response: ApiError;
+	  };
 
 export type EmailNotification = {
 	type: 'email';
@@ -25,7 +41,7 @@ export type NotificationState = {
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
-	content?: Content;
+	content?: ResolvedArticle;
 	parameters?: EmailNotification | PushNotification;
 	hasAttemptedSend: boolean;
 	confirmSendModalOpen: boolean;
@@ -33,35 +49,8 @@ export type NotificationState = {
 	sendingResult?: SendingResult;
 };
 
-export type SendError =
-	| 'insufficient_permissions'
-	| 'bad_request'
-	| 'validation_failed'
-	| 'unauthenticated';
-// TO DO - get shape form backend project when ready
-export type SendingResult =
-	| {
-			ok: true;
-			response: {
-				status: 'accepted';
-			};
-	  }
-	| {
-			ok: false;
-			response: {
-				error: SendError;
-				message: string;
-			};
-			requestFailed?: false;
-	  }
-	| {
-			ok: false;
-			requestFailed: true;
-			response?: undefined;
-	  };
-
 export type RequestEmailHtml = {
-	(articleId: string, options: { audience: string }): Promise<string>;
+	(request: EmailPreviewRequest): Promise<EmailPreviewResponse>;
 };
 
 export type NotificationAction =
@@ -78,7 +67,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'receive-article';
-			content: Content;
+			content: ResolvedArticle;
 	  }
 	| {
 			type: 'report-article-error';

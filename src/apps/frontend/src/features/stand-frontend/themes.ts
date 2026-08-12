@@ -145,7 +145,7 @@ export const articlePreviewCardTheme = {
 		padding: semanticSpacing.stackSm,
 		borderRadius: semanticRadius.cornerSm,
 		backgroundColor: baseColors.neutral[850],
-		width: '450px',
+		maxWidth: '470px',
 	}),
 	details: css({
 		display: 'flex',
@@ -179,5 +179,55 @@ export const articlePreviewCardTheme = {
 		borderRadius: semanticRadius.cornerXs,
 		objectFit: 'cover',
 		flexShrink: 0,
+	}),
+};
+
+export const audienceSegmentStyles = {
+	audienceSegmentCheckBoxTile: (isSelected: boolean) =>
+		css({
+			backgroundColor: isSelected
+				? baseColors.magenta[900]
+				: semanticColors.fill.weak,
+			color: semanticColors.text.strong,
+			'&:hover': {
+				backgroundColor: isSelected
+					? baseColors.magenta[900]
+					: semanticColors.fill.weakPressed,
+			},
+			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			padding: `${baseSpacing['6Px']} ${baseSpacing['6Px']}`,
+			borderRadius: semanticRadius.cornerSm,
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: `${baseSpacing['8Px']}`,
+			height: '56px',
+			width: '100%',
+		}),
+	audienceSegmentButton: css({
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		display: 'flex',
+		alignItems: 'center',
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
+	}),
+	audienceSegmentIcon: css({
+		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+		width: '24px',
+		height: '18px',
+		gap: `${baseSpacing['10Px']}`,
+	}),
+	isConfirmationStyle: css({
+		backgroundColor: semanticColors.fill.weak,
+		color: semanticColors.text.weak,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		display: 'flex',
+		alignItems: 'center',
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
 	}),
 };

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import {
-	appPushNotificationSegments,
-	MAX_APP_PUSH_SEGMENTS,
+	appPushTopicTypes,
+	MAX_APP_PUSH_TOPICS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegments,
@@ -116,7 +116,7 @@ describe('GET /v1/channels/constraints', () => {
 		);
 		expect(push.compose.minItems).toBe(1);
 		expect(push.compose.maxItems).toBe(1);
-		expect(push.audience.maxSegments).toBe(MAX_APP_PUSH_SEGMENTS);
+		expect(push.audience.maxTopics).toBe(MAX_APP_PUSH_TOPICS);
 	});
 
 	it('exposes the newsletter content limits and subject limit', async () => {
@@ -158,16 +158,20 @@ describe('GET /v1/channels/audiences', () => {
 		);
 	});
 
-	it('exposes only the id and label of every push segment', async () => {
+	it('exposes every push topic type with its editions, id and label only', async () => {
 		const response = await getAudiences();
 		const body = (await response.json()) as typeof channelAudiences;
 
 		expect(
-			body.channels[NotificationChannel.AppPushNotification].segments,
+			body.channels[NotificationChannel.AppPushNotification].topicTypes,
 		).toEqual(
-			Object.entries(appPushNotificationSegments).map(([id, { label }]) => ({
+			Object.entries(appPushTopicTypes).map(([id, { label, editions }]) => ({
 				id,
 				label,
+				editions: Object.entries(editions).map(([editionId, edition]) => ({
+					id: editionId,
+					label: edition.label,
+				})),
 			})),
 		);
 	});
@@ -188,9 +192,21 @@ describe('GET /v1/channels/audiences', () => {
 		const response = await getAudiences();
 		const body = (await response.json()) as typeof channelAudiences;
 
-		for (const { segments } of Object.values(body.channels)) {
-			for (const segment of segments) {
-				expect(Object.keys(segment).sort()).toEqual(['id', 'label']);
+		for (const segment of body.channels[NotificationChannel.Newsletter]
+			.segments) {
+			expect(Object.keys(segment).sort()).toEqual(['id', 'label']);
+		}
+
+		for (const topicType of body.channels[
+			NotificationChannel.AppPushNotification
+		].topicTypes) {
+			expect(Object.keys(topicType).sort()).toEqual([
+				'editions',
+				'id',
+				'label',
+			]);
+			for (const edition of topicType.editions) {
+				expect(Object.keys(edition).sort()).toEqual(['id', 'label']);
 			}
 		}
 	});
