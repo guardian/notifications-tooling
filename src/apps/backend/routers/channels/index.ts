@@ -90,7 +90,7 @@ const toTopicTypeOptions = (
  * The selectable audiences per channel the SPA fetches from
  * `GET /v1/channels/audiences` to populate its audience pickers. Keyed by
  * channel: newsletter exposes a `segments` list, while app-push exposes
- * `topicTypes` (alert types) each with their selectable `editions`. Only public
+ * `topicTypes` each with their selectable `editions`. Only public
  * ids and human labels are exposed; the downstream addressing (Braze campaign /
  * mobile-n10n topic) each selection resolves to is kept server-side.
  */

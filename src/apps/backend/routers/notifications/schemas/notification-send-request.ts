@@ -55,7 +55,7 @@ const appPushContentItem = z.strictObject({
 		.min(1)
 		.max(pushLimits.title.validationCap)
 		.meta({
-			description: `Short push alert title (1-${pushLimits.title.validationCap} characters).`,
+			description: `Short push notification title (1-${pushLimits.title.validationCap} characters).`,
 			example: 'Breaking news',
 		}),
 	body: z
@@ -63,7 +63,7 @@ const appPushContentItem = z.strictObject({
 		.min(1)
 		.max(pushLimits.body.validationCap)
 		.meta({
-			description: `Push alert body (1-${pushLimits.body.validationCap} characters).`,
+			description: `Push notification body (1-${pushLimits.body.validationCap} characters).`,
 			example: 'Historic global climate deal reached at the COP summit',
 		}),
 	link: guardianArticleLink,
@@ -149,18 +149,18 @@ const hasUniqueTopics = (items: Array<{ type: string; name: string }>) =>
 	items.length;
 
 /**
- * A single app-push target: a curated alert type and one of its editions. The
- * backend resolves the pair to a mobile-n10n topic (kept server-side). The set
- * of alert types and their editions is served by `GET /v1/channels/audiences`.
+ * A single app-push target: a curated topic type and one of its editions. The
+ * backend resolves the pair to a downstream topic (kept server-side). The set
+ * of topic types and their editions is served by `GET /v1/channels/audiences`.
  */
 const appPushTopicSelection = z
 	.strictObject({
 		type: z.enum(appPushTopicTypeIds).meta({
-			description: 'Alert type id (the FE\'s "alert type" dropdown).',
+			description: 'Topic type id (the FE\'s "topic type" dropdown).',
 			example: appPushTopicTypeIds[0],
 		}),
 		name: z.string().min(1).meta({
-			description: 'Edition id within the chosen alert type.',
+			description: 'Edition id within the chosen topic type.',
 			example: 'uk',
 		}),
 	})
@@ -171,14 +171,14 @@ const appPushTopicSelection = z
 			ctx.addIssue({
 				code: 'custom',
 				path: ['name'],
-				message: `'${topic.name}' is not a valid edition for alert type '${topic.type}'. Valid editions: ${editions.join(', ')}.`,
+				message: `'${topic.name}' is not a valid edition for topic type '${topic.type}'. Valid editions: ${editions.join(', ')}.`,
 			});
 		}
 	});
 
 /**
- * Push targets a list of alert-type/edition pairs, each resolving to one
- * mobile-n10n topic, capped at mobile-n10n's per-push limit.
+ * Push targets a list of topic-type/edition pairs, each resolving to one
+ * downstream topic, capped at the per-push limit.
  */
 const appPushTopicAudience = z.strictObject({
 	type: z.literal('topic'),
@@ -188,7 +188,7 @@ const appPushTopicAudience = z.strictObject({
 		.max(MAX_APP_PUSH_TOPICS)
 		.refine(hasUniqueTopics, { message: 'app-push topics must be unique.' })
 		.meta({
-			description: `Up to ${MAX_APP_PUSH_TOPICS} alert-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
+			description: `Up to ${MAX_APP_PUSH_TOPICS} topic-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
 			example: [{ type: appPushTopicTypeIds[0], name: 'uk' }],
 		}),
 });

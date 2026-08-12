@@ -87,7 +87,7 @@ export const channelConstraintsSchema = {
 								maxTopics: {
 									type: 'integer',
 									description:
-										'The maximum number of app-push topics (alert-type/edition pairs) a push may target.',
+										'The maximum number of app-push topics (topic-type/edition pairs) a push may target.',
 								},
 							},
 							example: pushConstraints.audience,

@@ -163,7 +163,7 @@ describe('dispatchNotification', () => {
 
 		expect(dispatchError).toEqual(
 			new Error(
-				"No mobile-n10n topic configured for alert type 'breaking-news' edition 'mars'.",
+				"No mobile-n10n topic configured for topic type 'breaking-news' edition 'mars'.",
 			),
 		);
 		expect(sendAppNotification).not.toHaveBeenCalled();

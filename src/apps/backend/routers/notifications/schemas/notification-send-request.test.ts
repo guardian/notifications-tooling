@@ -676,15 +676,15 @@ describe('notificationSendRequestSchema', () => {
 	});
 
 	describe('push topic audience', () => {
-		it('accepts every configured alert-type/edition pair', () => {
-			for (const alertTypeId of appPushTopicTypeIds) {
-				for (const editionId of appPushEditionIdsByTopicType[alertTypeId]) {
+		it('accepts every configured topic-type/edition pair', () => {
+			for (const topicTypeId of appPushTopicTypeIds) {
+				for (const editionId of appPushEditionIdsByTopicType[topicTypeId]) {
 					expectValid(
 						pushRequestWithPlan(
 							pushPlan({
 								audience: {
 									type: 'topic',
-									items: [{ type: alertTypeId, name: editionId }],
+									items: [{ type: topicTypeId, name: editionId }],
 								},
 							}),
 						),
@@ -693,14 +693,14 @@ describe('notificationSendRequestSchema', () => {
 			}
 		});
 
-		it('rejects an unknown alert type', () => {
+		it('rejects an unknown topic type', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
 							audience: {
 								type: 'topic',
-								items: [{ type: 'ghost-alert', name: 'uk' }],
+								items: [{ type: 'ghost-topic', name: 'uk' }],
 							},
 						}),
 					),
@@ -708,7 +708,7 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/app-push/audience/items/0/type');
 		});
 
-		it('rejects an edition that does not belong to the alert type', () => {
+		it('rejects an edition that does not belong to the topic type', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(

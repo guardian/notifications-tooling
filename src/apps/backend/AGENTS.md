@@ -29,7 +29,7 @@ follow-up work, do it or flag it explicitly.
 Use **clear, specific, self-documenting** names — never generic or loosely
 defined ones.
 
-- Prefer `appPushAlertTypes`, `notificationChannelContentLimits`,
+- Prefer `appPushTopicTypes`, `notificationChannelContentLimits`,
   `notificationSendRequestSchema` over `data`, `items`, `config`, `schema`,
   `result`, `temp`, `obj`, `value`.
 - A reader should understand what a variable holds from its name alone, without

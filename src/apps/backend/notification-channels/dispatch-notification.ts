@@ -175,7 +175,7 @@ const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 			const topic = resolveAppPushTopic(type, name);
 			if (!topic) {
 				throw new Error(
-					`No mobile-n10n topic configured for alert type '${type}' edition '${name}'.`,
+					`No mobile-n10n topic configured for topic type '${type}' edition '${name}'.`,
 				);
 			}
 			return topic;

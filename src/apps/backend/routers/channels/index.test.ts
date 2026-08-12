@@ -158,7 +158,7 @@ describe('GET /v1/channels/audiences', () => {
 		);
 	});
 
-	it('exposes every push alert type with its editions, id and label only', async () => {
+	it('exposes every push topic type with its editions, id and label only', async () => {
 		const response = await getAudiences();
 		const body = (await response.json()) as typeof channelAudiences;
 

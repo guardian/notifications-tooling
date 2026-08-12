@@ -29,7 +29,7 @@ const newsletterAudienceSchema = {
 	},
 } as const;
 
-/** A selectable app-push edition within an alert type: its id and human label. */
+/** A selectable app-push edition within a topic type: its id and human label. */
 const editionOptionSchema = {
 	type: 'object',
 	required: ['id', 'label'],
@@ -45,18 +45,18 @@ const editionOptionSchema = {
 	},
 } as const;
 
-/** A selectable app-push alert type: its id, label and selectable editions. */
+/** A selectable app-push topic type: its id, label and selectable editions. */
 const topicTypeOptionSchema = {
 	type: 'object',
 	required: ['id', 'label', 'editions'],
 	properties: {
 		id: {
 			type: 'string',
-			description: 'The public alert-type id referenced in a push plan topic.',
+			description: 'The public topic-type id referenced in a push plan topic.',
 		},
 		label: {
 			type: 'string',
-			description: 'Human-readable alert-type name for display in the UI.',
+			description: 'Human-readable topic-type name for display in the UI.',
 		},
 		editions: {
 			type: 'array',
@@ -65,7 +65,7 @@ const topicTypeOptionSchema = {
 	},
 } as const;
 
-/** The app-push channel's selectable audience: its alert types (topic types). */
+/** The app-push channel's selectable audience: its topic types. */
 const appPushAudienceSchema = {
 	type: 'object',
 	required: ['topicTypes'],
@@ -81,7 +81,7 @@ const appPushAudienceSchema = {
  * The `GET /v1/channels/audiences` response body: the selectable audiences per
  * channel the SPA uses to populate its audience pickers, keyed by channel under
  * `channels`. Newsletter exposes `segments`; app-push exposes `topicTypes`
- * (alert types) each with their selectable `editions`. Only public ids and
+ * each with their selectable `editions`. Only public ids and
  * labels are exposed; the downstream addressing each selection resolves to
  * (Braze campaign / mobile-n10n topic) is kept server-side.
  */
