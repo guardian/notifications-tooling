@@ -89,13 +89,7 @@ describe('dispatchAppPushTest', () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 
 		const outcomes = await dispatchAppPushTest(
-			{
-				idempotencyKey: 'test-newsletter-only',
-				sender: 'dispatch-test',
-				options: { dryRun: false },
-				content: { items: { lead: pushItem } },
-				channels: {},
-			} as unknown as NotificationTestSendRequest,
+			testPushRequest({ channels: {} }),
 			testId,
 			dependencies,
 		);

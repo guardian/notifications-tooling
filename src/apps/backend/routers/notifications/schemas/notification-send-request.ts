@@ -174,8 +174,7 @@ const appPushTopicSelection = <
 			}),
 		})
 		.superRefine((topic, ctx) => {
-			const editions: readonly string[] =
-				editionIdsByTopicType[topic.type as TopicTypeIds[number]];
+			const editions: readonly string[] = editionIdsByTopicType[topic.type];
 			if (!editions.includes(topic.name)) {
 				ctx.addIssue({
 					code: 'custom',
