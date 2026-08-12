@@ -103,12 +103,6 @@ export const AudienceSegments = ({
 									isSelected={isSelected}
 									onChange={() => onSegmentToggle(segment.code)}
 									aria-label={`Select ${segment.label} audience segment`}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											onSegmentToggle(segment.code);
-										}
-									}}
 									cssOverrides={css({
 										width: '100%',
 										flexDirection: 'row-reverse',
