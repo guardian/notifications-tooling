@@ -13,6 +13,7 @@ import type {
 import { articleFixture } from '../mocks/capi-fixtures';
 import { mockCapiFetch } from '../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../mocks/mock-fetch-email';
+import { mockRequestTestEmailSend } from '../mocks/mock-request-test-email-send';
 import { mockSendNotification } from '../mocks/mock-send-notification';
 import { parseHtml } from '../util/html-helpers';
 
@@ -32,6 +33,7 @@ export const WithNotificationContext = (
 		capiFetch = mockCapiFetch,
 		sendNotification = mockSendNotification,
 		requestEmailHtml = mockRequestEmailHtml,
+		requestTestEmailSend = mockRequestTestEmailSend,
 	} = functions;
 
 	return (
@@ -42,6 +44,7 @@ export const WithNotificationContext = (
 				capiFetch,
 				sendNotification,
 				requestEmailHtml,
+				requestTestEmailSend,
 			}}
 		>
 			{reactNode}

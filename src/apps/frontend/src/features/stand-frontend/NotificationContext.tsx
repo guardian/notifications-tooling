@@ -2,6 +2,7 @@ import type { ResolveArticleRequest, ResolveArticleResponse } from '@models';
 import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
 import type { SendNotificationRequest } from './api/schemas';
+import type { TestEmailRequestFunction } from './api/send-test-email';
 import type {
 	NotificationAction,
 	NotificationState,
@@ -20,6 +21,7 @@ export interface NotificationFormContextProps {
 		(sendNotificationRequest: SendNotificationRequest): Promise<SendingResult>;
 	};
 	requestEmailHtml: RequestEmailHtml;
+	requestTestEmailSend: TestEmailRequestFunction;
 }
 
 export const NotificationFormContext =
@@ -37,4 +39,8 @@ export const NotificationFormContext =
 			Promise.reject(new Error('no sendNotification implementation provided')),
 		requestEmailHtml: () =>
 			Promise.reject(new Error('no requestEmailHtml implementation provided')),
+		requestTestEmailSend: () =>
+			Promise.reject(
+				new Error('no requestTestEmailSend implementation provided'),
+			),
 	});
