@@ -34,7 +34,7 @@ export const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 	},
 	{
 		id: '#delivery-timing-section',
-		label: 'Timing and Delivery',
+		label: 'Timing and delivery',
 		canSkipFrom: true,
 		canSkipTo: true,
 	},
