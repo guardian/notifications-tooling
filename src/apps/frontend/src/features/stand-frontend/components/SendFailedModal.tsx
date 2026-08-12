@@ -1,7 +1,6 @@
 import { semanticColors } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
-import { Link } from '@guardian/stand/Link';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
@@ -20,17 +19,9 @@ const deriveUserFacingMessage = (
 ): ReactNode => {
 	switch (apiError.failure) {
 		case 'forbidden':
-			return `You don't have the correct authorisation to send ${channelDescription}s}`;
+			return `You don't have the correct authorisation to send ${channelDescription}s`;
 		case 'unauthenticated':
-			return (
-				<Typography>
-					Your login has expired.{' '}
-					<Link target="_blank" href="/">
-						Open the tool in a new tab
-					</Link>{' '}
-					to refresh your credentials, then try again
-				</Typography>
-			);
+			return <Typography>Your login has expired.</Typography>;
 		case 'json-parse-fail':
 		case 'schema-parse-fail':
 			return (
@@ -76,19 +67,17 @@ const checkIfCanRetry = (apiError: ApiError) => {
 	const { failure, status } = apiError;
 	switch (failure) {
 		case 'fetch-fail':
-			return true;
-		case 'json-parse-fail':
-			return false;
-		case 'schema-parse-fail':
-			return false;
-		case 'forbidden':
-			return false;
 		case 'unauthenticated':
-			return true;
 		case 'timeout':
 			return true;
+		case 'json-parse-fail':
+		case 'schema-parse-fail':
+		case 'forbidden':
+			return false;
 		case 'non-2xx-response':
-			return status && status >= 500;
+			return status != null && status >= 500;
+		default:
+			return false;
 	}
 };
 
