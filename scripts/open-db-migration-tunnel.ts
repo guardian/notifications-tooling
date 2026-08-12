@@ -22,12 +22,11 @@ const parseArgs = (): TunnelConfig => {
 	const profile = 'composer';
 	const region = 'eu-west-1';
 
-
 	if (args[0] === '--help' || args[0] === '-h') {
 		console.log(usage);
 		process.exit(0);
 	}
-	
+
 	if (args.length === 0) {
 		throw new Error('Missing required `--stage` argument.');
 	}
@@ -37,7 +36,6 @@ const parseArgs = (): TunnelConfig => {
 	}
 
 	if (args.length === 2) {
-
 		if (args[0] !== '--stage') {
 			throw new Error('First argument must be `--stage`.');
 		}
@@ -53,7 +51,7 @@ const parseArgs = (): TunnelConfig => {
 		throw new Error('Missing required `--stage` argument.');
 	}
 
-	const stackName = `notifications-${stage ?? 'CODE'}-dispatch-stack`;
+	const stackName = `notifications-${stage}-dispatch-stack`;
 
 	return {
 		localPort,
