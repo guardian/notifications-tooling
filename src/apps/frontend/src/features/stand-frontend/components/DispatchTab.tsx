@@ -1,9 +1,5 @@
 import { css } from '@emotion/react';
-import {
-	semanticColors,
-	semanticSizing,
-	semanticSpacing,
-} from '@guardian/stand';
+import { semanticSpacing } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
@@ -15,7 +11,6 @@ import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
 import { PreviewToggle } from './PreviewToggle';
-import { ScrollWrapper } from './ScrollWrapper';
 import {
 	DEFAULT_SIDE_NAV_HREF,
 	SIDE_NAVIGATION_PANEL_ITEMS,
@@ -106,10 +101,11 @@ export const DispatchTab = () => {
 								})}
 							>
 								<PreviewToggle />
-								<ScrollWrapper
-									style={css({
+								<div
+									css={css({
+										position: 'relative',
+										display: 'flex',
 										paddingLeft: semanticSpacing.stackMd,
-										borderLeft: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 										[from.md]: { paddingLeft: semanticSpacing.stackXl },
 										'@media (min-width: 1500px)': {
 											paddingLeft: '147px',
@@ -117,7 +113,7 @@ export const DispatchTab = () => {
 									})}
 								>
 									<CreateNotificationForm />
-								</ScrollWrapper>
+								</div>
 							</Item>
 							<Item
 								size={'grow'}
