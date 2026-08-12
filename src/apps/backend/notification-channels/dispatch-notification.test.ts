@@ -37,6 +37,8 @@ const ssmParameters: Record<string, string> = {
 	BRAZE_TEST_EMAIL_FROM: 'dev testing <dev-testing@email.theguardian.com>',
 	BRAZE_TEST_EMAIL_REPLY_TO: 'NO_REPLY_TO',
 	EMAIL_RENDERING_ENDPOINT: 'https://email-rendering.example.com',
+	MOBILE_N10N_ENDPOINT: 'https://n10n.example.com',
+	MOBILE_N10N_API_KEY: 'test-n10n-key',
 };
 
 const createDependencies = () => {
@@ -96,15 +98,45 @@ describe('dispatchNotification', () => {
 
 		await dispatchNotification(request, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledWith({
+			endpoint: 'https://n10n.example.com',
+			apiKey: 'test-n10n-key',
+			timeoutMs: 10_000,
+			sender: baseRequest.sender,
+			title: pushItem.title,
+			body: pushItem.body,
+			link: pushItem.link,
+			importance: 'Major',
 			topics: [
 				{ type: 'breaking', name: 'uk' },
 				{ type: 'newsstand', name: 'newsstandIos' },
 			],
-			title: pushItem.title,
-			body: pushItem.body,
-			link: pushItem.link,
 			media: undefined,
 		});
+	});
+
+	it('derives Minor importance when no breaking-news edition is targeted', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { lead: pushItem } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'sport', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		await dispatchNotification(request, dependencies);
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				importance: 'Minor',
+				topics: [{ type: 'breaking', name: 'uk-sport' }],
+			}),
+		);
 	});
 
 	it('forwards optional media to the app-notification client', async () => {
@@ -130,10 +162,15 @@ describe('dispatchNotification', () => {
 
 		await dispatchNotification(request, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledWith({
-			topics: [{ type: 'breaking', name: 'uk' }],
+			endpoint: 'https://n10n.example.com',
+			apiKey: 'test-n10n-key',
+			timeoutMs: 10_000,
+			sender: baseRequest.sender,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
+			importance: 'Major',
+			topics: [{ type: 'breaking', name: 'uk' }],
 			media,
 		});
 	});

@@ -126,37 +126,56 @@ describe('POST /v1/notifications', () => {
 		});
 
 		it('accepts a valid request with 202 and the acceptance envelope', async () => {
-			const response = await postNotification(validPushRequest());
-
-			expect(response.status).toBe(202);
-
-			const body = (await response.json()) as {
-				notificationId: string;
-				status: string;
-				plans: Array<{ channel: string; planId: string; status: string }>;
-				statusUrl: string;
-				cancellable: { cancelUrl: string; expiresAt: number };
-			};
-
-			expect(body.status).toBe('accepted');
-			expect(typeof body.notificationId).toBe('string');
-			expect(body.notificationId.length).toBeGreaterThan(0);
-
-			expect(body.plans).toEqual([
-				{
-					channel: 'app-push',
-					planId: `${body.notificationId}#app-push`,
-					status: 'accepted',
-				},
-			]);
-
-			expect(body.statusUrl).toBe(
-				`/v1/notifications/${body.notificationId}/status`,
+			const testApp = express();
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(mock(() => Promise.resolve())),
 			);
-			expect(body.cancellable.cancelUrl).toBe(
-				`/v1/notifications/${body.notificationId}/cancel`,
-			);
-			expect(typeof body.cancellable.expiresAt).toBe('number');
+			const dispatchServer = await startTestServer(testApp);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(202);
+
+				const body = (await response.json()) as {
+					notificationId: string;
+					status: string;
+					plans: Array<{ channel: string; planId: string; status: string }>;
+					statusUrl: string;
+					cancellable: { cancelUrl: string; expiresAt: number };
+				};
+
+				expect(body.status).toBe('accepted');
+				expect(typeof body.notificationId).toBe('string');
+				expect(body.notificationId.length).toBeGreaterThan(0);
+
+				expect(body.plans).toEqual([
+					{
+						channel: 'app-push',
+						planId: `${body.notificationId}#app-push`,
+						status: 'accepted',
+					},
+				]);
+
+				expect(body.statusUrl).toBe(
+					`/v1/notifications/${body.notificationId}/status`,
+				);
+				expect(body.cancellable.cancelUrl).toBe(
+					`/v1/notifications/${body.notificationId}/cancel`,
+				);
+				expect(typeof body.cancellable.expiresAt).toBe('number');
+			} finally {
+				await dispatchServer.close();
+			}
 		});
 	});
 

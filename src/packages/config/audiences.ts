@@ -274,14 +274,18 @@ export const getAppPushTopicTypes = (
 
 export const appPushTopicTypes = getAppPushTopicTypes(configurationStage);
 
-/** Resolves a request's (topic type, edition) pair to its mobile-n10n topic. */
+/** Resolves a (topic type, edition) pair to its downstream topic and importance. */
 export const resolveAppPushTopic = (
 	topicTypeId: AppPushTopicTypeId,
 	editionId: string,
-): MobileN10nTopic | undefined => {
+): { topic: MobileN10nTopic; importance: AppPushImportance } | undefined => {
 	const editions: Record<string, AppPushEdition> =
 		appPushTopicTypes[topicTypeId].editions;
-	return editions[editionId]?.mobileN10nTopic;
+	const edition = editions[editionId];
+	if (!edition) {
+		return undefined;
+	}
+	return { topic: edition.mobileN10nTopic, importance: edition.importance };
 };
 
 // Non-empty tuples so the validator can build `z.enum(...)` from them.

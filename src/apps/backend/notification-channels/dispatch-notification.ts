@@ -1,10 +1,12 @@
 import {
+	AppPushImportance,
 	newsletterSegments,
 	NotificationChannel,
 	resolveAppPushTopic,
 } from '@config';
 import { getSSMParameter } from '@config/ssm';
 import {
+	type AppNotificationImportance,
 	registerBrazeTestEmailRecipients,
 	renderEmail,
 	sendAppNotification,
@@ -25,6 +27,11 @@ const newsletterEnvironmentSchema = z.object({
 	BRAZE_API_KEY: z.string().trim().min(1),
 	BRAZE_REST_ENDPOINT: z.url(),
 	EMAIL_RENDERING_ENDPOINT: z.url(),
+});
+
+const appNotificationEnvironmentSchema = z.object({
+	MOBILE_N10N_ENDPOINT: z.url(),
+	MOBILE_N10N_API_KEY: z.string().trim().min(1),
 });
 
 const testEmailEnvironmentSchema = z.object({
@@ -169,17 +176,28 @@ const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 		NotificationChannel.AppPushNotification,
 	);
 
+	const resolvedTopics = plan.audience.items.map(({ type, name }) => {
+		const resolved = resolveAppPushTopic(type, name);
+		if (!resolved) {
+			throw new Error(
+				`No push topic is configured for topic type '${type}' edition '${name}'.`,
+			);
+		}
+		return resolved;
+	});
+
+	// mobile-n10n carries one importance per push; never downgrade a Major topic.
+	const importance: AppNotificationImportance = resolvedTopics.some(
+		({ importance }) => importance === AppPushImportance.Major,
+	)
+		? 'Major'
+		: 'Minor';
+
 	return {
 		item,
-		topics: plan.audience.items.map(({ type, name }) => {
-			const topic = resolveAppPushTopic(type, name);
-			if (!topic) {
-				throw new Error(
-					`No push topic is configured for topic type '${type}' edition '${name}'.`,
-				);
-			}
-			return topic;
-		}),
+		sender: request.sender,
+		importance,
+		topics: resolvedTopics.map(({ topic }) => topic),
 	};
 };
 
@@ -191,12 +209,28 @@ const dispatchAppPush = async (
 		return;
 	}
 
-	const { item, topics } = resolvedDispatch;
+	const { item, sender, importance, topics } = resolvedDispatch;
+
+	const [endpoint, apiKey] = await Promise.all([
+		dependencies.getSSMParameter('MOBILE_N10N_ENDPOINT'),
+		dependencies.getSSMParameter('MOBILE_N10N_API_KEY'),
+	]);
+
+	const environment = appNotificationEnvironmentSchema.parse({
+		MOBILE_N10N_ENDPOINT: endpoint,
+		MOBILE_N10N_API_KEY: apiKey,
+	});
+
 	await dependencies.sendAppNotification({
-		topics,
+		endpoint: environment.MOBILE_N10N_ENDPOINT,
+		apiKey: environment.MOBILE_N10N_API_KEY,
+		timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+		sender,
 		title: item.title,
 		body: item.body,
 		link: item.link,
+		importance,
+		topics,
 		media: item.media,
 	});
 };
