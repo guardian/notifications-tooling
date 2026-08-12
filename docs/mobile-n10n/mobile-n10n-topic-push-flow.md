@@ -64,10 +64,10 @@ sequenceDiagram
   (`contentApiId` derived from the URL, with the `item-trimmed` GITContent
   prefix) so the apps deep-link in place, falling back to an external link
   (`link: { url }`) when no content id can be derived.
-- Dispatch sets each push's `id` to `<notificationId>#<topicType>`, where
-  `notificationId` is minted by the router before dispatch. The suffix makes the
-  id unique per topic-type group and lets a re-send be observed and
-  deduplicated. mobile-n10n also returns its own `PushResult` id in the
+- Dispatch generates a fresh UUID per group and sends it as the payload `id`
+  (mobile-n10n requires a UUID). It returns each group's
+  `{ id, topicType, status, failureReason? }` so the ids and outcomes can be
+  persisted once a store exists. mobile-n10n echoes the id in its `PushResult`
   `201 Created` body.
 - The API key is sent as `Authorization: Bearer <key>`. mobile-n10n scopes each
   key to the topic types it may push to, so an unpermitted topic type is
@@ -75,10 +75,12 @@ sequenceDiagram
 - mobile-n10n enforces a non-empty topic list and a maximum of 20 topics per
   push. The client guards both bounds before calling out, and the request schema
   caps the total topics a plan may target.
-- Per-topic-type pushes are issued in parallel. If one group fails, groups that
-  already succeeded cannot be rolled back.
+- Per-topic-type pushes are issued in parallel with `Promise.allSettled`, so one
+  group's failure does not abort the others; each group's success/failure is
+  reported in the returned outcomes. Successful groups are not rolled back.
 - Dispatch adds no propagation delay and performs no automatic retry. A `202`
-  confirms API acceptance and the downstream `201`s, not delivery to devices.
+  confirms API acceptance, not delivery to devices; per-group outcomes carry the
+  actual `201`/failure of each `POST /push/topic`.
 - Provider failures are classified (`AppNotificationApiError`) and mapped by the
   error middleware to `504` on timeout and `502` otherwise, without leaking the
   provider response.

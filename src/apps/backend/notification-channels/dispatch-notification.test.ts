@@ -1,6 +1,6 @@
 import { describe, expect, it, mock } from 'bun:test';
 import { newsletterSegments, NotificationChannel } from '@config';
-import { AppNotificationApiError } from '@services';
+import { AppNotificationApiError, EmailRenderingError } from '@services';
 import type {
 	NotificationSendRequest,
 	NotificationTestSendRequest,
@@ -10,6 +10,9 @@ import {
 	dispatchNotification,
 	dispatchNotificationTest,
 } from './dispatch-notification';
+
+// `expect.any(String)` is typed `any`; cast so it sits in typed positions.
+const anyString = expect.any(String) as unknown as string;
 
 const pushItem = {
 	type: NotificationChannel.AppPushNotification,
@@ -109,7 +112,7 @@ describe('dispatchNotification', () => {
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
-			id: expect.any(String),
+			id: anyString,
 			sender: baseRequest.sender,
 			title: pushItem.title,
 			body: pushItem.body,
@@ -122,10 +125,10 @@ describe('dispatchNotification', () => {
 			],
 			media: undefined,
 		});
-		expect(outcomes).toEqual([
+		expect(outcomes.appPush).toEqual([
 			{
 				notificationId,
-				id: expect.any(String),
+				id: anyString,
 				topicType: 'breaking-news',
 				status: 'success',
 			},
@@ -159,28 +162,28 @@ describe('dispatchNotification', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				id: expect.any(String),
+				id: anyString,
 				importance: 'Major',
 				topics: [{ type: 'breaking', name: 'uk' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				id: expect.any(String),
+				id: anyString,
 				importance: 'Minor',
 				topics: [{ type: 'newsstand', name: 'newsstandIos' }],
 			}),
 		);
-		expect(outcomes).toEqual([
+		expect(outcomes.appPush).toEqual([
 			{
 				notificationId,
-				id: expect.any(String),
+				id: anyString,
 				topicType: 'breaking-news',
 				status: 'success',
 			},
 			{
 				notificationId,
-				id: expect.any(String),
+				id: anyString,
 				topicType: 'newsstand',
 				status: 'success',
 			},
@@ -221,16 +224,16 @@ describe('dispatchNotification', () => {
 
 		// Both pushes are attempted even though the first-listed one failed.
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
-		expect(outcomes).toEqual([
+		expect(outcomes.appPush).toEqual([
 			{
 				notificationId,
-				id: expect.any(String),
+				id: anyString,
 				topicType: 'breaking-news',
 				status: 'success',
 			},
 			{
 				notificationId,
-				id: expect.any(String),
+				id: anyString,
 				topicType: 'newsstand',
 				status: 'failure',
 				failureReason: 'http_error',
@@ -257,7 +260,7 @@ describe('dispatchNotification', () => {
 		await dispatchNotification(request, notificationId, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				id: expect.any(String),
+				id: anyString,
 				importance: 'Minor',
 				topics: [{ type: 'breaking', name: 'uk-sport' }],
 			}),
@@ -290,7 +293,7 @@ describe('dispatchNotification', () => {
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
-			id: expect.any(String),
+			id: anyString,
 			sender: baseRequest.sender,
 			title: pushItem.title,
 			body: pushItem.body,
@@ -350,7 +353,11 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			dependencies,
+		);
 		expect(renderEmail).toHaveBeenNthCalledWith(1, {
 			endpoint: 'https://email-rendering.example.com',
 			articleUrl: newsletterItem.link,
@@ -383,6 +390,22 @@ describe('dispatchNotification', () => {
 			subject: 'Daily briefing',
 			timeoutMs: 10_000,
 		});
+		expect(outcomes.newsletter).toEqual([
+			{
+				notificationId,
+				segmentId: 'UK',
+				campaignId: newsletterSegments.UK.brazeCampaignId,
+				dispatchId: 'dispatch-123',
+				status: 'success',
+			},
+			{
+				notificationId,
+				segmentId: 'US',
+				campaignId: newsletterSegments.US.brazeCampaignId,
+				dispatchId: 'dispatch-123',
+				status: 'success',
+			},
+		]);
 	});
 
 	it('dispatches every channel in a combined request', async () => {
@@ -416,10 +439,10 @@ describe('dispatchNotification', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 	});
 
-	it('attempts both channels when one fails', async () => {
+	it('records a failed newsletter send while the push succeeds', async () => {
 		const { dependencies, renderEmail, sendAppNotification } =
 			createDependencies();
-		renderEmail.mockRejectedValue(new Error('Rendering failed'));
+		renderEmail.mockRejectedValue(new EmailRenderingError(500, 'http_error'));
 		const request: NotificationSendRequest = {
 			...baseRequest,
 			content: { items: { push: pushItem, newsletter: newsletterItem } },
@@ -438,16 +461,32 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		let dispatchError: unknown;
-		try {
-			await dispatchNotification(request, notificationId, dependencies);
-		} catch (error) {
-			dispatchError = error;
-		}
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			dependencies,
+		);
 
-		expect(dispatchError).toEqual(new Error('Rendering failed'));
+		// Neither channel aborts the other; each failure is reported on its own.
 		expect(renderEmail).toHaveBeenCalledTimes(1);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+		expect(outcomes.appPush).toEqual([
+			{
+				notificationId,
+				id: anyString,
+				topicType: 'breaking-news',
+				status: 'success',
+			},
+		]);
+		expect(outcomes.newsletter).toEqual([
+			{
+				notificationId,
+				segmentId: 'UK',
+				campaignId: newsletterSegments.UK.brazeCampaignId,
+				status: 'failure',
+				failureReason: 'http_error',
+			},
+		]);
 	});
 
 	it('renders and sends test newsletters directly to normalized recipients', async () => {

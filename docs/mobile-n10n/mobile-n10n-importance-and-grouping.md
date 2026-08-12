@@ -72,18 +72,23 @@ pushes name a single topic type and make a single call.
 
 ## Failure isolation and retries
 
-Per-topic-type pushes are independent and issued in parallel. There is no
-persistence layer yet, so a failure has no cross-call transaction:
+Per-topic-type pushes are independent and issued in parallel with
+`Promise.allSettled`, so one group's failure does not abort the others. There is
+no persistence layer yet, so a failure has no cross-call transaction:
 
-- if one group's push fails, groups that already succeeded are not rolled back;
+- a fresh UUID is generated per group and sent as the mobile-n10n payload `id`;
+  dispatch returns each group's `{ id, topicType, status, failureReason? }` so
+  the outcomes can be persisted once a store exists;
+- if one group's push fails the others still complete, and successful groups are
+  not rolled back;
 - Dispatch does not retry automatically, because a failed call may have been
   accepted downstream and a blind retry could duplicate a push;
-- a successful Dispatch response means every group's `POST /push/topic` returned
-  `201`, not that any device received the notification.
+- the returned outcomes report per-group `success`/`failure` (with a classified
+  `failureReason`), not that any device received the notification.
 
-With persistence, each group's push should become an individually tracked,
-retryable unit keyed off the stored notification id, so partial failures can be
-recovered without resending groups that already succeeded.
+With persistence, each group's push becomes an individually tracked, retryable
+unit keyed off its returned id, so partial failures can be recovered without
+resending groups that already succeeded.
 
 ## Importance stays server-side
 

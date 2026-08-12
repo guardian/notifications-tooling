@@ -10,6 +10,10 @@ import {
 	AppNotificationApiError,
 	type AppNotificationFailureReason,
 	type AppNotificationImportance,
+	BrazeApiError,
+	type BrazeFailureReason,
+	EmailRenderingError,
+	type EmailRenderingFailureReason,
 	registerBrazeTestEmailRecipients,
 	renderEmail,
 	sendAppNotification,
@@ -48,6 +52,25 @@ export type AppPushDispatchOutcome = {
 	topicType: string;
 	status: 'success' | 'failure';
 	failureReason?: AppNotificationFailureReason | 'unknown';
+};
+
+/**
+ * The outcome of one newsletter send (one per targeted segment). `dispatchId` is
+ * Braze's `dispatch_id` from the campaign-trigger response, kept for tracking.
+ */
+export type NewsletterDispatchOutcome = {
+	notificationId: string;
+	segmentId: string;
+	campaignId: string;
+	dispatchId?: string;
+	status: 'success' | 'failure';
+	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
+};
+
+/** Per-channel dispatch outcomes returned for future persistence. */
+export type DispatchOutcomes = {
+	appPush: AppPushDispatchOutcome[];
+	newsletter: NewsletterDispatchOutcome[];
 };
 
 const testEmailEnvironmentSchema = z.object({
@@ -130,18 +153,26 @@ const resolveNewsletterDispatch = (request: NotificationSendRequest) => {
 			);
 		}
 
-		return { brazeCampaignId, emailRenderingNewsletterId };
+		return { segmentId, brazeCampaignId, emailRenderingNewsletterId };
 	});
 
 	return { item, plan, segments };
 };
 
+const newsletterFailureReason = (
+	error: unknown,
+): BrazeFailureReason | EmailRenderingFailureReason | 'unknown' =>
+	error instanceof BrazeApiError || error instanceof EmailRenderingError
+		? error.reason
+		: 'unknown';
+
 const dispatchNewsletter = async (
 	resolvedDispatch: ReturnType<typeof resolveNewsletterDispatch>,
+	notificationId: string,
 	dependencies: DispatchNotificationDependencies,
-): Promise<void> => {
+): Promise<NewsletterDispatchOutcome[]> => {
 	if (!resolvedDispatch) {
-		return;
+		return [];
 	}
 
 	const { item, plan, segments } = resolvedDispatch;
@@ -159,25 +190,51 @@ const dispatchNewsletter = async (
 		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
 	});
 
-	for (const { brazeCampaignId, emailRenderingNewsletterId } of segments) {
-		const html = await dependencies.renderEmail({
-			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
-			articleUrl: item.link,
-			newsletterId: emailRenderingNewsletterId,
-			headlineOverride: item.title,
-			previewText: item.body,
-			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-		});
+	// allSettled so one segment's render/send failure does not abort the others.
+	const settled = await Promise.allSettled(
+		segments.map(async ({ emailRenderingNewsletterId, brazeCampaignId }) => {
+			const html = await dependencies.renderEmail({
+				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
+				articleUrl: item.link,
+				newsletterId: emailRenderingNewsletterId,
+				headlineOverride: item.title,
+				previewText: item.body,
+				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+			});
 
-		await dependencies.sendBrazeCampaign({
-			apiKey: environment.BRAZE_API_KEY,
-			restEndpoint: environment.BRAZE_REST_ENDPOINT,
+			// Braze returns one dispatch_id per send; kept for tracking.
+			const { dispatch_id: dispatchId } = await dependencies.sendBrazeCampaign({
+				apiKey: environment.BRAZE_API_KEY,
+				restEndpoint: environment.BRAZE_REST_ENDPOINT,
+				campaignId: brazeCampaignId,
+				html,
+				subject: plan.compose.subject,
+				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+			});
+
+			return dispatchId;
+		}),
+	);
+
+	return settled.map((result, index): NewsletterDispatchOutcome => {
+		const { segmentId, brazeCampaignId } = segments[index]!;
+		if (result.status === 'fulfilled') {
+			return {
+				notificationId,
+				segmentId,
+				campaignId: brazeCampaignId,
+				dispatchId: result.value,
+				status: 'success',
+			};
+		}
+		return {
+			notificationId,
+			segmentId,
 			campaignId: brazeCampaignId,
-			html,
-			subject: plan.compose.subject,
-			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-		});
-	}
+			status: 'failure',
+			failureReason: newsletterFailureReason(result.reason),
+		};
+	});
 };
 
 const resolveAppPushDispatch = (request: NotificationSendRequest) => {
@@ -300,9 +357,9 @@ export const dispatchNotification = async (
 	request: NotificationSendRequest,
 	notificationId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
-): Promise<AppPushDispatchOutcome[]> => {
+): Promise<DispatchOutcomes> => {
 	if (request.options.dryRun) {
-		return [];
+		return { appPush: [], newsletter: [] };
 	}
 
 	if (request.options.scheduledFor) {
@@ -312,14 +369,14 @@ export const dispatchNotification = async (
 	const newsletterDispatch = resolveNewsletterDispatch(request);
 	const appPushDispatch = resolveAppPushDispatch(request);
 
-	// Per-push outcomes are returned for future persistence; nothing is retried
-	// automatically, so a re-send must not resend targets that already succeeded.
-	const [, appPushOutcomes] = await Promise.all([
-		dispatchNewsletter(newsletterDispatch, dependencies),
+	// Per-channel outcomes are returned for future persistence; nothing is
+	// retried automatically, so a re-send must not resend targets that succeeded.
+	const [newsletter, appPush] = await Promise.all([
+		dispatchNewsletter(newsletterDispatch, notificationId, dependencies),
 		dispatchAppPush(appPushDispatch, notificationId, dependencies),
 	]);
 
-	return appPushOutcomes;
+	return { appPush, newsletter };
 };
 
 export const dispatchNotificationTest = async (
