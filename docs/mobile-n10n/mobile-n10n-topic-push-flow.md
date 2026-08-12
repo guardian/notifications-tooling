@@ -58,10 +58,12 @@ sequenceDiagram
 - Each push carries a single `importance`, taken from its topic type
   (`breaking-news` is `Major`; every other topic type is `Minor`). No push ever
   has to reconcile more than one importance value.
-- The payload is a `BreakingNewsPayload` (`type: "news"`). The Guardian article
-  link is sent as an external link (`link: { url }`), the title maps to `title`
-  and the body to `message`. Optional media populates `imageUrl` and
-  `thumbnailUrl`.
+- The payload is a `BreakingNewsPayload` (`type: "news"`). The title maps to
+  `title` and the body to `message`; optional media populates `imageUrl` and
+  `thumbnailUrl`. The article link is sent as a Guardian link
+  (`contentApiId` derived from the URL, with the `item-trimmed` GITContent
+  prefix) so the apps deep-link in place, falling back to an external link
+  (`link: { url }`) when no content id can be derived.
 - Dispatch sets each push's `id` to `<notificationId>#<topicType>`, where
   `notificationId` is minted by the router before dispatch. The suffix makes the
   id unique per topic-type group and lets a re-send be observed and

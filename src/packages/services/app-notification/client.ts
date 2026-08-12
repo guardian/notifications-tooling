@@ -17,6 +17,12 @@ export type SendAppNotificationRequest = {
 	body: string;
 	/** Canonical Guardian article URL the notification opens. */
 	link: string;
+	/**
+	 * CAPI content id derived from `link`. When set, the notification carries a
+	 * Guardian link so the apps deep-link in place; otherwise `link` is sent as an
+	 * external URL.
+	 */
+	contentApiId?: string;
 	importance: AppNotificationImportance;
 	topics: ReadonlyArray<{ type: string; name: string }>;
 	media?: {
@@ -80,6 +86,7 @@ export const sendAppNotification = async ({
 	title,
 	body,
 	link,
+	contentApiId,
 	importance,
 	topics,
 	media,
@@ -102,7 +109,16 @@ export const sendAppNotification = async ({
 		title,
 		message: body,
 		sender,
-		link: { url: link },
+		// A Guardian link (contentApiId + `item-trimmed` GITContent prefix) so the
+		// apps open the article in place; an external URL when no id is derivable.
+		// `link.title` mirrors the message (the headline), as Fronts does.
+		link: contentApiId
+			? {
+					contentApiId,
+					title: body,
+					git: { mobileAggregatorPrefix: 'item-trimmed' },
+				}
+			: { url: link },
 		importance,
 		topic: topics.map(({ type, name }) => ({ type, name })),
 		debug: false,

@@ -18,6 +18,7 @@ const request: SendAppNotificationRequest = {
 	title: 'Breaking news',
 	body: 'World leaders gather in Geneva as talks open.',
 	link: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
+	contentApiId: 'world/2026/jul/08/ukraine-summit',
 	importance: 'Major',
 	topics: [
 		{ type: 'breaking', name: 'uk' },
@@ -53,7 +54,9 @@ describe('sendAppNotification', () => {
 					message: 'World leaders gather in Geneva as talks open.',
 					sender: 'notifications-tooling-spa/v1',
 					link: {
-						url: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
+						contentApiId: 'world/2026/jul/08/ukraine-summit',
+						title: 'World leaders gather in Geneva as talks open.',
+						git: { mobileAggregatorPrefix: 'item-trimmed' },
 					},
 					importance: 'Major',
 					topic: [
@@ -67,6 +70,23 @@ describe('sendAppNotification', () => {
 			},
 		);
 		expect(timeout).toHaveBeenCalledWith(10_000);
+	});
+
+	it('sends an external link when no content id can be derived', async () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ id: 'n10n-uuid' }, { status: 201 }),
+		);
+
+		const { contentApiId: _omitted, ...withoutContentId } = request;
+		void _omitted;
+		await sendAppNotification(withoutContentId);
+
+		const sentBody = JSON.parse(fetcher.mock.calls[0]?.[1]?.body as string) as {
+			link: unknown;
+		};
+		expect(sentBody.link).toEqual({
+			url: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
+		});
 	});
 
 	it('includes image and thumbnail when media is provided', async () => {

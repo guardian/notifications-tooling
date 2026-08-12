@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
 	AppPushImportance,
 	newsletterSegments,
@@ -6,6 +7,8 @@ import {
 } from '@config';
 import { getSSMParameter } from '@config/ssm';
 import {
+	AppNotificationApiError,
+	type AppNotificationFailureReason,
 	type AppNotificationImportance,
 	registerBrazeTestEmailRecipients,
 	renderEmail,
@@ -13,6 +16,7 @@ import {
 	sendBrazeCampaign,
 	sendBrazeTestEmail,
 } from '@services';
+import { determineArticleId } from '@utils';
 import { z } from 'zod';
 import type {
 	NotificationSendRequest,
@@ -33,6 +37,18 @@ const appNotificationEnvironmentSchema = z.object({
 	MOBILE_N10N_ENDPOINT: z.url(),
 	MOBILE_N10N_API_KEY: z.string().trim().min(1),
 });
+
+/**
+ * The outcome of one mobile-n10n push (one per targeted topic type). Returned so
+ * the caller can persist each POST's id and status once a store exists.
+ */
+export type AppPushDispatchOutcome = {
+	notificationId: string;
+	id: string;
+	topicType: string;
+	status: 'success' | 'failure';
+	failureReason?: AppNotificationFailureReason | 'unknown';
+};
 
 const testEmailEnvironmentSchema = z.object({
 	BRAZE_APP_ID: z.string().trim().min(1),
@@ -214,9 +230,9 @@ const dispatchAppPush = async (
 	resolvedDispatch: ReturnType<typeof resolveAppPushDispatch>,
 	notificationId: string,
 	dependencies: DispatchNotificationDependencies,
-): Promise<void> => {
+): Promise<AppPushDispatchOutcome[]> => {
 	if (!resolvedDispatch) {
-		return;
+		return [];
 	}
 
 	const { item, sender, pushes } = resolvedDispatch;
@@ -231,34 +247,62 @@ const dispatchAppPush = async (
 		MOBILE_N10N_API_KEY: apiKey,
 	});
 
-	await Promise.all(
-		pushes.map((push) =>
+	// Derive the CAPI content id so the apps deep-link; falls back to the raw URL.
+	const contentApiId = determineArticleId(item.link);
+
+	// A fresh id per topic-type push; returned so each POST can be persisted.
+	const dispatched = pushes.map((push) => ({ id: randomUUID(), push }));
+
+	// allSettled so one failed push does not abort the others.
+	const settled = await Promise.allSettled(
+		dispatched.map(({ id, push }) =>
 			dependencies.sendAppNotification({
 				endpoint: environment.MOBILE_N10N_ENDPOINT,
 				apiKey: environment.MOBILE_N10N_API_KEY,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-				// Deterministic per-group id (`<notificationId>#<topicType>`) so a
-				// re-send of the same request can be deduplicated downstream.
-				id: `${notificationId}#${push.topicType}`,
+				id,
 				sender,
 				title: item.title,
 				body: item.body,
 				link: item.link,
+				contentApiId,
 				importance: push.importance,
 				topics: push.topics,
 				media: item.media,
 			}),
 		),
 	);
+
+	return settled.map((result, index): AppPushDispatchOutcome => {
+		const { id, push } = dispatched[index]!;
+		if (result.status === 'fulfilled') {
+			return {
+				notificationId,
+				id,
+				topicType: push.topicType,
+				status: 'success',
+			};
+		}
+		return {
+			notificationId,
+			id,
+			topicType: push.topicType,
+			status: 'failure',
+			failureReason:
+				result.reason instanceof AppNotificationApiError
+					? result.reason.reason
+					: 'unknown',
+		};
+	});
 };
 
 export const dispatchNotification = async (
 	request: NotificationSendRequest,
 	notificationId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
-): Promise<void> => {
+): Promise<AppPushDispatchOutcome[]> => {
 	if (request.options.dryRun) {
-		return;
+		return [];
 	}
 
 	if (request.options.scheduledFor) {
@@ -268,13 +312,14 @@ export const dispatchNotification = async (
 	const newsletterDispatch = resolveNewsletterDispatch(request);
 	const appPushDispatch = resolveAppPushDispatch(request);
 
-	// Delivery outcomes are not persisted yet. Retrying after a partial failure
-	// can resend targets that already succeeded, so failures must not be retried
-	// automatically until partial-delivery recovery is implemented.
-	await Promise.all([
+	// Per-push outcomes are returned for future persistence; nothing is retried
+	// automatically, so a re-send must not resend targets that already succeeded.
+	const [, appPushOutcomes] = await Promise.all([
 		dispatchNewsletter(newsletterDispatch, dependencies),
 		dispatchAppPush(appPushDispatch, notificationId, dependencies),
 	]);
+
+	return appPushOutcomes;
 };
 
 export const dispatchNotificationTest = async (

@@ -1,5 +1,6 @@
 import { describe, expect, it, mock } from 'bun:test';
 import { newsletterSegments, NotificationChannel } from '@config';
+import { AppNotificationApiError } from '@services';
 import type {
 	NotificationSendRequest,
 	NotificationTestSendRequest,
@@ -98,17 +99,22 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			dependencies,
+		);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 		expect(sendAppNotification).toHaveBeenCalledWith({
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
-			id: `${notificationId}#breaking-news`,
+			id: expect.any(String),
 			sender: baseRequest.sender,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
+			contentApiId: 'world/2026/jul/22/lead',
 			importance: 'Major',
 			topics: [
 				{ type: 'breaking', name: 'uk' },
@@ -116,6 +122,14 @@ describe('dispatchNotification', () => {
 			],
 			media: undefined,
 		});
+		expect(outcomes).toEqual([
+			{
+				notificationId,
+				id: expect.any(String),
+				topicType: 'breaking-news',
+				status: 'success',
+			},
+		]);
 	});
 
 	it('sends one push per topic type when types are mixed', async () => {
@@ -137,22 +151,91 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			dependencies,
+		);
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				id: `${notificationId}#breaking-news`,
+				id: expect.any(String),
 				importance: 'Major',
 				topics: [{ type: 'breaking', name: 'uk' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				id: `${notificationId}#newsstand`,
+				id: expect.any(String),
 				importance: 'Minor',
 				topics: [{ type: 'newsstand', name: 'newsstandIos' }],
 			}),
 		);
+		expect(outcomes).toEqual([
+			{
+				notificationId,
+				id: expect.any(String),
+				topicType: 'breaking-news',
+				status: 'success',
+			},
+			{
+				notificationId,
+				id: expect.any(String),
+				topicType: 'newsstand',
+				status: 'success',
+			},
+		]);
+	});
+
+	it('returns per-push outcomes with statuses when a push fails', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		let call = 0;
+		sendAppNotification.mockImplementation(() => {
+			call += 1;
+			return call === 1
+				? Promise.resolve({ id: 'n10n-id' })
+				: Promise.reject(new AppNotificationApiError('http_error', 400));
+		});
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { lead: pushItem } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [
+							{ type: 'breaking-news', name: 'uk' },
+							{ type: 'newsstand', name: 'ios' },
+						],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			dependencies,
+		);
+
+		// Both pushes are attempted even though the first-listed one failed.
+		expect(sendAppNotification).toHaveBeenCalledTimes(2);
+		expect(outcomes).toEqual([
+			{
+				notificationId,
+				id: expect.any(String),
+				topicType: 'breaking-news',
+				status: 'success',
+			},
+			{
+				notificationId,
+				id: expect.any(String),
+				topicType: 'newsstand',
+				status: 'failure',
+				failureReason: 'http_error',
+			},
+		]);
 	});
 
 	it('derives Minor importance when no breaking-news edition is targeted', async () => {
@@ -174,7 +257,7 @@ describe('dispatchNotification', () => {
 		await dispatchNotification(request, notificationId, dependencies);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				id: `${notificationId}#sport`,
+				id: expect.any(String),
 				importance: 'Minor',
 				topics: [{ type: 'breaking', name: 'uk-sport' }],
 			}),
@@ -207,11 +290,12 @@ describe('dispatchNotification', () => {
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
-			id: `${notificationId}#breaking-news`,
+			id: expect.any(String),
 			sender: baseRequest.sender,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
+			contentApiId: 'world/2026/jul/22/lead',
 			importance: 'Major',
 			topics: [{ type: 'breaking', name: 'uk' }],
 			media,
