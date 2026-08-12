@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
+import { httpLogger } from '@http-logger';
 import express from 'express';
 import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
@@ -52,10 +53,11 @@ beforeAll(async () => {
 	authenticateRequests();
 	grantPermissions([UserPermissions.DispatchAccess]);
 	const app = express();
+	app.use(httpLogger);
 	app.use(express.json());
 	app.use(
 		'/v1/notification-tests',
-		createNotificationTestsRouter(mock(() => Promise.resolve())),
+		createNotificationTestsRouter(mock(() => Promise.resolve([]))),
 	);
 	server = await startTestServer(app);
 	baseUrl = server.baseUrl;
@@ -89,8 +91,9 @@ describe('POST /v1/notification-tests', () => {
 	});
 
 	it('accepts and dispatches a direct email test', async () => {
-		const dispatchRequest = mock(() => Promise.resolve());
+		const dispatchRequest = mock(() => Promise.resolve([]));
 		const app = express();
+		app.use(httpLogger);
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
@@ -117,10 +120,13 @@ describe('POST /v1/notification-tests', () => {
 
 			expect(response.status).toBe(202);
 			expect(body.dryRun).toBe(false);
-			expect(dispatchRequest).toHaveBeenCalledWith({
-				...validTestRequest(),
-				options: { dryRun: false },
-			});
+			expect(dispatchRequest).toHaveBeenCalledWith(
+				{
+					...validTestRequest(),
+					options: { dryRun: false },
+				},
+				expect.any(String),
+			);
 			expect(body.status).toBe('accepted');
 			expect(body.plans).toEqual([
 				{
@@ -138,8 +144,9 @@ describe('POST /v1/notification-tests', () => {
 	});
 
 	it('preserves dry-run mode in dispatch and the acceptance response', async () => {
-		const dispatchRequest = mock(() => Promise.resolve());
+		const dispatchRequest = mock(() => Promise.resolve([]));
 		const app = express();
+		app.use(httpLogger);
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
@@ -163,7 +170,7 @@ describe('POST /v1/notification-tests', () => {
 			const body = (await response.json()) as { dryRun: boolean };
 
 			expect(response.status).toBe(202);
-			expect(dispatchRequest).toHaveBeenCalledWith(request);
+			expect(dispatchRequest).toHaveBeenCalledWith(request, expect.any(String));
 			expect(body.dryRun).toBe(true);
 		} finally {
 			await dispatchServer.close();

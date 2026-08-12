@@ -35,6 +35,7 @@ const baseRequest = {
 } as const;
 
 const notificationId = 'notif-2f1c9a7e';
+const testId = 'test-9c1d5b2a';
 
 const ssmParameters: Record<string, string> = {
 	BRAZE_API_KEY: 'test-api-key',
@@ -514,7 +515,11 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotificationTest(request, dependencies);
+		const outcomes = await dispatchNotificationTest(
+			request,
+			testId,
+			dependencies,
+		);
 
 		expect(renderEmail).toHaveBeenNthCalledWith(1, {
 			endpoint: 'https://email-rendering.example.com',
@@ -551,6 +556,20 @@ describe('dispatchNotification', () => {
 			timeoutMs: 10_000,
 		});
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
+		expect(outcomes).toEqual([
+			{
+				testId,
+				variant: 'UK',
+				dispatchId: 'test-dispatch-123',
+				status: 'success',
+			},
+			{
+				testId,
+				variant: 'US',
+				dispatchId: 'test-dispatch-123',
+				status: 'success',
+			},
+		]);
 	});
 
 	it('renders a test dry run without registering or sending recipients', async () => {
@@ -577,8 +596,13 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotificationTest(request, dependencies);
+		const outcomes = await dispatchNotificationTest(
+			request,
+			testId,
+			dependencies,
+		);
 
+		expect(outcomes).toEqual([]);
 		expect(renderEmail).toHaveBeenCalledTimes(2);
 		expect(registerBrazeTestEmailRecipients).not.toHaveBeenCalled();
 		expect(sendBrazeTestEmail).not.toHaveBeenCalled();

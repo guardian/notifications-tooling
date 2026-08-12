@@ -73,6 +73,18 @@ export type DispatchOutcomes = {
 	newsletter: NewsletterDispatchOutcome[];
 };
 
+/**
+ * The outcome of one test-email send (one per rendering variant). `dispatchId`
+ * is Braze's `dispatch_id` from the test send, kept for tracking.
+ */
+export type NewsletterTestDispatchOutcome = {
+	testId: string;
+	variant: string;
+	dispatchId?: string;
+	status: 'success' | 'failure';
+	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
+};
+
 const testEmailEnvironmentSchema = z.object({
 	BRAZE_APP_ID: z.string().trim().min(1),
 	BRAZE_TEST_EMAIL_FROM: z.preprocess(
@@ -381,8 +393,9 @@ export const dispatchNotification = async (
 
 export const dispatchNotificationTest = async (
 	request: NotificationTestSendRequest,
+	testId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
-): Promise<void> => {
+): Promise<NewsletterTestDispatchOutcome[]> => {
 	const plan = request.channels[NotificationChannel.Newsletter];
 	if (plan.compose.items.length !== 1) {
 		throw new Error('Only one newsletter item can be rendered currently.');
@@ -422,9 +435,12 @@ export const dispatchNotificationTest = async (
 	const recipientEmails = plan.audience.items.map((email) =>
 		email.toLowerCase(),
 	);
-	const renderedVariants = [];
+
+	// All variants must render before any Braze call; a render failure aborts.
+	const renderedVariants: Array<{ segmentId: string; html: string }> = [];
 	for (const segmentId of plan.variants) {
 		renderedVariants.push({
+			segmentId,
 			html: await dependencies.renderEmail({
 				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 				articleUrl: item.link,
@@ -436,7 +452,7 @@ export const dispatchNotificationTest = async (
 		});
 	}
 	if (request.options.dryRun) {
-		return;
+		return [];
 	}
 
 	await dependencies.registerBrazeTestEmailRecipients({
@@ -446,17 +462,38 @@ export const dispatchNotificationTest = async (
 		timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 	});
 
-	for (const { html } of renderedVariants) {
-		await dependencies.sendBrazeTestEmail({
-			apiKey: environment.BRAZE_API_KEY,
-			restEndpoint: environment.BRAZE_REST_ENDPOINT,
-			appId: configuration.BRAZE_APP_ID,
-			from: configuration.BRAZE_TEST_EMAIL_FROM,
-			replyTo: configuration.BRAZE_TEST_EMAIL_REPLY_TO,
-			recipientEmails,
-			html,
-			subject: plan.compose.subject,
-			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-		});
-	}
+	// allSettled so one variant's send failure does not abort the others.
+	const settled = await Promise.allSettled(
+		renderedVariants.map(({ html }) =>
+			dependencies.sendBrazeTestEmail({
+				apiKey: environment.BRAZE_API_KEY,
+				restEndpoint: environment.BRAZE_REST_ENDPOINT,
+				appId: configuration.BRAZE_APP_ID,
+				from: configuration.BRAZE_TEST_EMAIL_FROM,
+				replyTo: configuration.BRAZE_TEST_EMAIL_REPLY_TO,
+				recipientEmails,
+				html,
+				subject: plan.compose.subject,
+				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+			}),
+		),
+	);
+
+	return settled.map((result, index): NewsletterTestDispatchOutcome => {
+		const { segmentId } = renderedVariants[index]!;
+		if (result.status === 'fulfilled') {
+			return {
+				testId,
+				variant: segmentId,
+				dispatchId: result.value.dispatch_id,
+				status: 'success',
+			};
+		}
+		return {
+			testId,
+			variant: segmentId,
+			status: 'failure',
+			failureReason: newsletterFailureReason(result.reason),
+		};
+	});
 };
