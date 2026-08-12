@@ -67,9 +67,19 @@ interface MobileN10nTopic {
 	name: string;
 }
 
+/**
+ * mobile-n10n's `importance` values (`BreakingNewsPayload.importance`). Used
+ * only by the app-push dispatch; never exposed in the public audiences contract.
+ */
+export enum AppPushImportance {
+	Major = 'Major',
+	Minor = 'Minor',
+}
+
 interface AppPushEdition {
 	label: string;
 	mobileN10nTopic: MobileN10nTopic;
+	importance: AppPushImportance;
 }
 
 interface AppPushTopicType {
@@ -89,16 +99,30 @@ const curatedAppPushTopicTypes = {
 	'breaking-news': {
 		label: 'Breaking news',
 		editions: {
-			uk: { label: 'UK', mobileN10nTopic: { type: 'breaking', name: 'uk' } },
-			us: { label: 'US', mobileN10nTopic: { type: 'breaking', name: 'us' } },
-			au: { label: 'AU', mobileN10nTopic: { type: 'breaking', name: 'au' } },
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk' },
+				importance: AppPushImportance.Major,
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'us' },
+				importance: AppPushImportance.Major,
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'au' },
+				importance: AppPushImportance.Major,
+			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: { type: 'breaking', name: 'international' },
+				importance: AppPushImportance.Major,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe' },
+				importance: AppPushImportance.Major,
 			},
 		},
 	},
@@ -108,22 +132,27 @@ const curatedAppPushTopicTypes = {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
+				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
+				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
+				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
+				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
+				importance: AppPushImportance.Minor,
 			},
 		},
 	},
@@ -133,14 +162,17 @@ const curatedAppPushTopicTypes = {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-editors-picks' },
+				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-editors-picks' },
+				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-editors-picks' },
+				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
@@ -148,10 +180,12 @@ const curatedAppPushTopicTypes = {
 					type: 'breaking',
 					name: 'international-editors-picks',
 				},
+				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-editors-picks' },
+				importance: AppPushImportance.Minor,
 			},
 		},
 	},
@@ -161,14 +195,17 @@ const curatedAppPushTopicTypes = {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
+				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
+				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
+				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
@@ -176,10 +213,12 @@ const curatedAppPushTopicTypes = {
 					type: 'breaking',
 					name: 'international-one-not-to-miss',
 				},
+				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
+				importance: AppPushImportance.Minor,
 			},
 		},
 	},
@@ -189,6 +228,7 @@ const curatedAppPushTopicTypes = {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-general-election' },
+				importance: AppPushImportance.Minor,
 			},
 		},
 	},
@@ -198,6 +238,7 @@ const curatedAppPushTopicTypes = {
 			ios: {
 				label: 'iOS',
 				mobileN10nTopic: { type: 'newsstand', name: 'newsstandIos' },
+				importance: AppPushImportance.Minor,
 			},
 		},
 	},
@@ -207,6 +248,7 @@ const curatedAppPushTopicTypes = {
 			test: {
 				label: 'Test',
 				mobileN10nTopic: { type: 'breaking', name: 'internal-test' },
+				importance: AppPushImportance.Minor,
 			},
 		},
 	},
