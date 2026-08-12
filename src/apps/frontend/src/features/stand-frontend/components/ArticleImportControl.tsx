@@ -131,6 +131,7 @@ export const ArticleImportControl = () => {
 						Article
 					</Typography>
 					<TextInput
+						aria-label="article URL"
 						isInvalid={!!showFieldErrors}
 						size="sm"
 						value={articleInputText}
