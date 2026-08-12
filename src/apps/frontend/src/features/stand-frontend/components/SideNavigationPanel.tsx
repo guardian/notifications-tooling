@@ -76,6 +76,7 @@ const theme: SidebarStepperNavigationTheme = {
 const sidebarNavigationCssOverrides = css({
 	'li > button > div:nth-of-type(2)': {
 		borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		paddingLeft: baseSpacing['16Px'],
 	},
 });
 
