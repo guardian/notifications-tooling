@@ -1,7 +1,7 @@
 import {
-	appPushNotificationSegments,
 	newsletterSegments,
 	NotificationChannel,
+	resolveAppPushTopic,
 } from '@config';
 import { getSSMParameter } from '@config/ssm';
 import {
@@ -171,9 +171,15 @@ const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 
 	return {
 		item,
-		topics: plan.audience.items.map(
-			(segmentId) => appPushNotificationSegments[segmentId].mobileN10nTopic,
-		),
+		topics: plan.audience.items.map(({ type, name }) => {
+			const topic = resolveAppPushTopic(type, name);
+			if (!topic) {
+				throw new Error(
+					`No push topic is configured for topic type '${type}' edition '${name}'.`,
+				);
+			}
+			return topic;
+		}),
 	};
 };
 

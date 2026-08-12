@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { acceptedEmailSendResponse } from '../../../mocks/api-fixtures';
 import {
 	completeEmailParams,
 	WithNotificationContext,
@@ -27,9 +28,7 @@ const meta: Meta<StoryArgs> = {
 			parameters: completeEmailParams,
 			sendingResult: {
 				ok: true,
-				response: {
-					status: 'accepted',
-				},
+				response: acceptedEmailSendResponse,
 			},
 		},
 	},

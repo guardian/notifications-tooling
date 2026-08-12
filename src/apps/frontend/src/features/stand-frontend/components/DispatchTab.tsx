@@ -15,7 +15,6 @@ import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
 import { PreviewToggle } from './PreviewToggle';
-import { ScrollWrapper } from './ScrollWrapper';
 import {
 	DEFAULT_SIDE_NAV_HREF,
 	SIDE_NAVIGATION_PANEL_ITEMS,
@@ -122,8 +121,10 @@ export const DispatchTab = () => {
 							})}
 						>
 							<PreviewToggle />
-							<ScrollWrapper
-								style={css({
+							<div
+								css={css({
+									position: 'relative',
+									display: 'flex',
 									paddingLeft: semanticSpacing.stackMd,
 									[from.md]: { paddingLeft: semanticSpacing.stackXl },
 									'@media (min-width: 1500px)': {
@@ -132,7 +133,7 @@ export const DispatchTab = () => {
 								})}
 							>
 								<CreateNotificationForm />
-							</ScrollWrapper>
+							</div>
 						</Item>
 						<Item
 							size={'grow'}

@@ -75,7 +75,7 @@ const createDependencies = () => {
 };
 
 describe('dispatchNotification', () => {
-	it('resolves push segments and calls the mocked app-notification client', async () => {
+	it('resolves push topics and calls the mocked app-notification client', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -83,8 +83,11 @@ describe('dispatchNotification', () => {
 			channels: {
 				[NotificationChannel.AppPushNotification]: {
 					audience: {
-						type: 'segment',
-						items: ['breaking-news-uk', 'newsstand-ios'],
+						type: 'topic',
+						items: [
+							{ type: 'breaking-news', name: 'uk' },
+							{ type: 'newsstand', name: 'ios' },
+						],
 					},
 					compose: { use: 'lead' },
 				},
@@ -100,7 +103,70 @@ describe('dispatchNotification', () => {
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
+			media: undefined,
 		});
+	});
+
+	it('forwards optional media to the app-notification client', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const media = {
+			type: 'image',
+			imageUrl: 'https://i.guim.co.uk/lead.jpg',
+			thumbnailUrl: 'https://i.guim.co.uk/thumb.jpg',
+		} as const;
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { lead: { ...pushItem, media } } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		await dispatchNotification(request, dependencies);
+		expect(sendAppNotification).toHaveBeenCalledWith({
+			topics: [{ type: 'breaking', name: 'uk' }],
+			title: pushItem.title,
+			body: pushItem.body,
+			link: pushItem.link,
+			media,
+		});
+	});
+
+	it('throws when a topic type/edition pair is not configured', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const request = {
+			...baseRequest,
+			content: { items: { lead: pushItem } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'mars' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		} as unknown as NotificationSendRequest;
+
+		let dispatchError: unknown;
+		try {
+			await dispatchNotification(request, dependencies);
+		} catch (error) {
+			dispatchError = error;
+		}
+
+		expect(dispatchError).toEqual(
+			new Error(
+				"No push topic is configured for topic type 'breaking-news' edition 'mars'.",
+			),
+		);
+		expect(sendAppNotification).not.toHaveBeenCalled();
 	});
 
 	it('renders each newsletter segment and sends it through Braze', async () => {
@@ -167,7 +233,10 @@ describe('dispatchNotification', () => {
 			content: { items: { push: pushItem, newsletter: newsletterItem } },
 			channels: {
 				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'segment', items: ['breaking-news-uk'] },
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
 					compose: { use: 'push' },
 				},
 				[NotificationChannel.Newsletter]: {
@@ -192,7 +261,10 @@ describe('dispatchNotification', () => {
 			content: { items: { push: pushItem, newsletter: newsletterItem } },
 			channels: {
 				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'segment', items: ['breaking-news-uk'] },
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
 					compose: { use: 'push' },
 				},
 				[NotificationChannel.Newsletter]: {
@@ -322,7 +394,10 @@ describe('dispatchNotification', () => {
 			content: { items: { lead: pushItem } },
 			channels: {
 				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'segment', items: ['breaking-news-uk'] },
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
 					compose: { use: 'lead' },
 				},
 			},
