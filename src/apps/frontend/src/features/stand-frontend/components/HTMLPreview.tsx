@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 import { HtmlPreview } from '@guardian/stand/HtmlPreviewLoader';
 import { Typography } from '@guardian/stand/Typography';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -86,6 +87,7 @@ export const HTMLPreview = () => {
 			}
 			widthOptions={[]}
 			defaultWidth={400}
+			cssOverrides={css({ maxWidth: '440px' })}
 		/>
 	);
 };
