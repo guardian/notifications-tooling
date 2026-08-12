@@ -1,8 +1,8 @@
 import { useReducer, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
-import { mockSendNotification } from '../../mocks/mock-send-notification';
 import { requestEmailHtml } from './api/fetch-email-preview';
+import { sendNotification } from './api/send-notification';
 import { MainLayout } from './components/MainLayout';
 import { NoPermissionsTab } from './components/NoPermissionsTab';
 import { type AppConfig, getAppConfig } from './get-config';
@@ -29,8 +29,8 @@ export const EmailNotificationPage = () => {
 						notification,
 						updateNotification,
 						capiFetch: hackyClientSideCapiFetch,
-						sendNotification: mockSendNotification,
 						requestEmailHtml: requestEmailHtml,
+						sendNotification: sendNotification,
 					}}
 				>
 					<MainLayout>

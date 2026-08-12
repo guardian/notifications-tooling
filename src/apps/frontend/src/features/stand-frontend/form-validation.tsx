@@ -1,7 +1,8 @@
+import { buildRequest } from './build-request-payloads';
 import type { NotificationState } from './types';
 
 export type NotificationFormErrorField =
-	'article' | 'subject' | 'preview' | 'audienceSegments';
+	'article' | 'subject' | 'preview' | 'audienceSegments' | 'cannotBuildRequest';
 
 export type NotificationFormErrors = NotificationFormErrorField[];
 
@@ -28,6 +29,11 @@ export const validateNotificationForm = (
 	}
 	if (audienceSegments.length === 0) {
 		errors.push('audienceSegments');
+	}
+	// if none of the specific errors above are observed, but still cannot build the request body
+	// return a fallback error
+	if (errors.length == 0 && !buildRequest(notification)) {
+		errors.push('cannotBuildRequest');
 	}
 
 	return errors;
