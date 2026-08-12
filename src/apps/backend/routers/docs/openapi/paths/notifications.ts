@@ -16,6 +16,14 @@ export const notificationsPath = {
 			content: {
 				'application/json': {
 					schema: { $ref: '#/components/schemas/NotificationSendRequest' },
+					examples: {
+						newsletter: {
+							$ref: '#/components/examples/NotificationSendNewsletter',
+						},
+						appPush: {
+							$ref: '#/components/examples/NotificationSendAppPush',
+						},
+					},
 				},
 			},
 		},
