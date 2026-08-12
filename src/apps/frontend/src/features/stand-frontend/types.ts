@@ -1,4 +1,5 @@
 import type { Content } from '@guardian/content-api-models/v1/content';
+import type { EmailPreviewRequest, EmailPreviewResponse } from '@models';
 import type { ApiError } from '../../api/errors';
 import type { SendNotificationResponse } from './api/schemas';
 
@@ -46,7 +47,7 @@ export type NotificationState = {
 };
 
 export type RequestEmailHtml = {
-	(articleId: string, options: { audience: string }): Promise<string>;
+	(request: EmailPreviewRequest): Promise<EmailPreviewResponse>;
 };
 
 export type NotificationAction =
