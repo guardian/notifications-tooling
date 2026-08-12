@@ -11,6 +11,7 @@ import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useContext } from 'react';
 import type { MutableRefObject } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
+import { layer, topBarHeight } from '../themes';
 import type { ActiveSection } from '../types';
 
 export const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
@@ -114,8 +115,8 @@ export const SideNavigationPanel = ({
 		<div
 			css={css({
 				position: 'sticky',
-				top: '0px',
-				zIndex: 1,
+				top: topBarHeight,
+				zIndex: layer.stickyContent,
 			})}
 		>
 			<SidebarStepperNavigation

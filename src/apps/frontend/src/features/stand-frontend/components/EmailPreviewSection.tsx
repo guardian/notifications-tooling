@@ -3,6 +3,7 @@ import { baseSpacing, semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
+import { layer, topBarHeight } from '../themes';
 import type {
 	AudienceSegment,
 	ChannelOption,
@@ -48,8 +49,8 @@ export const EmailPreviewSection = ({
 					flexBasis: 474,
 					paddingTop: '48px',
 					position: 'sticky',
-					top: '0px',
-					zIndex: 1,
+					top: topBarHeight,
+					zIndex: layer.stickyContent,
 				},
 			})}
 		>
