@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
+import { httpLogger } from '@http-logger';
 import express from 'express';
 import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
@@ -96,8 +97,11 @@ describe('POST /v1/notifications', () => {
 
 	describe('happy path', () => {
 		it('dispatches the validated request before accepting it', async () => {
-			const dispatchRequest = mock(() => Promise.resolve());
+			const dispatchRequest = mock(() =>
+				Promise.resolve({ appPush: [], newsletter: [] }),
+			);
 			const testApp = express();
+			testApp.use(httpLogger);
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
@@ -130,10 +134,13 @@ describe('POST /v1/notifications', () => {
 
 		it('accepts a valid request with 202 and the acceptance envelope', async () => {
 			const testApp = express();
+			testApp.use(httpLogger);
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
-				createNotificationsRouter(mock(() => Promise.resolve())),
+				createNotificationsRouter(
+					mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+				),
 			);
 			const dispatchServer = await startTestServer(testApp);
 

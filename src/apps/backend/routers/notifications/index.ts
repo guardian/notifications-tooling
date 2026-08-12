@@ -5,7 +5,10 @@ import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
-import { dispatchNotification } from '../../notification-channels/dispatch-notification';
+import {
+	dispatchNotification,
+	type DispatchOutcomes,
+} from '../../notification-channels/dispatch-notification';
 import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
@@ -71,7 +74,7 @@ export const handleValidationErrors: ErrorRequestHandler = (
 type DispatchValidatedNotification = (
 	request: NotificationSendRequest,
 	notificationId: string,
-) => Promise<unknown>;
+) => Promise<DispatchOutcomes>;
 
 export const createNotificationsRouter = (
 	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
@@ -92,7 +95,16 @@ export const createNotificationsRouter = (
 			// Mint the id before dispatch so each channel adapter can tag its
 			// downstream calls with it. Becomes the store's primary key later.
 			const notificationId = randomUUID();
-			await dispatchRequest(body, notificationId);
+			const { appPush, newsletter } = await dispatchRequest(
+				body,
+				notificationId,
+			);
+
+			// Outcomes are not persisted yet; log them so sends can be introspected.
+			req.log.info(
+				{ notificationId, appPush, newsletter },
+				'Dispatched notification channels',
+			);
 
 			const statusUrl = `/v1/notifications/${notificationId}/status`;
 
