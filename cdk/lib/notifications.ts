@@ -11,9 +11,16 @@ import { GuDatabaseInstance } from '@guardian/cdk/lib/constructs/rds';
 import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
-import { Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
-import { Port } from 'aws-cdk-lib/aws-ec2';
-import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { CfnOutput, Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
+import { CfnInstance, MachineImage, Port } from 'aws-cdk-lib/aws-ec2';
+import {
+	CfnInstanceProfile,
+	Effect,
+	ManagedPolicy,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { Architecture, LayerVersion } from 'aws-cdk-lib/aws-lambda';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
@@ -39,6 +46,9 @@ export class DispatchStack extends GuStack {
 		const { stage } = props;
 		const isProd = stage === 'PROD';
 		const domainName = `${app}.${isProd ? '' : 'code.dev-'}gutools.co.uk`;
+		const privateSubnets = GuVpc.subnetsFromParameter(this, {
+			type: SubnetType.PRIVATE,
+		});
 		const accountVpc = GuVpc.fromIdParameter(this, 'AccountVPC', {
 			availabilityZones: Fn.getAzs(this.region),
 			publicSubnetIds: GuVpc.subnetsFromParameter(this, {
@@ -61,6 +71,65 @@ export class DispatchStack extends GuStack {
 				securityGroupName: `DispatchLambdaSecurityGroup${stage}`,
 			},
 		);
+
+		const databaseSecurityGroup = new GuSecurityGroup(this, 'DBSecurityGroup', {
+			app,
+			description:
+				'Shared security group for the Dispatch database and migration jump host.',
+			vpc: accountVpc,
+			allowAllOutbound: true,
+		});
+
+		databaseSecurityGroup.addIngressRule(
+			lambdaSecurityGroup,
+			Port.tcp(DB_PORT),
+			'Allow ingress traffic from the Dispatch application lambda security group.',
+		);
+
+		databaseSecurityGroup.addIngressRule(
+			databaseSecurityGroup,
+			Port.tcp(DB_PORT),
+			'Allow ingress traffic between resources attached to the shared database security group.',
+		);
+
+		const migrationHostRole = new Role(this, 'DispatchMigrationHostRole', {
+			assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
+			managedPolicies: [
+				ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
+			],
+		});
+
+		const migrationHostInstanceProfile = new CfnInstanceProfile(
+			this,
+			'DispatchMigrationHostInstanceProfile',
+			{
+				roles: [migrationHostRole.roleName],
+			},
+		);
+
+		const migrationHost = new CfnInstance(this, 'DispatchMigrationHost', {
+			iamInstanceProfile: migrationHostInstanceProfile.ref,
+			imageId: MachineImage.latestAmazonLinux2023().getImage(this).imageId,
+			instanceType: 't3.nano',
+			securityGroupIds: [databaseSecurityGroup.securityGroupId],
+			subnetId: Fn.select(
+				0,
+				privateSubnets.map((subnet) => subnet.subnetId),
+			),
+			tags: [
+				{
+					key: 'Name',
+					value: `dispatch-db-migration-${stage.toLowerCase()}`,
+				},
+			],
+		});
+		migrationHost.addPropertyOverride('MetadataOptions.HttpTokens', 'required');
+
+		new CfnOutput(this, 'MigrationHostInstanceId', {
+			value: migrationHost.ref,
+			description:
+				'EC2 instance used as the Session Manager jump host for manual database migrations.',
+		});
 
 		const guApiLambda = new GuApiLambda(this, `${app}-lambda`, {
 			fileName: `${app}.zip`,
@@ -132,22 +201,6 @@ export class DispatchStack extends GuStack {
 			}),
 		);
 
-		const databaseSecurityGroup = new GuSecurityGroup(this, 'DBSecurityGroup', {
-			app,
-			description:
-				'Allow connections from the Dispatch application lambda to the database.',
-			vpc: accountVpc,
-			allowAllOutbound: false,
-			ingresses: [
-				{
-					range: lambdaSecurityGroup,
-					port: Port.tcp(DB_PORT),
-					description:
-						'Allow ingress traffic from the Dispatch application lambda security group.',
-				},
-			],
-		});
-
 		const dbConfig = {
 			TEST: {
 				instanceType: 'db.t4g.micro',
@@ -192,9 +245,7 @@ export class DispatchStack extends GuStack {
 			subnetGroup: new SubnetGroup(this, 'DBSubnetGroup', {
 				vpc: accountVpc,
 				vpcSubnets: {
-					subnets: GuVpc.subnetsFromParameter(this, {
-						type: SubnetType.PRIVATE,
-					}),
+					subnets: privateSubnets,
 				},
 				description: 'Subnet for the Dispatch database',
 			}),
