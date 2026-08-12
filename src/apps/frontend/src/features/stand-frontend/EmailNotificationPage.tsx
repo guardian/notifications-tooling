@@ -1,28 +1,18 @@
 import { useReducer, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { hackyClientSideCapiFetch } from '../../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../../mocks/mock-fetch-email';
 import { sendNotification } from './api/send-notification';
-import { DispatchTab } from './components/DispatchTab';
-import { HistoryTab } from './components/HistoryTab';
 import { MainLayout } from './components/MainLayout';
 import { NoPermissionsTab } from './components/NoPermissionsTab';
 import { type AppConfig, getAppConfig } from './get-config';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
-import type { NotificationAction, NotificationState, TabName } from './types';
+import type { NotificationAction, NotificationState } from './types';
 import { UserContext } from './UserContext';
 
 export const EmailNotificationPage = () => {
 	const [user] = useState<AppConfig | undefined>(getAppConfig());
-	const [currentTab, setCurrentTab] = useState<TabName>(() => {
-		switch (location.hash) {
-			case '#history':
-				return 'history';
-			case '#create':
-			default:
-				return 'create';
-		}
-	});
 
 	const [notification, updateNotification] = useReducer<
 		NotificationState,
@@ -43,13 +33,12 @@ export const EmailNotificationPage = () => {
 						requestEmailHtml: mockRequestEmailHtml,
 					}}
 				>
-					<MainLayout currentTab={currentTab} setTab={setCurrentTab}>
-						{currentTab === 'create' && <DispatchTab />}
-						{currentTab === 'history' && <HistoryTab />}
+					<MainLayout>
+						<Outlet />
 					</MainLayout>
 				</NotificationFormContext.Provider>
 			) : (
-				<MainLayout currentTab={currentTab} setTab={() => {}}>
+				<MainLayout>
 					<NoPermissionsTab />
 				</MainLayout>
 			)}
