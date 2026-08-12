@@ -36,11 +36,10 @@ export const MainLayout = ({ children }: Props) => {
 
 	return (
 		<Layout>
-			<Layout.TopBar>
-				<TopBar
-					theme={topBarTheme}
-					cssOverrides={css({ position: 'sticky', top: '0px', zIndex: 1 })}
-				>
+			<Layout.TopBar
+				cssOverrides={css({ position: 'sticky', top: 0, zIndex: 2 })}
+			>
+				<TopBar theme={topBarTheme}>
 					<TopBarToolName
 						name="Dispatch"
 						favicon={{
