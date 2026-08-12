@@ -2,16 +2,25 @@ import type { Content } from '@guardian/content-api-models/v1/content';
 import { Typography } from '@guardian/stand/Typography';
 import { getPillarColor } from '../pillar-colors';
 import { articlePreviewCardTheme } from '../themes';
+import { useRelativeTime } from '../use-relative-time';
 
 interface ArticlePreviewCardProps {
 	content: Content;
 }
 
 export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
-	const { sectionName, pillarId, pillarName, webTitle, fields } = content;
+	const {
+		sectionName,
+		pillarId,
+		pillarName,
+		webTitle,
+		fields,
+		webPublicationDate,
+	} = content;
 	const headline = fields?.headline ?? webTitle;
 	const thumbnail = fields?.thumbnail;
 	const pillarColor = getPillarColor(pillarId);
+	const publishedAt = useRelativeTime(webPublicationDate?.iso8601);
 
 	return (
 		<div css={articlePreviewCardTheme.card}>
@@ -21,10 +30,32 @@ export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
 						cssOverrides={articlePreviewCardTheme.sectionLabel(pillarColor)}
 					>
 						{sectionName && (
-							<Typography variant="bodyBoldXs">{sectionName}</Typography>
+							<Typography
+								variant="bodyBoldXs"
+								cssOverrides={articlePreviewCardTheme.sectionLabel(pillarColor)}
+							>
+								{sectionName}
+							</Typography>
 						)}
 						{sectionName && pillarName && ' / '}
 						{pillarName}
+					</Typography>
+				)}
+
+				{publishedAt && (
+					<Typography
+						variant="bodyXs"
+						element="p"
+						cssOverrides={articlePreviewCardTheme.published}
+					>
+						Published{' '}
+						<time
+							dateTime={publishedAt.iso8601}
+							title={publishedAt.formattedAbsoluteTime}
+							css={articlePreviewCardTheme.publishedRelative}
+						>
+							{publishedAt.label}
+						</time>
 					</Typography>
 				)}
 
@@ -34,6 +65,10 @@ export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
 					cssOverrides={articlePreviewCardTheme.headline}
 				>
 					{headline}
+				</Typography>
+
+				<Typography variant="bodyXs" cssOverrides={articlePreviewCardTheme.url}>
+					{content.webUrl}
 				</Typography>
 			</div>
 

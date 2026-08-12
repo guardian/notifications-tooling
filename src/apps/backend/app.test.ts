@@ -2,10 +2,21 @@ import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import type { NextFunction, Request, Response } from 'express';
 import type { ErrorEnvelope } from './error-envelope';
 import { errorMiddleware } from './middleware/error-middleware';
-import { installPandaAuthMock } from './utils/test-utils/panda-auth';
+import {
+	authenticateRequests,
+	installPandaAuthMock,
+	verifyCookieMock,
+} from './utils/test-utils/panda-auth';
 
 // Stub Panda verification before the app (and its real verifier) is imported.
 installPandaAuthMock();
+
+const serveIndexMock = mock((_request: Request, response: Response) =>
+	response.status(200).type('html').send('<div id="root"></div>'),
+);
+void mock.module('./middleware/serve-index', () => ({
+	serveIndex: serveIndexMock,
+}));
 
 const { notFoundHandler } = await import('./app');
 const { startTestServer } = await import('./utils/test-utils/server');
@@ -68,6 +79,7 @@ describe('unmatched routes over HTTP', () => {
 	let server: TestServer;
 
 	beforeAll(async () => {
+		authenticateRequests();
 		server = await startTestServer();
 	});
 
@@ -75,8 +87,10 @@ describe('unmatched routes over HTTP', () => {
 		await server.close();
 	});
 
-	it('serves the 404 envelope with a real requestId', async () => {
-		const response = await fetch(`${server.baseUrl}/no-such-route`);
+	it('serves the 404 envelope for unmatched non-page requests', async () => {
+		const response = await fetch(`${server.baseUrl}/no-such-route`, {
+			method: 'POST',
+		});
 		const body = (await response.json()) as ErrorEnvelope;
 
 		expect(response.status).toBe(404);
@@ -86,5 +100,47 @@ describe('unmatched routes over HTTP', () => {
 		expect(body.requestId).toBe(
 			response.headers.get('X-Request-Id') ?? undefined,
 		);
+	});
+
+	it('serves the SPA document for direct page-route requests', async () => {
+		const response = await fetch(`${server.baseUrl}/create`, {
+			headers: { Accept: 'text/html' },
+		});
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get('content-type')).toContain('text/html');
+		expect(await response.text()).toContain('<div id="root"></div>');
+	});
+
+	it('serves the SPA document for unknown page routes', async () => {
+		const response = await fetch(`${server.baseUrl}/no-such-route`);
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get('content-type')).toContain('text/html');
+		expect(await response.text()).toContain('<div id="root"></div>');
+	});
+
+	it('redirects unauthenticated page-route requests to login', async () => {
+		verifyCookieMock.mockResolvedValueOnce({ success: false });
+
+		const response = await fetch(`${server.baseUrl}/create`, {
+			headers: { Accept: 'text/html' },
+			redirect: 'manual',
+		});
+
+		expect(response.status).toBe(302);
+		const location = response.headers.get('location');
+		expect(location).toContain('/login');
+		expect(location).toContain(encodeURIComponent('/create'));
+	});
+
+	it('does not serve the SPA document for missing API routes', async () => {
+		const response = await fetch(`${server.baseUrl}/v1/no-such-route`, {
+			headers: { Accept: 'text/html' },
+		});
+		const body = (await response.json()) as ErrorEnvelope;
+
+		expect(response.status).toBe(404);
+		expect(body.error).toBe('not_found');
 	});
 });

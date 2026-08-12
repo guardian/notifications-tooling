@@ -1,6 +1,6 @@
-import { EmailNotificationPage } from '../features/stand-frontend/EmailNotificationPage';
+import { App } from '../App';
 import './page.css';
 
 export const Page: React.FC = () => {
-	return <EmailNotificationPage />;
+	return <App />;
 };
