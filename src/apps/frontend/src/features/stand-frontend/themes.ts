@@ -145,7 +145,7 @@ export const articlePreviewCardTheme = {
 		padding: semanticSpacing.stackSm,
 		borderRadius: semanticRadius.cornerSm,
 		backgroundColor: baseColors.neutral[850],
-		width: '450px',
+		maxWidth: '470px',
 	}),
 	details: css({
 		display: 'flex',
