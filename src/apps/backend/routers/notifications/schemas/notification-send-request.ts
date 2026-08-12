@@ -1,5 +1,6 @@
 import {
-	appPushNotificationSegmentIds,
+	appPushTopicTypeIds,
+	appPushEditionIdsByTopicType,
 	MAX_APP_PUSH_SEGMENTS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
@@ -137,14 +138,60 @@ const segmentAudience = <
 			}),
 	});
 
-const appPushSegmentAudience = segmentAudience(
-	appPushNotificationSegmentIds,
-	MAX_APP_PUSH_SEGMENTS,
-);
 const newsletterSegmentAudience = segmentAudience(
 	newsletterSegmentIds,
 	MAX_NEWSLETTER_SEGMENTS,
 );
+
+/** Every `{ type, name }` pair must be distinct. */
+const hasUniqueTopics = (items: Array<{ type: string; name: string }>) =>
+	new Set(items.map(({ type, name }) => `${type}\u0000${name}`)).size ===
+	items.length;
+
+/**
+ * A single app-push target: a curated alert type and one of its editions. The
+ * backend resolves the pair to a mobile-n10n topic (kept server-side). The set
+ * of alert types and their editions is served by `GET /v1/channels/audiences`.
+ */
+const appPushTopicSelection = z
+	.strictObject({
+		type: z.enum(appPushTopicTypeIds).meta({
+			description: 'Alert type id (the FE\'s "alert type" dropdown).',
+			example: appPushTopicTypeIds[0],
+		}),
+		name: z.string().min(1).meta({
+			description: 'Edition id within the chosen alert type.',
+			example: 'uk',
+		}),
+	})
+	.superRefine((topic, ctx) => {
+		const editions: readonly string[] =
+			appPushEditionIdsByTopicType[topic.type];
+		if (!editions.includes(topic.name)) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['name'],
+				message: `'${topic.name}' is not a valid edition for alert type '${topic.type}'. Valid editions: ${editions.join(', ')}.`,
+			});
+		}
+	});
+
+/**
+ * Push targets a list of alert-type/edition pairs, each resolving to one
+ * mobile-n10n topic, capped at mobile-n10n's per-push limit.
+ */
+const appPushTopicAudience = z.strictObject({
+	type: z.literal('topic'),
+	items: z
+		.array(appPushTopicSelection)
+		.min(1)
+		.max(MAX_APP_PUSH_SEGMENTS)
+		.refine(hasUniqueTopics, { message: 'app-push topics must be unique.' })
+		.meta({
+			description: `Up to ${MAX_APP_PUSH_SEGMENTS} alert-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
+			example: [{ type: appPushTopicTypeIds[0], name: 'uk' }],
+		}),
+});
 
 /** Ad-hoc test recipients addressed by email. */
 const testEmailAudience = z.strictObject({
@@ -210,7 +257,7 @@ const newsletterTestPlan = z.strictObject({
 
 /** An app-push delivery plan: who to target and the single item to send. */
 const appPushPlan = z.strictObject({
-	audience: appPushSegmentAudience,
+	audience: appPushTopicAudience,
 	compose: appPushCompose,
 });
 

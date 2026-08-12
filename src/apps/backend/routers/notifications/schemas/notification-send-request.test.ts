@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import {
-	appPushNotificationSegmentIds,
+	appPushTopicTypeIds,
+	appPushEditionIdsByTopicType,
 	MAX_APP_PUSH_SEGMENTS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
@@ -42,7 +43,7 @@ const newsletterItem = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const pushPlan = (overrides: Record<string, unknown> = {}) => ({
-	audience: { type: 'segment', items: ['breaking-news-uk'] },
+	audience: { type: 'topic', items: [{ type: 'breaking-news', name: 'uk' }] },
 	compose: { use: 'lead' },
 	...overrides,
 });
@@ -204,8 +205,8 @@ describe('notificationSendRequestSchema', () => {
 				channels: {
 					'app-push': {
 						audience: {
-							type: 'segment',
-							items: ['breaking-news-uk'],
+							type: 'topic',
+							items: [{ type: 'breaking-news', name: 'uk' }],
 						},
 						compose: { use: 'lead' },
 					},
@@ -241,8 +242,8 @@ describe('notificationSendRequestSchema', () => {
 				channels: {
 					'app-push': {
 						audience: {
-							type: 'segment',
-							items: ['breaking-news-uk'],
+							type: 'topic',
+							items: [{ type: 'breaking-news', name: 'uk' }],
 						},
 						compose: { use: 'pushLead' },
 					},
@@ -612,12 +613,12 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/newsletter/audience/items/0');
 		});
 
-		it('rejects an app-push segment used on a newsletter plan', () => {
+		it('rejects an app-push topic used on a newsletter plan', () => {
 			expect(
 				pathsOf(
 					newsletterRequestWithPlan(
 						newsletterPlan({
-							audience: { type: 'segment', items: ['breaking-news-uk'] },
+							audience: { type: 'segment', items: ['breaking-news'] },
 						}),
 					),
 				),
@@ -674,75 +675,87 @@ describe('notificationSendRequestSchema', () => {
 		});
 	});
 
-	describe('push segment audience', () => {
-		it('accepts every configured app-push segment', () => {
-			for (const id of appPushNotificationSegmentIds) {
-				expectValid(
-					pushRequestWithPlan(
-						pushPlan({
-							audience: { type: 'segment', items: [id] },
-						}),
-					),
-				);
+	describe('push topic audience', () => {
+		it('accepts every configured alert-type/edition pair', () => {
+			for (const alertTypeId of appPushTopicTypeIds) {
+				for (const editionId of appPushEditionIdsByTopicType[alertTypeId]) {
+					expectValid(
+						pushRequestWithPlan(
+							pushPlan({
+								audience: {
+									type: 'topic',
+									items: [{ type: alertTypeId, name: editionId }],
+								},
+							}),
+						),
+					);
+				}
 			}
 		});
 
-		it('rejects an unknown segment', () => {
-			expect(
-				pathsOf(
-					pushRequestWithPlan(
-						pushPlan({
-							audience: { type: 'segment', items: ['ghost-segment'] },
-						}),
-					),
-				),
-			).toContain('channels/app-push/audience/items/0');
-		});
-
-		it('rejects a newsletter segment used on a push plan', () => {
-			expect(
-				pathsOf(
-					pushRequestWithPlan(
-						pushPlan({
-							audience: { type: 'segment', items: ['UK'] },
-						}),
-					),
-				),
-			).toContain('channels/app-push/audience/items/0');
-		});
-
-		it('requires at least one segment', () => {
-			expect(
-				pathsOf(
-					pushRequestWithPlan(
-						pushPlan({ audience: { type: 'segment', items: [] } }),
-					),
-				),
-			).toContain('channels/app-push/audience/items');
-		});
-
-		it(`rejects more than ${MAX_APP_PUSH_SEGMENTS} segments`, () => {
-			const segments = Array.from(
-				{ length: MAX_APP_PUSH_SEGMENTS + 1 },
-				() => 'breaking-news-uk',
-			);
-			expect(
-				pathsOf(
-					pushRequestWithPlan(
-						pushPlan({ audience: { type: 'segment', items: segments } }),
-					),
-				),
-			).toContain('channels/app-push/audience/items');
-		});
-
-		it('rejects duplicate segments', () => {
+		it('rejects an unknown alert type', () => {
 			expect(
 				pathsOf(
 					pushRequestWithPlan(
 						pushPlan({
 							audience: {
-								type: 'segment',
-								items: ['breaking-news-uk', 'breaking-news-uk'],
+								type: 'topic',
+								items: [{ type: 'ghost-alert', name: 'uk' }],
+							},
+						}),
+					),
+				),
+			).toContain('channels/app-push/audience/items/0/type');
+		});
+
+		it('rejects an edition that does not belong to the alert type', () => {
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({
+							audience: {
+								type: 'topic',
+								items: [{ type: 'uk-general-election', name: 'us' }],
+							},
+						}),
+					),
+				),
+			).toContain('channels/app-push/audience/items/0/name');
+		});
+
+		it('requires at least one topic', () => {
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({ audience: { type: 'topic', items: [] } }),
+					),
+				),
+			).toContain('channels/app-push/audience/items');
+		});
+
+		it(`rejects more than ${MAX_APP_PUSH_SEGMENTS} topics`, () => {
+			const items = Array.from({ length: MAX_APP_PUSH_SEGMENTS + 1 }, () => ({
+				type: 'breaking-news',
+				name: 'uk',
+			}));
+			expect(
+				pathsOf(
+					pushRequestWithPlan(pushPlan({ audience: { type: 'topic', items } })),
+				),
+			).toContain('channels/app-push/audience/items');
+		});
+
+		it('rejects duplicate topics', () => {
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({
+							audience: {
+								type: 'topic',
+								items: [
+									{ type: 'breaking-news', name: 'uk' },
+									{ type: 'breaking-news', name: 'uk' },
+								],
 							},
 						}),
 					),
@@ -819,7 +832,10 @@ describe('notificationSendRequestSchema', () => {
 					pushRequest({
 						channels: {
 							sms: {
-								audience: { type: 'segment', items: ['breaking-news-uk'] },
+								audience: {
+									type: 'topic',
+									items: [{ type: 'breaking-news', name: 'uk' }],
+								},
 								compose: { use: 'lead' },
 							},
 						},
@@ -957,8 +973,8 @@ describe('notificationSendRequestSchema', () => {
 					pushRequestWithPlan(
 						pushPlan({
 							audience: {
-								type: 'segment',
-								items: ['breaking-news-uk'],
+								type: 'topic',
+								items: [{ type: 'breaking-news', name: 'uk' }],
 								surprise: true,
 							},
 						}),
