@@ -6,6 +6,7 @@ import { useContext } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
+import { topBarHeight } from '../themes';
 import type { ActiveSection } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
@@ -24,6 +25,7 @@ const createNotificationFormStyles = {
 			gap: semanticSpacing.stackMd,
 			borderLeft: activeSectionStyle,
 			paddingLeft: semanticSpacing.stackMd,
+			scrollMarginTop: topBarHeight,
 		}),
 };
 export const CreateNotificationForm = () => {

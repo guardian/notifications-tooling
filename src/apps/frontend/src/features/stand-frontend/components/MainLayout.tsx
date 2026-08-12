@@ -11,7 +11,7 @@ import {
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { AppConfig } from '../get-config';
-import { faviconTheme, topBarTheme } from '../themes';
+import { faviconTheme, layer, topBarTheme } from '../themes';
 import { UserContext } from '../UserContext';
 
 interface Props {
@@ -36,11 +36,10 @@ export const MainLayout = ({ children }: Props) => {
 
 	return (
 		<Layout>
-			<Layout.TopBar>
-				<TopBar
-					theme={topBarTheme}
-					cssOverrides={css({ position: 'sticky', top: '0px', zIndex: 1 })}
-				>
+			<Layout.TopBar
+				cssOverrides={css({ position: 'sticky', top: 0, zIndex: layer.topBar })}
+			>
+				<TopBar theme={topBarTheme}>
 					<TopBarToolName
 						name="Dispatch"
 						favicon={{
