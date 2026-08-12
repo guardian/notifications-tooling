@@ -1,5 +1,10 @@
 import { css } from '@emotion/react';
-import { baseColors, semanticColors, semanticSizing } from '@guardian/stand';
+import {
+	baseColors,
+	baseSpacing,
+	semanticColors,
+	semanticSizing,
+} from '@guardian/stand';
 import { SidebarStepperNavigation } from '@guardian/stand/SidebarStepperNavigation';
 import type { SidebarStepperNavigationTheme } from '@guardian/stand/SidebarStepperNavigation';
 import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
@@ -45,6 +50,11 @@ export const DEFAULT_SIDE_NAV_HREF =
 	SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
 
 const theme: SidebarStepperNavigationTheme = {
+	navigation: {
+		shared: {
+			border: 'none',
+		},
+	},
 	step: {
 		shared: {
 			height: '72px',
@@ -57,10 +67,17 @@ const theme: SidebarStepperNavigationTheme = {
 	},
 	stepContent: {
 		shared: {
-			marginLeft: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+			marginLeft: '0px',
+			gap: `${baseSpacing['4Px']}px`,
 		},
 	},
 };
+
+const sidebarNavigationCssOverrides = css({
+	'li > button > div:nth-of-type(2)': {
+		borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+	},
+});
 
 interface SideNavigationPanelProps {
 	selectedHref: string;
@@ -115,6 +132,7 @@ export const SideNavigationPanel = ({
 					});
 				}}
 				theme={theme}
+				cssOverrides={sidebarNavigationCssOverrides}
 			/>
 		</div>
 	);

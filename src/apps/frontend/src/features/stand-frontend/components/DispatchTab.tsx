@@ -1,5 +1,9 @@
 import { css } from '@emotion/react';
-import { semanticSpacing } from '@guardian/stand';
+import {
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
@@ -105,6 +109,7 @@ export const DispatchTab = () => {
 								<ScrollWrapper
 									style={css({
 										paddingLeft: semanticSpacing.stackMd,
+										borderLeft: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 										[from.md]: { paddingLeft: semanticSpacing.stackXl },
 										'@media (min-width: 1500px)': {
 											paddingLeft: '147px',
