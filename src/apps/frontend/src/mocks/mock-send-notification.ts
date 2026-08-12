@@ -1,38 +1,24 @@
+import type { ApiError } from '../api/errors';
 import type { SendingResult } from '../features/stand-frontend/types';
+import { acceptedEmailSendResponse } from './api-fixtures';
 
 export const mockSendNotification = () => {
 	return new Promise<SendingResult>((resolve) => {
 		setTimeout(() => {
 			resolve({
 				ok: true,
-				response: {
-					status: 'accepted',
-				},
+				response: acceptedEmailSendResponse,
 			});
 		}, 500);
 	});
 };
 
-export const mockSendRejectedNotification = () => {
+export const mockSendRejectedNotification = (apiError: ApiError) => () => {
 	return new Promise<SendingResult>((resolve) => {
 		setTimeout(() => {
 			resolve({
 				ok: false,
-				response: {
-					error: 'unauthenticated',
-					message: 'Authentication is required to access this resource.',
-				},
-			});
-		}, 500);
-	});
-};
-
-export const mockSendFailingRequest = () => {
-	return new Promise<SendingResult>((resolve) => {
-		setTimeout(() => {
-			resolve({
-				ok: false,
-				requestFailed: true,
+				response: apiError,
 			});
 		}, 500);
 	});

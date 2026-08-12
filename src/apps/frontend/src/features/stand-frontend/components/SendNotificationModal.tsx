@@ -1,6 +1,8 @@
 import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { useContext } from 'react';
+import type { SendNotificationRequest } from '../api/schemas';
+import { buildRequest } from '../build-request-payloads';
 import { NotificationFormContext } from '../NotificationContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
@@ -9,24 +11,15 @@ export const SendNotificationModal = () => {
 		NotificationFormContext,
 	);
 	const { confirmSendModalOpen, isWaitingForSend } = notification;
+	const sendNotificationRequest = buildRequest(notification);
 
-	const handleSending = () => {
-		updateNotification({ type: 'waiting-for-send' });
-		sendNotification(notification)
-			.then((result) => {
+	const handleSending =
+		(sendNotificationRequest: SendNotificationRequest) => () => {
+			updateNotification({ type: 'waiting-for-send' });
+			void sendNotification(sendNotificationRequest).then((result) => {
 				updateNotification({ type: 'receive-send-result', result });
-			})
-			.catch((err) => {
-				console.error(err);
-				updateNotification({
-					type: 'receive-send-result',
-					result: {
-						ok: false,
-						requestFailed: true,
-					},
-				});
 			});
-	};
+		};
 
 	return (
 		<Modal
@@ -63,9 +56,13 @@ export const SendNotificationModal = () => {
 						Cancel
 					</Button>
 					<Button
-						isDisabled={isWaitingForSend}
+						isDisabled={isWaitingForSend || !sendNotificationRequest}
 						icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
-						onPress={handleSending}
+						onPress={
+							sendNotificationRequest
+								? handleSending(sendNotificationRequest)
+								: undefined
+						}
 					>
 						Confirm send
 					</Button>

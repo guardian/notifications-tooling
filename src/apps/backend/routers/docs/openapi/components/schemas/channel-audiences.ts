@@ -17,8 +17,8 @@ const segmentOptionSchema = {
 	},
 } as const;
 
-/** A channel's selectable audience: its list of segments. */
-const channelAudienceSchema = {
+/** The newsletter channel's selectable audience: its list of segments. */
+const newsletterAudienceSchema = {
 	type: 'object',
 	required: ['segments'],
 	properties: {
@@ -29,16 +29,65 @@ const channelAudienceSchema = {
 	},
 } as const;
 
+/** A selectable app-push edition within a topic type: its id and human label. */
+const editionOptionSchema = {
+	type: 'object',
+	required: ['id', 'label'],
+	properties: {
+		id: {
+			type: 'string',
+			description: 'The public edition id referenced in a push plan topic.',
+		},
+		label: {
+			type: 'string',
+			description: 'Human-readable edition name for display in the UI.',
+		},
+	},
+} as const;
+
+/** A selectable app-push topic type: its id, label and selectable editions. */
+const topicTypeOptionSchema = {
+	type: 'object',
+	required: ['id', 'label', 'editions'],
+	properties: {
+		id: {
+			type: 'string',
+			description: 'The public topic-type id referenced in a push plan topic.',
+		},
+		label: {
+			type: 'string',
+			description: 'Human-readable topic-type name for display in the UI.',
+		},
+		editions: {
+			type: 'array',
+			items: editionOptionSchema,
+		},
+	},
+} as const;
+
+/** The app-push channel's selectable audience: its topic types. */
+const appPushAudienceSchema = {
+	type: 'object',
+	required: ['topicTypes'],
+	properties: {
+		topicTypes: {
+			type: 'array',
+			items: topicTypeOptionSchema,
+		},
+	},
+} as const;
+
 /**
- * The `GET /v1/channels/audiences` response body: the selectable audience
- * segments per channel the SPA uses to populate its audience pickers, keyed by
- * channel under `channels`. Only the public id and label are exposed; the
- * downstream addressing each id resolves to (Braze campaign / mobile-n10n
- * topic) is kept server-side.
+ * The `GET /v1/channels/audiences` response body: the selectable audiences per
+ * channel the SPA uses to populate its audience pickers, keyed by channel under
+ * `channels`. Newsletter exposes `segments`; app-push exposes `topicTypes`
+ * each with their selectable `editions`. Only public ids and
+ * labels are exposed; the downstream addressing each selection resolves to
+ * (Braze campaign / mobile-n10n topic) is kept server-side.
  */
 export const channelAudiencesSchema = {
 	type: 'object',
-	description: 'Per-channel audience segments (id + label), keyed by channel.',
+	description: 'Per-channel selectable audiences, keyed by channel.',
 	required: ['channels'],
 	properties: {
 		channels: {
@@ -49,12 +98,12 @@ export const channelAudiencesSchema = {
 			],
 			properties: {
 				[NotificationChannel.AppPushNotification]: {
-					...channelAudienceSchema,
+					...appPushAudienceSchema,
 					example:
 						channelAudiences.channels[NotificationChannel.AppPushNotification],
 				},
 				[NotificationChannel.Newsletter]: {
-					...channelAudienceSchema,
+					...newsletterAudienceSchema,
 					example: channelAudiences.channels[NotificationChannel.Newsletter],
 				},
 			},

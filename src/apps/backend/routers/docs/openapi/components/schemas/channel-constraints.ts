@@ -82,12 +82,12 @@ export const channelConstraintsSchema = {
 						},
 						audience: {
 							type: 'object',
-							required: ['maxSegments'],
+							required: ['maxTopics'],
 							properties: {
-								maxSegments: {
+								maxTopics: {
 									type: 'integer',
 									description:
-										'The maximum number of audience segments a push may target.',
+										'The maximum number of app-push topics (topic-type/edition pairs) a push may target.',
 								},
 							},
 							example: pushConstraints.audience,

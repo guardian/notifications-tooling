@@ -1,6 +1,7 @@
 import {
-	appPushNotificationSegmentIds,
-	MAX_APP_PUSH_SEGMENTS,
+	appPushEditionIdsByTopicType,
+	appPushTopicTypeIds,
+	MAX_APP_PUSH_TOPICS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegmentIds,
@@ -54,7 +55,7 @@ const appPushContentItem = z.strictObject({
 		.min(1)
 		.max(pushLimits.title.validationCap)
 		.meta({
-			description: `Short push alert title (1-${pushLimits.title.validationCap} characters).`,
+			description: `Short push notification title (1-${pushLimits.title.validationCap} characters).`,
 			example: 'Breaking news',
 		}),
 	body: z
@@ -62,7 +63,7 @@ const appPushContentItem = z.strictObject({
 		.min(1)
 		.max(pushLimits.body.validationCap)
 		.meta({
-			description: `Push alert body (1-${pushLimits.body.validationCap} characters).`,
+			description: `Push notification body (1-${pushLimits.body.validationCap} characters).`,
 			example: 'Historic global climate deal reached at the COP summit',
 		}),
 	link: guardianArticleLink,
@@ -137,14 +138,60 @@ const segmentAudience = <
 			}),
 	});
 
-const appPushSegmentAudience = segmentAudience(
-	appPushNotificationSegmentIds,
-	MAX_APP_PUSH_SEGMENTS,
-);
 const newsletterSegmentAudience = segmentAudience(
 	newsletterSegmentIds,
 	MAX_NEWSLETTER_SEGMENTS,
 );
+
+/** Every `{ type, name }` pair must be distinct. */
+const hasUniqueTopics = (items: Array<{ type: string; name: string }>) =>
+	new Set(items.map(({ type, name }) => `${type}\u0000${name}`)).size ===
+	items.length;
+
+/**
+ * A single app-push target: a curated topic type and one of its editions. The
+ * backend resolves the pair to a downstream topic (kept server-side). The set
+ * of topic types and their editions is served by `GET /v1/channels/audiences`.
+ */
+const appPushTopicSelection = z
+	.strictObject({
+		type: z.enum(appPushTopicTypeIds).meta({
+			description: 'Topic type id (the FE\'s "topic type" dropdown).',
+			example: appPushTopicTypeIds[0],
+		}),
+		name: z.string().min(1).meta({
+			description: 'Edition id within the chosen topic type.',
+			example: 'uk',
+		}),
+	})
+	.superRefine((topic, ctx) => {
+		const editions: readonly string[] =
+			appPushEditionIdsByTopicType[topic.type];
+		if (!editions.includes(topic.name)) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['name'],
+				message: `'${topic.name}' is not a valid edition for topic type '${topic.type}'. Valid editions: ${editions.join(', ')}.`,
+			});
+		}
+	});
+
+/**
+ * Push targets a list of topic-type/edition pairs, each resolving to one
+ * downstream topic, capped at the per-push limit.
+ */
+const appPushTopicAudience = z.strictObject({
+	type: z.literal('topic'),
+	items: z
+		.array(appPushTopicSelection)
+		.min(1)
+		.max(MAX_APP_PUSH_TOPICS)
+		.refine(hasUniqueTopics, { message: 'app-push topics must be unique.' })
+		.meta({
+			description: `Up to ${MAX_APP_PUSH_TOPICS} topic-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
+			example: [{ type: appPushTopicTypeIds[0], name: 'uk' }],
+		}),
+});
 
 /** Ad-hoc test recipients addressed by email. */
 const testEmailAudience = z.strictObject({
@@ -210,7 +257,7 @@ const newsletterTestPlan = z.strictObject({
 
 /** An app-push delivery plan: who to target and the single item to send. */
 const appPushPlan = z.strictObject({
-	audience: appPushSegmentAudience,
+	audience: appPushTopicAudience,
 	compose: appPushCompose,
 });
 
