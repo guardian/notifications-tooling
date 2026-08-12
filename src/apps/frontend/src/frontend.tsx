@@ -13,9 +13,25 @@ import '@guardian/stand/semantic/colors.css';
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
+import { RouterProvider as ReactAriaRouterProvider } from 'react-aria-components';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 import { queryClient } from './api/queryClient';
 import { App } from './App';
+
+const RoutedApp = () => {
+	const navigate = useNavigate();
+
+	return (
+		<ReactAriaRouterProvider
+			navigate={(path, options) => {
+				void navigate(path, options);
+			}}
+		>
+			<App />
+		</ReactAriaRouterProvider>
+	);
+};
 
 const elem = document.getElementById('root');
 if (!elem) {
@@ -25,7 +41,9 @@ if (!elem) {
 const app = (
 	<StrictMode>
 		<QueryClientProvider client={queryClient}>
-			<App />
+			<BrowserRouter>
+				<RoutedApp />
+			</BrowserRouter>
 		</QueryClientProvider>
 	</StrictMode>
 );

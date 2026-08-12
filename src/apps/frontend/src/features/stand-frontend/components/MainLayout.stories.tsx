@@ -26,8 +26,6 @@ const meta = {
 		),
 	],
 	args: {
-		currentTab: 'create',
-		setTab: () => {},
 		children: (
 			<Layout.Main>
 				<Typography variant="bodyMd">Page content goes here</Typography>

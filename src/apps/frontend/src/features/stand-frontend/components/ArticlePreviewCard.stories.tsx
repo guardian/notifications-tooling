@@ -1,3 +1,4 @@
+import type { CapiDateTime } from '@guardian/content-api-models/v1/capiDateTime';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
@@ -19,6 +20,12 @@ const meta = {
 export default meta;
 type PreviewCardStory = StoryObj<typeof meta>;
 
+const publicationDate = (minsAgo: number): CapiDateTime => ({
+	...articleFixture.webPublicationDate,
+	dateTime: {} as CapiDateTime['dateTime'],
+	iso8601: new Date(Date.now() - minsAgo).toISOString(),
+});
+
 export const WithThumbnail: PreviewCardStory = {
 	args: {
 		content: articleFixture,
@@ -38,6 +45,50 @@ export const WithThumbnail: PreviewCardStory = {
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
 		).toBeInTheDocument();
+	},
+};
+
+export const JustPublished: PreviewCardStory = {
+	args: {
+		content: {
+			...articleFixture,
+			webPublicationDate: publicationDate(2 * 60 * 1000),
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText(
+				(_, element) => element?.textContent === 'Published 2m ago',
+			),
+		).toBeInTheDocument();
+	},
+};
+
+export const PublishedLongAgo: PreviewCardStory = {
+	args: {
+		content: {
+			...articleFixture,
+			webPublicationDate: publicationDate(30 * 24 * 60 * 60 * 1000),
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText((_, element) =>
+				/^Published \d{1,2} \w{3} \d{4}$/.test(element?.textContent ?? ''),
+			),
+		).toBeInTheDocument();
+	},
+};
+
+export const WithoutPublicationDate: PreviewCardStory = {
+	args: {
+		content: { ...articleFixture, webPublicationDate: undefined },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.queryByText(/^Published/)).not.toBeInTheDocument();
 	},
 };
 
