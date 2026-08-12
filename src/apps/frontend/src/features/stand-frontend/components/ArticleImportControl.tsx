@@ -112,7 +112,6 @@ export const ArticleImportControl = () => {
 			}}
 		>
 			<div
-				id="article-section"
 				css={{
 					display: 'flex',
 					flexDirection: 'row',
