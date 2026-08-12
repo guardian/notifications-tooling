@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import {
 	appPushTopicTypeIds,
 	appPushEditionIdsByTopicType,
-	MAX_APP_PUSH_SEGMENTS,
+	MAX_APP_PUSH_TOPICS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegmentIds,
@@ -733,8 +733,8 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/app-push/audience/items');
 		});
 
-		it(`rejects more than ${MAX_APP_PUSH_SEGMENTS} topics`, () => {
-			const items = Array.from({ length: MAX_APP_PUSH_SEGMENTS + 1 }, () => ({
+		it(`rejects more than ${MAX_APP_PUSH_TOPICS} topics`, () => {
+			const items = Array.from({ length: MAX_APP_PUSH_TOPICS + 1 }, () => ({
 				type: 'breaking-news',
 				name: 'uk',
 			}));

@@ -53,7 +53,7 @@ const newsletterSegmentsByStage = {
 	},
 } as const satisfies Record<'CODE' | 'PROD', Record<string, NewsletterSegment>>;
 
-export type NewsletterSegmentId = keyof typeof newsletterSegmentsByStage.CODE;
+type NewsletterSegmentId = keyof typeof newsletterSegmentsByStage.CODE;
 
 export const getNewsletterSegments = (
 	stage: Env['STAGE'],
@@ -62,17 +62,17 @@ export const getNewsletterSegments = (
 
 export const newsletterSegments = getNewsletterSegments(configurationStage);
 
-export interface MobileN10nTopic {
+interface MobileN10nTopic {
 	type: string;
 	name: string;
 }
 
-export interface AppPushEdition {
+interface AppPushEdition {
 	label: string;
 	mobileN10nTopic: MobileN10nTopic;
 }
 
-export interface AppPushTopicType {
+interface AppPushTopicType {
 	label: string;
 	editions: Record<string, AppPushEdition>;
 }
@@ -267,7 +267,7 @@ export const appPushEditionIdsByTopicType = Object.fromEntries(
  * 20"`). Each push audience item resolves to one mobile-n10n topic, so this
  * caps the topics a single push plan may target.
  */
-export const MAX_APP_PUSH_SEGMENTS = 20;
+export const MAX_APP_PUSH_TOPICS = 20;
 
 /**
  * Newsletter segments resolve to Braze campaigns. Capped independently of push

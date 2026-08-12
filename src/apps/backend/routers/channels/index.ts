@@ -1,6 +1,6 @@
 import {
-	appPushNotificationSegments,
-	MAX_APP_PUSH_SEGMENTS,
+	appPushTopicTypes,
+	MAX_APP_PUSH_TOPICS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegments,
@@ -35,8 +35,8 @@ export const channelConstraints = {
 				],
 			// Push delivers a single content item (`compose.use`).
 			compose: { minItems: 1, maxItems: 1 },
-			// mobile-n10n rejects a push targeting more than `MAX_APP_PUSH_SEGMENTS` topics.
-			audience: { maxSegments: MAX_APP_PUSH_SEGMENTS },
+			// mobile-n10n rejects a push targeting more than `MAX_APP_PUSH_TOPICS` topics.
+			audience: { maxTopics: MAX_APP_PUSH_TOPICS },
 		},
 		[NotificationChannel.Newsletter]: {
 			content: notificationChannelContentLimits[NotificationChannel.Newsletter],
@@ -66,16 +66,38 @@ const toSegmentOptions = (
 	Object.entries(segments).map(([id, { label }]) => ({ id, label }));
 
 /**
- * The selectable audience segments per channel the SPA fetches from
+ * Reduces the curated app-push topic types to the public `{ id, label }` pairs,
+ * each carrying its selectable `editions` (also `{ id, label }`). The
+ * mobile-n10n topic coordinates each pair resolves to are kept server-side.
+ */
+const toTopicTypeOptions = (
+	topicTypes: Record<
+		string,
+		{ label: string; editions: Record<string, { label: string }> }
+	>,
+): Array<{
+	id: string;
+	label: string;
+	editions: Array<{ id: string; label: string }>;
+}> =>
+	Object.entries(topicTypes).map(([id, { label, editions }]) => ({
+		id,
+		label,
+		editions: toSegmentOptions(editions),
+	}));
+
+/**
+ * The selectable audiences per channel the SPA fetches from
  * `GET /v1/channels/audiences` to populate its audience pickers. Keyed by
- * channel, each exposing a `segments` list. Only the public segment id and
- * human label are exposed; the downstream addressing (Braze campaign /
- * mobile-n10n topic) each id resolves to is kept server-side.
+ * channel: newsletter exposes a `segments` list, while app-push exposes
+ * `topicTypes` (alert types) each with their selectable `editions`. Only public
+ * ids and human labels are exposed; the downstream addressing (Braze campaign /
+ * mobile-n10n topic) each selection resolves to is kept server-side.
  */
 export const channelAudiences = {
 	channels: {
 		[NotificationChannel.AppPushNotification]: {
-			segments: toSegmentOptions(appPushNotificationSegments),
+			topicTypes: toTopicTypeOptions(appPushTopicTypes),
 		},
 		[NotificationChannel.Newsletter]: {
 			segments: toSegmentOptions(newsletterSegments),

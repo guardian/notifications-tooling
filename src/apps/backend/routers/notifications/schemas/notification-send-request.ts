@@ -1,7 +1,7 @@
 import {
 	appPushTopicTypeIds,
 	appPushEditionIdsByTopicType,
-	MAX_APP_PUSH_SEGMENTS,
+	MAX_APP_PUSH_TOPICS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
 	newsletterSegmentIds,
@@ -185,10 +185,10 @@ const appPushTopicAudience = z.strictObject({
 	items: z
 		.array(appPushTopicSelection)
 		.min(1)
-		.max(MAX_APP_PUSH_SEGMENTS)
+		.max(MAX_APP_PUSH_TOPICS)
 		.refine(hasUniqueTopics, { message: 'app-push topics must be unique.' })
 		.meta({
-			description: `Up to ${MAX_APP_PUSH_SEGMENTS} alert-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
+			description: `Up to ${MAX_APP_PUSH_TOPICS} alert-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
 			example: [{ type: appPushTopicTypeIds[0], name: 'uk' }],
 		}),
 });
