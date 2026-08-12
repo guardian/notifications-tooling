@@ -5,11 +5,9 @@ import type {
 	NotificationSendRequest,
 	NotificationTestSendRequest,
 } from '../routers/notifications/schemas/notification-send-request';
-import type { DispatchNotificationDependencies } from './dispatch-notification';
-import {
-	dispatchNotification,
-	dispatchNotificationTest,
-} from './dispatch-notification';
+import { dispatchNotification } from './dispatch-notification';
+import { dispatchNotificationTest } from './newsletter/dispatch-newsletter-test';
+import type { DispatchNotificationDependencies } from './shared';
 
 // `expect.any(String)` is typed `any`; cast so it sits in typed positions.
 const anyString = expect.any(String) as unknown as string;

@@ -7,7 +7,7 @@ import { requirePermissions } from '../../middleware/permissions-middleware';
 import {
 	dispatchNotificationTest,
 	type NewsletterTestDispatchOutcome,
-} from '../../notification-channels/dispatch-notification';
+} from '../../notification-channels/newsletter/dispatch-newsletter-test';
 import { handleValidationErrors } from '../notifications';
 import {
 	type NotificationTestSendRequest,
