@@ -1,6 +1,6 @@
 import {
-	appPushTopicTypeIds,
 	appPushEditionIdsByTopicType,
+	appPushTopicTypeIds,
 	MAX_APP_PUSH_TOPICS,
 	MAX_NEWSLETTER_SEGMENTS,
 	MAX_TEST_EMAIL_RECIPIENTS,
