@@ -154,7 +154,7 @@ export const AudienceSegmentsPreviewPill = ({
 			}}
 		>
 			{!isConfirmation && (
-				<Typography variant="bodyBoldMd">Audience Segments</Typography>
+				<Typography variant="bodyBoldMd">Audience segments</Typography>
 			)}
 
 			<div
