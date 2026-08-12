@@ -79,11 +79,11 @@ export enum AppPushImportance {
 interface AppPushEdition {
 	label: string;
 	mobileN10nTopic: MobileN10nTopic;
-	importance: AppPushImportance;
 }
 
 interface AppPushTopicType {
 	label: string;
+	importance: AppPushImportance;
 	editions: Record<string, AppPushEdition>;
 }
 
@@ -98,81 +98,62 @@ interface AppPushTopicType {
 const curatedAppPushTopicTypes = {
 	'breaking-news': {
 		label: 'Breaking news',
+		importance: AppPushImportance.Major,
 		editions: {
-			uk: {
-				label: 'UK',
-				mobileN10nTopic: { type: 'breaking', name: 'uk' },
-				importance: AppPushImportance.Major,
-			},
-			us: {
-				label: 'US',
-				mobileN10nTopic: { type: 'breaking', name: 'us' },
-				importance: AppPushImportance.Major,
-			},
-			au: {
-				label: 'AU',
-				mobileN10nTopic: { type: 'breaking', name: 'au' },
-				importance: AppPushImportance.Major,
-			},
+			uk: { label: 'UK', mobileN10nTopic: { type: 'breaking', name: 'uk' } },
+			us: { label: 'US', mobileN10nTopic: { type: 'breaking', name: 'us' } },
+			au: { label: 'AU', mobileN10nTopic: { type: 'breaking', name: 'au' } },
 			international: {
 				label: 'International',
 				mobileN10nTopic: { type: 'breaking', name: 'international' },
-				importance: AppPushImportance.Major,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe' },
-				importance: AppPushImportance.Major,
 			},
 		},
 	},
 	sport: {
 		label: 'Sport',
+		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
-				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
-				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
-				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
-				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	'editors-picks': {
 		label: "Editors' picks",
+		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-editors-picks' },
-				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-editors-picks' },
-				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-editors-picks' },
-				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
@@ -180,32 +161,28 @@ const curatedAppPushTopicTypes = {
 					type: 'breaking',
 					name: 'international-editors-picks',
 				},
-				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-editors-picks' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	'one-not-to-miss': {
 		label: 'One not to miss',
+		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
-				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
-				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
-				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
@@ -213,42 +190,40 @@ const curatedAppPushTopicTypes = {
 					type: 'breaking',
 					name: 'international-one-not-to-miss',
 				},
-				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	'uk-general-election': {
 		label: 'UK general election',
+		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-general-election' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	newsstand: {
 		label: 'Newsstand',
+		importance: AppPushImportance.Minor,
 		editions: {
 			ios: {
 				label: 'iOS',
 				mobileN10nTopic: { type: 'newsstand', name: 'newsstandIos' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	test: {
 		label: 'Test',
+		importance: AppPushImportance.Minor,
 		editions: {
 			test: {
 				label: 'Test',
 				mobileN10nTopic: { type: 'breaking', name: 'internal-test' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
@@ -279,13 +254,12 @@ export const resolveAppPushTopic = (
 	topicTypeId: AppPushTopicTypeId,
 	editionId: string,
 ): { topic: MobileN10nTopic; importance: AppPushImportance } | undefined => {
-	const editions: Record<string, AppPushEdition> =
-		appPushTopicTypes[topicTypeId].editions;
-	const edition = editions[editionId];
+	const topicType = appPushTopicTypes[topicTypeId];
+	const edition = topicType.editions[editionId];
 	if (!edition) {
 		return undefined;
 	}
-	return { topic: edition.mobileN10nTopic, importance: edition.importance };
+	return { topic: edition.mobileN10nTopic, importance: topicType.importance };
 };
 
 // Non-empty tuples so the validator can build `z.enum(...)` from them.

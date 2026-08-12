@@ -176,28 +176,35 @@ const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 		NotificationChannel.AppPushNotification,
 	);
 
-	const resolvedTopics = plan.audience.items.map(({ type, name }) => {
+	// One push per topic type: each type carries a single importance, so grouping
+	// by type keeps every push's importance unambiguous — no collapsing needed.
+	const pushesByTopicType = new Map<
+		string,
+		{
+			importance: AppNotificationImportance;
+			topics: Array<{ type: string; name: string }>;
+		}
+	>();
+	for (const { type, name } of plan.audience.items) {
 		const resolved = resolveAppPushTopic(type, name);
 		if (!resolved) {
 			throw new Error(
 				`No push topic is configured for topic type '${type}' edition '${name}'.`,
 			);
 		}
-		return resolved;
-	});
-
-	// mobile-n10n carries one importance per push; never downgrade a Major topic.
-	const importance: AppNotificationImportance = resolvedTopics.some(
-		({ importance }) => importance === AppPushImportance.Major,
-	)
-		? 'Major'
-		: 'Minor';
+		const push = pushesByTopicType.get(type) ?? {
+			importance:
+				resolved.importance === AppPushImportance.Major ? 'Major' : 'Minor',
+			topics: [],
+		};
+		push.topics.push(resolved.topic);
+		pushesByTopicType.set(type, push);
+	}
 
 	return {
 		item,
 		sender: request.sender,
-		importance,
-		topics: resolvedTopics.map(({ topic }) => topic),
+		pushes: [...pushesByTopicType.values()],
 	};
 };
 
@@ -209,7 +216,7 @@ const dispatchAppPush = async (
 		return;
 	}
 
-	const { item, sender, importance, topics } = resolvedDispatch;
+	const { item, sender, pushes } = resolvedDispatch;
 
 	const [endpoint, apiKey] = await Promise.all([
 		dependencies.getSSMParameter('MOBILE_N10N_ENDPOINT'),
@@ -221,18 +228,22 @@ const dispatchAppPush = async (
 		MOBILE_N10N_API_KEY: apiKey,
 	});
 
-	await dependencies.sendAppNotification({
-		endpoint: environment.MOBILE_N10N_ENDPOINT,
-		apiKey: environment.MOBILE_N10N_API_KEY,
-		timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-		sender,
-		title: item.title,
-		body: item.body,
-		link: item.link,
-		importance,
-		topics,
-		media: item.media,
-	});
+	await Promise.all(
+		pushes.map((push) =>
+			dependencies.sendAppNotification({
+				endpoint: environment.MOBILE_N10N_ENDPOINT,
+				apiKey: environment.MOBILE_N10N_API_KEY,
+				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+				sender,
+				title: item.title,
+				body: item.body,
+				link: item.link,
+				importance: push.importance,
+				topics: push.topics,
+				media: item.media,
+			}),
+		),
+	);
 };
 
 export const dispatchNotification = async (

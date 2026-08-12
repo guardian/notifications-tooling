@@ -77,7 +77,45 @@ const createDependencies = () => {
 };
 
 describe('dispatchNotification', () => {
-	it('resolves push topics and calls the mocked app-notification client', async () => {
+	it('sends a single push for one topic type with multiple editions', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { lead: pushItem } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [
+							{ type: 'breaking-news', name: 'uk' },
+							{ type: 'breaking-news', name: 'us' },
+						],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		await dispatchNotification(request, dependencies);
+		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+		expect(sendAppNotification).toHaveBeenCalledWith({
+			endpoint: 'https://n10n.example.com',
+			apiKey: 'test-n10n-key',
+			timeoutMs: 10_000,
+			sender: baseRequest.sender,
+			title: pushItem.title,
+			body: pushItem.body,
+			link: pushItem.link,
+			importance: 'Major',
+			topics: [
+				{ type: 'breaking', name: 'uk' },
+				{ type: 'breaking', name: 'us' },
+			],
+			media: undefined,
+		});
+	});
+
+	it('sends one push per topic type when types are mixed', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -97,21 +135,19 @@ describe('dispatchNotification', () => {
 		};
 
 		await dispatchNotification(request, dependencies);
-		expect(sendAppNotification).toHaveBeenCalledWith({
-			endpoint: 'https://n10n.example.com',
-			apiKey: 'test-n10n-key',
-			timeoutMs: 10_000,
-			sender: baseRequest.sender,
-			title: pushItem.title,
-			body: pushItem.body,
-			link: pushItem.link,
-			importance: 'Major',
-			topics: [
-				{ type: 'breaking', name: 'uk' },
-				{ type: 'newsstand', name: 'newsstandIos' },
-			],
-			media: undefined,
-		});
+		expect(sendAppNotification).toHaveBeenCalledTimes(2);
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				importance: 'Major',
+				topics: [{ type: 'breaking', name: 'uk' }],
+			}),
+		);
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				importance: 'Minor',
+				topics: [{ type: 'newsstand', name: 'newsstandIos' }],
+			}),
+		);
 	});
 
 	it('derives Minor importance when no breaking-news edition is targeted', async () => {
