@@ -1,11 +1,11 @@
-import type { Content } from '@guardian/content-api-models/v1/content';
 import { Typography } from '@guardian/stand/Typography';
+import type { ResolvedArticle } from '@models';
 import { getPillarColor } from '../pillar-colors';
 import { articlePreviewCardTheme } from '../themes';
 import { useRelativeTime } from '../use-relative-time';
 
 interface ArticlePreviewCardProps {
-	content: Content;
+	content: ResolvedArticle;
 }
 
 export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
@@ -16,11 +16,12 @@ export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
 		webTitle,
 		fields,
 		webPublicationDate,
+		webUrl,
 	} = content;
 	const headline = fields?.headline ?? webTitle;
 	const thumbnail = fields?.thumbnail;
 	const pillarColor = getPillarColor(pillarId);
-	const publishedAt = useRelativeTime(webPublicationDate?.iso8601);
+	const publishedAt = useRelativeTime(webPublicationDate);
 
 	return (
 		<div css={articlePreviewCardTheme.card}>
@@ -68,7 +69,7 @@ export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
 				</Typography>
 
 				<Typography variant="bodyXs" cssOverrides={articlePreviewCardTheme.url}>
-					{content.webUrl}
+					{webUrl}
 				</Typography>
 			</div>
 

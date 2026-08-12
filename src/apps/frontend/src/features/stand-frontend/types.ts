@@ -1,5 +1,8 @@
-import type { Content } from '@guardian/content-api-models/v1/content';
-import type { EmailPreviewRequest, EmailPreviewResponse } from '@models';
+import type {
+	EmailPreviewRequest,
+	EmailPreviewResponse,
+	ResolvedArticle,
+} from '@models';
 import type { ApiError } from '../../api/errors';
 import type { SendNotificationResponse } from './api/schemas';
 
@@ -38,7 +41,7 @@ export type NotificationState = {
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
-	content?: Content;
+	content?: ResolvedArticle;
 	parameters?: EmailNotification | PushNotification;
 	hasAttemptedSend: boolean;
 	confirmSendModalOpen: boolean;
@@ -64,7 +67,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'receive-article';
-			content: Content;
+			content: ResolvedArticle;
 	  }
 	| {
 			type: 'report-article-error';

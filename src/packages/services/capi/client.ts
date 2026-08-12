@@ -1,46 +1,5 @@
-import { z } from 'zod';
-
-export type CapiFailureReason =
-	'not_found' | 'unavailable' | 'invalid_response';
-
-/** A classified failure talking to the Content API. */
-export class CapiError extends Error {
-	constructor(
-		readonly reason: CapiFailureReason,
-		options?: ErrorOptions,
-	) {
-		const message = (() => {
-			switch (reason) {
-				case 'not_found':
-					return 'The article could not be found.';
-				case 'unavailable':
-					return 'The Content API could not be reached.';
-				case 'invalid_response':
-					return 'The Content API returned an unexpected response.';
-			}
-		})();
-
-		super(message, options);
-		this.name = 'CapiError';
-	}
-}
-
-/**
- * A single CAPI content item, passed through verbatim. Only `id` is asserted;
- * every other field the JSON API returns (type, section, webUrl, webTitle,
- * publication date, tags, and the requested `fields`) is preserved.
- */
-const capiContentSchema = z.looseObject({ id: z.string() });
-
-/** The full CAPI content item for the resolved article. */
-export type ResolvedArticle = z.infer<typeof capiContentSchema>;
-
-const capiResponseSchema = z.object({
-	response: z.object({
-		status: z.string(),
-		content: capiContentSchema,
-	}),
-});
+import type { CapiResponse, ResolvedArticle } from '@models';
+import { CapiError, capiResponseSchema } from '@models';
 
 type FetchArticleRequest = {
 	endpoint: string;
@@ -79,7 +38,7 @@ export const fetchArticle = async ({
 		throw new CapiError('unavailable');
 	}
 
-	let parsed: z.infer<typeof capiResponseSchema>;
+	let parsed: CapiResponse;
 	try {
 		parsed = capiResponseSchema.parse(await response.json());
 	} catch (error) {

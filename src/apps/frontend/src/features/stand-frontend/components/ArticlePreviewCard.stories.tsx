@@ -1,4 +1,3 @@
-import type { CapiDateTime } from '@guardian/content-api-models/v1/capiDateTime';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
@@ -20,11 +19,8 @@ const meta = {
 export default meta;
 type PreviewCardStory = StoryObj<typeof meta>;
 
-const publicationDate = (minsAgo: number): CapiDateTime => ({
-	...articleFixture.webPublicationDate,
-	dateTime: {} as CapiDateTime['dateTime'],
-	iso8601: new Date(Date.now() - minsAgo).toISOString(),
-});
+const publicationDate = (minsAgo: number): string =>
+	new Date(Date.now() - minsAgo).toISOString();
 
 export const WithThumbnail: PreviewCardStory = {
 	args: {
@@ -96,7 +92,7 @@ export const WithoutThumbnail: PreviewCardStory = {
 	args: {
 		content: {
 			...articleFixture,
-			fields: { ...articleFixture.fields, thumbnail: undefined },
+			fields: { ...articleFixture.fields, thumbnail: '' },
 		},
 	},
 	play: async ({ canvasElement }) => {
