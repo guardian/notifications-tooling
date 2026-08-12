@@ -116,7 +116,7 @@ export const CreateNotificationForm = () => {
 						selected={audienceSegments}
 						error={
 							shouldShowErrors &&
-								requiredFieldErrors.includes('audienceSegments')
+							requiredFieldErrors.includes('audienceSegments')
 								? 'Please select an audience segment'
 								: undefined
 						}
