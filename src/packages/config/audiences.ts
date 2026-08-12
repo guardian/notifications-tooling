@@ -91,9 +91,10 @@ interface AppPushTopicType {
  * Push targets are curated topic types, each exposing its `editions`. A request
  * names a topic type and one of its editions; the backend resolves that pair to
  * the mobile-n10n topic (`{ type, name }`) that `guardian/facia-tool`'s Breaking
- * News tool emits, plus the registered `newsstand` topic. `test` is a catch-all
- * used while push is wired up end to end. The raw topic coordinates are kept out
- * of the public contract.
+ * News tool emits, plus the registered `newsstand` topic. The raw topic
+ * coordinates are kept out of the public contract. The internal test topic lives
+ * in `internalAppPushTestTopicTypes`, not here, so it can never be targeted by a
+ * production send.
  */
 const curatedAppPushTopicTypes = {
 	'breaking-news': {
@@ -217,6 +218,15 @@ const curatedAppPushTopicTypes = {
 			},
 		},
 	},
+} as const satisfies Record<string, AppPushTopicType>;
+
+/**
+ * The internal test topic type. Its single edition resolves to mobile-n10n's
+ * `internal-test` topic, which only internal test devices subscribe to. Kept out
+ * of `curatedAppPushTopicTypes` so it is accepted solely by
+ * `POST /v1/notification-tests`, never the production notifications endpoint.
+ */
+const internalAppPushTestTopicTypes = {
 	test: {
 		label: 'Test',
 		importance: AppPushImportance.Minor,
@@ -249,12 +259,26 @@ export const getAppPushTopicTypes = (
 
 export const appPushTopicTypes = getAppPushTopicTypes(configurationStage);
 
+/**
+ * The internal test topic types. Not stage-dependent (the `internal-test` topic
+ * exists in every environment) and only ever offered by the test endpoint.
+ */
+export type AppPushTestTopicTypeId = keyof typeof internalAppPushTestTopicTypes;
+
+export const appPushTestTopicTypes = internalAppPushTestTopicTypes;
+
+/** Production and internal-test topic types share a resolver. */
+const resolvableAppPushTopicTypes: Record<
+	AppPushTopicTypeId | AppPushTestTopicTypeId,
+	AppPushTopicType
+> = { ...appPushTopicTypes, ...appPushTestTopicTypes };
+
 /** Resolves a (topic type, edition) pair to its downstream topic and importance. */
 export const resolveAppPushTopic = (
-	topicTypeId: AppPushTopicTypeId,
+	topicTypeId: AppPushTopicTypeId | AppPushTestTopicTypeId,
 	editionId: string,
 ): { topic: MobileN10nTopic; importance: AppPushImportance } | undefined => {
-	const topicType = appPushTopicTypes[topicTypeId];
+	const topicType = resolvableAppPushTopicTypes[topicTypeId];
 	const edition = topicType.editions[editionId];
 	if (!edition) {
 		return undefined;
@@ -280,6 +304,19 @@ export const appPushEditionIdsByTopicType = Object.fromEntries(
 		Object.keys(editions),
 	]),
 ) as Record<AppPushTopicTypeId, [string, ...string[]]>;
+
+export const appPushTestTopicTypeIds = Object.keys(appPushTestTopicTypes) as [
+	AppPushTestTopicTypeId,
+	...AppPushTestTopicTypeId[],
+];
+
+/** Internal-test edition ids per test topic type, as non-empty tuples. */
+export const appPushTestEditionIdsByTopicType = Object.fromEntries(
+	Object.entries(appPushTestTopicTypes).map(([topicTypeId, { editions }]) => [
+		topicTypeId,
+		Object.keys(editions),
+	]),
+) as Record<AppPushTestTopicTypeId, [string, ...string[]]>;
 
 /**
  * mobile-n10n's `POST /push/topic` rejects a push targeting more than 20 topics

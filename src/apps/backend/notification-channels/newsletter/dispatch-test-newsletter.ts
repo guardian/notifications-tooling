@@ -44,12 +44,15 @@ export type NewsletterTestDispatchOutcome = {
 	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
 };
 
-export const dispatchNotificationTest = async (
+export const dispatchNewsletterTest = async (
 	request: NotificationTestSendRequest,
 	testId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
 ): Promise<NewsletterTestDispatchOutcome[]> => {
 	const plan = request.channels[NotificationChannel.Newsletter];
+	if (!plan) {
+		return [];
+	}
 	if (plan.compose.items.length !== 1) {
 		throw new Error('Only one newsletter item can be rendered currently.');
 	}

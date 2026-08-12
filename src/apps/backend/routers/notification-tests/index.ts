@@ -6,8 +6,8 @@ import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
 import {
 	dispatchNotificationTest,
-	type NewsletterTestDispatchOutcome,
-} from '../../notification-channels/newsletter/dispatch-test-newsletter';
+	type TestDispatchOutcomes,
+} from '../../notification-channels/dispatch-notification-test';
 import { handleValidationErrors } from '../notifications';
 import {
 	type NotificationTestSendRequest,
@@ -17,7 +17,7 @@ import {
 type DispatchValidatedNotificationTest = (
 	request: NotificationTestSendRequest,
 	testId: string,
-) => Promise<NewsletterTestDispatchOutcome[]>;
+) => Promise<TestDispatchOutcomes>;
 
 export const createNotificationTestsRouter = (
 	dispatchRequest: DispatchValidatedNotificationTest = dispatchNotificationTest,
@@ -34,11 +34,11 @@ export const createNotificationTestsRouter = (
 			const body = req.body;
 
 			const testId = randomUUID();
-			const newsletter = await dispatchRequest(body, testId);
+			const outcomes = await dispatchRequest(body, testId);
 
 			// Outcomes are not persisted yet; log them so tests can be introspected.
 			req.log.info(
-				{ testId, dryRun: body.options.dryRun, newsletter },
+				{ testId, dryRun: body.options.dryRun, ...outcomes },
 				'Dispatched notification test',
 			);
 

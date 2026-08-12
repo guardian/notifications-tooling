@@ -3,7 +3,7 @@ export const notificationTestsPath = {
 	post: {
 		summary: 'Send a notification to explicit test recipients',
 		description:
-			'Sends immediately to direct test recipients. Segment audiences and scheduling are not accepted. A dry run validates and renders content without registering recipients or sending messages.',
+			'Sends immediately to direct test recipients. Segment audiences and scheduling are not accepted. App-push tests may only target the internal test topic. A dry run validates and renders content without registering recipients or sending messages.',
 		security: [{ pandaCookie: [] }],
 		requestBody: {
 			required: true,
@@ -11,6 +11,14 @@ export const notificationTestsPath = {
 				'application/json': {
 					schema: {
 						$ref: '#/components/schemas/NotificationTestSendRequest',
+					},
+					examples: {
+						newsletter: {
+							$ref: '#/components/examples/NotificationTestNewsletter',
+						},
+						appPush: {
+							$ref: '#/components/examples/NotificationTestAppPush',
+						},
 					},
 				},
 			},

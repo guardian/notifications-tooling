@@ -57,7 +57,9 @@ beforeAll(async () => {
 	app.use(express.json());
 	app.use(
 		'/v1/notification-tests',
-		createNotificationTestsRouter(mock(() => Promise.resolve([]))),
+		createNotificationTestsRouter(
+			mock(() => Promise.resolve({ newsletter: [], appPush: [] })),
+		),
 	);
 	server = await startTestServer(app);
 	baseUrl = server.baseUrl;
@@ -91,7 +93,9 @@ describe('POST /v1/notification-tests', () => {
 	});
 
 	it('accepts and dispatches a direct email test', async () => {
-		const dispatchRequest = mock(() => Promise.resolve([]));
+		const dispatchRequest = mock(() =>
+			Promise.resolve({ newsletter: [], appPush: [] }),
+		);
 		const app = express();
 		app.use(httpLogger);
 		app.use(express.json());
@@ -144,7 +148,9 @@ describe('POST /v1/notification-tests', () => {
 	});
 
 	it('preserves dry-run mode in dispatch and the acceptance response', async () => {
-		const dispatchRequest = mock(() => Promise.resolve([]));
+		const dispatchRequest = mock(() =>
+			Promise.resolve({ newsletter: [], appPush: [] }),
+		);
 		const app = express();
 		app.use(httpLogger);
 		app.use(express.json());
@@ -172,6 +178,73 @@ describe('POST /v1/notification-tests', () => {
 			expect(response.status).toBe(202);
 			expect(dispatchRequest).toHaveBeenCalledWith(request, expect.any(String));
 			expect(body.dryRun).toBe(true);
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
+	it('accepts and dispatches an internal test app-push', async () => {
+		const dispatchRequest = mock(() =>
+			Promise.resolve({ newsletter: [], appPush: [] }),
+		);
+		const app = express();
+		app.use(httpLogger);
+		app.use(express.json());
+		app.use(
+			'/v1/notification-tests',
+			createNotificationTestsRouter(dispatchRequest),
+		);
+		const dispatchServer = await startTestServer(app);
+
+		try {
+			const request = {
+				idempotencyKey: 'test-push-2026-07-31',
+				sender: 'notifications-tooling-spa/v1',
+				content: {
+					items: {
+						lead: {
+							type: 'app-push',
+							title: 'Breaking news',
+							body: 'Historic global climate deal reached at the COP summit',
+							link: 'https://www.theguardian.com/world/2026/jul/31/climate',
+						},
+					},
+				},
+				channels: {
+					'app-push': {
+						audience: {
+							type: 'topic',
+							items: [{ type: 'test', name: 'test' }],
+						},
+						compose: { use: 'lead' },
+					},
+				},
+			};
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notification-tests`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(request),
+				},
+			);
+			const body = (await response.json()) as {
+				testId: string;
+				plans: Array<{ channel: string; planId: string; status: string }>;
+			};
+
+			expect(response.status).toBe(202);
+			expect(dispatchRequest).toHaveBeenCalledWith(
+				{ ...request, options: { dryRun: false } },
+				expect.any(String),
+			);
+			expect(body.plans).toEqual([
+				{
+					channel: 'app-push',
+					planId: `${body.testId}#app-push`,
+					status: 'accepted',
+				},
+			]);
 		} finally {
 			await dispatchServer.close();
 		}

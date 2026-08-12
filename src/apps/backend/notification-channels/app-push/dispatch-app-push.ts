@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import {
 	AppPushImportance,
+	type AppPushTestTopicTypeId,
+	type AppPushTopicTypeId,
 	NotificationChannel,
 	resolveAppPushTopic,
 } from '@config';
@@ -35,29 +37,27 @@ export type AppPushDispatchOutcome = {
 	failureReason?: AppNotificationFailureReason | 'unknown';
 };
 
-export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
-	const plan = request.channels[NotificationChannel.AppPushNotification];
-	if (!plan) {
-		return;
-	}
+/** One resolved push: a topic type, its importance, and its mobile-n10n topics. */
+export type ResolvedAppPush = {
+	topicType: string;
+	importance: AppNotificationImportance;
+	topics: Array<{ type: string; name: string }>;
+};
 
-	const item = requireContentItem(
-		request,
-		plan.compose.use,
-		NotificationChannel.AppPushNotification,
-	);
-
-	// One push per topic type: each type carries a single importance, so grouping
-	// by type keeps every push's importance unambiguous — no collapsing needed.
-	const pushesByTopicType = new Map<
-		string,
-		{
-			topicType: string;
-			importance: AppNotificationImportance;
-			topics: Array<{ type: string; name: string }>;
-		}
-	>();
-	for (const { type, name } of plan.audience.items) {
+/**
+ * Groups selected topic-type/edition pairs into one push per topic type. Each
+ * type carries a single importance, so grouping by type keeps every push's
+ * importance unambiguous. Throws if a pair has no configured topic. Shared by the
+ * production and internal-test push flows.
+ */
+export const groupAppPushTopicsByType = (
+	items: ReadonlyArray<{
+		type: AppPushTopicTypeId | AppPushTestTopicTypeId;
+		name: string;
+	}>,
+): ResolvedAppPush[] => {
+	const pushesByTopicType = new Map<string, ResolvedAppPush>();
+	for (const { type, name } of items) {
 		const resolved = resolveAppPushTopic(type, name);
 		if (!resolved) {
 			throw new Error(
@@ -73,11 +73,25 @@ export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 		push.topics.push(resolved.topic);
 		pushesByTopicType.set(type, push);
 	}
+	return [...pushesByTopicType.values()];
+};
+
+export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
+	const plan = request.channels[NotificationChannel.AppPushNotification];
+	if (!plan) {
+		return;
+	}
+
+	const item = requireContentItem(
+		request,
+		plan.compose.use,
+		NotificationChannel.AppPushNotification,
+	);
 
 	return {
 		item,
 		sender: request.sender,
-		pushes: [...pushesByTopicType.values()],
+		pushes: groupAppPushTopicsByType(plan.audience.items),
 	};
 };
 

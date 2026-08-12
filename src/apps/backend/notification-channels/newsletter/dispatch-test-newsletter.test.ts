@@ -2,9 +2,9 @@ import { describe, expect, it } from 'bun:test';
 import { newsletterSegments, NotificationChannel } from '@config';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import { createDependencies, newsletterItem, testId } from '../test-support';
-import { dispatchNotificationTest } from './dispatch-test-newsletter';
+import { dispatchNewsletterTest } from './dispatch-test-newsletter';
 
-describe('dispatchNotificationTest', () => {
+describe('dispatchNewsletterTest', () => {
 	it('renders and sends test newsletters directly to normalized recipients', async () => {
 		const {
 			dependencies,
@@ -30,7 +30,7 @@ describe('dispatchNotificationTest', () => {
 			},
 		};
 
-		const outcomes = await dispatchNotificationTest(
+		const outcomes = await dispatchNewsletterTest(
 			request,
 			testId,
 			dependencies,
@@ -111,7 +111,7 @@ describe('dispatchNotificationTest', () => {
 			},
 		};
 
-		const outcomes = await dispatchNotificationTest(
+		const outcomes = await dispatchNewsletterTest(
 			request,
 			testId,
 			dependencies,
