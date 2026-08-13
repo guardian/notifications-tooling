@@ -78,4 +78,43 @@ describe('dispatchNotificationTest', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 		expect(outcomes.appPush).toHaveLength(1);
 	});
+
+	it('short-circuits a dry run without dispatching either channel', async () => {
+		const {
+			dependencies,
+			renderEmail,
+			registerBrazeTestEmailRecipients,
+			sendBrazeTestEmail,
+			sendAppNotification,
+		} = createDependencies();
+		const request: NotificationTestSendRequest = {
+			idempotencyKey: 'test-dry-run',
+			sender: 'dispatch-test',
+			options: { dryRun: true },
+			content: { items: { news: newsletterItem, push: pushItem } },
+			channels: {
+				[NotificationChannel.Newsletter]: {
+					audience: { type: 'email', items: ['editor@theguardian.com'] },
+					variants: ['UK'],
+					compose: { items: ['news'], subject: '[TEST] Briefing' },
+				},
+				[NotificationChannel.AppPushNotification]: {
+					audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+					compose: { use: 'push' },
+				},
+			},
+		};
+
+		const outcomes = await dispatchNotificationTest(
+			request,
+			testId,
+			dependencies,
+		);
+
+		expect(outcomes).toEqual({ newsletter: [], appPush: [] });
+		expect(renderEmail).not.toHaveBeenCalled();
+		expect(registerBrazeTestEmailRecipients).not.toHaveBeenCalled();
+		expect(sendBrazeTestEmail).not.toHaveBeenCalled();
+		expect(sendAppNotification).not.toHaveBeenCalled();
+	});
 });

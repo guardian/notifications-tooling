@@ -41,7 +41,7 @@ describe('dispatchAppPushTest', () => {
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'internal-test' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(outcomes).toEqual([
@@ -49,7 +49,7 @@ describe('dispatchAppPushTest', () => {
 		]);
 	});
 
-	it('resolves topics but sends nothing on a dry run', async () => {
+	it('dispatches even when dryRun is set (gating is the orchestrator’s job)', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 
 		const outcomes = await dispatchAppPushTest(
@@ -58,8 +58,10 @@ describe('dispatchAppPushTest', () => {
 			dependencies,
 		);
 
-		expect(outcomes).toEqual([]);
-		expect(sendAppNotification).not.toHaveBeenCalled();
+		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+		expect(outcomes).toEqual([
+			{ testId, id: anyString, topicType: 'test', status: 'success' },
+		]);
 	});
 
 	it('reports a failure reason when the push fails', async () => {

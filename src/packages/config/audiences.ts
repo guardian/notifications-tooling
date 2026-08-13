@@ -233,7 +233,7 @@ const internalAppPushTestTopicTypes = {
 		editions: {
 			test: {
 				label: 'Test',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-test' },
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
 			},
 		},
 	},

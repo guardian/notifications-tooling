@@ -35,7 +35,8 @@ export type AppPushTestDispatchOutcome = {
 /**
  * Sends a test app-push to the internal test topic via mobile-n10n. The schema
  * guarantees only the internal test topic can reach here, so production devices
- * are never targeted. A dry run resolves the topics but sends nothing.
+ * are never targeted. Dry-run gating lives in the orchestrator
+ * (`dispatchNotificationTest`), so reaching here always dispatches.
  */
 export const dispatchAppPushTest = async (
 	request: NotificationTestSendRequest,
@@ -53,10 +54,6 @@ export const dispatchAppPushTest = async (
 		NotificationChannel.AppPushNotification,
 	);
 	const pushes = groupAppPushTopicsByType(plan.audience.items);
-
-	if (request.options.dryRun) {
-		return [];
-	}
 
 	const [endpoint, apiKey] = await Promise.all([
 		dependencies.getSSMParameter('MOBILE_N10N_ENDPOINT'),

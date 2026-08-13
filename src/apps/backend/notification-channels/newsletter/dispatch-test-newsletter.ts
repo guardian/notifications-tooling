@@ -107,9 +107,6 @@ export const dispatchNewsletterTest = async (
 			}),
 		});
 	}
-	if (request.options.dryRun) {
-		return [];
-	}
 
 	await dependencies.registerBrazeTestEmailRecipients({
 		apiKey: environment.BRAZE_API_KEY,

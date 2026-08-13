@@ -87,7 +87,7 @@ describe('dispatchNewsletterTest', () => {
 		]);
 	});
 
-	it('renders a test dry run without registering or sending recipients', async () => {
+	it('renders, registers and sends even when dryRun is set (gated by the orchestrator)', async () => {
 		const {
 			dependencies,
 			renderEmail,
@@ -111,15 +111,10 @@ describe('dispatchNewsletterTest', () => {
 			},
 		};
 
-		const outcomes = await dispatchNewsletterTest(
-			request,
-			testId,
-			dependencies,
-		);
+		await dispatchNewsletterTest(request, testId, dependencies);
 
-		expect(outcomes).toEqual([]);
 		expect(renderEmail).toHaveBeenCalledTimes(2);
-		expect(registerBrazeTestEmailRecipients).not.toHaveBeenCalled();
-		expect(sendBrazeTestEmail).not.toHaveBeenCalled();
+		expect(registerBrazeTestEmailRecipients).toHaveBeenCalledTimes(1);
+		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(2);
 	});
 });

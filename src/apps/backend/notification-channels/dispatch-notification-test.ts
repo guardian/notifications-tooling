@@ -23,6 +23,10 @@ export const dispatchNotificationTest = async (
 	testId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
 ): Promise<TestDispatchOutcomes> => {
+	if (request.options.dryRun) {
+		return { appPush: [], newsletter: [] };
+	}
+
 	// allSettled is unnecessary here: each channel already isolates its own
 	// failures, so one channel's outcomes never abort the other's.
 	const [newsletter, appPush] = await Promise.all([
