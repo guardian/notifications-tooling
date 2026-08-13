@@ -7,25 +7,32 @@ import {
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
 import { PreviewToggle } from './PreviewToggle';
-import { SideNavigationPanel } from './SideNavigationPanel';
+import {
+	DEFAULT_SIDE_NAV_HREF,
+	SideNavigationPanel,
+} from './SideNavigationPanel';
 
 export const CreateNewsletterEmailTab = () => {
 	const {
 		notification: { sendingResult, parameters },
 	} = useContext(NotificationFormContext);
+	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
 
 	return (
 		<>
 			{!sendingResult?.ok && (
 				<Layout.Sidebar layoutSmBreakpoint="above-grid">
-					<SideNavigationPanel />
+					<SideNavigationPanel
+						selectedHref={selectedHref}
+						onSelectedHrefChange={setSelectedHref}
+					/>
 				</Layout.Sidebar>
 			)}
 			<Layout.Main theme={layoutMainTheme}>
@@ -71,7 +78,7 @@ export const CreateNewsletterEmailTab = () => {
 										},
 									})}
 								>
-									<CreateNotificationForm />
+									<CreateNotificationForm activeSectionHref={selectedHref} />
 								</div>
 							</Item>
 							<Item
