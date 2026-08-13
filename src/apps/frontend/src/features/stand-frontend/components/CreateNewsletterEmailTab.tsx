@@ -28,7 +28,7 @@ export const CreateNewsletterEmailTab = () => {
 	return (
 		<>
 			{!sendingResult?.ok && (
-				<Layout.Sidebar layoutSmBreakpoint="above-grid">
+				<Layout.Sidebar layoutSmBreakpoint="hidden">
 					<SideNavigationPanel
 						selectedHref={selectedHref}
 						onSelectedHrefChange={setSelectedHref}
