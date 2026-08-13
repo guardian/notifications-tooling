@@ -78,6 +78,24 @@ sequenceDiagram
 - Per-topic-type pushes are issued in parallel with `Promise.allSettled`, so one
   group's failure does not abort the others; each group's success/failure is
   reported in the returned outcomes. Successful groups are not rolled back.
+
+## Test sends (`POST /v1/notification-tests`)
+
+The test endpoint reuses the same resolve → group → `POST /push/topic` flow (via
+`dispatchAppPushTest`), with one deliberate difference in what it may target:
+
+- A test app-push audience may target **only** the internal test topic type
+  defined in `internalAppPushTestTopicTypes` (`src/packages/config/audiences.ts`),
+  which resolves to the mobile-n10n topic `{ type: 'breaking', name:
+'internal-dispatch-test' }`. Only internal test devices subscribe to it, so a
+  test push never reaches real readers.
+- This topic type is kept out of the production `curatedAppPushTopicTypes`, and
+  the request schemas are built from separate id sets
+  (`appPushTestTopicTypeIds` for the test endpoint, `appPushTopicTypeIds` for
+  production). The two sets are mutually exclusive: `POST /v1/notifications`
+  rejects the internal test topic, and `POST /v1/notification-tests` rejects
+  every production topic. See [the notification-tests
+  flow](../braze/braze-test-email-send-flow.md) for the newsletter equivalent.
 - Dispatch adds no propagation delay and performs no automatic retry. A `202`
   confirms API acceptance, not delivery to devices; per-group outcomes carry the
   actual `201`/failure of each `POST /push/topic`.

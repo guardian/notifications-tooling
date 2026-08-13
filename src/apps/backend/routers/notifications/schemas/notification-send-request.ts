@@ -440,34 +440,9 @@ export const notificationSendRequestSchema = z
 		}
 	})
 	.meta({
+		// Request-body examples live in the OpenAPI `examples` map
+		// (components/examples/notification-send-request.ts), so none is set here.
 		description: 'The POST /v1/notifications request body.',
-		example: {
-			idempotencyKey: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-			content: {
-				items: {
-					'lead-story': {
-						type: NotificationChannel.Newsletter,
-						title: 'Your morning briefing',
-						body: 'The three stories shaping the day, plus what to keep an eye on.',
-						link: 'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
-					},
-				},
-			},
-			channels: {
-				[NotificationChannel.Newsletter]: {
-					audience: {
-						type: 'segment',
-						items: [newsletterSegmentIds[0]],
-					},
-					compose: {
-						items: ['lead-story'],
-						subject: 'Your morning briefing',
-					},
-				},
-			},
-			sender: 'editorial-newsletters',
-			options: { dryRun: false, scheduledFor: null },
-		},
 	});
 
 export type NotificationSendRequest = z.infer<
@@ -520,35 +495,9 @@ export const notificationTestSendRequestSchema = z
 		}
 	})
 	.meta({
+		// Request-body examples live in the OpenAPI `examples` map
+		// (components/examples/notification-test-send-request.ts), so none is set here.
 		description: 'The POST /v1/notification-tests request body.',
-		example: {
-			idempotencyKey: 'test-2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-			content: {
-				items: {
-					'lead-story': {
-						type: NotificationChannel.Newsletter,
-						title: 'Your morning briefing',
-						body: 'The three stories shaping the day.',
-						link: 'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
-					},
-				},
-			},
-			channels: {
-				[NotificationChannel.Newsletter]: {
-					audience: {
-						type: 'email',
-						items: ['newsletters.test@theguardian.com'],
-					},
-					variants: [newsletterSegmentIds[0]],
-					compose: {
-						items: ['lead-story'],
-						subject: '[TEST] Your morning briefing',
-					},
-				},
-			},
-			sender: 'notifications-tooling-spa/v1',
-			options: { dryRun: false },
-		},
 	});
 
 export type NotificationTestSendRequest = z.infer<

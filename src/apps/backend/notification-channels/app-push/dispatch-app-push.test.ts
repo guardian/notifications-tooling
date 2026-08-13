@@ -196,7 +196,7 @@ describe('dispatchNotification app push', () => {
 		);
 	});
 
-	it('forwards optional media to the app-notification client', async () => {
+	it('forwards optional media to the mobile-n10n client', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const media = {
 			type: 'image',
