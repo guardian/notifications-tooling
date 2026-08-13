@@ -3,15 +3,15 @@ import { expect, within } from 'storybook/test';
 import { WithNotificationContext } from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
 import type { NotificationState } from '../types';
-import { DispatchTab } from './DispatchTab';
+import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
 
 type StoryArgs = {
 	notificationState: NotificationState;
 };
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/DispatchTab',
-	component: DispatchTab,
+	title: 'Stand Frontend/CreateNewsletterEmailTab',
+	component: CreateNewsletterEmailTab,
 	args: {
 		notificationState: defaultState,
 	},
@@ -20,13 +20,16 @@ const meta: Meta<StoryArgs> = {
 		docs: {
 			description: {
 				component:
-					'Dispatch tab combining the notification creation form and preview with selected audience, channel, and delivery timing.',
+					'Newsletter email creation tab combining the notification form and preview with selected audience, channel, and delivery timing.',
 			},
 		},
 	},
 	render: (args) => {
 		const { notificationState } = args;
-		return WithNotificationContext(<DispatchTab />, notificationState);
+		return WithNotificationContext(
+			<CreateNewsletterEmailTab />,
+			notificationState,
+		);
 	},
 };
 

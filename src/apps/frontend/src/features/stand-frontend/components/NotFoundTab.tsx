@@ -2,6 +2,7 @@ import { semanticSpacing } from '@guardian/stand';
 import { Layout } from '@guardian/stand/Layout';
 import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
+import { appRoutes } from '../routes';
 
 export const NotFoundTab = () => (
 	<Layout.Main>
@@ -18,8 +19,8 @@ export const NotFoundTab = () => (
 				Page not found
 			</Typography>
 			<Typography>The page you requested does not exist.</Typography>
-			<LinkButton href="/create" variant="primary">
-				Go to Create
+			<LinkButton href={appRoutes.createNewsletterEmail} variant="primary">
+				Go to Create newsletter email
 			</LinkButton>
 		</div>
 	</Layout.Main>

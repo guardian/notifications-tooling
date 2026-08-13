@@ -11,6 +11,7 @@ import {
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { AppConfig } from '../get-config';
+import { topBarNavigationItems } from '../routes';
 import { faviconTheme, layer, topBarTheme } from '../themes';
 import { UserContext } from '../UserContext';
 
@@ -24,11 +25,6 @@ const getInitials = (user: AppConfig['user']): string => {
 	const lastName = user.lastName[0] ?? '';
 	return `${firstName}${lastName}`.toUpperCase() || 'U';
 };
-
-const navLinks = [
-	{ text: 'Create', path: '/create' },
-	{ text: 'History', path: '/history' },
-] as const;
 
 export const MainLayout = ({ children }: Props) => {
 	const { user } = useContext(UserContext) ?? {};
@@ -47,7 +43,7 @@ export const MainLayout = ({ children }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{navLinks.map(({ text, path }) => (
+						{topBarNavigationItems.map(({ text, path }) => (
 							<TopBarNavigation
 								key={path}
 								text={text}

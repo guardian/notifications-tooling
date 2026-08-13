@@ -43,5 +43,11 @@ export const Default: Story = {
 		await expect(
 			canvas.getByText('Page content goes here'),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('link', { name: 'Create newsletter email' }),
+		).toHaveAttribute('href', '/create-newsletter-email');
+		await expect(
+			canvas.getByRole('link', { name: 'Create app alert' }),
+		).toHaveAttribute('href', '/create-app-alert');
 	},
 };
