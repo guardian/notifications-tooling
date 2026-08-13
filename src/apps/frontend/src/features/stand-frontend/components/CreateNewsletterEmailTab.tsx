@@ -21,7 +21,7 @@ import {
 	SideNavigationPanel,
 } from './SideNavigationPanel';
 
-export const DispatchTab = () => {
+export const CreateNewsletterEmailTab = () => {
 	const {
 		notification: { sendingResult, parameters },
 		updateNotification,
