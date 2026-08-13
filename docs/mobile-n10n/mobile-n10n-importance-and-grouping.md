@@ -77,14 +77,18 @@ Per-topic-type pushes are independent and issued in parallel with
 no persistence layer yet, so a failure has no cross-call transaction:
 
 - a fresh UUID is generated per group and sent as the mobile-n10n payload `id`;
-  dispatch returns each group's `{ id, topicType, status, failureReason? }` so
-  the outcomes can be persisted once a store exists;
+  on full success dispatch returns each group's
+  `{ id, topicType, status, failureReason? }` so the outcomes can be persisted
+  once a store exists;
 - if one group's push fails the others still complete, and successful groups are
   not rolled back;
+- once every group has settled, dispatch rethrows the first provider failure,
+  which the error middleware maps to `504` on timeout and `502` otherwise, so the
+  endpoint reports the failure instead of a misleading `202`. The per-group
+  outcomes are computed but currently discarded on failure (nothing is persisted
+  yet);
 - Dispatch does not retry automatically, because a failed call may have been
-  accepted downstream and a blind retry could duplicate a push;
-- the returned outcomes report per-group `success`/`failure` (with a classified
-  `failureReason`), not that any device received the notification.
+  accepted downstream and a blind retry could duplicate a push.
 
 With persistence, each group's push becomes an individually tracked, retryable
 unit keyed off its returned id, so partial failures can be recovered without

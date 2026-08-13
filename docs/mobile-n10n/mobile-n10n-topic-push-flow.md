@@ -40,8 +40,13 @@ sequenceDiagram
 				N10n-->>Dispatch: 201 Created { id }
 			end
 
-			Dispatch-->>Router: Complete
-			Router-->>Client: 202 Accepted
+			alt A group's push failed
+				Dispatch-->>Router: Throw the provider error (all groups still attempted)
+				Router-->>Client: 502 (or 504 on timeout)
+			else All groups succeeded
+				Dispatch-->>Router: Per-group outcomes
+				Router-->>Client: 202 Accepted
+			end
 		end
 	end
 ```
@@ -76,8 +81,10 @@ sequenceDiagram
   push. The client guards both bounds before calling out, and the request schema
   caps the total topics a plan may target.
 - Per-topic-type pushes are issued in parallel with `Promise.allSettled`, so one
-  group's failure does not abort the others; each group's success/failure is
-  reported in the returned outcomes. Successful groups are not rolled back.
+  group's failure does not abort the others. Once every group has settled,
+  dispatch returns the per-group outcomes on full success; if any group failed it
+  rethrows the first provider error, which the error middleware maps to `504` on
+  timeout and `502` otherwise. Successful groups are not rolled back.
 
 ## Test sends (`POST /v1/notification-tests`)
 
@@ -97,8 +104,9 @@ The test endpoint reuses the same resolve → group → `POST /push/topic` flow 
   every production topic. See [the notification-tests
   flow](../braze/braze-test-email-send-flow.md) for the newsletter equivalent.
 - Dispatch adds no propagation delay and performs no automatic retry. A `202`
-  confirms API acceptance, not delivery to devices; per-group outcomes carry the
-  actual `201`/failure of each `POST /push/topic`.
-- Provider failures are classified (`AppNotificationApiError`) and mapped by the
-  error middleware to `504` on timeout and `502` otherwise, without leaking the
-  provider response.
+  confirms API acceptance once every group's `POST /push/topic` has succeeded, not
+  delivery to devices; the successful groups' outcomes are returned for future
+  persistence.
+- Provider failures are classified (`AppNotificationApiError`) and, after every
+  group has been attempted, rethrown so the error middleware maps them to `504`
+  on timeout and `502` otherwise, without leaking the provider response.

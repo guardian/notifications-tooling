@@ -54,7 +54,9 @@ Use option 3 for Notifications Tooling test-email audiences:
    segment audiences. Each targeted segment is dispatched independently (via
    `Promise.allSettled`, so one segment's failure does not abort the others), and
    the `dispatch_id` Braze returns per send is captured and reported per segment
-   for tracking and future persistence.
+   for tracking and future persistence. Once every segment has settled, a failure
+   is rethrown and mapped by the error middleware to `504` on timeout and `502`
+   otherwise.
 
 This validates the rendered email rather than the production campaign's delivery
 configuration. Because the campaign template only inserts the supplied body,
