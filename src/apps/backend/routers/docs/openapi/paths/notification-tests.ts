@@ -61,7 +61,7 @@ export const notificationTestsPath = {
 			},
 			'502': {
 				description:
-					'Braze or email rendering rejected the request or returned an invalid response.',
+					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) rejected the request or returned an invalid response.',
 				content: {
 					'application/json': {
 						schema: {
@@ -71,7 +71,8 @@ export const notificationTestsPath = {
 				},
 			},
 			'504': {
-				description: 'Braze or email rendering timed out.',
+				description:
+					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) timed out.',
 				content: {
 					'application/json': {
 						schema: {

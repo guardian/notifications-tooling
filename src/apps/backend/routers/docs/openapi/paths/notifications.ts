@@ -7,7 +7,7 @@
  */
 export const notificationsPath = {
 	post: {
-		summary: 'Validate and enqueue a notification',
+		summary: 'Validate and dispatch a notification',
 		description:
 			'Production notification endpoint. Audiences must reference configured segments; direct email recipients are not accepted.',
 		security: [{ pandaCookie: [] }],
@@ -30,7 +30,7 @@ export const notificationsPath = {
 		responses: {
 			'202': {
 				description:
-					'The notification passed validation and was enqueued for per-channel dispatch.',
+					'The notification passed validation and every requested channel was dispatched successfully.',
 				content: {
 					'application/json': {
 						schema: { $ref: '#/components/schemas/AcceptedNotification' },
@@ -63,7 +63,7 @@ export const notificationsPath = {
 			},
 			'502': {
 				description:
-					'Braze or email rendering rejected the request or returned an invalid response.',
+					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) rejected the request or returned an invalid response.',
 				content: {
 					'application/json': {
 						schema: {
@@ -73,7 +73,8 @@ export const notificationsPath = {
 				},
 			},
 			'504': {
-				description: 'Braze or email rendering timed out.',
+				description:
+					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) timed out.',
 				content: {
 					'application/json': {
 						schema: {

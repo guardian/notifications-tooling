@@ -1,7 +1,8 @@
-/** The `/v1/content/articles/resolve` path item. */
+/** The `/v1/preview/email` path item. */
 export const emailPreviewPath = {
 	post: {
-		summary: 'Provide the HTML for the notifcation email of a Guardian article',
+		summary:
+			'Provide the HTML for the notification email of a Guardian article',
 		description:
 			'Determines the CAPI content id and audience segment from the input and requests the HTML from the email-rendering service. Returns the HTML, articleId and newsletter Id.',
 		security: [{ pandaCookie: [] }],
