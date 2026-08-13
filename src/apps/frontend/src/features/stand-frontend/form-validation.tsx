@@ -1,9 +1,12 @@
+import { buildRequest } from './build-request-payloads';
 import type { NotificationState } from './types';
 
 export type NotificationFormErrorField =
-	'article' | 'subject' | 'preview' | 'audienceSegments';
+	'article' | 'subject' | 'preview' | 'audienceSegments' | 'cannotBuildRequest';
 
 export type NotificationFormErrors = NotificationFormErrorField[];
+
+const DEFAULT_ORIGIN = 'https://www.theguardian.com';
 
 export const validateNotificationForm = (
 	notification: NotificationState,
@@ -28,6 +31,11 @@ export const validateNotificationForm = (
 	}
 	if (audienceSegments.length === 0) {
 		errors.push('audienceSegments');
+	}
+	// if none of the specific errors above are observed, but still cannot build the request body
+	// return a fallback error
+	if (errors.length == 0 && !buildRequest(notification)) {
+		errors.push('cannotBuildRequest');
 	}
 
 	return errors;
@@ -64,7 +72,7 @@ const hostWhitelist = ['www.theguardian.com'];
 
 export const parseArticleUrlInputToContentId = (
 	articleInputText: string,
-): { articleId?: string; failure?: string } => {
+): { articleId?: string; failure?: string; webUrl?: string } => {
 	if (articleInputText.length === 0) {
 		return {};
 	}
@@ -85,13 +93,17 @@ export const parseArticleUrlInputToContentId = (
 		}
 
 		// the id of the article is the path with the leading slash removed
-		return { articleId: trimLeadingSlash(pathname) };
+		return {
+			articleId: trimLeadingSlash(pathname),
+			webUrl: `${url.origin}${pathname}`,
+		};
 	} catch {
 		// if not a URL, check if the inut is a valid article id
 		const maybeInputtedArticleId = trimLeadingSlash(articleInputText);
 		if (articleUrlPathPattern.test(`/${maybeInputtedArticleId}`)) {
 			return {
 				articleId: maybeInputtedArticleId,
+				webUrl: `${DEFAULT_ORIGIN}/${maybeInputtedArticleId}`,
 			};
 		}
 		return { failure: 'not valid url' };

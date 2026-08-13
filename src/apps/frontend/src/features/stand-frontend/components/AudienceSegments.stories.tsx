@@ -32,7 +32,7 @@ export const NoSelection: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Audience Segments')).toBeInTheDocument();
+		await expect(canvas.getByText('Audience segments')).toBeInTheDocument();
 		await expect(canvas.getByText('United Kingdom')).toBeInTheDocument();
 		await expect(canvas.getByText('United States')).toBeInTheDocument();
 		await expect(canvas.getByText('Australia')).toBeInTheDocument();

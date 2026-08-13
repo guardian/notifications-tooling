@@ -5,23 +5,79 @@ import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useContext } from 'react';
+import type { ApiError } from '../../../api/errors';
 import { getChannelDescription } from '../../../util/display-text-helpers';
+import type { SendNotificationRequest } from '../api/schemas';
+import { buildRequest } from '../build-request-payloads';
 import { NotificationFormContext } from '../NotificationContext';
-import type { NotificationState, SendError } from '../types';
+import type { NotificationState } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 
 const deriveUserFacingMessage = (
-	error: SendError,
-	messageFromApi: string,
+	apiError: ApiError,
 	channelDescription: string,
 ): ReactNode => {
-	switch (error) {
+	switch (apiError.failure) {
+		case 'forbidden':
+			return `You don't have the correct authorisation to send ${channelDescription}s`;
 		case 'unauthenticated':
-		case 'insufficient_permissions':
-			return `You don't have the correct authorisation to send ${channelDescription}s}`;
-		case 'validation_failed': // should only occur if the frontend isnt enforcing the constraints and validation before allowing a send
-		case 'bad_request': // should only occur if there is a bug in constructing the payload to the backend
-			return messageFromApi; // TO DO - we don't have user-facing messaging for these cases
+			return <Typography>Your login has expired.</Typography>;
+		case 'json-parse-fail':
+		case 'schema-parse-fail':
+			return (
+				<>
+					<Typography element="p">
+						Could not understand the response:
+					</Typography>
+					<Typography element="p" variant="bodyBoldSm">
+						{apiError.message}
+					</Typography>
+				</>
+			);
+		case 'non-2xx-response': // TO DO - parse the details array to return more specific info
+		case 'fetch-fail':
+		case 'timeout':
+		default:
+			return checkIfCanRetry(apiError) ? (
+				<Typography>
+					The {channelDescription} could not be sent at this time. Try again.
+				</Typography>
+			) : (
+				<Typography>The {channelDescription} could not be sent.</Typography>
+			);
+	}
+};
+
+const deriveErrorTitle = (apiError: ApiError, channelDescription: string) => {
+	switch (apiError.failure) {
+		case 'fetch-fail':
+			return 'There was a problem';
+		case 'json-parse-fail':
+		case 'schema-parse-fail':
+			return 'Communication Failure';
+		case 'non-2xx-response':
+		case 'timeout':
+		case 'unauthenticated':
+		case 'forbidden':
+			return `The ${channelDescription} couldn't be sent`;
+	}
+};
+
+const checkIfCanRetry = (apiError: ApiError) => {
+	const { failure, status } = apiError;
+	switch (failure) {
+		case 'fetch-fail':
+		case 'unauthenticated':
+		case 'timeout':
+			return true;
+		case 'json-parse-fail':
+		case 'schema-parse-fail':
+		case 'forbidden':
+			return false;
+		case 'non-2xx-response':
+			return status != null && status >= 500;
+		default:
+			return false;
 	}
 };
 
@@ -35,19 +91,16 @@ const getFailure = (notification: NotificationState) => {
 		notification.parameters?.type,
 	);
 
-	if (sendingResult.requestFailed) {
-		return {
-			title: 'There was a problem',
-			message:
-				'The newsletter email could not be sent at this time. Try again.',
-			canRetry: true,
-		};
-	}
-	const { message, error } = sendingResult.response;
+	const { loginUrl, details } = sendingResult.response;
 	return {
-		title: `The ${channelDescription} couldn't be sent`,
-		message: deriveUserFacingMessage(error, message, channelDescription),
-		canRetry: false,
+		title: deriveErrorTitle(sendingResult.response, channelDescription),
+		message: deriveUserFacingMessage(
+			sendingResult.response,
+			channelDescription,
+		),
+		canRetry: checkIfCanRetry(sendingResult.response),
+		loginUrl,
+		details,
 	};
 };
 
@@ -58,24 +111,15 @@ export const SendFailedModal = () => {
 
 	const { isWaitingForSend } = notification;
 	const failure = getFailure(notification);
+	const sendNotificationRequest = buildRequest(notification);
 
-	const handleRetry = () => {
-		updateNotification({ type: 'waiting-for-send' });
-		sendNotification(notification)
-			.then((result) => {
+	const handleRetry =
+		(sendNotificationRequest: SendNotificationRequest) => () => {
+			updateNotification({ type: 'waiting-for-send' });
+			void sendNotification(sendNotificationRequest).then((result) => {
 				updateNotification({ type: 'receive-send-result', result });
-			})
-			.catch((err) => {
-				console.error(err);
-				updateNotification({
-					type: 'receive-send-result',
-					result: {
-						ok: false,
-						requestFailed: true,
-					},
-				});
 			});
-	};
+		};
 
 	return (
 		<Modal
@@ -108,10 +152,10 @@ export const SendFailedModal = () => {
 					</Dialog.Header>
 					<Dialog.Content>{failure.message}</Dialog.Content>
 					<Dialog.Buttons theme={{ flexDirection: 'row' }}>
-						{failure.canRetry ? (
+						{failure.canRetry && !!sendNotificationRequest ? (
 							<Button
 								isDisabled={isWaitingForSend}
-								onPress={handleRetry}
+								onPress={handleRetry(sendNotificationRequest)}
 								icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
 							>
 								Try Again

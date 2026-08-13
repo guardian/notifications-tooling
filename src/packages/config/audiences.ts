@@ -1,6 +1,6 @@
 /**
- * Defines public, channel-agnostic segment ids surfaced to the FE and, in future,
- * served by `GET /v1/audiences`. The backend resolves newsletter segments to
+ * Defines public, channel-agnostic segment ids served, in future, by
+ * `GET /v1/audiences`. The backend resolves newsletter segments to
  * email-rendering newsletter configurations and Braze campaigns, and push
  * segments to mobile-n10n topics. These internals are kept out of the public
  * `POST /v1/notifications` contract, which references segment ids only.
@@ -53,7 +53,7 @@ const newsletterSegmentsByStage = {
 	},
 } as const satisfies Record<'CODE' | 'PROD', Record<string, NewsletterSegment>>;
 
-export type NewsletterSegmentId = keyof typeof newsletterSegmentsByStage.CODE;
+type NewsletterSegmentId = keyof typeof newsletterSegmentsByStage.CODE;
 
 export const getNewsletterSegments = (
 	stage: Env['STAGE'],
@@ -62,121 +62,227 @@ export const getNewsletterSegments = (
 
 export const newsletterSegments = getNewsletterSegments(configurationStage);
 
-export interface MobileN10nTopic {
+interface MobileN10nTopic {
 	type: string;
 	name: string;
 }
 
-export interface AppPushNotificationSegment {
+/**
+ * mobile-n10n's `importance` values (`BreakingNewsPayload.importance`). Used
+ * only by the app-push dispatch; never exposed in the public audiences contract.
+ */
+export enum AppPushImportance {
+	Major = 'Major',
+	Minor = 'Minor',
+}
+
+interface AppPushEdition {
 	label: string;
 	mobileN10nTopic: MobileN10nTopic;
+	importance: AppPushImportance;
+}
+
+interface AppPushTopicType {
+	label: string;
+	editions: Record<string, AppPushEdition>;
 }
 
 /**
- * Push segments mirror the topics `guardian/facia-tool`'s Breaking News tool
- * emits, plus the registered `newsstand` topic. `test` is a catch-all used
- * while push is wired up end to end.
+ * Push targets are curated topic types, each exposing its `editions`. A request
+ * names a topic type and one of its editions; the backend resolves that pair to
+ * the mobile-n10n topic (`{ type, name }`) that `guardian/facia-tool`'s Breaking
+ * News tool emits, plus the registered `newsstand` topic. `test` is a catch-all
+ * used while push is wired up end to end. The raw topic coordinates are kept out
+ * of the public contract.
  */
-export const appPushNotificationSegments = {
-	'breaking-news-uk': {
-		label: 'Breaking news UK',
-		mobileN10nTopic: { type: 'breaking', name: 'uk' },
-	},
-	'breaking-news-us': {
-		label: 'Breaking news US',
-		mobileN10nTopic: { type: 'breaking', name: 'us' },
-	},
-	'breaking-news-au': {
-		label: 'Breaking news AU',
-		mobileN10nTopic: { type: 'breaking', name: 'au' },
-	},
-	'breaking-news-international': {
-		label: 'Breaking news International',
-		mobileN10nTopic: { type: 'breaking', name: 'international' },
-	},
-	'breaking-news-europe': {
-		label: 'Breaking news Europe',
-		mobileN10nTopic: { type: 'breaking', name: 'europe' },
-	},
-	'breaking-news-uk-sport': {
-		label: 'Breaking news UK sport',
-		mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
-	},
-	'breaking-news-us-sport': {
-		label: 'Breaking news US sport',
-		mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
-	},
-	'breaking-news-au-sport': {
-		label: 'Breaking news AU sport',
-		mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
-	},
-	'breaking-news-international-sport': {
-		label: 'Breaking news International sport',
-		mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
-	},
-	'breaking-news-europe-sport': {
-		label: 'Breaking news Europe sport',
-		mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
-	},
-	'breaking-news-uk-editors-picks': {
-		label: "Breaking news UK editors' picks",
-		mobileN10nTopic: { type: 'breaking', name: 'uk-editors-picks' },
-	},
-	'breaking-news-us-editors-picks': {
-		label: "Breaking news US editors' picks",
-		mobileN10nTopic: { type: 'breaking', name: 'us-editors-picks' },
-	},
-	'breaking-news-au-editors-picks': {
-		label: "Breaking news AU editors' picks",
-		mobileN10nTopic: { type: 'breaking', name: 'au-editors-picks' },
-	},
-	'breaking-news-international-editors-picks': {
-		label: "Breaking news International editors' picks",
-		mobileN10nTopic: { type: 'breaking', name: 'international-editors-picks' },
-	},
-	'breaking-news-europe-editors-picks': {
-		label: "Breaking news Europe editors' picks",
-		mobileN10nTopic: { type: 'breaking', name: 'europe-editors-picks' },
-	},
-	'breaking-news-uk-one-not-to-miss': {
-		label: 'Breaking news UK one not to miss',
-		mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
-	},
-	'breaking-news-us-one-not-to-miss': {
-		label: 'Breaking news US one not to miss',
-		mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
-	},
-	'breaking-news-au-one-not-to-miss': {
-		label: 'Breaking news AU one not to miss',
-		mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
-	},
-	'breaking-news-international-one-not-to-miss': {
-		label: 'Breaking news International one not to miss',
-		mobileN10nTopic: {
-			type: 'breaking',
-			name: 'international-one-not-to-miss',
+const curatedAppPushTopicTypes = {
+	'breaking-news': {
+		label: 'Breaking news',
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk' },
+				importance: AppPushImportance.Major,
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'us' },
+				importance: AppPushImportance.Major,
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'au' },
+				importance: AppPushImportance.Major,
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: { type: 'breaking', name: 'international' },
+				importance: AppPushImportance.Major,
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: { type: 'breaking', name: 'europe' },
+				importance: AppPushImportance.Major,
+			},
 		},
 	},
-	'breaking-news-europe-one-not-to-miss': {
-		label: 'Breaking news Europe one not to miss',
-		mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
+	sport: {
+		label: 'Sport',
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
+				importance: AppPushImportance.Minor,
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
+				importance: AppPushImportance.Minor,
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
+				importance: AppPushImportance.Minor,
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
+				importance: AppPushImportance.Minor,
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
+				importance: AppPushImportance.Minor,
+			},
+		},
+	},
+	'editors-picks': {
+		label: "Editors' picks",
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk-editors-picks' },
+				importance: AppPushImportance.Minor,
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'us-editors-picks' },
+				importance: AppPushImportance.Minor,
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'au-editors-picks' },
+				importance: AppPushImportance.Minor,
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'international-editors-picks',
+				},
+				importance: AppPushImportance.Minor,
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: { type: 'breaking', name: 'europe-editors-picks' },
+				importance: AppPushImportance.Minor,
+			},
+		},
+	},
+	'one-not-to-miss': {
+		label: 'One not to miss',
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
+				importance: AppPushImportance.Minor,
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
+				importance: AppPushImportance.Minor,
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
+				importance: AppPushImportance.Minor,
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'international-one-not-to-miss',
+				},
+				importance: AppPushImportance.Minor,
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
+				importance: AppPushImportance.Minor,
+			},
+		},
 	},
 	'uk-general-election': {
 		label: 'UK general election',
-		mobileN10nTopic: { type: 'breaking', name: 'uk-general-election' },
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk-general-election' },
+				importance: AppPushImportance.Minor,
+			},
+		},
 	},
-	'newsstand-ios': {
-		label: 'Newsstand iOS',
-		mobileN10nTopic: { type: 'newsstand', name: 'newsstandIos' },
+	newsstand: {
+		label: 'Newsstand',
+		editions: {
+			ios: {
+				label: 'iOS',
+				mobileN10nTopic: { type: 'newsstand', name: 'newsstandIos' },
+				importance: AppPushImportance.Minor,
+			},
+		},
 	},
 	test: {
 		label: 'Test',
-		mobileN10nTopic: { type: 'breaking', name: 'internal-test' },
+		editions: {
+			test: {
+				label: 'Test',
+				mobileN10nTopic: { type: 'breaking', name: 'internal-test' },
+				importance: AppPushImportance.Minor,
+			},
+		},
 	},
-} as const satisfies Record<string, AppPushNotificationSegment>;
+} as const satisfies Record<string, AppPushTopicType>;
 
-export type AppPushNotificationSegmentId =
-	keyof typeof appPushNotificationSegments;
+/**
+ * Separated per stage to mirror newsletter segments. mobile-n10n topic
+ * coordinates are the same across environments (unlike Braze campaign ids), so
+ * CODE and PROD currently share the same curated set; the split lets either
+ * stage diverge without disturbing the other.
+ */
+const appPushTopicTypesByStage = {
+	CODE: curatedAppPushTopicTypes,
+	PROD: curatedAppPushTopicTypes,
+} as const satisfies Record<'CODE' | 'PROD', Record<string, AppPushTopicType>>;
+
+export type AppPushTopicTypeId = keyof typeof appPushTopicTypesByStage.CODE;
+
+export const getAppPushTopicTypes = (
+	stage: Env['STAGE'],
+): Record<AppPushTopicTypeId, AppPushTopicType> =>
+	appPushTopicTypesByStage[stage === 'PROD' ? 'PROD' : 'CODE'];
+
+export const appPushTopicTypes = getAppPushTopicTypes(configurationStage);
+
+/** Resolves a request's (topic type, edition) pair to its mobile-n10n topic. */
+export const resolveAppPushTopic = (
+	topicTypeId: AppPushTopicTypeId,
+	editionId: string,
+): MobileN10nTopic | undefined => {
+	const editions: Record<string, AppPushEdition> =
+		appPushTopicTypes[topicTypeId].editions;
+	return editions[editionId]?.mobileN10nTopic;
+};
 
 // Non-empty tuples so the validator can build `z.enum(...)` from them.
 export const newsletterSegmentIds = Object.keys(newsletterSegments) as [
@@ -184,17 +290,26 @@ export const newsletterSegmentIds = Object.keys(newsletterSegments) as [
 	...NewsletterSegmentId[],
 ];
 
-export const appPushNotificationSegmentIds = Object.keys(
-	appPushNotificationSegments,
-) as [AppPushNotificationSegmentId, ...AppPushNotificationSegmentId[]];
+export const appPushTopicTypeIds = Object.keys(appPushTopicTypes) as [
+	AppPushTopicTypeId,
+	...AppPushTopicTypeId[],
+];
+
+/** Edition ids per topic type, as non-empty tuples for `z.enum(...)`. */
+export const appPushEditionIdsByTopicType = Object.fromEntries(
+	Object.entries(appPushTopicTypes).map(([topicTypeId, { editions }]) => [
+		topicTypeId,
+		Object.keys(editions),
+	]),
+) as Record<AppPushTopicTypeId, [string, ...string[]]>;
 
 /**
  * mobile-n10n's `POST /push/topic` rejects a push targeting more than 20 topics
  * (`Main.pushTopics`: `val MaxTopics = 20` → `400 "Too many topics, maximum:
- * 20"`). Each push segment resolves to one mobile-n10n topic, so this caps the
- * segments a single push plan may target.
+ * 20"`). Each push audience item resolves to one mobile-n10n topic, so this
+ * caps the topics a single push plan may target.
  */
-export const MAX_APP_PUSH_SEGMENTS = 20;
+export const MAX_APP_PUSH_TOPICS = 20;
 
 /**
  * Newsletter segments resolve to Braze campaigns. Capped independently of push

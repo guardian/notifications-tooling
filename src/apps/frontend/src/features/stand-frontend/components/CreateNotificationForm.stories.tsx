@@ -1,10 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { articleFixture } from '../../../mocks/capi-fixtures';
+import type { ApiError } from '../../../api/errors';
 import {
-	mockSendFailingRequest,
-	mockSendRejectedNotification,
-} from '../../../mocks/mock-send-notification';
+	badRequestError,
+	fetchFailError,
+	internalError,
+	jsonParseFailure,
+	noPermissionError,
+	unauthenticatedError,
+} from '../../../mocks/api-fixtures';
+import { articleFixture } from '../../../mocks/capi-fixtures';
+import { mockSendRejectedNotification } from '../../../mocks/mock-send-notification';
 import {
 	completeEmailParams,
 	WithNotificationContext,
@@ -110,14 +116,14 @@ export const SendingEmail: Story = {
 	},
 };
 
-export const SendEmailFail: Story = {
+const buildErrorStory = (error: ApiError): Story => ({
 	args: {
 		notificationState: {
 			...populatedEmailState,
 			isWaitingForSend: false,
 			sendingResult: {
 				ok: false,
-				requestFailed: true,
+				response: error,
 			},
 		},
 	},
@@ -127,34 +133,15 @@ export const SendEmailFail: Story = {
 			<CreateNotificationForm />,
 			notificationState,
 			{
-				sendNotification: mockSendFailingRequest,
+				sendNotification: mockSendRejectedNotification(error),
 			},
 		);
 	},
-};
+});
 
-export const SendEmailRejected: Story = {
-	args: {
-		notificationState: {
-			...populatedEmailState,
-			isWaitingForSend: false,
-			sendingResult: {
-				ok: false,
-				response: {
-					error: 'unauthenticated',
-					message: 'Authentication is required to access this resource.',
-				},
-			},
-		},
-	},
-	render: (args) => {
-		const { notificationState } = args;
-		return WithNotificationContext(
-			<CreateNotificationForm />,
-			notificationState,
-			{
-				sendNotification: mockSendRejectedNotification,
-			},
-		);
-	},
-};
+export const Unauthenticated: Story = buildErrorStory(unauthenticatedError);
+export const BadRequest: Story = buildErrorStory(badRequestError);
+export const InternalError: Story = buildErrorStory(internalError);
+export const NoPermission: Story = buildErrorStory(noPermissionError);
+export const UnparsableResponse: Story = buildErrorStory(jsonParseFailure);
+export const FetchFailError: Story = buildErrorStory(fetchFailError);

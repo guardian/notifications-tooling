@@ -26,8 +26,6 @@ const meta = {
 		),
 	],
 	args: {
-		currentTab: 'create',
-		setTab: () => {},
 		children: (
 			<Layout.Main>
 				<Typography variant="bodyMd">Page content goes here</Typography>
@@ -45,5 +43,11 @@ export const Default: Story = {
 		await expect(
 			canvas.getByText('Page content goes here'),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('link', { name: 'Create newsletter email' }),
+		).toHaveAttribute('href', '/newsletter-email/create');
+		await expect(
+			canvas.getByRole('link', { name: 'Create app alert' }),
+		).toHaveAttribute('href', '/app-alert/create');
 	},
 };

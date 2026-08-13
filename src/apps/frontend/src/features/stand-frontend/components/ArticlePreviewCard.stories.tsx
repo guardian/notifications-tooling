@@ -19,6 +19,9 @@ const meta = {
 export default meta;
 type PreviewCardStory = StoryObj<typeof meta>;
 
+const publicationDate = (minsAgo: number): string =>
+	new Date(Date.now() - minsAgo).toISOString();
+
 export const WithThumbnail: PreviewCardStory = {
 	args: {
 		content: articleFixture,
@@ -41,11 +44,55 @@ export const WithThumbnail: PreviewCardStory = {
 	},
 };
 
+export const JustPublished: PreviewCardStory = {
+	args: {
+		content: {
+			...articleFixture,
+			webPublicationDate: publicationDate(2 * 60 * 1000),
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText(
+				(_, element) => element?.textContent === 'Published 2m ago',
+			),
+		).toBeInTheDocument();
+	},
+};
+
+export const PublishedLongAgo: PreviewCardStory = {
+	args: {
+		content: {
+			...articleFixture,
+			webPublicationDate: publicationDate(30 * 24 * 60 * 60 * 1000),
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText((_, element) =>
+				/^Published \d{1,2} \w{3} \d{4}$/.test(element?.textContent ?? ''),
+			),
+		).toBeInTheDocument();
+	},
+};
+
+export const WithoutPublicationDate: PreviewCardStory = {
+	args: {
+		content: { ...articleFixture, webPublicationDate: undefined },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.queryByText(/^Published/)).not.toBeInTheDocument();
+	},
+};
+
 export const WithoutThumbnail: PreviewCardStory = {
 	args: {
 		content: {
 			...articleFixture,
-			fields: { ...articleFixture.fields, thumbnail: undefined },
+			fields: { ...articleFixture.fields, thumbnail: '' },
 		},
 	},
 	play: async ({ canvasElement }) => {

@@ -9,16 +9,15 @@ import {
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
 import { type ReactNode, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { AppConfig } from '../get-config';
-import { faviconTheme, topBarTheme } from '../themes';
-import type { TabName } from '../types';
+import { topBarNavigationItems } from '../routes';
+import { faviconTheme, layer, topBarTheme } from '../themes';
 import { UserContext } from '../UserContext';
 
 interface Props {
 	children: ReactNode;
 	contentId?: string;
-	setTab: { (tab: TabName): void };
-	currentTab: TabName;
 }
 
 const getInitials = (user: AppConfig['user']): string => {
@@ -27,25 +26,16 @@ const getInitials = (user: AppConfig['user']): string => {
 	return `${firstName}${lastName}`.toUpperCase() || 'U';
 };
 
-const navLinks: Record<TabName, { text: string }> = {
-	create: {
-		text: 'Create',
-	},
-	history: {
-		text: 'History',
-	},
-};
-
-export const MainLayout = ({ children, currentTab, setTab }: Props) => {
+export const MainLayout = ({ children }: Props) => {
 	const { user } = useContext(UserContext) ?? {};
+	const { pathname } = useLocation();
 
 	return (
 		<Layout>
-			<Layout.TopBar>
-				<TopBar
-					theme={topBarTheme}
-					cssOverrides={css({ position: 'sticky', top: '0px', zIndex: 1 })}
-				>
+			<Layout.TopBar
+				cssOverrides={css({ position: 'sticky', top: 0, zIndex: layer.topBar })}
+			>
+				<TopBar theme={topBarTheme}>
 					<TopBarToolName
 						name="Dispatch"
 						favicon={{
@@ -53,13 +43,12 @@ export const MainLayout = ({ children, currentTab, setTab }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{Object.entries(navLinks).map(([tabName, { text }]) => (
+						{topBarNavigationItems.map(({ text, path }) => (
 							<TopBarNavigation
-								key={tabName}
+								key={path}
 								text={text}
-								isSelected={currentTab === tabName}
-								onPress={() => setTab(tabName as TabName)}
-								href={`#${tabName}`}
+								isSelected={pathname === path}
+								href={path}
 							/>
 						))}
 					</TopBarContainerLeft>

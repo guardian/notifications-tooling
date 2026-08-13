@@ -88,7 +88,7 @@ const ParameterDisplay = ({
 			{keyName === 'Channel' && (
 				<SendInfoPreviewPill channel={'email'} isConfirmation={true} />
 			)}
-			{keyName === 'Audience segment' && (
+			{keyName === 'Audience segments' && (
 				<AudienceSegmentsPreviewPill
 					segments={DEFAULT_SEGMENTS}
 					selected={value as AudienceSegment[]}
@@ -184,7 +184,7 @@ export const DispatchReport = () => {
 					<section>
 						<ParameterDisplay keyName="Channel" value="Email Newsletter" />
 						<ParameterDisplay
-							keyName="Audience segment"
+							keyName="Audience segments"
 							value={parameters.audienceSegments ?? []}
 						/>
 						<div></div>

@@ -36,7 +36,7 @@ export const sendNotificationRequestSchema = z.strictObject({
 	}),
 	sender: z.string(),
 	options: z.strictObject({
-		dryRun: z.literal(true),
+		dryRun: z.boolean(),
 		scheduledFor: z.null(),
 	}),
 });
@@ -92,7 +92,7 @@ export const channelConstraintsResponseSchema = z.object({
 				maxItems: z.number().int().positive(),
 			}),
 			audience: z.object({
-				maxSegments: z.number().int().positive(),
+				maxTopics: z.number().int().positive(),
 			}),
 		}),
 	}),

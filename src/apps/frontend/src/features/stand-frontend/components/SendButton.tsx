@@ -4,9 +4,13 @@ import {
 	semanticSpacing,
 } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
+import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
-import { checkIfReadyToSend } from '../form-validation';
+import {
+	checkIfReadyToSend,
+	validateNotificationForm,
+} from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import type { NotificationState } from '../types';
 
@@ -31,6 +35,8 @@ export const SendButton = () => {
 		return null;
 	}
 	const isReady = checkIfReadyToSend(notification);
+	const hasFallbackError =
+		validateNotificationForm(notification).includes('cannotBuildRequest');
 
 	return (
 		<div
@@ -64,10 +70,14 @@ export const SendButton = () => {
 					updateNotification({ type: 'set-show-confirm-send', isOpen: false });
 				}}
 				variant="primary"
-				id={'send-button-section'}
 			>
 				{buttonText(parameters)}
 			</Button>
+			{hasFallbackError && (
+				<InlineMessage level="error">
+					The form contains some missing or invalid data
+				</InlineMessage>
+			)}
 		</div>
 	);
 };

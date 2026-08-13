@@ -29,7 +29,7 @@ follow-up work, do it or flag it explicitly.
 Use **clear, specific, self-documenting** names — never generic or loosely
 defined ones.
 
-- Prefer `appPushNotificationSegments`, `notificationChannelContentLimits`,
+- Prefer `appPushTopicTypes`, `notificationChannelContentLimits`,
   `notificationSendRequestSchema` over `data`, `items`, `config`, `schema`,
   `result`, `temp`, `obj`, `value`.
 - A reader should understand what a variable holds from its name alone, without
@@ -40,7 +40,7 @@ defined ones.
   for the enum name and its members (e.g. `NotificationChannel.AppPushNotification`);
   module-level constants use camelCase (e.g. `newsletterSegments`). Do **not** use
   UPPER_SNAKE_CASE for consts/enums (except pre-existing exceptions like
-  `MAX_APP_PUSH_SEGMENTS` / `MAX_NEWSLETTER_SEGMENTS`).
+  `MAX_APP_PUSH_TOPICS` / `MAX_NEWSLETTER_SEGMENTS`).
 
 ## Comments
 

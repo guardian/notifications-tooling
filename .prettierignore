@@ -4,3 +4,4 @@ cdk/cdk.out/**
 docker/**
 !docker/docker-compose.local.yml
 src/apps/frontend/public/mockServiceWorker.js
+src/apps/frontend/storybook-static/**

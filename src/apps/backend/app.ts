@@ -16,6 +16,7 @@ import { docsRouter } from './routers/docs';
 import { healthRouter } from './routers/health';
 import { notificationTestsRouter } from './routers/notification-tests';
 import { notificationsRouter } from './routers/notifications';
+import { previewRouter } from './routers/preview';
 import { userRouter } from './routers/user';
 
 export const app: Application = express();
@@ -53,7 +54,29 @@ app.use('/v1/content', contentRouter);
 app.use('/v1/notification-tests', notificationTestsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
+app.use('/v1/preview', previewRouter);
 app.use('/docs/api', docsRouter);
+
+const serverRoutePrefixes = ['/health', '/v1', '/docs/api'];
+
+/**
+ * Browser-history routes are resolved by React Router, but a direct request
+ * must first receive the SPA document. Skip server-owned namespaces so missing
+ * backend routes still receive the normal error envelope.
+ */
+const spaFallback: express.RequestHandler = (req, res, next) => {
+	const isServerRoute = serverRoutePrefixes.some(
+		(prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`),
+	);
+
+	if (isServerRoute) {
+		return next('route');
+	}
+
+	return next();
+};
+
+app.get('*splat', spaFallback, authRedirectMiddleware, serveIndex);
 
 /**
  * The catch-all 404 and 500 responses use the same
