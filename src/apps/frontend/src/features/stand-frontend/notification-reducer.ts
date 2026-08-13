@@ -21,7 +21,6 @@ export const defaultState: NotificationState = {
 	isWaitingForSend: false,
 	hasAttemptedSend: false,
 	confirmSendModalOpen: false,
-	activeSection: '#article-section',
 	parameters: defaultEmailParams,
 };
 
@@ -139,10 +138,6 @@ export const notificationReducer = (
 				...state,
 				sendingResult: undefined,
 			};
-		}
-
-		case 'set-active-section': {
-			return { ...state, activeSection: action.text };
 		}
 	}
 };
