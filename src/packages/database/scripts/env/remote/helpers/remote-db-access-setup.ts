@@ -1,11 +1,8 @@
 // Remote database access helpers for parsing secrets, probing connectivity, and shaping migration env.
 
 import { Client, Pool } from 'pg';
-import type {
-	ManagedDatabaseSecret} from '../../../../managed-database-secret';
-import {
-	parseManagedDatabaseSecret,
-} from '../../../../managed-database-secret';
+import type { ManagedDatabaseSecret } from '../../../../managed-database-secret';
+import { parseManagedDatabaseSecret } from '../../../../managed-database-secret';
 import { getDatabaseSecretString } from './aws';
 import type { Config } from './cli-args';
 

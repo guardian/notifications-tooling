@@ -5,7 +5,7 @@ import {
 	getDatabaseSecretString,
 	getMigrationHostInstanceId,
 } from './helpers/aws';
-import type { Config} from './helpers/cli-args';
+import type { Config } from './helpers/cli-args';
 import { parseArgs } from './helpers/cli-args';
 
 export {};
