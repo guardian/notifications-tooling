@@ -19,10 +19,12 @@ import { SendNotificationModal } from './SendNotificationModal';
 
 const NotificationFormSection = ({
 	id,
+	isActive,
 	children,
-}: PropsWithChildren<{ id: string }>) => (
+}: PropsWithChildren<{ id: string; isActive: boolean }>) => (
 	<section
 		id={id}
+		data-scrollspy-active={isActive ? '' : undefined}
 		css={css({
 			display: 'flex',
 			flexDirection: 'column',
@@ -39,11 +41,16 @@ const NotificationFormSection = ({
 	</section>
 );
 
-export const CreateNotificationForm = () => {
+interface CreateNotificationFormProps {
+	activeSectionHref: string;
+}
+
+export const CreateNotificationForm = ({
+	activeSectionHref,
+}: CreateNotificationFormProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	// Called before the early return: hooks cannot sit behind a conditional.
 	const { data: constraints } = useChannelConstraints();
 
 	if (!notification.parameters) {
@@ -57,6 +64,7 @@ export const CreateNotificationForm = () => {
 			: undefined;
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
+
 	return (
 		<div
 			css={{
@@ -82,7 +90,10 @@ export const CreateNotificationForm = () => {
 					},
 				}}
 			>
-				<NotificationFormSection id="article-section">
+				<NotificationFormSection
+					id="article-section"
+					isActive={activeSectionHref === '#article-section'}
+				>
 					<ArticleImportControl />
 
 					<ChannelSelector
@@ -97,10 +108,16 @@ export const CreateNotificationForm = () => {
 						}}
 					/>
 				</NotificationFormSection>
-				<NotificationFormSection id="content-section">
+				<NotificationFormSection
+					id="content-section"
+					isActive={activeSectionHref === '#content-section'}
+				>
 					<EmailFields constraints={constraints} />
 				</NotificationFormSection>
-				<NotificationFormSection id="audience-section">
+				<NotificationFormSection
+					id="audience-section"
+					isActive={activeSectionHref === '#audience-section'}
+				>
 					<AudienceSegments
 						selected={audienceSegments}
 						error={
@@ -117,7 +134,10 @@ export const CreateNotificationForm = () => {
 						}}
 					/>
 				</NotificationFormSection>
-				<NotificationFormSection id="delivery-timing-section">
+				<NotificationFormSection
+					id="delivery-timing-section"
+					isActive={activeSectionHref === '#delivery-timing-section'}
+				>
 					<DeliveryAndTimingSelector
 						selectedDeliveryTiming={emailDeliveryOption}
 						channel={notification.parameters.type}
@@ -129,7 +149,10 @@ export const CreateNotificationForm = () => {
 						}}
 					/>
 				</NotificationFormSection>
-				<NotificationFormSection id="send-button-section">
+				<NotificationFormSection
+					id="send-button-section"
+					isActive={activeSectionHref === '#send-button-section'}
+				>
 					<SendButton />
 				</NotificationFormSection>
 				<SendNotificationModal />

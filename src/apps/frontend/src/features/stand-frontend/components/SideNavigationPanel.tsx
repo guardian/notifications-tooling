@@ -8,7 +8,7 @@ import {
 import { SidebarStepperNavigation } from '@guardian/stand/SidebarStepperNavigation';
 import type { SidebarStepperNavigationTheme } from '@guardian/stand/SidebarStepperNavigation';
 import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { layer, topBarHeight } from '../themes';
 
 const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
@@ -44,7 +44,7 @@ const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 	},
 ];
 
-const DEFAULT_SIDE_NAV_HREF =
+export const DEFAULT_SIDE_NAV_HREF =
 	SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
 
 const ACTIVE_SECTION_VIEWPORT_POSITION = 0.75;
@@ -80,28 +80,21 @@ const sidebarNavigationCssOverrides = css({
 	},
 });
 
-const highlightSection = (href: string) => {
-	document
-		.querySelector('[data-scrollspy-active]')
-		?.removeAttribute('data-scrollspy-active');
-	document
-		.getElementById(href.slice(1))
-		?.setAttribute('data-scrollspy-active', '');
-};
+interface SideNavigationPanelProps {
+	selectedHref: string;
+	onSelectedHrefChange: (href: string) => void;
+}
 
-export const SideNavigationPanel = () => {
-	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
+export const SideNavigationPanel = ({
+	selectedHref,
+	onSelectedHrefChange,
+}: SideNavigationPanelProps) => {
 	const selectedHrefRef = useRef(DEFAULT_SIDE_NAV_HREF);
-	const highlightedHrefRef = useRef<string | undefined>(undefined);
 	const isClickLockedRef = useRef(false);
 
 	const selectHref = (href: string) => {
-		if (highlightedHrefRef.current !== href) {
-			highlightSection(href);
-			highlightedHrefRef.current = href;
-		}
 		selectedHrefRef.current = href;
-		setSelectedHref(href);
+		onSelectedHrefChange(href);
 	};
 
 	useEffect(() => {
@@ -113,10 +106,8 @@ export const SideNavigationPanel = () => {
 
 		const selectItem = (item: (typeof SIDE_NAVIGATION_PANEL_ITEMS)[number]) => {
 			if (selectedHrefRef.current !== item.id) {
-				selectHref(item.id);
-			} else if (highlightedHrefRef.current !== item.id) {
-				highlightSection(item.id);
-				highlightedHrefRef.current = item.id;
+				selectedHrefRef.current = item.id;
+				onSelectedHrefChange(item.id);
 			}
 			if (window.location.hash !== item.id) {
 				window.history.replaceState(window.history.state, '', item.id);
@@ -168,7 +159,7 @@ export const SideNavigationPanel = () => {
 				window.cancelAnimationFrame(animationFrameId);
 			}
 		};
-	}, []);
+	}, [onSelectedHrefChange]);
 
 	const handleTileClick = (href: string) => {
 		selectHref(href);
@@ -206,9 +197,7 @@ export const SideNavigationPanel = () => {
 					isNonLinear: true,
 					steps: SIDE_NAVIGATION_PANEL_ITEMS,
 				}}
-				onPress={(stepId) => {
-					handleTileClick(stepId);
-				}}
+				onPress={handleTileClick}
 				theme={theme}
 				cssOverrides={sidebarNavigationCssOverrides}
 			/>
