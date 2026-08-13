@@ -5,14 +5,14 @@ import {
 	getDatabaseSecretString,
 	getMigrationHostInstanceId,
 } from './helpers/aws';
-import type { Config } from './helpers/cli-args';
+import type { RemoteMigrationConfig } from './helpers/cli-args';
 import { parseArgs } from './helpers/cli-args';
 
 export {};
 
 const usage = `Usage: bun run db:migration:tunnel --stage <CODE|PROD> [--local-port <port>]\n\nExample:\n  bun run db:migration:tunnel --stage CODE\n`;
 
-const getDatabaseHost = (config: Config) => {
+const getDatabaseHost = (config: RemoteMigrationConfig) => {
 	const secretString = getDatabaseSecretString(config);
 	return parseManagedDatabaseSecret(JSON.parse(secretString)).host;
 };

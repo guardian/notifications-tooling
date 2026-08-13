@@ -1,5 +1,5 @@
 // AWS CLI helpers for resolving remote database secrets and migration host details.
-import type { Config } from './cli-args';
+import type { RemoteMigrationConfig } from './cli-args';
 
 export const runAws = (awsArgs: string[]) => {
 	const processResult = Bun.spawnSync({
@@ -16,7 +16,7 @@ export const runAws = (awsArgs: string[]) => {
 	return processResult.stdout.toString().trim();
 };
 
-export const getDatabaseSecretString = (config: Config) =>
+export const getDatabaseSecretString = (config: RemoteMigrationConfig) =>
 	runAws([
 		'secretsmanager',
 		'get-secret-value',
@@ -32,7 +32,7 @@ export const getDatabaseSecretString = (config: Config) =>
 		'text',
 	]);
 
-export const getMigrationHostInstanceId = (config: Config) => {
+export const getMigrationHostInstanceId = (config: RemoteMigrationConfig) => {
 	const instanceId = runAws([
 		'cloudformation',
 		'describe-stacks',

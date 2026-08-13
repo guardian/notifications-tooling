@@ -123,6 +123,8 @@ export class DispatchStack extends GuStack {
 				},
 			],
 		});
+
+		// Require IMDSv2 for the migration host to ensure that the SSM agent can retrieve temporary credentials securely.
 		migrationHost.addPropertyOverride('MetadataOptions.HttpTokens', 'required');
 
 		new CfnOutput(this, 'MigrationHostInstanceId', {

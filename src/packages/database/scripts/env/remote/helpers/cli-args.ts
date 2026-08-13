@@ -2,7 +2,7 @@
 export type Stage = 'CODE' | 'PROD';
 export const LOCAL_PORT = '6543';
 
-export type Config = {
+export type RemoteMigrationConfig = {
 	stage: Stage;
 	localPort: string;
 	region: string;
@@ -10,11 +10,11 @@ export type Config = {
 	profile: string;
 };
 
-export const parseArgs = (usage: string): Config => {
+export const parseArgs = (usage: string): RemoteMigrationConfig => {
 	const args = Bun.argv.slice(2);
 	let stage: Stage | undefined;
+	// Set a default local port, but allow it to be overridden via CLI argument.
 	let localPort = LOCAL_PORT;
-
 	const profile = 'composer';
 	const region = 'eu-west-1';
 
