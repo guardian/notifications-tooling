@@ -63,6 +63,7 @@ export const EmailPreviewSection = ({
 				css={css({
 					display: 'flex',
 					flexDirection: 'column',
+					gap: semanticSpacing.stackLg,
 					visibility: fetchedArticleId ? 'visible' : 'hidden',
 				})}
 			>
