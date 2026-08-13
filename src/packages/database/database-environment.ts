@@ -15,9 +15,9 @@ export const loadDatabaseEnvironment = (): DatabaseEnvironment => {
 	const parsedEnvironment = databaseEnvironmentSchema.safeParse(process.env);
 
 	if (!parsedEnvironment.success) {
-		throw new Error(
-			'Missing required database environment variables: DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD.',
-		);
+		throw new Error('Invalid database environment configuration.', {
+			cause: parsedEnvironment.error,
+		});
 	}
 
 	return parsedEnvironment.data;
