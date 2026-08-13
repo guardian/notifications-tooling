@@ -3,6 +3,8 @@ import { baseSpacing, semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
+import { useContext } from 'react';
+import { NotificationFormContext } from '../NotificationContext';
 import { layer, topBarHeight } from '../themes';
 import type {
 	AudienceSegment,
@@ -27,6 +29,9 @@ export const EmailPreviewSection = ({
 	selectedChannel,
 	selectedDeliveryTiming,
 }: EmailPreviewSectionProps) => {
+	const {
+		notification: { fetchedArticleId },
+	} = useContext(NotificationFormContext);
 	return (
 		<section
 			css={css({
@@ -54,38 +59,46 @@ export const EmailPreviewSection = ({
 				},
 			})}
 		>
-			<header
+			<div
 				css={css({
 					display: 'flex',
 					flexDirection: 'column',
-					gap: baseSpacing['12Px'], // adjust spacing as needed
-					alignItems: 'stretch',
+					visibility: fetchedArticleId ? 'visible' : 'hidden',
 				})}
 			>
-				<div
-					css={{
+				<header
+					css={css({
 						display: 'flex',
-						alignItems: 'center',
-						gap: 5,
-					}}
+						flexDirection: 'column',
+						gap: baseSpacing['12Px'], // adjust spacing as needed
+						alignItems: 'stretch',
+					})}
 				>
-					<Icon symbol="preview" />
-					<Typography variant="bodyBoldMd">Preview</Typography>
-				</div>
-				<Typography variant="bodySm">
-					The preview for the newsletter email and/or the app alert notification
-					will be shown below.
-				</Typography>
-			</header>
-			<SendInfoPreviewPill
-				channel={selectedChannel}
-				deliveryTiming={selectedDeliveryTiming}
-			/>
-			<AudienceSegmentsPreviewPill
-				segments={DEFAULT_SEGMENTS}
-				selected={selectedSegments}
-			/>
-			<HTMLPreview />
+					<div
+						css={{
+							display: 'flex',
+							alignItems: 'center',
+							gap: 5,
+						}}
+					>
+						<Icon symbol="preview" />
+						<Typography variant="bodyBoldMd">Preview</Typography>
+					</div>
+					<Typography variant="bodySm">
+						The preview for the newsletter email and/or the app alert
+						notification will be shown below.
+					</Typography>
+				</header>
+				<SendInfoPreviewPill
+					channel={selectedChannel}
+					deliveryTiming={selectedDeliveryTiming}
+				/>
+				<AudienceSegmentsPreviewPill
+					segments={DEFAULT_SEGMENTS}
+					selected={selectedSegments}
+				/>
+				<HTMLPreview />
+			</div>
 		</section>
 	);
 };
