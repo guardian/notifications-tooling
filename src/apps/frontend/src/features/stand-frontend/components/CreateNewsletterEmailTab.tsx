@@ -21,6 +21,8 @@ import {
 	SideNavigationPanel,
 } from './SideNavigationPanel';
 
+const ACTIVE_SECTION_VIEWPORT_POSITION = 0.75;
+
 export const CreateNewsletterEmailTab = () => {
 	const {
 		notification: { sendingResult, parameters },
@@ -28,41 +30,70 @@ export const CreateNewsletterEmailTab = () => {
 	} = useContext(NotificationFormContext);
 
 	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
+	const activeHrefRef = useRef(DEFAULT_SIDE_NAV_HREF);
 	const isClickLockedRef = useRef(false);
+	const setActiveHref = (href: string) => {
+		activeHrefRef.current = href;
+		setSelectedHref(href);
+	};
 
 	useEffect(() => {
 		if (sendingResult) {
 			return;
 		}
 
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					const id = entry.target.getAttribute('id');
-					if (entry.isIntersecting && id && !isClickLockedRef.current) {
-						const href = `#${id}`;
-						if (SIDE_NAVIGATION_PANEL_ITEMS.some((item) => item.id === href)) {
-							setSelectedHref(href);
-							updateNotification({
-								type: 'set-active-section',
-								text: href as ActiveSection,
-							});
-						}
-					}
-				});
-			},
-			{ rootMargin: '-8% 0px -8% 0px' },
-		);
-
-		SIDE_NAVIGATION_PANEL_ITEMS.forEach((item) => {
-			// item.id is e.g. '#article-section'; strip the leading '#' for getElementById
-			const el = document.getElementById(item.id.slice(1));
-			if (el) {
-				observer.observe(el);
+		const getSections = () =>
+			SIDE_NAVIGATION_PANEL_ITEMS.flatMap((item) => {
+				const element = document.getElementById(item.id.slice(1));
+				return element ? [{ item, element }] : [];
+			});
+		const isAtPageBottom = () =>
+			window.scrollY > 0 &&
+			window.innerHeight + window.scrollY >=
+			document.documentElement.scrollHeight - 1;
+		const setActiveItem = (item: (typeof SIDE_NAVIGATION_PANEL_ITEMS)[number]) => {
+			if (activeHrefRef.current === item.id) {
+				return;
 			}
-		});
 
-		return () => observer.disconnect();
+			setActiveHref(item.id);
+			updateNotification({
+				type: 'set-active-section',
+				text: item.id as ActiveSection,
+			});
+			window.history.replaceState(window.history.state, '', item.id);
+		};
+		const updateActiveSection = () => {
+			const sections = getSections();
+			if (isClickLockedRef.current || sections.length === 0) {
+				return;
+			}
+
+			if (window.scrollY === 0) {
+				setActiveItem(sections[0]!.item);
+				return;
+			}
+
+			if (isAtPageBottom()) {
+				setActiveItem(sections.at(-1)?.item ?? sections[0]!.item);
+				return;
+			}
+
+			const markerPosition = window.innerHeight * ACTIVE_SECTION_VIEWPORT_POSITION;
+			const activeSection = sections.findLast(
+				({ element }) => element.getBoundingClientRect().top <= markerPosition,
+			);
+			setActiveItem(activeSection?.item ?? sections[0]!.item);
+		};
+
+		updateActiveSection();
+		window.addEventListener('scroll', updateActiveSection, { passive: true });
+		window.addEventListener('resize', updateActiveSection);
+
+		return () => {
+			window.removeEventListener('scroll', updateActiveSection);
+			window.removeEventListener('resize', updateActiveSection);
+		};
 	}, [sendingResult, updateNotification]);
 
 	return (
@@ -71,7 +102,7 @@ export const CreateNewsletterEmailTab = () => {
 				<Layout.Sidebar layoutSmBreakpoint="above-grid">
 					<SideNavigationPanel
 						selectedHref={selectedHref}
-						setSelectedHref={setSelectedHref}
+						setSelectedHref={setActiveHref}
 						isClickLockedRef={isClickLockedRef}
 					/>
 				</Layout.Sidebar>

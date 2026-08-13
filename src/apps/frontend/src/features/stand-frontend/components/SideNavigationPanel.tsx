@@ -96,6 +96,9 @@ export const SideNavigationPanel = ({
 
 	const handleTileClick = (href: string) => {
 		setSelectedHref(href);
+		if (window.location.hash !== href) {
+			window.history.pushState(window.history.state, '', href);
+		}
 		if (isClickLockedRef) {
 			isClickLockedRef.current = true;
 			const targetId = href.replace('#', '');

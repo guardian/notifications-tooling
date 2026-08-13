@@ -21,6 +21,7 @@ export const defaultState: NotificationState = {
 	isWaitingForSend: false,
 	hasAttemptedSend: false,
 	confirmSendModalOpen: false,
+	activeSection: '#article-section',
 	parameters: defaultEmailParams,
 };
 
