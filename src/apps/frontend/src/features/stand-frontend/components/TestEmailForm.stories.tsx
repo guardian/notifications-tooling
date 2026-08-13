@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
-import { WithNotificationContext } from '../../../stories/story-helpers';
-import { defaultState } from '../notification-reducer';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { ApiError } from '../../../api/errors';
+import { mockFailingRequestTestEmailSend } from '../../../mocks/mock-request-test-email-send';
+import {
+	populatedEmailState,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
 import type { NotificationState } from '../types';
 import { TestEmailForm } from './TestEmailForm';
 
@@ -15,7 +19,7 @@ const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/TestEmailForm',
 	component: TestEmailForm,
 	args: {
-		notificationState: defaultState,
+		notificationState: populatedEmailState,
 	},
 	render: ({ notificationState }) =>
 		WithNotificationContext(<TestEmailForm />, notificationState),
@@ -63,5 +67,42 @@ export const WithInvalidEmail: Story = {
 		await expect(
 			canvas.getByRole('button', { name: 'Send test notification' }),
 		).toBeDisabled();
+	},
+};
+export const SentTestEmail: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const input = canvas.getByPlaceholderText('name@theguardian.com');
+		const button = canvas.getByRole('button', {
+			name: 'Send test notification',
+		});
+		await userEvent.type(input, 'joe.blogs@theguardian.com');
+		await userEvent.click(button);
+
+		await waitFor(() =>
+			expect(canvas.getByText('Test email sent')).toBeInTheDocument(),
+		);
+	},
+};
+
+export const FailingTestEmail: Story = {
+	render: ({ notificationState }) =>
+		WithNotificationContext(<TestEmailForm />, notificationState, {
+			requestTestEmailSend: mockFailingRequestTestEmailSend(
+				new ApiError({ message: 'test error', failure: 'non-2xx-response' }),
+			),
+		}),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const input = canvas.getByPlaceholderText('name@theguardian.com');
+		const button = canvas.getByRole('button', {
+			name: 'Send test notification',
+		});
+		await userEvent.type(input, 'joe.blogs@theguardian.com');
+		await userEvent.click(button);
+
+		await waitFor(() =>
+			expect(canvas.getByText(/^Test email failed/)).toBeInTheDocument(),
+		);
 	},
 };

@@ -1,3 +1,4 @@
+import type { ApiError } from '../api/errors';
 import type { TestEmailRequestFunction } from '../features/stand-frontend/api/send-test-email';
 
 export const mockRequestTestEmailSend: TestEmailRequestFunction = () => {
@@ -19,3 +20,13 @@ export const mockRequestTestEmailSend: TestEmailRequestFunction = () => {
 		}, 500);
 	});
 };
+
+export const mockFailingRequestTestEmailSend =
+	(error: ApiError): TestEmailRequestFunction =>
+	() => {
+		return new Promise((_resolve, reject) => {
+			setTimeout(() => {
+				reject(error);
+			}, 500);
+		});
+	};

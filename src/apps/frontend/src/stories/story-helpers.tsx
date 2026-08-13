@@ -60,3 +60,10 @@ export const completeEmailParams: EmailNotification = {
 	emailDeliveryOption: 'immediate',
 	audienceSegments: ['AU', 'UK'],
 };
+
+export const populatedEmailState = {
+	...defaultState,
+	content: articleFixture,
+	fetchedArticleId: articleFixture.id,
+	parameters: completeEmailParams,
+};
