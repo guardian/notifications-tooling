@@ -1,5 +1,5 @@
 import { defineConfig } from 'drizzle-kit';
-import { getEnvConnectionString } from './env-connection-string';
+import { getEnvConnectionString } from './runtime-connection-string';
 
 /* eslint-disable-next-line import/no-default-export -- Drizzle Kit requires the configuration to be the default export. */
 export default defineConfig({
