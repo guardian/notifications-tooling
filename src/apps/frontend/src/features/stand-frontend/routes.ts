@@ -1,6 +1,6 @@
 export const appRoutes = {
-	createNewsletterEmail: '/create-newsletter-email',
-	createAppAlert: '/create-app-alert',
+	createNewsletterEmail: '/newsletter-email/create',
+	createAppAlert: '/app-alert/create',
 	history: '/history',
 } as const;
 

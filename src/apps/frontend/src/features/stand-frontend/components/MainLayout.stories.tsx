@@ -45,9 +45,9 @@ export const Default: Story = {
 		).toBeInTheDocument();
 		await expect(
 			canvas.getByRole('link', { name: 'Create newsletter email' }),
-		).toHaveAttribute('href', '/create-newsletter-email');
+		).toHaveAttribute('href', '/newsletter-email/create');
 		await expect(
 			canvas.getByRole('link', { name: 'Create app alert' }),
-		).toHaveAttribute('href', '/create-app-alert');
+		).toHaveAttribute('href', '/app-alert/create');
 	},
 };
