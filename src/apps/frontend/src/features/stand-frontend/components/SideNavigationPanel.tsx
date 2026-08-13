@@ -11,7 +11,7 @@ import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef, useState } from 'react';
 import { layer, topBarHeight } from '../themes';
 
-export const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
+const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 	{
 		id: '#article-section',
 		label: 'Article and channel',
@@ -44,7 +44,7 @@ export const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 	},
 ];
 
-export const DEFAULT_SIDE_NAV_HREF =
+const DEFAULT_SIDE_NAV_HREF =
 	SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
 
 const ACTIVE_SECTION_VIEWPORT_POSITION = 0.75;
