@@ -1,16 +1,21 @@
 import { describe, expect, it } from 'bun:test';
-import type { Content } from '@guardian/content-api-models/v1/content';
+import type { ResolvedArticle } from '@models';
 import '../../../happydom-setup';
 import { articleFixture } from '../../mocks/capi-fixtures';
 import { defaultState, notificationReducer } from './notification-reducer';
 
-const articleWithStandfirst = (standfirst?: string): Content => ({
-	...articleFixture,
-	fields: {
-		...articleFixture.fields,
-		standfirst,
-	},
-});
+const articleWithStandfirst = (standfirst?: string): ResolvedArticle =>
+	standfirst
+		? {
+				...articleFixture,
+				fields: {
+					...articleFixture.fields,
+					standfirst,
+				},
+			}
+		: {
+				...articleFixture,
+			};
 
 const receiveArticle = (standfirst?: string, preview?: string) =>
 	notificationReducer(

@@ -1,5 +1,8 @@
-import type { Content } from '@guardian/content-api-models/v1/content';
-import type { EmailPreviewRequest, EmailPreviewResponse } from '@models';
+import type {
+	EmailPreviewRequest,
+	EmailPreviewResponse,
+	ResolvedArticle,
+} from '@models';
 import type { ApiError } from '../../api/errors';
 import type { SendNotificationResponse } from './api/schemas';
 
@@ -34,16 +37,24 @@ export type PushNotification = {
 	audienceSegments?: AudienceSegment[];
 };
 
+export type ActiveSection =
+	| '#article-section'
+	| '#content-section'
+	| '#audience-section'
+	| '#delivery-timing-section'
+	| '#send-button-section';
+
 export type NotificationState = {
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
-	content?: Content;
+	content?: ResolvedArticle;
 	parameters?: EmailNotification | PushNotification;
 	hasAttemptedSend: boolean;
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
 	sendingResult?: SendingResult;
+	activeSection?: ActiveSection;
 };
 
 export type RequestEmailHtml = {
@@ -64,7 +75,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'receive-article';
-			content: Content;
+			content: ResolvedArticle;
 	  }
 	| {
 			type: 'report-article-error';
@@ -87,6 +98,10 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'dismiss-send-error';
+	  }
+	| {
+			type: 'set-active-section';
+			text: NotificationState['activeSection'];
 	  }
 	| {
 			type: 'reset';

@@ -6,6 +6,8 @@ export type NotificationFormErrorField =
 
 export type NotificationFormErrors = NotificationFormErrorField[];
 
+const DEFAULT_ORIGIN = 'https://www.theguardian.com';
+
 export const validateNotificationForm = (
 	notification: NotificationState,
 ): NotificationFormErrors => {
@@ -70,7 +72,7 @@ const hostWhitelist = ['www.theguardian.com'];
 
 export const parseArticleUrlInputToContentId = (
 	articleInputText: string,
-): { articleId?: string; failure?: string } => {
+): { articleId?: string; failure?: string; webUrl?: string } => {
 	if (articleInputText.length === 0) {
 		return {};
 	}
@@ -91,13 +93,17 @@ export const parseArticleUrlInputToContentId = (
 		}
 
 		// the id of the article is the path with the leading slash removed
-		return { articleId: trimLeadingSlash(pathname) };
+		return {
+			articleId: trimLeadingSlash(pathname),
+			webUrl: `${url.origin}${pathname}`,
+		};
 	} catch {
 		// if not a URL, check if the inut is a valid article id
 		const maybeInputtedArticleId = trimLeadingSlash(articleInputText);
 		if (articleUrlPathPattern.test(`/${maybeInputtedArticleId}`)) {
 			return {
 				articleId: maybeInputtedArticleId,
+				webUrl: `${DEFAULT_ORIGIN}/${maybeInputtedArticleId}`,
 			};
 		}
 		return { failure: 'not valid url' };

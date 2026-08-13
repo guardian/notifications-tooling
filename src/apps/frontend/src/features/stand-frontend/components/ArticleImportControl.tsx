@@ -5,6 +5,7 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext, useState } from 'react';
+import { ApiError } from '../../../api/errors';
 import {
 	parseArticleUrlInputToContentId,
 	validateNotificationForm,
@@ -12,6 +13,31 @@ import {
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
+
+// TO DO - more helpful error UI
+// can we capture when article was taken down?
+const getUserFacingError = (err: unknown): string => {
+	if (!(err instanceof ApiError)) {
+		return err instanceof Error ? err.message : 'UNKNOWN ERROR';
+	}
+
+	switch (err.failure) {
+		case 'unauthenticated':
+		case 'forbidden':
+		case 'timeout':
+		case 'fetch-fail':
+		case 'json-parse-fail':
+		case 'schema-parse-fail':
+			return err.message;
+		case 'non-2xx-response':
+			switch (err.status) {
+				case 404:
+					return 'The URL is in the right format, but there is no article live there';
+				default:
+					return err.message;
+			}
+	}
+};
 
 export const ArticleImportControl = () => {
 	const { notification, updateNotification, capiFetch } = useContext(
@@ -32,7 +58,7 @@ export const ArticleImportControl = () => {
 
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
-	const { articleId, failure } =
+	const { failure, webUrl, articleId } =
 		parseArticleUrlInputToContentId(articleInputText);
 
 	const fetchArticle = () => {
@@ -44,16 +70,18 @@ export const ArticleImportControl = () => {
 			return;
 		}
 
-		if (!articleId) {
+		if (!webUrl) {
 			return;
 		}
 
 		updateNotification({ type: 'waiting-for-article' });
-		capiFetch(articleId)
-			.then((content) => {
+		capiFetch({
+			article: webUrl,
+		})
+			.then((responseBody) => {
 				updateNotification({
 					type: 'receive-article',
-					content,
+					content: responseBody.article,
 				});
 				setLockArticleInputText(true);
 			})
@@ -61,7 +89,7 @@ export const ArticleImportControl = () => {
 				// TO DO - error reporting/telemetry
 				updateNotification({
 					type: 'report-article-error',
-					errorMessage: err instanceof Error ? err.message : 'UNKNOWN ERROR',
+					errorMessage: getUserFacingError(err),
 				});
 			});
 	};
@@ -84,7 +112,6 @@ export const ArticleImportControl = () => {
 			}}
 		>
 			<div
-				id="article-section"
 				css={{
 					display: 'flex',
 					flexDirection: 'row',

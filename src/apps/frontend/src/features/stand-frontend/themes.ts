@@ -11,8 +11,16 @@ import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 
+export const topBarHeight = '4rem';
+
+export const layer = {
+	stickyContent: 1,
+	topBar: 2,
+} as const;
+
 export const topBarTheme: TopBarTheme = {
 	backgroundColor: baseColors.magenta[200],
+	height: topBarHeight,
 	borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 	borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 	borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
@@ -179,5 +187,56 @@ export const articlePreviewCardTheme = {
 		borderRadius: semanticRadius.cornerXs,
 		objectFit: 'cover',
 		flexShrink: 0,
+	}),
+};
+
+export const audienceSegmentStyles = {
+	audienceSegmentCheckBoxTile: (isSelected: boolean) =>
+		css({
+			backgroundColor: isSelected
+				? baseColors.magenta[900]
+				: semanticColors.fill.weak,
+			color: semanticColors.text.strong,
+			'&:hover': {
+				backgroundColor: isSelected
+					? baseColors.magenta[900]
+					: semanticColors.fill.weakPressed,
+			},
+			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			padding: `${baseSpacing['6Px']} ${baseSpacing['6Px']}`,
+			borderRadius: semanticRadius.cornerSm,
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: `${baseSpacing['8Px']}`,
+			height: '56px',
+			width: '100%',
+		}),
+	audienceSegmentButton: css({
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		backgroundColor: semanticColors.fill.weak,
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		display: 'flex',
+		alignItems: 'center',
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
+	}),
+	audienceSegmentIcon: css({
+		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+		width: '24px',
+		height: '18px',
+		gap: `${baseSpacing['10Px']}`,
+	}),
+	isConfirmationStyle: css({
+		backgroundColor: semanticColors.fill.weak,
+		color: semanticColors.text.weak,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
+		borderRadius: semanticRadius.cornerSm,
+		display: 'flex',
+		alignItems: 'center',
+		gap: `${baseSpacing['8Px']}`,
+		height: '32px',
 	}),
 };
