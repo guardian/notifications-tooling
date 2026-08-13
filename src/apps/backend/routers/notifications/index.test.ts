@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
 import { httpLogger } from '@http-logger';
+import { AppNotificationApiError, BrazeApiError } from '@services';
 import express from 'express';
+import { errorMiddleware } from '../../middleware/error-middleware';
 import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
@@ -183,6 +185,67 @@ describe('POST /v1/notifications', () => {
 					`/v1/notifications/${body.notificationId}/cancel`,
 				);
 				expect(typeof body.cancellable.expiresAt).toBe('number');
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+	});
+
+	describe('provider failures surface as the documented HTTP codes', () => {
+		// Dispatch rethrows the underlying provider error; errorMiddleware maps it.
+		const startFailingServer = (rejection: Error) => {
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(mock(() => Promise.reject(rejection))),
+			);
+			testApp.use(errorMiddleware);
+			return startTestServer(testApp);
+		};
+
+		it('maps an upstream provider rejection to 502', async () => {
+			const dispatchServer = await startFailingServer(
+				new BrazeApiError('campaign trigger', 'http_error', 500),
+			);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(502);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('braze_request_failed');
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+
+		it('maps an upstream provider timeout to 504', async () => {
+			const dispatchServer = await startFailingServer(
+				new AppNotificationApiError('timeout'),
+			);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(504);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('app_notification_failed');
 			} finally {
 				await dispatchServer.close();
 			}

@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'bun:test';
-import { newsletterSegments, NotificationChannel } from '@config';
+import { NotificationChannel } from '@config';
 import { EmailRenderingError } from '@services';
 import type { NotificationSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import { dispatchNotification } from './dispatch-notification';
 import {
-	anyString,
 	baseRequest,
 	createDependencies,
 	newsletterItem,
@@ -44,10 +43,11 @@ describe('dispatchNotification', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 	});
 
-	it('records a failed newsletter send while the push succeeds', async () => {
+	it('surfaces a provider failure while still attempting the other channel', async () => {
 		const { dependencies, renderEmail, sendAppNotification } =
 			createDependencies();
-		renderEmail.mockRejectedValue(new EmailRenderingError(500, 'http_error'));
+		const renderingError = new EmailRenderingError(500, 'http_error');
+		renderEmail.mockRejectedValue(renderingError);
 		const request: NotificationSendRequest = {
 			...baseRequest,
 			content: { items: { push: pushItem, newsletter: newsletterItem } },
@@ -66,32 +66,20 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		const outcomes = await dispatchNotification(
-			request,
-			notificationId,
-			dependencies,
-		);
+		// The newsletter failure is rethrown so the endpoint returns the
+		// documented 502/504 instead of a false 202.
+		let dispatchError: unknown;
+		try {
+			await dispatchNotification(request, notificationId, dependencies);
+		} catch (error) {
+			dispatchError = error;
+		}
 
-		// Neither channel aborts the other; each failure is reported on its own.
+		expect(dispatchError).toBe(renderingError);
+
+		// Neither channel aborts the other: the push is still attempted.
 		expect(renderEmail).toHaveBeenCalledTimes(1);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
-		expect(outcomes.appPush).toEqual([
-			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
-				status: 'success',
-			},
-		]);
-		expect(outcomes.newsletter).toEqual([
-			{
-				notificationId,
-				segmentId: 'UK',
-				campaignId: newsletterSegments.UK.brazeCampaignId,
-				status: 'failure',
-				failureReason: 'http_error',
-			},
-		]);
 	});
 
 	it('does not call downstream clients for a dry run', async () => {

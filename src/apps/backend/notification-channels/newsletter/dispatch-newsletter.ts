@@ -8,7 +8,9 @@ import {
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import {
+	type ChannelDispatchResult,
 	type DispatchNotificationDependencies,
+	firstSettledError,
 	PROVIDER_REQUEST_TIMEOUT_MS,
 	requireContentItem,
 } from '../shared';
@@ -79,9 +81,9 @@ export const dispatchNewsletter = async (
 	resolvedDispatch: ReturnType<typeof resolveNewsletterDispatch>,
 	notificationId: string,
 	dependencies: DispatchNotificationDependencies,
-): Promise<NewsletterDispatchOutcome[]> => {
+): Promise<ChannelDispatchResult<NewsletterDispatchOutcome>> => {
 	if (!resolvedDispatch) {
-		return [];
+		return { outcomes: [] };
 	}
 
 	const { item, plan, segments } = resolvedDispatch;
@@ -125,7 +127,7 @@ export const dispatchNewsletter = async (
 		}),
 	);
 
-	return settled.map((result, index): NewsletterDispatchOutcome => {
+	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
 		const { segmentId, brazeCampaignId } = segments[index]!;
 		if (result.status === 'fulfilled') {
 			return {
@@ -144,4 +146,6 @@ export const dispatchNewsletter = async (
 			failureReason: newsletterFailureReason(result.reason),
 		};
 	});
+
+	return { outcomes, error: firstSettledError(settled) };
 };

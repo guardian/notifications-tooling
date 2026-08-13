@@ -34,6 +34,29 @@ export const defaultDependencies: DispatchNotificationDependencies = {
 	sendBrazeTestEmail,
 };
 
+/**
+ * A channel's per-target outcomes plus the first provider rejection, if any.
+ * Every target is still attempted (see the `allSettled` in each dispatcher); the
+ * `error` lets the orchestrator surface that failure as the documented 502/504
+ * instead of a false 202.
+ */
+export type ChannelDispatchResult<TOutcome> = {
+	outcomes: TOutcome[];
+	error?: unknown;
+};
+
+/** The first rejection among settled results, or `undefined` if all fulfilled. */
+export const firstSettledError = (
+	settled: ReadonlyArray<PromiseSettledResult<unknown>>,
+): unknown => {
+	for (const result of settled) {
+		if (result.status === 'rejected') {
+			return result.reason;
+		}
+	}
+	return undefined;
+};
+
 export const requireContentItem = (
 	request: NotificationSendRequest | NotificationTestSendRequest,
 	itemId: string,

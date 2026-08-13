@@ -10,6 +10,7 @@ import {
 	notificationId,
 	pushItem,
 } from '../test-support';
+import { dispatchAppPush, resolveAppPushDispatch } from './dispatch-app-push';
 
 describe('dispatchNotification app push', () => {
 	it('sends a single push for one topic type with multiple editions', async () => {
@@ -119,14 +120,15 @@ describe('dispatchNotification app push', () => {
 		]);
 	});
 
-	it('returns per-push outcomes with statuses when a push fails', async () => {
+	it('returns per-push outcomes and surfaces the error when a push fails', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
+		const pushError = new AppNotificationApiError('http_error', 400);
 		let call = 0;
 		sendAppNotification.mockImplementation(() => {
 			call += 1;
 			return call === 1
 				? Promise.resolve({ id: 'n10n-id' })
-				: Promise.reject(new AppNotificationApiError('http_error', 400));
+				: Promise.reject(pushError);
 		});
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -145,15 +147,15 @@ describe('dispatchNotification app push', () => {
 			},
 		};
 
-		const outcomes = await dispatchNotification(
-			request,
+		const { outcomes, error } = await dispatchAppPush(
+			resolveAppPushDispatch(request),
 			notificationId,
 			dependencies,
 		);
 
 		// Both pushes are attempted even though the first-listed one failed.
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
-		expect(outcomes.appPush).toEqual([
+		expect(outcomes).toEqual([
 			{
 				notificationId,
 				id: anyString,
@@ -168,6 +170,8 @@ describe('dispatchNotification app push', () => {
 				failureReason: 'http_error',
 			},
 		]);
+		// The failure is surfaced so the orchestrator can rethrow it as a 502/504.
+		expect(error).toBe(pushError);
 	});
 
 	it('derives Minor importance when no breaking-news edition is targeted', async () => {
