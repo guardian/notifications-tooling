@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { NotificationChannel } from '@config';
+import { AppNotificationApiError } from '@services';
 import type { NotificationTestSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import { dispatchNotificationTest } from './dispatch-notification-test';
 import {
@@ -116,5 +117,44 @@ describe('dispatchNotificationTest', () => {
 		expect(registerBrazeTestEmailRecipients).not.toHaveBeenCalled();
 		expect(sendBrazeTestEmail).not.toHaveBeenCalled();
 		expect(sendAppNotification).not.toHaveBeenCalled();
+	});
+
+	it('surfaces a provider failure while still attempting the other channel', async () => {
+		const { dependencies, sendBrazeTestEmail, sendAppNotification } =
+			createDependencies();
+		const pushError = new AppNotificationApiError('timeout');
+		sendAppNotification.mockRejectedValue(pushError);
+		const request: NotificationTestSendRequest = {
+			idempotencyKey: 'test-combined',
+			sender: 'dispatch-test',
+			options: { dryRun: false },
+			content: { items: { news: newsletterItem, push: pushItem } },
+			channels: {
+				[NotificationChannel.Newsletter]: {
+					audience: { type: 'email', items: ['editor@theguardian.com'] },
+					variants: ['UK'],
+					compose: { items: ['news'], subject: '[TEST] Briefing' },
+				},
+				[NotificationChannel.AppPushNotification]: {
+					audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+					compose: { use: 'push' },
+				},
+			},
+		};
+
+		// The push failure is rethrown so the endpoint returns the documented
+		// 502/504 instead of a false 202.
+		let dispatchError: unknown;
+		try {
+			await dispatchNotificationTest(request, testId, dependencies);
+		} catch (error) {
+			dispatchError = error;
+		}
+
+		expect(dispatchError).toBe(pushError);
+
+		// Neither channel aborts the other: the newsletter is still attempted.
+		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(1);
+		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 	});
 });

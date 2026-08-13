@@ -27,12 +27,20 @@ export const dispatchNotificationTest = async (
 		return { appPush: [], newsletter: [] };
 	}
 
-	// allSettled is unnecessary here: each channel already isolates its own
-	// failures, so one channel's outcomes never abort the other's.
+	// Both channels are attempted in full (each isolates its own targets); a
+	// provider rejection then surfaces as the documented 502/504 rather than a
+	// false 202.
 	const [newsletter, appPush] = await Promise.all([
 		dispatchNewsletterTest(request, testId, dependencies),
 		dispatchAppPushTest(request, testId, dependencies),
 	]);
 
-	return { newsletter, appPush };
+	const error = newsletter.error ?? appPush.error;
+	if (error !== undefined) {
+		throw error instanceof Error
+			? error
+			: new Error('Notification test dispatch failed.', { cause: error });
+	}
+
+	return { newsletter: newsletter.outcomes, appPush: appPush.outcomes };
 };

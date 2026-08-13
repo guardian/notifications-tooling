@@ -6,8 +6,10 @@ import type {
 import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import {
+	type ChannelDispatchResult,
 	defaultDependencies,
 	type DispatchNotificationDependencies,
+	firstSettledError,
 	PROVIDER_REQUEST_TIMEOUT_MS,
 	requireContentItem,
 } from '../shared';
@@ -48,10 +50,10 @@ export const dispatchNewsletterTest = async (
 	request: NotificationTestSendRequest,
 	testId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
-): Promise<NewsletterTestDispatchOutcome[]> => {
+): Promise<ChannelDispatchResult<NewsletterTestDispatchOutcome>> => {
 	const plan = request.channels[NotificationChannel.Newsletter];
 	if (!plan) {
-		return [];
+		return { outcomes: [] };
 	}
 	if (plan.compose.items.length !== 1) {
 		throw new Error('Only one newsletter item can be rendered currently.');
@@ -132,21 +134,25 @@ export const dispatchNewsletterTest = async (
 		),
 	);
 
-	return settled.map((result, index): NewsletterTestDispatchOutcome => {
-		const { segmentId } = renderedVariants[index]!;
-		if (result.status === 'fulfilled') {
+	const outcomes = settled.map(
+		(result, index): NewsletterTestDispatchOutcome => {
+			const { segmentId } = renderedVariants[index]!;
+			if (result.status === 'fulfilled') {
+				return {
+					testId,
+					variant: segmentId,
+					dispatchId: result.value.dispatch_id,
+					status: 'success',
+				};
+			}
 			return {
 				testId,
 				variant: segmentId,
-				dispatchId: result.value.dispatch_id,
-				status: 'success',
+				status: 'failure',
+				failureReason: newsletterFailureReason(result.reason),
 			};
-		}
-		return {
-			testId,
-			variant: segmentId,
-			status: 'failure',
-			failureReason: newsletterFailureReason(result.reason),
-		};
-	});
+		},
+	);
+
+	return { outcomes, error: firstSettledError(settled) };
 };

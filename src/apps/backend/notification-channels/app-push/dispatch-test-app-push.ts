@@ -8,8 +8,10 @@ import { determineArticleId } from '@utils';
 import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import {
+	type ChannelDispatchResult,
 	defaultDependencies,
 	type DispatchNotificationDependencies,
+	firstSettledError,
 	PROVIDER_REQUEST_TIMEOUT_MS,
 	requireContentItem,
 } from '../shared';
@@ -42,10 +44,10 @@ export const dispatchAppPushTest = async (
 	request: NotificationTestSendRequest,
 	testId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
-): Promise<AppPushTestDispatchOutcome[]> => {
+): Promise<ChannelDispatchResult<AppPushTestDispatchOutcome>> => {
 	const plan = request.channels[NotificationChannel.AppPushNotification];
 	if (!plan) {
-		return [];
+		return { outcomes: [] };
 	}
 
 	const item = requireContentItem(
@@ -91,7 +93,7 @@ export const dispatchAppPushTest = async (
 		),
 	);
 
-	return settled.map((result, index): AppPushTestDispatchOutcome => {
+	const outcomes = settled.map((result, index): AppPushTestDispatchOutcome => {
 		const { id, push } = dispatched[index]!;
 		if (result.status === 'fulfilled') {
 			return {
@@ -112,4 +114,6 @@ export const dispatchAppPushTest = async (
 					: 'unknown',
 		};
 	});
+
+	return { outcomes, error: firstSettledError(settled) };
 };

@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
 import { httpLogger } from '@http-logger';
+import { BrazeApiError, EmailRenderingError } from '@services';
 import express from 'express';
+import { errorMiddleware } from '../../middleware/error-middleware';
 import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
@@ -248,6 +250,67 @@ describe('POST /v1/notification-tests', () => {
 		} finally {
 			await dispatchServer.close();
 		}
+	});
+
+	describe('provider failures surface as the documented HTTP codes', () => {
+		// Dispatch rethrows the underlying provider error; errorMiddleware maps it.
+		const startFailingServer = (rejection: Error) => {
+			const app = express();
+			app.use(httpLogger);
+			app.use(express.json());
+			app.use(
+				'/v1/notification-tests',
+				createNotificationTestsRouter(mock(() => Promise.reject(rejection))),
+			);
+			app.use(errorMiddleware);
+			return startTestServer(app);
+		};
+
+		it('maps an upstream provider rejection to 502', async () => {
+			const dispatchServer = await startFailingServer(
+				new EmailRenderingError(500, 'http_error'),
+			);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notification-tests`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validTestRequest()),
+					},
+				);
+
+				expect(response.status).toBe(502);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('email_rendering_failed');
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+
+		it('maps an upstream provider timeout to 504', async () => {
+			const dispatchServer = await startFailingServer(
+				new BrazeApiError('test email send', 'timeout'),
+			);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notification-tests`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validTestRequest()),
+					},
+				);
+
+				expect(response.status).toBe(504);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('braze_request_failed');
+			} finally {
+				await dispatchServer.close();
+			}
+		});
 	});
 
 	it('rejects segment audiences', async () => {

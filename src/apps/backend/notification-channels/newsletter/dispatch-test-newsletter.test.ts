@@ -30,7 +30,7 @@ describe('dispatchNewsletterTest', () => {
 			},
 		};
 
-		const outcomes = await dispatchNewsletterTest(
+		const { outcomes } = await dispatchNewsletterTest(
 			request,
 			testId,
 			dependencies,

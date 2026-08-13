@@ -30,7 +30,7 @@ describe('dispatchAppPushTest', () => {
 	it('sends a test push to the internal test topic', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 
-		const outcomes = await dispatchAppPushTest(
+		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest(),
 			testId,
 			dependencies,
@@ -52,7 +52,7 @@ describe('dispatchAppPushTest', () => {
 	it('dispatches even when dryRun is set (gating is the orchestrator’s job)', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 
-		const outcomes = await dispatchAppPushTest(
+		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest({ options: { dryRun: true } }),
 			testId,
 			dependencies,
@@ -64,13 +64,12 @@ describe('dispatchAppPushTest', () => {
 		]);
 	});
 
-	it('reports a failure reason when the push fails', async () => {
+	it('reports a failure reason and surfaces the error when the push fails', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
-		sendAppNotification.mockRejectedValue(
-			new AppNotificationApiError('http_error', 400),
-		);
+		const pushError = new AppNotificationApiError('http_error', 400);
+		sendAppNotification.mockRejectedValue(pushError);
 
-		const outcomes = await dispatchAppPushTest(
+		const { outcomes, error } = await dispatchAppPushTest(
 			testPushRequest(),
 			testId,
 			dependencies,
@@ -85,12 +84,14 @@ describe('dispatchAppPushTest', () => {
 				failureReason: 'http_error',
 			},
 		]);
+		// The failure is surfaced so the orchestrator can rethrow it as a 502/504.
+		expect(error).toBe(pushError);
 	});
 
 	it('returns nothing when no app-push channel is present', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 
-		const outcomes = await dispatchAppPushTest(
+		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest({ channels: {} }),
 			testId,
 			dependencies,
