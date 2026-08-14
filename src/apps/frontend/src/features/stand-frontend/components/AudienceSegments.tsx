@@ -5,9 +5,10 @@ import type { CheckboxTheme } from '@guardian/stand/Checkbox';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
-import { audienceSegmentStyles } from '../themes';
+import { audienceSegmentStyles, previewPillStyles } from '../themes';
 import { type AudienceSegment } from '../types';
 import { FlagAtom } from './FlagAtom';
+import { PreviewPillList } from './PreviewPillList';
 
 export interface Segment {
 	code: AudienceSegment;
@@ -115,7 +116,7 @@ export const AudienceSegments = ({
 											gap: semanticSpacing.stackXs,
 										})}
 									>
-										<div css={audienceSegmentStyles.audienceSegmentIcon}>
+										<div css={previewPillStyles.icon}>
 											<FlagAtom segmentCode={segment.code} />
 										</div>
 										<Typography
@@ -145,59 +146,12 @@ export const AudienceSegmentsPreviewPill = ({
 	segments = DEFAULT_SEGMENTS,
 	selected,
 	isConfirmation = false,
-}: AudienceSegmentsPreviewPillProps) => {
-	return (
-		<>
-			{selected.length !== 0 && (
-				<div
-					css={{
-						display: 'flex',
-						flexDirection: 'column',
-						gap: semanticSpacing.stackXs,
-					}}
-				>
-					{!isConfirmation && (
-						<Typography variant="bodyBoldMd">Audience segments</Typography>
-					)}
-
-					<div
-						css={{
-							display: 'flex',
-							flexDirection: 'row',
-							gap: semanticSpacing.stackXs,
-						}}
-					>
-						{selected.map((segmentCode) => {
-							const matchingSegment = segments.find(
-								(segment) => segment.code === segmentCode,
-							);
-							const segmentLabel = matchingSegment?.label ?? segmentCode;
-							return (
-								<div
-									key={segmentCode}
-									css={
-										isConfirmation
-											? audienceSegmentStyles.isConfirmationStyle
-											: audienceSegmentStyles.audienceSegmentButton
-									}
-								>
-									<div css={audienceSegmentStyles.audienceSegmentIcon}>
-										<FlagAtom segmentCode={segmentCode} />
-									</div>
-									<Typography
-										variant="bodySm"
-										cssOverrides={css({
-											color: semanticColors.text.strong,
-										})}
-									>
-										{segmentLabel}
-									</Typography>
-								</div>
-							);
-						})}
-					</div>
-				</div>
-			)}
-		</>
-	);
-};
+}: AudienceSegmentsPreviewPillProps) => (
+	<PreviewPillList
+		title="Audience segments"
+		options={segments.map(({ code, label }) => ({ id: code, label }))}
+		selected={selected}
+		isConfirmation={isConfirmation}
+		renderIcon={(segmentCode) => <FlagAtom segmentCode={segmentCode} />}
+	/>
+);

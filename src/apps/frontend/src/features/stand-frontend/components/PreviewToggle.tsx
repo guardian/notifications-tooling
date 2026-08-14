@@ -2,20 +2,18 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import type { ReactNode } from 'react';
 import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
+import { AppPreviewSection } from './AppPreviewSection';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
-export const PreviewToggle = () => {
-	const [isExpanded, setIsExpanded] = useState(false);
-	const { notification } = useContext(NotificationFormContext);
+interface PreviewToggleProps {
+	children: ReactNode;
+}
 
-	const selectedSegments = notification.parameters?.audienceSegments ?? [];
-	const selectedChannel = notification.parameters?.type;
-	const selectedDeliveryTiming =
-		notification.parameters?.type === 'email'
-			? notification.parameters.emailDeliveryOption
-			: undefined;
+const PreviewToggle = ({ children }: PreviewToggleProps) => {
+	const [isExpanded, setIsExpanded] = useState(false);
 
 	return (
 		<div
@@ -50,13 +48,33 @@ export const PreviewToggle = () => {
 				/>
 			</button>
 
-			{isExpanded && (
-				<EmailPreviewSection
-					selectedSegments={selectedSegments}
-					selectedChannel={selectedChannel}
-					selectedDeliveryTiming={selectedDeliveryTiming}
-				/>
-			)}
+			{isExpanded && children}
 		</div>
+	);
+};
+
+export const AppPreviewToggle = () => (
+	<PreviewToggle>
+		<AppPreviewSection />
+	</PreviewToggle>
+);
+
+export const EmailPreviewToggle = () => {
+	const { notification } = useContext(NotificationFormContext);
+	const selectedSegments = notification.parameters?.audienceSegments ?? [];
+	const selectedChannel = notification.parameters?.type;
+	const selectedDeliveryTiming =
+		notification.parameters?.type === 'email'
+			? notification.parameters.emailDeliveryOption
+			: undefined;
+
+	return (
+		<PreviewToggle>
+			<EmailPreviewSection
+				selectedSegments={selectedSegments}
+				selectedChannel={selectedChannel}
+				selectedDeliveryTiming={selectedDeliveryTiming}
+			/>
+		</PreviewToggle>
 	);
 };

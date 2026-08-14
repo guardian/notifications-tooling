@@ -62,3 +62,16 @@ export const PreviewBoth: SendInfoPreviewPillType = {
 		<SendInfoPreviewPill channel="email" deliveryTiming="immediate" />
 	),
 };
+
+export const PreviewAppAlert: SendInfoPreviewPillType = {
+	render: () => (
+		<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByText('App alert')).toBeVisible();
+		await expect(canvas.getByText('Immediate send')).toBeVisible();
+		await expect(canvas.getByText('mobile_screensaver')).toBeInTheDocument();
+		await expect(canvas.getByText('bolt')).toBeInTheDocument();
+	},
+};

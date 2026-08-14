@@ -13,7 +13,7 @@ import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
-import { PreviewToggle } from './PreviewToggle';
+import { EmailPreviewToggle } from './PreviewToggle';
 import {
 	DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
@@ -65,7 +65,7 @@ export const CreateNewsletterEmailTab = () => {
 									maxWidth: '826px',
 								})}
 							>
-								<PreviewToggle />
+								<EmailPreviewToggle />
 								<div
 									css={css({
 										position: 'relative',
