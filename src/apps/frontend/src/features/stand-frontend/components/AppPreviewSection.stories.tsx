@@ -30,9 +30,7 @@ export const Default: Story = {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('Preview')).toBeVisible();
 		await expect(
-			canvas.getByText(
-				'The preview for the newsletter email and/or the app alert notification will be shown below.',
-			),
+			canvas.getByText('The preview for the app alert will be shown below.'),
 		).toBeVisible();
 	},
 };
