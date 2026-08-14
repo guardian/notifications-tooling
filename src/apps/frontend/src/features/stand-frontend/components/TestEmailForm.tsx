@@ -14,6 +14,7 @@ import { validateGuardianEmail } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
 import type { AudienceSegment, NotificationState } from '../types';
+import { UserContext } from '../UserContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
 type TestSendParams = {
@@ -104,7 +105,8 @@ export const TestEmailForm = () => {
 	const { notification, requestTestEmailSend } = useContext(
 		NotificationFormContext,
 	);
-	const [emailInput, setEmailInput] = useState('');
+	const { user } = useContext(UserContext) ?? {};
+	const [emailInput, setEmailInput] = useState(user?.email ?? '');
 	const [sendInProgress, setSendInProgress] = useState(false);
 	const [confirmation, setConfirmation] = useState<TestEmailResponse>();
 	const [paramsLastUsed, setParamsLastUsed] = useState<TestSendParams>();
