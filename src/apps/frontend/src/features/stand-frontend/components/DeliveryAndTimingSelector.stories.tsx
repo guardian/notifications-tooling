@@ -21,7 +21,7 @@ type SelectorStory = StoryObj<typeof meta>;
 export const Unselected: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: undefined,
-		onChange: () => { },
+		onChange: () => {},
 		channel: 'email',
 	},
 	play: async ({ canvasElement }) => {
@@ -37,7 +37,7 @@ export const Unselected: SelectorStory = {
 export const Selected: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: 'immediate',
-		onChange: () => { },
+		onChange: () => {},
 		channel: 'email',
 	},
 };
