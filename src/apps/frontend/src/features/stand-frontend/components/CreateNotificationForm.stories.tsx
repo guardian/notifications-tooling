@@ -20,6 +20,7 @@ import { CreateNotificationForm } from './CreateNotificationForm';
 
 type StoryArgs = {
 	notificationState: NotificationState;
+	activeSectionHref: string;
 };
 type Story = StoryObj<StoryArgs>;
 
@@ -28,11 +29,12 @@ const meta: Meta<StoryArgs> = {
 	component: CreateNotificationForm,
 	args: {
 		notificationState: defaultState,
+		activeSectionHref: '#article-section',
 	},
 	render: (args) => {
-		const { notificationState } = args;
+		const { activeSectionHref, notificationState } = args;
 		return WithNotificationContext(
-			<CreateNotificationForm />,
+			<CreateNotificationForm activeSectionHref={activeSectionHref} />,
 			notificationState,
 		);
 	},
@@ -120,9 +122,9 @@ const buildErrorStory = (error: ApiError): Story => ({
 		},
 	},
 	render: (args) => {
-		const { notificationState } = args;
+		const { activeSectionHref, notificationState } = args;
 		return WithNotificationContext(
-			<CreateNotificationForm />,
+			<CreateNotificationForm activeSectionHref={activeSectionHref} />,
 			notificationState,
 			{
 				sendNotification: mockSendRejectedNotification(error),

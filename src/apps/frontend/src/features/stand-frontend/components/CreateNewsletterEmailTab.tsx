@@ -7,72 +7,31 @@ import {
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
-import type { ActiveSection } from '../types';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
 import { PreviewToggle } from './PreviewToggle';
 import {
 	DEFAULT_SIDE_NAV_HREF,
-	SIDE_NAVIGATION_PANEL_ITEMS,
 	SideNavigationPanel,
 } from './SideNavigationPanel';
 
 export const CreateNewsletterEmailTab = () => {
 	const {
 		notification: { sendingResult, parameters },
-		updateNotification,
 	} = useContext(NotificationFormContext);
-
 	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
-	const isClickLockedRef = useRef(false);
-
-	useEffect(() => {
-		if (sendingResult) {
-			return;
-		}
-
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					const id = entry.target.getAttribute('id');
-					if (entry.isIntersecting && id && !isClickLockedRef.current) {
-						const href = `#${id}`;
-						if (SIDE_NAVIGATION_PANEL_ITEMS.some((item) => item.id === href)) {
-							setSelectedHref(href);
-							updateNotification({
-								type: 'set-active-section',
-								text: href as ActiveSection,
-							});
-						}
-					}
-				});
-			},
-			{ rootMargin: '-8% 0px -8% 0px' },
-		);
-
-		SIDE_NAVIGATION_PANEL_ITEMS.forEach((item) => {
-			// item.id is e.g. '#article-section'; strip the leading '#' for getElementById
-			const el = document.getElementById(item.id.slice(1));
-			if (el) {
-				observer.observe(el);
-			}
-		});
-
-		return () => observer.disconnect();
-	}, [sendingResult, updateNotification]);
 
 	return (
 		<>
 			{!sendingResult?.ok && (
-				<Layout.Sidebar layoutSmBreakpoint="above-grid">
+				<Layout.Sidebar layoutSmBreakpoint="hidden">
 					<SideNavigationPanel
 						selectedHref={selectedHref}
-						setSelectedHref={setSelectedHref}
-						isClickLockedRef={isClickLockedRef}
+						onSelectedHrefChange={setSelectedHref}
 					/>
 				</Layout.Sidebar>
 			)}
@@ -119,7 +78,7 @@ export const CreateNewsletterEmailTab = () => {
 										},
 									})}
 								>
-									<CreateNotificationForm />
+									<CreateNotificationForm activeSectionHref={selectedHref} />
 								</div>
 							</Item>
 							<Item

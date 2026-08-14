@@ -3,11 +3,11 @@ import { baseColors, semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
+import type { PropsWithChildren } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { topBarHeight } from '../themes';
-import type { ActiveSection } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
@@ -17,22 +17,40 @@ import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
 
-const createNotificationFormStyles = {
-	sectionStyle: (activeSectionStyle: string | undefined) =>
-		css({
+const NotificationFormSection = ({
+	id,
+	isActive,
+	children,
+}: PropsWithChildren<{ id: string; isActive: boolean }>) => (
+	<section
+		id={id}
+		data-scrollspy-active={isActive ? '' : undefined}
+		css={css({
 			display: 'flex',
 			flexDirection: 'column',
 			gap: semanticSpacing.stackMd,
-			borderLeft: activeSectionStyle,
+			borderLeft: `${semanticSizing.border.md} solid transparent`,
 			paddingLeft: semanticSpacing.stackMd,
 			scrollMarginTop: topBarHeight,
-		}),
-};
-export const CreateNotificationForm = () => {
+			'&[data-scrollspy-active]': {
+				borderLeftColor: baseColors.magenta[200],
+			},
+		})}
+	>
+		{children}
+	</section>
+);
+
+interface CreateNotificationFormProps {
+	activeSectionHref: string;
+}
+
+export const CreateNotificationForm = ({
+	activeSectionHref,
+}: CreateNotificationFormProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	// Called before the early return: hooks cannot sit behind a conditional.
 	const { data: constraints } = useChannelConstraints();
 
 	if (!notification.parameters) {
@@ -46,12 +64,6 @@ export const CreateNotificationForm = () => {
 			: undefined;
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
-	const activeSection = notification.activeSection;
-
-	const getSectionBorder = (sectionId: ActiveSection) =>
-		activeSection === sectionId
-			? `${semanticSizing.border.md} solid ${baseColors.magenta[200]}`
-			: undefined;
 
 	return (
 		<div
@@ -78,11 +90,9 @@ export const CreateNotificationForm = () => {
 					},
 				}}
 			>
-				<section
+				<NotificationFormSection
 					id="article-section"
-					css={createNotificationFormStyles.sectionStyle(
-						getSectionBorder('#article-section'),
-					)}
+					isActive={activeSectionHref === '#article-section'}
 				>
 					<ArticleImportControl />
 
@@ -97,20 +107,16 @@ export const CreateNotificationForm = () => {
 							}
 						}}
 					/>
-				</section>
-				<section
+				</NotificationFormSection>
+				<NotificationFormSection
 					id="content-section"
-					css={createNotificationFormStyles.sectionStyle(
-						getSectionBorder('#content-section'),
-					)}
+					isActive={activeSectionHref === '#content-section'}
 				>
 					<EmailFields constraints={constraints} />
-				</section>
-				<section
+				</NotificationFormSection>
+				<NotificationFormSection
 					id="audience-section"
-					css={createNotificationFormStyles.sectionStyle(
-						getSectionBorder('#audience-section'),
-					)}
+					isActive={activeSectionHref === '#audience-section'}
 				>
 					<AudienceSegments
 						selected={audienceSegments}
@@ -127,12 +133,10 @@ export const CreateNotificationForm = () => {
 							});
 						}}
 					/>
-				</section>
-				<section
+				</NotificationFormSection>
+				<NotificationFormSection
 					id="delivery-timing-section"
-					css={createNotificationFormStyles.sectionStyle(
-						getSectionBorder('#delivery-timing-section'),
-					)}
+					isActive={activeSectionHref === '#delivery-timing-section'}
 				>
 					<DeliveryAndTimingSelector
 						selectedDeliveryTiming={emailDeliveryOption}
@@ -144,15 +148,13 @@ export const CreateNotificationForm = () => {
 							});
 						}}
 					/>
-				</section>
-				<section
+				</NotificationFormSection>
+				<NotificationFormSection
 					id="send-button-section"
-					css={createNotificationFormStyles.sectionStyle(
-						getSectionBorder('#send-button-section'),
-					)}
+					isActive={activeSectionHref === '#send-button-section'}
 				>
 					<SendButton />
-				</section>
+				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />
 			</div>

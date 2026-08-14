@@ -8,13 +8,12 @@ import {
 import { SidebarStepperNavigation } from '@guardian/stand/SidebarStepperNavigation';
 import type { SidebarStepperNavigationTheme } from '@guardian/stand/SidebarStepperNavigation';
 import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
-import { useContext } from 'react';
-import type { MutableRefObject } from 'react';
-import { NotificationFormContext } from '../NotificationContext';
+import { useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import { layer, topBarHeight } from '../themes';
-import type { ActiveSection } from '../types';
 
-export const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
+const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 	{
 		id: '#article-section',
 		label: 'Article and channel',
@@ -83,32 +82,113 @@ const sidebarNavigationCssOverrides = css({
 
 interface SideNavigationPanelProps {
 	selectedHref: string;
-	setSelectedHref: (href: string) => void;
-	isClickLockedRef?: MutableRefObject<boolean>;
+	onSelectedHrefChange: (href: string) => void;
 }
 
 export const SideNavigationPanel = ({
 	selectedHref,
-	setSelectedHref,
-	isClickLockedRef,
+	onSelectedHrefChange,
 }: SideNavigationPanelProps) => {
-	const { updateNotification } = useContext(NotificationFormContext);
+	const { hash } = useLocation();
+	const navigate = useNavigate();
+	const selectedHrefRef = useRef(DEFAULT_SIDE_NAV_HREF);
+	const locationHashRef = useRef(hash);
+	const isClickLockedRef = useRef(false);
+
+	useEffect(() => {
+		locationHashRef.current = hash;
+	}, [hash]);
+
+	const selectHref = (href: string) => {
+		selectedHrefRef.current = href;
+		onSelectedHrefChange(href);
+	};
+
+	useEffect(() => {
+		const sections = SIDE_NAVIGATION_PANEL_ITEMS.flatMap((item) => {
+			const element = document.getElementById(item.id.slice(1));
+			return element ? [{ item, element }] : [];
+		});
+		let animationFrameId: number | undefined;
+
+		const selectItem = (item: (typeof SIDE_NAVIGATION_PANEL_ITEMS)[number]) => {
+			if (selectedHrefRef.current !== item.id) {
+				selectedHrefRef.current = item.id;
+				onSelectedHrefChange(item.id);
+			}
+			if (locationHashRef.current !== item.id) {
+				locationHashRef.current = item.id;
+				void navigate({ hash: item.id }, { replace: true });
+			}
+		};
+		const updateActiveSection = () => {
+			if (isClickLockedRef.current || sections.length === 0) {
+				return;
+			}
+
+			if (window.scrollY === 0) {
+				selectItem(sections[0]!.item);
+				return;
+			}
+
+			const isAtPageBottom =
+				window.innerHeight + window.scrollY >=
+				document.documentElement.scrollHeight - 1;
+			if (isAtPageBottom) {
+				selectItem(sections.at(-1)?.item ?? sections[0]!.item);
+				return;
+			}
+
+			const markerPosition =
+				window.innerHeight * ACTIVE_SECTION_VIEWPORT_POSITION;
+			const activeSection = sections.findLast(
+				({ element }) => element.getBoundingClientRect().top <= markerPosition,
+			);
+			selectItem(activeSection?.item ?? sections[0]!.item);
+		};
+		const scheduleUpdate = () => {
+			if (animationFrameId !== undefined) {
+				return;
+			}
+			animationFrameId = window.requestAnimationFrame(() => {
+				animationFrameId = undefined;
+				updateActiveSection();
+			});
+		};
+
+		updateActiveSection();
+		window.addEventListener('scroll', scheduleUpdate, { passive: true });
+		window.addEventListener('resize', scheduleUpdate);
+
+		return () => {
+			window.removeEventListener('scroll', scheduleUpdate);
+			window.removeEventListener('resize', scheduleUpdate);
+			if (animationFrameId !== undefined) {
+				window.cancelAnimationFrame(animationFrameId);
+			}
+		};
+	}, [navigate, onSelectedHrefChange]);
 
 	const handleTileClick = (href: string) => {
-		setSelectedHref(href);
-		if (isClickLockedRef) {
-			isClickLockedRef.current = true;
-			const targetId = href.replace('#', '');
-			document.getElementById(targetId)?.scrollIntoView({
-				behavior: 'smooth',
-				block: 'start',
-			});
-
-			// Unlock scroll updates after anchor navigation settles
-			window.setTimeout(() => {
-				isClickLockedRef.current = false;
-			}, 500);
+		selectHref(href);
+		if (locationHashRef.current !== href) {
+			locationHashRef.current = href;
+			void navigate({ hash: href });
 		}
+
+		isClickLockedRef.current = true;
+		const unlockScrollUpdates = () => {
+			isClickLockedRef.current = false;
+			window.clearTimeout(unlockTimeoutId);
+			window.removeEventListener('scrollend', unlockScrollUpdates);
+		};
+		window.addEventListener('scrollend', unlockScrollUpdates, { once: true });
+		const unlockTimeoutId = window.setTimeout(unlockScrollUpdates, 1_000);
+		const targetId = href.slice(1);
+		document.getElementById(targetId)?.scrollIntoView({
+			behavior: 'smooth',
+			block: 'start',
+		});
 	};
 
 	return (
@@ -126,13 +206,7 @@ export const SideNavigationPanel = ({
 					isNonLinear: true,
 					steps: SIDE_NAVIGATION_PANEL_ITEMS,
 				}}
-				onPress={(stepId) => {
-					handleTileClick(stepId);
-					updateNotification({
-						type: 'set-active-section',
-						text: stepId as ActiveSection,
-					});
-				}}
+				onPress={handleTileClick}
 				theme={theme}
 				cssOverrides={sidebarNavigationCssOverrides}
 			/>

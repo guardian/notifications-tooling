@@ -139,9 +139,5 @@ export const notificationReducer = (
 				sendingResult: undefined,
 			};
 		}
-
-		case 'set-active-section': {
-			return { ...state, activeSection: action.text };
-		}
 	}
 };

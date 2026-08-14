@@ -37,13 +37,6 @@ export type PushNotification = {
 	audienceSegments?: AudienceSegment[];
 };
 
-export type ActiveSection =
-	| '#article-section'
-	| '#content-section'
-	| '#audience-section'
-	| '#delivery-timing-section'
-	| '#send-button-section';
-
 export type NotificationState = {
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
@@ -54,7 +47,6 @@ export type NotificationState = {
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
 	sendingResult?: SendingResult;
-	activeSection?: ActiveSection;
 };
 
 export type RequestEmailHtml = {
@@ -98,10 +90,6 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'dismiss-send-error';
-	  }
-	| {
-			type: 'set-active-section';
-			text: NotificationState['activeSection'];
 	  }
 	| {
 			type: 'reset';
