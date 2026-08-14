@@ -13,7 +13,7 @@ import { layoutMainTheme } from '../themes';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
 import {
-	DEFAULT_SIDE_NAV_HREF,
+	APP_DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
 } from './SideNavigationPanel';
 
@@ -21,7 +21,7 @@ export const CreateAppAlertTab = () => {
 	const {
 		notification: { sendingResult },
 	} = useContext(NotificationFormContext);
-	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
+	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
 
 	return (
 		<>
@@ -30,6 +30,7 @@ export const CreateAppAlertTab = () => {
 					<SideNavigationPanel
 						selectedHref={selectedHref}
 						onSelectedHrefChange={setSelectedHref}
+						channel={'push'}
 					/>
 				</Layout.Sidebar>
 			)}
