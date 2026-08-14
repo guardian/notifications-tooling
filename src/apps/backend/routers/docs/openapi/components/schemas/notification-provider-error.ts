@@ -6,7 +6,11 @@ export const notificationProviderErrorSchema = {
 		error: {
 			type: 'string',
 			description: 'Machine-readable provider failure code.',
-			enum: ['email_rendering_failed', 'braze_request_failed'],
+			enum: [
+				'email_rendering_failed',
+				'braze_request_failed',
+				'app_notification_failed',
+			],
 		},
 		message: {
 			type: 'string',

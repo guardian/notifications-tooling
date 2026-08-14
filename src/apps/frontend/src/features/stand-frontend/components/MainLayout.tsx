@@ -11,7 +11,8 @@ import {
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { AppConfig } from '../get-config';
-import { faviconTheme, topBarTheme } from '../themes';
+import { topBarNavigationItems } from '../routes';
+import { faviconTheme, layer, topBarTheme } from '../themes';
 import { UserContext } from '../UserContext';
 
 interface Props {
@@ -25,22 +26,16 @@ const getInitials = (user: AppConfig['user']): string => {
 	return `${firstName}${lastName}`.toUpperCase() || 'U';
 };
 
-const navLinks = [
-	{ text: 'Create', path: '/create' },
-	{ text: 'History', path: '/history' },
-] as const;
-
 export const MainLayout = ({ children }: Props) => {
 	const { user } = useContext(UserContext) ?? {};
 	const { pathname } = useLocation();
 
 	return (
 		<Layout>
-			<Layout.TopBar>
-				<TopBar
-					theme={topBarTheme}
-					cssOverrides={css({ position: 'sticky', top: '0px', zIndex: 1 })}
-				>
+			<Layout.TopBar
+				cssOverrides={css({ position: 'sticky', top: 0, zIndex: layer.topBar })}
+			>
+				<TopBar theme={topBarTheme}>
 					<TopBarToolName
 						name="Dispatch"
 						favicon={{
@@ -48,7 +43,7 @@ export const MainLayout = ({ children }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{navLinks.map(({ text, path }) => (
+						{topBarNavigationItems.map(({ text, path }) => (
 							<TopBarNavigation
 								key={path}
 								text={text}

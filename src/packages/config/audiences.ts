@@ -71,19 +71,21 @@ interface MobileN10nTopic {
  * mobile-n10n's `importance` values (`BreakingNewsPayload.importance`). Used
  * only by the app-push dispatch; never exposed in the public audiences contract.
  */
-export enum AppPushImportance {
-	Major = 'Major',
-	Minor = 'Minor',
-}
+export const AppPushImportance = {
+	Major: 'Major',
+	Minor: 'Minor',
+} as const;
+export type AppPushImportance =
+	(typeof AppPushImportance)[keyof typeof AppPushImportance];
 
 interface AppPushEdition {
 	label: string;
 	mobileN10nTopic: MobileN10nTopic;
-	importance: AppPushImportance;
 }
 
 interface AppPushTopicType {
 	label: string;
+	importance: AppPushImportance;
 	editions: Record<string, AppPushEdition>;
 }
 
@@ -91,88 +93,70 @@ interface AppPushTopicType {
  * Push targets are curated topic types, each exposing its `editions`. A request
  * names a topic type and one of its editions; the backend resolves that pair to
  * the mobile-n10n topic (`{ type, name }`) that `guardian/facia-tool`'s Breaking
- * News tool emits, plus the registered `newsstand` topic. `test` is a catch-all
- * used while push is wired up end to end. The raw topic coordinates are kept out
- * of the public contract.
+ * News tool emits, plus the registered `newsstand` topic. The raw topic
+ * coordinates are kept out of the public contract. The internal test topic lives
+ * in `internalAppPushTestTopicTypes`, not here, so it can never be targeted by a
+ * production send.
  */
 const curatedAppPushTopicTypes = {
 	'breaking-news': {
 		label: 'Breaking news',
+		importance: AppPushImportance.Major,
 		editions: {
-			uk: {
-				label: 'UK',
-				mobileN10nTopic: { type: 'breaking', name: 'uk' },
-				importance: AppPushImportance.Major,
-			},
-			us: {
-				label: 'US',
-				mobileN10nTopic: { type: 'breaking', name: 'us' },
-				importance: AppPushImportance.Major,
-			},
-			au: {
-				label: 'AU',
-				mobileN10nTopic: { type: 'breaking', name: 'au' },
-				importance: AppPushImportance.Major,
-			},
+			uk: { label: 'UK', mobileN10nTopic: { type: 'breaking', name: 'uk' } },
+			us: { label: 'US', mobileN10nTopic: { type: 'breaking', name: 'us' } },
+			au: { label: 'AU', mobileN10nTopic: { type: 'breaking', name: 'au' } },
 			international: {
 				label: 'International',
 				mobileN10nTopic: { type: 'breaking', name: 'international' },
-				importance: AppPushImportance.Major,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe' },
-				importance: AppPushImportance.Major,
 			},
 		},
 	},
 	sport: {
 		label: 'Sport',
+		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
-				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
-				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
-				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
-				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	'editors-picks': {
 		label: "Editors' picks",
+		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-editors-picks' },
-				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-editors-picks' },
-				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-editors-picks' },
-				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
@@ -180,32 +164,28 @@ const curatedAppPushTopicTypes = {
 					type: 'breaking',
 					name: 'international-editors-picks',
 				},
-				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-editors-picks' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	'one-not-to-miss': {
 		label: 'One not to miss',
+		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
-				importance: AppPushImportance.Minor,
 			},
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
-				importance: AppPushImportance.Minor,
 			},
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
-				importance: AppPushImportance.Minor,
 			},
 			international: {
 				label: 'International',
@@ -213,42 +193,49 @@ const curatedAppPushTopicTypes = {
 					type: 'breaking',
 					name: 'international-one-not-to-miss',
 				},
-				importance: AppPushImportance.Minor,
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	'uk-general-election': {
 		label: 'UK general election',
+		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-general-election' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
 	newsstand: {
 		label: 'Newsstand',
+		importance: AppPushImportance.Minor,
 		editions: {
 			ios: {
 				label: 'iOS',
 				mobileN10nTopic: { type: 'newsstand', name: 'newsstandIos' },
-				importance: AppPushImportance.Minor,
 			},
 		},
 	},
+} as const satisfies Record<string, AppPushTopicType>;
+
+/**
+ * The internal test topic type. Its single edition resolves to mobile-n10n's
+ * `internal-test` topic, which only internal test devices subscribe to. Kept out
+ * of `curatedAppPushTopicTypes` so it is accepted solely by
+ * `POST /v1/notification-tests`, never the production notifications endpoint.
+ */
+const internalAppPushTestTopicTypes = {
 	test: {
 		label: 'Test',
+		importance: AppPushImportance.Minor,
 		editions: {
 			test: {
 				label: 'Test',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-test' },
-				importance: AppPushImportance.Minor,
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
 			},
 		},
 	},
@@ -274,14 +261,31 @@ export const getAppPushTopicTypes = (
 
 export const appPushTopicTypes = getAppPushTopicTypes(configurationStage);
 
-/** Resolves a request's (topic type, edition) pair to its mobile-n10n topic. */
+/**
+ * The internal test topic types. Not stage-dependent (the `internal-test` topic
+ * exists in every environment) and only ever offered by the test endpoint.
+ */
+export type AppPushTestTopicTypeId = keyof typeof internalAppPushTestTopicTypes;
+
+export const appPushTestTopicTypes = internalAppPushTestTopicTypes;
+
+/** Production and internal-test topic types share a resolver. */
+const resolvableAppPushTopicTypes: Record<
+	AppPushTopicTypeId | AppPushTestTopicTypeId,
+	AppPushTopicType
+> = { ...appPushTopicTypes, ...appPushTestTopicTypes };
+
+/** Resolves a (topic type, edition) pair to its downstream topic and importance. */
 export const resolveAppPushTopic = (
-	topicTypeId: AppPushTopicTypeId,
+	topicTypeId: AppPushTopicTypeId | AppPushTestTopicTypeId,
 	editionId: string,
-): MobileN10nTopic | undefined => {
-	const editions: Record<string, AppPushEdition> =
-		appPushTopicTypes[topicTypeId].editions;
-	return editions[editionId]?.mobileN10nTopic;
+): { topic: MobileN10nTopic; importance: AppPushImportance } | undefined => {
+	const topicType = resolvableAppPushTopicTypes[topicTypeId];
+	const edition = topicType.editions[editionId];
+	if (!edition) {
+		return undefined;
+	}
+	return { topic: edition.mobileN10nTopic, importance: topicType.importance };
 };
 
 // Non-empty tuples so the validator can build `z.enum(...)` from them.
@@ -302,6 +306,19 @@ export const appPushEditionIdsByTopicType = Object.fromEntries(
 		Object.keys(editions),
 	]),
 ) as Record<AppPushTopicTypeId, [string, ...string[]]>;
+
+export const appPushTestTopicTypeIds = Object.keys(appPushTestTopicTypes) as [
+	AppPushTestTopicTypeId,
+	...AppPushTestTopicTypeId[],
+];
+
+/** Internal-test edition ids per test topic type, as non-empty tuples. */
+export const appPushTestEditionIdsByTopicType = Object.fromEntries(
+	Object.entries(appPushTestTopicTypes).map(([topicTypeId, { editions }]) => [
+		topicTypeId,
+		Object.keys(editions),
+	]),
+) as Record<AppPushTestTopicTypeId, [string, ...string[]]>;
 
 /**
  * mobile-n10n's `POST /push/topic` rejects a push targeting more than 20 topics

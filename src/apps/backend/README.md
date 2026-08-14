@@ -26,12 +26,12 @@ campaign IDs are configured in `src/packages/config/audiences.ts`. The public
 segment key, display label, and downstream IDs are independent values. Campaign
 IDs point to Braze dev environment test campaigns.
 
-The app-notification client is currently a mock. It receives the translated
-topic and content request but does not make a network call.
+The mobile-n10n client receives the translated topic and content request and
+posts it to mobile-n10n's `POST /push/topic`.
 
-`POST /v1/notifications` validates and dispatches app-push requests to the mock
-client. For newsletter segments it renders the selected article through
-email-rendering and triggers the mapped Braze campaign.
+`POST /v1/notifications` validates and dispatches app-push requests to the
+mobile-n10n client. For newsletter segments it renders the selected article
+through email-rendering and triggers the mapped Braze campaign.
 
 ## Test email behaviour
 

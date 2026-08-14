@@ -3,6 +3,9 @@ import { baseSpacing, semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
+import { useContext } from 'react';
+import { NotificationFormContext } from '../NotificationContext';
+import { layer, topBarHeight } from '../themes';
 import type {
 	AudienceSegment,
 	ChannelOption,
@@ -27,6 +30,9 @@ export const EmailPreviewSection = ({
 	selectedChannel,
 	selectedDeliveryTiming,
 }: EmailPreviewSectionProps) => {
+	const {
+		notification: { fetchedArticleId },
+	} = useContext(NotificationFormContext);
 	return (
 		<section
 			css={css({
@@ -49,44 +55,53 @@ export const EmailPreviewSection = ({
 					flexBasis: 474,
 					paddingTop: '48px',
 					position: 'sticky',
-					top: '0px',
-					zIndex: 1,
+					top: topBarHeight,
+					zIndex: layer.stickyContent,
 				},
 			})}
 		>
-			<header
+			<div
 				css={css({
 					display: 'flex',
 					flexDirection: 'column',
-					gap: baseSpacing['12Px'], // adjust spacing as needed
-					alignItems: 'stretch',
+					gap: semanticSpacing.stackLg,
+					visibility: fetchedArticleId ? 'visible' : 'hidden',
 				})}
 			>
-				<div
-					css={{
+				<header
+					css={css({
 						display: 'flex',
-						alignItems: 'center',
-						gap: 5,
-					}}
+						flexDirection: 'column',
+						gap: baseSpacing['12Px'], // adjust spacing as needed
+						alignItems: 'stretch',
+					})}
 				>
-					<Icon symbol="preview" />
-					<Typography variant="bodyBoldMd">Preview</Typography>
-				</div>
-				<Typography variant="bodySm">
-					The preview for the newsletter email and/or the app alert notification
-					will be shown below.
-				</Typography>
-			</header>
-			<HTMLPreview />
-			<SendInfoPreviewPill
-				channel={selectedChannel}
-				deliveryTiming={selectedDeliveryTiming}
-			/>
-			<AudienceSegmentsPreviewPill
-				segments={DEFAULT_SEGMENTS}
-				selected={selectedSegments}
-			/>
-			<TestEmailForm />
+					<div
+						css={{
+							display: 'flex',
+							alignItems: 'center',
+							gap: 5,
+						}}
+					>
+						<Icon symbol="preview" />
+						<Typography variant="bodyBoldMd">Preview</Typography>
+					</div>
+					<Typography variant="bodySm">
+						The preview for the newsletter email and/or the app alert
+						notification will be shown below.
+					</Typography>
+				</header>
+				<SendInfoPreviewPill
+					channel={selectedChannel}
+					deliveryTiming={selectedDeliveryTiming}
+				/>
+				<AudienceSegmentsPreviewPill
+					segments={DEFAULT_SEGMENTS}
+					selected={selectedSegments}
+				/>
+				<HTMLPreview />
+				<TestEmailForm />
+			</div>
 		</section>
 	);
 };

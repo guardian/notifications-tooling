@@ -3,7 +3,7 @@ export const notificationTestsPath = {
 	post: {
 		summary: 'Send a notification to explicit test recipients',
 		description:
-			'Sends immediately to direct test recipients. Segment audiences and scheduling are not accepted. A dry run validates and renders content without registering recipients or sending messages.',
+			'Sends immediately to direct test recipients. Segment audiences and scheduling are not accepted. App-push tests may only target the internal test topic. A dry run validates and renders content without registering recipients or sending messages.',
 		security: [{ pandaCookie: [] }],
 		requestBody: {
 			required: true,
@@ -11,6 +11,14 @@ export const notificationTestsPath = {
 				'application/json': {
 					schema: {
 						$ref: '#/components/schemas/NotificationTestSendRequest',
+					},
+					examples: {
+						newsletter: {
+							$ref: '#/components/examples/NotificationTestNewsletter',
+						},
+						appPush: {
+							$ref: '#/components/examples/NotificationTestAppPush',
+						},
 					},
 				},
 			},
@@ -53,7 +61,7 @@ export const notificationTestsPath = {
 			},
 			'502': {
 				description:
-					'Braze or email rendering rejected the request or returned an invalid response.',
+					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) rejected the request or returned an invalid response.',
 				content: {
 					'application/json': {
 						schema: {
@@ -63,7 +71,8 @@ export const notificationTestsPath = {
 				},
 			},
 			'504': {
-				description: 'Braze or email rendering timed out.',
+				description:
+					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) timed out.',
 				content: {
 					'application/json': {
 						schema: {

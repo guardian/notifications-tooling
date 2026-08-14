@@ -1,4 +1,8 @@
-import { BrazeApiError, EmailRenderingError } from '@services';
+import {
+	AppNotificationApiError,
+	BrazeApiError,
+	EmailRenderingError,
+} from '@services';
 import type { ErrorRequestHandler } from 'express';
 import { buildErrorEnvelope } from '../error-envelope';
 
@@ -26,6 +30,14 @@ export const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
 		res.status(err.reason === 'timeout' ? 504 : 502).json({
 			error: 'braze_request_failed',
 			message: 'Braze could not complete the request.',
+		});
+		return;
+	}
+
+	if (err instanceof AppNotificationApiError) {
+		res.status(err.reason === 'timeout' ? 504 : 502).json({
+			error: 'app_notification_failed',
+			message: 'The app notification service could not complete the request.',
 		});
 		return;
 	}

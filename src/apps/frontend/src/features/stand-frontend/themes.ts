@@ -11,8 +11,16 @@ import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 
+export const topBarHeight = '4rem';
+
+export const layer = {
+	stickyContent: 1,
+	topBar: 2,
+} as const;
+
 export const topBarTheme: TopBarTheme = {
 	backgroundColor: baseColors.magenta[200],
+	height: topBarHeight,
 	borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 	borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
 	borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
@@ -206,6 +214,7 @@ export const audienceSegmentStyles = {
 		}),
 	audienceSegmentButton: css({
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		backgroundColor: semanticColors.fill.weak,
 		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
 		borderRadius: semanticRadius.cornerSm,
 		display: 'flex',

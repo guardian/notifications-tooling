@@ -4,7 +4,10 @@ import { Router } from 'express';
 import validate from 'express-zod-safe';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
-import { dispatchNotificationTest } from '../../notification-channels/dispatch-notification';
+import {
+	dispatchNotificationTest,
+	type TestDispatchOutcomes,
+} from '../../notification-channels/dispatch-notification-test';
 import { handleValidationErrors } from '../notifications';
 import {
 	type NotificationTestSendRequest,
@@ -13,7 +16,8 @@ import {
 
 type DispatchValidatedNotificationTest = (
 	request: NotificationTestSendRequest,
-) => Promise<unknown>;
+	testId: string,
+) => Promise<TestDispatchOutcomes>;
 
 export const createNotificationTestsRouter = (
 	dispatchRequest: DispatchValidatedNotificationTest = dispatchNotificationTest,
@@ -28,9 +32,16 @@ export const createNotificationTestsRouter = (
 		}),
 		async (req, res) => {
 			const body = req.body;
-			await dispatchRequest(body);
 
 			const testId = randomUUID();
+			const outcomes = await dispatchRequest(body, testId);
+
+			// Outcomes are not persisted yet; log them so tests can be introspected.
+			req.log.info(
+				{ testId, dryRun: body.options.dryRun, ...outcomes },
+				'Dispatched notification test',
+			);
+
 			res.status(202).json({
 				testId,
 				status: 'accepted',
