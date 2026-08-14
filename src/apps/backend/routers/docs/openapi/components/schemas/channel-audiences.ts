@@ -110,3 +110,24 @@ export const channelAudiencesSchema = {
 		},
 	},
 } as const;
+
+export const emailChannelConfigSchema = {
+	type: 'object',
+	description: 'Per-channel per-channel email config, keyed by channel.',
+	properties: {
+		additionalProperties: {
+			type: 'object',
+			properties: {
+				label: {
+					type: 'string',
+				},
+				brazeCampaignId: {
+					type: 'string',
+				},
+				emailRenderingNewsletterId: {
+					type: 'string',
+				},
+			},
+		},
+	},
+};

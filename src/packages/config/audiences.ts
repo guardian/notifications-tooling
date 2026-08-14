@@ -15,6 +15,12 @@ export interface NewsletterSegment {
 	emailRenderingNewsletterId: string;
 }
 
+/**
+ * ID of a test campaign created in the live Braze account for dry-runs on PROD.
+ * The audience should be restricted to internal Guardian users
+ * */
+const LIVE_ACCOUNT_TEST_CAMPAIGN_ID = '79a123db-4bec-413b-a20c-207ff285adfd';
+
 // TODO: Move this configuration into settings backed by JSON in S3 or RDS.
 const newsletterSegmentsByStage = {
 	CODE: {
@@ -26,6 +32,7 @@ const newsletterSegmentsByStage = {
 		US: {
 			label: 'US',
 			brazeCampaignId: 'a945e3ae-165b-46d7-b163-0ca1c6beb2f4',
+			// this is the right id for the CODE version of this newsletter - the PROD version below does have different casing
 			emailRenderingNewsletterId: 'breakingnewsus',
 		},
 		AU: {
@@ -42,8 +49,8 @@ const newsletterSegmentsByStage = {
 		},
 		US: {
 			label: 'US',
-			brazeCampaignId: '',
-			emailRenderingNewsletterId: '',
+			brazeCampaignId: LIVE_ACCOUNT_TEST_CAMPAIGN_ID,
+			emailRenderingNewsletterId: 'breaking-news-us',
 		},
 		AU: {
 			label: 'AU',

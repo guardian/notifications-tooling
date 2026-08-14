@@ -1,7 +1,10 @@
 import { acceptedNotificationSchema } from './accepted-notification';
 import { acceptedTestNotificationSchema } from './accepted-test-notification';
 import { articleResolutionErrorSchema } from './article-resolution-error';
-import { channelAudiencesSchema } from './channel-audiences';
+import {
+	channelAudiencesSchema,
+	emailChannelConfigSchema,
+} from './channel-audiences';
 import { channelConstraintsSchema } from './channel-constraints';
 import { emailPreviewErrorSchema } from './email-preview-error';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
@@ -36,6 +39,7 @@ export const schemas = {
 	NotificationProviderError: notificationProviderErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
+	EmailChannelConfig: emailChannelConfigSchema,
 	ResolveArticleRequest: resolveArticleRequestSchema,
 	ResolvedArticle: resolvedArticleSchema,
 	ArticleResolutionError: articleResolutionErrorSchema,

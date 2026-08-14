@@ -41,3 +41,29 @@ export const channelsAudiencesPath = {
 		},
 	},
 } as const;
+
+/** The `/v1/channels/config/emai` path item. */
+export const emailConfigPath = {
+	get: {
+		summary: 'Retrieve per-channel email config',
+		description:
+			'Returns the config with the segment ID and newsletter ID for each email channel. Intended for trouble-shooting and confirming the correct config is in place.',
+		security: [{ pandaCookie: [] }],
+		responses: {
+			'200': {
+				description: 'The per-channel email config.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/EmailChannelConfig' },
+						examples: {
+							newsletter: {
+								$ref: '#/components/examples/EmailChannelConfig',
+							},
+						},
+					},
+				},
+			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
+		},
+	},
+} as const;

@@ -131,4 +131,10 @@ export const channelsRouter = Router()
 		(_req: Request, res: Response) => {
 			res.json(channelAudiences);
 		},
-	);
+	)
+	// not requiring permissions for this endpoint as could be
+	// needed for troubleshooting by engineers on rota
+	// who wouldn't necessarily have DispatchAccess
+	.get('/config/email', authMiddleware, (_req: Request, res: Response) => {
+		res.json(newsletterSegments);
+	});
