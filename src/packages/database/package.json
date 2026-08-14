@@ -7,7 +7,7 @@
 		"typecheck": "tsc --noEmit",
 		"db:migration:create": "bun run scripts/env/development/create-db-migration.ts",
 		"db:migration:apply": "bun x drizzle-kit migrate --config=drizzle.config.ts",
-		"db:migration:tunnel": "bun run scripts/env/remote/open-db-migration-tunnel.ts",
+		"db:migration:tunnel": "bun run scripts/env/remote/start-remote-db-port-forward.ts",
 		"db:migration:remote-apply": "bun run scripts/env/remote/prepare-and-apply-remote-db-migrations.ts",
 		"db:reset": "bash scripts/env/development/reset-db.sh",
 		"db:migration:check": "bun x drizzle-kit check --config=drizzle.config.ts"

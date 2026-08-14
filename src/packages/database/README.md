@@ -64,6 +64,29 @@ command:
 bun run db:migration:remote-apply --stage CODE
 ```
 
+#### Migration diagram
+
+```mermaid
+flowchart TB
+  A["bun run<br/>db:migration:remote-apply"]
+  B["prepare-and-apply-remote-db-migrations.ts"]
+
+  A --> B
+
+  B --> C["Create connection to<br/>localhost:6543"]
+  C --> D["SSM port-forward"]
+
+  subgraph VPC["VPC"]
+    subgraph SG["Shared security group"]
+      E["EC2 migration host"]
+      F["Postgres database<br/>:5432"]
+    end
+  end
+
+  D --> E
+  E -->|"forwards to remote host:5432"| F
+```
+
 `db:migration:remote-apply` now opens the SSM tunnel for the requested stage,
 waits for the forwarded local port, connects over SSL, runs the migration, and
 then closes the tunnel.

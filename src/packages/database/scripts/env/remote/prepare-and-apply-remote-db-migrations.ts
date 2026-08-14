@@ -24,7 +24,7 @@ const tunnelProcess = Bun.spawn({
 	cmd: [
 		'bun',
 		'run',
-		'scripts/env/remote/open-db-migration-tunnel.ts',
+		'scripts/env/remote/start-remote-db-port-forward.ts',
 		'--stage',
 		config.stage,
 		'--local-port',
