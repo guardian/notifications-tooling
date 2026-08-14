@@ -94,9 +94,15 @@ then closes the tunnel.
 You do not need to run `db:migration:tunnel` first when using
 `db:migration:remote-apply`.
 
-`db:migration:tunnel` still exists for manual inspection or other one-off
-database access, for example when connecting with `psql` or a GUI client such
-as DBeaver over the forwarded local port.
+### How to connect to the DB using Dbeaver
+1. Download Dbeaver using brew 
+    `brew install --cask dbeaver-community`
+2. Retrieve the username and password from the `/[stage]/notifications/dispatch/db` secret in AWS Secret Manager using the composer AWS profile.
+3. Open the ssm session by running `bun run db:migration:tunnel --stage CODE`. This creates a long lived connection that will run in the terminal.
+4. Add a new postgres db connection
+5. Fill in the port ( default is `6543`), host `localhost`, database name `dispatchdb`.
+6. Fill in the sensitive db credentials (user, password).
+7. Finish 
 
 ### Reset local database
 
