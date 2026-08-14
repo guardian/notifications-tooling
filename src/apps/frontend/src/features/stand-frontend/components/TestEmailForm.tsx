@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ApiError } from '../../../api/errors';
 import type {
 	TestEmailResponse,
@@ -13,16 +13,22 @@ import type {
 import { validateGuardianEmail } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
-import type { NotificationState } from '../types';
+import type { AudienceSegment, NotificationState } from '../types';
+import { LoadingSpinner } from './LoadingSpinner';
 
-const constructRequest = (
+type TestSendParams = {
+	emailInput: string;
+	audienceSegments: AudienceSegment[];
+	emailSubjectLine: string;
+	subject: string;
+	preview: string;
+	webUrl: string;
+};
+
+const getSendParams = (
 	emailInput: string,
 	notificationState: NotificationState,
-): TestEmailSendRequest | undefined => {
-	if (validateGuardianEmail(emailInput)) {
-		return undefined;
-	}
-
+): TestSendParams | undefined => {
 	const { parameters, content } = notificationState;
 	if (parameters?.type !== 'email') {
 		return undefined;
@@ -46,37 +52,53 @@ const constructRequest = (
 		: subject;
 
 	return {
-		channels: {
-			newsletter: {
-				audience: {
-					type: 'email',
-					items: [emailInput],
-				},
-				variants: audienceSegments,
-				compose: {
-					items: ['lead-story'],
-					subject: emailSubjectLine,
-				},
-			},
-		},
-		options: {
-			dryRun: false,
-		},
-		// TO DO - what format?
-		idempotencyKey: `${emailInput}-${emailSubjectLine}-${Date.now()}`,
-		content: {
-			items: {
-				'lead-story': {
-					type: 'newsletter',
-					title: subject,
-					body: preview,
-					link: content.webUrl,
-				},
-			},
-		},
-		sender: 'notifications-tooling-spa/v1',
+		emailInput,
+		audienceSegments,
+		emailSubjectLine,
+		subject,
+		preview,
+		webUrl: content.webUrl,
 	};
 };
+
+const makePayload = ({
+	emailInput,
+	emailSubjectLine,
+	audienceSegments,
+	subject,
+	preview,
+	webUrl,
+}: TestSendParams): TestEmailSendRequest => ({
+	channels: {
+		newsletter: {
+			audience: {
+				type: 'email',
+				items: [emailInput],
+			},
+			variants: audienceSegments,
+			compose: {
+				items: ['lead-story'],
+				subject: emailSubjectLine,
+			},
+		},
+	},
+	options: {
+		dryRun: false,
+	},
+	// TO DO - what format?
+	idempotencyKey: `${emailInput}-${emailSubjectLine}-${Date.now()}`,
+	content: {
+		items: {
+			'lead-story': {
+				type: 'newsletter',
+				title: subject,
+				body: preview,
+				link: webUrl,
+			},
+		},
+	},
+	sender: 'notifications-tooling-spa/v1',
+});
 
 export const TestEmailForm = () => {
 	const { notification, requestTestEmailSend } = useContext(
@@ -85,19 +107,42 @@ export const TestEmailForm = () => {
 	const [emailInput, setEmailInput] = useState('');
 	const [sendInProgress, setSendInProgress] = useState(false);
 	const [confirmation, setConfirmation] = useState<TestEmailResponse>();
+	const [paramsLastUsed, setParamsLastUsed] = useState<TestSendParams>();
 	const [sendError, setSendError] = useState<ApiError>();
 
-	const inputError = validateGuardianEmail(emailInput);
-	const request = constructRequest(emailInput, notification);
+	const emailValidationIssue = validateGuardianEmail(emailInput);
+	const sendParams = getSendParams(emailInput, notification);
+
+	// remove the confirmation if the user changes anything that would
+	// affect the request payload
+	useEffect(() => {
+		if (!confirmation || !paramsLastUsed) {
+			return;
+		}
+		const newSendParams = getSendParams(emailInput, notification);
+		if (!newSendParams) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect -- is ok
+			return setConfirmation(undefined);
+		}
+
+		if (
+			Object.entries(newSendParams).some(([key, value]) => {
+				return paramsLastUsed[key as keyof TestSendParams] !== value;
+			})
+		) {
+			return setConfirmation(undefined);
+		}
+	}, [confirmation, paramsLastUsed, emailInput, notification]);
 
 	const handleSend = () => {
-		if (!request) {
+		if (!sendParams || validateGuardianEmail(emailInput)) {
 			return;
 		}
 
 		setConfirmation(undefined);
 		setSendInProgress(true);
-		void requestTestEmailSend(request)
+		setParamsLastUsed(sendParams);
+		void requestTestEmailSend(makePayload(sendParams))
 			.then((response) => {
 				setConfirmation(response);
 			})
@@ -115,7 +160,7 @@ export const TestEmailForm = () => {
 				}
 			})
 			.finally(() => {
-				setTimeout(() => setSendInProgress(false), 1000);
+				setSendInProgress(false);
 			});
 	};
 
@@ -136,8 +181,8 @@ export const TestEmailForm = () => {
 				aria-label="email address for test send"
 				value={emailInput}
 				onChange={setEmailInput}
-				error={inputError}
-				isInvalid={emailInput.length > 0 && !!inputError}
+				error={emailValidationIssue}
+				isInvalid={emailInput.length > 0 && !!emailValidationIssue}
 			/>
 			<Typography element="div" variant="helpTextFormMd">
 				Sends test only to the email address above, on the enabled channels -
@@ -145,12 +190,18 @@ export const TestEmailForm = () => {
 			</Typography>
 
 			<Button
-				isDisabled={sendInProgress || !request || !!inputError}
+				isDisabled={
+					sendInProgress ||
+					!sendParams ||
+					!!emailValidationIssue ||
+					!!confirmation
+				}
 				cssOverrides={css({
 					alignSelf: 'flex-start',
 					marginTop: semanticSpacing.stackXs,
 				})}
 				onPress={handleSend}
+				icon={sendInProgress ? <LoadingSpinner /> : undefined}
 			>
 				Send test notification
 			</Button>
