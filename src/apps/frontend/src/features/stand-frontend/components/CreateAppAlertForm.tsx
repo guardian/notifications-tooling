@@ -115,7 +115,7 @@ export const CreateAppAlertForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton />
+					<SendButton channel={'push'} />
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />

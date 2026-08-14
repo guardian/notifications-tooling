@@ -12,12 +12,14 @@ import {
 	validateNotificationForm,
 } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
-import type { NotificationState } from '../types';
+import type { ChannelOption } from '../types';
 
-const buttonText = (
-	parameters: Required<NotificationState>['parameters'],
-): string => {
-	switch (parameters.type) {
+interface SendButtonProps {
+	channel?: ChannelOption;
+}
+
+const buttonText = (channel: ChannelOption): string => {
+	switch (channel) {
 		case 'email':
 			return 'Send newsletter email';
 		case 'push':
@@ -25,7 +27,7 @@ const buttonText = (
 	}
 };
 
-export const SendButton = () => {
+export const SendButton = ({ channel = 'email' }: SendButtonProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
@@ -71,7 +73,7 @@ export const SendButton = () => {
 				}}
 				variant="primary"
 			>
-				{buttonText(parameters)}
+				{buttonText(channel)}
 			</Button>
 			{hasFallbackError && (
 				<InlineMessage level="error">
