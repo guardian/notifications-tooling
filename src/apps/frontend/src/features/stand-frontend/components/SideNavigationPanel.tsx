@@ -9,6 +9,7 @@ import { SidebarStepperNavigation } from '@guardian/stand/SidebarStepperNavigati
 import type { SidebarStepperNavigationTheme } from '@guardian/stand/SidebarStepperNavigation';
 import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef } from 'react';
+import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import { layer, topBarHeight } from '../themes';
 
 const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
@@ -46,8 +47,6 @@ const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 
 export const DEFAULT_SIDE_NAV_HREF =
 	SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
-
-const ACTIVE_SECTION_VIEWPORT_POSITION = 0.75;
 
 const theme: SidebarStepperNavigationTheme = {
 	navigation: {
