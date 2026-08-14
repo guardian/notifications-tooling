@@ -25,7 +25,7 @@ const preview: Preview = {
 			// A fresh QueryClient per story avoids cache bleed between stories.
 			const queryClient = new QueryClient();
 			return (
-				<BrowserRouter>
+				<BrowserRouter basename={window.location.pathname}>
 					<QueryClientProvider client={queryClient}>
 						<Story />
 					</QueryClientProvider>
