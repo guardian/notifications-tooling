@@ -1,22 +1,25 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { getChannelDescription } from '../../../util/display-text-helpers';
-import { emailDeliveryOptionNameMap } from '../option-values';
+import { deliveryOptionNameMap } from '../option-values';
 import type { ChannelOption } from '../types';
-import { type EmailDeliveryOption } from '../types';
+import { type DeliveryOption } from '../types';
 import { SelectableTile } from './SelectableTile';
 
 interface DeliveryAndTimingSelectorProps {
-	selectedDeliveryTiming?: EmailDeliveryOption;
-	onChange: (deliveryTiming?: EmailDeliveryOption) => void;
+	selectedDeliveryTiming?: DeliveryOption;
+	onChange: (deliveryTiming?: string) => void;
 	channel: ChannelOption;
 }
 
 export const DeliveryAndTimingSelector = ({
-	selectedDeliveryTiming,
+	selectedDeliveryTiming = 'immediate',
 	onChange,
 	channel,
 }: DeliveryAndTimingSelectorProps) => {
+	const selectedDeliveryAndTimingParams =
+		deliveryOptionNameMap[selectedDeliveryTiming];
+
 	return (
 		<div
 			css={{
@@ -36,25 +39,15 @@ export const DeliveryAndTimingSelector = ({
 				or scheduled for later
 			</Typography>
 
-			{Object.entries(emailDeliveryOptionNameMap).map(
-				([emailDeliveryOption, { name, description, symbol }]) => (
-					<SelectableTile
-						key={emailDeliveryOption}
-						tileLabel={name}
-						tileValue={emailDeliveryOption}
-						tileDescription={description}
-						tileSymbol={symbol}
-						selectedValue={selectedDeliveryTiming}
-						onChange={(selected) => {
-							switch (selected) {
-								case 'immediate':
-									onChange(selected);
-									break;
-							}
-						}}
-					/>
-				),
-			)}
+			<SelectableTile
+				key={selectedDeliveryTiming}
+				tileLabel={selectedDeliveryAndTimingParams.name}
+				tileValue={selectedDeliveryTiming}
+				tileDescription={selectedDeliveryAndTimingParams.description}
+				tileSymbol={selectedDeliveryAndTimingParams.symbol}
+				selectedValue={selectedDeliveryTiming}
+				onChange={onChange}
+			/>
 		</div>
 	);
 };

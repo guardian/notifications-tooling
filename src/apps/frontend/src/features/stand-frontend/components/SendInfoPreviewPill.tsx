@@ -2,15 +2,15 @@ import { semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { activePillTheme } from '../themes';
-import type { ChannelOption, EmailDeliveryOption } from '../types';
+import type { ChannelOption, DeliveryOption } from '../types';
 
 interface SendInfoPreviewPillProps {
 	channel?: ChannelOption;
-	deliveryTiming?: EmailDeliveryOption;
+	deliveryTiming?: DeliveryOption;
 	isConfirmation?: boolean;
 }
 
-const getLabel = (value: ChannelOption | EmailDeliveryOption) => {
+const getLabel = (value: ChannelOption | DeliveryOption) => {
 	switch (value) {
 		case 'immediate':
 			return 'Immediate send';
@@ -21,7 +21,7 @@ const getLabel = (value: ChannelOption | EmailDeliveryOption) => {
 	}
 };
 
-const getIcon = (value: ChannelOption | EmailDeliveryOption) => {
+const getIcon = (value: ChannelOption | DeliveryOption) => {
 	switch (value) {
 		case 'immediate':
 			return 'bolt';
@@ -38,7 +38,7 @@ export const SendInfoPreviewPill = ({
 	isConfirmation = false,
 }: SendInfoPreviewPillProps) => {
 	const selectedValues = [channel, deliveryTiming].filter(
-		(value): value is ChannelOption | EmailDeliveryOption => Boolean(value),
+		(value): value is ChannelOption | DeliveryOption => Boolean(value),
 	);
 
 	return (

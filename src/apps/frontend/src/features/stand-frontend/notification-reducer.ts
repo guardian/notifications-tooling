@@ -14,6 +14,7 @@ export const defaultEmailParams: EmailNotification = {
 
 export const defaultPushParams: PushNotification = {
 	type: 'push',
+	pushDeliveryOption: 'appImmediate',
 };
 
 export const defaultState: NotificationState = {
@@ -47,6 +48,15 @@ export const notificationReducer = (
 				parameters: { ...state.parameters, ...action.mod },
 			};
 		}
+		case 'modify-app-alert-parameters': {
+			if (state.parameters?.type !== 'push') {
+				return state;
+			}
+			return {
+				...state,
+				parameters: { ...state.parameters, ...action.mod },
+			};
+		}
 
 		case 'set-channel': {
 			switch (action.channel) {
@@ -65,7 +75,24 @@ export const notificationReducer = (
 				}
 			}
 		}
-
+		// eslint-disable-next-line no-fallthrough -- previous case has exhaustive switch
+		case 'set-delivery-timing': {
+			switch (action.deliveryOption) {
+				case 'immediate':
+					return {
+						...state,
+						hasAttemptedSend: false,
+						parameters: defaultEmailParams,
+					};
+				case 'appImmediate': {
+					return {
+						...state,
+						hasAttemptedSend: false,
+						parameters: defaultPushParams,
+					};
+				}
+			}
+		}
 		// eslint-disable-next-line no-fallthrough -- previous case has exhaustive switch
 		case 'set-attempted-send': {
 			return {

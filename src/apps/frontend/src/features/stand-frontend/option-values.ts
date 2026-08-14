@@ -1,11 +1,17 @@
 import type { Icon } from '@guardian/stand/Icon';
 import type { ComponentProps } from 'react';
-import type { AudienceSegment, EmailDeliveryOption, KickerId } from './types';
+import type { AudienceSegment, DeliveryOption, KickerId } from './types';
 import type { ChannelOption } from './types';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 
 export type ChannelParams = {
+	name: string;
+	description: string;
+	symbol?: IconSymbol;
+};
+
+type DeliveryOptionMeta = {
 	name: string;
 	description: string;
 	symbol?: IconSymbol;
@@ -36,13 +42,16 @@ export const audienceSegmentNameMap: Record<AudienceSegment, string> = {
 	AU: 'Australia',
 };
 
-export const emailDeliveryOptionNameMap: Record<
-	EmailDeliveryOption,
-	{ name: string; description: string; symbol?: IconSymbol }
-> = {
-	immediate: {
-		name: 'Immediate',
-		description: 'Sends right now via Braze',
-		symbol: 'bolt',
-	},
-};
+export const deliveryOptionNameMap: Record<DeliveryOption, DeliveryOptionMeta> =
+	{
+		immediate: {
+			name: 'Immediate',
+			description: 'Sends right now via Braze',
+			symbol: 'bolt',
+		},
+		appImmediate: {
+			name: 'Immediate',
+			description: 'Sends right now',
+			symbol: 'bolt',
+		},
+	};

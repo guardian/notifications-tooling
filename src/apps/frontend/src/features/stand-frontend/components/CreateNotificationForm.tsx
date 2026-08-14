@@ -58,10 +58,10 @@ export const CreateNotificationForm = ({
 	}
 
 	const audienceSegments = notification.parameters.audienceSegments ?? [];
-	const emailDeliveryOption =
-		notification.parameters.type === 'email'
-			? notification.parameters.emailDeliveryOption
-			: undefined;
+	// const emailDeliveryOption =
+	// 	notification.parameters.type === 'email' ? notification.parameters.emailDeliveryOption : notification.parameters.pushDeliveryOption
+
+	const deliveryOption = 'immediate'; //TODO - change to notification.parameters.emailDeliveryOption
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
 
@@ -139,13 +139,18 @@ export const CreateNotificationForm = ({
 					isActive={activeSectionHref === '#delivery-timing-section'}
 				>
 					<DeliveryAndTimingSelector
-						selectedDeliveryTiming={emailDeliveryOption}
+						selectedDeliveryTiming={deliveryOption}
 						channel={notification.parameters.type}
-						onChange={(emailDeliveryOption) => {
-							updateNotification({
-								type: 'modify-email-parameters',
-								mod: { emailDeliveryOption },
-							});
+						onChange={(deliveryOption) => {
+							switch (deliveryOption) {
+								case 'immediate':
+								case 'appImmediate':
+									updateNotification({
+										type: 'set-delivery-timing',
+										deliveryOption,
+									});
+									break;
+							}
 						}}
 					/>
 				</NotificationFormSection>

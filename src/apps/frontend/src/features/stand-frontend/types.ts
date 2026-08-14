@@ -9,7 +9,7 @@ import type { SendNotificationResponse } from './api/schemas';
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
 export type KickerId = 'breaking-news' | 'exclusive';
-export type EmailDeliveryOption = 'immediate';
+export type DeliveryOption = 'immediate' | 'appImmediate';
 export type AudienceSegment = 'UK' | 'US' | 'AU';
 
 export type SendingResult =
@@ -29,11 +29,12 @@ export type EmailNotification = {
 	preview?: string;
 	emailHtml?: string;
 	audienceSegments?: AudienceSegment[];
-	emailDeliveryOption?: EmailDeliveryOption;
+	emailDeliveryOption?: DeliveryOption;
 };
 
 export type PushNotification = {
 	type: 'push';
+	pushDeliveryOption?: DeliveryOption;
 	audienceSegments?: AudienceSegment[];
 };
 
@@ -59,8 +60,16 @@ export type NotificationAction =
 			channel: ChannelOption;
 	  }
 	| {
+			type: 'set-delivery-timing';
+			deliveryOption: DeliveryOption;
+	  }
+	| {
 			type: 'modify-email-parameters';
 			mod: Partial<EmailNotification>;
+	  }
+	| {
+			type: 'modify-app-alert-parameters';
+			mod: Partial<PushNotification>;
 	  }
 	| {
 			type: 'waiting-for-article';

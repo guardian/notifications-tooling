@@ -34,11 +34,19 @@ export const Unselected: SelectorStory = {
 	},
 };
 
-export const Selected: SelectorStory = {
+export const ImmediateDeliveryInEmailNotification: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: 'immediate',
 		onChange: () => {},
 		channel: 'email',
+	},
+};
+
+export const SImmediateDeliveryInAppAlert: SelectorStory = {
+	args: {
+		selectedDeliveryTiming: 'appImmediate',
+		onChange: () => {},
+		channel: 'push',
 	},
 };
 

@@ -6,11 +6,7 @@ import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layer, topBarHeight } from '../themes';
-import type {
-	AudienceSegment,
-	ChannelOption,
-	EmailDeliveryOption,
-} from '../types';
+import type { AudienceSegment, ChannelOption, DeliveryOption } from '../types';
 import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,
@@ -21,7 +17,7 @@ import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 interface EmailPreviewSectionProps {
 	selectedSegments: AudienceSegment[];
 	selectedChannel?: ChannelOption;
-	selectedDeliveryTiming?: EmailDeliveryOption;
+	selectedDeliveryTiming?: DeliveryOption;
 }
 
 export const EmailPreviewSection = ({

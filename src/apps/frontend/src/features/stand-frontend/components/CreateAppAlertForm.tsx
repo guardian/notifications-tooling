@@ -6,8 +6,10 @@ import type { PropsWithChildren } from 'react';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { topBarHeight } from '../themes';
+import type { DeliveryOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
+import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
@@ -45,6 +47,12 @@ export const CreateAppAlertForm = ({
 }: CreateAppAlertFormProps) => {
 	const { updateNotification } = useContext(NotificationFormContext);
 
+	// const pushDeliveryOption =
+	// 	notification.parameters.type === 'push'
+	// 		? notification.parameters.pushDeliveryOption
+	// 		: notification.parameters.emailDeliveryOption;
+
+	const pushDeliveryOption = 'appImmediate'; //TODO - change to notification.parameters.pushDeliveryOption
 	return (
 		<div
 			css={{
@@ -77,7 +85,7 @@ export const CreateAppAlertForm = ({
 					<ArticleImportControl />
 
 					<ChannelSelector
-						selectedChannel={'push'}
+						selectedChannel={'push'} //TODO -change to notification.parameters.type
 						onChange={(channel) => {
 							switch (channel) {
 								case 'email':
@@ -85,6 +93,21 @@ export const CreateAppAlertForm = ({
 									updateNotification({ type: 'set-channel', channel });
 									break;
 							}
+						}}
+					/>
+				</NotificationFormSection>
+				<NotificationFormSection
+					id="delivery-timing-section"
+					isActive={activeSectionHref === '#delivery-timing-section'}
+				>
+					<DeliveryAndTimingSelector
+						selectedDeliveryTiming={pushDeliveryOption}
+						channel={'push'} //TODO - change to notification.parameters.type
+						onChange={(pushDeliveryOption) => {
+							updateNotification({
+								type: 'set-delivery-timing',
+								deliveryOption: pushDeliveryOption as DeliveryOption,
+							});
 						}}
 					/>
 				</NotificationFormSection>
