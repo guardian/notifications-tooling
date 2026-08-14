@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { WithNotificationContext } from '../../../stories/story-helpers';
+import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import { defaultState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
@@ -74,7 +75,10 @@ export const SectionNavigation: Story = {
 			}
 			const sectionTop = section.getBoundingClientRect().top + window.scrollY;
 			window.scrollTo({
-				top: sectionTop - window.innerHeight * 0.75 + 1,
+				top:
+					sectionTop -
+					window.innerHeight * ACTIVE_SECTION_VIEWPORT_POSITION +
+					1,
 			});
 			window.dispatchEvent(new Event('scroll'));
 		};
