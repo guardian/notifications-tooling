@@ -21,7 +21,7 @@ type SelectorStory = StoryObj<typeof meta>;
 export const Unselected: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: undefined,
-		onChange: () => {},
+		onChange: () => { },
 		channel: 'email',
 	},
 	play: async ({ canvasElement }) => {
@@ -37,7 +37,7 @@ export const Unselected: SelectorStory = {
 export const Selected: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: 'immediate',
-		onChange: () => {},
+		onChange: () => { },
 		channel: 'email',
 	},
 };
@@ -71,7 +71,11 @@ export const PreviewAppAlert: SendInfoPreviewPillType = {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('App alert')).toBeVisible();
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
-		await expect(canvas.getByText('mobile_screensaver')).toBeInTheDocument();
-		await expect(canvas.getByText('bolt')).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('img', { name: 'App alert icon' }),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('img', { name: 'Immediate send icon' }),
+		).toBeInTheDocument();
 	},
 };
