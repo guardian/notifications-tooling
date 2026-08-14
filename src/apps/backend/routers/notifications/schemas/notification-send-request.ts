@@ -1,5 +1,7 @@
 import {
 	appPushEditionIdsByTopicType,
+	appPushTestEditionIdsByTopicType,
+	appPushTestTopicTypeIds,
 	appPushTopicTypeIds,
 	MAX_APP_PUSH_TOPICS,
 	MAX_NEWSLETTER_SEGMENTS,
@@ -153,45 +155,80 @@ const hasUniqueTopics = (items: Array<{ type: string; name: string }>) =>
  * backend resolves the pair to a downstream topic (kept server-side). The set
  * of topic types and their editions is served by `GET /v1/channels/audiences`.
  */
-const appPushTopicSelection = z
-	.strictObject({
-		type: z.enum(appPushTopicTypeIds).meta({
-			description: 'Topic type id (the FE\'s "topic type" dropdown).',
-			example: appPushTopicTypeIds[0],
-		}),
-		name: z.string().min(1).meta({
-			description: 'Edition id within the chosen topic type.',
-			example: 'uk',
-		}),
-	})
-	.superRefine((topic, ctx) => {
-		const editions: readonly string[] =
-			appPushEditionIdsByTopicType[topic.type];
-		if (!editions.includes(topic.name)) {
-			ctx.addIssue({
-				code: 'custom',
-				path: ['name'],
-				message: `'${topic.name}' is not a valid edition for topic type '${topic.type}'. Valid editions: ${editions.join(', ')}.`,
-			});
-		}
-	});
+const appPushTopicSelection = <
+	const TopicTypeIds extends readonly [string, ...string[]],
+>(
+	topicTypeIds: TopicTypeIds,
+	editionIdsByTopicType: Record<TopicTypeIds[number], readonly string[]>,
+	editionExample: string,
+) =>
+	z
+		.strictObject({
+			type: z.enum(topicTypeIds).meta({
+				description: 'Topic type id (the FE\'s "topic type" dropdown).',
+				example: topicTypeIds[0],
+			}),
+			name: z.string().min(1).meta({
+				description: 'Edition id within the chosen topic type.',
+				example: editionExample,
+			}),
+		})
+		.superRefine((topic, ctx) => {
+			const editions: readonly string[] = editionIdsByTopicType[topic.type];
+			if (!editions.includes(topic.name)) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['name'],
+					message: `'${topic.name}' is not a valid edition for topic type '${topic.type}'. Valid editions: ${editions.join(', ')}.`,
+				});
+			}
+		});
 
 /**
  * Push targets a list of topic-type/edition pairs, each resolving to one
  * downstream topic, capped at the per-push limit.
  */
-const appPushTopicAudience = z.strictObject({
-	type: z.literal('topic'),
-	items: z
-		.array(appPushTopicSelection)
-		.min(1)
-		.max(MAX_APP_PUSH_TOPICS)
-		.refine(hasUniqueTopics, { message: 'app-push topics must be unique.' })
-		.meta({
-			description: `Up to ${MAX_APP_PUSH_TOPICS} topic-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
-			example: [{ type: appPushTopicTypeIds[0], name: 'uk' }],
-		}),
-});
+const appPushTopicAudience = <
+	const TopicTypeIds extends readonly [string, ...string[]],
+>(
+	topicTypeIds: TopicTypeIds,
+	editionIdsByTopicType: Record<TopicTypeIds[number], readonly string[]>,
+	exampleItem: { type: string; name: string },
+	description: string,
+) =>
+	z.strictObject({
+		type: z.literal('topic'),
+		items: z
+			.array(
+				appPushTopicSelection(
+					topicTypeIds,
+					editionIdsByTopicType,
+					exampleItem.name,
+				),
+			)
+			.min(1)
+			.max(MAX_APP_PUSH_TOPICS)
+			.refine(hasUniqueTopics, { message: 'app-push topics must be unique.' })
+			.meta({ description, example: [exampleItem] }),
+	});
+
+const productionAppPushTopicAudience = appPushTopicAudience(
+	appPushTopicTypeIds,
+	appPushEditionIdsByTopicType,
+	{ type: appPushTopicTypeIds[0], name: 'uk' },
+	`Up to ${MAX_APP_PUSH_TOPICS} topic-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
+);
+
+/** Test push may only target the internal test topic, never a production one. */
+const testAppPushTopicAudience = appPushTopicAudience(
+	appPushTestTopicTypeIds,
+	appPushTestEditionIdsByTopicType,
+	{
+		type: appPushTestTopicTypeIds[0],
+		name: appPushTestEditionIdsByTopicType[appPushTestTopicTypeIds[0]][0],
+	},
+	`Up to ${MAX_APP_PUSH_TOPICS} internal test topic pairs. Test sends may only target the internal test topic; production topics are rejected.`,
+);
 
 /** Ad-hoc test recipients addressed by email. */
 const testEmailAudience = z.strictObject({
@@ -257,7 +294,13 @@ const newsletterTestPlan = z.strictObject({
 
 /** An app-push delivery plan: who to target and the single item to send. */
 const appPushPlan = z.strictObject({
-	audience: appPushTopicAudience,
+	audience: productionAppPushTopicAudience,
+	compose: appPushCompose,
+});
+
+/** A test app-push plan targets the internal test topic only. */
+const appPushTestPlan = z.strictObject({
+	audience: testAppPushTopicAudience,
 	compose: appPushCompose,
 });
 
@@ -280,11 +323,15 @@ const channelsSchema = z
 
 const testChannelsSchema = z
 	.strictObject({
-		[NotificationChannel.Newsletter]: newsletterTestPlan,
+		[NotificationChannel.Newsletter]: newsletterTestPlan.optional(),
+		[NotificationChannel.AppPushNotification]: appPushTestPlan.optional(),
+	})
+	.refine((channels) => Object.keys(channels).length > 0, {
+		message: 'At least one channel must be provided.',
 	})
 	.meta({
 		description:
-			'Test delivery plans keyed by channel. Test sends currently support newsletter email recipients only.',
+			'Test delivery plans keyed by channel. Newsletter targets explicit email recipients; app-push targets the internal test topic only. A channel may appear at most once; provide at least one.',
 	});
 
 const requestBaseShape = {
@@ -393,34 +440,9 @@ export const notificationSendRequestSchema = z
 		}
 	})
 	.meta({
+		// Request-body examples live in the OpenAPI `examples` map
+		// (components/examples/notification-send-request.ts), so none is set here.
 		description: 'The POST /v1/notifications request body.',
-		example: {
-			idempotencyKey: '2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-			content: {
-				items: {
-					'lead-story': {
-						type: NotificationChannel.Newsletter,
-						title: 'Your morning briefing',
-						body: 'The three stories shaping the day, plus what to keep an eye on.',
-						link: 'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
-					},
-				},
-			},
-			channels: {
-				[NotificationChannel.Newsletter]: {
-					audience: {
-						type: 'segment',
-						items: [newsletterSegmentIds[0]],
-					},
-					compose: {
-						items: ['lead-story'],
-						subject: 'Your morning briefing',
-					},
-				},
-			},
-			sender: 'editorial-newsletters',
-			options: { dryRun: false, scheduledFor: null },
-		},
 	});
 
 export type NotificationSendRequest = z.infer<
@@ -443,12 +465,27 @@ export const notificationTestSendRequestSchema = z
 			.default({ dryRun: false }),
 	})
 	.superRefine((value, ctx) => {
+		const composeRefs: ComposeReference[] = [];
+
 		const newsletter = value.channels[NotificationChannel.Newsletter];
-		const composeRefs = newsletter.compose.items.map((key, index) => ({
-			channel: NotificationChannel.Newsletter,
-			key,
-			path: ['compose', 'items', index],
-		}));
+		if (newsletter) {
+			newsletter.compose.items.forEach((key, index) => {
+				composeRefs.push({
+					channel: NotificationChannel.Newsletter,
+					key,
+					path: ['compose', 'items', index],
+				});
+			});
+		}
+
+		const appPush = value.channels[NotificationChannel.AppPushNotification];
+		if (appPush) {
+			composeRefs.push({
+				channel: NotificationChannel.AppPushNotification,
+				key: appPush.compose.use,
+				path: ['compose', 'use'],
+			});
+		}
 
 		for (const issue of composeReferenceIssues(
 			value.content.items,
@@ -458,35 +495,9 @@ export const notificationTestSendRequestSchema = z
 		}
 	})
 	.meta({
+		// Request-body examples live in the OpenAPI `examples` map
+		// (components/examples/notification-test-send-request.ts), so none is set here.
 		description: 'The POST /v1/notification-tests request body.',
-		example: {
-			idempotencyKey: 'test-2f1c9a7e-8b0d-4a3e-9c1b-7d6e5f4a3b2c',
-			content: {
-				items: {
-					'lead-story': {
-						type: NotificationChannel.Newsletter,
-						title: 'Your morning briefing',
-						body: 'The three stories shaping the day.',
-						link: 'https://www.theguardian.com/environment/2026/jul/20/global-climate-deal',
-					},
-				},
-			},
-			channels: {
-				[NotificationChannel.Newsletter]: {
-					audience: {
-						type: 'email',
-						items: ['newsletters.test@theguardian.com'],
-					},
-					variants: [newsletterSegmentIds[0]],
-					compose: {
-						items: ['lead-story'],
-						subject: '[TEST] Your morning briefing',
-					},
-				},
-			},
-			sender: 'notifications-tooling-spa/v1',
-			options: { dryRun: false },
-		},
 	});
 
 export type NotificationTestSendRequest = z.infer<

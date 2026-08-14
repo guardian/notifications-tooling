@@ -8,12 +8,12 @@ this path.
 sequenceDiagram
 	autonumber
 	actor Client
-	participant Router as Notifications router
-	participant Dispatch as dispatchNotification
+	participant Router as Notification-tests router
+	participant Dispatch as dispatchNotificationTest
 	participant Renderer as Email-rendering
 	participant Braze as Braze REST API
 
-	Client->>Router: POST /v1/notifications
+	Client->>Router: POST /v1/notification-tests
 	Router->>Router: Validate request and lowercase recipient emails
 
 	alt Invalid request
@@ -40,13 +40,18 @@ sequenceDiagram
 
 			Note over Dispatch,Braze: Profile processing is asynchronous and Dispatch does not wait or retry
 
-			loop Each rendered variant
+			par Each rendered variant
 				Dispatch->>Braze: POST /messages/send to stable recipient aliases
 				Braze-->>Dispatch: Message request accepted
 			end
 
-			Dispatch-->>Router: Complete
-			Router-->>Client: 202 Accepted
+			alt A variant's send failed
+				Dispatch-->>Router: Throw the provider error (all variants still attempted)
+				Router-->>Client: 502 (or 504 on timeout)
+			else All variants sent
+				Dispatch-->>Router: Per-variant outcomes
+				Router-->>Client: 202 Accepted
+			end
 		end
 	end
 ```
@@ -63,7 +68,10 @@ sequenceDiagram
   recipient in the request.
 - Direct sends use `recipient_subscription_state: "all"` and do not trigger a
   production campaign.
-- Braze calls are sequential. If a later send fails, earlier accepted sends
-  cannot be rolled back.
+- The `/users/track` profile update runs once before any `/messages/send`. The
+  per-variant sends then run in parallel via `Promise.allSettled`, so one send's
+  failure does not abort the others, and successful sends cannot be rolled back.
 - Dispatch adds no propagation delay and performs no automatic retry. A `202`
-  confirms API acceptance, not inbox delivery.
+  confirms API acceptance once every variant has sent, not inbox delivery; if any
+  variant's send fails, dispatch rethrows the first provider error and the error
+  middleware maps it to `504` on timeout and `502` otherwise.

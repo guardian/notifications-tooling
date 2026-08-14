@@ -123,6 +123,19 @@ const newsletterTestRequest = (overrides: Record<string, unknown> = {}) => ({
 	...overrides,
 });
 
+const pushTestRequest = (overrides: Record<string, unknown> = {}) => ({
+	idempotencyKey: 'test-push-2026-07-08',
+	sender: 'notifications-tooling-spa/v1',
+	content: { items: { lead: pushItem() } },
+	channels: {
+		[NotificationChannel.AppPushNotification]: {
+			audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+			compose: { use: 'lead' },
+		},
+	},
+	...overrides,
+});
+
 // --- Assertion helpers ---
 
 const parse = (input: unknown) =>
@@ -708,6 +721,21 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/app-push/audience/items/0/type');
 		});
 
+		it('rejects the internal test topic on the production endpoint', () => {
+			expect(
+				pathsOf(
+					pushRequestWithPlan(
+						pushPlan({
+							audience: {
+								type: 'topic',
+								items: [{ type: 'test', name: 'test' }],
+							},
+						}),
+					),
+				),
+			).toContain('channels/app-push/audience/items/0/type');
+		});
+
 		it('rejects an edition that does not belong to the topic type', () => {
 			expect(
 				pathsOf(
@@ -1012,7 +1040,8 @@ describe('notificationSendRequestSchema', () => {
 });
 
 describe('notificationTestSendRequestSchema', () => {
-	const testPathsOf = (input: unknown) => {
+	// Asserts the schema rejects the input, then returns the failing field paths.
+	const rejectionPathsOf = (input: unknown) => {
 		const result = notificationTestSendRequestSchema.safeParse(input);
 		expect(result.success).toBe(false);
 		return result.success
@@ -1032,7 +1061,7 @@ describe('notificationTestSendRequestSchema', () => {
 
 	it('rejects a segment audience', () => {
 		expect(
-			testPathsOf(newsletterRequest()).some((path) =>
+			rejectionPathsOf(newsletterRequest()).some((path) =>
 				path.startsWith('channels/newsletter/audience'),
 			),
 		).toBe(true);
@@ -1041,7 +1070,7 @@ describe('notificationTestSendRequestSchema', () => {
 	it('rejects an invalid email address', () => {
 		const request = newsletterTestRequest();
 		request.channels.newsletter.audience.items = ['not-an-email'];
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/newsletter/audience/items/0',
 		);
 	});
@@ -1054,25 +1083,25 @@ describe('notificationTestSendRequestSchema', () => {
 		>;
 		audience.segments = ['UK'];
 
-		expect(testPathsOf(request)).toContain('channels/newsletter/audience');
+		expect(rejectionPathsOf(request)).toContain('channels/newsletter/audience');
 	});
 
 	it('requires at least one rendering variant', () => {
 		const request = newsletterTestRequest();
 		request.channels.newsletter.variants = [];
-		expect(testPathsOf(request)).toContain('channels/newsletter/variants');
+		expect(rejectionPathsOf(request)).toContain('channels/newsletter/variants');
 	});
 
 	it('rejects duplicate rendering variants', () => {
 		const request = newsletterTestRequest();
 		request.channels.newsletter.variants = ['UK', 'UK'];
-		expect(testPathsOf(request)).toContain('channels/newsletter/variants');
+		expect(rejectionPathsOf(request)).toContain('channels/newsletter/variants');
 	});
 
 	it('rejects a compose reference to a missing item', () => {
 		const request = newsletterTestRequest();
 		request.channels.newsletter.compose.items = ['missing'];
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/newsletter/compose/items/0',
 		);
 	});
@@ -1080,7 +1109,7 @@ describe('notificationTestSendRequestSchema', () => {
 	it('rejects a compose reference to the wrong channel type', () => {
 		const request = newsletterTestRequest();
 		request.content.items.lead = pushItem();
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/newsletter/compose/items/0',
 		);
 	});
@@ -1091,7 +1120,7 @@ describe('notificationTestSendRequestSchema', () => {
 			{ length: MAX_TEST_EMAIL_RECIPIENTS + 1 },
 			(_, index) => `test-${index}@theguardian.com`,
 		);
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/newsletter/audience/items',
 		);
 	});
@@ -1109,10 +1138,77 @@ describe('notificationTestSendRequestSchema', () => {
 
 	it('rejects scheduling', () => {
 		expect(
-			testPathsOf({
+			rejectionPathsOf({
 				...newsletterTestRequest(),
 				options: { dryRun: true, scheduledFor: null },
 			}),
 		).toContain('options');
+	});
+
+	it('accepts an app-push test to the internal test topic', () => {
+		const result =
+			notificationTestSendRequestSchema.safeParse(pushTestRequest());
+		expect(result.success).toBe(true);
+	});
+
+	it('accepts a combined newsletter and app-push test', () => {
+		const result = notificationTestSendRequestSchema.safeParse({
+			idempotencyKey: 'test-combined-2026-07-08',
+			sender: 'notifications-tooling-spa/v1',
+			content: { items: { news: newsletterItem(), push: pushItem() } },
+			channels: {
+				[NotificationChannel.Newsletter]: {
+					audience: {
+						type: 'email',
+						items: ['newsletters.test@theguardian.com'],
+					},
+					variants: ['UK'],
+					compose: { items: ['news'], subject: '[TEST] Briefing' },
+				},
+				[NotificationChannel.AppPushNotification]: {
+					audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+					compose: { use: 'push' },
+				},
+			},
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it('rejects a production topic type in an app-push test', () => {
+		const request = pushTestRequest();
+		request.channels[NotificationChannel.AppPushNotification].audience.items = [
+			{ type: 'breaking-news', name: 'uk' },
+		];
+		expect(rejectionPathsOf(request)).toContain(
+			'channels/app-push/audience/items/0/type',
+		);
+	});
+
+	it('rejects an unknown edition for the internal test topic', () => {
+		const request = pushTestRequest();
+		request.channels[NotificationChannel.AppPushNotification].audience.items = [
+			{ type: 'test', name: 'ghost' },
+		];
+		expect(rejectionPathsOf(request)).toContain(
+			'channels/app-push/audience/items/0/name',
+		);
+	});
+
+	it('rejects an app-push test compose reference to a missing item', () => {
+		const request = pushTestRequest();
+		request.channels[NotificationChannel.AppPushNotification].compose.use =
+			'missing';
+		expect(rejectionPathsOf(request)).toContain(
+			'channels/app-push/compose/use',
+		);
+	});
+
+	it('requires at least one channel', () => {
+		expect(
+			rejectionPathsOf({
+				...newsletterTestRequest(),
+				channels: {},
+			}),
+		).toContain('channels');
 	});
 });

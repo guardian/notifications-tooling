@@ -1,6 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
+import { httpLogger } from '@http-logger';
+import { AppNotificationApiError, BrazeApiError } from '@services';
 import express from 'express';
+import { errorMiddleware } from '../../middleware/error-middleware';
 import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
@@ -96,8 +99,11 @@ describe('POST /v1/notifications', () => {
 
 	describe('happy path', () => {
 		it('dispatches the validated request before accepting it', async () => {
-			const dispatchRequest = mock(() => Promise.resolve());
+			const dispatchRequest = mock(() =>
+				Promise.resolve({ appPush: [], newsletter: [] }),
+			);
 			const testApp = express();
+			testApp.use(httpLogger);
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
@@ -116,47 +122,133 @@ describe('POST /v1/notifications', () => {
 				);
 
 				expect(response.status).toBe(202);
-				expect(dispatchRequest).toHaveBeenCalledWith({
-					...validPushRequest(),
-					options: { dryRun: false, scheduledFor: null },
-				});
+				expect(dispatchRequest).toHaveBeenCalledWith(
+					{
+						...validPushRequest(),
+						options: { dryRun: false, scheduledFor: null },
+					},
+					expect.any(String),
+				);
 			} finally {
 				await dispatchServer.close();
 			}
 		});
 
 		it('accepts a valid request with 202 and the acceptance envelope', async () => {
-			const response = await postNotification(validPushRequest());
-
-			expect(response.status).toBe(202);
-
-			const body = (await response.json()) as {
-				notificationId: string;
-				status: string;
-				plans: Array<{ channel: string; planId: string; status: string }>;
-				statusUrl: string;
-				cancellable: { cancelUrl: string; expiresAt: number };
-			};
-
-			expect(body.status).toBe('accepted');
-			expect(typeof body.notificationId).toBe('string');
-			expect(body.notificationId.length).toBeGreaterThan(0);
-
-			expect(body.plans).toEqual([
-				{
-					channel: 'app-push',
-					planId: `${body.notificationId}#app-push`,
-					status: 'accepted',
-				},
-			]);
-
-			expect(body.statusUrl).toBe(
-				`/v1/notifications/${body.notificationId}/status`,
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(
+					mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+				),
 			);
-			expect(body.cancellable.cancelUrl).toBe(
-				`/v1/notifications/${body.notificationId}/cancel`,
+			const dispatchServer = await startTestServer(testApp);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(202);
+
+				const body = (await response.json()) as {
+					notificationId: string;
+					status: string;
+					plans: Array<{ channel: string; planId: string; status: string }>;
+					statusUrl: string;
+					cancellable: { cancelUrl: string; expiresAt: number };
+				};
+
+				expect(body.status).toBe('accepted');
+				expect(typeof body.notificationId).toBe('string');
+				expect(body.notificationId.length).toBeGreaterThan(0);
+
+				expect(body.plans).toEqual([
+					{
+						channel: 'app-push',
+						planId: `${body.notificationId}#app-push`,
+						status: 'accepted',
+					},
+				]);
+
+				expect(body.statusUrl).toBe(
+					`/v1/notifications/${body.notificationId}/status`,
+				);
+				expect(body.cancellable.cancelUrl).toBe(
+					`/v1/notifications/${body.notificationId}/cancel`,
+				);
+				expect(typeof body.cancellable.expiresAt).toBe('number');
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+	});
+
+	describe('provider failures surface as the documented HTTP codes', () => {
+		// Dispatch rethrows the underlying provider error; errorMiddleware maps it.
+		const startFailingServer = (rejection: Error) => {
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(mock(() => Promise.reject(rejection))),
 			);
-			expect(typeof body.cancellable.expiresAt).toBe('number');
+			testApp.use(errorMiddleware);
+			return startTestServer(testApp);
+		};
+
+		it('maps an upstream provider rejection to 502', async () => {
+			const dispatchServer = await startFailingServer(
+				new BrazeApiError('campaign trigger', 'http_error', 500),
+			);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(502);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('braze_request_failed');
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+
+		it('maps an upstream provider timeout to 504', async () => {
+			const dispatchServer = await startFailingServer(
+				new AppNotificationApiError('timeout'),
+			);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(504);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('app_notification_failed');
+			} finally {
+				await dispatchServer.close();
+			}
 		});
 	});
 
