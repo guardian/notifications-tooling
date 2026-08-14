@@ -5,7 +5,10 @@ import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
-import { dispatchNotification } from '../../notification-channels/dispatch-notification';
+import {
+	dispatchNotification,
+	type DispatchOutcomes,
+} from '../../notification-channels/dispatch-notification';
 import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
@@ -70,7 +73,8 @@ export const handleValidationErrors: ErrorRequestHandler = (
 
 type DispatchValidatedNotification = (
 	request: NotificationSendRequest,
-) => Promise<unknown>;
+	notificationId: string,
+) => Promise<DispatchOutcomes>;
 
 export const createNotificationsRouter = (
 	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
@@ -87,11 +91,21 @@ export const createNotificationsRouter = (
 		}),
 		async (req, res) => {
 			const body = req.body;
-			await dispatchRequest(body);
 
-			// No persistence layer yet, so mint the id in-process. Once a store
-			// exists this becomes the primary key the channel adapters update.
+			// Mint the id before dispatch so each channel adapter can tag its
+			// downstream calls with it. Becomes the store's primary key later.
 			const notificationId = randomUUID();
+			const { appPush, newsletter } = await dispatchRequest(
+				body,
+				notificationId,
+			);
+
+			// Outcomes are not persisted yet; log them so sends can be introspected.
+			req.log.info(
+				{ notificationId, appPush, newsletter },
+				'Dispatched notification channels',
+			);
+
 			const statusUrl = `/v1/notifications/${notificationId}/status`;
 
 			const plans = Object.keys(body.channels).map((channel) => ({

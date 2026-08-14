@@ -109,3 +109,16 @@ export const parseArticleUrlInputToContentId = (
 		return { failure: 'not valid url' };
 	}
 };
+
+const emailPattern = /^[+a-zA-Z0-9_.'-]+@([a-zA-Z0-9-]+\.)+[a-zA-Z0-9]{2,6}$/;
+const emailDomainWhitelist = ['theguardian.com', 'guardian.co.uk'];
+export const validateGuardianEmail = (emailInput: string) => {
+	if (!emailPattern.test(emailInput)) {
+		return 'not a valid email';
+	}
+	const domain = emailInput.toLowerCase().split('@').pop();
+	if (!domain || !emailDomainWhitelist.includes(domain)) {
+		return 'not a guardian email address';
+	}
+	return undefined;
+};

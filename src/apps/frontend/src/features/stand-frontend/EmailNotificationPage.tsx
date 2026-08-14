@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { fetchCapiDataFromApi } from './api/fetch-capi-content';
 import { requestEmailHtml } from './api/fetch-email-preview';
 import { sendNotification } from './api/send-notification';
+import { requestTestEmailSend } from './api/send-test-email';
 import { MainLayout } from './components/MainLayout';
 import { NoPermissionsTab } from './components/NoPermissionsTab';
 import { type AppConfig, getAppConfig } from './get-config';
@@ -31,6 +32,7 @@ export const EmailNotificationPage = () => {
 						capiFetch: fetchCapiDataFromApi,
 						requestEmailHtml: requestEmailHtml,
 						sendNotification: sendNotification,
+						requestTestEmailSend: requestTestEmailSend,
 					}}
 				>
 					<MainLayout>
