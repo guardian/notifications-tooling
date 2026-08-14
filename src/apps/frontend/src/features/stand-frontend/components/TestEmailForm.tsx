@@ -174,7 +174,7 @@ export const TestEmailForm = () => {
 				gap: semanticSpacing.stackXs,
 			}}
 		>
-			<Typography variant="bodyBoldMd">Test send</Typography>
+			<Typography variant="bodyBoldMd">Send a test</Typography>
 
 			<TextInput
 				description="Enter your email to send a test"
@@ -187,8 +187,8 @@ export const TestEmailForm = () => {
 				isInvalid={emailInput.length > 0 && !!emailValidationIssue}
 			/>
 			<Typography element="div" variant="helpTextFormMd">
-				Sends test only to the email address above, on the enabled channels -
-				audience segments and timing are ignored.
+				Tests send only to the email address above — audience segments and
+				timing are ignored.
 			</Typography>
 
 			<Button
@@ -203,9 +203,11 @@ export const TestEmailForm = () => {
 					marginTop: semanticSpacing.stackXs,
 				})}
 				onPress={handleSend}
+				variant="secondary"
+				size="md"
 				icon={sendInProgress ? <LoadingSpinner /> : undefined}
 			>
-				Send test notification
+				Send test
 			</Button>
 
 			{confirmation && (
