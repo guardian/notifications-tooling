@@ -74,11 +74,21 @@ export class DispatchStack extends GuStack {
 
 		const databaseSecurityGroup = new GuSecurityGroup(this, 'DBSecurityGroup', {
 			app,
-			description:
-				'Shared security group for the Dispatch database and migration jump host.',
+			description: 'Security group for the Dispatch database.',
 			vpc: accountVpc,
-			allowAllOutbound: true,
+			allowAllOutbound: false,
 		});
+
+		const migrationHostSecurityGroup = new GuSecurityGroup(
+			this,
+			'DispatchMigrationHostSecurityGroup',
+			{
+				app,
+				description: 'Security group for the Dispatch migration jump host.',
+				vpc: accountVpc,
+				allowAllOutbound: true,
+			},
+		);
 
 		databaseSecurityGroup.addIngressRule(
 			lambdaSecurityGroup,
@@ -87,9 +97,9 @@ export class DispatchStack extends GuStack {
 		);
 
 		databaseSecurityGroup.addIngressRule(
-			databaseSecurityGroup,
+			migrationHostSecurityGroup,
 			Port.tcp(DB_PORT),
-			'Allow ingress traffic between resources attached to the shared database security group.',
+			'Allow ingress traffic from the migration jump host security group.',
 		);
 
 		const migrationHostRole = new Role(this, 'DispatchMigrationHostRole', {
@@ -111,7 +121,7 @@ export class DispatchStack extends GuStack {
 			iamInstanceProfile: migrationHostInstanceProfile.ref,
 			imageId: MachineImage.latestAmazonLinux2023().getImage(this).imageId,
 			instanceType: 't3.nano',
-			securityGroupIds: [databaseSecurityGroup.securityGroupId],
+			securityGroupIds: [migrationHostSecurityGroup.securityGroupId],
 			subnetId: Fn.select(
 				0,
 				privateSubnets.map((subnet) => subnet.subnetId),
