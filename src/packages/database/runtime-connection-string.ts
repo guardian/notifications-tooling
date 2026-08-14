@@ -1,23 +1,21 @@
 import { getSecretValue } from '@config/ssm';
 import { logger } from '@http-logger';
-import { z } from 'zod';
-import { getEnvConnectionString } from './env-connection-string';
-
-// This schema matches the managed database credentials stored in Secrets Manager
-const dbConfigSchema = z.object({
-	host: z.string(),
-	port: z.number(),
-	dbname: z.string(),
-	username: z.string(),
-	password: z.string(),
-});
-type DBConfigSchema = z.infer<typeof dbConfigSchema>;
+import { loadDatabaseEnvironment } from './database-environment';
+import { parseManagedDatabaseSecret } from './managed-database-secret';
 
 const isRunningInLambda = !!process.env.LAMBDA_TASK_ROOT;
 
+export const getEnvConnectionString = (): string => {
+	const { DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, DB_SSL_MODE } =
+		loadDatabaseEnvironment();
+	const query = DB_SSL_MODE ? `?sslmode=${DB_SSL_MODE}` : '';
+
+	return `postgresql://${encodeURIComponent(DB_USERNAME)}:${encodeURIComponent(DB_PASSWORD)}@${DB_HOST}:${DB_PORT}/${encodeURIComponent(DB_NAME)}${query}`;
+};
+
 const getLambdaDbConfig = async () => {
 	try {
-		return await getSecretValue('db', (value) => dbConfigSchema.parse(value));
+		return await getSecretValue('db', parseManagedDatabaseSecret);
 	} catch (error) {
 		logger.error(
 			{ error },
@@ -33,7 +31,7 @@ export const getRuntimeConnectionString = async () => {
 		return getEnvConnectionString();
 	}
 
-	const config: DBConfigSchema = await getLambdaDbConfig();
+	const config = await getLambdaDbConfig();
 
 	const { host, port, dbname, username, password } = config;
 

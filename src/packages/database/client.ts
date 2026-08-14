@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { getRuntimeConnectionString } from './runtime-db-config';
+import { getRuntimeConnectionString } from './runtime-connection-string';
 
 type Db = ReturnType<typeof drizzle>;
 

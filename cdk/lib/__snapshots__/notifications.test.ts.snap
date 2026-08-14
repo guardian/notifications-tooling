@@ -6,20 +6,27 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuSubnetListParameter",
       "GuSubnetListParameter",
+      "GuSubnetListParameter",
       "GuVpcParameter",
+      "GuSecurityGroup",
+      "GuSecurityGroup",
       "GuSecurityGroup",
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuCertificate",
       "GuCname",
-      "GuSecurityGroup",
-      "GuSubnetListParameter",
       "GuDatabaseInstance",
       "GuDeveloperPolicyExperimental",
     ],
     "gu:cdk:version": "64.3.0",
   },
   "Outputs": {
+    "MigrationHostInstanceId": {
+      "Description": "EC2 instance used as the Session Manager jump host for manual database migrations.",
+      "Value": {
+        "Ref": "DispatchMigrationHost",
+      },
+    },
     "dispatchlambdadispatchapiEndpoint2C4D30C9": {
       "Value": {
         "Fn::Join": [
@@ -53,6 +60,10 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Default": "/account/vpc/primary/subnets/private",
       "Description": "A list of private subnets",
       "Type": "AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>",
+    },
+    "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
     },
     "VpcId": {
       "Default": "/account/vpc/primary/id",
@@ -108,7 +119,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     },
     "DBSecurityGroupDispatchED54EAC4": {
       "Properties": {
-        "GroupDescription": "Allow connections from the Dispatch application lambda to the database.",
+        "GroupDescription": "Security group for the Dispatch database.",
         "SecurityGroupEgress": [
           {
             "CidrIp": "255.255.255.255/32",
@@ -160,6 +171,27 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "SourceSecurityGroupId": {
           "Fn::GetAtt": [
             "DispatchLambdaSecurityGroupDispatchDC5B2093",
+            "GroupId",
+          ],
+        },
+        "ToPort": 5432,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "DBSecurityGroupDispatchfromDispatchDispatchMigrationHostSecurityGroupDispatchDDB42E335432A3879875": {
+      "Properties": {
+        "Description": "Allow ingress traffic from the migration jump host security group.",
+        "FromPort": 5432,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "DBSecurityGroupDispatchED54EAC4",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "DispatchMigrationHostSecurityGroupDispatchAC319C3A",
             "GroupId",
           ],
         },
@@ -464,6 +496,156 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::IAM::ManagedPolicy",
+    },
+    "DispatchMigrationHost": {
+      "Properties": {
+        "IamInstanceProfile": {
+          "Ref": "DispatchMigrationHostInstanceProfile",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.nano",
+        "MetadataOptions": {
+          "HttpTokens": "required",
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "DispatchMigrationHostSecurityGroupDispatchAC319C3A",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Fn::Select": [
+            0,
+            {
+              "Ref": "PrivateSubnets",
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.3.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Name",
+            "Value": "dispatch-db-migration-test",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "DispatchMigrationHostInstanceProfile": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "DispatchMigrationHostRole3A031A1C",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "DispatchMigrationHostRole3A031A1C": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.3.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "DispatchMigrationHostSecurityGroupDispatchAC319C3A": {
+      "Properties": {
+        "GroupDescription": "Security group for the Dispatch migration jump host.",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "dispatch",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "64.3.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "VpcId": {
+          "Ref": "VpcId",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "dispatchlambdaEBD865CC": {
       "DependsOn": [
