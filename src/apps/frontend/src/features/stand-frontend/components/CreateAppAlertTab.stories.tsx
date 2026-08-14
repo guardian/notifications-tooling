@@ -1,14 +1,34 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import { WithNotificationContext } from '../../../stories/story-helpers';
+import { defaultAppAlertState } from '../notification-reducer';
+import type { NotificationState } from '../types';
 import { CreateAppAlertTab } from './CreateAppAlertTab';
+
+type StoryArgs = {
+	notificationState: NotificationState;
+};
 
 const meta = {
 	title: 'Stand Frontend/CreateAppAlertTab',
 	component: CreateAppAlertTab,
+	args: {
+		notificationState: defaultAppAlertState,
+	},
 	parameters: {
 		layout: 'fullscreen',
+		docs: {
+			description: {
+				component:
+					'App alert creation tab combining the notification form and preview with selected channel,alert type, editions  and delivery timing.',
+			},
+		},
 	},
-} satisfies Meta<typeof CreateAppAlertTab>;
+	render: (args: StoryArgs) => {
+		const { notificationState } = args;
+		return WithNotificationContext(<CreateAppAlertTab />, notificationState);
+	},
+} satisfies Meta<StoryArgs>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

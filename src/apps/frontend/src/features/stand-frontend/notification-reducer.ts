@@ -24,6 +24,14 @@ export const defaultState: NotificationState = {
 	parameters: defaultEmailParams,
 };
 
+export const defaultAppAlertState: NotificationState = {
+	isFetchingContent: false,
+	isWaitingForSend: false,
+	hasAttemptedSend: false,
+	confirmSendModalOpen: false,
+	parameters: defaultPushParams,
+};
+
 export const notificationReducer = (
 	prevState: NotificationState,
 	action: NotificationAction,
