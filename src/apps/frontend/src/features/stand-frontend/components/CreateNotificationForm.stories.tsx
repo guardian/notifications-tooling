@@ -9,10 +9,9 @@ import {
 	noPermissionError,
 	unauthenticatedError,
 } from '../../../mocks/api-fixtures';
-import { articleFixture } from '../../../mocks/capi-fixtures';
 import { mockSendRejectedNotification } from '../../../mocks/mock-send-notification';
 import {
-	completeEmailParams,
+	populatedEmailState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
@@ -40,13 +39,6 @@ const meta: Meta<StoryArgs> = {
 };
 
 export default meta;
-
-const populatedEmailState = {
-	...defaultState,
-	content: articleFixture,
-	fetchedArticleId: articleFixture.id,
-	parameters: completeEmailParams,
-};
 
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
