@@ -743,7 +743,7 @@ describe('notificationSendRequestSchema', () => {
 						pushPlan({
 							audience: {
 								type: 'topic',
-								items: [{ type: 'uk-general-election', name: 'us' }],
+								items: [{ type: 'sport', name: 'mars' }],
 							},
 						}),
 					),

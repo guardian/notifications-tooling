@@ -93,10 +93,9 @@ interface AppPushTopicType {
  * Push targets are curated topic types, each exposing its `editions`. A request
  * names a topic type and one of its editions; the backend resolves that pair to
  * the mobile-n10n topic (`{ type, name }`) that `guardian/facia-tool`'s Breaking
- * News tool emits, plus the registered `newsstand` topic. The raw topic
- * coordinates are kept out of the public contract. The internal test topic lives
- * in `internalAppPushTestTopicTypes`, not here, so it can never be targeted by a
- * production send.
+ * News tool emits. The raw topic coordinates are kept out of the public
+ * contract. The internal test topic lives in `internalAppPushTestTopicTypes`,
+ * not here, so it can never be targeted by a production send.
  */
 const curatedAppPushTopicTypes = {
 	'breaking-news': {
@@ -197,26 +196,6 @@ const curatedAppPushTopicTypes = {
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
-			},
-		},
-	},
-	'uk-general-election': {
-		label: 'UK general election',
-		importance: AppPushImportance.Minor,
-		editions: {
-			uk: {
-				label: 'UK',
-				mobileN10nTopic: { type: 'breaking', name: 'uk-general-election' },
-			},
-		},
-	},
-	newsstand: {
-		label: 'Newsstand',
-		importance: AppPushImportance.Minor,
-		editions: {
-			ios: {
-				label: 'iOS',
-				mobileN10nTopic: { type: 'newsstand', name: 'newsstandIos' },
 			},
 		},
 	},
