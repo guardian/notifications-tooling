@@ -13,6 +13,7 @@ import {
 } from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
+import { TestEmailForm } from './TestEmailForm';
 
 interface EmailPreviewSectionProps {
 	selectedSegments: AudienceSegment[];
@@ -95,6 +96,7 @@ export const EmailPreviewSection = ({
 					selected={selectedSegments}
 				/>
 				<HTMLPreview />
+				<TestEmailForm />
 			</div>
 		</section>
 	);

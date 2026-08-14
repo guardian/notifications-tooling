@@ -9,6 +9,8 @@ import { SidebarStepperNavigation } from '@guardian/stand/SidebarStepperNavigati
 import type { SidebarStepperNavigationTheme } from '@guardian/stand/SidebarStepperNavigation';
 import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import { layer, topBarHeight } from '../themes';
 
 const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
@@ -46,8 +48,6 @@ const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 
 export const DEFAULT_SIDE_NAV_HREF =
 	SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
-
-const ACTIVE_SECTION_VIEWPORT_POSITION = 0.75;
 
 const theme: SidebarStepperNavigationTheme = {
 	navigation: {
@@ -89,8 +89,15 @@ export const SideNavigationPanel = ({
 	selectedHref,
 	onSelectedHrefChange,
 }: SideNavigationPanelProps) => {
+	const { hash } = useLocation();
+	const navigate = useNavigate();
 	const selectedHrefRef = useRef(DEFAULT_SIDE_NAV_HREF);
+	const locationHashRef = useRef(hash);
 	const isClickLockedRef = useRef(false);
+
+	useEffect(() => {
+		locationHashRef.current = hash;
+	}, [hash]);
 
 	const selectHref = (href: string) => {
 		selectedHrefRef.current = href;
@@ -109,8 +116,9 @@ export const SideNavigationPanel = ({
 				selectedHrefRef.current = item.id;
 				onSelectedHrefChange(item.id);
 			}
-			if (window.location.hash !== item.id) {
-				window.history.replaceState(window.history.state, '', item.id);
+			if (locationHashRef.current !== item.id) {
+				locationHashRef.current = item.id;
+				void navigate({ hash: item.id }, { replace: true });
 			}
 		};
 		const updateActiveSection = () => {
@@ -159,12 +167,13 @@ export const SideNavigationPanel = ({
 				window.cancelAnimationFrame(animationFrameId);
 			}
 		};
-	}, [onSelectedHrefChange]);
+	}, [navigate, onSelectedHrefChange]);
 
 	const handleTileClick = (href: string) => {
 		selectHref(href);
-		if (window.location.hash !== href) {
-			window.history.pushState(window.history.state, '', href);
+		if (locationHashRef.current !== href) {
+			locationHashRef.current = href;
+			void navigate({ hash: href });
 		}
 
 		isClickLockedRef.current = true;

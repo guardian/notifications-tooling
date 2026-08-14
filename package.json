@@ -30,7 +30,8 @@
 		"format:check": "prettier --check .",
 		"typecheck": "bun run --filter '*' typecheck",
 		"db:start": "docker compose --env-file src/packages/database/.env -f docker/docker-compose.local.yml up -d --wait",
-		"db:stop": "docker compose --env-file src/packages/database/.env -f docker/docker-compose.local.yml down"
+		"db:stop": "docker compose --env-file src/packages/database/.env -f docker/docker-compose.local.yml down",
+		"storybook": "bun run --filter='frontend' storybook"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config": "16.0.0",
