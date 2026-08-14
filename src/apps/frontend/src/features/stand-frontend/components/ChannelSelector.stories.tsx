@@ -33,9 +33,32 @@ export const Unselected: SelectorStory = {
 	},
 };
 
-export const Selected: SelectorStory = {
+export const SelectEmailNotification: SelectorStory = {
 	args: {
 		selectedChannel: 'email',
 		onChange: () => {},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByText('Channel')).toBeInTheDocument();
+		await expect(canvas.getByText('Newsletter email')).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Sends via the braze breaking-news campaign'),
+		).toBeInTheDocument();
+	},
+};
+
+export const SelectAppAlert: SelectorStory = {
+	args: {
+		selectedChannel: 'push',
+		onChange: () => {},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByText('Channel')).toBeInTheDocument();
+		await expect(canvas.getByText('App alert')).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Push notification to Guardian app users'),
+		).toBeInTheDocument();
 	},
 };

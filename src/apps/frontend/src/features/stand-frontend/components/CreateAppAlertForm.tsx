@@ -43,9 +43,7 @@ interface CreateAppAlertFormProps {
 export const CreateAppAlertForm = ({
 	activeSectionHref,
 }: CreateAppAlertFormProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
+	const { updateNotification } = useContext(NotificationFormContext);
 
 	return (
 		<div
@@ -79,7 +77,7 @@ export const CreateAppAlertForm = ({
 					<ArticleImportControl />
 
 					<ChannelSelector
-						selectedChannel={notification.parameters?.type ?? 'push'}
+						selectedChannel={'push'}
 						onChange={(channel) => {
 							switch (channel) {
 								case 'email':

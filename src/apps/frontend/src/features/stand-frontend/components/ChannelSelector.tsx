@@ -10,9 +10,10 @@ interface ChannelSelectorProps {
 }
 
 export const ChannelSelector = ({
-	selectedChannel,
+	selectedChannel = 'email',
 	onChange,
 }: ChannelSelectorProps) => {
+	const selectedChannelParams = channelOptionNameMap[selectedChannel];
 	return (
 		<>
 			<div
@@ -32,19 +33,15 @@ export const ChannelSelector = ({
 					Choose the channel the notification is sent to
 				</Typography>
 
-				{Object.entries(channelOptionNameMap).map(
-					([channelOption, { name, description, symbol }]) => (
-						<SelectableTile
-							key={channelOption}
-							tileLabel={name}
-							tileValue={channelOption}
-							tileDescription={description}
-							tileSymbol={symbol}
-							selectedValue={selectedChannel}
-							onChange={onChange}
-						/>
-					),
-				)}
+				<SelectableTile
+					key={selectedChannel}
+					tileLabel={selectedChannelParams.name}
+					tileValue={selectedChannel}
+					tileDescription={selectedChannelParams.description}
+					tileSymbol={selectedChannelParams.symbol}
+					selectedValue={selectedChannel}
+					onChange={onChange}
+				/>
 			</div>
 		</>
 	);
