@@ -118,7 +118,7 @@ export const SideNavigationPanel = ({
 			}
 			if (locationHashRef.current !== item.id) {
 				locationHashRef.current = item.id;
-				navigate({ hash: item.id }, { replace: true });
+				void navigate({ hash: item.id }, { replace: true });
 			}
 		};
 		const updateActiveSection = () => {
@@ -173,7 +173,7 @@ export const SideNavigationPanel = ({
 		selectHref(href);
 		if (locationHashRef.current !== href) {
 			locationHashRef.current = href;
-			navigate({ hash: href });
+			void navigate({ hash: href });
 		}
 
 		isClickLockedRef.current = true;

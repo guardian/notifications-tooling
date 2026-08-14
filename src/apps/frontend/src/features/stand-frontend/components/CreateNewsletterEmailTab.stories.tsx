@@ -72,11 +72,11 @@ export const SectionNavigation: Story = {
 		const expectActiveSection = async (id: string) => {
 			await waitFor(async () => {
 				await expect(
-					canvasElement.querySelector('[data-router-location-hash]'),
-				).toHaveAttribute('data-router-location-hash', `#${id}`);
-				await expect(
 					document.querySelector('[data-scrollspy-active]'),
 				).toHaveAttribute('id', id);
+				await expect(
+					canvasElement.querySelector('[data-router-location-hash]'),
+				).toHaveAttribute('data-router-location-hash', `#${id}`);
 			});
 		};
 		const scrollSectionToActivationPoint = (id: string) => {
