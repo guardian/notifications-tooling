@@ -5,19 +5,13 @@ import type { ChannelOption } from './types';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 
-export type ChannelParams = {
+type OptionDisplayInfo = {
 	name: string;
 	description: string;
 	symbol?: IconSymbol;
 };
 
-type DeliveryOptionMeta = {
-	name: string;
-	description: string;
-	symbol?: IconSymbol;
-};
-
-export const channelOptionNameMap: Record<ChannelOption, ChannelParams> = {
+export const channelOptionNameMap: Record<ChannelOption, OptionDisplayInfo> = {
 	email: {
 		name: 'Newsletter email',
 		description: 'Sends via the braze breaking-news campaign',
@@ -42,7 +36,7 @@ export const audienceSegmentNameMap: Record<AudienceSegment, string> = {
 	AU: 'Australia',
 };
 
-export const deliveryOptionNameMap: Record<DeliveryOption, DeliveryOptionMeta> =
+export const deliveryOptionNameMap: Record<DeliveryOption, OptionDisplayInfo> =
 	{
 		immediate: {
 			name: 'Immediate',
