@@ -77,8 +77,11 @@ flowchart TB
   C --> D["SSM port-forward"]
 
   subgraph VPC["VPC"]
-    subgraph SG["Shared security group"]
+    subgraph MSG["Migration host security group"]
       E["EC2 migration host"]
+    end
+
+    subgraph DSG["Database security group"]
       F["Postgres database<br/>:5432"]
     end
   end
@@ -88,8 +91,8 @@ flowchart TB
 ```
 
 `db:migration:remote-apply` now opens the SSM tunnel for the requested stage,
-waits for the forwarded local port, connects over SSL, runs the migration, and
-then closes the tunnel.
+waits for the forwarded local port, connects over SSL through the migration host
+to the database security group, runs the migration, and then closes the tunnel.
 
 You do not need to run `db:migration:tunnel` first when using
 `db:migration:remote-apply`.
