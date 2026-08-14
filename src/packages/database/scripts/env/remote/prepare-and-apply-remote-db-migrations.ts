@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
+import { spawnCommand } from '../../helpers/process';
 import { parseArgs } from './helpers/cli-args';
 import {
 	createRemoteDatabasePool,
@@ -20,7 +21,7 @@ console.log(
 	`Applying migrations to ${config.stage} through localhost:${config.localPort}`,
 );
 
-const tunnelProcess = Bun.spawn({
+const tunnelProcess = spawnCommand({
 	cmd: [
 		'bun',
 		'run',
@@ -31,10 +32,6 @@ const tunnelProcess = Bun.spawn({
 		config.localPort,
 	],
 	cwd: databasePackageDir,
-	stdin: 'inherit',
-	stdout: 'inherit',
-	stderr: 'inherit',
-	env: process.env,
 });
 
 let exitCode = 1;

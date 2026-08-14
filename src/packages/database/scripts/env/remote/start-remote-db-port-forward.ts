@@ -4,6 +4,7 @@ import { parseManagedDatabaseSecret } from '../../../managed-database-secret';
 import {
 	getDatabaseSecretString,
 	getMigrationHostInstanceId,
+	spawnAws,
 } from './helpers/aws';
 import type { RemoteMigrationConfig } from './helpers/cli-args';
 import { parseArgs } from './helpers/cli-args';
@@ -25,15 +26,10 @@ console.log(
 	`Opening tunnel for ${config.stage} on localhost:${config.localPort} via ${instanceId}`,
 );
 
-const sessionProcess = Bun.spawn({
-	cmd: [
-		'aws',
+const sessionProcess = spawnAws(
+	[
 		'ssm',
 		'start-session',
-		'--profile',
-		config.profile,
-		'--region',
-		config.region,
 		'--target',
 		instanceId,
 		'--document-name',
@@ -41,10 +37,7 @@ const sessionProcess = Bun.spawn({
 		'--parameters',
 		`host=${databaseHost},portNumber=5432,localPortNumber=${config.localPort}`,
 	],
-	stdin: 'inherit',
-	stdout: 'inherit',
-	stderr: 'inherit',
-	env: process.env,
-});
+	config,
+);
 
 process.exit(await sessionProcess.exited);
