@@ -7,6 +7,7 @@ import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { topBarHeight } from '../themes';
 import type { DeliveryOption } from '../types';
+import type { ChannelOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
@@ -47,11 +48,7 @@ export const CreateAppAlertForm = ({
 }: CreateAppAlertFormProps) => {
 	const { updateNotification } = useContext(NotificationFormContext);
 
-	// const pushDeliveryOption =
-	// 	notification.parameters.type === 'push'
-	// 		? notification.parameters.pushDeliveryOption
-	// 		: notification.parameters.emailDeliveryOption;
-
+	const channel = 'push'; //TODO - change to notification.parameters.type
 	const pushDeliveryOption = 'appImmediate'; //TODO - change to notification.parameters.pushDeliveryOption
 	return (
 		<div
@@ -85,14 +82,12 @@ export const CreateAppAlertForm = ({
 					<ArticleImportControl />
 
 					<ChannelSelector
-						selectedChannel={'push'} //TODO -change to notification.parameters.type
+						selectedChannel={channel} //TODO -change to notification.parameters.type
 						onChange={(channel) => {
-							switch (channel) {
-								case 'email':
-								case 'push':
-									updateNotification({ type: 'set-channel', channel });
-									break;
-							}
+							updateNotification({
+								type: 'set-channel',
+								channel: channel as ChannelOption,
+							});
 						}}
 					/>
 				</NotificationFormSection>
@@ -102,7 +97,7 @@ export const CreateAppAlertForm = ({
 				>
 					<DeliveryAndTimingSelector
 						selectedDeliveryTiming={pushDeliveryOption}
-						channel={'push'} //TODO - change to notification.parameters.type
+						channel={channel} //TODO - change to notification.parameters.type
 						onChange={(pushDeliveryOption) => {
 							updateNotification({
 								type: 'set-delivery-timing',
@@ -115,7 +110,7 @@ export const CreateAppAlertForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton channel={'push'} />
+					<SendButton channel={channel} />
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />
