@@ -8,7 +8,7 @@ import {
 	pushItem,
 	testId,
 } from '../test-support';
-import { dispatchAppPushTest } from './dispatch-test-app-push';
+import { dispatchAppPushTest } from './dispatch-app-push-test';
 
 const testPushRequest = (
 	overrides: Partial<NotificationTestSendRequest> = {},

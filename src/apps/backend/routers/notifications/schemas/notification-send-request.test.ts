@@ -1040,7 +1040,8 @@ describe('notificationSendRequestSchema', () => {
 });
 
 describe('notificationTestSendRequestSchema', () => {
-	const testPathsOf = (input: unknown) => {
+	// Asserts the schema rejects the input, then returns the failing field paths.
+	const rejectionPathsOf = (input: unknown) => {
 		const result = notificationTestSendRequestSchema.safeParse(input);
 		expect(result.success).toBe(false);
 		return result.success
@@ -1060,7 +1061,7 @@ describe('notificationTestSendRequestSchema', () => {
 
 	it('rejects a segment audience', () => {
 		expect(
-			testPathsOf(newsletterRequest()).some((path) =>
+			rejectionPathsOf(newsletterRequest()).some((path) =>
 				path.startsWith('channels/newsletter/audience'),
 			),
 		).toBe(true);
@@ -1069,7 +1070,7 @@ describe('notificationTestSendRequestSchema', () => {
 	it('rejects an invalid email address', () => {
 		const request = newsletterTestRequest();
 		request.channels.newsletter.audience.items = ['not-an-email'];
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/newsletter/audience/items/0',
 		);
 	});
@@ -1082,25 +1083,25 @@ describe('notificationTestSendRequestSchema', () => {
 		>;
 		audience.segments = ['UK'];
 
-		expect(testPathsOf(request)).toContain('channels/newsletter/audience');
+		expect(rejectionPathsOf(request)).toContain('channels/newsletter/audience');
 	});
 
 	it('requires at least one rendering variant', () => {
 		const request = newsletterTestRequest();
 		request.channels.newsletter.variants = [];
-		expect(testPathsOf(request)).toContain('channels/newsletter/variants');
+		expect(rejectionPathsOf(request)).toContain('channels/newsletter/variants');
 	});
 
 	it('rejects duplicate rendering variants', () => {
 		const request = newsletterTestRequest();
 		request.channels.newsletter.variants = ['UK', 'UK'];
-		expect(testPathsOf(request)).toContain('channels/newsletter/variants');
+		expect(rejectionPathsOf(request)).toContain('channels/newsletter/variants');
 	});
 
 	it('rejects a compose reference to a missing item', () => {
 		const request = newsletterTestRequest();
 		request.channels.newsletter.compose.items = ['missing'];
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/newsletter/compose/items/0',
 		);
 	});
@@ -1108,7 +1109,7 @@ describe('notificationTestSendRequestSchema', () => {
 	it('rejects a compose reference to the wrong channel type', () => {
 		const request = newsletterTestRequest();
 		request.content.items.lead = pushItem();
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/newsletter/compose/items/0',
 		);
 	});
@@ -1119,7 +1120,7 @@ describe('notificationTestSendRequestSchema', () => {
 			{ length: MAX_TEST_EMAIL_RECIPIENTS + 1 },
 			(_, index) => `test-${index}@theguardian.com`,
 		);
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/newsletter/audience/items',
 		);
 	});
@@ -1137,7 +1138,7 @@ describe('notificationTestSendRequestSchema', () => {
 
 	it('rejects scheduling', () => {
 		expect(
-			testPathsOf({
+			rejectionPathsOf({
 				...newsletterTestRequest(),
 				options: { dryRun: true, scheduledFor: null },
 			}),
@@ -1178,7 +1179,7 @@ describe('notificationTestSendRequestSchema', () => {
 		request.channels[NotificationChannel.AppPushNotification].audience.items = [
 			{ type: 'breaking-news', name: 'uk' },
 		];
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/app-push/audience/items/0/type',
 		);
 	});
@@ -1188,7 +1189,7 @@ describe('notificationTestSendRequestSchema', () => {
 		request.channels[NotificationChannel.AppPushNotification].audience.items = [
 			{ type: 'test', name: 'ghost' },
 		];
-		expect(testPathsOf(request)).toContain(
+		expect(rejectionPathsOf(request)).toContain(
 			'channels/app-push/audience/items/0/name',
 		);
 	});
@@ -1197,12 +1198,14 @@ describe('notificationTestSendRequestSchema', () => {
 		const request = pushTestRequest();
 		request.channels[NotificationChannel.AppPushNotification].compose.use =
 			'missing';
-		expect(testPathsOf(request)).toContain('channels/app-push/compose/use');
+		expect(rejectionPathsOf(request)).toContain(
+			'channels/app-push/compose/use',
+		);
 	});
 
 	it('requires at least one channel', () => {
 		expect(
-			testPathsOf({
+			rejectionPathsOf({
 				...newsletterTestRequest(),
 				channels: {},
 			}),

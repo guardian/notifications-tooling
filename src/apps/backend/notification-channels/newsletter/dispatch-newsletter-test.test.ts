@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { newsletterSegments, NotificationChannel } from '@config';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import { createDependencies, newsletterItem, testId } from '../test-support';
-import { dispatchNewsletterTest } from './dispatch-test-newsletter';
+import { dispatchNewsletterTest } from './dispatch-newsletter-test';
 
 describe('dispatchNewsletterTest', () => {
 	it('renders and sends test newsletters directly to normalized recipients', async () => {

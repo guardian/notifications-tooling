@@ -71,10 +71,12 @@ interface MobileN10nTopic {
  * mobile-n10n's `importance` values (`BreakingNewsPayload.importance`). Used
  * only by the app-push dispatch; never exposed in the public audiences contract.
  */
-export enum AppPushImportance {
-	Major = 'Major',
-	Minor = 'Minor',
-}
+export const AppPushImportance = {
+	Major: 'Major',
+	Minor: 'Minor',
+} as const;
+export type AppPushImportance =
+	(typeof AppPushImportance)[keyof typeof AppPushImportance];
 
 interface AppPushEdition {
 	label: string;

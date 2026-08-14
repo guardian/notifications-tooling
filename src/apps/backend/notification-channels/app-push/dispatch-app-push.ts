@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import {
-	AppPushImportance,
 	type AppPushTestTopicTypeId,
 	type AppPushTopicTypeId,
 	NotificationChannel,
@@ -68,8 +67,7 @@ export const groupAppPushTopicsByType = (
 		}
 		const push = pushesByTopicType.get(type) ?? {
 			topicType: type,
-			importance:
-				resolved.importance === AppPushImportance.Major ? 'Major' : 'Minor',
+			importance: resolved.importance,
 			topics: [],
 		};
 		push.topics.push(resolved.topic);

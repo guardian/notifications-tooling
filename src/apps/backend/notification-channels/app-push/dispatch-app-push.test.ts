@@ -12,7 +12,7 @@ import {
 } from '../test-support';
 import { dispatchAppPush, resolveAppPushDispatch } from './dispatch-app-push';
 
-describe('dispatchNotification app push', () => {
+describe('dispatchNotification (app-push channel)', () => {
 	it('sends a single push for one topic type with multiple editions', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {

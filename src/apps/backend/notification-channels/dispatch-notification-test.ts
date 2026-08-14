@@ -2,11 +2,11 @@ import type { NotificationTestSendRequest } from '../routers/notifications/schem
 import {
 	type AppPushTestDispatchOutcome,
 	dispatchAppPushTest,
-} from './app-push/dispatch-test-app-push';
+} from './app-push/dispatch-app-push-test';
 import {
 	dispatchNewsletterTest,
 	type NewsletterTestDispatchOutcome,
-} from './newsletter/dispatch-test-newsletter';
+} from './newsletter/dispatch-newsletter-test';
 import {
 	defaultDependencies,
 	type DispatchNotificationDependencies,

@@ -9,7 +9,7 @@ import {
 	notificationId,
 } from '../test-support';
 
-describe('dispatchNotification newsletter', () => {
+describe('dispatchNotification (newsletter channel)', () => {
 	it('renders each newsletter segment and sends it through Braze', async () => {
 		const { dependencies, renderEmail, sendBrazeCampaign } =
 			createDependencies();
