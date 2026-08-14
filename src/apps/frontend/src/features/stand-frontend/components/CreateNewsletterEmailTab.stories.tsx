@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useLocation } from 'react-router-dom';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { WithNotificationContext } from '../../../stories/story-helpers';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
@@ -9,11 +8,6 @@ import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
 
 type StoryArgs = {
 	notificationState: NotificationState;
-};
-
-const RouterLocationHash = () => {
-	const { hash } = useLocation();
-	return <span data-router-location-hash={hash} hidden />;
 };
 
 const meta: Meta<StoryArgs> = {
@@ -34,10 +28,7 @@ const meta: Meta<StoryArgs> = {
 	render: (args) => {
 		const { notificationState } = args;
 		return WithNotificationContext(
-			<>
-				<CreateNewsletterEmailTab />
-				<RouterLocationHash />
-			</>,
+			<CreateNewsletterEmailTab />,
 			notificationState,
 		);
 	},
@@ -71,12 +62,10 @@ export const SectionNavigation: Story = {
 
 		const expectActiveSection = async (id: string) => {
 			await waitFor(async () => {
+				await expect(window.location.hash).toBe(`#${id}`);
 				await expect(
 					document.querySelector('[data-scrollspy-active]'),
 				).toHaveAttribute('id', id);
-				await expect(
-					canvasElement.querySelector('[data-router-location-hash]'),
-				).toHaveAttribute('data-router-location-hash', `#${id}`);
 			});
 		};
 		const scrollSectionToActivationPoint = (id: string) => {
