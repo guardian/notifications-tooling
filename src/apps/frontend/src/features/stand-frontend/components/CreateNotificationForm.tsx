@@ -59,9 +59,11 @@ export const CreateNotificationForm = ({
 		return null;
 	}
 
-	const channel = 'email'; //TODO - change to notification.parameters.type
-	const emailDeliveryOption = 'immediate'; //TODO - change to notification.parameters.emailDeliveryOption
-
+	const channel = notification.parameters.type;
+	const emailDeliveryOption =
+		notification.parameters.type === 'email'
+			? (notification.parameters.emailDeliveryOption ?? 'immediate')
+			: undefined;
 	const audienceSegments = notification.parameters.audienceSegments ?? [];
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;

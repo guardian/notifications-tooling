@@ -42,7 +42,7 @@ export const ImmediateDeliveryInEmailNotification: SelectorStory = {
 	},
 };
 
-export const SImmediateDeliveryInAppAlert: SelectorStory = {
+export const ImmediateDeliveryInAppAlert: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: 'appImmediate',
 		onChange: () => {},
