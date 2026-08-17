@@ -2,6 +2,7 @@ import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { alertTypeNameMap } from '../option-values';
+import { SelectableSegments } from './SelectableSegments';
 
 const toOptionKey = (value: string, name = 'alertType') => `${name}//${value}`;
 
@@ -10,8 +11,8 @@ export const AlertEditionsSection = () => {
 		NotificationFormContext,
 	);
 
-	const { alertType } = notification.parameters;
-
+	const { alertType , editions } = notification.parameters;
+	const shouldShowErrors = notification.hasAttemptedSend;
 	return (
 		<>
 			<Select
@@ -54,6 +55,20 @@ export const AlertEditionsSection = () => {
 					{alertTypeNameMap['undefined']}
 				</Option>
 			</Select>
+			<SelectableSegments
+				selected={editions}
+				error={
+					shouldShowErrors && requiredFieldErrors.includes('editions')
+						? 'Please select an edition'
+						: undefined
+				}
+				onChange={(edition) => {
+					updateNotification({
+						type: 'modify-app-alert-parameters',
+						appMod: { editions },
+					});
+				}}
+			/>
 		</>
 	);
 };

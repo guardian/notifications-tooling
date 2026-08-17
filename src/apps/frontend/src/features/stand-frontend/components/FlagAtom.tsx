@@ -1,5 +1,11 @@
 import type { AudienceSegment } from '../types';
-import { auFlag, ukFlag, usFlag } from './FlagIcons';
+import {
+	auFlag,
+	euFlag,
+	internationalGlobe,
+	ukFlag,
+	usFlag,
+} from './FlagIcons';
 
 export const FlagAtom = ({ segmentCode }: { segmentCode: AudienceSegment }) => {
 	switch (segmentCode) {
@@ -9,6 +15,10 @@ export const FlagAtom = ({ segmentCode }: { segmentCode: AudienceSegment }) => {
 			return usFlag;
 		case 'AU':
 			return auFlag;
+		case 'EU':
+			return euFlag;
+		case 'INT':
+			return internationalGlobe;
 		default:
 			return null;
 	}

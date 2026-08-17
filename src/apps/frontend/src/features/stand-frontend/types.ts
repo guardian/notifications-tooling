@@ -13,6 +13,7 @@ export type AlertType =
 	'breaking-news' | 'sport' | 'editors-picks' | 'one-not-to-miss';
 export type DeliveryOption = 'immediate' | 'appImmediate';
 export type AudienceSegment = 'UK' | 'US' | 'AU';
+export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
 
 export type SendingResult =
 	| {
@@ -39,7 +40,7 @@ export type PushNotification = {
 	alertType?: AlertType;
 	headline?: string;
 	pushDeliveryOption?: DeliveryOption;
-	audienceSegments?: AudienceSegment[];
+	editions?: Edition[];
 };
 
 export type NotificationState = {
