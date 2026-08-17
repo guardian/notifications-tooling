@@ -209,18 +209,12 @@ export const DispatchReport = () => {
 					height: '40px',
 				}}
 			>
-				<Button
-					variant="primary"
-					onClick={() => updateNotification({ type: 'reset' })}
-				>
-					Done
-				</Button>
 				{parameters?.type === 'email' && (
 					<Button
-						variant="tertiary"
-						onClick={() => console.log('Copy to App alert')}
+						variant="primary"
+						onClick={() => updateNotification({ type: 'reset' })}
 					>
-						Copy to App alert
+						Create new newsletter email
 					</Button>
 				)}
 			</div>

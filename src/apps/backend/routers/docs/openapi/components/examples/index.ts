@@ -1,3 +1,4 @@
+import { emailChannelConfigExample } from './chanel-config';
 import {
 	notificationSendAppPushExample,
 	notificationSendNewsletterExample,
@@ -13,4 +14,5 @@ export const examples = {
 	NotificationSendAppPush: notificationSendAppPushExample,
 	NotificationTestNewsletter: notificationTestNewsletterExample,
 	NotificationTestAppPush: notificationTestAppPushExample,
+	EmailChannelConfig: emailChannelConfigExample,
 } as const;

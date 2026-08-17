@@ -10,8 +10,10 @@ import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
+import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
+import { PreviewToggle } from './PreviewToggle';
 import {
 	APP_DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
@@ -64,6 +66,7 @@ export const CreateAppAlertTab = () => {
 									maxWidth: '826px',
 								})}
 							>
+								<PreviewToggle />
 								<div
 									css={css({
 										position: 'relative',
@@ -78,6 +81,20 @@ export const CreateAppAlertTab = () => {
 								>
 									<CreateAppAlertForm activeSectionHref={selectedHref} />
 								</div>
+							</Item>
+							<Item
+								size={'grow'}
+								cssOverrides={css({
+									display: 'none',
+									justifyContent: 'center',
+									alignItems: 'flex-start',
+									flow: 'vertical',
+									['@media (min-width: 1280px)']: {
+										display: 'flex',
+									},
+								})}
+							>
+								<AppPreviewSection />
 							</Item>
 						</>
 					)}

@@ -3,8 +3,8 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-database_dir="$(cd "$script_dir/.." && pwd)"
-repo_root="$(cd "$script_dir/../../../.." && pwd)"
+database_dir="$(cd "$script_dir/../../.." && pwd)"
+repo_root="$(cd "$script_dir/../../../../../.." && pwd)"
 compose_file="$repo_root/docker/docker-compose.local.yml"
 compose_env_file="$database_dir/.env"
 compose_env_example_file="$database_dir/.env.example"

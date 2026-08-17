@@ -15,6 +15,12 @@ export interface NewsletterSegment {
 	emailRenderingNewsletterId: string;
 }
 
+/**
+ * ID of a test campaign created in the live Braze account for dry-runs on PROD.
+ * The audience should be restricted to internal Guardian users
+ * */
+const LIVE_ACCOUNT_TEST_CAMPAIGN_ID = '79a123db-4bec-413b-a20c-207ff285adfd';
+
 // TODO: Move this configuration into settings backed by JSON in S3 or RDS.
 const newsletterSegmentsByStage = {
 	CODE: {
@@ -26,6 +32,7 @@ const newsletterSegmentsByStage = {
 		US: {
 			label: 'US',
 			brazeCampaignId: 'a945e3ae-165b-46d7-b163-0ca1c6beb2f4',
+			// this is the right id for the CODE version of this newsletter - the PROD version below does have different casing
 			emailRenderingNewsletterId: 'breakingnewsus',
 		},
 		AU: {
@@ -42,8 +49,8 @@ const newsletterSegmentsByStage = {
 		},
 		US: {
 			label: 'US',
-			brazeCampaignId: '',
-			emailRenderingNewsletterId: '',
+			brazeCampaignId: LIVE_ACCOUNT_TEST_CAMPAIGN_ID,
+			emailRenderingNewsletterId: 'breaking-news-us',
 		},
 		AU: {
 			label: 'AU',
@@ -93,10 +100,9 @@ interface AppPushTopicType {
  * Push targets are curated topic types, each exposing its `editions`. A request
  * names a topic type and one of its editions; the backend resolves that pair to
  * the mobile-n10n topic (`{ type, name }`) that `guardian/facia-tool`'s Breaking
- * News tool emits, plus the registered `newsstand` topic. The raw topic
- * coordinates are kept out of the public contract. The internal test topic lives
- * in `internalAppPushTestTopicTypes`, not here, so it can never be targeted by a
- * production send.
+ * News tool emits. The raw topic coordinates are kept out of the public
+ * contract. The internal test topic lives in `internalAppPushTestTopicTypes`,
+ * not here, so it can never be targeted by a production send.
  */
 const curatedAppPushTopicTypes = {
 	'breaking-news': {
@@ -197,26 +203,6 @@ const curatedAppPushTopicTypes = {
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
-			},
-		},
-	},
-	'uk-general-election': {
-		label: 'UK general election',
-		importance: AppPushImportance.Minor,
-		editions: {
-			uk: {
-				label: 'UK',
-				mobileN10nTopic: { type: 'breaking', name: 'uk-general-election' },
-			},
-		},
-	},
-	newsstand: {
-		label: 'Newsstand',
-		importance: AppPushImportance.Minor,
-		editions: {
-			ios: {
-				label: 'iOS',
-				mobileN10nTopic: { type: 'newsstand', name: 'newsstandIos' },
 			},
 		},
 	},

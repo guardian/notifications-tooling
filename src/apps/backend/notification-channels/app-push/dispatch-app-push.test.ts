@@ -76,7 +76,7 @@ describe('dispatchNotification (app-push channel)', () => {
 						type: 'topic',
 						items: [
 							{ type: 'breaking-news', name: 'uk' },
-							{ type: 'newsstand', name: 'ios' },
+							{ type: 'sport', name: 'uk' },
 						],
 					},
 					compose: { use: 'lead' },
@@ -101,7 +101,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Minor',
-				topics: [{ type: 'newsstand', name: 'newsstandIos' }],
+				topics: [{ type: 'breaking', name: 'uk-sport' }],
 			}),
 		);
 		expect(outcomes.appPush).toEqual([
@@ -114,7 +114,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			{
 				notificationId,
 				id: anyString,
-				topicType: 'newsstand',
+				topicType: 'sport',
 				status: 'success',
 			},
 		]);
@@ -139,7 +139,7 @@ describe('dispatchNotification (app-push channel)', () => {
 						type: 'topic',
 						items: [
 							{ type: 'breaking-news', name: 'uk' },
-							{ type: 'newsstand', name: 'ios' },
+							{ type: 'sport', name: 'uk' },
 						],
 					},
 					compose: { use: 'lead' },
@@ -165,7 +165,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			{
 				notificationId,
 				id: anyString,
-				topicType: 'newsstand',
+				topicType: 'sport',
 				status: 'failure',
 				failureReason: 'http_error',
 			},
