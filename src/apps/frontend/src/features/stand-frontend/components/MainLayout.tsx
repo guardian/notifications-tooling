@@ -11,9 +11,9 @@ import {
 import type { AppConfig } from '@models';
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ConfigContext } from '../ConfigContext';
 import { topBarNavigationItems } from '../routes';
 import { faviconTheme, layer, topBarTheme } from '../themes';
-import { UserContext } from '../UserContext';
 
 interface Props {
 	children: ReactNode;
@@ -27,7 +27,7 @@ const getInitials = (user: AppConfig['user']): string => {
 };
 
 export const MainLayout = ({ children }: Props) => {
-	const { user } = useContext(UserContext) ?? {};
+	const { user } = useContext(ConfigContext) ?? {};
 	const { pathname } = useLocation();
 
 	return (
