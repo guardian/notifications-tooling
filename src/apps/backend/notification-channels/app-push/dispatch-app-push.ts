@@ -42,14 +42,17 @@ export type AppPushDispatchOutcome = {
 export type ResolvedAppPush = {
 	topicType: string;
 	importance: AppNotificationImportance;
+	titleOverride?: string;
 	topics: Array<{ type: string; name: string }>;
 };
 
 /**
  * Groups selected topic-type/edition pairs into one push per topic type. Each
  * type carries a single importance, so grouping by type keeps every push's
- * importance unambiguous. Throws if a pair has no configured topic. Shared by the
- * production and internal-test push flows.
+ * importance unambiguous. Editions carrying a title override cannot share the
+ * generic topic-type title, so each is keyed (and sent) separately. Throws if a
+ * pair has no configured topic. Shared by the production and internal-test push
+ * flows.
  */
 export const groupAppPushTopicsByType = (
 	items: ReadonlyArray<{
@@ -57,7 +60,7 @@ export const groupAppPushTopicsByType = (
 		name: string;
 	}>,
 ): ResolvedAppPush[] => {
-	const pushesByTopicType = new Map<string, ResolvedAppPush>();
+	const pushesByKey = new Map<string, ResolvedAppPush>();
 	for (const { type, name } of items) {
 		const resolved = resolveAppPushTopic(type, name);
 		if (!resolved) {
@@ -65,15 +68,19 @@ export const groupAppPushTopicsByType = (
 				`No push topic is configured for topic type '${type}' edition '${name}'.`,
 			);
 		}
-		const push = pushesByTopicType.get(type) ?? {
+		const key = resolved.titleOverride
+			? `${type}::${resolved.titleOverride}`
+			: type;
+		const push = pushesByKey.get(key) ?? {
 			topicType: type,
 			importance: resolved.importance,
+			titleOverride: resolved.titleOverride,
 			topics: [],
 		};
 		push.topics.push(resolved.topic);
-		pushesByTopicType.set(type, push);
+		pushesByKey.set(key, push);
 	}
-	return [...pushesByTopicType.values()];
+	return [...pushesByKey.values()];
 };
 
 export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
@@ -131,7 +138,7 @@ export const dispatchAppPush = async (
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 				id,
 				sender,
-				title: item.title,
+				title: push.titleOverride ?? item.title,
 				body: item.body,
 				link: item.link,
 				contentApiId,
