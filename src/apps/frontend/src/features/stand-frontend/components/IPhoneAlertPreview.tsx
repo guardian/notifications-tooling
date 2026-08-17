@@ -52,6 +52,7 @@ export const IPhoneAlertPreview = ({
 					width: '68.5%',
 				})}
 				aria-label="iPhone notification preview"
+				role="img"
 			>
 				<div
 					css={css({
