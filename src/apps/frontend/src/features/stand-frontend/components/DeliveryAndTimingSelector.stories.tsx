@@ -70,3 +70,20 @@ export const PreviewBoth: SendInfoPreviewPillType = {
 		<SendInfoPreviewPill channel="email" deliveryTiming="immediate" />
 	),
 };
+
+export const PreviewAppAlert: SendInfoPreviewPillType = {
+	render: () => (
+		<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByText('App alert')).toBeVisible();
+		await expect(canvas.getByText('Immediate send')).toBeVisible();
+		await expect(
+			canvas.getByRole('img', { name: 'App alert icon' }),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('img', { name: 'Immediate send icon' }),
+		).toBeInTheDocument();
+	},
+};

@@ -13,11 +13,11 @@ import { layoutMainTheme } from '../themes';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
-import { PreviewToggle } from './PreviewToggle';
 import {
 	APP_DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
 } from './SideNavigationPanel';
+import { AppPreviewToggle } from './PreviewToggle';
 
 export const CreateAppAlertTab = () => {
 	const {
@@ -66,7 +66,7 @@ export const CreateAppAlertTab = () => {
 									maxWidth: '826px',
 								})}
 							>
-								<PreviewToggle />
+								<AppPreviewToggle />
 								<div
 									css={css({
 										position: 'relative',

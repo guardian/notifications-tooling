@@ -14,6 +14,7 @@ import { validateGuardianEmail } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
 import type { AudienceSegment, NotificationState } from '../types';
+import { UserContext } from '../UserContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
 type TestSendParams = {
@@ -104,7 +105,8 @@ export const TestEmailForm = () => {
 	const { notification, requestTestEmailSend } = useContext(
 		NotificationFormContext,
 	);
-	const [emailInput, setEmailInput] = useState('');
+	const { user } = useContext(UserContext) ?? {};
+	const [emailInput, setEmailInput] = useState(user?.email ?? '');
 	const [sendInProgress, setSendInProgress] = useState(false);
 	const [confirmation, setConfirmation] = useState<TestEmailResponse>();
 	const [paramsLastUsed, setParamsLastUsed] = useState<TestSendParams>();
@@ -172,7 +174,7 @@ export const TestEmailForm = () => {
 				gap: semanticSpacing.stackXs,
 			}}
 		>
-			<Typography variant="bodyBoldMd">Test send</Typography>
+			<Typography variant="bodyBoldMd">Send a test</Typography>
 
 			<TextInput
 				description="Enter your email to send a test"
@@ -185,8 +187,8 @@ export const TestEmailForm = () => {
 				isInvalid={emailInput.length > 0 && !!emailValidationIssue}
 			/>
 			<Typography element="div" variant="helpTextFormMd">
-				Sends test only to the email address above, on the enabled channels -
-				audience segments and timing are ignored.
+				Tests send only to the email address above — audience segments and
+				timing are ignored.
 			</Typography>
 
 			<Button
@@ -201,9 +203,11 @@ export const TestEmailForm = () => {
 					marginTop: semanticSpacing.stackXs,
 				})}
 				onPress={handleSend}
+				variant="secondary"
+				size="md"
 				icon={sendInProgress ? <LoadingSpinner /> : undefined}
 			>
-				Send test notification
+				Send test
 			</Button>
 
 			{confirmation && (

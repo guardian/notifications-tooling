@@ -212,7 +212,10 @@ export const audienceSegmentStyles = {
 			height: '56px',
 			width: '100%',
 		}),
-	audienceSegmentButton: css({
+};
+
+export const previewPillStyles = {
+	pill: css({
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		backgroundColor: semanticColors.fill.weak,
 		padding: `${baseSpacing['6Px']} ${baseSpacing['8Px']}`,
@@ -222,13 +225,13 @@ export const audienceSegmentStyles = {
 		gap: `${baseSpacing['8Px']}`,
 		height: '32px',
 	}),
-	audienceSegmentIcon: css({
+	icon: css({
 		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
 		width: '24px',
 		height: '18px',
 		gap: `${baseSpacing['10Px']}`,
 	}),
-	isConfirmationStyle: css({
+	confirmationPill: css({
 		backgroundColor: semanticColors.fill.weak,
 		color: semanticColors.text.weak,
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
