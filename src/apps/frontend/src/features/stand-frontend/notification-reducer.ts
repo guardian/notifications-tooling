@@ -77,33 +77,21 @@ export const notificationReducer = (
 		}
 		// eslint-disable-next-line no-fallthrough -- previous case has exhaustive switch
 		case 'set-delivery-timing': {
-			if (!state.parameters) {
-				return state;
+			switch (action.deliveryOption) {
+				case 'immediate':
+					return {
+						...state,
+						hasAttemptedSend: false,
+						parameters: defaultEmailParams,
+					};
+				case 'appImmediate': {
+					return {
+						...state,
+						hasAttemptedSend: false,
+						parameters: defaultPushParams,
+					};
+				}
 			}
-
-			if (state.parameters.type === 'email') {
-				return {
-					...state,
-					hasAttemptedSend: false,
-					parameters: {
-						...state.parameters,
-						emailDeliveryOption: action.deliveryOption,
-					},
-				};
-			}
-
-			if (state.parameters.type === 'push') {
-				return {
-					...state,
-					hasAttemptedSend: false,
-					parameters: {
-						...state.parameters,
-						pushDeliveryOption: action.deliveryOption,
-					},
-				};
-			}
-
-			return state;
 		}
 		// eslint-disable-next-line no-fallthrough -- previous case has exhaustive switch
 		case 'set-attempted-send': {
