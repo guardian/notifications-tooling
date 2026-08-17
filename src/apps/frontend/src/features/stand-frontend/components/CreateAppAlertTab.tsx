@@ -6,24 +6,35 @@ import {
 } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
-import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { AppPreviewSection } from './AppPreviewSection';
+import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
 import { AppPreviewToggle } from './PreviewToggle';
+import {
+	APP_DEFAULT_SIDE_NAV_HREF,
+	SideNavigationPanel,
+} from './SideNavigationPanel';
 
 export const CreateAppAlertTab = () => {
 	const {
 		notification: { sendingResult },
 	} = useContext(NotificationFormContext);
+	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
 
 	return (
 		<>
 			{!sendingResult?.ok && (
-				<Layout.Sidebar layoutSmBreakpoint="hidden"></Layout.Sidebar>
+				<Layout.Sidebar layoutSmBreakpoint="hidden">
+					<SideNavigationPanel
+						selectedHref={selectedHref}
+						onSelectedHrefChange={setSelectedHref}
+						channel={'push'}
+					/>
+				</Layout.Sidebar>
 			)}
 			<Layout.Main theme={layoutMainTheme}>
 				<Grid
@@ -68,9 +79,7 @@ export const CreateAppAlertTab = () => {
 										},
 									})}
 								>
-									<Typography variant="heading2Xl" element="h1">
-										Create app alert
-									</Typography>
+									<CreateAppAlertForm activeSectionHref={selectedHref} />
 								</div>
 							</Item>
 							<Item

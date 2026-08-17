@@ -1,10 +1,6 @@
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
-import type {
-	AudienceSegment,
-	ChannelOption,
-	EmailDeliveryOption,
-} from '../types';
+import type { AudienceSegment, ChannelOption, DeliveryOption } from '../types';
 import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,
@@ -17,7 +13,7 @@ import { TestEmailForm } from './TestEmailForm';
 interface EmailPreviewSectionProps {
 	selectedSegments: AudienceSegment[];
 	selectedChannel?: ChannelOption;
-	selectedDeliveryTiming?: EmailDeliveryOption;
+	selectedDeliveryTiming?: DeliveryOption;
 }
 
 export const EmailPreviewSection = ({

@@ -15,7 +15,7 @@ import {
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
 import { NotificationFormContext } from '../NotificationContext';
-import { emailDeliveryOptionNameMap } from '../option-values';
+import { deliveryOptionNameMap } from '../option-values';
 import type { AudienceSegment } from '../types';
 import {
 	AudienceSegmentsPreviewPill,
@@ -192,8 +192,7 @@ export const DispatchReport = () => {
 							keyName="Delivery"
 							value={
 								parameters.emailDeliveryOption
-									? emailDeliveryOptionNameMap[parameters.emailDeliveryOption]
-											.name
+									? deliveryOptionNameMap[parameters.emailDeliveryOption].name
 									: ''
 							}
 						/>

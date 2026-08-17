@@ -2,19 +2,15 @@ import { css } from '@emotion/react';
 import { baseColors, semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
 import type { PropsWithChildren } from 'react';
-import { useChannelConstraints } from '../api/useChannelConstraints';
-import { validateNotificationForm } from '../form-validation';
+import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { topBarHeight } from '../themes';
-import type { ChannelOption } from '../types';
 import type { DeliveryOption } from '../types';
+import type { ChannelOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
-import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
-import { EmailFields } from './EmailFields';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
@@ -43,31 +39,17 @@ const NotificationFormSection = ({
 	</section>
 );
 
-interface CreateNotificationFormProps {
+interface CreateAppAlertFormProps {
 	activeSectionHref: string;
 }
 
-export const CreateNotificationForm = ({
+export const CreateAppAlertForm = ({
 	activeSectionHref,
-}: CreateNotificationFormProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
-	const { data: constraints } = useChannelConstraints();
+}: CreateAppAlertFormProps) => {
+	const { updateNotification } = useContext(NotificationFormContext);
 
-	if (!notification.parameters) {
-		return null;
-	}
-
-	const channel = notification.parameters.type;
-	const emailDeliveryOption =
-		notification.parameters.type === 'email'
-			? (notification.parameters.emailDeliveryOption ?? 'immediate')
-			: undefined;
-	const audienceSegments = notification.parameters.audienceSegments ?? [];
-	const requiredFieldErrors = validateNotificationForm(notification);
-	const shouldShowErrors = notification.hasAttemptedSend;
-
+	const channel = 'push'; //TODO - change to notification.parameters.type
+	const pushDeliveryOption = 'appImmediate'; //TODO - change to notification.parameters.pushDeliveryOption
 	return (
 		<div
 			css={{
@@ -79,7 +61,7 @@ export const CreateNotificationForm = ({
 			}}
 		>
 			<Typography variant="heading2Xl" element="h2">
-				Create newsletter email
+				Create app alert
 			</Typography>
 
 			<div
@@ -100,7 +82,7 @@ export const CreateNotificationForm = ({
 					<ArticleImportControl />
 
 					<ChannelSelector
-						selectedChannel={channel}
+						selectedChannel={channel} //TODO -change to notification.parameters.type
 						onChange={(channel) => {
 							updateNotification({
 								type: 'set-channel',
@@ -110,42 +92,16 @@ export const CreateNotificationForm = ({
 					/>
 				</NotificationFormSection>
 				<NotificationFormSection
-					id="content-section"
-					isActive={activeSectionHref === '#content-section'}
-				>
-					<EmailFields constraints={constraints} />
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="audience-section"
-					isActive={activeSectionHref === '#audience-section'}
-				>
-					<AudienceSegments
-						selected={audienceSegments}
-						error={
-							shouldShowErrors &&
-							requiredFieldErrors.includes('audienceSegments')
-								? 'Please select an audience segment'
-								: undefined
-						}
-						onChange={(audienceSegments) => {
-							updateNotification({
-								type: 'modify-email-parameters',
-								mod: { audienceSegments },
-							});
-						}}
-					/>
-				</NotificationFormSection>
-				<NotificationFormSection
 					id="delivery-timing-section"
 					isActive={activeSectionHref === '#delivery-timing-section'}
 				>
 					<DeliveryAndTimingSelector
-						selectedDeliveryTiming={emailDeliveryOption}
+						selectedDeliveryTiming={pushDeliveryOption}
 						channel={channel} //TODO - change to notification.parameters.type
-						onChange={(emailDeliveryOption) => {
+						onChange={(pushDeliveryOption) => {
 							updateNotification({
 								type: 'set-delivery-timing',
-								deliveryOption: emailDeliveryOption as DeliveryOption,
+								deliveryOption: pushDeliveryOption as DeliveryOption,
 							});
 						}}
 					/>

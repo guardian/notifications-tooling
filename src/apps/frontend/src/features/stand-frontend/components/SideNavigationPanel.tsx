@@ -12,6 +12,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import { layer, topBarHeight } from '../themes';
+import type { ChannelOption } from '../types';
 
 const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 	{
@@ -46,8 +47,44 @@ const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
 	},
 ];
 
+const APP_SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
+	{
+		id: '#article-section',
+		label: 'Article and channel',
+		canSkipFrom: true,
+		canSkipTo: true,
+	},
+	{
+		id: '#alert-section',
+		label: 'Alert type and editions',
+		canSkipFrom: true,
+		canSkipTo: true,
+	},
+	{
+		id: '#headline-section',
+		label: 'App alert headline',
+		canSkipFrom: true,
+		canSkipTo: true,
+	},
+	{
+		id: '#delivery-timing-section',
+		label: 'Timing and delivery',
+		canSkipFrom: true,
+		canSkipTo: true,
+	},
+	{
+		id: '#send-button-section',
+		label: 'Send',
+		canSkipFrom: true,
+		canSkipTo: true,
+	},
+];
+
 export const DEFAULT_SIDE_NAV_HREF =
 	SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
+
+export const APP_DEFAULT_SIDE_NAV_HREF =
+	APP_SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
 
 const theme: SidebarStepperNavigationTheme = {
 	navigation: {
@@ -83,15 +120,24 @@ const sidebarNavigationCssOverrides = css({
 interface SideNavigationPanelProps {
 	selectedHref: string;
 	onSelectedHrefChange: (href: string) => void;
+	channel?: ChannelOption;
 }
 
 export const SideNavigationPanel = ({
 	selectedHref,
 	onSelectedHrefChange,
+	channel = 'email',
 }: SideNavigationPanelProps) => {
+	const PANEL_ITEMS =
+		channel === 'push'
+			? APP_SIDE_NAVIGATION_PANEL_ITEMS
+			: SIDE_NAVIGATION_PANEL_ITEMS;
+	const DEFAULT_HREF =
+		channel === 'push' ? APP_DEFAULT_SIDE_NAV_HREF : DEFAULT_SIDE_NAV_HREF;
+
 	const { hash } = useLocation();
 	const navigate = useNavigate();
-	const selectedHrefRef = useRef(DEFAULT_SIDE_NAV_HREF);
+	const selectedHrefRef = useRef(DEFAULT_HREF);
 	const locationHashRef = useRef(hash);
 	const isClickLockedRef = useRef(false);
 
@@ -105,13 +151,13 @@ export const SideNavigationPanel = ({
 	};
 
 	useEffect(() => {
-		const sections = SIDE_NAVIGATION_PANEL_ITEMS.flatMap((item) => {
+		const sections = PANEL_ITEMS.flatMap((item) => {
 			const element = document.getElementById(item.id.slice(1));
 			return element ? [{ item, element }] : [];
 		});
 		let animationFrameId: number | undefined;
 
-		const selectItem = (item: (typeof SIDE_NAVIGATION_PANEL_ITEMS)[number]) => {
+		const selectItem = (item: (typeof PANEL_ITEMS)[number]) => {
 			if (selectedHrefRef.current !== item.id) {
 				selectedHrefRef.current = item.id;
 				onSelectedHrefChange(item.id);
@@ -167,7 +213,7 @@ export const SideNavigationPanel = ({
 				window.cancelAnimationFrame(animationFrameId);
 			}
 		};
-	}, [navigate, onSelectedHrefChange]);
+	}, [navigate, onSelectedHrefChange, PANEL_ITEMS]);
 
 	const handleTileClick = (href: string) => {
 		selectHref(href);
@@ -204,7 +250,7 @@ export const SideNavigationPanel = ({
 				currentStepId={selectedHref}
 				stepNavConfig={{
 					isNonLinear: true,
-					steps: SIDE_NAVIGATION_PANEL_ITEMS,
+					steps: PANEL_ITEMS,
 				}}
 				onPress={handleTileClick}
 				theme={theme}
