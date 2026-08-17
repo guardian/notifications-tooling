@@ -17,7 +17,11 @@ export const AppAlertFields = ({ constraints }: AppAlertFieldsProps) => {
 	const headlineLimits =
 		appPush?.compose.headline ?? APP_ALERT_LIMIT_FALLBACKS.headline;
 
-	const { headline = '' } = notification.parameters;
+	const appPushParameters =
+		notification.parameters?.type === 'push'
+			? notification.parameters
+			: undefined;
+	const headline = appPushParameters?.headline ?? '';
 	// const requiredFieldErrors = validateNotificationForm(notification);
 	const requiredFieldErrors: string[] = [];
 	const shouldShowErrors = notification.hasAttemptedSend;

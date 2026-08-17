@@ -92,7 +92,7 @@ export const channelConstraintsResponseSchema = z.object({
 				maxItems: z.number().int().positive(),
 				headline: contentFieldLimitsSchema,
 			}),
-			audience: z.object({
+			editions: z.object({
 				maxTopics: z.number().int().positive(),
 			}),
 		}),

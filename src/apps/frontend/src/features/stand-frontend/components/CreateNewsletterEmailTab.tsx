@@ -24,7 +24,7 @@ export const CreateNewsletterEmailTab = () => {
 		notification: { sendingResult, parameters },
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
-
+	const emailParameters = parameters?.type === 'email' ? parameters : undefined;
 	return (
 		<>
 			{!sendingResult?.ok && (
@@ -94,12 +94,10 @@ export const CreateNewsletterEmailTab = () => {
 								})}
 							>
 								<EmailPreviewSection
-									selectedSegments={parameters?.audienceSegments ?? []}
-									selectedChannel={parameters?.type}
+									selectedSegments={emailParameters?.audienceSegments ?? []}
+									selectedChannel={emailParameters?.type}
 									selectedDeliveryTiming={
-										parameters?.type === 'email'
-											? parameters.emailDeliveryOption
-											: undefined
+										emailParameters?.emailDeliveryOption ?? undefined
 									}
 								/>
 							</Item>

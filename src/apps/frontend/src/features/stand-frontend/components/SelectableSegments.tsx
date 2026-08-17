@@ -15,8 +15,8 @@ export interface Segment {
 }
 
 interface SelectableSegmentsPickerProps {
-	title: string;
-	description: string;
+	title?: string;
+	description?: string;
 	segments?: Segment[];
 	selected: Edition[];
 	onChange: (selected: Edition[]) => void;
@@ -48,11 +48,14 @@ const customTheme: CheckboxTheme = {
 };
 
 export const SelectableSegments = ({
+	title,
+	description,
 	segments = DEFAULT_EDITIONS,
 	selected,
 	onChange,
 	error,
 }: SelectableSegmentsPickerProps) => {
+	console.log('Title', title, 'Description', description);
 	const onSegmentToggle = (segmentCode: Edition) => {
 		const next = selected.includes(segmentCode)
 			? selected.filter((code) => code !== segmentCode)

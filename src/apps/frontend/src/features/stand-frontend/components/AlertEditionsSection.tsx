@@ -11,8 +11,13 @@ export const AlertEditionsSection = () => {
 		NotificationFormContext,
 	);
 
-	const { alertType , editions } = notification.parameters;
-	const shouldShowErrors = notification.hasAttemptedSend;
+	const appPushParameters =
+		notification.parameters?.type === 'push'
+			? notification.parameters
+			: undefined;
+	const alertType = appPushParameters?.alertType ?? 'breaking-news';
+	const editions = appPushParameters?.editions ?? [];
+
 	return (
 		<>
 			<Select
@@ -20,26 +25,21 @@ export const AlertEditionsSection = () => {
 				label="Alert type"
 				description="Choose the type of app alert"
 				onChange={(key) => {
-					const alertType =
+					const selectedAlertType =
 						typeof key === 'string' ? key.split('//').at(1) : undefined;
-					switch (alertType) {
+					switch (selectedAlertType) {
 						case 'breaking-news':
 						case 'sport':
 						case 'editors-picks':
 						case 'one-not-to-miss':
 							return updateNotification({
 								type: 'modify-app-alert-parameters',
-								appMod: { alertType },
-							});
-						default:
-							return updateNotification({
-								type: 'modify-app-alert-parameters',
-								appMod: { alertType: undefined },
+								appMod: { alertType: selectedAlertType },
 							});
 					}
 				}}
 				selectionMode="single"
-				value={toOptionKey(alertType ?? 'undefined')}
+				value={toOptionKey(alertType)}
 			>
 				<Option id={toOptionKey('breaking-news')}>
 					{alertTypeNameMap['breaking-news']}
@@ -51,21 +51,13 @@ export const AlertEditionsSection = () => {
 				<Option id={toOptionKey('one-not-to-miss')}>
 					{alertTypeNameMap['one-not-to-miss']}
 				</Option>
-				<Option id={toOptionKey('undefined')}>
-					{alertTypeNameMap['undefined']}
-				</Option>
 			</Select>
 			<SelectableSegments
 				selected={editions}
-				error={
-					shouldShowErrors && requiredFieldErrors.includes('editions')
-						? 'Please select an edition'
-						: undefined
-				}
-				onChange={(edition) => {
+				onChange={(newEdition) => {
 					updateNotification({
 						type: 'modify-app-alert-parameters',
-						appMod: { editions },
+						appMod: { editions: newEdition },
 					});
 				}}
 			/>

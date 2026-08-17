@@ -61,12 +61,14 @@ export const AppPreviewToggle = () => (
 
 export const EmailPreviewToggle = () => {
 	const { notification } = useContext(NotificationFormContext);
-	const selectedSegments = notification.parameters?.audienceSegments ?? [];
-	const selectedChannel = notification.parameters?.type;
-	const selectedDeliveryTiming =
+	const emailParameters =
 		notification.parameters?.type === 'email'
-			? notification.parameters.emailDeliveryOption
+			? notification.parameters
 			: undefined;
+	const selectedSegments = emailParameters?.audienceSegments ?? [];
+	const selectedChannel = emailParameters?.type;
+	const selectedDeliveryTiming =
+		emailParameters?.emailDeliveryOption ?? undefined;
 
 	return (
 		<PreviewToggle>
