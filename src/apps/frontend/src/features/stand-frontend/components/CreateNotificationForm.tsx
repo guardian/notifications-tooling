@@ -2,14 +2,14 @@ import { css } from '@emotion/react';
 import { baseColors, semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
 import type { PropsWithChildren } from 'react';
+import { useContext } from 'react';
+import { useChannelAudiences } from '../api/useChannelAudiences';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { topBarHeight } from '../themes';
-import type { ChannelOption } from '../types';
-import type { DeliveryOption } from '../types';
+import type { ChannelOption, DeliveryOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
@@ -54,6 +54,9 @@ export const CreateNotificationForm = ({
 		NotificationFormContext,
 	);
 	const { data: constraints } = useChannelConstraints();
+	const { data: audiences } = useChannelAudiences();
+
+	console.log('audiences', audiences);
 
 	if (!notification.parameters) {
 		return null;
