@@ -27,11 +27,13 @@ const meta: Meta<StoryArgs> = {
 
 export default meta;
 
+const BUTTON_TEXT = 'Send test';
+
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
-			canvas.getByRole('button', { name: 'Send test notification' }),
+			canvas.getByRole('button', { name: BUTTON_TEXT }),
 		).toBeDisabled();
 		await expect(
 			canvas.getByPlaceholderText('name@theguardian.com'),
@@ -45,7 +47,7 @@ export const WithValidEmail: Story = {
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
 		await userEvent.type(input, 'joe.blogs@theguardian.com');
 		await expect(
-			canvas.getByRole('button', { name: 'Send test notification' }),
+			canvas.getByRole('button', { name: BUTTON_TEXT }),
 		).toBeEnabled();
 	},
 };
@@ -55,7 +57,7 @@ export const WithNonGuardianEmail: Story = {
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
 		await userEvent.type(input, 'joe.blogs@example.com');
 		await expect(
-			canvas.getByRole('button', { name: 'Send test notification' }),
+			canvas.getByRole('button', { name: BUTTON_TEXT }),
 		).toBeDisabled();
 	},
 };
@@ -65,7 +67,7 @@ export const WithInvalidEmail: Story = {
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
 		await userEvent.type(input, 'joe.blogs^example.com');
 		await expect(
-			canvas.getByRole('button', { name: 'Send test notification' }),
+			canvas.getByRole('button', { name: BUTTON_TEXT }),
 		).toBeDisabled();
 	},
 };
@@ -74,7 +76,7 @@ export const SentTestEmail: Story = {
 		const canvas = within(canvasElement);
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
 		const button = canvas.getByRole('button', {
-			name: 'Send test notification',
+			name: BUTTON_TEXT,
 		});
 		await userEvent.type(input, 'joe.blogs@theguardian.com');
 		await userEvent.click(button);
@@ -96,7 +98,7 @@ export const FailingTestEmail: Story = {
 		const canvas = within(canvasElement);
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
 		const button = canvas.getByRole('button', {
-			name: 'Send test notification',
+			name: BUTTON_TEXT,
 		});
 		await userEvent.type(input, 'joe.blogs@theguardian.com');
 		await userEvent.click(button);
