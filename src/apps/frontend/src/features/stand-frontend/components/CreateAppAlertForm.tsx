@@ -9,6 +9,7 @@ import { NotificationFormContext } from '../NotificationContext';
 import { topBarHeight } from '../themes';
 import type { DeliveryOption } from '../types';
 import type { ChannelOption } from '../types';
+import { AlertEditionsSection } from './AlertEditionsSection';
 import { AppAlertFields } from './AppAlertFields';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
@@ -94,6 +95,12 @@ export const CreateAppAlertForm = ({
 							});
 						}}
 					/>
+				</NotificationFormSection>
+				<NotificationFormSection
+					id="alert-section"
+					isActive={activeSectionHref === '#alert-section'}
+				>
+					<AlertEditionsSection />
 				</NotificationFormSection>
 				<NotificationFormSection
 					id="headline-section"

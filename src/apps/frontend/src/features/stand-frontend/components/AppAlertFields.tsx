@@ -1,11 +1,11 @@
 import { useContext } from 'react';
-import type { useChannelConstraints } from '../api/useChannelConstraints';
-import  { APP_ALERT_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
+import type { ChannelConstraintsResponse } from '../api/schemas';
+import { APP_ALERT_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
 import { NotificationTextInput } from './NotificationTextInput';
 
 interface AppAlertFieldsProps {
-	constraints?: ReturnType<typeof useChannelConstraints>['data'];
+	constraints?: ChannelConstraintsResponse;
 }
 
 export const AppAlertFields = ({ constraints }: AppAlertFieldsProps) => {
@@ -13,14 +13,17 @@ export const AppAlertFields = ({ constraints }: AppAlertFieldsProps) => {
 		NotificationFormContext,
 	);
 
+	if (notification.parameters?.type !== 'push') {
+		return null;
+	}
 
-	const appPush = constraints?.channels.appPush;
+	const appPush = constraints?.channels['app-push'];
 	const headlineLimits =
 		appPush?.compose.headline ?? APP_ALERT_LIMIT_FALLBACKS.headline;
 
 	const { headline = '' } = notification.parameters;
 	// const requiredFieldErrors = validateNotificationForm(notification);
-	const requiredFieldErrors = {};
+	const requiredFieldErrors: string[] = [];
 	const shouldShowErrors = notification.hasAttemptedSend;
 
 	return (
