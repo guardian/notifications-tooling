@@ -8,11 +8,13 @@ import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
+import { ConfigContext } from '../ConfigContext';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
+import { UnderConstructionTab } from './NotAvailableTab';
 import { AppPreviewToggle } from './PreviewToggle';
 import {
 	APP_DEFAULT_SIDE_NAV_HREF,
@@ -20,10 +22,15 @@ import {
 } from './SideNavigationPanel';
 
 export const CreateAppAlertTab = () => {
+	const { DISABLE_APP_SEND_TAB = false } = useContext(ConfigContext) ?? {};
 	const {
 		notification: { sendingResult },
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
+
+	if (DISABLE_APP_SEND_TAB) {
+		return <UnderConstructionTab />;
+	}
 
 	return (
 		<>

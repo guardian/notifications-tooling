@@ -6,7 +6,7 @@ import { requestEmailHtml } from './api/fetch-email-preview';
 import { sendNotification } from './api/send-notification';
 import { requestTestEmailSend } from './api/send-test-email';
 import { MainLayout } from './components/MainLayout';
-import { NoPermissionsTab } from './components/NoPermissionsTab';
+import { NoPermissionsTab } from './components/NotAvailableTab';
 import { ConfigContext } from './ConfigContext';
 import { getAppConfig } from './get-config';
 import { defaultState, notificationReducer } from './notification-reducer';

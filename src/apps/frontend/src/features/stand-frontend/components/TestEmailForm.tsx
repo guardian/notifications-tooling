@@ -10,11 +10,11 @@ import type {
 	TestEmailResponse,
 	TestEmailSendRequest,
 } from '../api/send-test-email';
+import { ConfigContext } from '../ConfigContext';
 import { validateGuardianEmail } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
 import type { AudienceSegment, NotificationState } from '../types';
-import { ConfigContext } from '../ConfigContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
 type TestSendParams = {

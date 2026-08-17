@@ -26,8 +26,15 @@ const getInitials = (user: AppConfig['user']): string => {
 	return `${firstName}${lastName}`.toUpperCase() || 'U';
 };
 
+const filteredTopBarNavigationItems = (disableAppSend: boolean) => {
+	return disableAppSend
+		? topBarNavigationItems.filter((item) => item.path !== '/app-alert/create')
+		: topBarNavigationItems;
+};
+
 export const MainLayout = ({ children }: Props) => {
-	const { user } = useContext(ConfigContext) ?? {};
+	const { user, DISABLE_APP_SEND_TAB = false } =
+		useContext(ConfigContext) ?? {};
 	const { pathname } = useLocation();
 
 	return (
@@ -43,14 +50,16 @@ export const MainLayout = ({ children }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{topBarNavigationItems.map(({ text, path }) => (
-							<TopBarNavigation
-								key={path}
-								text={text}
-								isSelected={pathname === path}
-								href={path}
-							/>
-						))}
+						{filteredTopBarNavigationItems(DISABLE_APP_SEND_TAB).map(
+							({ text, path }) => (
+								<TopBarNavigation
+									key={path}
+									text={text}
+									isSelected={pathname === path}
+									href={path}
+								/>
+							),
+						)}
 					</TopBarContainerLeft>
 					{user && (
 						<Avatar
