@@ -13,10 +13,6 @@ export const AppAlertFields = ({ constraints }: AppAlertFieldsProps) => {
 		NotificationFormContext,
 	);
 
-	if (notification.parameters?.type !== 'push') {
-		return null;
-	}
-
 	const appPush = constraints?.channels['app-push'];
 	const headlineLimits =
 		appPush?.compose.headline ?? APP_ALERT_LIMIT_FALLBACKS.headline;
