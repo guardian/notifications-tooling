@@ -325,4 +325,79 @@ describe('dispatchNotification (app-push channel)', () => {
 			},
 		]);
 	});
+
+	it('splits the overridden US sport edition out when mixed with other topic types and sport editions', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { lead: pushItem } },
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [
+							{ type: 'breaking-news', name: 'uk' },
+							{ type: 'sport', name: 'uk' },
+							{ type: 'sport', name: 'us' },
+							{ type: 'sport', name: 'au' },
+						],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			dependencies,
+		);
+
+		// breaking-news (1) + grouped uk/au sport (1) + overridden us sport (1).
+		expect(sendAppNotification).toHaveBeenCalledTimes(3);
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				title: pushItem.title,
+				importance: 'Major',
+				topics: [{ type: 'breaking', name: 'uk' }],
+			}),
+		);
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				title: pushItem.title,
+				importance: 'Minor',
+				topics: [
+					{ type: 'breaking', name: 'uk-sport' },
+					{ type: 'breaking', name: 'au-sport' },
+				],
+			}),
+		);
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				title: 'Sports news',
+				importance: 'Minor',
+				topics: [{ type: 'breaking', name: 'us-sport' }],
+			}),
+		);
+		expect(outcomes.appPush).toEqual([
+			{
+				notificationId,
+				id: anyString,
+				topicType: 'breaking-news',
+				status: 'success',
+			},
+			{
+				notificationId,
+				id: anyString,
+				topicType: 'sport',
+				status: 'success',
+			},
+			{
+				notificationId,
+				id: anyString,
+				topicType: 'sport',
+				status: 'success',
+			},
+		]);
+	});
 });
