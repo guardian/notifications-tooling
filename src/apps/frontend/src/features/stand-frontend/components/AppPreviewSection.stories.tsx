@@ -7,8 +7,8 @@ import { AppPreviewSection } from './AppPreviewSection';
 const meta = {
 	title: 'Stand Frontend/AppPreviewSection',
 	component: AppPreviewSection,
-	render: () =>
-		WithNotificationContext(<AppPreviewSection />, {
+	render: (args) =>
+		WithNotificationContext(<AppPreviewSection {...args} />, {
 			...defaultState,
 			fetchedArticleId: 'article-id',
 		}),
@@ -32,5 +32,11 @@ export const Default: Story = {
 		await expect(
 			canvas.getByText('The preview for the app alert will be shown below.'),
 		).toBeVisible();
+		await expect(canvas.getByText('Send info')).toBeVisible();
+		await expect(canvas.getByText('App alert')).toBeVisible();
+		await expect(canvas.getByText('Immediate send')).toBeVisible();
+		await expect(canvas.getByText('Editions')).toBeVisible();
+		await expect(canvas.getByText('UK')).toBeVisible();
+		await expect(canvas.getByText('International')).toBeVisible();
 	},
 };
