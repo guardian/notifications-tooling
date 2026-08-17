@@ -6,3 +6,5 @@ export interface UserResponse {
 	user: User;
 	permissions: string[];
 }
+
+export type AppConfig = UserResponse;

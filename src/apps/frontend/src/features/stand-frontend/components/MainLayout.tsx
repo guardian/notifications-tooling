@@ -8,9 +8,9 @@ import {
 	TopBarNavigation,
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
+import type { AppConfig } from '@models';
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { AppConfig } from '../get-config';
 import { topBarNavigationItems } from '../routes';
 import { faviconTheme, layer, topBarTheme } from '../themes';
 import { UserContext } from '../UserContext';

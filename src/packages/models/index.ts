@@ -1,3 +1,3 @@
 export * from './capi';
-export * from './user';
+export * from './frontend-app-config';
 export * from './api-contract/preview';
