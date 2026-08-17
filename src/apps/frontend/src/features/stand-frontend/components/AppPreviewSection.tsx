@@ -3,6 +3,7 @@ import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import type { AppPushTopicSelection, TopicTypeOption } from './Editions';
 import { Editions } from './Editions';
+import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
@@ -53,11 +54,9 @@ export const AppPreviewSection = ({
 					paddingBlock: '12px',
 				})}
 			>
-				<span css={{ fontSize: '14px' }}>
-					App alert formats might differ across platforms and devices
-				</span>
+				App alert formats might differ across platforms and devices
 			</AlertBanner>
-			{/* App Preview iPhone and Android */}
+			<IPhoneAlertPreview />
 		</PreviewSection>
 	);
 };
