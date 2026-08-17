@@ -34,6 +34,7 @@ export type EmailNotification = {
 
 export type PushNotification = {
 	type: 'push';
+	headline?: string;
 	pushDeliveryOption?: DeliveryOption;
 	audienceSegments?: AudienceSegment[];
 };
@@ -69,7 +70,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'modify-app-alert-parameters';
-			mod: Partial<PushNotification>;
+			appMod: Partial<PushNotification>;
 	  }
 	| {
 			type: 'waiting-for-article';

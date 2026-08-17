@@ -4,10 +4,12 @@ import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import type { PropsWithChildren } from 'react';
 import { useContext } from 'react';
+import { useChannelConstraints } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
 import { topBarHeight } from '../themes';
 import type { DeliveryOption } from '../types';
 import type { ChannelOption } from '../types';
+import { AppAlertFields } from './AppAlertFields';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
@@ -47,6 +49,8 @@ export const CreateAppAlertForm = ({
 	activeSectionHref,
 }: CreateAppAlertFormProps) => {
 	const { updateNotification } = useContext(NotificationFormContext);
+
+	const { data: constraints } = useChannelConstraints();
 
 	const channel = 'push'; //TODO - change to notification.parameters.type
 	const pushDeliveryOption = 'appImmediate'; //TODO - change to notification.parameters.pushDeliveryOption
@@ -90,6 +94,12 @@ export const CreateAppAlertForm = ({
 							});
 						}}
 					/>
+				</NotificationFormSection>
+				<NotificationFormSection
+					id="headline-section"
+					isActive={activeSectionHref === '#headline-section'}
+				>
+					<AppAlertFields constraints={constraints} />
 				</NotificationFormSection>
 				<NotificationFormSection
 					id="delivery-timing-section"

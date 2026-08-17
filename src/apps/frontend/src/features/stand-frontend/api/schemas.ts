@@ -85,11 +85,12 @@ export const channelConstraintsResponseSchema = z.object({
 				maxTestRecipients: z.number().int().positive(),
 			}),
 		}),
-		'app-push': z.object({
+		appPush: z.object({
 			content: channelContentLimitsSchema,
 			compose: z.object({
 				minItems: z.number().int().nonnegative(),
 				maxItems: z.number().int().positive(),
+				headline: contentFieldLimitsSchema,
 			}),
 			audience: z.object({
 				maxTopics: z.number().int().positive(),
