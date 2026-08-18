@@ -1,13 +1,10 @@
-import { css } from '@emotion/react';
-import { baseColors, semanticSizing, semanticSpacing } from '@guardian/stand';
+import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
-import type { PropsWithChildren } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
-import { topBarHeight } from '../themes';
 import type { ChannelOption } from '../types';
 import type { DeliveryOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
@@ -15,33 +12,10 @@ import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { EmailFields } from './EmailFields';
+import { NotificationFormSection } from './NotificationFormSection';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
-
-const NotificationFormSection = ({
-	id,
-	isActive,
-	children,
-}: PropsWithChildren<{ id: string; isActive: boolean }>) => (
-	<section
-		id={id}
-		data-scrollspy-active={isActive ? '' : undefined}
-		css={css({
-			display: 'flex',
-			flexDirection: 'column',
-			gap: semanticSpacing.stackMd,
-			borderLeft: `${semanticSizing.border.md} solid transparent`,
-			paddingLeft: semanticSpacing.stackMd,
-			scrollMarginTop: topBarHeight,
-			'&[data-scrollspy-active]': {
-				borderLeftColor: baseColors.magenta[200],
-			},
-		})}
-	>
-		{children}
-	</section>
-);
 
 interface CreateNotificationFormProps {
 	activeSectionHref: string;
@@ -59,12 +33,15 @@ export const CreateNotificationForm = ({
 		return null;
 	}
 
-	const channel = notification.parameters.type;
-	const emailDeliveryOption =
+	const emailParameters =
 		notification.parameters.type === 'email'
-			? (notification.parameters.emailDeliveryOption ?? 'immediate')
+			? notification.parameters
 			: undefined;
-	const audienceSegments = notification.parameters.audienceSegments ?? [];
+	const channel = emailParameters?.type ?? 'email';
+	const emailDeliveryOption =
+		emailParameters?.emailDeliveryOption ?? 'immediate';
+
+	const audienceSegments = emailParameters?.audienceSegments ?? [];
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
 
@@ -154,7 +131,7 @@ export const CreateNotificationForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton channel={channel} />
+					<SendButton>{'Send newsletter email'}</SendButton>
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />

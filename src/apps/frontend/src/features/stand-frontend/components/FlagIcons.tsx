@@ -69,6 +69,58 @@ export const auFlag = (
 	</svg>
 );
 
+export const euFlag = (
+	<svg
+		height="18"
+		xmlns="http://www.w3.org/2000/svg"
+		id="flag-icons-eu"
+		viewBox="0 0 640 480"
+	>
+		<defs>
+			<path
+				id="eu-star"
+				d="M0,-1 0.24,-0.32 0.95,-0.31 0.38,0.12 0.59,0.81 0,0.4 -0.59,0.81 -0.38,0.12 -0.95,-0.31 -0.24,-0.32 Z"
+				fill="#FFCC00"
+			/>
+		</defs>
+		<path fill="#039" d="M0 0h640v480H0z" />
+		<g transform="translate(320,240)">
+			<use href="#eu-star" transform="translate(0,-150) scale(26)" />
+			<use href="#eu-star" transform="translate(66.67,-129.9) scale(26)" />
+			<use href="#eu-star" transform="translate(115.47,-75) scale(26)" />
+			<use href="#eu-star" transform="translate(133.33,0) scale(26)" />
+			<use href="#eu-star" transform="translate(115.47,75) scale(26)" />
+			<use href="#eu-star" transform="translate(66.67,129.9) scale(26)" />
+			<use href="#eu-star" transform="translate(0,150) scale(26)" />
+			<use href="#eu-star" transform="translate(-66.67,129.9) scale(26)" />
+			<use href="#eu-star" transform="translate(-115.47,75) scale(26)" />
+			<use href="#eu-star" transform="translate(-133.33,0) scale(26)" />
+			<use href="#eu-star" transform="translate(-115.47,-75) scale(26)" />
+			<use href="#eu-star" transform="translate(-66.67,-129.9) scale(26)" />
+		</g>
+	</svg>
+);
+
+export const internationalGlobe = (
+	<svg
+		height="18px"
+		xmlns="http://www.w3.org/2000/svg"
+		id="flag-icons-globe"
+		viewBox="0 0 24 24"
+		fill="none"
+	>
+		<g stroke="#337ab7" strokeWidth="1.5" strokeLinecap="round">
+			<circle cx="12" cy="12" r="10" />
+			<line x1="2" y1="8.5" x2="22" y2="8.5" />
+			<line x1="1.8" y1="12" x2="22.2" y2="12" />
+			<line x1="2" y1="15.5" x2="22" y2="15.5" />
+			<line x1="12" y1="2" x2="12" y2="22" />
+			<path d="M 12 2 C 7 6.5 7 17.5 12 22" />
+			<path d="M 12 2 C 17 6.5 17 17.5 12 22" />
+		</g>
+	</svg>
+);
+
 export const scheduleIcon = (
 	<svg
 		width="16.67"

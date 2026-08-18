@@ -1,43 +1,20 @@
-import { css } from '@emotion/react';
-import { baseColors, semanticSizing, semanticSpacing } from '@guardian/stand';
+import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
-import type { PropsWithChildren } from 'react';
 import { useContext } from 'react';
+import { useChannelConstraints } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
-import { topBarHeight } from '../themes';
 import type { DeliveryOption } from '../types';
 import type { ChannelOption } from '../types';
+import { AlertEditionsSection } from './AlertEditionsSection';
+import { AppAlertFields } from './AppAlertFields';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
+import { NotificationFormSection } from './NotificationFormSection';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
-
-const NotificationFormSection = ({
-	id,
-	isActive,
-	children,
-}: PropsWithChildren<{ id: string; isActive: boolean }>) => (
-	<section
-		id={id}
-		data-scrollspy-active={isActive ? '' : undefined}
-		css={css({
-			display: 'flex',
-			flexDirection: 'column',
-			gap: semanticSpacing.stackMd,
-			borderLeft: `${semanticSizing.border.md} solid transparent`,
-			paddingLeft: semanticSpacing.stackMd,
-			scrollMarginTop: topBarHeight,
-			'&[data-scrollspy-active]': {
-				borderLeftColor: baseColors.magenta[200],
-			},
-		})}
-	>
-		{children}
-	</section>
-);
 
 interface CreateAppAlertFormProps {
 	activeSectionHref: string;
@@ -47,6 +24,8 @@ export const CreateAppAlertForm = ({
 	activeSectionHref,
 }: CreateAppAlertFormProps) => {
 	const { updateNotification } = useContext(NotificationFormContext);
+
+	const { data: constraints } = useChannelConstraints();
 
 	const channel = 'push'; //TODO - change to notification.parameters.type
 	const pushDeliveryOption = 'appImmediate'; //TODO - change to notification.parameters.pushDeliveryOption
@@ -92,6 +71,18 @@ export const CreateAppAlertForm = ({
 					/>
 				</NotificationFormSection>
 				<NotificationFormSection
+					id="alert-section"
+					isActive={activeSectionHref === '#alert-section'}
+				>
+					<AlertEditionsSection />
+				</NotificationFormSection>
+				<NotificationFormSection
+					id="headline-section"
+					isActive={activeSectionHref === '#headline-section'}
+				>
+					<AppAlertFields constraints={constraints} />
+				</NotificationFormSection>
+				<NotificationFormSection
 					id="delivery-timing-section"
 					isActive={activeSectionHref === '#delivery-timing-section'}
 				>
@@ -110,7 +101,7 @@ export const CreateAppAlertForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton channel={channel} />
+					<SendButton>{'Send push notification'}</SendButton>
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />
