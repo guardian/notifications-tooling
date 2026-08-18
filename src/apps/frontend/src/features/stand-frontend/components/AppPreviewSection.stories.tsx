@@ -23,6 +23,10 @@ const meta = {
 	},
 	args: {
 		topicTypes: FALLBACK_TOPIC_TYPES,
+		selectedTopics: [
+			{ type: 'breaking-news', name: 'uk' },
+			{ type: 'breaking-news', name: 'international' },
+		],
 	},
 } satisfies Meta<typeof AppPreviewSection>;
 

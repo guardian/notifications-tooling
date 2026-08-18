@@ -17,11 +17,19 @@ import { layoutMainTheme } from '../themes';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
+import type { AppPushTopicSelection } from './Editions';
 import { AppPreviewToggle } from './PreviewToggle';
 import {
 	APP_DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
 } from './SideNavigationPanel';
+
+// TO DO - when we have the controls to select the topic in place,
+// derive the selected topics from the NotificationFormContext state
+const TEMPORARY_SELECTED_TOPICS: AppPushTopicSelection[] = [
+	{ type: 'breaking-news', name: 'uk' },
+	{ type: 'breaking-news', name: 'international' },
+];
 
 export const CreateAppAlertTab = () => {
 	const {
@@ -74,7 +82,10 @@ export const CreateAppAlertTab = () => {
 									maxWidth: '826px',
 								})}
 							>
-								<AppPreviewToggle topicTypes={topicTypes} />
+								<AppPreviewToggle
+									topicTypes={topicTypes}
+									selectedTopics={TEMPORARY_SELECTED_TOPICS}
+								/>
 								<div
 									css={css({
 										position: 'relative',
@@ -102,7 +113,10 @@ export const CreateAppAlertTab = () => {
 									},
 								})}
 							>
-								<AppPreviewSection topicTypes={topicTypes} />
+								<AppPreviewSection
+									topicTypes={topicTypes}
+									selectedTopics={TEMPORARY_SELECTED_TOPICS}
+								/>
 							</Item>
 						</>
 					)}

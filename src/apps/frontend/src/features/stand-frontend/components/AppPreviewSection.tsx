@@ -7,19 +7,14 @@ import { Editions } from './Editions';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
-const TEMPORARY_SELECTED_TOPICS: AppPushTopicSelection[] = [
-	{ type: 'breaking-news', name: 'uk' },
-	{ type: 'breaking-news', name: 'international' },
-];
-
 interface AppPreviewSectionProps {
 	topicTypes: TopicTypeOption[];
-	selectedTopics?: AppPushTopicSelection[];
+	selectedTopics: AppPushTopicSelection[];
 }
 
 export const AppPreviewSection = ({
 	topicTypes,
-	selectedTopics = TEMPORARY_SELECTED_TOPICS,
+	selectedTopics,
 }: AppPreviewSectionProps) => {
 	return (
 		<PreviewSection
