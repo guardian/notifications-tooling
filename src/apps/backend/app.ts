@@ -28,6 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
+app.use('/docs/api', docsRouter);
 
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 
@@ -55,7 +56,6 @@ app.use('/v1/notification-tests', notificationTestsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
 app.use('/v1/preview', previewRouter);
-app.use('/docs/api', docsRouter);
 
 const serverRoutePrefixes = ['/health', '/v1', '/docs/api'];
 
