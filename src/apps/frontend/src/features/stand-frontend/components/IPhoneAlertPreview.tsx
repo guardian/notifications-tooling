@@ -20,14 +20,14 @@ export const IPhoneAlertPreview = ({
 	headline = DEFAULT_HEADLINE,
 	thumbnailUrl = DEFAULT_THUMBNAIL_URL,
 }: IPhoneAlertPreviewProps) => (
-	<div
+	<figure
 		css={css({
 			display: 'flex',
 			flexDirection: 'column',
 			gap: 8,
 		})}
 	>
-		<Typography variant="bodyBoldSm">Apple</Typography>
+		<Typography variant="bodyBoldSm" element="figcaption">Apple</Typography>
 		<div
 			css={css({
 				alignItems: 'center',
@@ -133,5 +133,5 @@ export const IPhoneAlertPreview = ({
 				</div>
 			</div>
 		</div>
-	</div>
+	</figure>
 );
