@@ -1,13 +1,13 @@
 import { css } from '@emotion/react';
 import { semanticColors } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-import guardianLogo from '../assets/guardian-logo.png';
 import {
 	type AlertPreviewProps,
 	DEFAULT_ALERT_TYPE,
 	DEFAULT_HEADLINE,
 	DeviceAlertPreview,
 } from './DeviceAlertPreview';
+import { GuardianLogo } from './GuardianLogo';
 
 export const IPhoneAlertPreview = ({
 	alertType = DEFAULT_ALERT_TYPE,
@@ -33,17 +33,10 @@ export const IPhoneAlertPreview = ({
 			aria-label="iPhone notification preview"
 			role="img"
 		>
-			<img
-				src={guardianLogo}
-				alt=""
-				css={css({
-					alignSelf: 'center',
-					borderRadius: 9,
-					boxShadow: '0 1px 3px rgba(0, 0, 0, 0.4)',
-					height: 34,
-					width: 34,
-				})}
-				aria-hidden="true"
+			<GuardianLogo
+				size={34}
+				borderRadius={9}
+				boxShadow="0 1px 3px rgba(0, 0, 0, 0.4)"
 			/>
 
 			<div

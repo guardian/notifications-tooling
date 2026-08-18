@@ -1,13 +1,13 @@
 import { css } from '@emotion/react';
 import { baseColors, semanticColors } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-import guardianLogo from '../assets/guardian-logo.png';
 import {
 	type AlertPreviewProps,
 	DEFAULT_ALERT_TYPE,
 	DEFAULT_HEADLINE,
 	DeviceAlertPreview,
 } from './DeviceAlertPreview';
+import { GuardianLogo } from './GuardianLogo';
 
 export const AndroidAlertPreview = ({
 	alertType = DEFAULT_ALERT_TYPE,
@@ -36,15 +36,7 @@ export const AndroidAlertPreview = ({
 					marginBottom: 9,
 				})}
 			>
-				<img
-					src={guardianLogo}
-					alt=""
-					css={css({
-						height: 12,
-						width: 12,
-					})}
-					aria-hidden="true"
-				/>
+				<GuardianLogo size={12} />
 				<Typography
 					variant="bodyXs"
 					cssOverrides={css({ color: baseColors.blue[500] })}
