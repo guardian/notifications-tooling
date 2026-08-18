@@ -26,7 +26,18 @@ const meta = {
 	},
 	render: (args: StoryArgs) => {
 		const { notificationState } = args;
-		return WithNotificationContext(<CreateAppAlertTab />, notificationState);
+		return (
+			<div
+				style={{
+					display: 'flex',
+					minWidth: '1600px',
+					minHeight: '100vh',
+					boxSizing: 'border-box',
+				}}
+			>
+				{WithNotificationContext(<CreateAppAlertTab />, notificationState)}
+			</div>
+		);
 	},
 } satisfies Meta<StoryArgs>;
 

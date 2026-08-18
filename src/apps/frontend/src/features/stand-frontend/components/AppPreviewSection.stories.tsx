@@ -38,5 +38,10 @@ export const Default: Story = {
 		await expect(canvas.getByText('Editions')).toBeVisible();
 		await expect(canvas.getByText('UK')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
+		await expect(
+			canvas.getByLabelText('iPhone notification preview'),
+		).toBeVisible();
+		await expect(canvas.getByText('Breaking news')).toBeVisible();
+		await expect(canvas.getByAltText('Article thumbnail')).toBeVisible();
 	},
 };

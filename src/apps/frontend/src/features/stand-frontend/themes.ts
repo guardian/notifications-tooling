@@ -226,7 +226,7 @@ export const previewPillStyles = {
 		height: '32px',
 	}),
 	icon: css({
-		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+		border: `${semanticSizing.border.default} transparent  ${semanticColors.border.weak}`,
 		width: '24px',
 		height: '18px',
 		gap: `${baseSpacing['10Px']}`,
