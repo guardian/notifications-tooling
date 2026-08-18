@@ -40,6 +40,9 @@ export const CreateAppAlertTab = () => {
 				<Grid
 					cssOverrides={css({
 						height: '100%',
+						'@media (min-width: 1310px)': {
+							flexWrap: 'nowrap',
+						},
 					})}
 					theme={{
 						sm: { gap: '0px', padding: `0px 0px 0px` },
@@ -64,6 +67,7 @@ export const CreateAppAlertTab = () => {
 								size={'grow'}
 								cssOverrides={css({
 									maxWidth: '826px',
+									minWidth: 0,
 								})}
 							>
 								<AppPreviewToggle />
@@ -89,8 +93,11 @@ export const CreateAppAlertTab = () => {
 									justifyContent: 'center',
 									alignItems: 'flex-start',
 									flow: 'vertical',
-									['@media (min-width: 1280px)']: {
+									['@media (min-width: 1310px)']: {
 										display: 'flex',
+										flex: '0 0 474px',
+										marginLeft: 'auto',
+										maxWidth: '474px',
 									},
 								})}
 							>
