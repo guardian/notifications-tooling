@@ -4,7 +4,7 @@ import { NotificationFormContext } from '../NotificationContext';
 import { alertTypeNameMap } from '../option-values';
 import type { AlertType } from '../types';
 import type { Edition } from '../types';
-import { SelectableSegments } from './SelectableSegments';
+import { SelectableEditions } from './SelectableEditions';
 
 const toOptionKey = (value: string, name = 'alertType') => `${name}//${value}`;
 
@@ -57,7 +57,9 @@ export const AlertEditionsSection = () => {
 					{alertTypeNameMap['one-not-to-miss']}
 				</Option>
 			</Select>
-			<SelectableSegments
+			<SelectableEditions
+				title={'Editions'}
+				description={'Choose the editions the app alert will be sent to'}
 				selected={alertEditions} //Replace with edition values from notification.parameters.editions
 				onChange={(newEdition) => {
 					setAlertEditions(newEdition);

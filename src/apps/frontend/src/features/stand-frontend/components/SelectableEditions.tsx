@@ -14,7 +14,7 @@ export interface Segment {
 	label: string;
 }
 
-interface SelectableSegmentsPickerProps {
+interface SelectableEditionsPickerProps {
 	title?: string;
 	description?: string;
 	segments?: Segment[];
@@ -47,15 +47,14 @@ const customTheme: CheckboxTheme = {
 	},
 };
 
-export const SelectableSegments = ({
+export const SelectableEditions = ({
 	title,
 	description,
 	segments = DEFAULT_EDITIONS,
 	selected,
 	onChange,
 	error,
-}: SelectableSegmentsPickerProps) => {
-	console.log('Title', title, 'Description', description);
+}: SelectableEditionsPickerProps) => {
 	const onSegmentToggle = (segmentCode: Edition) => {
 		const next = selected.includes(segmentCode)
 			? selected.filter((code) => code !== segmentCode)
@@ -71,9 +70,12 @@ export const SelectableSegments = ({
 				gap: semanticSpacing.stackXs,
 			}}
 		>
-			<Typography variant="bodyBoldMd">Editions</Typography>
-			<Typography variant="bodyCompactSm">
-				Choose the editions the app alert will be sent to
+			<Typography variant="labelFormMd">{title}</Typography>
+			<Typography
+				variant="helpTextFormMd"
+				cssOverrides={css({ color: semanticColors.text.weak })}
+			>
+				{description}
 			</Typography>
 
 			<Grid
