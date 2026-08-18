@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import type { TopicTypeOption } from '../api/schemas';
+import { AndroidAlertPreview } from './AndroidAlertPreview';
 import type { AppPushTopicSelection } from './Editions';
 import { Editions } from './Editions';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
@@ -40,6 +41,7 @@ export const AppPreviewSection = ({
 				App alert formats might differ across platforms and devices
 			</AlertBanner>
 			<IPhoneAlertPreview thumbnailUrl={TEMPORARY_THUMBNAIL_URL} />
+			<AndroidAlertPreview thumbnailUrl={TEMPORARY_THUMBNAIL_URL} />
 		</PreviewSection>
 	);
 };

@@ -49,7 +49,13 @@ export const Default: Story = {
 		await expect(
 			canvas.getByLabelText('iPhone notification preview'),
 		).toBeVisible();
-		await expect(canvas.getByText('Breaking news')).toBeVisible();
+		await expect(
+			canvas.getByLabelText('Android notification preview'),
+		).toBeVisible();
+		await expect(canvas.getAllByText('Breaking news')).toHaveLength(2);
 		await expect(canvas.getByAltText('Article thumbnail')).toBeVisible();
+		await expect(
+			canvas.getByAltText('Android article thumbnail'),
+		).toBeVisible();
 	},
 };
