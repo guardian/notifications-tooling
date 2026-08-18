@@ -101,6 +101,18 @@ export type ChannelConstraintsResponse = z.infer<
 	typeof channelConstraintsResponseSchema
 >;
 
+const editionOptionSchema = z.object({
+	id: z.string(),
+	label: z.string(),
+});
+
+const topicTypeOptionSchema = z.object({
+	id: z.string(),
+	label: z.string(),
+	editions: editionOptionSchema.array(),
+});
+export type TopicTypeOption = z.infer<typeof topicTypeOptionSchema>;
+
 /**
  * `GET /v1/channels/audiences`. Non-strict throughout, so the backend can add
  * a channel, a field, or an audience cap without breaking a deployed SPA — the
@@ -121,18 +133,7 @@ export const channelAudienceResponseSchema = z.object({
 				.loose(),
 			'app-push': z
 				.object({
-					topicTypes: z.array(
-						z.object({
-							id: z.string(),
-							label: z.string(),
-							editions: z.array(
-								z.object({
-									id: z.string(),
-									label: z.string(),
-								}),
-							),
-						}),
-					),
+					topicTypes: topicTypeOptionSchema.array(),
 				})
 				.loose(),
 		})

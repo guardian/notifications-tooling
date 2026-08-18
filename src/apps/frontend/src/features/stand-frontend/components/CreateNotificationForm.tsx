@@ -4,7 +4,6 @@ import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import type { PropsWithChildren } from 'react';
 import { useContext } from 'react';
-import { useChannelAudiences } from '../api/useChannelAudiences';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
@@ -54,9 +53,6 @@ export const CreateNotificationForm = ({
 		NotificationFormContext,
 	);
 	const { data: constraints } = useChannelConstraints();
-	const { data: audiences } = useChannelAudiences();
-
-	console.log('audiences', audiences);
 
 	if (!notification.parameters) {
 		return null;

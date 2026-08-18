@@ -1,26 +1,11 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
-import type { AppPushTopicSelection, TopicTypeOption } from './Editions';
+import type { TopicTypeOption } from '../api/schemas';
+import type { AppPushTopicSelection } from './Editions';
 import { Editions } from './Editions';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
-
-// TODO: Replace these defaults with GET /v1/channels/audiences data and
-// app-alert form selections when that integration is available.
-const TEMPORARY_TOPIC_TYPES: TopicTypeOption[] = [
-	{
-		id: 'breaking-news',
-		label: 'Breaking news',
-		editions: [
-			{ id: 'uk', label: 'UK' },
-			{ id: 'us', label: 'US' },
-			{ id: 'au', label: 'AU' },
-			{ id: 'international', label: 'International' },
-			{ id: 'europe', label: 'Europe' },
-		],
-	},
-];
 
 const TEMPORARY_SELECTED_TOPICS: AppPushTopicSelection[] = [
 	{ type: 'breaking-news', name: 'uk' },
@@ -28,12 +13,12 @@ const TEMPORARY_SELECTED_TOPICS: AppPushTopicSelection[] = [
 ];
 
 interface AppPreviewSectionProps {
-	topicTypes?: TopicTypeOption[];
+	topicTypes: TopicTypeOption[];
 	selectedTopics?: AppPushTopicSelection[];
 }
 
 export const AppPreviewSection = ({
-	topicTypes = TEMPORARY_TOPIC_TYPES,
+	topicTypes,
 	selectedTopics = TEMPORARY_SELECTED_TOPICS,
 }: AppPreviewSectionProps) => {
 	return (

@@ -2,10 +2,24 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../../../api/client';
 import { ApiError } from '../../../api/errors';
 import { redirectToLogin } from '../../../api/redirectToLogin';
-import type { ChannelAudienceResponse } from './schemas';
+import type { ChannelAudienceResponse, TopicTypeOption } from './schemas';
 import { channelAudienceResponseSchema } from './schemas';
 
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
+
+export const FALLBACK_TOPIC_TYPES: TopicTypeOption[] = [
+	{
+		id: 'breaking-news',
+		label: 'Breaking news',
+		editions: [
+			{ id: 'uk', label: 'UK' },
+			{ id: 'us', label: 'US' },
+			{ id: 'au', label: 'AU' },
+			{ id: 'international', label: 'International' },
+			{ id: 'europe', label: 'Europe' },
+		],
+	},
+];
 
 /**
  * Reads the per-channel constraints the backend derives from the same config it

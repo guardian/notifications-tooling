@@ -8,6 +8,10 @@ import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
+import {
+	FALLBACK_TOPIC_TYPES,
+	useChannelAudiences,
+} from '../api/useChannelAudiences';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { AppPreviewSection } from './AppPreviewSection';
@@ -24,6 +28,10 @@ export const CreateAppAlertTab = () => {
 		notification: { sendingResult },
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
+	const { data: audiences } = useChannelAudiences();
+
+	const topicTypes =
+		audiences?.channels['app-push'].topicTypes ?? FALLBACK_TOPIC_TYPES;
 
 	return (
 		<>
@@ -66,7 +74,7 @@ export const CreateAppAlertTab = () => {
 									maxWidth: '826px',
 								})}
 							>
-								<AppPreviewToggle />
+								<AppPreviewToggle topicTypes={topicTypes} />
 								<div
 									css={css({
 										position: 'relative',
@@ -94,7 +102,7 @@ export const CreateAppAlertTab = () => {
 									},
 								})}
 							>
-								<AppPreviewSection />
+								<AppPreviewSection topicTypes={topicTypes} />
 							</Item>
 						</>
 					)}
