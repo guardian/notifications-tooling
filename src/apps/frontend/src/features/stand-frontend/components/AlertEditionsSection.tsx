@@ -1,22 +1,25 @@
 import { Option, Select } from '@guardian/stand/Select';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { alertTypeNameMap } from '../option-values';
+import type { AlertType } from '../types';
+import type { Edition } from '../types';
 import { SelectableSegments } from './SelectableSegments';
 
 const toOptionKey = (value: string, name = 'alertType') => `${name}//${value}`;
 
 export const AlertEditionsSection = () => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
+	const { updateNotification } = useContext(NotificationFormContext);
 
-	const appPushParameters =
-		notification.parameters?.type === 'push'
-			? notification.parameters
-			: undefined;
-	const alertType = appPushParameters?.alertType ?? 'breaking-news';
-	const editions = appPushParameters?.editions ?? [];
+	// const appPushParameters =
+	// 	notification.parameters?.type === 'push'
+	// 		? notification.parameters
+	// 		: undefined;
+	// const alertType = appPushParameters?.alertType ?? 'breaking-news';
+	// const editions = appPushParameters?.editions ?? [];
+
+	const [alertType, setAlertType] = useState<AlertType>('breaking-news'); //TODO - change to notification.parameters.alertType
+	const [alertEditions, setAlertEditions] = useState<Edition[]>([]); //TODO - change to notification.parameters.alertEditions
 
 	return (
 		<>
@@ -32,9 +35,11 @@ export const AlertEditionsSection = () => {
 						case 'sport':
 						case 'editors-picks':
 						case 'one-not-to-miss':
-							return updateNotification({
+							setAlertType(selectedAlertType);
+							return;
+							updateNotification({
 								type: 'modify-app-alert-parameters',
-								appMod: { alertType: selectedAlertType },
+								appMod: { alertType: selectedAlertType as AlertType },
 							});
 					}
 				}}
@@ -53,8 +58,9 @@ export const AlertEditionsSection = () => {
 				</Option>
 			</Select>
 			<SelectableSegments
-				selected={editions}
+				selected={alertEditions} //Replace with edition values from notification.parameters.editions
 				onChange={(newEdition) => {
+					setAlertEditions(newEdition);
 					updateNotification({
 						type: 'modify-app-alert-parameters',
 						appMod: { editions: newEdition },
