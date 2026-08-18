@@ -8,7 +8,15 @@ declare module '*.svg' {
 	export = path;
 }
 
-declare module '*.css' {}
+declare module '*.png' {
+	/**
+	 * A path to the PNG file
+	 */
+	const path: `${string}.png`;
+	export = path;
+}
+
+declare module '*.css' { }
 
 declare module '*.module.css' {
 	/**

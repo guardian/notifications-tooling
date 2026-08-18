@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import { semanticColors } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import guardianLogo from '../assets/guardian-logo.png';
 
 const DEFAULT_ALERT_TYPE = 'Breaking news';
 const DEFAULT_HEADLINE =
@@ -47,34 +48,25 @@ export const IPhoneAlertPreview = ({
 					display: 'grid',
 					gridTemplateColumns: '34px minmax(0, 1fr) 28px',
 					gap: 9,
-					maxWidth: 307,
+					maxWidth: 353,
 					padding: 12,
 					width: '68.5%',
 				})}
 				aria-label="iPhone notification preview"
 				role="img"
 			>
-				<div
+				<img
+					src={guardianLogo}
+					alt=""
 					css={css({
-						alignItems: 'center',
 						alignSelf: 'start',
-						backgroundColor: '#052962',
 						borderRadius: 9,
 						boxShadow: '0 1px 3px rgba(0, 0, 0, 0.4)',
-						color: '#ffffff',
-						display: 'flex',
-						fontFamily: 'Georgia, serif',
-						fontSize: 22,
-						fontWeight: 700,
 						height: 34,
-						justifyContent: 'center',
-						lineHeight: 1,
 						width: 34,
 					})}
 					aria-hidden="true"
-				>
-					G
-				</div>
+				/>
 
 				<div
 					css={css({
