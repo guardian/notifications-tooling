@@ -27,7 +27,9 @@ export const IPhoneAlertPreview = ({
 			gap: 8,
 		})}
 	>
-		<Typography variant="bodyBoldSm" element="figcaption">Apple</Typography>
+		<Typography variant="bodyBoldSm" element="figcaption">
+			Apple
+		</Typography>
 		<div
 			css={css({
 				alignItems: 'center',
