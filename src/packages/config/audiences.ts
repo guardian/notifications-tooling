@@ -88,6 +88,12 @@ export type AppPushImportance =
 interface AppPushEdition {
 	label: string;
 	mobileN10nTopic: MobileN10nTopic;
+	/**
+	 * Overrides the notification title for this specific edition. When set, the
+	 * edition is dispatched as its own push rather than grouped with the rest of
+	 * its topic type, so it can carry this bespoke title.
+	 */
+	titleOverride?: string;
 }
 
 interface AppPushTopicType {
@@ -123,7 +129,7 @@ const curatedAppPushTopicTypes = {
 		},
 	},
 	sport: {
-		label: 'Sport',
+		label: 'Sport news',
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
@@ -133,6 +139,7 @@ const curatedAppPushTopicTypes = {
 			us: {
 				label: 'US',
 				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
+				titleOverride: 'Sports news',
 			},
 			au: {
 				label: 'AU',
@@ -265,13 +272,23 @@ const resolvableAppPushTopicTypes: Record<
 export const resolveAppPushTopic = (
 	topicTypeId: AppPushTopicTypeId | AppPushTestTopicTypeId,
 	editionId: string,
-): { topic: MobileN10nTopic; importance: AppPushImportance } | undefined => {
+):
+	| {
+			topic: MobileN10nTopic;
+			importance: AppPushImportance;
+			titleOverride?: string;
+	  }
+	| undefined => {
 	const topicType = resolvableAppPushTopicTypes[topicTypeId];
 	const edition = topicType.editions[editionId];
 	if (!edition) {
 		return undefined;
 	}
-	return { topic: edition.mobileN10nTopic, importance: topicType.importance };
+	return {
+		topic: edition.mobileN10nTopic,
+		importance: topicType.importance,
+		titleOverride: edition.titleOverride,
+	};
 };
 
 // Non-empty tuples so the validator can build `z.enum(...)` from them.
