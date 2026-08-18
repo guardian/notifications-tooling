@@ -46,7 +46,7 @@ export const IPhoneAlertPreview = ({
 						'0 8px 24px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
 					boxSizing: 'border-box',
 					display: 'grid',
-					gridTemplateColumns: '34px minmax(0, 1fr) 28px',
+					gridTemplateColumns: '34px minmax(0, 1fr) 32px',
 					gap: 9,
 					maxWidth: 353,
 					padding: 12,
@@ -125,9 +125,9 @@ export const IPhoneAlertPreview = ({
 						alt="Article thumbnail"
 						css={css({
 							borderRadius: 4,
-							height: 28,
+							height: 32,
 							objectFit: 'cover',
-							width: 28,
+							width: 32,
 						})}
 					/>
 				</div>
