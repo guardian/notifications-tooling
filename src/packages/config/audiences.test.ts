@@ -29,6 +29,23 @@ describe('resolveAppPushTopic', () => {
 		expect(resolveAppPushTopic('breaking-news', 'uk')).toEqual({
 			topic: { type: 'breaking', name: 'uk' },
 			importance: AppPushImportance.Major,
+			titleOverride: undefined,
+		});
+	});
+
+	it('surfaces the title override for the US sport edition', () => {
+		expect(resolveAppPushTopic('sport', 'us')).toEqual({
+			topic: { type: 'breaking', name: 'us-sport' },
+			importance: AppPushImportance.Minor,
+			titleOverride: 'Sports news',
+		});
+	});
+
+	it('leaves other sport editions without a title override', () => {
+		expect(resolveAppPushTopic('sport', 'uk')).toEqual({
+			topic: { type: 'breaking', name: 'uk-sport' },
+			importance: AppPushImportance.Minor,
+			titleOverride: undefined,
 		});
 	});
 
