@@ -21,6 +21,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+	args: {
+		thumbnailUrl: articleFixture.fields?.thumbnail,
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -29,6 +32,17 @@ export const Default: Story = {
 		await expect(canvas.getByText('Apple')).toBeVisible();
 		await expect(canvas.getByText('Breaking news')).toBeVisible();
 		await expect(canvas.getByAltText('Article thumbnail')).toBeVisible();
+	},
+};
+
+export const WithoutThumbnail: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByLabelText('iPhone notification preview'),
+		).toBeVisible();
+		await expect(canvas.getByText('Breaking news')).toBeVisible();
+		await expect(canvas.queryByAltText('Article thumbnail')).toBeNull();
 	},
 };
 

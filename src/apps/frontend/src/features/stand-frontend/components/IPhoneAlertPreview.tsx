@@ -6,8 +6,6 @@ import guardianLogo from '../assets/guardian-logo.png';
 const DEFAULT_ALERT_TYPE = 'Breaking news';
 const DEFAULT_HEADLINE =
 	'Global leaders gather for emergency talks as major agreement is announced';
-const DEFAULT_THUMBNAIL_URL =
-	'https://media.guim.co.uk/5f2a9721082c580c1696cd5bb8e2ca0d711bf608/361_0_1440_1152/500.jpg';
 
 interface IPhoneAlertPreviewProps {
 	alertType?: string;
@@ -18,7 +16,7 @@ interface IPhoneAlertPreviewProps {
 export const IPhoneAlertPreview = ({
 	alertType = DEFAULT_ALERT_TYPE,
 	headline = DEFAULT_HEADLINE,
-	thumbnailUrl = DEFAULT_THUMBNAIL_URL,
+	thumbnailUrl,
 }: IPhoneAlertPreviewProps) => (
 	<figure
 		css={css({
@@ -48,7 +46,7 @@ export const IPhoneAlertPreview = ({
 						'0 8px 24px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
 					boxSizing: 'border-box',
 					display: 'grid',
-					gridTemplateColumns: '34px minmax(0, 1fr) 32px',
+					gridTemplateColumns: `34px minmax(0, 1fr) ${thumbnailUrl ? '32px' : 'auto'}`,
 					gap: 9,
 					maxWidth: 353,
 					padding: 12,
@@ -122,16 +120,18 @@ export const IPhoneAlertPreview = ({
 					>
 						now
 					</Typography>
-					<img
-						src={thumbnailUrl}
-						alt="Article thumbnail"
-						css={css({
-							borderRadius: 4,
-							height: 32,
-							objectFit: 'cover',
-							width: 32,
-						})}
-					/>
+					{thumbnailUrl && (
+						<img
+							src={thumbnailUrl}
+							alt="Article thumbnail"
+							css={css({
+								borderRadius: 4,
+								height: 32,
+								objectFit: 'cover',
+								width: 32,
+							})}
+						/>
+					)}
 				</div>
 			</div>
 		</div>

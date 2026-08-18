@@ -28,6 +28,9 @@ const TEMPORARY_SELECTED_TOPICS: AppPushTopicSelection[] = [
 	{ type: 'breaking-news', name: 'international' },
 ];
 
+const TEMPORARY_THUMBNAIL_URL =
+	'https://media.guim.co.uk/5f2a9721082c580c1696cd5bb8e2ca0d711bf608/361_0_1440_1152/500.jpg';
+
 interface AppPreviewSectionProps {
 	topicTypes?: TopicTypeOption[];
 	selectedTopics?: AppPushTopicSelection[];
@@ -56,7 +59,7 @@ export const AppPreviewSection = ({
 			>
 				App alert formats might differ across platforms and devices
 			</AlertBanner>
-			<IPhoneAlertPreview />
+			<IPhoneAlertPreview thumbnailUrl={TEMPORARY_THUMBNAIL_URL} />
 		</PreviewSection>
 	);
 };
