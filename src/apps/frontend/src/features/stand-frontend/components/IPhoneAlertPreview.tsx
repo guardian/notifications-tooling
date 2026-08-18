@@ -59,7 +59,7 @@ export const IPhoneAlertPreview = ({
 					src={guardianLogo}
 					alt=""
 					css={css({
-						alignSelf: 'start',
+						alignSelf: 'center',
 						borderRadius: 9,
 						boxShadow: '0 1px 3px rgba(0, 0, 0, 0.4)',
 						height: 34,
