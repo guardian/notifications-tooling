@@ -9,8 +9,11 @@ import type { SendNotificationResponse } from './api/schemas';
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
 export type KickerId = 'breaking-news' | 'exclusive';
+export type AlertType =
+	'breaking-news' | 'sport' | 'editors-picks' | 'one-not-to-miss';
 export type DeliveryOption = 'immediate' | 'appImmediate';
 export type AudienceSegment = 'UK' | 'US' | 'AU';
+export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
 
 export type SendingResult =
 	| {
@@ -34,8 +37,10 @@ export type EmailNotification = {
 
 export type PushNotification = {
 	type: 'push';
+	alertType?: AlertType;
+	headline?: string;
 	pushDeliveryOption?: DeliveryOption;
-	audienceSegments?: AudienceSegment[];
+	editions?: Edition[];
 };
 
 export type NotificationState = {
@@ -69,7 +74,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'modify-app-alert-parameters';
-			mod: Partial<PushNotification>;
+			appMod: Partial<PushNotification>;
 	  }
 	| {
 			type: 'waiting-for-article';

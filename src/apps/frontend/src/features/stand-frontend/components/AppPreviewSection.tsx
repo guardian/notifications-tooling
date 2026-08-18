@@ -4,8 +4,12 @@ import { AlertBanner } from '@guardian/stand/AlertBanner';
 import type { TopicTypeOption } from '../api/schemas';
 import type { AppPushTopicSelection } from './Editions';
 import { Editions } from './Editions';
+import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
+
+const TEMPORARY_THUMBNAIL_URL =
+	'https://media.guim.co.uk/5f2a9721082c580c1696cd5bb8e2ca0d711bf608/361_0_1440_1152/500.jpg';
 
 interface AppPreviewSectionProps {
 	topicTypes: TopicTypeOption[];
@@ -33,11 +37,9 @@ export const AppPreviewSection = ({
 					paddingBlock: '12px',
 				})}
 			>
-				<span css={{ fontSize: '14px' }}>
-					App alert formats might differ across platforms and devices
-				</span>
+				App alert formats might differ across platforms and devices
 			</AlertBanner>
-			{/* App Preview iPhone and Android */}
+			<IPhoneAlertPreview thumbnailUrl={TEMPORARY_THUMBNAIL_URL} />
 		</PreviewSection>
 	);
 };
