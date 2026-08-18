@@ -12,7 +12,7 @@ import type { AppConfig } from '@models';
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../ConfigContext';
-import { topBarNavigationItems } from '../routes';
+import { getTopBarNavigationItems } from '../routes';
 import { faviconTheme, layer, topBarTheme } from '../themes';
 
 interface Props {
@@ -26,15 +26,9 @@ const getInitials = (user: AppConfig['user']): string => {
 	return `${firstName}${lastName}`.toUpperCase() || 'U';
 };
 
-const filteredTopBarNavigationItems = (disableAppSend: boolean) => {
-	return disableAppSend
-		? topBarNavigationItems.filter((item) => item.path !== '/app-alert/create')
-		: topBarNavigationItems;
-};
-
 export const MainLayout = ({ children }: Props) => {
-	const { user, DISABLE_APP_SEND_TAB = false } =
-		useContext(ConfigContext) ?? {};
+	const config = useContext(ConfigContext);
+	const { user } = config ?? {};
 	const { pathname } = useLocation();
 
 	return (
@@ -50,16 +44,14 @@ export const MainLayout = ({ children }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{filteredTopBarNavigationItems(DISABLE_APP_SEND_TAB).map(
-							({ text, path }) => (
-								<TopBarNavigation
-									key={path}
-									text={text}
-									isSelected={pathname === path}
-									href={path}
-								/>
-							),
-						)}
+						{getTopBarNavigationItems(config).map(({ text, path }) => (
+							<TopBarNavigation
+								key={path}
+								text={text}
+								isSelected={pathname === path}
+								href={path}
+							/>
+						))}
 					</TopBarContainerLeft>
 					{user && (
 						<Avatar
