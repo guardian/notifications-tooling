@@ -32,7 +32,7 @@ export const AndroidAlertPreview = ({
 		>
 			<div
 				css={css({
-					backgroundColor: semanticColors.bg.raisedLevel1Inverse,
+					backgroundColor: semanticColors.bg.base,
 					borderRadius: 12,
 					boxShadow: '0 4px 16px rgba(0, 0, 0, 0.22)',
 					boxSizing: 'border-box',
@@ -69,13 +69,13 @@ export const AndroidAlertPreview = ({
 					</div>
 					<Typography
 						variant="bodyXs"
-						cssOverrides={css({ color: baseColors.blue[700] })}
+						cssOverrides={css({ color: baseColors.blue[500] })}
 					>
 						Guardian
 					</Typography>
 					<Typography
 						variant="bodyXs"
-						cssOverrides={css({ color: semanticColors.text.weakInverse })}
+						cssOverrides={css({ color: semanticColors.text.weak })}
 					>
 						· now
 					</Typography>
@@ -97,7 +97,7 @@ export const AndroidAlertPreview = ({
 						<Typography
 							variant="bodyBoldSm"
 							cssOverrides={css({
-								color: semanticColors.text.strongerInverse,
+								color: semanticColors.text.strong,
 								overflow: 'hidden',
 								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
@@ -109,7 +109,7 @@ export const AndroidAlertPreview = ({
 							element="p"
 							variant="bodySm"
 							cssOverrides={css({
-								color: semanticColors.text.weakInverse,
+								color: semanticColors.text.weak,
 								display: '-webkit-box',
 								margin: 0,
 								overflow: 'hidden',
