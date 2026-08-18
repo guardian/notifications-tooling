@@ -66,7 +66,7 @@ export const CreateNotificationForm = ({
 					gap: semanticSpacing.stackLg,
 					width: '100%',
 					[from.md]: {
-						width: '476px',
+						maxWidth: '500px',
 					},
 				}}
 			>

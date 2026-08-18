@@ -20,7 +20,7 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 			css={css({
 				display: 'flex',
 				flexDirection: 'column',
-				['@media (min-width: 1280px)']: {
+				['@media (min-width: 1310px)']: {
 					display: 'none',
 				},
 				borderBottom: `2px solid ${semanticColors.border.weak}`,
