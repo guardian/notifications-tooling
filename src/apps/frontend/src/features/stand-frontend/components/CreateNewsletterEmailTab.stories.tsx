@@ -27,9 +27,20 @@ const meta: Meta<StoryArgs> = {
 	},
 	render: (args) => {
 		const { notificationState } = args;
-		return WithNotificationContext(
-			<CreateNewsletterEmailTab />,
-			notificationState,
+		return (
+			<div
+				style={{
+					display: 'flex',
+					minWidth: '1600px',
+					minHeight: '100vh',
+					boxSizing: 'border-box',
+				}}
+			>
+				{WithNotificationContext(
+					<CreateNewsletterEmailTab />,
+					notificationState,
+				)}
+			</div>
 		);
 	},
 };
