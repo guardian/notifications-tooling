@@ -1,6 +1,11 @@
 import type { Icon } from '@guardian/stand/Icon';
 import type { ComponentProps } from 'react';
-import type { AudienceSegment, DeliveryOption, KickerId } from './types';
+import type {
+	AlertType,
+	AudienceSegment,
+	DeliveryOption,
+	KickerId,
+} from './types';
 import type { ChannelOption } from './types';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
@@ -27,6 +32,14 @@ export const channelOptionNameMap: Record<ChannelOption, OptionDisplayInfo> = {
 export const kickerNameMap: Record<KickerId | 'undefined', string> = {
 	'breaking-news': 'Breaking News',
 	exclusive: 'Exclusive',
+	undefined: 'None',
+};
+
+export const alertTypeNameMap: Record<AlertType | 'undefined', string> = {
+	'breaking-news': 'Breaking News',
+	sport: 'Sport',
+	'editors-picks': 'Editors’ Picks',
+	'one-not-to-miss': 'One Not to Miss',
 	undefined: 'None',
 };
 

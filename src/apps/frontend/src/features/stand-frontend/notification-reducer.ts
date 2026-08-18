@@ -54,7 +54,7 @@ export const notificationReducer = (
 			}
 			return {
 				...state,
-				parameters: { ...state.parameters, ...action.mod },
+				parameters: { ...state.parameters, ...action.appMod },
 			};
 		}
 
