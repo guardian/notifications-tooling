@@ -77,8 +77,8 @@ export const CreateAppAlertForm = ({
 					<AlertEditionsSection />
 				</NotificationFormSection>
 				<NotificationFormSection
-					id="headline-section"
-					isActive={activeSectionHref === '#headline-section'}
+					id="content-section"
+					isActive={activeSectionHref === '#content-section'}
 				>
 					<AppAlertFields constraints={constraints} />
 				</NotificationFormSection>
