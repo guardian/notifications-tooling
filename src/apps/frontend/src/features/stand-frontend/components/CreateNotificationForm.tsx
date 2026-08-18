@@ -131,7 +131,7 @@ export const CreateNotificationForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton channel={channel} />
+					<SendButton>{'Send newsletter email'}</SendButton>
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />
