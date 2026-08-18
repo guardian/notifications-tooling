@@ -25,15 +25,15 @@ const EMAIL_STEPS: StepNavStep[] = [
 	buildStep('#article-section', 'Article and channel'),
 	buildStep('#content-section', 'Content'),
 	buildStep('#audience-section', 'Audience'),
-	buildStep('#delivery-timing-section', 'Timing and delivery'),
+	buildStep('#delivery-timing-section', 'Delivery and timing'),
 	buildStep('#send-button-section', 'Send'),
 ];
 
 const PUSH_STEPS: StepNavStep[] = [
 	buildStep('#article-section', 'Article and channel'),
 	buildStep('#alert-section', 'Alert type and editions'),
-	buildStep('#headline-section', 'App alert headline'),
-	buildStep('#delivery-timing-section', 'Timing and delivery'),
+	buildStep('#content-section', 'Content'),
+	buildStep('#delivery-timing-section', 'Delivery and timing'),
 	buildStep('#send-button-section', 'Send'),
 ];
 
