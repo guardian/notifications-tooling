@@ -1,125 +1,106 @@
 import { css } from '@emotion/react';
 import { baseColors, semanticColors } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-
-const DEFAULT_ALERT_TYPE = 'Breaking news';
-const DEFAULT_HEADLINE =
-	'Global leaders gather for emergency talks as major agreement is announced';
-const DEFAULT_THUMBNAIL_URL =
-	'https://media.guim.co.uk/5f2a9721082c580c1696cd5bb8e2ca0d711bf608/361_0_1440_1152/500.jpg';
-
-interface AndroidAlertPreviewProps {
-	alertType?: string;
-	headline?: string;
-	thumbnailUrl?: string;
-}
+import guardianLogo from '../assets/guardian-logo.png';
+import {
+	type AlertPreviewProps,
+	DEFAULT_ALERT_TYPE,
+	DEFAULT_HEADLINE,
+	DeviceAlertPreview,
+} from './DeviceAlertPreview';
 
 export const AndroidAlertPreview = ({
 	alertType = DEFAULT_ALERT_TYPE,
 	headline = DEFAULT_HEADLINE,
-	thumbnailUrl = DEFAULT_THUMBNAIL_URL,
-}: AndroidAlertPreviewProps) => (
-	<div css={css({ display: 'flex', flexDirection: 'column', gap: 8 })}>
-		<Typography variant="bodyBoldSm">Android</Typography>
+	thumbnailUrl,
+}: AlertPreviewProps) => (
+	<DeviceAlertPreview platform="Android">
 		<div
 			css={css({
-				alignItems: 'center',
-				aspectRatio: '448 / 176',
-				backgroundColor: semanticColors.bg.raisedLevel3Inverse,
-				display: 'flex',
-				justifyContent: 'center',
+				backgroundColor: semanticColors.bg.base,
+				borderRadius: 12,
+				boxShadow: '0 4px 16px rgba(0, 0, 0, 0.22)',
+				boxSizing: 'border-box',
+				maxWidth: 307,
+				padding: 14,
+				width: '68.5%',
 			})}
+			aria-label="Android notification preview"
+			role="img"
 		>
 			<div
 				css={css({
-					backgroundColor: semanticColors.bg.base,
-					borderRadius: 12,
-					boxShadow: '0 4px 16px rgba(0, 0, 0, 0.22)',
-					boxSizing: 'border-box',
-					maxWidth: 307,
-					padding: 14,
-					width: '68.5%',
+					alignItems: 'center',
+					display: 'flex',
+					gap: 6,
+					marginBottom: 9,
 				})}
-				aria-label="Android notification preview"
+			>
+				<img
+					src={guardianLogo}
+					alt=""
+					css={css({
+						height: 12,
+						width: 12,
+					})}
+					aria-hidden="true"
+				/>
+				<Typography
+					variant="bodyXs"
+					cssOverrides={css({ color: baseColors.blue[500] })}
+				>
+					Guardian
+				</Typography>
+				<Typography
+					variant="bodyXs"
+					cssOverrides={css({ color: semanticColors.text.weak })}
+				>
+					· now
+				</Typography>
+			</div>
+			<div
+				css={css({
+					display: 'grid',
+					gap: 10,
+					gridTemplateColumns: thumbnailUrl
+						? 'minmax(0, 1fr) 32px'
+						: 'minmax(0, 1fr)',
+				})}
 			>
 				<div
 					css={css({
-						alignItems: 'center',
 						display: 'flex',
-						gap: 6,
-						marginBottom: 9,
+						flexDirection: 'column',
+						minWidth: 0,
 					})}
 				>
-					<div
-						css={css({
-							alignItems: 'center',
-							backgroundColor: '#052962',
-							color: semanticColors.text.strongerInverse,
-							display: 'flex',
-							fontFamily: 'Georgia, serif',
-							fontSize: 9,
-							fontWeight: 700,
-							height: 12,
-							justifyContent: 'center',
-							width: 12,
-						})}
-						aria-hidden="true"
-					>
-						G
-					</div>
 					<Typography
-						variant="bodyXs"
-						cssOverrides={css({ color: baseColors.blue[500] })}
+						variant="bodyBoldSm"
+						cssOverrides={css({
+							color: semanticColors.text.strong,
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							whiteSpace: 'nowrap',
+						})}
 					>
-						Guardian
+						{alertType}
 					</Typography>
 					<Typography
-						variant="bodyXs"
-						cssOverrides={css({ color: semanticColors.text.weak })}
+						element="p"
+						variant="bodySm"
+						cssOverrides={css({
+							color: semanticColors.text.weak,
+							display: '-webkit-box',
+							margin: 0,
+							overflow: 'hidden',
+							WebkitBoxOrient: 'vertical',
+							WebkitLineClamp: 2,
+						})}
 					>
-						· now
+						{headline}
 					</Typography>
 				</div>
-				<div
-					css={css({
-						display: 'grid',
-						gap: 10,
-						gridTemplateColumns: 'minmax(0, 1fr) 32px',
-					})}
-				>
-					<div
-						css={css({
-							display: 'flex',
-							flexDirection: 'column',
-							minWidth: 0,
-						})}
-					>
-						<Typography
-							variant="bodyBoldSm"
-							cssOverrides={css({
-								color: semanticColors.text.strong,
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap',
-							})}
-						>
-							{alertType}
-						</Typography>
-						<Typography
-							element="p"
-							variant="bodySm"
-							cssOverrides={css({
-								color: semanticColors.text.weak,
-								display: '-webkit-box',
-								margin: 0,
-								overflow: 'hidden',
-								WebkitBoxOrient: 'vertical',
-								WebkitLineClamp: 2,
-							})}
-						>
-							{headline}
-						</Typography>
-					</div>
+				{thumbnailUrl && (
 					<img
 						src={thumbnailUrl}
 						alt="Android article thumbnail"
@@ -131,8 +112,8 @@ export const AndroidAlertPreview = ({
 							width: 32,
 						})}
 					/>
-				</div>
+				)}
 			</div>
 		</div>
-	</div>
+	</DeviceAlertPreview>
 );
