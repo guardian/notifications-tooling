@@ -14,77 +14,36 @@ import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import { layer, topBarHeight } from '../themes';
 import type { ChannelOption } from '../types';
 
-const SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
-	{
-		id: '#article-section',
-		label: 'Article and channel',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
-	{
-		id: '#content-section',
-		label: 'Content',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
-	{
-		id: '#audience-section',
-		label: 'Audience',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
-	{
-		id: '#delivery-timing-section',
-		label: 'Timing and delivery',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
-	{
-		id: '#send-button-section',
-		label: 'Send',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
+const buildStep = (id: string, label: string): StepNavStep => ({
+	id,
+	label,
+	canSkipFrom: true,
+	canSkipTo: true,
+});
+
+const EMAIL_STEPS: StepNavStep[] = [
+	buildStep('#article-section', 'Article and channel'),
+	buildStep('#content-section', 'Content'),
+	buildStep('#audience-section', 'Audience'),
+	buildStep('#delivery-timing-section', 'Timing and delivery'),
+	buildStep('#send-button-section', 'Send'),
 ];
 
-const APP_SIDE_NAVIGATION_PANEL_ITEMS: StepNavStep[] = [
-	{
-		id: '#article-section',
-		label: 'Article and channel',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
-	{
-		id: '#alert-section',
-		label: 'Alert type and editions',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
-	{
-		id: '#headline-section',
-		label: 'App alert headline',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
-	{
-		id: '#delivery-timing-section',
-		label: 'Timing and delivery',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
-	{
-		id: '#send-button-section',
-		label: 'Send',
-		canSkipFrom: true,
-		canSkipTo: true,
-	},
+const PUSH_STEPS: StepNavStep[] = [
+	buildStep('#article-section', 'Article and channel'),
+	buildStep('#alert-section', 'Alert type and editions'),
+	buildStep('#headline-section', 'App alert headline'),
+	buildStep('#delivery-timing-section', 'Timing and delivery'),
+	buildStep('#send-button-section', 'Send'),
 ];
 
-export const DEFAULT_SIDE_NAV_HREF =
-	SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
+const PANEL_ITEMS_BY_CHANNEL: Record<ChannelOption, StepNavStep[]> = {
+	email: EMAIL_STEPS,
+	push: PUSH_STEPS,
+};
 
-export const APP_DEFAULT_SIDE_NAV_HREF =
-	APP_SIDE_NAVIGATION_PANEL_ITEMS[0]?.id ?? '#article-section';
+export const DEFAULT_SIDE_NAV_HREF = EMAIL_STEPS[0]!.id;
+export const APP_DEFAULT_SIDE_NAV_HREF = PUSH_STEPS[0]!.id;
 
 const theme: SidebarStepperNavigationTheme = {
 	navigation: {
@@ -128,10 +87,7 @@ export const SideNavigationPanel = ({
 	onSelectedHrefChange,
 	channel = 'email',
 }: SideNavigationPanelProps) => {
-	const PANEL_ITEMS =
-		channel === 'push'
-			? APP_SIDE_NAVIGATION_PANEL_ITEMS
-			: SIDE_NAVIGATION_PANEL_ITEMS;
+	const PANEL_ITEMS = PANEL_ITEMS_BY_CHANNEL[channel];
 	const DEFAULT_HREF =
 		channel === 'push' ? APP_DEFAULT_SIDE_NAV_HREF : DEFAULT_SIDE_NAV_HREF;
 
