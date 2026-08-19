@@ -10,9 +10,14 @@ import {
 import { GuDatabaseInstance } from '@guardian/cdk/lib/constructs/rds';
 import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { App } from 'aws-cdk-lib';
 import { CfnOutput, Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ComparisonOperator,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { CfnInstance, MachineImage, Port } from 'aws-cdk-lib/aws-ec2';
 import {
 	CfnInstanceProfile,
@@ -154,15 +159,7 @@ export class DispatchStack extends GuStack {
 			fileName: `${app}.zip`,
 			handler: 'handler.handler',
 			runtime: Runtime.NODEJS_24_X,
-			monitoringConfiguration: isProd
-				? {
-						http5xxAlarm: {
-							tolerated5xxPercentage: 5,
-							alarmName: 'Notifications\\Dispatch-5xx-Alarm',
-						},
-						snsTopicName: 'pagerduty-cloudwatch-alerts-low-priority',
-					}
-				: { noMonitoring: true },
+			monitoringConfiguration: { noMonitoring: true },
 			app,
 			architecture: Architecture.ARM_64,
 			api: {
@@ -190,6 +187,25 @@ export class DispatchStack extends GuStack {
 			securityGroups: [lambdaSecurityGroup],
 			allowPublicSubnet: true,
 		});
+
+		if (isProd) {
+			new GuAlarm(this, 'DispatchApi5xxCountAlarm', {
+				alarmName: 'Notifications\\Dispatch-ApiGateway-5xx-Count-Alarm',
+				alarmDescription:
+					'Dispatch API Gateway returned 5 or more 5XX responses within 5 minutes.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				evaluationPeriods: 1,
+				metric: guApiLambda.api.metricServerError({
+					period: Duration.minutes(5),
+					statistic: 'sum',
+				}),
+				snsTopicName: 'pagerduty-cloudwatch-alerts-low-priority',
+				threshold: 5,
+				treatMissingData: TreatMissingData.NOT_BREACHING,
+				app,
+			});
+		}
 
 		const domain = guApiLambda.api.addDomainName(`${app}-domain`, {
 			certificate: new GuCertificate(this, {
