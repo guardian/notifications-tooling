@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isRunningLocally } from '@config';
-import type { UserResponse } from '@models';
+import { getSSMParameter } from '@config/ssm';
+import type { AppConfig } from '@models';
 import type { Request, RequestHandler, Response } from 'express';
 import { clientAssetsDir } from '../client-assets';
 import { listUserPermissions } from '../utils/permissions/permissions-store';
@@ -38,10 +39,12 @@ export const serveIndex: RequestHandler = async (
 	req: Request,
 	res: Response,
 ) => {
+	const DISABLE_APP_SEND_TAB = await getSSMParameter('DISABLE_APP_SEND_TAB');
 	const permissions = await listUserPermissions(req.user!.email);
-	const config: UserResponse = {
+	const config: AppConfig = {
 		user: req.user!,
 		permissions,
+		DISABLE_APP_SEND_TAB: DISABLE_APP_SEND_TAB.toLowerCase() === 'true',
 	};
 	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,

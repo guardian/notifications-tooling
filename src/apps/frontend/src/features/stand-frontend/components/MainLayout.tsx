@@ -8,12 +8,12 @@ import {
 	TopBarNavigation,
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
+import type { AppConfig } from '@models';
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { AppConfig } from '../get-config';
-import { topBarNavigationItems } from '../routes';
+import { ConfigContext } from '../ConfigContext';
+import { getTopBarNavigationItems } from '../routes';
 import { faviconTheme, layer, topBarTheme } from '../themes';
-import { UserContext } from '../UserContext';
 
 interface Props {
 	children: ReactNode;
@@ -27,7 +27,8 @@ const getInitials = (user: AppConfig['user']): string => {
 };
 
 export const MainLayout = ({ children }: Props) => {
-	const { user } = useContext(UserContext) ?? {};
+	const config = useContext(ConfigContext);
+	const { user } = config ?? {};
 	const { pathname } = useLocation();
 
 	return (
@@ -43,7 +44,7 @@ export const MainLayout = ({ children }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{topBarNavigationItems.map(({ text, path }) => (
+						{getTopBarNavigationItems(config).map(({ text, path }) => (
 							<TopBarNavigation
 								key={path}
 								text={text}

@@ -1,4 +1,4 @@
-import type { AppConfig } from '../features/stand-frontend/get-config';
+import type { AppConfig } from '@models';
 
 export const mockAppConfig: AppConfig = {
 	user: {
