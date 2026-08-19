@@ -1,4 +1,5 @@
 import { GuCertificate } from '@guardian/cdk/lib/constructs/acm';
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
@@ -12,6 +13,11 @@ import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/co
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
 import { CfnOutput, Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
+import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ComparisonOperator,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { CfnInstance, MachineImage, Port } from 'aws-cdk-lib/aws-ec2';
 import {
 	CfnInstanceProfile,
@@ -35,6 +41,11 @@ const LOGIN_GUTOOLS_CONFIG_BUCKET = 'login-gutools-config';
 const PERMISSIONS_CACHE_BUCKET = 'permissions-cache';
 const DB_PORT = 5432;
 
+const apiGatewayThrottle = {
+	throttlingRateLimit: 10,
+	throttlingBurstLimit: 20,
+};
+
 type DispatchStackProps = GuStackProps & {
 	stage: 'TEST' | 'CODE' | 'PROD';
 };
@@ -45,6 +56,7 @@ export class DispatchStack extends GuStack {
 
 		const { stage } = props;
 		const isProd = stage === 'PROD';
+		const apiThrottleOptions = apiGatewayThrottle;
 		const domainName = `${app}.${isProd ? '' : 'code.dev-'}gutools.co.uk`;
 		const privateSubnets = GuVpc.subnetsFromParameter(this, {
 			type: SubnetType.PRIVATE,
@@ -147,12 +159,7 @@ export class DispatchStack extends GuStack {
 			fileName: `${app}.zip`,
 			handler: 'handler.handler',
 			runtime: Runtime.NODEJS_24_X,
-			monitoringConfiguration: isProd
-				? {
-						http5xxAlarm: { tolerated5xxPercentage: 5 },
-						snsTopicName: 'pagerduty-cloudwatch-alerts-low-priority',
-					}
-				: { noMonitoring: true },
+			monitoringConfiguration: { noMonitoring: true },
 			app,
 			architecture: Architecture.ARM_64,
 			api: {
@@ -162,8 +169,12 @@ export class DispatchStack extends GuStack {
 					'It provides a frontend for users to configure and send notifications, and a ' +
 					'backend responsible for forwarding requests to relevant downstream services e.g. ' +
 					'app and email notification APIs.',
+				deployOptions: {
+					...apiThrottleOptions,
+					loggingLevel: MethodLoggingLevel.ERROR,
+					dataTraceEnabled: false,
+				},
 			},
-			reservedConcurrentExecutions: 10,
 			layers: [
 				LayerVersion.fromLayerVersionArn(
 					this,
@@ -176,6 +187,25 @@ export class DispatchStack extends GuStack {
 			securityGroups: [lambdaSecurityGroup],
 			allowPublicSubnet: true,
 		});
+
+		if (isProd) {
+			new GuAlarm(this, 'DispatchApi5xxCountAlarm', {
+				alarmName: 'Notifications\\Dispatch-ApiGateway-5xx-Count-Alarm',
+				alarmDescription:
+					'Dispatch API Gateway returned 5 or more 5XX responses within 5 minutes.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				evaluationPeriods: 1,
+				metric: guApiLambda.api.metricServerError({
+					period: Duration.minutes(5),
+					statistic: 'sum',
+				}),
+				snsTopicName: 'pagerduty-cloudwatch-alerts-low-priority',
+				threshold: 5,
+				treatMissingData: TreatMissingData.NOT_BREACHING,
+				app,
+			});
+		}
 
 		const domain = guApiLambda.api.addDomainName(`${app}-domain`, {
 			certificate: new GuCertificate(this, {
