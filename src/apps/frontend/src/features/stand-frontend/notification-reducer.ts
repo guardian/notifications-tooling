@@ -165,6 +165,13 @@ export const notificationReducer = (
 			return structuredClone(defaultState);
 		}
 
+		case 'reset-app-alert': {
+			if (state.isFetchingContent || state.isWaitingForSend) {
+				return state;
+			}
+			return structuredClone(defaultAppAlertState);
+		}
+
 		case 'dismiss-send-error': {
 			if (state.sendingResult?.ok !== false) {
 				return state;

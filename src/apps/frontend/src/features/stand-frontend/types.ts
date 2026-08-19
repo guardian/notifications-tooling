@@ -107,4 +107,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'reset';
+	  }
+	| {
+			type: 'reset-app-alert';
 	  };

@@ -14,7 +14,9 @@ export const CreateFormTitle = ({
 	setArticleInputText,
 	setLockArticleInputText,
 }: CreateFormTitleProps) => {
-	const { updateNotification } = useContext(NotificationFormContext);
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 	return (
 		<section
 			css={{
@@ -35,7 +37,12 @@ export const CreateFormTitle = ({
 				onClick={() => {
 					setArticleInputText('');
 					setLockArticleInputText(false);
-					updateNotification({ type: 'reset' });
+					updateNotification({
+						type:
+							notification.parameters?.type === 'email'
+								? 'reset'
+								: 'reset-app-alert',
+					});
 				}}
 			/>
 		</section>
