@@ -2,6 +2,7 @@ import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
+import { getChannelDescription } from '../../../util/display-text-helpers';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
 import type { DeliveryOption } from '../types';
@@ -101,7 +102,7 @@ export const CreateAppAlertForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton>{'Send push notification'}</SendButton>
+					<SendButton>{`Send ${getChannelDescription(channel)}`}</SendButton>
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />

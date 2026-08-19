@@ -51,7 +51,8 @@ export const checkIfReadyToSend = (
 		return errors.length === 0;
 	}
 	if (parameters?.type === 'push') {
-		return false;
+		// TODO - app alert form validation is not implemented yet
+		return true;
 	}
 
 	return false;
