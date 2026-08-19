@@ -1,32 +1,43 @@
 import './index.css';
 
+import { useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import type { AppConfig } from '../../../packages/models';
 import { CreateAppAlertTab } from './features/stand-frontend/components/CreateAppAlertTab';
 import { CreateNewsletterEmailTab } from './features/stand-frontend/components/CreateNewsletterEmailTab';
 import { HistoryTab } from './features/stand-frontend/components/HistoryTab';
 import { NotFoundTab } from './features/stand-frontend/components/NotFoundTab';
+import { ConfigContext } from './features/stand-frontend/ConfigContext';
 import { EmailNotificationPage } from './features/stand-frontend/EmailNotificationPage';
-import { appRoutes } from './features/stand-frontend/routes';
+import { getAppConfig } from './features/stand-frontend/get-config';
+import { getAppRoutes } from './features/stand-frontend/routes';
 
 export function App() {
+	const [config] = useState<AppConfig | undefined>(getAppConfig());
+	const [appRoutes] = useState(() => getAppRoutes(config));
+
 	return (
-		<Routes>
-			<Route element={<EmailNotificationPage />}>
-				<Route
-					index
-					element={<Navigate to={appRoutes.createNewsletterEmail} replace />}
-				/>
-				<Route
-					path={appRoutes.createNewsletterEmail}
-					element={<CreateNewsletterEmailTab />}
-				/>
-				<Route
-					path={appRoutes.createAppAlert}
-					element={<CreateAppAlertTab />}
-				/>
-				<Route path={appRoutes.history} element={<HistoryTab />} />
-				<Route path="*" element={<NotFoundTab />} />
-			</Route>
-		</Routes>
+		<ConfigContext.Provider value={config}>
+			<Routes>
+				<Route element={<EmailNotificationPage />}>
+					<Route
+						index
+						element={<Navigate to={appRoutes.createNewsletterEmail} replace />}
+					/>
+					<Route
+						path={appRoutes.createNewsletterEmail}
+						element={<CreateNewsletterEmailTab />}
+					/>
+					{appRoutes.createAppAlert && (
+						<Route
+							path={appRoutes.createAppAlert}
+							element={<CreateAppAlertTab />}
+						/>
+					)}
+					<Route path={appRoutes.history} element={<HistoryTab />} />
+					<Route path="*" element={<NotFoundTab />} />
+				</Route>
+			</Routes>
+		</ConfigContext.Provider>
 	);
 }

@@ -20,7 +20,7 @@ export const ChannelSelector = ({
 				css={{
 					display: 'flex',
 					flexDirection: 'column',
-					gap: semanticSpacing.stackXs,
+					gap: semanticSpacing.stackXxs,
 				}}
 			>
 				<Typography variant="bodyBoldMd">Channel</Typography>

@@ -6,3 +6,7 @@ export interface UserResponse {
 	user: User;
 	permissions: string[];
 }
+
+export type AppConfig = UserResponse & {
+	DISABLE_APP_SEND_TAB?: boolean;
+};

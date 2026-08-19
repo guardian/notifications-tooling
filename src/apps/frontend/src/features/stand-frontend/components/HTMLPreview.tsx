@@ -99,7 +99,7 @@ export const HTMLPreview = () => {
 			}
 			widthOptions={[]}
 			defaultWidth={400}
-			cssOverrides={css({ maxWidth: '440px' })}
+			cssOverrides={css({ width: '440px' })}
 		/>
 	);
 };

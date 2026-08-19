@@ -181,6 +181,7 @@ export const articlePreviewCardTheme = {
 	url: css({
 		fontSize: '12px',
 		color: semanticColors.text.link,
+		overflowWrap: 'anywhere',
 	}),
 	thumbnail: css({
 		width: '120px',
