@@ -1,6 +1,7 @@
 import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { useContext } from 'react';
+import { getChannelDescription } from '../../../util/display-text-helpers';
 import type { SendNotificationRequest } from '../api/schemas';
 import { buildRequest } from '../build-request-payloads';
 import { NotificationFormContext } from '../NotificationContext';
@@ -12,6 +13,9 @@ export const SendNotificationModal = () => {
 	);
 	const { confirmSendModalOpen, isWaitingForSend } = notification;
 	const sendNotificationRequest = buildRequest(notification);
+	const channelDescription = getChannelDescription(
+		notification.parameters?.type,
+	);
 
 	const handleSending =
 		(sendNotificationRequest: SendNotificationRequest) => () => {
@@ -39,9 +43,11 @@ export const SendNotificationModal = () => {
 			<Dialog aria-label="confirm notification send">
 				<Dialog.Dismiss ariaLabel="Close Modal" />
 				<Dialog.Header>
-					Are you sure you want to send the newsletter email?
+					Are you sure you want to send the {channelDescription}?
 				</Dialog.Header>
-				<Dialog.Content>Sent newsletter emails cannot be undone</Dialog.Content>
+				<Dialog.Content>
+					Sent {channelDescription}s cannot be undone
+				</Dialog.Content>
 				<Dialog.Buttons theme={{ flexDirection: 'row' }}>
 					<Button
 						isDisabled={isWaitingForSend}

@@ -1,7 +1,7 @@
 import type { ChannelOption } from '../features/stand-frontend/types';
 
 const channelDescriptions = {
-	email: 'email newsletter',
+	email: 'newsletter email',
 	push: 'app alert',
 };
 

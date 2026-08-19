@@ -14,6 +14,7 @@ import {
 } from '../api/useChannelAudiences';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
+import { useTabChannel } from '../use-tab-channel';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
@@ -40,6 +41,8 @@ export const CreateAppAlertTab = () => {
 
 	const topicTypes =
 		audiences?.channels['app-push'].topicTypes ?? FALLBACK_TOPIC_TYPES;
+
+	useTabChannel('push');
 
 	return (
 		<>
