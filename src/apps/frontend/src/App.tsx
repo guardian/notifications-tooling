@@ -11,10 +11,9 @@ import { ConfigContext } from './features/stand-frontend/ConfigContext';
 import { EmailNotificationPage } from './features/stand-frontend/EmailNotificationPage';
 import { getAppConfig } from './features/stand-frontend/get-config';
 import {
-	defaultAppAlertState,
-	defaultState,
-} from './features/stand-frontend/notification-reducer';
-import { NotificationFormProvider } from './features/stand-frontend/NotificationFormProvider';
+	AppAlertNotificationFormProvider,
+	NewsletterNotificationFormProvider,
+} from './features/stand-frontend/NotificationFormProvider';
 import { getAppRoutes } from './features/stand-frontend/routes';
 
 export function App() {
@@ -32,24 +31,18 @@ export function App() {
 					<Route
 						path={appRoutes.createNewsletterEmail}
 						element={
-							<NotificationFormProvider
-								key="newsletter"
-								initialNotification={defaultState}
-							>
+							<NewsletterNotificationFormProvider>
 								<CreateNewsletterEmailTab />
-							</NotificationFormProvider>
+							</NewsletterNotificationFormProvider>
 						}
 					/>
 					{appRoutes.createAppAlert && (
 						<Route
 							path={appRoutes.createAppAlert}
 							element={
-								<NotificationFormProvider
-									key="app-alert"
-									initialNotification={defaultAppAlertState}
-								>
+								<AppAlertNotificationFormProvider>
 									<CreateAppAlertTab />
-								</NotificationFormProvider>
+								</AppAlertNotificationFormProvider>
 							}
 						/>
 					)}

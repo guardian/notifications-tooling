@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { MainLayout } from './components/MainLayout';
 import { NoPermissionsTab } from './components/NoPermissionsTab';
 import { ConfigContext } from './ConfigContext';
+import { NotificationDraftsProvider } from './NotificationFormProvider';
 
 export const EmailNotificationPage = () => {
 	const config = useContext(ConfigContext);
@@ -11,9 +12,11 @@ export const EmailNotificationPage = () => {
 	return (
 		<>
 			{hasAccess ? (
-				<MainLayout>
-					<Outlet />
-				</MainLayout>
+				<NotificationDraftsProvider>
+					<MainLayout>
+						<Outlet />
+					</MainLayout>
+				</NotificationDraftsProvider>
 			) : (
 				<MainLayout>
 					<NoPermissionsTab />
