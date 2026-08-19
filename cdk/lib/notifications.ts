@@ -12,6 +12,7 @@ import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/co
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
 import { CfnOutput, Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
+import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway';
 import { CfnInstance, MachineImage, Port } from 'aws-cdk-lib/aws-ec2';
 import {
 	CfnInstanceProfile,
@@ -35,6 +36,11 @@ const LOGIN_GUTOOLS_CONFIG_BUCKET = 'login-gutools-config';
 const PERMISSIONS_CACHE_BUCKET = 'permissions-cache';
 const DB_PORT = 5432;
 
+const apiGatewayThrottle = {
+	throttlingRateLimit: 10,
+	throttlingBurstLimit: 20,
+};
+
 type DispatchStackProps = GuStackProps & {
 	stage: 'TEST' | 'CODE' | 'PROD';
 };
@@ -45,6 +51,7 @@ export class DispatchStack extends GuStack {
 
 		const { stage } = props;
 		const isProd = stage === 'PROD';
+		const apiThrottleOptions = apiGatewayThrottle;
 		const domainName = `${app}.${isProd ? '' : 'code.dev-'}gutools.co.uk`;
 		const privateSubnets = GuVpc.subnetsFromParameter(this, {
 			type: SubnetType.PRIVATE,
@@ -149,7 +156,10 @@ export class DispatchStack extends GuStack {
 			runtime: Runtime.NODEJS_24_X,
 			monitoringConfiguration: isProd
 				? {
-						http5xxAlarm: { tolerated5xxPercentage: 5 },
+						http5xxAlarm: {
+							tolerated5xxPercentage: 5,
+							alarmName: 'Notifications\\Dispatch-5xx-Alarm',
+						},
 						snsTopicName: 'pagerduty-cloudwatch-alerts-low-priority',
 					}
 				: { noMonitoring: true },
@@ -162,8 +172,12 @@ export class DispatchStack extends GuStack {
 					'It provides a frontend for users to configure and send notifications, and a ' +
 					'backend responsible for forwarding requests to relevant downstream services e.g. ' +
 					'app and email notification APIs.',
+				deployOptions: {
+					...apiThrottleOptions,
+					loggingLevel: MethodLoggingLevel.ERROR,
+					dataTraceEnabled: false,
+				},
 			},
-			reservedConcurrentExecutions: 10,
 			layers: [
 				LayerVersion.fromLayerVersionArn(
 					this,
