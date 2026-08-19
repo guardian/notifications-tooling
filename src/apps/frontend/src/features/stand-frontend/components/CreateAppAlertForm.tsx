@@ -1,5 +1,4 @@
-import { semanticSizing, semanticSpacing } from '@guardian/stand';
-import { Typography } from '@guardian/stand/Typography';
+import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
@@ -10,12 +9,12 @@ import { AlertEditionsSection } from './AlertEditionsSection';
 import { AppAlertFields } from './AppAlertFields';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
+import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { NotificationFormSection } from './NotificationFormSection';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
-import { TextLinkButton } from './TextLinkButton';
 
 interface CreateAppAlertFormProps {
 	activeSectionHref: string;
@@ -40,25 +39,7 @@ export const CreateAppAlertForm = ({
 				gap: semanticSpacing.stackXl,
 			}}
 		>
-			<section
-				css={{
-					display: 'flex',
-					flexDirection: 'row',
-					justifyContent: 'space-between',
-					alignItems: 'center',
-					maxWidth: '488px',
-					borderLeft: `${semanticSizing.border.md} solid transparent`,
-					paddingLeft: semanticSpacing.stackMd,
-				}}
-			>
-				<Typography variant="heading2Xl" element="h2">
-					Create app alert
-				</Typography>
-				<TextLinkButton
-					text={'Clear all fields'}
-					onClick={() => updateNotification({ type: 'reset' })}
-				/>
-			</section>
+			<CreateFormTitle title={'Create app alert'} />
 
 			<div
 				css={{

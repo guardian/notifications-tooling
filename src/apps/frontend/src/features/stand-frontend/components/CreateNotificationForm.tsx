@@ -1,5 +1,4 @@
-import { semanticSizing, semanticSpacing } from '@guardian/stand';
-import { Typography } from '@guardian/stand/Typography';
+import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
@@ -10,13 +9,13 @@ import type { DeliveryOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
+import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { EmailFields } from './EmailFields';
 import { NotificationFormSection } from './NotificationFormSection';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
-import { TextLinkButton } from './TextLinkButton';
 
 interface CreateNotificationFormProps {
 	activeSectionHref: string;
@@ -56,25 +55,7 @@ export const CreateNotificationForm = ({
 				gap: semanticSpacing.stackXl,
 			}}
 		>
-			<section
-				css={{
-					display: 'flex',
-					flexDirection: 'row',
-					justifyContent: 'space-between',
-					alignItems: 'center',
-					maxWidth: '488px',
-					borderLeft: `${semanticSizing.border.md} solid transparent`,
-					paddingLeft: semanticSpacing.stackMd,
-				}}
-			>
-				<Typography variant="heading2Xl" element="h2">
-					Create newsletter email
-				</Typography>
-				<TextLinkButton
-					text={'Clear all fields'}
-					onClick={() => updateNotification({ type: 'reset' })}
-				/>
-			</section>
+			<CreateFormTitle title={'Create newsletter email'} />
 
 			<div
 				css={{
@@ -82,8 +63,6 @@ export const CreateNotificationForm = ({
 					flexDirection: 'column',
 					gap: semanticSpacing.stackLg,
 					width: '100%',
-					borderLeft: `${semanticSizing.border.md} solid transparent`,
-					paddingLeft: semanticSpacing.stackMd,
 					[from.md]: {
 						maxWidth: '500px',
 					},
