@@ -1,6 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
 import type { DeliveryOption } from '../types';
@@ -23,12 +23,21 @@ interface CreateAppAlertFormProps {
 export const CreateAppAlertForm = ({
 	activeSectionHref,
 }: CreateAppAlertFormProps) => {
-	const { updateNotification } = useContext(NotificationFormContext);
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 
 	const { data: constraints } = useChannelConstraints();
 
 	const channel = 'push'; //TODO - change to notification.parameters.type
 	const pushDeliveryOption = 'appImmediate'; //TODO - change to notification.parameters.pushDeliveryOption
+
+	const [articleInputText, setArticleInputText] = useState(
+		() => notification.content?.webUrl ?? '',
+	);
+
+	const [lockArticleInputText, setLockArticleInputText] = useState(false);
+
 	return (
 		<div
 			css={{
@@ -39,7 +48,11 @@ export const CreateAppAlertForm = ({
 				gap: semanticSpacing.stackXl,
 			}}
 		>
-			<CreateFormTitle title={'Create app alert'} />
+			<CreateFormTitle
+				title={'Create app alert'}
+				setArticleInputText={setArticleInputText}
+				setLockArticleInputText={setLockArticleInputText}
+			/>
 
 			<div
 				css={{
@@ -56,7 +69,12 @@ export const CreateAppAlertForm = ({
 					id="article-section"
 					isActive={activeSectionHref === '#article-section'}
 				>
-					<ArticleImportControl />
+					<ArticleImportControl
+						articleInputText={articleInputText}
+						setArticleInputText={setArticleInputText}
+						lockArticleInputText={lockArticleInputText}
+						setLockArticleInputText={setLockArticleInputText}
+					/>
 
 					<ChannelSelector
 						selectedChannel={channel} //TODO -change to notification.parameters.type

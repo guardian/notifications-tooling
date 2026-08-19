@@ -4,7 +4,16 @@ import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { TextLinkButton } from './TextLinkButton';
 
-export const CreateFormTitle = ({ title }: { title: string }) => {
+export interface CreateFormTitleProps {
+	title: string;
+	setArticleInputText: (setArticleInputText: string) => void;
+	setLockArticleInputText: (lockArticleInputText: boolean) => void;
+}
+export const CreateFormTitle = ({
+	title,
+	setArticleInputText,
+	setLockArticleInputText,
+}: CreateFormTitleProps) => {
 	const { updateNotification } = useContext(NotificationFormContext);
 	return (
 		<section
@@ -23,7 +32,11 @@ export const CreateFormTitle = ({ title }: { title: string }) => {
 			</Typography>
 			<TextLinkButton
 				text={'Clear all fields'}
-				onClick={() => updateNotification({ type: 'reset' })}
+				onClick={() => {
+					setArticleInputText('');
+					setLockArticleInputText(false);
+					updateNotification({ type: 'reset' });
+				}}
 			/>
 		</section>
 	);

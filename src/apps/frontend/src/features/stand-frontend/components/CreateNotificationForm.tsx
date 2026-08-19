@@ -1,6 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
@@ -27,6 +27,11 @@ export const CreateNotificationForm = ({
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
+	const [articleInputText, setArticleInputText] = useState(
+		() => notification.content?.webUrl ?? '',
+	);
+	const [lockArticleInputText, setLockArticleInputText] = useState(false);
+
 	const { data: constraints } = useChannelConstraints();
 
 	if (!notification.parameters) {
@@ -55,7 +60,11 @@ export const CreateNotificationForm = ({
 				gap: semanticSpacing.stackXl,
 			}}
 		>
-			<CreateFormTitle title={'Create newsletter email'} />
+			<CreateFormTitle
+				title={'Create newsletter email'}
+				setArticleInputText={setArticleInputText}
+				setLockArticleInputText={setLockArticleInputText}
+			/>
 
 			<div
 				css={{
@@ -72,7 +81,12 @@ export const CreateNotificationForm = ({
 					id="article-section"
 					isActive={activeSectionHref === '#article-section'}
 				>
-					<ArticleImportControl />
+					<ArticleImportControl
+						articleInputText={articleInputText}
+						setArticleInputText={setArticleInputText}
+						lockArticleInputText={lockArticleInputText}
+						setLockArticleInputText={setLockArticleInputText}
+					/>
 
 					<ChannelSelector
 						selectedChannel={channel}
