@@ -50,7 +50,7 @@ export const Expanded: Story = {
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
 		await expect(
 			canvas.getByText(
-				'The preview for the newsletter email and/or the app alert notification will be shown below.',
+				'The preview for the newsletter email will be shown below.',
 			),
 		).toBeInTheDocument();
 	},
