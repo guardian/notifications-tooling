@@ -1,4 +1,5 @@
 import { GuCertificate } from '@guardian/cdk/lib/constructs/acm';
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
@@ -10,7 +11,6 @@ import {
 import { GuDatabaseInstance } from '@guardian/cdk/lib/constructs/rds';
 import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { App } from 'aws-cdk-lib';
 import { CfnOutput, Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway';
