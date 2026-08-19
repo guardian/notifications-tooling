@@ -14,7 +14,7 @@ import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import { layer, topBarHeight } from '../themes';
 import type { ChannelOption } from '../types';
 
-const buildStep = (id: string, label: string): StepNavStep => ({
+const getStep = (id: string, label: string): StepNavStep => ({
 	id,
 	label,
 	canSkipFrom: true,
@@ -22,19 +22,19 @@ const buildStep = (id: string, label: string): StepNavStep => ({
 });
 
 const EMAIL_STEPS: StepNavStep[] = [
-	buildStep('#article-section', 'Article and channel'),
-	buildStep('#content-section', 'Content'),
-	buildStep('#audience-section', 'Audience'),
-	buildStep('#delivery-timing-section', 'Delivery and timing'),
-	buildStep('#send-button-section', 'Send'),
+	getStep('#article-section', 'Article and channel'),
+	getStep('#content-section', 'Content'),
+	getStep('#audience-section', 'Audience'),
+	getStep('#delivery-timing-section', 'Delivery and timing'),
+	getStep('#send-button-section', 'Send'),
 ];
 
 const PUSH_STEPS: StepNavStep[] = [
-	buildStep('#article-section', 'Article and channel'),
-	buildStep('#alert-section', 'Alert type and editions'),
-	buildStep('#content-section', 'Content'),
-	buildStep('#delivery-timing-section', 'Delivery and timing'),
-	buildStep('#send-button-section', 'Send'),
+	getStep('#article-section', 'Article and channel'),
+	getStep('#alert-section', 'Alert type and editions'),
+	getStep('#content-section', 'Content'),
+	getStep('#delivery-timing-section', 'Delivery and timing'),
+	getStep('#send-button-section', 'Send'),
 ];
 
 const PANEL_ITEMS_BY_CHANNEL: Record<ChannelOption, StepNavStep[]> = {
