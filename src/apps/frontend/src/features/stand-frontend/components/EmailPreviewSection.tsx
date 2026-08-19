@@ -27,7 +27,7 @@ export const EmailPreviewSection = ({
 	return (
 		<PreviewSection
 			title="Preview"
-			description="The preview for the newsletter email and/or the app alert notification will be shown below."
+			description="The preview for the newsletter email will be shown below."
 			isVisible={Boolean(fetchedArticleId)}
 		>
 			<SendInfoPreviewPill
