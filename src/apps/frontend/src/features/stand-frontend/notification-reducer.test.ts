@@ -2,7 +2,11 @@ import { describe, expect, it } from 'bun:test';
 import type { ResolvedArticle } from '@models';
 import '../../../happydom-setup';
 import { articleFixture } from '../../mocks/capi-fixtures';
-import { defaultState, notificationReducer } from './notification-reducer';
+import {
+	defaultAppAlertState,
+	defaultState,
+	notificationReducer,
+} from './notification-reducer';
 
 const articleWithStandfirst = (standfirst?: string): ResolvedArticle =>
 	standfirst
@@ -34,6 +38,30 @@ const receiveArticle = (standfirst?: string, preview?: string) =>
 	);
 
 describe('notificationReducer receive-article', () => {
+	it('uses the article headline as the default app-alert headline', () => {
+		const state = notificationReducer(defaultAppAlertState, {
+			type: 'receive-article',
+			content: articleFixture,
+		});
+
+		expect(state.parameters).toMatchObject({
+			type: 'push',
+			headline: articleFixture.fields?.headline,
+		});
+	});
+
+	it('uses the article web title when no headline field is returned', () => {
+		const state = notificationReducer(defaultAppAlertState, {
+			type: 'receive-article',
+			content: { ...articleFixture, fields: undefined },
+		});
+
+		expect(state.parameters).toMatchObject({
+			type: 'push',
+			headline: articleFixture.webTitle,
+		});
+	});
+
 	it('imports linked standfirst text without link formatting', () => {
 		const state = receiveArticle(
 			'<p>Read the <a href="https://example.com">full analysis</a> today.</p>',
