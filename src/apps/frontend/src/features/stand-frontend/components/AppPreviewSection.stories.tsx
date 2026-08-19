@@ -1,23 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { WithNotificationContext } from '../../../stories/story-helpers';
+import { articleFixture } from '../../../mocks/capi-fixtures';
+import {
+	populatedPushState,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
 import { FALLBACK_TOPIC_TYPES } from '../api/useChannelAudiences';
-import { defaultState } from '../notification-reducer';
 import { AppPreviewSection } from './AppPreviewSection';
 
 const meta = {
 	title: 'Stand Frontend/AppPreviewSection',
 	component: AppPreviewSection,
 	render: (args) =>
-		WithNotificationContext(<AppPreviewSection {...args} />, {
-			...defaultState,
-			fetchedArticleId: 'article-id',
-		}),
+		WithNotificationContext(
+			<AppPreviewSection {...args} />,
+			populatedPushState,
+		),
 	parameters: {
 		docs: {
 			description: {
 				component:
-					'App alert preview composition. Device-specific preview content will be added here.',
+					'App alert preview populated from the imported article and current app-alert selections.',
 			},
 		},
 	},
@@ -52,7 +55,10 @@ export const Default: Story = {
 		await expect(
 			canvas.getByLabelText('Android notification preview'),
 		).toBeVisible();
-		await expect(canvas.getAllByText('Breaking news')).toHaveLength(2);
+		await expect(canvas.getAllByText('Breaking News')).toHaveLength(2);
+		await expect(
+			canvas.getAllByText(articleFixture.fields?.headline ?? ''),
+		).toHaveLength(2);
 		await expect(canvas.getByAltText('Article thumbnail')).toBeVisible();
 		await expect(
 			canvas.getByAltText('Android article thumbnail'),
