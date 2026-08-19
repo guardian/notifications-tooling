@@ -10,6 +10,7 @@ import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
+import { useTabChannel } from '../use-tab-channel';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
@@ -24,6 +25,8 @@ export const CreateAppAlertTab = () => {
 		notification: { sendingResult },
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
+
+	useTabChannel('push');
 
 	return (
 		<>
