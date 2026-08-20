@@ -40,7 +40,7 @@ export const CreateFormTitle = ({
 					updateNotification({
 						type:
 							notification.parameters?.type === 'email'
-								? 'reset'
+								? 'reset-newsletter-email'
 								: 'reset-app-alert',
 					});
 				}}

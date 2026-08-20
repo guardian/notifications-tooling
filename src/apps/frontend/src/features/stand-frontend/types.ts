@@ -106,7 +106,7 @@ export type NotificationAction =
 			type: 'dismiss-send-error';
 	  }
 	| {
-			type: 'reset';
+			type: 'reset-newsletter-email';
 	  }
 	| {
 			type: 'reset-app-alert';

@@ -158,7 +158,7 @@ export const notificationReducer = (
 			};
 		}
 
-		case 'reset': {
+		case 'reset-newsletter-email': {
 			if (state.isFetchingContent || state.isWaitingForSend) {
 				return state;
 			}
