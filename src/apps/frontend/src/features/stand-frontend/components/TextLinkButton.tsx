@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { semanticColors } from '@guardian/stand';
-import { Typography } from '@guardian/stand/Typography';
+import { Button } from '@guardian/stand/Button';
 
 export interface TextLinkButtonProps {
 	text: string;
@@ -16,16 +16,27 @@ export const TextLinkButton = ({
 	onClick,
 }: TextLinkButtonProps) => {
 	return (
-		<Typography
-			variant={textVariant ?? 'bodyMd'}
-			element="span"
-			onClick={onClick}
-			css={css({
-				color: textColor ?? `${semanticColors.fill.link}`,
-				textDecoration: 'underline',
-			})}
-		>
-			{text}
-		</Typography>
+		<>
+			<Button
+				onClick={onClick}
+				variant="tertiary"
+				cssOverrides={css({
+					border: 'none',
+					backgroundColor: 'transparent',
+					color: textColor ?? `${semanticColors.fill.link}`,
+					textDecoration: 'underline',
+					textStyle: textVariant ?? 'bodyMd',
+					fontWeight: 'normal',
+					fontSize: '14px',
+					'&:hover': {
+						color: textColor ?? `${semanticColors.fill.link}`,
+						border: 'none',
+						backgroundColor: 'transparent',
+					},
+				})}
+			>
+				{text}
+			</Button>
+		</>
 	);
 };
