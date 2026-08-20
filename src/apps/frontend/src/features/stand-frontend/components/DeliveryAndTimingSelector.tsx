@@ -19,7 +19,6 @@ export const DeliveryAndTimingSelector = ({
 }: DeliveryAndTimingSelectorProps) => {
 	const selectedDeliveryAndTimingParams =
 		deliveryOptionNameMap[selectedDeliveryTiming];
-
 	return (
 		<div
 			css={{
@@ -35,8 +34,7 @@ export const DeliveryAndTimingSelector = ({
 					color: semanticColors.text.weak,
 				}}
 			>
-				Choose whether the {getChannelDescription(channel)} is sent immediately
-				or scheduled for later
+				The {getChannelDescription(channel)} is sent immediately
 			</Typography>
 
 			<SelectableTile

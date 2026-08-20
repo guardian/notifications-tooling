@@ -10,6 +10,7 @@ import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
+import { useTabChannel } from '../use-tab-channel';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
@@ -24,6 +25,9 @@ export const CreateNewsletterEmailTab = () => {
 		notification: { sendingResult, parameters },
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
+	const emailParameters = parameters?.type === 'email' ? parameters : undefined;
+
+	useTabChannel('email');
 
 	return (
 		<>
@@ -39,6 +43,9 @@ export const CreateNewsletterEmailTab = () => {
 				<Grid
 					cssOverrides={css({
 						height: '100%',
+						'@media (min-width: 1310px)': {
+							flexWrap: 'nowrap',
+						},
 					})}
 					theme={{
 						sm: { gap: '0px', padding: `0px 0px 0px` },
@@ -63,6 +70,7 @@ export const CreateNewsletterEmailTab = () => {
 								size={'grow'}
 								cssOverrides={css({
 									maxWidth: '826px',
+									minWidth: 0,
 								})}
 							>
 								<EmailPreviewToggle />
@@ -88,18 +96,19 @@ export const CreateNewsletterEmailTab = () => {
 									justifyContent: 'center',
 									alignItems: 'flex-start',
 									flow: 'vertical',
-									['@media (min-width: 1280px)']: {
+									['@media (min-width: 1310px)']: {
 										display: 'flex',
+										flex: '0 0 474px',
+										marginLeft: 'auto',
+										maxWidth: '474px',
 									},
 								})}
 							>
 								<EmailPreviewSection
-									selectedSegments={parameters?.audienceSegments ?? []}
-									selectedChannel={parameters?.type}
+									selectedSegments={emailParameters?.audienceSegments ?? []}
+									selectedChannel={emailParameters?.type}
 									selectedDeliveryTiming={
-										parameters?.type === 'email'
-											? parameters.emailDeliveryOption
-											: undefined
+										emailParameters?.emailDeliveryOption ?? undefined
 									}
 								/>
 							</Item>

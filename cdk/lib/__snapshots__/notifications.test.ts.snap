@@ -65,6 +65,10 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64",
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
     },
+    "SsmParameterValueinfosecwafservicesprimarywafarnC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/infosec/waf/services/primarywaf-arn",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
     "VpcId": {
       "Default": "/account/vpc/primary/id",
       "Description": "Virtual Private Cloud to run EC2 instances within. Should NOT be the account default VPC.",
@@ -225,6 +229,33 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::RDS::DBSubnetGroup",
+    },
+    "DispatchApiWebAclAssociation": {
+      "Properties": {
+        "ResourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":apigateway:eu-west-1::/restapis/",
+              {
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
+              },
+              "/stages/",
+              {
+                "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
+              },
+            ],
+          ],
+        },
+        "WebACLArn": {
+          "Ref": "SsmParameterValueinfosecwafservicesprimarywafarnC96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+      },
+      "Type": "AWS::WAFv2::WebACLAssociation",
     },
     "DispatchAppDNS": {
       "Properties": {
@@ -677,7 +708,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           "LogFormat": "JSON",
         },
         "MemorySize": 512,
-        "ReservedConcurrentExecutions": 10,
         "Role": {
           "Fn::GetAtt": [
             "dispatchlambdaServiceRole973DFF82",
@@ -1110,6 +1140,16 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "DeploymentId": {
           "Ref": "dispatchlambdadispatchapiDeployment664A949C35be3cfa92cef0c2ea5f50d1d4fa6800",
         },
+        "MethodSettings": [
+          {
+            "DataTraceEnabled": false,
+            "HttpMethod": "*",
+            "LoggingLevel": "ERROR",
+            "ResourcePath": "/*",
+            "ThrottlingBurstLimit": 20,
+            "ThrottlingRateLimit": 10,
+          },
+        ],
         "RestApiId": {
           "Ref": "dispatchlambdadispatchapiEEAA8616",
         },

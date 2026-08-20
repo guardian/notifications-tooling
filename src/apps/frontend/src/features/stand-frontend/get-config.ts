@@ -1,9 +1,4 @@
-import type { User } from '@models';
-
-export interface AppConfig {
-	user: User;
-	permissions: string[];
-}
+import type { AppConfig } from '@models';
 
 declare global {
 	interface Window {

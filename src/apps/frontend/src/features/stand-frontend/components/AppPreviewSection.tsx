@@ -1,46 +1,49 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
-import type { AppPushTopicSelection, TopicTypeOption } from './Editions';
+import { useContext } from 'react';
+import type { TopicTypeOption } from '../api/schemas';
+import { NotificationFormContext } from '../NotificationContext';
+import type { Edition } from '../types';
+import { AndroidAlertPreview } from './AndroidAlertPreview';
 import { Editions } from './Editions';
+import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
-// TODO: Replace these defaults with GET /v1/channels/audiences data and
-// app-alert form selections when that integration is available.
-const TEMPORARY_TOPIC_TYPES: TopicTypeOption[] = [
-	{
-		id: 'breaking-news',
-		label: 'Breaking news',
-		editions: [
-			{ id: 'uk', label: 'UK' },
-			{ id: 'us', label: 'US' },
-			{ id: 'au', label: 'AU' },
-			{ id: 'international', label: 'International' },
-			{ id: 'europe', label: 'Europe' },
-		],
-	},
-];
-
-const TEMPORARY_SELECTED_TOPICS: AppPushTopicSelection[] = [
-	{ type: 'breaking-news', name: 'uk' },
-	{ type: 'breaking-news', name: 'international' },
-];
-
 interface AppPreviewSectionProps {
-	topicTypes?: TopicTypeOption[];
-	selectedTopics?: AppPushTopicSelection[];
+	topicTypes: TopicTypeOption[];
 }
 
-export const AppPreviewSection = ({
-	topicTypes = TEMPORARY_TOPIC_TYPES,
-	selectedTopics = TEMPORARY_SELECTED_TOPICS,
-}: AppPreviewSectionProps) => {
+const editionIds: Record<Edition, string> = {
+	UK: 'uk',
+	US: 'us',
+	AU: 'au',
+	EU: 'europe',
+	INT: 'international',
+};
+
+export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
+	const { notification } = useContext(NotificationFormContext);
+	const parameters =
+		notification.parameters?.type === 'push'
+			? notification.parameters
+			: undefined;
+	const alertType = parameters?.alertType ?? 'breaking-news';
+	const alertTypeLabel =
+		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
+	const selectedTopics = (parameters?.editions ?? []).map((edition) => ({
+		type: alertType,
+		name: editionIds[edition],
+	}));
+	const headline = parameters?.headline;
+	const thumbnailUrl = notification.content?.fields?.thumbnail;
+
 	return (
 		<PreviewSection
 			title="Preview"
 			description="The preview for the app alert will be shown below."
-			isVisible={Boolean(true)}
+			isVisible={Boolean(notification.fetchedArticleId)}
 		>
 			<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
 			<Editions topicTypes={topicTypes} selected={selectedTopics} />
@@ -53,11 +56,18 @@ export const AppPreviewSection = ({
 					paddingBlock: '12px',
 				})}
 			>
-				<span css={{ fontSize: '14px' }}>
-					App alert formats might differ across platforms and devices
-				</span>
+				App alert formats might differ across platforms and devices
 			</AlertBanner>
-			{/* App Preview iPhone and Android */}
+			<IPhoneAlertPreview
+				alertType={alertTypeLabel}
+				headline={headline}
+				thumbnailUrl={thumbnailUrl}
+			/>
+			<AndroidAlertPreview
+				alertType={alertTypeLabel}
+				headline={headline}
+				thumbnailUrl={thumbnailUrl}
+			/>
 		</PreviewSection>
 	);
 };

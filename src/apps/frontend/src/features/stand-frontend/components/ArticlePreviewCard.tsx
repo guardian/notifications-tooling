@@ -1,3 +1,4 @@
+import { Link } from '@guardian/stand/Link';
 import { Typography } from '@guardian/stand/Typography';
 import type { ResolvedArticle } from '@models';
 import { getPillarColor } from '../pillar-colors';
@@ -68,9 +69,14 @@ export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
 					{headline}
 				</Typography>
 
-				<Typography variant="bodyXs" cssOverrides={articlePreviewCardTheme.url}>
+				<Link
+					cssOverrides={articlePreviewCardTheme.url}
+					href={webUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
 					{webUrl}
-				</Typography>
+				</Link>
 			</div>
 
 			{thumbnail && (

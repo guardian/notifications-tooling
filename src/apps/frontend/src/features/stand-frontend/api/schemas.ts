@@ -90,8 +90,9 @@ export const channelConstraintsResponseSchema = z.object({
 			compose: z.object({
 				minItems: z.number().int().nonnegative(),
 				maxItems: z.number().int().positive(),
+				headline: contentFieldLimitsSchema,
 			}),
-			audience: z.object({
+			editions: z.object({
 				maxTopics: z.number().int().positive(),
 			}),
 		}),
@@ -99,6 +100,48 @@ export const channelConstraintsResponseSchema = z.object({
 });
 export type ChannelConstraintsResponse = z.infer<
 	typeof channelConstraintsResponseSchema
+>;
+
+const editionOptionSchema = z.object({
+	id: z.string(),
+	label: z.string(),
+});
+
+const topicTypeOptionSchema = z.object({
+	id: z.string(),
+	label: z.string(),
+	editions: editionOptionSchema.array(),
+});
+export type TopicTypeOption = z.infer<typeof topicTypeOptionSchema>;
+
+/**
+ * `GET /v1/channels/audiences`. Non-strict throughout, so the backend can add
+ * a channel, a field, or an audience cap without breaking a deployed SPA — the
+ * client only fails on something it asked for going missing or changing type.
+ */
+export const channelAudienceResponseSchema = z.object({
+	channels: z
+		.object({
+			newsletter: z
+				.object({
+					segments: z.array(
+						z.object({
+							id: z.string(),
+							label: z.string(),
+						}),
+					),
+				})
+				.loose(),
+			'app-push': z
+				.object({
+					topicTypes: topicTypeOptionSchema.array(),
+				})
+				.loose(),
+		})
+		.loose(),
+});
+export type ChannelAudienceResponse = z.infer<
+	typeof channelAudienceResponseSchema
 >;
 
 export const sendNotificationResponseSchema = z.strictObject({

@@ -27,6 +27,15 @@ type Story = StoryObj<StoryArgs>;
 const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/CreateNotificationForm',
 	component: CreateNotificationForm,
+	parameters: {
+		layout: 'fullscreen',
+		docs: {
+			description: {
+				component:
+					'The form for creating a newsletter email notification. This story shows the form in various states, including empty, populated, and error states.',
+			},
+		},
+	},
 	args: {
 		notificationState: defaultState,
 		activeSectionHref: '#article-section',

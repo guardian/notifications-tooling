@@ -55,8 +55,10 @@ _Avoid_: proof, render, draft
 
 **Channel**:
 A delivery destination. Exactly two exist: **`newsletter`** (email, via Braze) and
-**`app-push`** (mobile, via mobile-n10n).
-_Avoid_: `email`, `push`, `app-notification`, platform, medium
+**`app-push`** (mobile, via mobile-n10n). To an editor these are always named
+**newsletter email** and **app alert**.
+_Avoid_: `email`, `push`, `app-notification`, platform, medium; email newsletter
+and push notification as user-facing names
 
 **Segment**:
 A named, public audience group that a plan targets by id. The broker resolves a
@@ -78,6 +80,20 @@ A client-generated identifier that marks two requests as the same intent, so a
 retry is not delivered twice. Required today but inert — there is no persistence
 to deduplicate against.
 _Avoid_: request id, notification id, dedupe key
+
+**Send confirmation**:
+The interruption shown _before_ a notification is sent, guarding the editor's
+intent: it restates what will go out, and only on approval does it fire the send
+request. It is not an outcome — it exists precisely because sending cannot be
+undone.
+_Avoid_: confirmation (bare — collides with the dispatch report), confirm dialog,
+are-you-sure
+
+**Dispatch report**:
+The account shown _after_ a notification is sent, derived from the send response,
+telling the editor whether it succeeded and what was delivered. It reports an
+outcome; it never sends anything.
+_Avoid_: confirmation page, success page, report page
 
 ### Limits
 

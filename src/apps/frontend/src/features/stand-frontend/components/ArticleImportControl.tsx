@@ -1,10 +1,10 @@
 import { css } from '@emotion/react';
-import { semanticSpacing } from '@guardian/stand';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { ApiError } from '../../../api/errors';
 import {
 	parseArticleUrlInputToContentId,
@@ -39,7 +39,18 @@ const getUserFacingError = (err: unknown): string => {
 	}
 };
 
-export const ArticleImportControl = () => {
+export interface ArticleImportControlProps {
+	articleInputText: string;
+	setArticleInputText: (setArticleInputText: string) => void;
+	lockArticleInputText: boolean;
+	setLockArticleInputText: (lockArticleInputText: boolean) => void;
+}
+export const ArticleImportControl = ({
+	articleInputText,
+	setArticleInputText,
+	lockArticleInputText,
+	setLockArticleInputText,
+}: ArticleImportControlProps) => {
 	const { notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
 	);
@@ -51,12 +62,6 @@ export const ArticleImportControl = () => {
 		hasAttemptedSend,
 		content,
 	} = notification;
-
-	const [articleInputText, setArticleInputText] = useState(
-		() => content?.webUrl ?? '',
-	);
-
-	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
 	const { failure, webUrl, articleId } =
 		parseArticleUrlInputToContentId(articleInputText);
@@ -123,12 +128,24 @@ export const ArticleImportControl = () => {
 					css={{
 						display: 'flex',
 						flexDirection: 'column',
-						gap: semanticSpacing.stackSm,
+						gap: semanticSpacing.stackXxs,
 					}}
 				>
 					<Typography variant="bodyBoldMd" element="h3">
 						Article
 					</Typography>
+					{/* 
+						NOTE - we are not using the "description" field of the TextInput for this text
+						as design does not want the colour shade to change when the TextInput is in the
+						disabled state.
+						*/}
+					<Typography
+						variant="helpTextFormMd"
+						theme={{ color: semanticColors.text.weak }}
+					>
+						Copy and paste a Guardian article URL and fetch
+					</Typography>
+
 					<TextInput
 						aria-label="article URL"
 						isInvalid={!!showFieldErrors}
@@ -136,7 +153,6 @@ export const ArticleImportControl = () => {
 						value={articleInputText}
 						placeholder="https://www.theguardian.com/..."
 						isDisabled={isFetchingContent || lockArticleInputText}
-						description="Copy and paste a Guardian article URL and fetch"
 						onChange={setArticleInputText}
 						cssOverrides={css({ width: '356px' })}
 					/>

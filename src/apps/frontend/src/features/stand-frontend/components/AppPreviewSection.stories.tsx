@@ -1,26 +1,38 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { ComponentProps } from 'react';
 import { expect, within } from 'storybook/test';
-import { WithNotificationContext } from '../../../stories/story-helpers';
-import { defaultState } from '../notification-reducer';
+import { articleFixture } from '../../../mocks/capi-fixtures';
+import {
+	populatedPushState,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
+import { FALLBACK_TOPIC_TYPES } from '../api/useChannelAudiences';
+import { defaultAppAlertState } from '../notification-reducer';
+import type { NotificationState } from '../types';
 import { AppPreviewSection } from './AppPreviewSection';
 
-const meta = {
+type StoryArgs = ComponentProps<typeof AppPreviewSection> & {
+	notificationState: NotificationState;
+};
+
+const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/AppPreviewSection',
 	component: AppPreviewSection,
-	render: (args) =>
-		WithNotificationContext(<AppPreviewSection {...args} />, {
-			...defaultState,
-			fetchedArticleId: 'article-id',
-		}),
+	render: ({ notificationState, ...args }) =>
+		WithNotificationContext(<AppPreviewSection {...args} />, notificationState),
 	parameters: {
 		docs: {
 			description: {
 				component:
-					'App alert preview composition. Device-specific preview content will be added here.',
+					'App alert preview populated from the imported article and current app-alert selections.',
 			},
 		},
 	},
-} satisfies Meta<typeof AppPreviewSection>;
+	args: {
+		topicTypes: FALLBACK_TOPIC_TYPES,
+		notificationState: populatedPushState,
+	},
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -38,5 +50,34 @@ export const Default: Story = {
 		await expect(canvas.getByText('Editions')).toBeVisible();
 		await expect(canvas.getByText('UK')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
+		await expect(canvas.queryByText('US')).not.toBeInTheDocument();
+		await expect(canvas.queryByText('AU')).not.toBeInTheDocument();
+		await expect(canvas.queryByText('Europe')).not.toBeInTheDocument();
+		await expect(
+			canvas.getByLabelText('iPhone notification preview'),
+		).toBeVisible();
+		await expect(
+			canvas.getByLabelText('Android notification preview'),
+		).toBeVisible();
+		await expect(canvas.getAllByText('Breaking news')).toHaveLength(2);
+		await expect(
+			canvas.getAllByText(articleFixture.fields?.headline ?? ''),
+		).toHaveLength(2);
+		await expect(canvas.getByAltText('Article thumbnail')).toBeVisible();
+		await expect(
+			canvas.getByAltText('Android article thumbnail'),
+		).toBeVisible();
+	},
+};
+
+export const BeforeArticleImport: Story = {
+	args: {
+		notificationState: defaultAppAlertState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText('The preview for the app alert will be shown below.'),
+		).not.toBeVisible();
 	},
 };

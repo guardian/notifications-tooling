@@ -14,6 +14,7 @@ export const defaultEmailParams: EmailNotification = {
 
 export const defaultPushParams: PushNotification = {
 	type: 'push',
+	alertType: 'breaking-news',
 	pushDeliveryOption: 'appImmediate',
 };
 
@@ -54,7 +55,7 @@ export const notificationReducer = (
 			}
 			return {
 				...state,
-				parameters: { ...state.parameters, ...action.mod },
+				parameters: { ...state.parameters, ...action.appMod },
 			};
 		}
 
@@ -117,6 +118,9 @@ export const notificationReducer = (
 				parameters.preview = standfirstText || parameters.preview;
 				parameters.subject = headline ?? parameters.subject;
 			}
+			if (parameters?.type === 'push') {
+				parameters.headline = headline ?? action.content.webTitle;
+			}
 
 			return {
 				...state,
@@ -158,11 +162,18 @@ export const notificationReducer = (
 			};
 		}
 
-		case 'reset': {
+		case 'reset-newsletter-email': {
 			if (state.isFetchingContent || state.isWaitingForSend) {
 				return state;
 			}
 			return structuredClone(defaultState);
+		}
+
+		case 'reset-app-alert': {
+			if (state.isFetchingContent || state.isWaitingForSend) {
+				return state;
+			}
+			return structuredClone(defaultAppAlertState);
 		}
 
 		case 'dismiss-send-error': {

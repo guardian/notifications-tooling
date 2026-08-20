@@ -4,6 +4,7 @@ import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useContext, useState } from 'react';
+import type { TopicTypeOption } from '../api/schemas';
 import { NotificationFormContext } from '../NotificationContext';
 import { AppPreviewSection } from './AppPreviewSection';
 import { EmailPreviewSection } from './EmailPreviewSection';
@@ -20,7 +21,7 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 			css={css({
 				display: 'flex',
 				flexDirection: 'column',
-				['@media (min-width: 1280px)']: {
+				['@media (min-width: 1310px)']: {
 					display: 'none',
 				},
 				borderBottom: `2px solid ${semanticColors.border.weak}`,
@@ -53,20 +54,26 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 	);
 };
 
-export const AppPreviewToggle = () => (
+export const AppPreviewToggle = ({
+	topicTypes,
+}: {
+	topicTypes: TopicTypeOption[];
+}) => (
 	<PreviewToggle>
-		<AppPreviewSection />
+		<AppPreviewSection topicTypes={topicTypes} />
 	</PreviewToggle>
 );
 
 export const EmailPreviewToggle = () => {
 	const { notification } = useContext(NotificationFormContext);
-	const selectedSegments = notification.parameters?.audienceSegments ?? [];
-	const selectedChannel = notification.parameters?.type;
-	const selectedDeliveryTiming =
+	const emailParameters =
 		notification.parameters?.type === 'email'
-			? notification.parameters.emailDeliveryOption
+			? notification.parameters
 			: undefined;
+	const selectedSegments = emailParameters?.audienceSegments ?? [];
+	const selectedChannel = emailParameters?.type;
+	const selectedDeliveryTiming =
+		emailParameters?.emailDeliveryOption ?? undefined;
 
 	return (
 		<PreviewToggle>

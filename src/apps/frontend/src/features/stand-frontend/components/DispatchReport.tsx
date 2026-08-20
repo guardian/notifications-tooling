@@ -212,7 +212,9 @@ export const DispatchReport = () => {
 				{parameters?.type === 'email' && (
 					<Button
 						variant="primary"
-						onClick={() => updateNotification({ type: 'reset' })}
+						onClick={() =>
+							updateNotification({ type: 'reset-newsletter-email' })
+						}
 					>
 						Create new newsletter email
 					</Button>

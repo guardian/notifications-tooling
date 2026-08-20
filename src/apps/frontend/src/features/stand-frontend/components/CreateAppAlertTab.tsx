@@ -8,8 +8,13 @@ import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
+import {
+	FALLBACK_TOPIC_TYPES,
+	useChannelAudiences,
+} from '../api/useChannelAudiences';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
+import { useTabChannel } from '../use-tab-channel';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { DispatchReport } from './DispatchReport';
@@ -24,6 +29,12 @@ export const CreateAppAlertTab = () => {
 		notification: { sendingResult },
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
+	const { data: audiences } = useChannelAudiences();
+
+	const topicTypes =
+		audiences?.channels['app-push'].topicTypes ?? FALLBACK_TOPIC_TYPES;
+
+	useTabChannel('push');
 
 	return (
 		<>
@@ -40,6 +51,9 @@ export const CreateAppAlertTab = () => {
 				<Grid
 					cssOverrides={css({
 						height: '100%',
+						'@media (min-width: 1310px)': {
+							flexWrap: 'nowrap',
+						},
 					})}
 					theme={{
 						sm: { gap: '0px', padding: `0px 0px 0px` },
@@ -64,9 +78,10 @@ export const CreateAppAlertTab = () => {
 								size={'grow'}
 								cssOverrides={css({
 									maxWidth: '826px',
+									minWidth: 0,
 								})}
 							>
-								<AppPreviewToggle />
+								<AppPreviewToggle topicTypes={topicTypes} />
 								<div
 									css={css({
 										position: 'relative',
@@ -89,12 +104,15 @@ export const CreateAppAlertTab = () => {
 									justifyContent: 'center',
 									alignItems: 'flex-start',
 									flow: 'vertical',
-									['@media (min-width: 1280px)']: {
+									['@media (min-width: 1310px)']: {
 										display: 'flex',
+										flex: '0 0 474px',
+										marginLeft: 'auto',
+										maxWidth: '474px',
 									},
 								})}
 							>
-								<AppPreviewSection />
+								<AppPreviewSection topicTypes={topicTypes} />
 							</Item>
 						</>
 					)}

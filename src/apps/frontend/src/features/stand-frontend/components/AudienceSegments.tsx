@@ -71,8 +71,11 @@ export const AudienceSegments = ({
 				gap: semanticSpacing.stackXs,
 			}}
 		>
-			<Typography variant="bodyBoldMd">Audience segments</Typography>
-			<Typography variant="bodyCompactSm">
+			<Typography variant="labelFormMd">Audience segments</Typography>
+			<Typography
+				variant="helpTextFormMd"
+				cssOverrides={css({ color: semanticColors.text.weak })}
+			>
 				Choose the audience the email notification will be sent to
 			</Typography>
 

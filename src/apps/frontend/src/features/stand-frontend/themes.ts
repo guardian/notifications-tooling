@@ -153,7 +153,7 @@ export const articlePreviewCardTheme = {
 		padding: semanticSpacing.stackSm,
 		borderRadius: semanticRadius.cornerSm,
 		backgroundColor: baseColors.neutral[850],
-		maxWidth: '470px',
+		maxWidth: '500px',
 	}),
 	details: css({
 		display: 'flex',
@@ -181,6 +181,7 @@ export const articlePreviewCardTheme = {
 	url: css({
 		fontSize: '12px',
 		color: semanticColors.text.link,
+		overflowWrap: 'anywhere',
 	}),
 	thumbnail: css({
 		width: '120px',
@@ -226,7 +227,7 @@ export const previewPillStyles = {
 		height: '32px',
 	}),
 	icon: css({
-		border: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+		border: `${semanticSizing.border.default} transparent  ${semanticColors.border.weak}`,
 		width: '24px',
 		height: '18px',
 		gap: `${baseSpacing['10Px']}`,

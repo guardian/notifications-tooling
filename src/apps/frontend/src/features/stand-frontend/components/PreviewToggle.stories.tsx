@@ -2,8 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import {
 	completeEmailParams,
+	populatedPushState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
+import { FALLBACK_TOPIC_TYPES } from '../api/useChannelAudiences';
 import { defaultState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { AppPreviewToggle, EmailPreviewToggle } from './PreviewToggle';
@@ -50,15 +52,21 @@ export const Expanded: Story = {
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
 		await expect(
 			canvas.getByText(
-				'The preview for the newsletter email and/or the app alert notification will be shown below.',
+				'The preview for the newsletter email will be shown below.',
 			),
 		).toBeInTheDocument();
 	},
 };
 
 export const AppExpanded: Story = {
+	args: {
+		notificationState: populatedPushState,
+	},
 	render: ({ notificationState }) =>
-		WithNotificationContext(<AppPreviewToggle />, notificationState),
+		WithNotificationContext(
+			<AppPreviewToggle topicTypes={FALLBACK_TOPIC_TYPES} />,
+			notificationState,
+		),
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const toggle = canvas.getByRole('button', { name: 'Preview' });

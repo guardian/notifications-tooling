@@ -49,10 +49,9 @@ export const HTMLPreview = () => {
 	const [emailHtml, setEmailHtml] = useState<string>();
 	const [errorMessage, setErrorMessage] = useState<string>();
 	const [isLoading, setIsLoading] = useState(false);
-
-	const stringifiedAudience = (parameters?.audienceSegments ?? []).join();
-	const { webUrl } = content ?? {};
 	const emailParameters = parameters?.type === 'email' ? parameters : undefined;
+	const stringifiedAudience = (emailParameters?.audienceSegments ?? []).join();
+	const { webUrl } = content ?? {};
 
 	const fetchHtml = useCallback(async () => {
 		if (!webUrl) {
@@ -100,7 +99,7 @@ export const HTMLPreview = () => {
 			}
 			widthOptions={[]}
 			defaultWidth={400}
-			cssOverrides={css({ maxWidth: '440px' })}
+			cssOverrides={css({ width: '440px' })}
 		/>
 	);
 };
