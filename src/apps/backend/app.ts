@@ -49,13 +49,13 @@ app.use(
 );
 
 // Private - authenticated routes
-app.use('/docs/api', docsRouter);
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/content', contentRouter);
 app.use('/v1/notification-tests', notificationTestsRouter);
 app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
 app.use('/v1/preview', previewRouter);
+app.use('/docs/api', docsRouter);
 
 const serverRoutePrefixes = ['/health', '/v1', '/docs/api'];
 
