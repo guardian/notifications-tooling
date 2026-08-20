@@ -55,7 +55,7 @@ export const Default: Story = {
 		await expect(
 			canvas.getByLabelText('Android notification preview'),
 		).toBeVisible();
-		await expect(canvas.getAllByText('Breaking News')).toHaveLength(2);
+		await expect(canvas.getAllByText('Breaking news')).toHaveLength(2);
 		await expect(
 			canvas.getAllByText(articleFixture.fields?.headline ?? ''),
 		).toHaveLength(2);
