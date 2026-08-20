@@ -1,5 +1,6 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { getChannelDescription } from '../../../util/display-text-helpers';
 import { deliveryOptionNameMap } from '../option-values';
 import type { ChannelOption } from '../types';
 import { type DeliveryOption } from '../types';
@@ -18,8 +19,6 @@ export const DeliveryAndTimingSelector = ({
 }: DeliveryAndTimingSelectorProps) => {
 	const selectedDeliveryAndTimingParams =
 		deliveryOptionNameMap[selectedDeliveryTiming];
-	const channelDescription =
-		channel === 'email' ? 'newsletter email' : 'app alert';
 	return (
 		<div
 			css={{
@@ -35,7 +34,7 @@ export const DeliveryAndTimingSelector = ({
 					color: semanticColors.text.weak,
 				}}
 			>
-				The {channelDescription} is sent immediately
+				The {getChannelDescription(channel)} is sent immediately
 			</Typography>
 
 			<SelectableTile
