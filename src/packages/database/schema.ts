@@ -46,6 +46,9 @@ export const notifications = pgTable(
 		kind: notificationKindEnum('kind').notNull(),
 		status: notificationStatusEnum('status').notNull().default('accepted'),
 		sender: text('sender').notNull(),
+		// The pan-domain-authenticated user's email, resolved from the Panda
+		// cookie by authMiddleware. Panda exposes email as the stable user id.
+		createdByEmail: text('created_by_email').notNull(),
 		dryRun: boolean('dry_run').notNull().default(false),
 		scheduledFor: timestamp('scheduled_for', {
 			withTimezone: true,

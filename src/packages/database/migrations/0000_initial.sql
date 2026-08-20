@@ -20,6 +20,7 @@ CREATE TABLE "notifications" (
 	"kind" "notification_kind" NOT NULL,
 	"status" "notification_status" DEFAULT 'accepted' NOT NULL,
 	"sender" text NOT NULL,
+	"created_by_email" text NOT NULL,
 	"dry_run" boolean DEFAULT false NOT NULL,
 	"scheduled_for" timestamp with time zone,
 	"content" jsonb NOT NULL,
