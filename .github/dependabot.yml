@@ -36,6 +36,11 @@ updates:
       - dependency-name: typescript
         update-types:
           - version-update:semver-major
+      # Stand's Dialog.Header still uses the title slot removed in React Aria
+      # 1.20, which causes every confirmation modal to throw while rendering.
+      - dependency-name: react-aria-components
+        versions:
+          - 1.20.x
     groups:
       all:
         patterns: ['*']
