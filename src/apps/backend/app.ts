@@ -28,7 +28,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
-app.use('/docs/api', docsRouter);
 
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 
@@ -50,6 +49,7 @@ app.use(
 );
 
 // Private - authenticated routes
+app.use('/docs/api', docsRouter);
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/content', contentRouter);
 app.use('/v1/notification-tests', notificationTestsRouter);
