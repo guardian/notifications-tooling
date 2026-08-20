@@ -1,282 +1,264 @@
 {
-  "id": "db1752d2-0d98-448c-9382-bcb8a495e2e5",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "7",
-  "dialect": "postgresql",
-  "tables": {
-    "public.notification_dispatches": {
-      "name": "notification_dispatches",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "notification_id": {
-          "name": "notification_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "channel": {
-          "name": "channel",
-          "type": "notification_channel",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "target": {
-          "name": "target",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_ref": {
-          "name": "provider_ref",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "dispatch_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "failure_reason": {
-          "name": "failure_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "detail": {
-          "name": "detail",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "notification_dispatches_notification_channel_target_unique": {
-          "name": "notification_dispatches_notification_channel_target_unique",
-          "columns": [
-            {
-              "expression": "notification_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "channel",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "target",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "notification_dispatches_notification_id_notifications_id_fk": {
-          "name": "notification_dispatches_notification_id_notifications_id_fk",
-          "tableFrom": "notification_dispatches",
-          "tableTo": "notifications",
-          "columnsFrom": [
-            "notification_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.notifications": {
-      "name": "notifications",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "idempotency_key": {
-          "name": "idempotency_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "notification_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "notification_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'accepted'"
-        },
-        "sender": {
-          "name": "sender",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_by_email": {
-          "name": "created_by_email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "dry_run": {
-          "name": "dry_run",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "scheduled_for": {
-          "name": "scheduled_for",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "content": {
-          "name": "content",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "channels": {
-          "name": "channels",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "notifications_idempotency_key_unique": {
-          "name": "notifications_idempotency_key_unique",
-          "columns": [
-            {
-              "expression": "idempotency_key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    }
-  },
-  "enums": {
-    "public.dispatch_status": {
-      "name": "dispatch_status",
-      "schema": "public",
-      "values": [
-        "success",
-        "failure"
-      ]
-    },
-    "public.notification_channel": {
-      "name": "notification_channel",
-      "schema": "public",
-      "values": [
-        "newsletter",
-        "app-push"
-      ]
-    },
-    "public.notification_kind": {
-      "name": "notification_kind",
-      "schema": "public",
-      "values": [
-        "send",
-        "test"
-      ]
-    },
-    "public.notification_status": {
-      "name": "notification_status",
-      "schema": "public",
-      "values": [
-        "accepted",
-        "delivered",
-        "partially_delivered",
-        "failed"
-      ]
-    }
-  },
-  "schemas": {},
-  "sequences": {},
-  "roles": {},
-  "policies": {},
-  "views": {},
-  "_meta": {
-    "columns": {},
-    "schemas": {},
-    "tables": {}
-  }
+	"id": "db1752d2-0d98-448c-9382-bcb8a495e2e5",
+	"prevId": "00000000-0000-0000-0000-000000000000",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.notification_dispatches": {
+			"name": "notification_dispatches",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"notification_id": {
+					"name": "notification_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"channel": {
+					"name": "channel",
+					"type": "notification_channel",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"target": {
+					"name": "target",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"provider_ref": {
+					"name": "provider_ref",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"status": {
+					"name": "status",
+					"type": "dispatch_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"failure_reason": {
+					"name": "failure_reason",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"detail": {
+					"name": "detail",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"notification_dispatches_notification_channel_target_unique": {
+					"name": "notification_dispatches_notification_channel_target_unique",
+					"columns": [
+						{
+							"expression": "notification_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "channel",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "target",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": true,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"notification_dispatches_notification_id_notifications_id_fk": {
+					"name": "notification_dispatches_notification_id_notifications_id_fk",
+					"tableFrom": "notification_dispatches",
+					"tableTo": "notifications",
+					"columnsFrom": ["notification_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.notifications": {
+			"name": "notifications",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"idempotency_key": {
+					"name": "idempotency_key",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"kind": {
+					"name": "kind",
+					"type": "notification_kind",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "notification_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'accepted'"
+				},
+				"sender": {
+					"name": "sender",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_by_email": {
+					"name": "created_by_email",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"dry_run": {
+					"name": "dry_run",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"scheduled_for": {
+					"name": "scheduled_for",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"content": {
+					"name": "content",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"channels": {
+					"name": "channels",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"notifications_idempotency_key_unique": {
+					"name": "notifications_idempotency_key_unique",
+					"columns": [
+						{
+							"expression": "idempotency_key",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": true,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {
+		"public.dispatch_status": {
+			"name": "dispatch_status",
+			"schema": "public",
+			"values": ["success", "failure"]
+		},
+		"public.notification_channel": {
+			"name": "notification_channel",
+			"schema": "public",
+			"values": ["newsletter", "app-push"]
+		},
+		"public.notification_kind": {
+			"name": "notification_kind",
+			"schema": "public",
+			"values": ["send", "test"]
+		},
+		"public.notification_status": {
+			"name": "notification_status",
+			"schema": "public",
+			"values": ["accepted", "delivered", "partially_delivered", "failed"]
+		}
+	},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
 }
