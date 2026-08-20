@@ -8,6 +8,7 @@ import { useContext } from 'react';
 import { ApiError } from '../../../api/errors';
 import {
 	parseArticleUrlInputToContentId,
+	validateAppAlertForm,
 	validateNotificationForm,
 } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
@@ -102,7 +103,10 @@ export const ArticleImportControl = ({
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
 
-	const requiredFieldErrors = validateNotificationForm(notification);
+	const requiredFieldErrors =
+		notification.parameters?.type === 'email'
+			? validateNotificationForm(notification)
+			: validateAppAlertForm(notification);
 	const showFieldErrors =
 		failure ??
 		(requiredFieldErrors.includes('article') && hasAttemptedSend
@@ -134,7 +138,7 @@ export const ArticleImportControl = ({
 					<Typography variant="bodyBoldMd" element="h3">
 						Article
 					</Typography>
-					{/* 
+					{/*
 						NOTE - we are not using the "description" field of the TextInput for this text
 						as design does not want the colour shade to change when the TextInput is in the
 						disabled state.
