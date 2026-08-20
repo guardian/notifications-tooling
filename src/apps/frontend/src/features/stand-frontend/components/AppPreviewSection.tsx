@@ -1,31 +1,49 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
+import { useContext } from 'react';
 import type { TopicTypeOption } from '../api/schemas';
+import { NotificationFormContext } from '../NotificationContext';
+import type { Edition } from '../types';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
-import type { AppPushTopicSelection } from './Editions';
 import { Editions } from './Editions';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
-const TEMPORARY_THUMBNAIL_URL =
-	'https://media.guim.co.uk/5f2a9721082c580c1696cd5bb8e2ca0d711bf608/361_0_1440_1152/500.jpg';
-
 interface AppPreviewSectionProps {
 	topicTypes: TopicTypeOption[];
-	selectedTopics: AppPushTopicSelection[];
 }
 
-export const AppPreviewSection = ({
-	topicTypes,
-	selectedTopics,
-}: AppPreviewSectionProps) => {
+const editionIds: Record<Edition, string> = {
+	UK: 'uk',
+	US: 'us',
+	AU: 'au',
+	EU: 'europe',
+	INT: 'international',
+};
+
+export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
+	const { notification } = useContext(NotificationFormContext);
+	const parameters =
+		notification.parameters?.type === 'push'
+			? notification.parameters
+			: undefined;
+	const alertType = parameters?.alertType ?? 'breaking-news';
+	const alertTypeLabel =
+		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
+	const selectedTopics = (parameters?.editions ?? []).map((edition) => ({
+		type: alertType,
+		name: editionIds[edition],
+	}));
+	const headline = parameters?.headline;
+	const thumbnailUrl = notification.content?.fields?.thumbnail;
+
 	return (
 		<PreviewSection
 			title="Preview"
 			description="The preview for the app alert will be shown below."
-			isVisible={Boolean(true)}
+			isVisible={Boolean(notification.fetchedArticleId)}
 		>
 			<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
 			<Editions topicTypes={topicTypes} selected={selectedTopics} />
@@ -40,8 +58,16 @@ export const AppPreviewSection = ({
 			>
 				App alert formats might differ across platforms and devices
 			</AlertBanner>
-			<IPhoneAlertPreview thumbnailUrl={TEMPORARY_THUMBNAIL_URL} />
-			<AndroidAlertPreview thumbnailUrl={TEMPORARY_THUMBNAIL_URL} />
+			<IPhoneAlertPreview
+				alertType={alertTypeLabel}
+				headline={headline}
+				thumbnailUrl={thumbnailUrl}
+			/>
+			<AndroidAlertPreview
+				alertType={alertTypeLabel}
+				headline={headline}
+				thumbnailUrl={thumbnailUrl}
+			/>
 		</PreviewSection>
 	);
 };

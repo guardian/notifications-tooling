@@ -10,6 +10,10 @@ import { NotFoundTab } from './features/stand-frontend/components/NotFoundTab';
 import { ConfigContext } from './features/stand-frontend/ConfigContext';
 import { EmailNotificationPage } from './features/stand-frontend/EmailNotificationPage';
 import { getAppConfig } from './features/stand-frontend/get-config';
+import {
+	AppAlertNotificationFormProvider,
+	NewsletterNotificationFormProvider,
+} from './features/stand-frontend/NotificationFormProvider';
 import { getAppRoutes } from './features/stand-frontend/routes';
 
 export function App() {
@@ -26,12 +30,20 @@ export function App() {
 					/>
 					<Route
 						path={appRoutes.createNewsletterEmail}
-						element={<CreateNewsletterEmailTab />}
+						element={
+							<NewsletterNotificationFormProvider>
+								<CreateNewsletterEmailTab />
+							</NewsletterNotificationFormProvider>
+						}
 					/>
 					{appRoutes.createAppAlert && (
 						<Route
 							path={appRoutes.createAppAlert}
-							element={<CreateAppAlertTab />}
+							element={
+								<AppAlertNotificationFormProvider>
+									<CreateAppAlertTab />
+								</AppAlertNotificationFormProvider>
+							}
 						/>
 					)}
 					<Route path={appRoutes.history} element={<HistoryTab />} />

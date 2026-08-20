@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { WithNotificationContext } from '../../../stories/story-helpers';
+import { articleFixture } from '../../../mocks/capi-fixtures';
+import {
+	populatedPushState,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
 import { defaultAppAlertState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
@@ -48,6 +52,19 @@ export const Default: Story = {
 		await expect(canvas.getByText('Headline')).toBeInTheDocument();
 		await expect(canvas.getByText('Delivery and timing')).toBeInTheDocument();
 		await expect(canvas.getByText('Send')).toBeInTheDocument();
+	},
+};
+
+export const WithImportedArticle: Story = {
+	args: {
+		notificationState: populatedPushState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByText('Article imported')).toBeVisible();
+		await expect(canvas.getByLabelText('Headline')).toHaveValue(
+			articleFixture.fields?.headline,
+		);
 	},
 };
 

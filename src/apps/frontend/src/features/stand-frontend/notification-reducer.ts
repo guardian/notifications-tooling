@@ -14,6 +14,7 @@ export const defaultEmailParams: EmailNotification = {
 
 export const defaultPushParams: PushNotification = {
 	type: 'push',
+	alertType: 'breaking-news',
 	pushDeliveryOption: 'appImmediate',
 };
 
@@ -116,6 +117,9 @@ export const notificationReducer = (
 				const standfirstText = htmlToSingleLineText(standfirst);
 				parameters.preview = standfirstText || parameters.preview;
 				parameters.subject = headline ?? parameters.subject;
+			}
+			if (parameters?.type === 'push') {
+				parameters.headline = headline ?? action.content.webTitle;
 			}
 
 			return {
