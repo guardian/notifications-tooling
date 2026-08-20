@@ -35,11 +35,14 @@ import {
 	PostgresEngineVersion,
 	SubnetGroup,
 } from 'aws-cdk-lib/aws-rds';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2';
 
 const PAN_DOMAIN_AUTH_SETTINGS_BUCKET = 'pan-domain-auth-settings';
 const LOGIN_GUTOOLS_CONFIG_BUCKET = 'login-gutools-config';
 const PERMISSIONS_CACHE_BUCKET = 'permissions-cache';
 const DB_PORT = 5432;
+const PRIMARY_WAF_ARN_PARAMETER = '/infosec/waf/services/primarywaf-arn';
 
 const apiGatewayThrottle = {
 	throttlingRateLimit: 10,
@@ -188,6 +191,11 @@ export class DispatchStack extends GuStack {
 			allowPublicSubnet: true,
 		});
 
+		const primaryWebAclArn = StringParameter.valueForStringParameter(
+			this,
+			PRIMARY_WAF_ARN_PARAMETER,
+		);
+
 		if (isProd) {
 			new GuAlarm(this, 'DispatchApi5xxCountAlarm', {
 				alarmName: 'Notifications\\Dispatch-ApiGateway-5xx-Count-Alarm',
@@ -220,6 +228,11 @@ export class DispatchStack extends GuStack {
 			domainName,
 			ttl: Duration.hours(1),
 			resourceRecord: domain.domainNameAliasDomainName,
+		});
+
+		new CfnWebACLAssociation(this, 'DispatchApiWebAclAssociation', {
+			resourceArn: guApiLambda.api.deploymentStage.stageArn,
+			webAclArn: primaryWebAclArn,
 		});
 
 		guApiLambda.addToRolePolicy(

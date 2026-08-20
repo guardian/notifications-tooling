@@ -1,18 +1,8 @@
 import { Icon } from '@guardian/stand/Icon';
+import type { TopicTypeOption } from '../api/schemas';
 import type { AudienceSegment } from '../types';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
-
-export interface EditionOption {
-	id: string;
-	label: string;
-}
-
-export interface TopicTypeOption {
-	id: string;
-	label: string;
-	editions: EditionOption[];
-}
 
 export interface AppPushTopicSelection {
 	type: string;
@@ -41,7 +31,6 @@ export const Editions = ({ topicTypes, selected }: EditionsProps) => {
 		})),
 	);
 	const selectedIds = selected.map(selectionId);
-
 	return (
 		<PreviewPillList
 			title="Editions"

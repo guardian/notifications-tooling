@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { WithNotificationContext } from '../../../stories/story-helpers';
+import { FALLBACK_TOPIC_TYPES } from '../api/useChannelAudiences';
 import { defaultState } from '../notification-reducer';
 import { AppPreviewSection } from './AppPreviewSection';
 
@@ -19,6 +20,13 @@ const meta = {
 					'App alert preview composition. Device-specific preview content will be added here.',
 			},
 		},
+	},
+	args: {
+		topicTypes: FALLBACK_TOPIC_TYPES,
+		selectedTopics: [
+			{ type: 'breaking-news', name: 'uk' },
+			{ type: 'breaking-news', name: 'international' },
+		],
 	},
 } satisfies Meta<typeof AppPreviewSection>;
 
