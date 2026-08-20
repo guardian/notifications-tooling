@@ -20,17 +20,34 @@ const ProviderHarness = () => {
 	const [channel, setChannel] = useState<'newsletter' | 'app-alert'>(
 		'newsletter',
 	);
+	const [newsletterArticleInputText, setNewsletterArticleInputText] =
+		useState('');
+	const [newsletterLockArticleInputText, setNewsletterLockArticleInputText] =
+		useState(false);
+	const [appAlertArticleInputText, setAppAlertArticleInputText] = useState('');
+	const [appAlertLockArticleInputText, setAppAlertLockArticleInputText] =
+		useState(false);
 	return (
 		<NotificationDraftsProvider>
 			<button onClick={() => setChannel('newsletter')}>Newsletter</button>
 			<button onClick={() => setChannel('app-alert')}>App alert</button>
 			{channel === 'newsletter' ? (
 				<NewsletterNotificationFormProvider>
-					<ArticleImportControl />
+					<ArticleImportControl
+						articleInputText={newsletterArticleInputText}
+						setArticleInputText={setNewsletterArticleInputText}
+						lockArticleInputText={newsletterLockArticleInputText}
+						setLockArticleInputText={setNewsletterLockArticleInputText}
+					/>
 				</NewsletterNotificationFormProvider>
 			) : (
 				<AppAlertNotificationFormProvider>
-					<ArticleImportControl />
+					<ArticleImportControl
+						articleInputText={appAlertArticleInputText}
+						setArticleInputText={setAppAlertArticleInputText}
+						lockArticleInputText={appAlertLockArticleInputText}
+						setLockArticleInputText={setAppAlertLockArticleInputText}
+					/>
 				</AppAlertNotificationFormProvider>
 			)}
 		</NotificationDraftsProvider>
