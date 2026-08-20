@@ -19,10 +19,7 @@ const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/AppPreviewSection',
 	component: AppPreviewSection,
 	render: ({ notificationState, ...args }) =>
-		WithNotificationContext(
-			<AppPreviewSection {...args} />,
-			notificationState,
-		),
+		WithNotificationContext(<AppPreviewSection {...args} />, notificationState),
 	parameters: {
 		docs: {
 			description: {
