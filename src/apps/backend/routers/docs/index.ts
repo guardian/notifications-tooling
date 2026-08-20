@@ -1,21 +1,26 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { Router } from 'express';
-import getAbsoluteSwaggerFsPath from 'swagger-ui-dist/absolute-path';
 import swaggerUi from 'swagger-ui-express';
 import { authRedirectMiddleware } from '../../middleware/auth-middleware';
 import { openApiDocument } from './openapi';
 
-const swaggerPath = getAbsoluteSwaggerFsPath();
-
-console.log('Swagger path:', swaggerPath);
-console.log(
-	'Bundle exists:',
-	fs.existsSync(path.join(swaggerPath, 'swagger-ui-bundle.js')),
-);
+const docsBasePath = '/docs/api/';
+const swaggerHtml = swaggerUi
+	.generateHTML(openApiDocument)
+	.replaceAll('./swagger-ui.css', `${docsBasePath}swagger-ui.css`)
+	.replaceAll('./favicon-32x32.png', `${docsBasePath}favicon-32x32.png`)
+	.replaceAll('./favicon-16x16.png', `${docsBasePath}favicon-16x16.png`)
+	.replaceAll('./swagger-ui-bundle.js', `${docsBasePath}swagger-ui-bundle.js`)
+	.replaceAll(
+		'./swagger-ui-standalone-preset.js',
+		`${docsBasePath}swagger-ui-standalone-preset.js`,
+	)
+	.replaceAll('./swagger-ui-init.js', `${docsBasePath}swagger-ui-init.js`);
 
 export const docsRouter = Router();
 docsRouter.use(authRedirectMiddleware);
 
+docsRouter.get(['', '/'], (_request, response) => {
+	response.type('html').send(swaggerHtml);
+});
+
 docsRouter.use('/', swaggerUi.serve);
-docsRouter.get('/', swaggerUi.setup(openApiDocument));
