@@ -20,6 +20,7 @@ export const TextLinkButton = ({
 			<Button
 				onClick={onClick}
 				variant="tertiary"
+				aria-label={text}
 				cssOverrides={css({
 					border: 'none',
 					backgroundColor: 'transparent',
