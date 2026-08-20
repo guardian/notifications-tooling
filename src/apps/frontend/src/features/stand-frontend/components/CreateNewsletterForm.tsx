@@ -16,13 +16,13 @@ import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
 
-interface CreateNotificationFormProps {
+interface CreateNewsletterFormProps {
 	activeSectionHref: string;
 }
 
-export const CreateNotificationForm = ({
+export const CreateNewsletterForm = ({
 	activeSectionHref,
-}: CreateNotificationFormProps) => {
+}: CreateNewsletterFormProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);

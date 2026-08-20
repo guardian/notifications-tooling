@@ -11,7 +11,7 @@ import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { useTabChannel } from '../use-tab-channel';
-import { CreateNotificationForm } from './CreateNotificationForm';
+import { CreateNewsletterForm } from './CreateNewsletterForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
 import { EmailPreviewToggle } from './PreviewToggle';
@@ -86,7 +86,7 @@ export const CreateNewsletterEmailTab = () => {
 										},
 									})}
 								>
-									<CreateNotificationForm activeSectionHref={selectedHref} />
+									<CreateNewsletterForm activeSectionHref={selectedHref} />
 								</div>
 							</Item>
 							<Item
