@@ -1,7 +1,7 @@
 CREATE TYPE "public"."dispatch_status" AS ENUM('success', 'failure');--> statement-breakpoint
 CREATE TYPE "public"."notification_channel" AS ENUM('newsletter', 'app-push');--> statement-breakpoint
 CREATE TYPE "public"."notification_kind" AS ENUM('send', 'test');--> statement-breakpoint
-CREATE TYPE "public"."notification_status" AS ENUM('accepted');--> statement-breakpoint
+CREATE TYPE "public"."notification_status" AS ENUM('accepted', 'delivered', 'partially_delivered', 'failed');--> statement-breakpoint
 CREATE TABLE "notification_dispatches" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"notification_id" uuid NOT NULL,
@@ -11,7 +11,8 @@ CREATE TABLE "notification_dispatches" (
 	"status" "dispatch_status" NOT NULL,
 	"failure_reason" text,
 	"detail" jsonb,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "notifications" (

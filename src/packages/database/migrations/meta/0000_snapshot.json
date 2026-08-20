@@ -1,5 +1,5 @@
 {
-  "id": "4f55fb3a-6a4a-493b-aaec-8fb46b6c635c",
+  "id": "db1752d2-0d98-448c-9382-bcb8a495e2e5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -61,6 +61,13 @@
         },
         "created_at": {
           "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
@@ -255,7 +262,10 @@
       "name": "notification_status",
       "schema": "public",
       "values": [
-        "accepted"
+        "accepted",
+        "delivered",
+        "partially_delivered",
+        "failed"
       ]
     }
   },

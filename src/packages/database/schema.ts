@@ -16,7 +16,12 @@ export const notificationKindEnum = pgEnum('notification_kind', [
 ]);
 
 export const notificationStatusEnum = pgEnum('notification_status', [
+	// Request stored, not yet dispatched (or dry-run / scheduled).
 	'accepted',
+	// Rolled up from the dispatch outcomes once delivery settles.
+	'delivered', // every target succeeded
+	'partially_delivered', // at least one target failed and at least one succeeded
+	'failed', // every target failed
 ]);
 
 export const notificationChannelEnum = pgEnum('notification_channel', [
@@ -98,6 +103,13 @@ export const notificationDispatches = pgTable(
 		// Channel-specific extras (e.g. campaignId, importance, editions).
 		detail: jsonb('detail'),
 		createdAt: timestamp('created_at', {
+			withTimezone: true,
+			mode: 'date',
+		})
+			.notNull()
+			.defaultNow(),
+		// Bumped when a retry upserts this target's outcome.
+		updatedAt: timestamp('updated_at', {
 			withTimezone: true,
 			mode: 'date',
 		})
