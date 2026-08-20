@@ -38,6 +38,7 @@ export const CreateAppAlertForm = ({
 
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
+	console.log('PArams', notification.parameters);
 	return (
 		<div
 			css={{
