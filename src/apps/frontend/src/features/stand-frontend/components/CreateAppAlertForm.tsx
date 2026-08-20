@@ -1,7 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
-import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { NotificationFormContext } from '../NotificationContext';
 import type { DeliveryOption } from '../types';
@@ -10,6 +9,7 @@ import { AlertEditionsSection } from './AlertEditionsSection';
 import { AppAlertFields } from './AppAlertFields';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelSelector } from './ChannelSelector';
+import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { NotificationFormSection } from './NotificationFormSection';
 import { SendButton } from './SendButton';
@@ -23,12 +23,21 @@ interface CreateAppAlertFormProps {
 export const CreateAppAlertForm = ({
 	activeSectionHref,
 }: CreateAppAlertFormProps) => {
-	const { updateNotification } = useContext(NotificationFormContext);
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 
 	const { data: constraints } = useChannelConstraints();
 
 	const channel = 'push'; //TODO - change to notification.parameters.type
 	const pushDeliveryOption = 'appImmediate'; //TODO - change to notification.parameters.pushDeliveryOption
+
+	const [articleInputText, setArticleInputText] = useState(
+		() => notification.content?.webUrl ?? '',
+	);
+
+	const [lockArticleInputText, setLockArticleInputText] = useState(false);
+
 	return (
 		<div
 			css={{
@@ -39,9 +48,11 @@ export const CreateAppAlertForm = ({
 				gap: semanticSpacing.stackXl,
 			}}
 		>
-			<Typography variant="heading2Xl" element="h2">
-				Create app alert
-			</Typography>
+			<CreateFormTitle
+				title={'Create app alert'}
+				setArticleInputText={setArticleInputText}
+				setLockArticleInputText={setLockArticleInputText}
+			/>
 
 			<div
 				css={{
@@ -58,7 +69,12 @@ export const CreateAppAlertForm = ({
 					id="article-section"
 					isActive={activeSectionHref === '#article-section'}
 				>
-					<ArticleImportControl />
+					<ArticleImportControl
+						articleInputText={articleInputText}
+						setArticleInputText={setArticleInputText}
+						lockArticleInputText={lockArticleInputText}
+						setLockArticleInputText={setLockArticleInputText}
+					/>
 
 					<ChannelSelector
 						selectedChannel={channel} //TODO -change to notification.parameters.type

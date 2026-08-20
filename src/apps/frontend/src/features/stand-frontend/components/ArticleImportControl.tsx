@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { ApiError } from '../../../api/errors';
 import {
 	parseArticleUrlInputToContentId,
@@ -39,7 +39,18 @@ const getUserFacingError = (err: unknown): string => {
 	}
 };
 
-export const ArticleImportControl = () => {
+export interface ArticleImportControlProps {
+	articleInputText: string;
+	setArticleInputText: (setArticleInputText: string) => void;
+	lockArticleInputText: boolean;
+	setLockArticleInputText: (lockArticleInputText: boolean) => void;
+}
+export const ArticleImportControl = ({
+	articleInputText,
+	setArticleInputText,
+	lockArticleInputText,
+	setLockArticleInputText,
+}: ArticleImportControlProps) => {
 	const { notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
 	);
@@ -51,12 +62,6 @@ export const ArticleImportControl = () => {
 		hasAttemptedSend,
 		content,
 	} = notification;
-
-	const [articleInputText, setArticleInputText] = useState(
-		() => content?.webUrl ?? '',
-	);
-
-	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
 	const { failure, webUrl, articleId } =
 		parseArticleUrlInputToContentId(articleInputText);

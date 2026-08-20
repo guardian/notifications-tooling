@@ -1,7 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
-import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
@@ -9,6 +8,7 @@ import type { ChannelOption, DeliveryOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
+import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { EmailFields } from './EmailFields';
 import { NotificationFormSection } from './NotificationFormSection';
@@ -26,6 +26,11 @@ export const CreateNotificationForm = ({
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
+	const [articleInputText, setArticleInputText] = useState(
+		() => notification.content?.webUrl ?? '',
+	);
+	const [lockArticleInputText, setLockArticleInputText] = useState(false);
+
 	const { data: constraints } = useChannelConstraints();
 
 	if (!notification.parameters) {
@@ -54,9 +59,11 @@ export const CreateNotificationForm = ({
 				gap: semanticSpacing.stackXl,
 			}}
 		>
-			<Typography variant="heading2Xl" element="h2">
-				Create newsletter email
-			</Typography>
+			<CreateFormTitle
+				title={'Create newsletter email'}
+				setArticleInputText={setArticleInputText}
+				setLockArticleInputText={setLockArticleInputText}
+			/>
 
 			<div
 				css={{
@@ -73,7 +80,12 @@ export const CreateNotificationForm = ({
 					id="article-section"
 					isActive={activeSectionHref === '#article-section'}
 				>
-					<ArticleImportControl />
+					<ArticleImportControl
+						articleInputText={articleInputText}
+						setArticleInputText={setArticleInputText}
+						lockArticleInputText={lockArticleInputText}
+						setLockArticleInputText={setLockArticleInputText}
+					/>
 
 					<ChannelSelector
 						selectedChannel={channel}

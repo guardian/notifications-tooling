@@ -158,11 +158,18 @@ export const notificationReducer = (
 			};
 		}
 
-		case 'reset': {
+		case 'reset-newsletter-email': {
 			if (state.isFetchingContent || state.isWaitingForSend) {
 				return state;
 			}
 			return structuredClone(defaultState);
+		}
+
+		case 'reset-app-alert': {
+			if (state.isFetchingContent || state.isWaitingForSend) {
+				return state;
+			}
+			return structuredClone(defaultAppAlertState);
 		}
 
 		case 'dismiss-send-error': {
