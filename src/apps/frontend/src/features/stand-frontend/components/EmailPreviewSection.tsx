@@ -1,16 +1,15 @@
 import { useContext } from 'react';
-import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
 import { NotificationFormContext } from '../NotificationContext';
-import type { AudienceSegment, ChannelOption, DeliveryOption } from '../types';
+import type { ChannelOption, DeliveryOption } from '../types';
+import { useAudienceEditions } from '../use-audience-editions';
 import { AudienceSegmentsPreviewPill } from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 import { TestEmailForm } from './TestEmailForm';
-import { useAudienceEditions } from '../use-audience-editions';
 
 interface EmailPreviewSectionProps {
-	selectedSegments: AudienceSegment[];
+	selectedSegments: string[];
 	selectedChannel?: ChannelOption;
 	selectedDeliveryTiming?: DeliveryOption;
 }

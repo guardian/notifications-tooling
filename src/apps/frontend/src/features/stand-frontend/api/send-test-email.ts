@@ -13,7 +13,7 @@ export type TestEmailSendRequest = {
 				type: 'email';
 				items: string[];
 			};
-			variants: Array<'UK' | 'US' | 'AU'>;
+			variants: string[];
 			compose: {
 				items: string[];
 				subject: string;

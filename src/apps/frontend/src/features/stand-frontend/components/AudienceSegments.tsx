@@ -5,28 +5,26 @@ import { Checkbox } from '@guardian/stand/Checkbox';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
-import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
 import { audienceSegmentNameMap } from '../option-values';
 import { audienceSegmentStyles, previewPillStyles } from '../themes';
-import { type AudienceSegment } from '../types';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
 
 export interface Segment {
-	id: AudienceSegment;
+	id: string;
 	label: string;
 }
 
 interface AudienceSegmentPickerProps {
 	segments: Segment[];
-	selected: AudienceSegment[];
-	onChange: (selected: AudienceSegment[]) => void;
+	selected: string[];
+	onChange: (selected: string[]) => void;
 	error?: string;
 }
 
 interface AudienceSegmentsPreviewPillProps {
 	segments: Segment[];
-	selected: AudienceSegment[];
+	selected: string[];
 	isConfirmation?: boolean;
 }
 
@@ -52,7 +50,7 @@ export const AudienceSegments = ({
 	onChange,
 	error,
 }: AudienceSegmentPickerProps) => {
-	const onSegmentToggle = (segmentCode: AudienceSegment) => {
+	const onSegmentToggle = (segmentCode: string) => {
 		const next = selected.includes(segmentCode)
 			? selected.filter((code) => code !== segmentCode)
 			: [...selected, segmentCode];
