@@ -7,7 +7,6 @@ import { useContext, useState } from 'react';
 import type { TopicTypeOption } from '../api/schemas';
 import { NotificationFormContext } from '../NotificationContext';
 import { AppPreviewSection } from './AppPreviewSection';
-import type { AppPushTopicSelection } from './Editions';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
 interface PreviewToggleProps {
@@ -57,16 +56,11 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 
 export const AppPreviewToggle = ({
 	topicTypes,
-	selectedTopics,
 }: {
 	topicTypes: TopicTypeOption[];
-	selectedTopics: AppPushTopicSelection[];
 }) => (
 	<PreviewToggle>
-		<AppPreviewSection
-			topicTypes={topicTypes}
-			selectedTopics={selectedTopics}
-		/>
+		<AppPreviewSection topicTypes={topicTypes} />
 	</PreviewToggle>
 );
 

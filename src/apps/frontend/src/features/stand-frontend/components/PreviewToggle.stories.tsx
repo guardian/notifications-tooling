@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import {
 	completeEmailParams,
+	populatedPushState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
 import { FALLBACK_TOPIC_TYPES } from '../api/useChannelAudiences';
@@ -58,15 +59,12 @@ export const Expanded: Story = {
 };
 
 export const AppExpanded: Story = {
+	args: {
+		notificationState: populatedPushState,
+	},
 	render: ({ notificationState }) =>
 		WithNotificationContext(
-			<AppPreviewToggle
-				selectedTopics={[
-					{ type: 'breaking-news', name: 'uk' },
-					{ type: 'breaking-news', name: 'international' },
-				]}
-				topicTypes={FALLBACK_TOPIC_TYPES}
-			/>,
+			<AppPreviewToggle topicTypes={FALLBACK_TOPIC_TYPES} />,
 			notificationState,
 		),
 	play: async ({ canvasElement }) => {
