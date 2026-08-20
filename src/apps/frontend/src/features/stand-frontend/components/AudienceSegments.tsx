@@ -1,38 +1,34 @@
 import { css } from '@emotion/react';
 import { baseColors, semanticColors, semanticSpacing } from '@guardian/stand';
-import { Checkbox } from '@guardian/stand/Checkbox';
 import type { CheckboxTheme } from '@guardian/stand/Checkbox';
+import { Checkbox } from '@guardian/stand/Checkbox';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
+import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
+import { audienceSegmentNameMap } from '../option-values';
 import { audienceSegmentStyles, previewPillStyles } from '../themes';
 import { type AudienceSegment } from '../types';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
 
 export interface Segment {
-	code: AudienceSegment;
+	id: AudienceSegment;
 	label: string;
 }
 
 interface AudienceSegmentPickerProps {
-	segments?: Segment[];
+	segments: Segment[];
 	selected: AudienceSegment[];
 	onChange: (selected: AudienceSegment[]) => void;
 	error?: string;
 }
 
 interface AudienceSegmentsPreviewPillProps {
-	segments?: Segment[];
+	segments: Segment[];
 	selected: AudienceSegment[];
 	isConfirmation?: boolean;
 }
-
-export const DEFAULT_SEGMENTS: Segment[] = [
-	{ code: 'UK', label: 'United Kingdom' },
-	{ code: 'US', label: 'United States' },
-	{ code: 'AU', label: 'Australia' },
-];
 
 const customTheme: CheckboxTheme = {
 	input: {
@@ -51,7 +47,7 @@ const customTheme: CheckboxTheme = {
 };
 
 export const AudienceSegments = ({
-	segments = DEFAULT_SEGMENTS,
+	segments,
 	selected,
 	onChange,
 	error,
@@ -91,9 +87,9 @@ export const AudienceSegments = ({
 				}}
 			>
 				{segments.map((segment) => {
-					const isSelected = selected.includes(segment.code);
+					const isSelected = selected.includes(segment.id);
 					return (
-						<Item size={4} key={segment.code}>
+						<Item size={4} key={segment.id}>
 							<div
 								css={audienceSegmentStyles.audienceSegmentCheckBoxTile(
 									isSelected,
@@ -103,7 +99,7 @@ export const AudienceSegments = ({
 									theme={customTheme}
 									size="sm"
 									isSelected={isSelected}
-									onChange={() => onSegmentToggle(segment.code)}
+									onChange={() => onSegmentToggle(segment.id)}
 									aria-label={`Select ${segment.label} audience segment`}
 									cssOverrides={css({
 										width: '100%',
@@ -120,7 +116,7 @@ export const AudienceSegments = ({
 										})}
 									>
 										<div css={previewPillStyles.icon}>
-											<FlagAtom segmentCode={segment.code} />
+											<FlagAtom segmentCode={segment.id} />
 										</div>
 										<Typography
 											variant="headingXs"
@@ -130,7 +126,7 @@ export const AudienceSegments = ({
 												height: '24px',
 											})}
 										>
-											{segment.label}
+											{audienceSegmentNameMap[segment.id] ?? segment.label}
 										</Typography>
 									</div>
 								</Checkbox>
@@ -146,13 +142,13 @@ export const AudienceSegments = ({
 };
 
 export const AudienceSegmentsPreviewPill = ({
-	segments = DEFAULT_SEGMENTS,
+	segments,
 	selected,
 	isConfirmation = false,
 }: AudienceSegmentsPreviewPillProps) => (
 	<PreviewPillList
 		title="Audience segments"
-		options={segments.map(({ code, label }) => ({ id: code, label }))}
+		options={segments}
 		selected={selected}
 		isConfirmation={isConfirmation}
 		renderIcon={(segmentCode) => <FlagAtom segmentCode={segmentCode} />}

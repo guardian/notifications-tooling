@@ -12,7 +12,7 @@ export type KickerId = 'breaking-news' | 'exclusive';
 export type AlertType =
 	'breaking-news' | 'sport' | 'editors-picks' | 'one-not-to-miss';
 export type DeliveryOption = 'immediate' | 'appImmediate';
-export type AudienceSegment = 'UK' | 'US' | 'AU';
+export type AudienceSegment = string;
 export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
 
 export type SendingResult =
