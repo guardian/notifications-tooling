@@ -93,8 +93,8 @@ export const CreateAppAlertForm = ({
 					<AlertEditionsSection />
 				</NotificationFormSection>
 				<NotificationFormSection
-					id="headline-section"
-					isActive={activeSectionHref === '#headline-section'}
+					id="content-section"
+					isActive={activeSectionHref === '#content-section'}
 				>
 					<AppAlertFields constraints={constraints} />
 				</NotificationFormSection>
@@ -117,7 +117,7 @@ export const CreateAppAlertForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton>{'Send push notification'}</SendButton>
+					<SendButton>{'Send app alert'}</SendButton>
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />

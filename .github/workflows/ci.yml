@@ -113,6 +113,7 @@ jobs:
   storybook-tests:
     name: Storybook interaction tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
 
@@ -137,7 +138,7 @@ jobs:
 
       - name: Install Playwright browser
         working-directory: src/apps/frontend
-        run: bunx playwright install --with-deps chromium
+        run: bunx playwright install chromium
 
       - name: Run Storybook tests
         working-directory: src/apps/frontend

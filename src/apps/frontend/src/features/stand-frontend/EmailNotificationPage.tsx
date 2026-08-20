@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import { useContext, useReducer } from 'react';
 import { Outlet } from 'react-router-dom';
 import { fetchCapiDataFromApi } from './api/fetch-capi-content';
 import { requestEmailHtml } from './api/fetch-email-preview';
@@ -6,24 +6,23 @@ import { sendNotification } from './api/send-notification';
 import { requestTestEmailSend } from './api/send-test-email';
 import { MainLayout } from './components/MainLayout';
 import { NoPermissionsTab } from './components/NoPermissionsTab';
-import { type AppConfig, getAppConfig } from './get-config';
+import { ConfigContext } from './ConfigContext';
 import { defaultState, notificationReducer } from './notification-reducer';
 import { NotificationFormContext } from './NotificationContext';
 import type { NotificationAction, NotificationState } from './types';
-import { UserContext } from './UserContext';
 
 export const EmailNotificationPage = () => {
-	const [user] = useState<AppConfig | undefined>(getAppConfig());
+	const config = useContext(ConfigContext);
 
 	const [notification, updateNotification] = useReducer<
 		NotificationState,
 		[NotificationAction]
 	>(notificationReducer, defaultState);
 
-	const hasAccess = user?.permissions.includes('dispatch_access');
+	const hasAccess = config?.permissions.includes('dispatch_access');
 
 	return (
-		<UserContext.Provider value={user}>
+		<>
 			{hasAccess ? (
 				<NotificationFormContext.Provider
 					value={{
@@ -44,6 +43,6 @@ export const EmailNotificationPage = () => {
 					<NoPermissionsTab />
 				</MainLayout>
 			)}
-		</UserContext.Provider>
+		</>
 	);
 };

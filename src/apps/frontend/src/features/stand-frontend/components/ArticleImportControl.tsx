@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { semanticSpacing } from '@guardian/stand';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
@@ -128,12 +128,24 @@ export const ArticleImportControl = ({
 					css={{
 						display: 'flex',
 						flexDirection: 'column',
-						gap: semanticSpacing.stackSm,
+						gap: semanticSpacing.stackXxs,
 					}}
 				>
 					<Typography variant="bodyBoldMd" element="h3">
 						Article
 					</Typography>
+					{/* 
+						NOTE - we are not using the "description" field of the TextInput for this text
+						as design does not want the colour shade to change when the TextInput is in the
+						disabled state.
+						*/}
+					<Typography
+						variant="helpTextFormMd"
+						theme={{ color: semanticColors.text.weak }}
+					>
+						Copy and paste a Guardian article URL and fetch
+					</Typography>
+
 					<TextInput
 						aria-label="article URL"
 						isInvalid={!!showFieldErrors}
@@ -141,7 +153,6 @@ export const ArticleImportControl = ({
 						value={articleInputText}
 						placeholder="https://www.theguardian.com/..."
 						isDisabled={isFetchingContent || lockArticleInputText}
-						description="Copy and paste a Guardian article URL and fetch"
 						onChange={setArticleInputText}
 						cssOverrides={css({ width: '356px' })}
 					/>

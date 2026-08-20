@@ -20,7 +20,7 @@ export const ChannelSelector = ({
 				css={{
 					display: 'flex',
 					flexDirection: 'column',
-					gap: semanticSpacing.stackXs,
+					gap: semanticSpacing.stackXxs,
 				}}
 			>
 				<Typography variant="bodyBoldMd">Channel</Typography>
@@ -30,7 +30,7 @@ export const ChannelSelector = ({
 						color: semanticColors.text.weak,
 					}}
 				>
-					Choose the channel the notification is sent to
+					The channel the notification is sent to
 				</Typography>
 
 				<SelectableTile

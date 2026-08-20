@@ -4,8 +4,10 @@ import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useContext, useState } from 'react';
+import type { TopicTypeOption } from '../api/schemas';
 import { NotificationFormContext } from '../NotificationContext';
 import { AppPreviewSection } from './AppPreviewSection';
+import type { AppPushTopicSelection } from './Editions';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
 interface PreviewToggleProps {
@@ -53,9 +55,18 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 	);
 };
 
-export const AppPreviewToggle = () => (
+export const AppPreviewToggle = ({
+	topicTypes,
+	selectedTopics,
+}: {
+	topicTypes: TopicTypeOption[];
+	selectedTopics: AppPushTopicSelection[];
+}) => (
 	<PreviewToggle>
-		<AppPreviewSection />
+		<AppPreviewSection
+			topicTypes={topicTypes}
+			selectedTopics={selectedTopics}
+		/>
 	</PreviewToggle>
 );
 

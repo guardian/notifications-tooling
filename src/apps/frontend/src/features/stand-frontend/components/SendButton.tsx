@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 import {
 	semanticColors,
 	semanticSizing,
@@ -40,8 +41,11 @@ export const SendButton = ({ children }: SendButtonProps) => {
 				gap: semanticSpacing.stackXxs,
 			}}
 		>
-			<Typography variant="labelFormCompactMd">Send</Typography>
-			<Typography variant="helpTextFormMd" color={semanticColors.text.weak}>
+			<Typography variant="labelFormMd">Send</Typography>
+			<Typography
+				variant="helpTextFormMd"
+				cssOverrides={css({ color: semanticColors.text.weak })}
+			>
 				Before sending, review in the preview on the right
 			</Typography>
 			<Button
