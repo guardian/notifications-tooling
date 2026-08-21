@@ -1,5 +1,5 @@
 import { Option, Select } from '@guardian/stand/Select';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import type { NewsletterFormValues } from '../notification-forms';
@@ -14,6 +14,11 @@ interface EmailFieldsProps {
 
 export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 	const { control } = useFormContext<NewsletterFormValues>();
+	const kicker = useWatch<NewsletterFormValues, 'kicker'>({
+		control,
+		name: 'kicker',
+	});
+	const subjectPrefixLength = kicker ? kickerNameMap[kicker].length + 2 : 0;
 
 	const newsletter = constraints?.channels.newsletter;
 	const subjectLimits =
@@ -68,6 +73,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 						update={field.onChange}
 						softLimit={subjectLimits.recommended}
 						hardLimit={subjectLimits.editorialLimit}
+						characterCount={field.value.length + subjectPrefixLength}
 						error={fieldState.error?.message}
 					/>
 				)}

@@ -74,6 +74,29 @@ export const ValidationErrors: Story = {
 	},
 };
 
+export const HardLimitBlocksSend: Story = {
+	args: {
+		notificationState: populatedPushState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const headline = canvas.getByLabelText('Headline');
+		await userEvent.clear(headline);
+		await userEvent.type(headline, 'a'.repeat(121));
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		);
+
+		await expect(
+			canvas.getByText('Headline must be 120 characters or fewer'),
+		).toBeVisible();
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			screen.queryByText('Are you sure you want to send the app alert?'),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const WithImportedArticle: Story = {
 	args: {
 		notificationState: populatedPushState,
