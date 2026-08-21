@@ -5,6 +5,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../../api/config';
 import { articleFixture } from '../../mocks/capi-fixtures';
+import { channelConstraintsHandler } from '../../mocks/handlers/channels';
 import { htmlToSingleLineText } from '../../util/html-helpers';
 import { ArticleImportControl } from './components/ArticleImportControl';
 import type {
@@ -116,7 +117,7 @@ const meta = {
 	title: 'Stand Frontend/NotificationFormProvider',
 	component: ProviderHarness,
 	parameters: {
-		msw: { handlers: [resolveArticleHandler] },
+		msw: { handlers: [resolveArticleHandler, channelConstraintsHandler] },
 	},
 } satisfies Meta<typeof ProviderHarness>;
 

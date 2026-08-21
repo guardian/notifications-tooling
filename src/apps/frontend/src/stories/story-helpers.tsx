@@ -2,11 +2,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { type ReactNode, useReducer } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
-	appAlertFormSchema,
 	type AppAlertFormValues,
+	createAppAlertFormSchema,
+	createNewsletterFormSchema,
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
-	newsletterFormSchema,
 	type NewsletterFormValues,
 } from '../features/stand-frontend/notification-forms';
 import {
@@ -22,6 +22,7 @@ import type {
 	NotificationState,
 } from '../features/stand-frontend/types';
 import { articleFixture } from '../mocks/capi-fixtures';
+import { channelConstraints } from '../mocks/handlers/channels';
 import { mockCapiFetch } from '../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../mocks/mock-fetch-email';
 import { mockRequestTestEmailSend } from '../mocks/mock-request-test-email-send';
@@ -40,6 +41,8 @@ export const WithNotificationContext = (
 	channel: ChannelOption = 'email',
 	formValues?: Partial<NewsletterFormValues> | Partial<AppAlertFormValues>,
 ) => {
+	const newsletterConstraints = channelConstraints.channels.newsletter;
+	const appAlertConstraints = channelConstraints.channels['app-push'];
 	const [notification, updateNotification] = useReducer<
 		NotificationState,
 		[NotificationAction]
@@ -57,14 +60,23 @@ export const WithNotificationContext = (
 			...defaultNewsletterFormValues,
 			...newsletterValues,
 		},
-		resolver: zodResolver(newsletterFormSchema),
+		resolver: zodResolver(
+			createNewsletterFormSchema({
+				subject: newsletterConstraints.compose.subject.editorialLimit,
+				preview: newsletterConstraints.content.body.editorialLimit,
+			}),
+		),
 	});
 	const appAlertForm = useForm({
 		defaultValues: {
 			...defaultAppAlertFormValues,
 			...appAlertValues,
 		},
-		resolver: zodResolver(appAlertFormSchema),
+		resolver: zodResolver(
+			createAppAlertFormSchema({
+				headline: appAlertConstraints.compose.headline.editorialLimit,
+			}),
+		),
 	});
 
 	const {

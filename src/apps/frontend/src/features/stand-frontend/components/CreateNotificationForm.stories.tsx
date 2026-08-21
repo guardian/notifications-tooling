@@ -86,6 +86,31 @@ export const ValidationErrors: Story = {
 	},
 };
 
+export const HardLimitBlocksSend: Story = {
+	args: {
+		notificationState: populatedEmailState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const subject = canvas.getByLabelText('Subject');
+		await userEvent.clear(subject);
+		await userEvent.type(subject, 'a'.repeat(60));
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send newsletter email' }),
+		);
+
+		await expect(
+			canvas.getByText(
+				'Subject must be 70 characters or fewer including the kicker',
+			),
+		).toBeVisible();
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			screen.queryByText('Are you sure you want to send the newsletter email?'),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const Empty: Story = {
 	args: {
 		notificationState: {
