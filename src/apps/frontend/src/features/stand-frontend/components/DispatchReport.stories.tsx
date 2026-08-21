@@ -70,7 +70,9 @@ export const EmailSuccess: Story = {
 	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
 
-		await expect(canvas.getByRole('heading', { name: 'Newsletter email sent' })).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
+		).toBeVisible();
 		await expect(canvas.getByText('Newsletter email')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('Australia')).toBeVisible();
@@ -91,7 +93,9 @@ export const AppAlertSuccess: Story = {
 	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
 
-		await expect(canvas.getByRole('heading', { name: 'App alert sent' })).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', { name: 'App alert sent' }),
+		).toBeVisible();
 		await expect(canvas.getByText('App alert')).toBeVisible();
 		await expect(canvas.getByText('UK, INT')).toBeVisible();
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
