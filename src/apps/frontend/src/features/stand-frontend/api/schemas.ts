@@ -106,6 +106,7 @@ const editionOptionSchema = z.object({
 	id: z.string(),
 	label: z.string(),
 });
+export type EditionOption = z.infer<typeof editionOptionSchema>;
 
 const topicTypeOptionSchema = z.object({
 	id: z.string(),
@@ -124,12 +125,7 @@ export const channelAudienceResponseSchema = z.object({
 		.object({
 			newsletter: z
 				.object({
-					segments: z.array(
-						z.object({
-							id: z.string(),
-							label: z.string(),
-						}),
-					),
+					segments: z.array(editionOptionSchema),
 				})
 				.loose(),
 			'app-push': z

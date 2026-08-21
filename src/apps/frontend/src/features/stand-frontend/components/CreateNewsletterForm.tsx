@@ -5,6 +5,7 @@ import { useChannelConstraints } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import type { ChannelOption, DeliveryOption } from '../types';
+import { useAudienceEditions } from '../use-audience-editions';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
@@ -16,13 +17,13 @@ import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
 
-interface CreateNotificationFormProps {
+interface CreateNewsletterFormProps {
 	activeSectionHref: string;
 }
 
-export const CreateNotificationForm = ({
+export const CreateNewsletterForm = ({
 	activeSectionHref,
-}: CreateNotificationFormProps) => {
+}: CreateNewsletterFormProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
@@ -32,6 +33,7 @@ export const CreateNotificationForm = ({
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
 	const { data: constraints } = useChannelConstraints();
+	const segments = useAudienceEditions('email');
 
 	if (!notification.parameters) {
 		return null;
@@ -108,6 +110,7 @@ export const CreateNotificationForm = ({
 					isActive={activeSectionHref === '#audience-section'}
 				>
 					<AudienceSegments
+						segments={segments}
 						selected={audienceSegments}
 						error={
 							shouldShowErrors &&

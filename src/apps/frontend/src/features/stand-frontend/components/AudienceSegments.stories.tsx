@@ -1,14 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
 import {
 	AudienceSegments,
 	AudienceSegmentsPreviewPill,
-	DEFAULT_SEGMENTS,
 } from './AudienceSegments';
 
 const meta = {
 	title: 'Stand Frontend/AudienceSegments',
 	component: AudienceSegments,
+	args: {
+		segments: FALLBACK_EDITIONS,
+	},
 	parameters: {
 		docs: {
 			description: {
@@ -61,23 +64,15 @@ export const AllSelected: Story = {
 };
 
 export const PreviewWithSingleSelection: AudienceSegmentsPreviewPillStory = {
-	render: () => (
-		<AudienceSegmentsPreviewPill
-			segments={DEFAULT_SEGMENTS}
-			selected={['AU']}
-		/>
-	),
+	render: (args) => <AudienceSegmentsPreviewPill {...args} selected={['AU']} />,
 	args: {
 		selected: ['AU'],
 	},
 };
 
 export const PreviewWithMultipleSelection: AudienceSegmentsPreviewPillStory = {
-	render: () => (
-		<AudienceSegmentsPreviewPill
-			segments={DEFAULT_SEGMENTS}
-			selected={['UK', 'US']}
-		/>
+	render: (args) => (
+		<AudienceSegmentsPreviewPill {...args} selected={['UK', 'US']} />
 	),
 	args: {
 		selected: ['UK', 'US'],

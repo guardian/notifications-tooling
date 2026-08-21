@@ -1,17 +1,15 @@
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
-import type { AudienceSegment, ChannelOption, DeliveryOption } from '../types';
-import {
-	AudienceSegmentsPreviewPill,
-	DEFAULT_SEGMENTS,
-} from './AudienceSegments';
+import type { ChannelOption, DeliveryOption } from '../types';
+import { useAudienceEditions } from '../use-audience-editions';
+import { AudienceSegmentsPreviewPill } from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 import { TestEmailForm } from './TestEmailForm';
 
 interface EmailPreviewSectionProps {
-	selectedSegments: AudienceSegment[];
+	selectedSegments: string[];
 	selectedChannel?: ChannelOption;
 	selectedDeliveryTiming?: DeliveryOption;
 }
@@ -21,6 +19,8 @@ export const EmailPreviewSection = ({
 	selectedChannel,
 	selectedDeliveryTiming,
 }: EmailPreviewSectionProps) => {
+	const segments = useAudienceEditions('email');
+
 	const {
 		notification: { fetchedArticleId },
 	} = useContext(NotificationFormContext);
@@ -35,7 +35,7 @@ export const EmailPreviewSection = ({
 				deliveryTiming={selectedDeliveryTiming}
 			/>
 			<AudienceSegmentsPreviewPill
-				segments={DEFAULT_SEGMENTS}
+				segments={segments}
 				selected={selectedSegments}
 			/>
 			<HTMLPreview />

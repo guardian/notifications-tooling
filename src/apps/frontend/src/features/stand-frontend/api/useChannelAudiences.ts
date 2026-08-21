@@ -2,7 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../../../api/client';
 import { ApiError } from '../../../api/errors';
 import { redirectToLogin } from '../../../api/redirectToLogin';
-import type { ChannelAudienceResponse, TopicTypeOption } from './schemas';
+import type {
+	ChannelAudienceResponse,
+	EditionOption,
+	TopicTypeOption,
+} from './schemas';
 import { channelAudienceResponseSchema } from './schemas';
 
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
@@ -19,6 +23,12 @@ export const FALLBACK_TOPIC_TYPES: TopicTypeOption[] = [
 			{ id: 'europe', label: 'Europe' },
 		],
 	},
+];
+
+export const FALLBACK_EDITIONS: EditionOption[] = [
+	{ id: 'UK', label: 'United Kingdom' },
+	{ id: 'US', label: 'United States' },
+	{ id: 'AU', label: 'Australia' },
 ];
 
 /**

@@ -1,6 +1,5 @@
 import { Icon } from '@guardian/stand/Icon';
 import type { TopicTypeOption } from '../api/schemas';
-import type { AudienceSegment } from '../types';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
 
@@ -17,7 +16,7 @@ interface EditionsProps {
 const selectionId = ({ type, name }: AppPushTopicSelection) =>
 	`${type}:${name}`;
 
-const editionFlagCodes: Partial<Record<string, AudienceSegment>> = {
+const editionFlagCodes: Partial<Record<string, string>> = {
 	uk: 'UK',
 	us: 'US',
 	au: 'AU',

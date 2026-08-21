@@ -14,13 +14,10 @@ import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
+import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
 import { NotificationFormContext } from '../NotificationContext';
 import { deliveryOptionNameMap } from '../option-values';
-import type { AudienceSegment } from '../types';
-import {
-	AudienceSegmentsPreviewPill,
-	DEFAULT_SEGMENTS,
-} from './AudienceSegments';
+import { AudienceSegmentsPreviewPill } from './AudienceSegments';
 import { scheduleIcon } from './FlagIcons';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
@@ -67,7 +64,7 @@ const ParameterDisplay = ({
 	value,
 }: {
 	keyName: string;
-	value: string | AudienceSegment[];
+	value: string | string[];
 }) => {
 	//This is temporary solution to display the delivery time in the confirmation page.
 	const tempTime = new Date().toLocaleTimeString('en-GB', {
@@ -90,8 +87,8 @@ const ParameterDisplay = ({
 			)}
 			{keyName === 'Audience segments' && (
 				<AudienceSegmentsPreviewPill
-					segments={DEFAULT_SEGMENTS}
-					selected={value as AudienceSegment[]}
+					segments={FALLBACK_EDITIONS}
+					selected={value as string[]}
 					isConfirmation={true}
 				/>
 			)}

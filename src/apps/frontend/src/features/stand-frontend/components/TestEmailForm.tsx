@@ -14,12 +14,12 @@ import { ConfigContext } from '../ConfigContext';
 import { validateGuardianEmail } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
-import type { AudienceSegment, NotificationState } from '../types';
+import type { NotificationState } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 
 type TestSendParams = {
 	emailInput: string;
-	audienceSegments: AudienceSegment[];
+	audienceSegments: string[];
 	emailSubjectLine: string;
 	subject: string;
 	preview: string;
