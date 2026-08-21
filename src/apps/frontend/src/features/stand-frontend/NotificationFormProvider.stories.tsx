@@ -1,10 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 import { useState } from 'react';
+import { useWatch } from 'react-hook-form';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../../api/config';
 import { articleFixture } from '../../mocks/capi-fixtures';
 import { ArticleImportControl } from './components/ArticleImportControl';
+import type {
+	AppAlertFormValues,
+	NewsletterFormValues,
+} from './notification-forms';
 import {
 	AppAlertNotificationFormProvider,
 	NewsletterNotificationFormProvider,
@@ -15,6 +20,20 @@ const resolveArticleHandler = http.post(
 	`${getApiBaseUrl()}/v1/content/articles/resolve`,
 	() => HttpResponse.json({ article: articleFixture }),
 );
+
+const NewsletterSubject = () => {
+	const subject = useWatch<NewsletterFormValues, 'subject'>({
+		name: 'subject',
+	});
+	return <output aria-label="Newsletter subject">{subject}</output>;
+};
+
+const AppAlertHeadline = () => {
+	const headline = useWatch<AppAlertFormValues, 'headline'>({
+		name: 'headline',
+	});
+	return <output aria-label="App alert headline">{headline}</output>;
+};
 
 const ProviderHarness = () => {
 	const [channel, setChannel] = useState<'newsletter' | 'app-alert'>(
@@ -33,6 +52,7 @@ const ProviderHarness = () => {
 			<button onClick={() => setChannel('app-alert')}>App alert</button>
 			{channel === 'newsletter' ? (
 				<NewsletterNotificationFormProvider>
+					<NewsletterSubject />
 					<ArticleImportControl
 						articleInputText={newsletterArticleInputText}
 						setArticleInputText={setNewsletterArticleInputText}
@@ -42,6 +62,7 @@ const ProviderHarness = () => {
 				</NewsletterNotificationFormProvider>
 			) : (
 				<AppAlertNotificationFormProvider>
+					<AppAlertHeadline />
 					<ArticleImportControl
 						articleInputText={appAlertArticleInputText}
 						setArticleInputText={setAppAlertArticleInputText}
@@ -75,13 +96,22 @@ export const ArticleStateIsSeparateByTab: Story = {
 		await waitFor(() =>
 			expect(canvas.getByText('Article imported')).toBeVisible(),
 		);
+		await expect(canvas.getByLabelText('Newsletter subject')).toHaveTextContent(
+			articleFixture.fields?.headline ?? '',
+		);
 
 		await userEvent.click(canvas.getByRole('button', { name: 'App alert' }));
 		await expect(canvas.getByLabelText('article URL')).toHaveValue('');
+		await expect(
+			canvas.getByLabelText('App alert headline'),
+		).toBeEmptyDOMElement();
 
 		await userEvent.click(canvas.getByRole('button', { name: 'Newsletter' }));
 		await expect(canvas.getByLabelText('article URL')).toHaveValue(
 			articleFixture.webUrl,
+		);
+		await expect(canvas.getByLabelText('Newsletter subject')).toHaveTextContent(
+			articleFixture.fields?.headline ?? '',
 		);
 	},
 };

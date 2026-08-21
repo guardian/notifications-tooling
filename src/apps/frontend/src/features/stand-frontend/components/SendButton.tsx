@@ -8,11 +8,17 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import { useFormContext } from 'react-hook-form';
 import {
-	checkIfReadyToSend,
-	validateAppAlertForm,
-	validateNotificationForm,
-} from '../form-validation';
+	buildAppAlertRequest,
+	buildNewsletterRequest,
+} from '../build-request-payloads';
+import {
+	appAlertFormSchema,
+	type AppAlertFormValues,
+	newsletterFormSchema,
+	type NewsletterFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 
 interface SendButtonProps {
@@ -20,19 +26,38 @@ interface SendButtonProps {
 }
 
 export const SendButton = ({ children }: SendButtonProps) => {
-	const { notification, updateNotification } = useContext(
+	const { channel, notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	const { parameters } = notification;
+	const {
+		formState: { errors },
+		handleSubmit,
+		setError,
+	} = useFormContext<NewsletterFormValues | AppAlertFormValues>();
+	const prepareSend = (values: NewsletterFormValues | AppAlertFormValues) => {
+		if (!notification.content) {
+			setError('root.article', {
+				message: 'Paste a URL to fetch an article',
+			});
+			return;
+		}
 
-	if (!parameters) {
-		return null;
-	}
-	const isReady = checkIfReadyToSend(notification);
-	const hasFallbackError =
-		parameters.type === 'email'
-			? validateNotificationForm(notification).includes('cannotBuildRequest')
-			: validateAppAlertForm(notification).includes('cannotBuildRequest');
+		const idempotencyKey = crypto.randomUUID();
+		const request =
+			channel === 'email'
+				? buildNewsletterRequest({
+						values: newsletterFormSchema.parse(values),
+						content: notification.content,
+						idempotencyKey,
+					})
+				: buildAppAlertRequest({
+						values: appAlertFormSchema.parse(values),
+						content: notification.content,
+						idempotencyKey,
+					});
+
+		updateNotification({ type: 'prepare-send', request });
+	};
 
 	return (
 		<div
@@ -53,28 +78,20 @@ export const SendButton = ({ children }: SendButtonProps) => {
 			</Typography>
 			<Button
 				onClick={() => {
-					if (isReady) {
-						updateNotification({
-							type: 'set-attempted-send',
-							hasAttemptedSend: false,
+					if (!notification.content) {
+						setError('root.article', {
+							message: 'Paste a URL to fetch an article',
 						});
-						updateNotification({ type: 'set-show-confirm-send', isOpen: true });
-						return;
 					}
-
-					updateNotification({
-						type: 'set-attempted-send',
-						hasAttemptedSend: true,
-					});
-					updateNotification({ type: 'set-show-confirm-send', isOpen: false });
+					void handleSubmit(prepareSend)();
 				}}
 				variant="primary"
 			>
 				{children}
 			</Button>
-			{hasFallbackError && (
+			{errors.root?.request && (
 				<InlineMessage level="error">
-					The form contains some missing or invalid data
+					{errors.root.request.message}
 				</InlineMessage>
 			)}
 		</div>

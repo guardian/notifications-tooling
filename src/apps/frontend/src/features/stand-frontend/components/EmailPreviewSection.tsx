@@ -1,6 +1,7 @@
 import { useContext } from 'react';
+import { useWatch } from 'react-hook-form';
+import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import type { AudienceSegment, ChannelOption, DeliveryOption } from '../types';
 import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,
@@ -10,20 +11,21 @@ import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 import { TestEmailForm } from './TestEmailForm';
 
-interface EmailPreviewSectionProps {
-	selectedSegments: AudienceSegment[];
-	selectedChannel?: ChannelOption;
-	selectedDeliveryTiming?: DeliveryOption;
-}
-
-export const EmailPreviewSection = ({
-	selectedSegments,
-	selectedChannel,
-	selectedDeliveryTiming,
-}: EmailPreviewSectionProps) => {
+export const EmailPreviewSection = () => {
 	const {
 		notification: { fetchedArticleId },
 	} = useContext(NotificationFormContext);
+	const selectedSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
+		name: 'audienceSegments',
+		defaultValue: [],
+	});
+	const selectedDeliveryTiming = useWatch<
+		NewsletterFormValues,
+		'deliveryOption'
+	>({
+		name: 'deliveryOption',
+		defaultValue: 'immediate',
+	});
 	return (
 		<PreviewSection
 			title="Preview"
@@ -31,7 +33,7 @@ export const EmailPreviewSection = ({
 			isVisible={Boolean(fetchedArticleId)}
 		>
 			<SendInfoPreviewPill
-				channel={selectedChannel}
+				channel="email"
 				deliveryTiming={selectedDeliveryTiming}
 			/>
 			<AudienceSegmentsPreviewPill

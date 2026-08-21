@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import type { ApiError } from '../../../api/errors';
 import {
 	badRequestError,
@@ -11,6 +11,7 @@ import {
 } from '../../../mocks/api-fixtures';
 import { mockSendRejectedNotification } from '../../../mocks/mock-send-notification';
 import {
+	completeEmailParams,
 	populatedEmailState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -45,6 +46,9 @@ const meta: Meta<StoryArgs> = {
 		return WithNotificationContext(
 			<CreateNotificationForm activeSectionHref={activeSectionHref} />,
 			notificationState,
+			{},
+			'email',
+			notificationState.content ? completeEmailParams : undefined,
 		);
 	},
 };
@@ -64,13 +68,30 @@ export const Default: Story = {
 	},
 };
 
+export const ValidationErrors: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send newsletter email' }),
+		);
+
+		await expect(canvas.getByText('Subject is required')).toBeVisible();
+		await expect(canvas.getByText('Preview text is required')).toBeVisible();
+		await expect(
+			canvas.getByText('Please select an audience segment'),
+		).toBeVisible();
+		await expect(
+			canvas.getByText('Paste a URL to fetch an article'),
+		).toBeVisible();
+	},
+};
+
 export const Empty: Story = {
 	args: {
 		notificationState: {
 			isFetchingContent: false,
 			confirmSendModalOpen: false,
 			isWaitingForSend: false,
-			hasAttemptedSend: false,
 		},
 	},
 };
@@ -138,6 +159,8 @@ const buildErrorStory = (error: ApiError): Story => ({
 			{
 				sendNotification: mockSendRejectedNotification(error),
 			},
+			'email',
+			completeEmailParams,
 		);
 	},
 });

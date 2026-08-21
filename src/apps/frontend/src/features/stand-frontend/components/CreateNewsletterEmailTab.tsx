@@ -10,7 +10,6 @@ import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
-import { useTabChannel } from '../use-tab-channel';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
@@ -22,12 +21,9 @@ import {
 
 export const CreateNewsletterEmailTab = () => {
 	const {
-		notification: { sendingResult, parameters },
+		notification: { sendingResult },
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
-	const emailParameters = parameters?.type === 'email' ? parameters : undefined;
-
-	useTabChannel('email');
 
 	return (
 		<>
@@ -104,13 +100,7 @@ export const CreateNewsletterEmailTab = () => {
 									},
 								})}
 							>
-								<EmailPreviewSection
-									selectedSegments={emailParameters?.audienceSegments ?? []}
-									selectedChannel={emailParameters?.type}
-									selectedDeliveryTiming={
-										emailParameters?.emailDeliveryOption ?? undefined
-									}
-								/>
+								<EmailPreviewSection />
 							</Item>
 						</>
 					)}
