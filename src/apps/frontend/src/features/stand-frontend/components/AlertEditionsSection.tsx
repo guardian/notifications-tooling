@@ -1,5 +1,6 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { useContext } from 'react';
+import { validateAppAlertForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { alertTypeNameMap } from '../option-values';
 import { SelectableEditions } from './SelectableEditions';
@@ -17,6 +18,8 @@ export const AlertEditionsSection = () => {
 	const alertType = appPushParameters?.alertType ?? 'breaking-news';
 	const alertEditions = appPushParameters?.editions ?? [];
 
+	const requiredFieldErrors = validateAppAlertForm(notification);
+	const shouldShowErrors = notification.hasAttemptedSend;
 	return (
 		<>
 			<Select
@@ -62,6 +65,11 @@ export const AlertEditionsSection = () => {
 						appMod: { editions: newEdition },
 					});
 				}}
+				error={
+					shouldShowErrors && requiredFieldErrors.includes('editions')
+						? 'Please select an edition'
+						: undefined
+				}
 			/>
 		</>
 	);

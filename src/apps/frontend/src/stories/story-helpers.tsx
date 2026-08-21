@@ -1,5 +1,6 @@
 import { type ReactNode, useReducer } from 'react';
 import {
+	defaultAppAlertState,
 	defaultState,
 	notificationReducer,
 } from '../features/stand-frontend/notification-reducer';
@@ -78,7 +79,7 @@ export const completePushParams: PushNotification = {
 };
 
 export const populatedPushState: NotificationState = {
-	...defaultState,
+	...defaultAppAlertState,
 	content: articleFixture,
 	fetchedArticleId: articleFixture.id,
 	parameters: completePushParams,

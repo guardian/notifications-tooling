@@ -54,12 +54,15 @@ export const Default: Story = {
 };
 
 export const ConfirmationStep: Story = {
+	args: {
+		notificationState: {
+			isFetchingContent: false,
+			isWaitingForSend: false,
+			confirmSendModalOpen: true,
+			hasAttemptedSend: false,
+		},
+	},
 	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await userEvent.click(
-			canvas.getByRole('button', { name: 'Send app alert' }),
-		);
-
 		const screen = within(canvasElement.ownerDocument.body);
 		await expect(
 			screen.getByText('Are you sure you want to send the app alert?'),
