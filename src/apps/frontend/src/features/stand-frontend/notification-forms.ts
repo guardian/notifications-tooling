@@ -1,0 +1,43 @@
+import { z } from 'zod';
+
+export const newsletterFormSchema = z.object({
+	kicker: z.enum(['breaking-news', 'exclusive']).optional(),
+	subject: z.string().trim().min(1, 'Subject is required'),
+	preview: z.string().trim().min(1, 'Preview text is required'),
+	audienceSegments: z
+		.array(z.enum(['UK', 'US', 'AU']))
+		.min(1, 'Please select an audience segment'),
+	deliveryOption: z.literal('immediate'),
+});
+
+export const appAlertFormSchema = z.object({
+	alertType: z.enum([
+		'breaking-news',
+		'sport',
+		'editors-picks',
+		'one-not-to-miss',
+	]),
+	headline: z.string().trim().min(1, 'Headline is required'),
+	editions: z
+		.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT']))
+		.min(1, 'Please select an edition'),
+	deliveryOption: z.literal('appImmediate'),
+});
+
+export type NewsletterFormValues = z.infer<typeof newsletterFormSchema>;
+export type AppAlertFormValues = z.infer<typeof appAlertFormSchema>;
+
+export const defaultNewsletterFormValues: NewsletterFormValues = {
+	kicker: 'breaking-news',
+	subject: '',
+	preview: '',
+	audienceSegments: [],
+	deliveryOption: 'immediate',
+};
+
+export const defaultAppAlertFormValues: AppAlertFormValues = {
+	alertType: 'breaking-news',
+	headline: '',
+	editions: [],
+	deliveryOption: 'appImmediate',
+};

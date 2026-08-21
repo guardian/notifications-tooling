@@ -1,9 +1,8 @@
 import { Option, Select } from '@guardian/stand/Select';
-import { useContext } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
-import { validateNotificationForm } from '../form-validation';
-import { NotificationFormContext } from '../NotificationContext';
+import type { NewsletterFormValues } from '../notification-forms';
 import { kickerNameMap } from '../option-values';
 import { NotificationTextInput } from './NotificationTextInput';
 
@@ -14,13 +13,7 @@ interface EmailFieldsProps {
 }
 
 export const EmailFields = ({ constraints }: EmailFieldsProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
-
-	if (notification.parameters?.type !== 'email') {
-		return null;
-	}
+	const { control } = useFormContext<NewsletterFormValues>();
 
 	const newsletter = constraints?.channels.newsletter;
 	const subjectLimits =
@@ -28,85 +21,73 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 	const previewLimits =
 		newsletter?.content.body ?? NEWSLETTER_LIMIT_FALLBACKS.body;
 
-	const { kicker, subject = '', preview = '' } = notification.parameters;
-	const requiredFieldErrors = validateNotificationForm(notification);
-	const shouldShowErrors = notification.hasAttemptedSend;
-
 	return (
 		<>
-			<Select
+			<Controller
+				control={control}
 				name="kicker"
-				label="Kicker"
-				description="Choose the kicker for the email newsletter"
-				onChange={(key) => {
-					const kicker =
-						typeof key === 'string' ? key.split('//').at(1) : undefined;
-					switch (kicker) {
-						case 'breaking-news':
-						case 'exclusive':
-							return updateNotification({
-								type: 'modify-email-parameters',
-								mod: { kicker },
-							});
-						default:
-							return updateNotification({
-								type: 'modify-email-parameters',
-								mod: { kicker: undefined },
-							});
-					}
-				}}
-				selectionMode="single"
-				value={toOptionKey(kicker ?? 'undefined')}
-			>
-				<Option id={toOptionKey('breaking-news')}>
-					{kickerNameMap['breaking-news']}
-				</Option>
-				<Option id={toOptionKey('exclusive')}>
-					{kickerNameMap['exclusive']}
-				</Option>
-				<Option id={toOptionKey('undefined')}>
-					{kickerNameMap['undefined']}
-				</Option>
-			</Select>
-
-			<NotificationTextInput
-				label="Subject"
-				description="Choose the subject line (kicker included in character count)"
-				placeholder="Enter a subject line here..."
-				value={subject}
-				update={(subject) =>
-					updateNotification({
-						type: 'modify-email-parameters',
-						mod: { subject },
-					})
-				}
-				softLimit={subjectLimits.recommended}
-				hardLimit={subjectLimits.editorialLimit}
-				error={
-					shouldShowErrors && requiredFieldErrors.includes('subject')
-						? 'Subject is required'
-						: undefined
-				}
+				render={({ field }) => (
+					<Select
+						name={field.name}
+						label="Kicker"
+						description="Choose the kicker for the email newsletter"
+						onChange={(key) => {
+							const kicker =
+								typeof key === 'string' ? key.split('//').at(1) : undefined;
+							field.onChange(
+								kicker === 'breaking-news' || kicker === 'exclusive'
+									? kicker
+									: undefined,
+							);
+						}}
+						selectionMode="single"
+						value={toOptionKey(field.value ?? 'undefined')}
+					>
+						<Option id={toOptionKey('breaking-news')}>
+							{kickerNameMap['breaking-news']}
+						</Option>
+						<Option id={toOptionKey('exclusive')}>
+							{kickerNameMap['exclusive']}
+						</Option>
+						<Option id={toOptionKey('undefined')}>
+							{kickerNameMap['undefined']}
+						</Option>
+					</Select>
+				)}
 			/>
 
-			<NotificationTextInput
-				label="Preview text"
-				description="Choose the preview text for the email newsletter"
-				placeholder="Enter preview text here..."
-				value={preview}
-				update={(preview) =>
-					updateNotification({
-						type: 'modify-email-parameters',
-						mod: { preview },
-					})
-				}
-				softLimit={previewLimits.recommended}
-				hardLimit={previewLimits.editorialLimit}
-				error={
-					shouldShowErrors && requiredFieldErrors.includes('preview')
-						? 'Preview text is required'
-						: undefined
-				}
+			<Controller
+				control={control}
+				name="subject"
+				render={({ field, fieldState }) => (
+					<NotificationTextInput
+						label="Subject"
+						description="Choose the subject line (kicker included in character count)"
+						placeholder="Enter a subject line here..."
+						value={field.value}
+						update={field.onChange}
+						softLimit={subjectLimits.recommended}
+						hardLimit={subjectLimits.editorialLimit}
+						error={fieldState.error?.message}
+					/>
+				)}
+			/>
+
+			<Controller
+				control={control}
+				name="preview"
+				render={({ field, fieldState }) => (
+					<NotificationTextInput
+						label="Preview text"
+						description="Choose the preview text for the email newsletter"
+						placeholder="Enter preview text here..."
+						value={field.value}
+						update={field.onChange}
+						softLimit={previewLimits.recommended}
+						hardLimit={previewLimits.editorialLimit}
+						error={fieldState.error?.message}
+					/>
+				)}
 			/>
 		</>
 	);

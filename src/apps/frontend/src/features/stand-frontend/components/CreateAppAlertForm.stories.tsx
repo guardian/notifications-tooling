@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
+	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -36,6 +37,9 @@ const meta: Meta<StoryArgs> = {
 		return WithNotificationContext(
 			<CreateAppAlertForm activeSectionHref={activeSectionHref} />,
 			notificationState,
+			{},
+			'push',
+			notificationState.content ? completePushParams : undefined,
 		);
 	},
 };
@@ -52,6 +56,21 @@ export const Default: Story = {
 		await expect(canvas.getByText('Headline')).toBeInTheDocument();
 		await expect(canvas.getByText('Delivery and timing')).toBeInTheDocument();
 		await expect(canvas.getByText('Send')).toBeInTheDocument();
+	},
+};
+
+export const ValidationErrors: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		);
+
+		await expect(canvas.getByText('Headline is required')).toBeVisible();
+		await expect(canvas.getByText('Please select an edition')).toBeVisible();
+		await expect(
+			canvas.getByText('Paste a URL to fetch an article'),
+		).toBeVisible();
 	},
 };
 
@@ -75,7 +94,6 @@ export const Empty: Story = {
 			isFetchingContent: false,
 			confirmSendModalOpen: false,
 			isWaitingForSend: false,
-			hasAttemptedSend: false,
 		},
 	},
 };

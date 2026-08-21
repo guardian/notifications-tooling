@@ -25,7 +25,6 @@ const meta: Meta<StoryArgs> = {
 	args: {
 		notificationState: {
 			...defaultState,
-			parameters: completeEmailParams,
 			sendingResult: {
 				ok: true,
 				response: acceptedEmailSendResponse,
@@ -33,7 +32,13 @@ const meta: Meta<StoryArgs> = {
 		},
 	},
 	render: (args) => {
-		return WithNotificationContext(<DispatchReport />, args.notificationState);
+		return WithNotificationContext(
+			<DispatchReport />,
+			args.notificationState,
+			{},
+			'email',
+			completeEmailParams,
+		);
 	},
 };
 

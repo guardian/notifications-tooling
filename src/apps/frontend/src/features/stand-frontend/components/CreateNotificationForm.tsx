@@ -1,10 +1,10 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../api/useChannelConstraints';
-import { validateNotificationForm } from '../form-validation';
+import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import type { ChannelOption, DeliveryOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
@@ -23,31 +23,14 @@ interface CreateNotificationFormProps {
 export const CreateNotificationForm = ({
 	activeSectionHref,
 }: CreateNotificationFormProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
+	const { notification } = useContext(NotificationFormContext);
+	const { control } = useFormContext<NewsletterFormValues>();
 	const [articleInputText, setArticleInputText] = useState(
 		() => notification.content?.webUrl ?? '',
 	);
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
 	const { data: constraints } = useChannelConstraints();
-
-	if (!notification.parameters) {
-		return null;
-	}
-
-	const emailParameters =
-		notification.parameters.type === 'email'
-			? notification.parameters
-			: undefined;
-	const channel = emailParameters?.type ?? 'email';
-	const emailDeliveryOption =
-		emailParameters?.emailDeliveryOption ?? 'immediate';
-
-	const audienceSegments = emailParameters?.audienceSegments ?? [];
-	const requiredFieldErrors = validateNotificationForm(notification);
-	const shouldShowErrors = notification.hasAttemptedSend;
 
 	return (
 		<div
@@ -87,15 +70,7 @@ export const CreateNotificationForm = ({
 						setLockArticleInputText={setLockArticleInputText}
 					/>
 
-					<ChannelSelector
-						selectedChannel={channel}
-						onChange={(channel) => {
-							updateNotification({
-								type: 'set-channel',
-								channel: channel as ChannelOption,
-							});
-						}}
-					/>
+					<ChannelSelector selectedChannel="email" onChange={() => {}} />
 				</NotificationFormSection>
 				<NotificationFormSection
 					id="content-section"
@@ -107,35 +82,32 @@ export const CreateNotificationForm = ({
 					id="audience-section"
 					isActive={activeSectionHref === '#audience-section'}
 				>
-					<AudienceSegments
-						selected={audienceSegments}
-						error={
-							shouldShowErrors &&
-							requiredFieldErrors.includes('audienceSegments')
-								? 'Please select an audience segment'
-								: undefined
-						}
-						onChange={(audienceSegments) => {
-							updateNotification({
-								type: 'modify-email-parameters',
-								mod: { audienceSegments },
-							});
-						}}
+					<Controller
+						control={control}
+						name="audienceSegments"
+						render={({ field, fieldState }) => (
+							<AudienceSegments
+								selected={field.value}
+								error={fieldState.error?.message}
+								onChange={field.onChange}
+							/>
+						)}
 					/>
 				</NotificationFormSection>
 				<NotificationFormSection
 					id="delivery-timing-section"
 					isActive={activeSectionHref === '#delivery-timing-section'}
 				>
-					<DeliveryAndTimingSelector
-						selectedDeliveryTiming={emailDeliveryOption}
-						channel={channel} //TODO - change to notification.parameters.type
-						onChange={(emailDeliveryOption) => {
-							updateNotification({
-								type: 'set-delivery-timing',
-								deliveryOption: emailDeliveryOption as DeliveryOption,
-							});
-						}}
+					<Controller
+						control={control}
+						name="deliveryOption"
+						render={({ field }) => (
+							<DeliveryAndTimingSelector
+								selectedDeliveryTiming={field.value}
+								channel="email"
+								onChange={field.onChange}
+							/>
+						)}
 					/>
 				</NotificationFormSection>
 				<NotificationFormSection

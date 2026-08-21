@@ -5,12 +5,14 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { ApiError } from '../../../api/errors';
-import {
-	parseArticleUrlInputToContentId,
-	validateAppAlertForm,
-	validateNotificationForm,
-} from '../form-validation';
+import { htmlToSingleLineText } from '../../../util/html-helpers';
+import { parseArticleUrlInputToContentId } from '../form-validation';
+import type {
+	AppAlertFormValues,
+	NewsletterFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -52,17 +54,17 @@ export const ArticleImportControl = ({
 	lockArticleInputText,
 	setLockArticleInputText,
 }: ArticleImportControlProps) => {
-	const { notification, updateNotification, capiFetch } = useContext(
+	const { channel, notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
 	);
-
 	const {
-		fetchedArticleId,
-		isFetchingContent,
-		fetchArticleError,
-		hasAttemptedSend,
-		content,
-	} = notification;
+		clearErrors,
+		formState: { submitCount },
+		setValue,
+	} = useFormContext<NewsletterFormValues | AppAlertFormValues>();
+
+	const { fetchedArticleId, isFetchingContent, fetchArticleError, content } =
+		notification;
 
 	const { failure, webUrl, articleId } =
 		parseArticleUrlInputToContentId(articleInputText);
@@ -85,9 +87,23 @@ export const ArticleImportControl = ({
 			article: webUrl,
 		})
 			.then((responseBody) => {
+				const { article } = responseBody;
+				if (channel === 'email') {
+					const { headline, standfirst } = article.fields ?? {};
+					if (headline) {
+						setValue('subject', headline);
+					}
+					const preview = htmlToSingleLineText(standfirst);
+					if (preview) {
+						setValue('preview', preview);
+					}
+				} else {
+					setValue('headline', article.fields?.headline ?? article.webTitle);
+				}
+				clearErrors('root');
 				updateNotification({
 					type: 'receive-article',
-					content: responseBody.article,
+					content: article,
 				});
 				setLockArticleInputText(true);
 			})
@@ -102,14 +118,9 @@ export const ArticleImportControl = ({
 
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
-
-	const requiredFieldErrors =
-		notification.parameters?.type === 'email'
-			? validateNotificationForm(notification)
-			: validateAppAlertForm(notification);
 	const showFieldErrors =
 		failure ??
-		(requiredFieldErrors.includes('article') && hasAttemptedSend
+		(!content && submitCount > 0
 			? 'Paste a URL to fetch an article'
 			: undefined);
 

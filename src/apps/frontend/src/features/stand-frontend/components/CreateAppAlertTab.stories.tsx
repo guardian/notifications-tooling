@@ -1,12 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { WithNotificationContext } from '../../../stories/story-helpers';
+import {
+	completePushParams,
+	populatedPushState,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
+import type { AppAlertFormValues } from '../notification-forms';
 import { defaultAppAlertState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { CreateAppAlertTab } from './CreateAppAlertTab';
 
 type StoryArgs = {
 	notificationState: NotificationState;
+	formValues?: Partial<AppAlertFormValues>;
 };
 
 const meta = {
@@ -25,7 +31,7 @@ const meta = {
 		},
 	},
 	render: (args: StoryArgs) => {
-		const { notificationState } = args;
+		const { formValues, notificationState } = args;
 		return (
 			<div
 				style={{
@@ -35,7 +41,13 @@ const meta = {
 					boxSizing: 'border-box',
 				}}
 			>
-				{WithNotificationContext(<CreateAppAlertTab />, notificationState)}
+				{WithNotificationContext(
+					<CreateAppAlertTab />,
+					notificationState,
+					{},
+					'push',
+					formValues,
+				)}
 			</div>
 		);
 	},
@@ -56,11 +68,10 @@ export const Default: Story = {
 export const ConfirmationStep: Story = {
 	args: {
 		notificationState: {
-			isFetchingContent: false,
-			isWaitingForSend: false,
+			...populatedPushState,
 			confirmSendModalOpen: true,
-			hasAttemptedSend: false,
 		},
+		formValues: completePushParams,
 	},
 	play: async ({ canvasElement }) => {
 		const screen = within(canvasElement.ownerDocument.body);

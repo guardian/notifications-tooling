@@ -1,6 +1,7 @@
 import { semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { NotificationFormContext } from '../NotificationContext';
 import { TextLinkButton } from './TextLinkButton';
 
@@ -14,9 +15,8 @@ export const CreateFormTitle = ({
 	setArticleInputText,
 	setLockArticleInputText,
 }: CreateFormTitleProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
+	const { channel, updateNotification } = useContext(NotificationFormContext);
+	const { reset } = useFormContext();
 	return (
 		<section
 			css={{
@@ -37,9 +37,10 @@ export const CreateFormTitle = ({
 				onClick={() => {
 					setArticleInputText('');
 					setLockArticleInputText(false);
+					reset();
 					updateNotification({
 						type:
-							notification.parameters?.type === 'email'
+							channel === 'email'
 								? 'reset-newsletter-email'
 								: 'reset-app-alert',
 					});

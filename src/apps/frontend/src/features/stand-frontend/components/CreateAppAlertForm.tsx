@@ -1,10 +1,10 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../api/useChannelConstraints';
+import type { AppAlertFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import type { DeliveryOption } from '../types';
-import type { ChannelOption } from '../types';
 import { AlertEditionsSection } from './AlertEditionsSection';
 import { AppAlertFields } from './AppAlertFields';
 import { ArticleImportControl } from './ArticleImportControl';
@@ -23,14 +23,10 @@ interface CreateAppAlertFormProps {
 export const CreateAppAlertForm = ({
 	activeSectionHref,
 }: CreateAppAlertFormProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
+	const { control } = useFormContext<AppAlertFormValues>();
+	const { notification } = useContext(NotificationFormContext);
 
 	const { data: constraints } = useChannelConstraints();
-
-	const channel = 'push'; //TODO - change to notification.parameters.type
-	const pushDeliveryOption = 'appImmediate'; //TODO - change to notification.parameters.pushDeliveryOption
 
 	const [articleInputText, setArticleInputText] = useState(
 		() => notification.content?.webUrl ?? '',
@@ -76,15 +72,7 @@ export const CreateAppAlertForm = ({
 						setLockArticleInputText={setLockArticleInputText}
 					/>
 
-					<ChannelSelector
-						selectedChannel={channel} //TODO -change to notification.parameters.type
-						onChange={(channel) => {
-							updateNotification({
-								type: 'set-channel',
-								channel: channel as ChannelOption,
-							});
-						}}
-					/>
+					<ChannelSelector selectedChannel="push" onChange={() => {}} />
 				</NotificationFormSection>
 				<NotificationFormSection
 					id="alert-section"
@@ -102,15 +90,16 @@ export const CreateAppAlertForm = ({
 					id="delivery-timing-section"
 					isActive={activeSectionHref === '#delivery-timing-section'}
 				>
-					<DeliveryAndTimingSelector
-						selectedDeliveryTiming={pushDeliveryOption}
-						channel={channel} //TODO - change to notification.parameters.type
-						onChange={(pushDeliveryOption) => {
-							updateNotification({
-								type: 'set-delivery-timing',
-								deliveryOption: pushDeliveryOption as DeliveryOption,
-							});
-						}}
+					<Controller
+						control={control}
+						name="deliveryOption"
+						render={({ field }) => (
+							<DeliveryAndTimingSelector
+								selectedDeliveryTiming={field.value}
+								channel="push"
+								onChange={field.onChange}
+							/>
+						)}
 					/>
 				</NotificationFormSection>
 				<NotificationFormSection

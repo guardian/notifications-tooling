@@ -10,10 +10,15 @@ import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
+import type {
+	AppAlertFormValues,
+	NewsletterFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { deliveryOptionNameMap } from '../option-values';
 import type { AudienceSegment } from '../types';
@@ -86,7 +91,10 @@ const ParameterDisplay = ({
 		<div css={styles.parameter}>
 			<Typography variant="bodyBoldMd">{keyName}:</Typography>
 			{keyName === 'Channel' && (
-				<SendInfoPreviewPill channel={'email'} isConfirmation={true} />
+				<SendInfoPreviewPill
+					channel={value === 'App alert' ? 'push' : 'email'}
+					isConfirmation={true}
+				/>
 			)}
 			{keyName === 'Audience segments' && (
 				<AudienceSegmentsPreviewPill
@@ -131,23 +139,63 @@ const ParameterDisplay = ({
 					</div>
 				</div>
 			)}
+			{keyName === 'Editions' && <Typography>{String(value)}</Typography>}
 		</div>
 	);
 };
 
+const NewsletterDispatchDetails = () => {
+	const audienceSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
+		name: 'audienceSegments',
+		defaultValue: [],
+	});
+	const deliveryOption = useWatch<NewsletterFormValues, 'deliveryOption'>({
+		name: 'deliveryOption',
+		defaultValue: 'immediate',
+	});
+
+	return (
+		<section>
+			<ParameterDisplay keyName="Channel" value="Email Newsletter" />
+			<ParameterDisplay keyName="Audience segments" value={audienceSegments} />
+			<ParameterDisplay
+				keyName="Delivery"
+				value={deliveryOptionNameMap[deliveryOption].name}
+			/>
+		</section>
+	);
+};
+
+const AppAlertDispatchDetails = () => {
+	const editions = useWatch<AppAlertFormValues, 'editions'>({
+		name: 'editions',
+		defaultValue: [],
+	});
+
+	return (
+		<section>
+			<ParameterDisplay keyName="Channel" value="App alert" />
+			<ParameterDisplay keyName="Editions" value={editions.join(', ')} />
+			<ParameterDisplay
+				keyName="Delivery"
+				value={deliveryOptionNameMap.appImmediate.name}
+			/>
+		</section>
+	);
+};
+
 export const DispatchReport = () => {
-	const { updateNotification, notification } = useContext(
+	const { channel, updateNotification, notification } = useContext(
 		NotificationFormContext,
 	);
-	const { sendingResult, parameters } = notification;
+	const { reset } = useFormContext();
+	const { sendingResult } = notification;
 
 	if (!sendingResult?.ok) {
 		return null;
 	}
 
-	const notificationDescription = capitalise(
-		getChannelDescription(parameters?.type),
-	);
+	const notificationDescription = capitalise(getChannelDescription(channel));
 
 	return (
 		<section css={styles.container}>
@@ -180,23 +228,10 @@ export const DispatchReport = () => {
 					<Typography variant="headingMd">Details</Typography>
 				</header>
 
-				{parameters?.type === 'email' && (
-					<section>
-						<ParameterDisplay keyName="Channel" value="Email Newsletter" />
-						<ParameterDisplay
-							keyName="Audience segments"
-							value={parameters.audienceSegments ?? []}
-						/>
-						<div></div>
-						<ParameterDisplay
-							keyName="Delivery"
-							value={
-								parameters.emailDeliveryOption
-									? deliveryOptionNameMap[parameters.emailDeliveryOption].name
-									: ''
-							}
-						/>
-					</section>
+				{channel === 'email' ? (
+					<NewsletterDispatchDetails />
+				) : (
+					<AppAlertDispatchDetails />
 				)}
 			</div>
 			<div
@@ -209,16 +244,20 @@ export const DispatchReport = () => {
 					height: '40px',
 				}}
 			>
-				{parameters?.type === 'email' && (
-					<Button
-						variant="primary"
-						onClick={() =>
-							updateNotification({ type: 'reset-newsletter-email' })
-						}
-					>
-						Create new newsletter email
-					</Button>
-				)}
+				<Button
+					variant="primary"
+					onClick={() => {
+						reset();
+						updateNotification({
+							type:
+								channel === 'email'
+									? 'reset-newsletter-email'
+									: 'reset-app-alert',
+						});
+					}}
+				>
+					Create new {getChannelDescription(channel)}
+				</Button>
 			</div>
 		</section>
 	);
