@@ -27,8 +27,8 @@ const meta: Meta<StoryArgs> = {
 			...defaultState,
 			parameters: completeEmailParams,
 			sendingResult: {
-				ok: true,
-				response: acceptedEmailSendResponse,
+				success: true,
+				data: acceptedEmailSendResponse,
 			},
 		},
 	},

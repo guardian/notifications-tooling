@@ -83,7 +83,7 @@ const checkIfCanRetry = (apiError: ApiError) => {
 
 const getFailure = (notification: NotificationState) => {
 	const { sendingResult } = notification;
-	if (sendingResult?.ok !== false) {
+	if (sendingResult?.success !== false) {
 		return undefined;
 	}
 
@@ -91,14 +91,11 @@ const getFailure = (notification: NotificationState) => {
 		notification.parameters?.type,
 	);
 
-	const { loginUrl, details } = sendingResult.response;
+	const { loginUrl, details } = sendingResult.failure;
 	return {
-		title: deriveErrorTitle(sendingResult.response, channelDescription),
-		message: deriveUserFacingMessage(
-			sendingResult.response,
-			channelDescription,
-		),
-		canRetry: checkIfCanRetry(sendingResult.response),
+		title: deriveErrorTitle(sendingResult.failure, channelDescription),
+		message: deriveUserFacingMessage(sendingResult.failure, channelDescription),
+		canRetry: checkIfCanRetry(sendingResult.failure),
 		loginUrl,
 		details,
 	};

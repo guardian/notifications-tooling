@@ -1,13 +1,16 @@
 import type { ResolveArticleRequest, ResolveArticleResponse } from '@models';
 import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
-import type { SendNotificationRequest } from './api/schemas';
+import type { Result } from '../../api/client';
+import type {
+	SendNotificationRequest,
+	SendNotificationResponse,
+} from './api/schemas';
 import type { TestEmailRequestFunction } from './api/send-test-email';
 import type {
 	NotificationAction,
 	NotificationState,
 	RequestEmailHtml,
-	SendingResult,
 } from './types';
 
 export interface NotificationFormContextProps {
@@ -18,7 +21,9 @@ export interface NotificationFormContextProps {
 	};
 	// TO DO - get the required payload from the backend
 	sendNotification: {
-		(sendNotificationRequest: SendNotificationRequest): Promise<SendingResult>;
+		(
+			sendNotificationRequest: SendNotificationRequest,
+		): Promise<Result<SendNotificationResponse>>;
 	};
 	requestEmailHtml: RequestEmailHtml;
 	requestTestEmailSend: TestEmailRequestFunction;
