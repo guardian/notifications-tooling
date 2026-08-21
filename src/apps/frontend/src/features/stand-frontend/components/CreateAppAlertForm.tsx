@@ -3,6 +3,7 @@ import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../api/useChannelConstraints';
+import { buildAppAlertRequest } from '../build-request-payloads';
 import type { AppAlertFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { AlertEditionsSection } from './AlertEditionsSection';
@@ -23,8 +24,10 @@ interface CreateAppAlertFormProps {
 export const CreateAppAlertForm = ({
 	activeSectionHref,
 }: CreateAppAlertFormProps) => {
-	const { control } = useFormContext<AppAlertFormValues>();
-	const { notification } = useContext(NotificationFormContext);
+	const { control, setValue } = useFormContext<AppAlertFormValues>();
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 
 	const { data: constraints } = useChannelConstraints();
 
@@ -48,6 +51,9 @@ export const CreateAppAlertForm = ({
 				title={'Create app alert'}
 				setArticleInputText={setArticleInputText}
 				setLockArticleInputText={setLockArticleInputText}
+				onResetNotification={() =>
+					updateNotification({ type: 'reset-app-alert' })
+				}
 			/>
 
 			<div
@@ -70,6 +76,9 @@ export const CreateAppAlertForm = ({
 						setArticleInputText={setArticleInputText}
 						lockArticleInputText={lockArticleInputText}
 						setLockArticleInputText={setLockArticleInputText}
+						onArticleImported={(article) =>
+							setValue('headline', article.fields?.headline ?? article.webTitle)
+						}
 					/>
 
 					<ChannelSelector selectedChannel="push" onChange={() => {}} />
@@ -106,7 +115,9 @@ export const CreateAppAlertForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton>{'Send app alert'}</SendButton>
+					<SendButton buildRequest={buildAppAlertRequest}>
+						Send app alert
+					</SendButton>
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />

@@ -4,15 +4,11 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
+import type { ResolvedArticle } from '@models';
 import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ApiError } from '../../../api/errors';
-import { htmlToSingleLineText } from '../../../util/html-helpers';
 import { parseArticleUrlInputToContentId } from '../form-validation';
-import type {
-	AppAlertFormValues,
-	NewsletterFormValues,
-} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -47,21 +43,22 @@ export interface ArticleImportControlProps {
 	setArticleInputText: (setArticleInputText: string) => void;
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
+	onArticleImported: (article: ResolvedArticle) => void;
 }
 export const ArticleImportControl = ({
 	articleInputText,
 	setArticleInputText,
 	lockArticleInputText,
 	setLockArticleInputText,
+	onArticleImported,
 }: ArticleImportControlProps) => {
-	const { channel, notification, updateNotification, capiFetch } = useContext(
+	const { notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
 	);
 	const {
 		clearErrors,
 		formState: { submitCount },
-		setValue,
-	} = useFormContext<NewsletterFormValues | AppAlertFormValues>();
+	} = useFormContext();
 
 	const { fetchedArticleId, isFetchingContent, fetchArticleError, content } =
 		notification;
@@ -88,18 +85,7 @@ export const ArticleImportControl = ({
 		})
 			.then((responseBody) => {
 				const { article } = responseBody;
-				if (channel === 'email') {
-					const { headline, standfirst } = article.fields ?? {};
-					if (headline) {
-						setValue('subject', headline);
-					}
-					const preview = htmlToSingleLineText(standfirst);
-					if (preview) {
-						setValue('preview', preview);
-					}
-				} else {
-					setValue('headline', article.fields?.headline ?? article.webTitle);
-				}
+				onArticleImported(article);
 				clearErrors('root');
 				updateNotification({
 					type: 'receive-article',

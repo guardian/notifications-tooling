@@ -6,14 +6,25 @@ import {
 } from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
 import type { NotificationState } from '../types';
-import { DispatchReport } from './DispatchReport';
+import { DispatchReport, NewsletterDispatchDetails } from './DispatchReport';
 
 type StoryArgs = { notificationState: NotificationState };
 type Story = StoryObj<StoryArgs>;
 
+const DispatchReportStory = ({ notificationState }: StoryArgs) =>
+	WithNotificationContext(
+		<DispatchReport onResetNotification={() => {}}>
+			<NewsletterDispatchDetails />
+		</DispatchReport>,
+		notificationState,
+		{},
+		'email',
+		completeEmailParams,
+	);
+
 const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/DispatchReport',
-	component: DispatchReport,
+	component: DispatchReportStory,
 	parameters: {
 		docs: {
 			description: {
@@ -30,15 +41,6 @@ const meta: Meta<StoryArgs> = {
 				response: acceptedEmailSendResponse,
 			},
 		},
-	},
-	render: (args) => {
-		return WithNotificationContext(
-			<DispatchReport />,
-			args.notificationState,
-			{},
-			'email',
-			completeEmailParams,
-		);
 	},
 };
 
