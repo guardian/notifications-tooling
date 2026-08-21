@@ -3,7 +3,7 @@ import type {
 	EmailPreviewResponse,
 	ResolvedArticle,
 } from '@models';
-import type { ApiError } from '../../api/errors';
+import type { Result } from '../../api/client';
 import type { SendNotificationResponse } from './api/schemas';
 
 export type TabName = 'create' | 'history';
@@ -14,16 +14,6 @@ export type AlertType =
 export type DeliveryOption = 'immediate' | 'appImmediate';
 export type AudienceSegment = 'UK' | 'US' | 'AU';
 export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
-
-export type SendingResult =
-	| {
-			ok: true;
-			response: SendNotificationResponse;
-	  }
-	| {
-			ok: false;
-			response: ApiError;
-	  };
 
 export type EmailNotification = {
 	type: 'email';
@@ -52,11 +42,11 @@ export type NotificationState = {
 	hasAttemptedSend: boolean;
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
-	sendingResult?: SendingResult;
+	sendingResult?: Result<SendNotificationResponse>;
 };
 
 export type RequestEmailHtml = {
-	(request: EmailPreviewRequest): Promise<EmailPreviewResponse>;
+	(request: EmailPreviewRequest): Promise<Result<EmailPreviewResponse>>;
 };
 
 export type NotificationAction =
@@ -100,7 +90,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'receive-send-result';
-			result: SendingResult;
+			result: Result<SendNotificationResponse>;
 	  }
 	| {
 			type: 'dismiss-send-error';

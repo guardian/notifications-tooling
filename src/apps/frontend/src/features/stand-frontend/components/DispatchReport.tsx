@@ -141,7 +141,7 @@ export const DispatchReport = () => {
 	);
 	const { sendingResult, parameters } = notification;
 
-	if (!sendingResult?.ok) {
+	if (!sendingResult?.success) {
 		return null;
 	}
 

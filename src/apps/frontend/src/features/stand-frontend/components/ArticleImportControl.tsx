@@ -5,7 +5,7 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
-import { ApiError } from '../../../api/errors';
+import type { ApiError } from '../../../api/errors';
 import {
 	parseArticleUrlInputToContentId,
 	validateAppAlertForm,
@@ -17,11 +17,7 @@ import { LoadingSpinner } from './LoadingSpinner';
 
 // TO DO - more helpful error UI
 // can we capture when article was taken down?
-const getUserFacingError = (err: unknown): string => {
-	if (!(err instanceof ApiError)) {
-		return err instanceof Error ? err.message : 'UNKNOWN ERROR';
-	}
-
+const getUserFacingError = (err: ApiError): string => {
 	switch (err.failure) {
 		case 'unauthenticated':
 		case 'forbidden':
@@ -81,23 +77,22 @@ export const ArticleImportControl = ({
 		}
 
 		updateNotification({ type: 'waiting-for-article' });
-		capiFetch({
+		void capiFetch({
 			article: webUrl,
-		})
-			.then((responseBody) => {
-				updateNotification({
-					type: 'receive-article',
-					content: responseBody.article,
-				});
-				setLockArticleInputText(true);
-			})
-			.catch((err) => {
+		}).then((result) => {
+			if (!result.success) {
 				// TO DO - error reporting/telemetry
-				updateNotification({
+				return updateNotification({
 					type: 'report-article-error',
-					errorMessage: getUserFacingError(err),
+					errorMessage: getUserFacingError(result.failure),
 				});
+			}
+			updateNotification({
+				type: 'receive-article',
+				content: result.data.article,
 			});
+			setLockArticleInputText(true);
+		});
 	};
 
 	const showImportedArticle =

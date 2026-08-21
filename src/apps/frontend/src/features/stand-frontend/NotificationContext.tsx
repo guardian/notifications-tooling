@@ -1,24 +1,30 @@
 import type { ResolveArticleRequest, ResolveArticleResponse } from '@models';
 import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
-import type { SendNotificationRequest } from './api/schemas';
+import type { Result } from '../../api/client';
+import { ApiError } from '../../api/errors';
+import type {
+	SendNotificationRequest,
+	SendNotificationResponse,
+} from './api/schemas';
 import type { TestEmailRequestFunction } from './api/send-test-email';
 import type {
 	NotificationAction,
 	NotificationState,
 	RequestEmailHtml,
-	SendingResult,
 } from './types';
 
 export interface NotificationFormContextProps {
 	notification: NotificationState;
 	updateNotification: ActionDispatch<[NotificationAction]>;
 	capiFetch: {
-		(request: ResolveArticleRequest): Promise<ResolveArticleResponse>;
+		(request: ResolveArticleRequest): Promise<Result<ResolveArticleResponse>>;
 	};
 	// TO DO - get the required payload from the backend
 	sendNotification: {
-		(sendNotificationRequest: SendNotificationRequest): Promise<SendingResult>;
+		(
+			sendNotificationRequest: SendNotificationRequest,
+		): Promise<Result<SendNotificationResponse>>;
 	};
 	requestEmailHtml: RequestEmailHtml;
 	requestTestEmailSend: TestEmailRequestFunction;
@@ -34,13 +40,35 @@ export const NotificationFormContext =
 		},
 		updateNotification: () => {},
 		capiFetch: () =>
-			Promise.reject(new Error('no capiFetch implementation provided')),
+			Promise.resolve({
+				success: false,
+				failure: new ApiError({
+					message: 'no capiFetch implementation provided',
+					failure: 'fetch-fail',
+				}),
+			}),
 		sendNotification: () =>
-			Promise.reject(new Error('no sendNotification implementation provided')),
+			Promise.resolve({
+				success: false,
+				failure: new ApiError({
+					message: 'no sendNotification implementation provided',
+					failure: 'fetch-fail',
+				}),
+			}),
 		requestEmailHtml: () =>
-			Promise.reject(new Error('no requestEmailHtml implementation provided')),
+			Promise.resolve({
+				success: false,
+				failure: new ApiError({
+					message: 'no requestEmailHtml implementation provided',
+					failure: 'fetch-fail',
+				}),
+			}),
 		requestTestEmailSend: () =>
-			Promise.reject(
-				new Error('no requestTestEmailSend implementation provided'),
-			),
+			Promise.resolve({
+				success: false,
+				failure: new ApiError({
+					message: 'no requestTestEmailSend implementation provided',
+					failure: 'fetch-fail',
+				}),
+			}),
 	});
