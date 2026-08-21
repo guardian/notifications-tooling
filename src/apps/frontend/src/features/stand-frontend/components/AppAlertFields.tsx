@@ -1,8 +1,7 @@
-import { useContext } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { ChannelConstraintsResponse } from '../api/schemas';
 import { APP_ALERT_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
-import { validateAppAlertForm } from '../form-validation';
-import { NotificationFormContext } from '../NotificationContext';
+import type { AppAlertFormValues } from '../notification-forms';
 import { NotificationTextInput } from './NotificationTextInput';
 
 interface AppAlertFieldsProps {
@@ -10,41 +9,27 @@ interface AppAlertFieldsProps {
 }
 
 export const AppAlertFields = ({ constraints }: AppAlertFieldsProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
+	const { control } = useFormContext<AppAlertFormValues>();
 
 	const appPush = constraints?.channels['app-push'];
 	const headlineLimits =
 		appPush?.compose.headline ?? APP_ALERT_LIMIT_FALLBACKS.headline;
-
-	const appPushParameters =
-		notification.parameters?.type === 'push'
-			? notification.parameters
-			: undefined;
-	const headline = appPushParameters?.headline ?? '';
-	const requiredFieldErrors = validateAppAlertForm(notification);
-	const shouldShowErrors = notification.hasAttemptedSend;
-
 	return (
-		<NotificationTextInput
-			label="Headline"
-			description="Choose the headline for the app alert"
-			placeholder="Enter a headline here..."
-			value={headline}
-			update={(headline) =>
-				updateNotification({
-					type: 'modify-app-alert-parameters',
-					appMod: { headline },
-				})
-			}
-			softLimit={headlineLimits.recommended}
-			hardLimit={headlineLimits.editorialLimit}
-			error={
-				shouldShowErrors && requiredFieldErrors.includes('headline')
-					? 'Headline is required'
-					: undefined
-			}
+		<Controller
+			control={control}
+			name="headline"
+			render={({ field, fieldState }) => (
+				<NotificationTextInput
+					label="Headline"
+					description="Choose the headline for the app alert"
+					placeholder="Enter a headline here..."
+					value={field.value}
+					update={field.onChange}
+					softLimit={headlineLimits.recommended}
+					hardLimit={headlineLimits.editorialLimit}
+					error={fieldState.error?.message}
+				/>
+			)}
 		/>
 	);
 };

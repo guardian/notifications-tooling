@@ -2,7 +2,9 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { useContext } from 'react';
+import { useWatch } from 'react-hook-form';
 import type { TopicTypeOption } from '../api/schemas';
+import type { AppAlertFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import type { Edition } from '../types';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
@@ -25,18 +27,24 @@ const editionIds: Record<Edition, string> = {
 
 export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 	const { notification } = useContext(NotificationFormContext);
-	const parameters =
-		notification.parameters?.type === 'push'
-			? notification.parameters
-			: undefined;
-	const alertType = parameters?.alertType ?? 'breaking-news';
+	const alertType = useWatch<AppAlertFormValues, 'alertType'>({
+		name: 'alertType',
+		defaultValue: 'breaking-news',
+	});
+	const editions = useWatch<AppAlertFormValues, 'editions'>({
+		name: 'editions',
+		defaultValue: [],
+	});
+	const headline = useWatch<AppAlertFormValues, 'headline'>({
+		name: 'headline',
+		defaultValue: '',
+	});
 	const alertTypeLabel =
 		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
-	const selectedTopics = (parameters?.editions ?? []).map((edition) => ({
+	const selectedTopics = editions.map((edition) => ({
 		type: alertType,
 		name: editionIds[edition],
 	}));
-	const headline = parameters?.headline;
 	const thumbnailUrl = notification.content?.fields?.thumbnail;
 
 	return (
