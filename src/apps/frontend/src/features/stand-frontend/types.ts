@@ -46,7 +46,7 @@ export type NotificationState = {
 };
 
 export type RequestEmailHtml = {
-	(request: EmailPreviewRequest): Promise<EmailPreviewResponse>;
+	(request: EmailPreviewRequest): Promise<Result<EmailPreviewResponse>>;
 };
 
 export type NotificationAction =

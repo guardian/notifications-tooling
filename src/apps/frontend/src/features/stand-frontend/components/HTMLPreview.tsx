@@ -65,11 +65,14 @@ export const HTMLPreview = () => {
 		if (audience.length === 0) {
 			return `<div>no audience</div>`;
 		}
-		const response = await requestEmailHtml({
+		const result = await requestEmailHtml({
 			article: webUrl,
 			audience: audience,
 		});
-		return response.html;
+		if (!result.success) {
+			throw result.failure;
+		}
+		return result.data.html;
 	}, [webUrl, requestEmailHtml, stringifiedAudience]);
 
 	useEffect(() => {

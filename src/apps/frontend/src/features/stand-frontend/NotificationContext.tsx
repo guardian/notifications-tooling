@@ -56,7 +56,13 @@ export const NotificationFormContext =
 				}),
 			}),
 		requestEmailHtml: () =>
-			Promise.reject(new Error('no requestEmailHtml implementation provided')),
+			Promise.resolve({
+				success: false,
+				failure: new ApiError({
+					message: 'no requestEmailHtml implementation provided',
+					failure: 'fetch-fail',
+				}),
+			}),
 		requestTestEmailSend: () =>
 			Promise.resolve({
 				success: false,
