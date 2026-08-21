@@ -9,19 +9,22 @@ import {
 import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import type { ReactNode } from 'react';
 import { useContext } from 'react';
 import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
 import { NotificationFormContext } from '../NotificationContext';
-import { deliveryOptionNameMap } from '../option-values';
-import type { AudienceSegment } from '../types';
+import type { DeliveryOption } from '../types';
 import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,
 } from './AudienceSegments';
+import { FlagAtom } from './FlagAtom';
 import { scheduleIcon } from './FlagIcons';
+import { PreviewPillList } from './PreviewPillList';
+import { DEFAULT_EDITIONS } from './SelectableEditions';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const styles = {
@@ -42,6 +45,7 @@ const styles = {
 		borderWidth: semanticSizing.border.default,
 		borderStyle: 'solid',
 		borderColor: semanticColors.border.weak,
+		borderRadius: semanticRadius.cornerSm,
 		margin: `${semanticSpacing.stackLg} 0`,
 
 		header: {
@@ -64,10 +68,21 @@ const styles = {
 
 const ParameterDisplay = ({
 	keyName,
-	value,
+	children,
 }: {
 	keyName: string;
-	value: string | AudienceSegment[];
+	children: ReactNode;
+}) => (
+	<div css={styles.parameter}>
+		<Typography variant="bodyBoldMd">{keyName}:</Typography>
+		{children}
+	</div>
+);
+
+const DeliveryDisplay = ({
+	deliveryTiming,
+}: {
+	deliveryTiming: DeliveryOption;
 }) => {
 	//This is temporary solution to display the delivery time in the confirmation page.
 	const tempTime = new Date().toLocaleTimeString('en-GB', {
@@ -83,54 +98,36 @@ const ParameterDisplay = ({
 	const temporaryDeliveryTime = `${tempTime} (ET), ${tempDate}`;
 
 	return (
-		<div css={styles.parameter}>
-			<Typography variant="bodyBoldMd">{keyName}:</Typography>
-			{keyName === 'Channel' && (
-				<SendInfoPreviewPill channel={'email'} isConfirmation={true} />
-			)}
-			{keyName === 'Audience segments' && (
-				<AudienceSegmentsPreviewPill
-					segments={DEFAULT_SEGMENTS}
-					selected={value as AudienceSegment[]}
-					isConfirmation={true}
-				/>
-			)}
-			{keyName === 'Delivery' && (
-				<div
-					css={{
-						display: 'flex',
-						flexDirection: 'row',
-						gap: semanticSpacing.stackSm,
-					}}
-				>
-					<SendInfoPreviewPill
-						deliveryTiming={'immediate'}
-						isConfirmation={true}
-					/>
-					<div
-						css={{
-							display: 'flex',
-							flexDirection: 'row',
-							gap: semanticSpacing.stackSm,
-							alignItems: 'center',
-							height: semanticSizing.height.sm,
-							border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
-							borderRadius: semanticRadius.cornerSm,
-							padding: `0 ${semanticSpacing.stackSm}`,
-						}}
-					>
-						<Icon
-							size="md"
-							css={{ paddingTop: '1.67px', paddingLeft: '1.67px' }}
-						>
-							{scheduleIcon}
-						</Icon>
-						<Typography variant="bodySm" css={{ height: '18px' }}>
-							{temporaryDeliveryTime}
-						</Typography>
-					</div>
-				</div>
-			)}
+		<div
+			css={{
+				display: 'flex',
+				flexDirection: 'row',
+				gap: semanticSpacing.stackSm,
+			}}
+		>
+			<SendInfoPreviewPill
+				deliveryTiming={deliveryTiming}
+				isConfirmation={true}
+			/>
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'row',
+					gap: semanticSpacing.stackSm,
+					alignItems: 'center',
+					height: semanticSizing.height.sm,
+					border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+					borderRadius: semanticRadius.cornerSm,
+					padding: `0 ${semanticSpacing.stackSm}`,
+				}}
+			>
+				<Icon size="md" css={{ paddingTop: '1.67px', paddingLeft: '1.67px' }}>
+					{scheduleIcon}
+				</Icon>
+				<Typography variant="bodySm" css={{ height: '18px' }}>
+					{temporaryDeliveryTime}
+				</Typography>
+			</div>
 		</div>
 	);
 };
@@ -151,7 +148,13 @@ export const DispatchReport = () => {
 
 	return (
 		<section css={styles.container}>
-			<div>
+			<div
+				css={{
+					gap: semanticSpacing.stackXxs,
+					display: 'flex',
+					flexDirection: 'column',
+				}}
+			>
 				<div
 					css={{
 						display: 'flex',
@@ -171,7 +174,7 @@ export const DispatchReport = () => {
 					</Typography>
 				</div>
 				<Typography variant="bodyMd" css={{ fontSize: '16px' }}>
-					Notification confirmation details below
+					Confirmation details below
 				</Typography>
 			</div>
 
@@ -182,20 +185,46 @@ export const DispatchReport = () => {
 
 				{parameters?.type === 'email' && (
 					<section>
-						<ParameterDisplay keyName="Channel" value="Email Newsletter" />
-						<ParameterDisplay
-							keyName="Audience segments"
-							value={parameters.audienceSegments ?? []}
-						/>
-						<div></div>
-						<ParameterDisplay
-							keyName="Delivery"
-							value={
-								parameters.emailDeliveryOption
-									? deliveryOptionNameMap[parameters.emailDeliveryOption].name
-									: ''
-							}
-						/>
+						<ParameterDisplay keyName="Channel">
+							<SendInfoPreviewPill channel="email" isConfirmation={true} />
+						</ParameterDisplay>
+						<ParameterDisplay keyName="Audience segments">
+							<AudienceSegmentsPreviewPill
+								segments={DEFAULT_SEGMENTS}
+								selected={parameters.audienceSegments ?? []}
+								isConfirmation={true}
+							/>
+						</ParameterDisplay>
+						<ParameterDisplay keyName="Delivery and time">
+							<DeliveryDisplay
+								deliveryTiming={parameters.emailDeliveryOption ?? 'immediate'}
+							/>
+						</ParameterDisplay>
+					</section>
+				)}
+
+				{parameters?.type === 'push' && (
+					<section>
+						<ParameterDisplay keyName="Channel">
+							<SendInfoPreviewPill channel="push" isConfirmation={true} />
+						</ParameterDisplay>
+						<ParameterDisplay keyName="Editions">
+							<PreviewPillList
+								title="Editions"
+								options={DEFAULT_EDITIONS.map(({ code, label }) => ({
+									id: code,
+									label,
+								}))}
+								selected={parameters.editions ?? []}
+								isConfirmation={true}
+								renderIcon={(code) => <FlagAtom segmentCode={code} />}
+							/>
+						</ParameterDisplay>
+						<ParameterDisplay keyName="Delivery and time">
+							<DeliveryDisplay
+								deliveryTiming={parameters.pushDeliveryOption ?? 'appImmediate'}
+							/>
+						</ParameterDisplay>
 					</section>
 				)}
 			</div>
@@ -217,6 +246,14 @@ export const DispatchReport = () => {
 						}
 					>
 						Create new newsletter email
+					</Button>
+				)}
+				{parameters?.type === 'push' && (
+					<Button
+						variant="primary"
+						onClick={() => updateNotification({ type: 'reset-app-alert' })}
+					>
+						Create new app alert
 					</Button>
 				)}
 			</div>

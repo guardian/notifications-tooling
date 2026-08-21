@@ -52,7 +52,7 @@ export const channelConstraintsSchema = {
 			properties: {
 				[NotificationChannel.AppPushNotification]: {
 					type: 'object',
-					required: ['content', 'compose', 'audience'],
+					required: ['content', 'compose', 'editions'],
 					properties: {
 						content: {
 							type: 'object',
@@ -65,7 +65,7 @@ export const channelConstraintsSchema = {
 						},
 						compose: {
 							type: 'object',
-							required: ['minItems', 'maxItems'],
+							required: ['minItems', 'maxItems', 'headline'],
 							properties: {
 								minItems: {
 									type: 'integer',
@@ -77,10 +77,11 @@ export const channelConstraintsSchema = {
 									description:
 										'The maximum number of content items a plan may compose.',
 								},
+								headline: contentFieldLimitsSchema,
 							},
 							example: pushConstraints.compose,
 						},
-						audience: {
+						editions: {
 							type: 'object',
 							required: ['maxTopics'],
 							properties: {
@@ -90,7 +91,7 @@ export const channelConstraintsSchema = {
 										'The maximum number of app-push topics (topic-type/edition pairs) a push may target.',
 								},
 							},
-							example: pushConstraints.audience,
+							example: pushConstraints.editions,
 						},
 					},
 				},

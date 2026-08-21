@@ -33,10 +33,18 @@ export const channelConstraints = {
 				notificationChannelContentLimits[
 					NotificationChannel.AppPushNotification
 				],
-			// Push delivers a single content item (`compose.use`).
-			compose: { minItems: 1, maxItems: 1 },
+			// Push delivers a single content item, composed into a headline bounded
+			// by the same limits as an item's title.
+			compose: {
+				minItems: 1,
+				maxItems: 1,
+				headline:
+					notificationChannelContentLimits[
+						NotificationChannel.AppPushNotification
+					].title,
+			},
 			// mobile-n10n rejects a push targeting more than `MAX_APP_PUSH_TOPICS` topics.
-			audience: { maxTopics: MAX_APP_PUSH_TOPICS },
+			editions: { maxTopics: MAX_APP_PUSH_TOPICS },
 		},
 		[NotificationChannel.Newsletter]: {
 			content: notificationChannelContentLimits[NotificationChannel.Newsletter],

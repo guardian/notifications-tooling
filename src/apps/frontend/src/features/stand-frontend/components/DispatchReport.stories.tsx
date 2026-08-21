@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { acceptedEmailSendResponse } from '../../../mocks/api-fixtures';
 import {
 	completeEmailParams,
+	completePushParams,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
@@ -22,6 +23,14 @@ const meta: Meta<StoryArgs> = {
 			},
 		},
 	},
+	render: (args) => {
+		return WithNotificationContext(<DispatchReport />, args.notificationState);
+	},
+};
+
+export default meta;
+
+export const EmailSuccess: Story = {
 	args: {
 		notificationState: {
 			...defaultState,
@@ -32,11 +41,17 @@ const meta: Meta<StoryArgs> = {
 			},
 		},
 	},
-	render: (args) => {
-		return WithNotificationContext(<DispatchReport />, args.notificationState);
-	},
 };
 
-export default meta;
-
-export const EmailSuccess: Story = {};
+export const AppAlertSuccess: Story = {
+	args: {
+		notificationState: {
+			...defaultState,
+			parameters: completePushParams,
+			sendingResult: {
+				ok: true,
+				response: acceptedEmailSendResponse,
+			},
+		},
+	},
+};

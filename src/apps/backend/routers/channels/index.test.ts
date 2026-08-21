@@ -116,7 +116,11 @@ describe('GET /v1/channels/constraints', () => {
 		);
 		expect(push.compose.minItems).toBe(1);
 		expect(push.compose.maxItems).toBe(1);
-		expect(push.audience.maxTopics).toBe(MAX_APP_PUSH_TOPICS);
+		expect(push.compose.headline).toEqual(
+			notificationChannelContentLimits[NotificationChannel.AppPushNotification]
+				.title,
+		);
+		expect(push.editions.maxTopics).toBe(MAX_APP_PUSH_TOPICS);
 	});
 
 	it('exposes the newsletter content limits and subject limit', async () => {
