@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { articleFixture } from '../../mocks/capi-fixtures';
 import { defaultState, notificationReducer } from './notification-reducer';
 
-describe('notificationReducer receive-article', () => {
+describe('notificationReducer article lifecycle', () => {
 	it('stores the imported article and completes loading', () => {
 		const state = notificationReducer(
 			{ ...defaultState, isFetchingContent: true },
@@ -16,6 +16,23 @@ describe('notificationReducer receive-article', () => {
 			content: articleFixture,
 			fetchedArticleId: articleFixture.id,
 			isFetchingContent: false,
+		});
+	});
+
+	it('clears stale article content when fetching an article fails', () => {
+		const state = notificationReducer(
+			{ ...defaultState, content: articleFixture, isFetchingContent: true },
+			{
+				type: 'report-article-error',
+				errorMessage: 'Article not found',
+			},
+		);
+
+		expect(state).toMatchObject({
+			content: undefined,
+			fetchedArticleId: undefined,
+			isFetchingContent: false,
+			fetchArticleError: 'Article not found',
 		});
 	});
 });

@@ -20,8 +20,7 @@ import type {
 	NewsletterFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { deliveryOptionNameMap } from '../option-values';
-import type { AudienceSegment } from '../types';
+import type { DeliveryOption } from '../types';
 import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,
@@ -68,11 +67,22 @@ const styles = {
 };
 
 const ParameterDisplay = ({
-	keyName,
-	value,
+	label,
+	children,
 }: {
-	keyName: string;
-	value: string | AudienceSegment[];
+	label: string;
+	children: ReactNode;
+}) => (
+	<div css={styles.parameter}>
+		<Typography variant="bodyBoldMd">{label}:</Typography>
+		{children}
+	</div>
+);
+
+const DeliveryParameter = ({
+	deliveryTiming,
+}: {
+	deliveryTiming: DeliveryOption;
 }) => {
 	//This is temporary solution to display the delivery time in the confirmation page.
 	const tempTime = new Date().toLocaleTimeString('en-GB', {
@@ -88,59 +98,39 @@ const ParameterDisplay = ({
 	const temporaryDeliveryTime = `${tempTime} (ET), ${tempDate}`;
 
 	return (
-		<div css={styles.parameter}>
-			<Typography variant="bodyBoldMd">{keyName}:</Typography>
-			{keyName === 'Channel' && (
+		<ParameterDisplay label="Delivery">
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'row',
+					gap: semanticSpacing.stackSm,
+				}}
+			>
 				<SendInfoPreviewPill
-					channel={value === 'App alert' ? 'push' : 'email'}
+					deliveryTiming={deliveryTiming}
 					isConfirmation={true}
 				/>
-			)}
-			{keyName === 'Audience segments' && (
-				<AudienceSegmentsPreviewPill
-					segments={DEFAULT_SEGMENTS}
-					selected={value as AudienceSegment[]}
-					isConfirmation={true}
-				/>
-			)}
-			{keyName === 'Delivery' && (
 				<div
 					css={{
 						display: 'flex',
 						flexDirection: 'row',
 						gap: semanticSpacing.stackSm,
+						alignItems: 'center',
+						height: semanticSizing.height.sm,
+						border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+						borderRadius: semanticRadius.cornerSm,
+						padding: `0 ${semanticSpacing.stackSm}`,
 					}}
 				>
-					<SendInfoPreviewPill
-						deliveryTiming={'immediate'}
-						isConfirmation={true}
-					/>
-					<div
-						css={{
-							display: 'flex',
-							flexDirection: 'row',
-							gap: semanticSpacing.stackSm,
-							alignItems: 'center',
-							height: semanticSizing.height.sm,
-							border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
-							borderRadius: semanticRadius.cornerSm,
-							padding: `0 ${semanticSpacing.stackSm}`,
-						}}
-					>
-						<Icon
-							size="md"
-							css={{ paddingTop: '1.67px', paddingLeft: '1.67px' }}
-						>
-							{scheduleIcon}
-						</Icon>
-						<Typography variant="bodySm" css={{ height: '18px' }}>
-							{temporaryDeliveryTime}
-						</Typography>
-					</div>
+					<Icon size="md" css={{ paddingTop: '1.67px', paddingLeft: '1.67px' }}>
+						{scheduleIcon}
+					</Icon>
+					<Typography variant="bodySm" css={{ height: '18px' }}>
+						{temporaryDeliveryTime}
+					</Typography>
 				</div>
-			)}
-			{keyName === 'Editions' && <Typography>{String(value)}</Typography>}
-		</div>
+			</div>
+		</ParameterDisplay>
 	);
 };
 
@@ -156,12 +146,17 @@ export const NewsletterDispatchDetails = () => {
 
 	return (
 		<section>
-			<ParameterDisplay keyName="Channel" value="Email Newsletter" />
-			<ParameterDisplay keyName="Audience segments" value={audienceSegments} />
-			<ParameterDisplay
-				keyName="Delivery"
-				value={deliveryOptionNameMap[deliveryOption].name}
-			/>
+			<ParameterDisplay label="Channel">
+				<SendInfoPreviewPill channel="email" isConfirmation={true} />
+			</ParameterDisplay>
+			<ParameterDisplay label="Audience segments">
+				<AudienceSegmentsPreviewPill
+					segments={DEFAULT_SEGMENTS}
+					selected={audienceSegments}
+					isConfirmation={true}
+				/>
+			</ParameterDisplay>
+			<DeliveryParameter deliveryTiming={deliveryOption} />
 		</section>
 	);
 };
@@ -174,12 +169,13 @@ export const AppAlertDispatchDetails = () => {
 
 	return (
 		<section>
-			<ParameterDisplay keyName="Channel" value="App alert" />
-			<ParameterDisplay keyName="Editions" value={editions.join(', ')} />
-			<ParameterDisplay
-				keyName="Delivery"
-				value={deliveryOptionNameMap.appImmediate.name}
-			/>
+			<ParameterDisplay label="Channel">
+				<SendInfoPreviewPill channel="push" isConfirmation={true} />
+			</ParameterDisplay>
+			<ParameterDisplay label="Editions">
+				<Typography>{editions.join(', ')}</Typography>
+			</ParameterDisplay>
+			<DeliveryParameter deliveryTiming="appImmediate" />
 		</section>
 	);
 };

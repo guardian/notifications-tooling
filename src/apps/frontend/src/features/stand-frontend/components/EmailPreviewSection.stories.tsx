@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import type { completeEmailParams } from '../../../stories/story-helpers';
-import { WithNotificationContext } from '../../../stories/story-helpers';
-import { defaultState } from '../notification-reducer';
+import {
+	populatedEmailState,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
 import type { NotificationState } from '../types';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
@@ -15,10 +17,7 @@ const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/EmailPreviewSection',
 	component: EmailPreviewSection,
 	args: {
-		notificationState: {
-			...defaultState,
-			fetchedArticleId: 'article-id',
-		},
+		notificationState: populatedEmailState,
 	},
 	render: ({ notificationState, formValues }) =>
 		WithNotificationContext(
@@ -59,20 +58,14 @@ export const WithDeliveryTiming: Story = {};
 
 export const WithSegments: Story = {
 	args: {
-		notificationState: {
-			...defaultState,
-			fetchedArticleId: 'article-id',
-		},
+		notificationState: populatedEmailState,
 		formValues: { audienceSegments: ['UK', 'US'] },
 	},
 };
 
 export const FullyPopulated: Story = {
 	args: {
-		notificationState: {
-			...defaultState,
-			fetchedArticleId: 'article-id',
-		},
+		notificationState: populatedEmailState,
 		formValues: { audienceSegments: ['UK', 'US', 'AU'] },
 	},
 };

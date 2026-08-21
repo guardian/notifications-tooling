@@ -39,6 +39,7 @@ export const notificationReducer = (
 			return {
 				...state,
 				fetchedArticleId: undefined,
+				content: undefined,
 				isFetchingContent: false,
 				fetchArticleError: action.errorMessage,
 			};
