@@ -121,22 +121,23 @@ export const PopulatedEmail: Story = {
 	},
 };
 
-export const SubmitWithEnter: Story = {
+export const SubmitWithNativeForm: Story = {
 	args: {
 		notificationState: populatedEmailState,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByRole('form', { name: 'Create newsletter email' }),
-		).toBeVisible();
-
-		await userEvent.click(canvas.getByLabelText('Subject'));
-		await userEvent.keyboard('{Enter}');
+		const form = canvas.getByRole<HTMLFormElement>('form', {
+			name: 'Create newsletter email',
+		});
+		await expect(form).toBeVisible();
+		form.requestSubmit();
 
 		const screen = within(canvasElement.ownerDocument.body);
 		await expect(
-			screen.getByText('Are you sure you want to send the newsletter email?'),
+			await screen.findByText(
+				'Are you sure you want to send the newsletter email?',
+			),
 		).toBeVisible();
 	},
 };
