@@ -134,6 +134,18 @@ describe('unmatched routes over HTTP', () => {
 		expect(location).toContain(encodeURIComponent('/create'));
 	});
 
+	it('serves Swagger UI at /docs/api without redirecting', async () => {
+		const response = await fetch(`${server.baseUrl}/docs/api`, {
+			redirect: 'manual',
+		});
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get('content-type')).toContain('text/html');
+		const body = await response.text();
+		expect(body).toContain('/docs/api/swagger-ui.css');
+		expect(body).toContain('/docs/api/swagger-ui-bundle.js');
+	});
+
 	it('does not serve the SPA document for missing API routes', async () => {
 		const response = await fetch(`${server.baseUrl}/v1/no-such-route`, {
 			headers: { Accept: 'text/html' },

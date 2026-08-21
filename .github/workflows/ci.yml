@@ -94,6 +94,8 @@ jobs:
           mkdir -p dist/frontend
           cp -v src/apps/backend/dist/handler.js dist/
           cp -Rv src/apps/frontend/dist/. dist/frontend/
+          mkdir -p dist/node_modules
+          cp -LR src/apps/backend/node_modules/swagger-ui-dist dist/node_modules/swagger-ui-dist
           cd dist
           zip -r dispatch.zip .
 
