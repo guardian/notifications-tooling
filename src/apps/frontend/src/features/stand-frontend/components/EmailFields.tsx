@@ -27,11 +27,11 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 		newsletter?.compose.subject ?? NEWSLETTER_LIMIT_FALLBACKS.title;
 	const previewLimits =
 		newsletter?.content.body ?? NEWSLETTER_LIMIT_FALLBACKS.body;
-
-	const { kicker, subject = '', preview = '' } = notification.parameters;
+	const kicker = notification.parameters.kicker;
+	const kickerName = kicker !== undefined ? kickerNameMap[kicker] + ` : ` : '';
+	const { subject = '', preview = '' } = notification.parameters;
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
-
 	return (
 		<>
 			<Select
@@ -72,7 +72,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 			<NotificationTextInput
 				label="Subject"
 				description="Choose the subject line (kicker included in character count)"
-				placeholder="Enter a subject line here..."
+				placeholder={`${kickerName}${''}Enter a subject line here...`}
 				value={subject}
 				update={(subject) =>
 					updateNotification({
