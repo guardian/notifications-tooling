@@ -1,0 +1,66 @@
+import { css } from '@emotion/react';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
+import { Icon } from '@guardian/stand/Icon';
+import { Typography } from '@guardian/stand/Typography';
+import { useId } from 'react';
+import { channelOptionNameMap } from '../option-values';
+import { selectableTileTheme } from '../themes';
+import type { ChannelOption } from '../types';
+
+interface ChannelDisplayProps {
+	channel: ChannelOption;
+}
+
+export const ChannelDisplay = ({ channel }: ChannelDisplayProps) => {
+	const headingId = useId();
+	const { description, name, symbol } = channelOptionNameMap[channel];
+
+	return (
+		<section
+			aria-labelledby={headingId}
+			css={{
+				display: 'flex',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackXxs,
+			}}
+		>
+			<Typography id={headingId} variant="bodyBoldMd">
+				Channel
+			</Typography>
+			<Typography variant="bodySm" css={{ color: semanticColors.text.weak }}>
+				The channel the notification is sent to
+			</Typography>
+
+			<div css={selectableTileTheme.selectableTile(true)}>
+				<div
+					css={css({
+						display: 'flex',
+						flexDirection: 'column',
+						minWidth: 0,
+					})}
+				>
+					<div css={selectableTileTheme.iconRow}>
+						{symbol && (
+							<Icon size="md" symbol={symbol} alt={`${name} channel`} />
+						)}
+						<Typography
+							variant="headingCompactSm"
+							css={selectableTileTheme.titleStyle}
+						>
+							{name}
+						</Typography>
+					</div>
+					<Typography
+						variant="bodySm"
+						css={{
+							color: semanticColors.text.weak,
+							padding: `0 ${semanticSpacing.stackSm} 12px ${semanticSpacing.stackSm}`,
+						}}
+					>
+						{description}
+					</Typography>
+				</div>
+			</div>
+		</section>
+	);
+};

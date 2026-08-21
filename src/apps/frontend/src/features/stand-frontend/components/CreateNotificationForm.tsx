@@ -9,7 +9,7 @@ import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticleImportControl } from './ArticleImportControl';
 import { AudienceSegments } from './AudienceSegments';
-import { ChannelSelector } from './ChannelSelector';
+import { ChannelDisplay } from './ChannelDisplay';
 import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { EmailFields } from './EmailFields';
@@ -112,7 +112,7 @@ export const CreateNotificationForm = ({
 							}}
 						/>
 
-						<ChannelSelector selectedChannel="email" onChange={() => { }} />
+						<ChannelDisplay channel="email" />
 					</NotificationFormSection>
 					<NotificationFormSection
 						id="content-section"

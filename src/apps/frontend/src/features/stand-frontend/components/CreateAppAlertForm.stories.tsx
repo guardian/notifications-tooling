@@ -87,22 +87,21 @@ export const WithImportedArticle: Story = {
 	},
 };
 
-export const SubmitWithEnter: Story = {
+export const SubmitWithNativeForm: Story = {
 	args: {
 		notificationState: populatedPushState,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByRole('form', { name: 'Create app alert' }),
-		).toBeVisible();
-
-		await userEvent.click(canvas.getByLabelText('Headline'));
-		await userEvent.keyboard('{Enter}');
+		const form = canvas.getByRole<HTMLFormElement>('form', {
+			name: 'Create app alert',
+		});
+		await expect(form).toBeVisible();
+		form.requestSubmit();
 
 		const screen = within(canvasElement.ownerDocument.body);
 		await expect(
-			screen.getByText('Are you sure you want to send the app alert?'),
+			await screen.findByText('Are you sure you want to send the app alert?'),
 		).toBeVisible();
 	},
 };

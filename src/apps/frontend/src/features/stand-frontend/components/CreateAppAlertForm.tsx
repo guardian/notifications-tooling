@@ -9,7 +9,7 @@ import { NotificationFormContext } from '../NotificationContext';
 import { AlertEditionsSection } from './AlertEditionsSection';
 import { AppAlertFields } from './AppAlertFields';
 import { ArticleImportControl } from './ArticleImportControl';
-import { ChannelSelector } from './ChannelSelector';
+import { ChannelDisplay } from './ChannelDisplay';
 import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { NotificationFormSection } from './NotificationFormSection';
@@ -109,7 +109,7 @@ export const CreateAppAlertForm = ({
 							}
 						/>
 
-						<ChannelSelector selectedChannel="push" onChange={() => { }} />
+						<ChannelDisplay channel="push" />
 					</NotificationFormSection>
 					<NotificationFormSection
 						id="alert-section"
