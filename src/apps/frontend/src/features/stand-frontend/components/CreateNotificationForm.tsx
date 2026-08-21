@@ -1,6 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
-import { useContext, useState } from 'react';
+import { type FormEvent, useContext, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { htmlToSingleLineText } from '../../../util/html-helpers';
 import { useChannelConstraints } from '../api/useChannelConstraints';
@@ -28,116 +28,140 @@ export const CreateNotificationForm = ({
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	const { control, setValue } = useFormContext<NewsletterFormValues>();
+	const { control, handleSubmit, setError, setValue } =
+		useFormContext<NewsletterFormValues>();
 	const [articleInputText, setArticleInputText] = useState(
 		() => notification.content?.webUrl ?? '',
 	);
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
 	const { data: constraints } = useChannelConstraints();
+	const prepareSend = (values: NewsletterFormValues) => {
+		if (!notification.content) {
+			return;
+		}
+		updateNotification({
+			type: 'prepare-send',
+			request: buildNewsletterRequest({
+				values,
+				content: notification.content,
+				idempotencyKey: crypto.randomUUID(),
+			}),
+		});
+	};
+	const submitForm = (event: FormEvent<HTMLFormElement>) => {
+		if (!notification.content) {
+			setError('root.article', {
+				message: 'Paste a URL to fetch an article',
+			});
+		}
+		void handleSubmit(prepareSend)(event);
+	};
 
 	return (
-		<div
-			css={{
-				marginTop: semanticSpacing.stackXl,
-				marginBottom: semanticSpacing.stackXl,
-				display: 'flex',
-				flexDirection: 'column',
-				gap: semanticSpacing.stackXl,
-			}}
-		>
-			<CreateFormTitle
-				title={'Create newsletter email'}
-				setArticleInputText={setArticleInputText}
-				setLockArticleInputText={setLockArticleInputText}
-				onResetNotification={() =>
-					updateNotification({ type: 'reset-newsletter-email' })
-				}
-			/>
-
-			<div
+		<>
+			<form
+				aria-label="Create newsletter email"
+				onSubmit={submitForm}
 				css={{
+					marginTop: semanticSpacing.stackXl,
+					marginBottom: semanticSpacing.stackXl,
 					display: 'flex',
 					flexDirection: 'column',
-					gap: semanticSpacing.stackLg,
-					width: '100%',
-					[from.md]: {
-						maxWidth: '500px',
-					},
+					gap: semanticSpacing.stackXl,
 				}}
 			>
-				<NotificationFormSection
-					id="article-section"
-					isActive={activeSectionHref === '#article-section'}
-				>
-					<ArticleImportControl
-						articleInputText={articleInputText}
-						setArticleInputText={setArticleInputText}
-						lockArticleInputText={lockArticleInputText}
-						setLockArticleInputText={setLockArticleInputText}
-						onArticleImported={(article) => {
-							const { headline, standfirst } = article.fields ?? {};
-							if (headline) {
-								setValue('subject', headline);
-							}
-							const preview = htmlToSingleLineText(standfirst);
-							if (preview) {
-								setValue('preview', preview);
-							}
-						}}
-					/>
+				<CreateFormTitle
+					title={'Create newsletter email'}
+					setArticleInputText={setArticleInputText}
+					setLockArticleInputText={setLockArticleInputText}
+					onResetNotification={() =>
+						updateNotification({ type: 'reset-newsletter-email' })
+					}
+				/>
 
-					<ChannelSelector selectedChannel="email" onChange={() => {}} />
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="content-section"
-					isActive={activeSectionHref === '#content-section'}
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: semanticSpacing.stackLg,
+						width: '100%',
+						[from.md]: {
+							maxWidth: '500px',
+						},
+					}}
 				>
-					<EmailFields constraints={constraints} />
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="audience-section"
-					isActive={activeSectionHref === '#audience-section'}
-				>
-					<Controller
-						control={control}
-						name="audienceSegments"
-						render={({ field, fieldState }) => (
-							<AudienceSegments
-								selected={field.value}
-								error={fieldState.error?.message}
-								onChange={field.onChange}
-							/>
-						)}
-					/>
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="delivery-timing-section"
-					isActive={activeSectionHref === '#delivery-timing-section'}
-				>
-					<Controller
-						control={control}
-						name="deliveryOption"
-						render={({ field }) => (
-							<DeliveryAndTimingSelector
-								selectedDeliveryTiming={field.value}
-								channel="email"
-								onChange={field.onChange}
-							/>
-						)}
-					/>
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="send-button-section"
-					isActive={activeSectionHref === '#send-button-section'}
-				>
-					<SendButton buildRequest={buildNewsletterRequest}>
-						Send newsletter email
-					</SendButton>
-				</NotificationFormSection>
-				<SendNotificationModal />
-				<SendFailedModal />
-			</div>
-		</div>
+					<NotificationFormSection
+						id="article-section"
+						isActive={activeSectionHref === '#article-section'}
+					>
+						<ArticleImportControl
+							articleInputText={articleInputText}
+							setArticleInputText={setArticleInputText}
+							lockArticleInputText={lockArticleInputText}
+							setLockArticleInputText={setLockArticleInputText}
+							onArticleImported={(article) => {
+								const { headline, standfirst } = article.fields ?? {};
+								if (headline) {
+									setValue('subject', headline);
+								}
+								const preview = htmlToSingleLineText(standfirst);
+								if (preview) {
+									setValue('preview', preview);
+								}
+							}}
+						/>
+
+						<ChannelSelector selectedChannel="email" onChange={() => { }} />
+					</NotificationFormSection>
+					<NotificationFormSection
+						id="content-section"
+						isActive={activeSectionHref === '#content-section'}
+					>
+						<EmailFields constraints={constraints} />
+					</NotificationFormSection>
+					<NotificationFormSection
+						id="audience-section"
+						isActive={activeSectionHref === '#audience-section'}
+					>
+						<Controller
+							control={control}
+							name="audienceSegments"
+							render={({ field, fieldState }) => (
+								<AudienceSegments
+									selected={field.value}
+									error={fieldState.error?.message}
+									onChange={field.onChange}
+								/>
+							)}
+						/>
+					</NotificationFormSection>
+					<NotificationFormSection
+						id="delivery-timing-section"
+						isActive={activeSectionHref === '#delivery-timing-section'}
+					>
+						<Controller
+							control={control}
+							name="deliveryOption"
+							render={({ field }) => (
+								<DeliveryAndTimingSelector
+									selectedDeliveryTiming={field.value}
+									channel="email"
+									onChange={field.onChange}
+								/>
+							)}
+						/>
+					</NotificationFormSection>
+					<NotificationFormSection
+						id="send-button-section"
+						isActive={activeSectionHref === '#send-button-section'}
+					>
+						<SendButton>Send newsletter email</SendButton>
+					</NotificationFormSection>
+				</div>
+			</form>
+			<SendNotificationModal />
+			<SendFailedModal />
+		</>
 	);
 };

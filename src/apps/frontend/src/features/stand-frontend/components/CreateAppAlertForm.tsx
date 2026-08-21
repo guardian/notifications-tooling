@@ -1,6 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
-import { useContext, useState } from 'react';
+import { type FormEvent, useContext, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { buildAppAlertRequest } from '../build-request-payloads';
@@ -24,7 +24,8 @@ interface CreateAppAlertFormProps {
 export const CreateAppAlertForm = ({
 	activeSectionHref,
 }: CreateAppAlertFormProps) => {
-	const { control, setValue } = useFormContext<AppAlertFormValues>();
+	const { control, handleSubmit, setError, setValue } =
+		useFormContext<AppAlertFormValues>();
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
@@ -36,92 +37,118 @@ export const CreateAppAlertForm = ({
 	);
 
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
+	const prepareSend = (values: AppAlertFormValues) => {
+		if (!notification.content) {
+			return;
+		}
+		updateNotification({
+			type: 'prepare-send',
+			request: buildAppAlertRequest({
+				values,
+				content: notification.content,
+				idempotencyKey: crypto.randomUUID(),
+			}),
+		});
+	};
+	const submitForm = (event: FormEvent<HTMLFormElement>) => {
+		if (!notification.content) {
+			setError('root.article', {
+				message: 'Paste a URL to fetch an article',
+			});
+		}
+		void handleSubmit(prepareSend)(event);
+	};
 
 	return (
-		<div
-			css={{
-				marginTop: semanticSpacing.stackXl,
-				marginBottom: semanticSpacing.stackXl,
-				display: 'flex',
-				flexDirection: 'column',
-				gap: semanticSpacing.stackXl,
-			}}
-		>
-			<CreateFormTitle
-				title={'Create app alert'}
-				setArticleInputText={setArticleInputText}
-				setLockArticleInputText={setLockArticleInputText}
-				onResetNotification={() =>
-					updateNotification({ type: 'reset-app-alert' })
-				}
-			/>
-
-			<div
+		<>
+			<form
+				aria-label="Create app alert"
+				onSubmit={submitForm}
 				css={{
+					marginTop: semanticSpacing.stackXl,
+					marginBottom: semanticSpacing.stackXl,
 					display: 'flex',
 					flexDirection: 'column',
-					gap: semanticSpacing.stackLg,
-					width: '100%',
-					[from.md]: {
-						maxWidth: '500px',
-					},
+					gap: semanticSpacing.stackXl,
 				}}
 			>
-				<NotificationFormSection
-					id="article-section"
-					isActive={activeSectionHref === '#article-section'}
-				>
-					<ArticleImportControl
-						articleInputText={articleInputText}
-						setArticleInputText={setArticleInputText}
-						lockArticleInputText={lockArticleInputText}
-						setLockArticleInputText={setLockArticleInputText}
-						onArticleImported={(article) =>
-							setValue('headline', article.fields?.headline ?? article.webTitle)
-						}
-					/>
+				<CreateFormTitle
+					title={'Create app alert'}
+					setArticleInputText={setArticleInputText}
+					setLockArticleInputText={setLockArticleInputText}
+					onResetNotification={() =>
+						updateNotification({ type: 'reset-app-alert' })
+					}
+				/>
 
-					<ChannelSelector selectedChannel="push" onChange={() => {}} />
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="alert-section"
-					isActive={activeSectionHref === '#alert-section'}
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: semanticSpacing.stackLg,
+						width: '100%',
+						[from.md]: {
+							maxWidth: '500px',
+						},
+					}}
 				>
-					<AlertEditionsSection />
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="content-section"
-					isActive={activeSectionHref === '#content-section'}
-				>
-					<AppAlertFields constraints={constraints} />
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="delivery-timing-section"
-					isActive={activeSectionHref === '#delivery-timing-section'}
-				>
-					<Controller
-						control={control}
-						name="deliveryOption"
-						render={({ field }) => (
-							<DeliveryAndTimingSelector
-								selectedDeliveryTiming={field.value}
-								channel="push"
-								onChange={field.onChange}
-							/>
-						)}
-					/>
-				</NotificationFormSection>
-				<NotificationFormSection
-					id="send-button-section"
-					isActive={activeSectionHref === '#send-button-section'}
-				>
-					<SendButton buildRequest={buildAppAlertRequest}>
-						Send app alert
-					</SendButton>
-				</NotificationFormSection>
-				<SendNotificationModal />
-				<SendFailedModal />
-			</div>
-		</div>
+					<NotificationFormSection
+						id="article-section"
+						isActive={activeSectionHref === '#article-section'}
+					>
+						<ArticleImportControl
+							articleInputText={articleInputText}
+							setArticleInputText={setArticleInputText}
+							lockArticleInputText={lockArticleInputText}
+							setLockArticleInputText={setLockArticleInputText}
+							onArticleImported={(article) =>
+								setValue(
+									'headline',
+									article.fields?.headline ?? article.webTitle,
+								)
+							}
+						/>
+
+						<ChannelSelector selectedChannel="push" onChange={() => { }} />
+					</NotificationFormSection>
+					<NotificationFormSection
+						id="alert-section"
+						isActive={activeSectionHref === '#alert-section'}
+					>
+						<AlertEditionsSection />
+					</NotificationFormSection>
+					<NotificationFormSection
+						id="content-section"
+						isActive={activeSectionHref === '#content-section'}
+					>
+						<AppAlertFields constraints={constraints} />
+					</NotificationFormSection>
+					<NotificationFormSection
+						id="delivery-timing-section"
+						isActive={activeSectionHref === '#delivery-timing-section'}
+					>
+						<Controller
+							control={control}
+							name="deliveryOption"
+							render={({ field }) => (
+								<DeliveryAndTimingSelector
+									selectedDeliveryTiming={field.value}
+									channel="push"
+									onChange={field.onChange}
+								/>
+							)}
+						/>
+					</NotificationFormSection>
+					<NotificationFormSection
+						id="send-button-section"
+						isActive={activeSectionHref === '#send-button-section'}
+					>
+						<SendButton>Send app alert</SendButton>
+					</NotificationFormSection>
+				</div>
+			</form>
+			<SendNotificationModal />
+			<SendFailedModal />
+		</>
 	);
 };
