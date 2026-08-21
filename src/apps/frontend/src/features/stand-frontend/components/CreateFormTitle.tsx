@@ -1,21 +1,20 @@
 import { semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { NotificationFormContext } from '../NotificationContext';
 import { TextLinkButton } from './TextLinkButton';
 
 export interface CreateFormTitleProps {
 	title: string;
 	setArticleInputText: (setArticleInputText: string) => void;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
+	onResetNotification: () => void;
 }
 export const CreateFormTitle = ({
 	title,
 	setArticleInputText,
 	setLockArticleInputText,
+	onResetNotification,
 }: CreateFormTitleProps) => {
-	const { channel, updateNotification } = useContext(NotificationFormContext);
 	const { reset } = useFormContext();
 	return (
 		<section
@@ -38,12 +37,7 @@ export const CreateFormTitle = ({
 					setArticleInputText('');
 					setLockArticleInputText(false);
 					reset();
-					updateNotification({
-						type:
-							channel === 'email'
-								? 'reset-newsletter-email'
-								: 'reset-app-alert',
-					});
+					onResetNotification();
 				}}
 			/>
 		</section>

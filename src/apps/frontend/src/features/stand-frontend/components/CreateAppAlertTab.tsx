@@ -16,7 +16,7 @@ import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
-import { DispatchReport } from './DispatchReport';
+import { AppAlertDispatchDetails, DispatchReport } from './DispatchReport';
 import { AppPreviewToggle } from './PreviewToggle';
 import {
 	APP_DEFAULT_SIDE_NAV_HREF,
@@ -26,6 +26,7 @@ import {
 export const CreateAppAlertTab = () => {
 	const {
 		notification: { sendingResult },
+		updateNotification,
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
 	const { data: audiences } = useChannelAudiences();
@@ -67,7 +68,13 @@ export const CreateAppAlertTab = () => {
 								paddingRight: semanticSpacing.stackLg,
 							})}
 						>
-							<DispatchReport />
+							<DispatchReport
+								onResetNotification={() =>
+									updateNotification({ type: 'reset-app-alert' })
+								}
+							>
+								<AppAlertDispatchDetails />
+							</DispatchReport>
 						</Item>
 					) : (
 						<>

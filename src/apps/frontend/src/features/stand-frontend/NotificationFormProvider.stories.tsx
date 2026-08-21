@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
-import { useState } from 'react';
-import { useWatch } from 'react-hook-form';
+import { type ComponentProps, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../../api/config';
 import { articleFixture } from '../../mocks/capi-fixtures';
+import { htmlToSingleLineText } from '../../util/html-helpers';
 import { ArticleImportControl } from './components/ArticleImportControl';
 import type {
 	AppAlertFormValues,
@@ -35,6 +36,42 @@ const AppAlertHeadline = () => {
 	return <output aria-label="App alert headline">{headline}</output>;
 };
 
+type ArticleImportProps = Omit<
+	ComponentProps<typeof ArticleImportControl>,
+	'onArticleImported'
+>;
+
+const NewsletterArticleImport = (props: ArticleImportProps) => {
+	const { setValue } = useFormContext<NewsletterFormValues>();
+	return (
+		<ArticleImportControl
+			{...props}
+			onArticleImported={(article) => {
+				const { headline, standfirst } = article.fields ?? {};
+				if (headline) {
+					setValue('subject', headline);
+				}
+				const preview = htmlToSingleLineText(standfirst);
+				if (preview) {
+					setValue('preview', preview);
+				}
+			}}
+		/>
+	);
+};
+
+const AppAlertArticleImport = (props: ArticleImportProps) => {
+	const { setValue } = useFormContext<AppAlertFormValues>();
+	return (
+		<ArticleImportControl
+			{...props}
+			onArticleImported={(article) =>
+				setValue('headline', article.fields?.headline ?? article.webTitle)
+			}
+		/>
+	);
+};
+
 const ProviderHarness = () => {
 	const [channel, setChannel] = useState<'newsletter' | 'app-alert'>(
 		'newsletter',
@@ -53,7 +90,7 @@ const ProviderHarness = () => {
 			{channel === 'newsletter' ? (
 				<NewsletterNotificationFormProvider>
 					<NewsletterSubject />
-					<ArticleImportControl
+					<NewsletterArticleImport
 						articleInputText={newsletterArticleInputText}
 						setArticleInputText={setNewsletterArticleInputText}
 						lockArticleInputText={newsletterLockArticleInputText}
@@ -63,7 +100,7 @@ const ProviderHarness = () => {
 			) : (
 				<AppAlertNotificationFormProvider>
 					<AppAlertHeadline />
-					<ArticleImportControl
+					<AppAlertArticleImport
 						articleInputText={appAlertArticleInputText}
 						setArticleInputText={setAppAlertArticleInputText}
 						lockArticleInputText={appAlertLockArticleInputText}

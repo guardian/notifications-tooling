@@ -9,7 +9,7 @@ import {
 import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext } from 'react';
+import { type ReactNode, useContext } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import {
 	capitalise,
@@ -144,7 +144,7 @@ const ParameterDisplay = ({
 	);
 };
 
-const NewsletterDispatchDetails = () => {
+export const NewsletterDispatchDetails = () => {
 	const audienceSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
 		name: 'audienceSegments',
 		defaultValue: [],
@@ -166,7 +166,7 @@ const NewsletterDispatchDetails = () => {
 	);
 };
 
-const AppAlertDispatchDetails = () => {
+export const AppAlertDispatchDetails = () => {
 	const editions = useWatch<AppAlertFormValues, 'editions'>({
 		name: 'editions',
 		defaultValue: [],
@@ -184,10 +184,16 @@ const AppAlertDispatchDetails = () => {
 	);
 };
 
-export const DispatchReport = () => {
-	const { channel, updateNotification, notification } = useContext(
-		NotificationFormContext,
-	);
+interface DispatchReportProps {
+	children: ReactNode;
+	onResetNotification: () => void;
+}
+
+export const DispatchReport = ({
+	children,
+	onResetNotification,
+}: DispatchReportProps) => {
+	const { channel, notification } = useContext(NotificationFormContext);
 	const { reset } = useFormContext();
 	const { sendingResult } = notification;
 
@@ -228,11 +234,7 @@ export const DispatchReport = () => {
 					<Typography variant="headingMd">Details</Typography>
 				</header>
 
-				{channel === 'email' ? (
-					<NewsletterDispatchDetails />
-				) : (
-					<AppAlertDispatchDetails />
-				)}
+				{children}
 			</div>
 			<div
 				css={{
@@ -248,12 +250,7 @@ export const DispatchReport = () => {
 					variant="primary"
 					onClick={() => {
 						reset();
-						updateNotification({
-							type:
-								channel === 'email'
-									? 'reset-newsletter-email'
-									: 'reset-app-alert',
-						});
+						onResetNotification();
 					}}
 				>
 					Create new {getChannelDescription(channel)}

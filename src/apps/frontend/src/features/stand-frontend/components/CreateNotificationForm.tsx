@@ -2,7 +2,9 @@ import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { htmlToSingleLineText } from '../../../util/html-helpers';
 import { useChannelConstraints } from '../api/useChannelConstraints';
+import { buildNewsletterRequest } from '../build-request-payloads';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticleImportControl } from './ArticleImportControl';
@@ -23,8 +25,10 @@ interface CreateNotificationFormProps {
 export const CreateNotificationForm = ({
 	activeSectionHref,
 }: CreateNotificationFormProps) => {
-	const { notification } = useContext(NotificationFormContext);
-	const { control } = useFormContext<NewsletterFormValues>();
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
+	const { control, setValue } = useFormContext<NewsletterFormValues>();
 	const [articleInputText, setArticleInputText] = useState(
 		() => notification.content?.webUrl ?? '',
 	);
@@ -46,6 +50,9 @@ export const CreateNotificationForm = ({
 				title={'Create newsletter email'}
 				setArticleInputText={setArticleInputText}
 				setLockArticleInputText={setLockArticleInputText}
+				onResetNotification={() =>
+					updateNotification({ type: 'reset-newsletter-email' })
+				}
 			/>
 
 			<div
@@ -68,6 +75,16 @@ export const CreateNotificationForm = ({
 						setArticleInputText={setArticleInputText}
 						lockArticleInputText={lockArticleInputText}
 						setLockArticleInputText={setLockArticleInputText}
+						onArticleImported={(article) => {
+							const { headline, standfirst } = article.fields ?? {};
+							if (headline) {
+								setValue('subject', headline);
+							}
+							const preview = htmlToSingleLineText(standfirst);
+							if (preview) {
+								setValue('preview', preview);
+							}
+						}}
 					/>
 
 					<ChannelSelector selectedChannel="email" onChange={() => {}} />
@@ -114,7 +131,9 @@ export const CreateNotificationForm = ({
 					id="send-button-section"
 					isActive={activeSectionHref === '#send-button-section'}
 				>
-					<SendButton>{'Send newsletter email'}</SendButton>
+					<SendButton buildRequest={buildNewsletterRequest}>
+						Send newsletter email
+					</SendButton>
 				</NotificationFormSection>
 				<SendNotificationModal />
 				<SendFailedModal />

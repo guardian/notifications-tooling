@@ -7,34 +7,35 @@ import {
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
+import type { ResolvedArticle } from '@models';
 import { useContext } from 'react';
-import { useFormContext } from 'react-hook-form';
-import {
-	buildAppAlertRequest,
-	buildNewsletterRequest,
-} from '../build-request-payloads';
-import {
-	appAlertFormSchema,
-	type AppAlertFormValues,
-	newsletterFormSchema,
-	type NewsletterFormValues,
-} from '../notification-forms';
+import { type FieldValues, useFormContext } from 'react-hook-form';
+import type { SendNotificationRequest } from '../api/schemas';
 import { NotificationFormContext } from '../NotificationContext';
 
-interface SendButtonProps {
+interface SendButtonProps<FormValues extends FieldValues> {
 	children: React.ReactNode;
+	buildRequest: (args: {
+		values: FormValues;
+		content: ResolvedArticle;
+		idempotencyKey: string;
+	}) => SendNotificationRequest;
 }
 
-export const SendButton = ({ children }: SendButtonProps) => {
-	const { channel, notification, updateNotification } = useContext(
+export const SendButton = <FormValues extends FieldValues>({
+	children,
+	buildRequest,
+}: SendButtonProps<FormValues>) => {
+	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
 	const {
 		formState: { errors },
 		handleSubmit,
 		setError,
-	} = useFormContext<NewsletterFormValues | AppAlertFormValues>();
-	const prepareSend = (values: NewsletterFormValues | AppAlertFormValues) => {
+	} = useFormContext<FormValues>();
+
+	const prepareSend = (values: FormValues) => {
 		if (!notification.content) {
 			setError('root.article', {
 				message: 'Paste a URL to fetch an article',
@@ -43,18 +44,11 @@ export const SendButton = ({ children }: SendButtonProps) => {
 		}
 
 		const idempotencyKey = crypto.randomUUID();
-		const request =
-			channel === 'email'
-				? buildNewsletterRequest({
-						values: newsletterFormSchema.parse(values),
-						content: notification.content,
-						idempotencyKey,
-					})
-				: buildAppAlertRequest({
-						values: appAlertFormSchema.parse(values),
-						content: notification.content,
-						idempotencyKey,
-					});
+		const request = buildRequest({
+			values,
+			content: notification.content,
+			idempotencyKey,
+		});
 
 		updateNotification({ type: 'prepare-send', request });
 	};
