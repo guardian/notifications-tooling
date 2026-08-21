@@ -121,6 +121,26 @@ export const PopulatedEmail: Story = {
 	},
 };
 
+export const SubmitWithEnter: Story = {
+	args: {
+		notificationState: populatedEmailState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('form', { name: 'Create newsletter email' }),
+		).toBeVisible();
+
+		await userEvent.click(canvas.getByLabelText('Subject'));
+		await userEvent.keyboard('{Enter}');
+
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			screen.getByText('Are you sure you want to send the newsletter email?'),
+		).toBeVisible();
+	},
+};
+
 export const ConfirmationStep: Story = {
 	args: {
 		notificationState: {

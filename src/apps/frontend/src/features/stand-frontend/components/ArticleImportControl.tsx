@@ -160,6 +160,7 @@ export const ArticleImportControl = ({
 				</div>
 				{!lockArticleInputText && (
 					<Button
+						type="button"
 						isDisabled={isFetchingContent}
 						icon="upload"
 						size="sm"
@@ -171,6 +172,7 @@ export const ArticleImportControl = ({
 				)}
 				{lockArticleInputText && (
 					<Button
+						type="button"
 						isDisabled={isFetchingContent}
 						icon="refresh"
 						size="sm"

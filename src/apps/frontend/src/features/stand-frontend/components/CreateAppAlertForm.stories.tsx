@@ -87,6 +87,26 @@ export const WithImportedArticle: Story = {
 	},
 };
 
+export const SubmitWithEnter: Story = {
+	args: {
+		notificationState: populatedPushState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('form', { name: 'Create app alert' }),
+		).toBeVisible();
+
+		await userEvent.click(canvas.getByLabelText('Headline'));
+		await userEvent.keyboard('{Enter}');
+
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			screen.getByText('Are you sure you want to send the app alert?'),
+		).toBeVisible();
+	},
+};
+
 export const Empty: Story = {
 	args: {
 		notificationState: {
