@@ -56,7 +56,7 @@ export const SendNotificationModal = () => {
 		: isAppAlert
 			? handleSendingAppAlert
 			: undefined;
-			
+
 	const canConfirmSend = Boolean(confirmSend);
 
 	return (
