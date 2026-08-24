@@ -1,6 +1,7 @@
 import { describe, expect, it, mock } from 'bun:test';
 import { beforeEach } from 'node:test';
-import { act, createElement } from 'react';
+import { act } from '@testing-library/react';
+import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { ChannelAudienceResponse } from './api/schemas';
 import type { ChannelOption } from './types';
@@ -82,70 +83,71 @@ describe('useAudienceEditions', () => {
 				'null',
 		);
 
-		return { container, root, output };
+		const cleanUp = () => {
+			act(() => {
+				root.unmount();
+				container.remove();
+			});
+		};
+
+		return { output, cleanUp };
 	};
 
 	it('when asked for email, can get the email segments', () => {
-		const { output, root, container } = renderTestComponent({
+		const { output, cleanUp } = renderTestComponent({
 			channel: 'email',
 		});
 
 		expect(output).toEqual(TEST_NEWSLETTER_SEGMENTS);
 
-		root.unmount();
-		container.remove();
+		cleanUp();
 	});
 	it('when asked for email, returns the fallback if data is unset', () => {
 		testResponse.data = undefined;
-		const { output, root, container } = renderTestComponent({
+		const { output, cleanUp } = renderTestComponent({
 			channel: 'email',
 		});
 
 		expect(output).toEqual(FALLBACK_EDITIONS);
 
-		root.unmount();
-		container.remove();
+		cleanUp();
 	});
 	it('when asked for push data without a topic id, returns the fallback', () => {
-		const { output, root, container } = renderTestComponent({
+		const { output, cleanUp } = renderTestComponent({
 			channel: 'push',
 		});
 
 		expect(output).toEqual(FALLBACK_EDITIONS);
 
-		root.unmount();
-		container.remove();
+		cleanUp();
 	});
 	it('when asked for push data with a topic id not in the data, returns the fallback', () => {
-		const { output, root, container } = renderTestComponent({
+		const { output, cleanUp } = renderTestComponent({
 			channel: 'push',
 			topicId: 'not a topic',
 		});
 
 		expect(output).toEqual(FALLBACK_EDITIONS);
 
-		root.unmount();
-		container.remove();
+		cleanUp();
 	});
 	it('when asked for push data with a matching topic id not in the data, returns the editions for that topic', () => {
-		const { output, root, container } = renderTestComponent({
+		const { output, cleanUp } = renderTestComponent({
 			channel: 'push',
 			topicId: TEST_PUSH_TOPIC.id,
 		});
 		expect(output).toEqual(TEST_PUSH_TOPIC.editions);
 
-		root.unmount();
-		container.remove();
+		cleanUp();
 	});
 	it('when asked for push data with a topic but the data is undefined, returns the fallback', () => {
 		testResponse.data = undefined;
-		const { output, root, container } = renderTestComponent({
+		const { output, cleanUp } = renderTestComponent({
 			channel: 'push',
 			topicId: TEST_PUSH_TOPIC.id,
 		});
 		expect(output).toEqual(FALLBACK_EDITIONS);
 
-		root.unmount();
-		container.remove();
+		cleanUp();
 	});
 });
