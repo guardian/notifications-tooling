@@ -36,7 +36,6 @@ const requestBaseShape = {
 
 const newsletterSendRequestSchema = z.strictObject({
 	...requestBaseShape,
-	idempotencyKey: z.string(),
 	content: z.strictObject({
 		items: z.record(z.string(), newsletterContentItemSchema),
 	}),

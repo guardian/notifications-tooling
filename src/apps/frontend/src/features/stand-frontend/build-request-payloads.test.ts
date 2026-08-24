@@ -69,4 +69,41 @@ describe('notification request builders', () => {
 			},
 		});
 	});
+
+	it('rejects content that does not match the request channel', () => {
+		const newsletterRequest = buildNewsletterRequest({
+			values: {
+				kicker: 'exclusive',
+				subject: 'A developing story',
+				preview: 'What readers need to know.',
+				audienceSegments: ['UK'],
+				deliveryOption: 'immediate',
+			},
+			content: articleFixture,
+			idempotencyKey: 'newsletter-operation-id',
+		});
+		const appPushRequest = buildAppAlertRequest({
+			values: {
+				alertType: 'breaking-news',
+				headline: 'A developing story',
+				editions: ['UK'],
+				deliveryOption: 'appImmediate',
+			},
+			content: articleFixture,
+			idempotencyKey: 'app-alert-operation-id',
+		});
+
+		expect(
+			sendNotificationRequestSchema.safeParse({
+				...newsletterRequest,
+				content: appPushRequest.content,
+			}).success,
+		).toBeFalse();
+		expect(
+			sendNotificationRequestSchema.safeParse({
+				...appPushRequest,
+				content: newsletterRequest.content,
+			}).success,
+		).toBeFalse();
+	});
 });
