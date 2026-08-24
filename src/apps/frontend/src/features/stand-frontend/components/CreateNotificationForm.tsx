@@ -1,17 +1,17 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
 import { type FormEvent, useContext, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { htmlToSingleLineText } from '../../../util/html-helpers';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { buildNewsletterRequest } from '../build-request-payloads';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticleImportControl } from './ArticleImportControl';
-import { AudienceSegments } from './AudienceSegments';
+import { AudienceSegmentsFormField } from './AudienceSegmentsFormField';
 import { ChannelDisplay } from './ChannelDisplay';
 import { CreateFormTitle } from './CreateFormTitle';
-import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
+import { DeliveryOptionFormField } from './DeliveryOptionFormField';
 import { EmailFields } from './EmailFields';
 import { NotificationFormSection } from './NotificationFormSection';
 import { SendButton } from './SendButton';
@@ -28,7 +28,7 @@ export const CreateNotificationForm = ({
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	const { control, handleSubmit, setError, setValue } =
+	const { handleSubmit, setError, setValue } =
 		useFormContext<NewsletterFormValues>();
 	const [articleInputText, setArticleInputText] = useState(
 		() => notification.content?.webUrl ?? '',
@@ -124,33 +124,13 @@ export const CreateNotificationForm = ({
 						id="audience-section"
 						isActive={activeSectionHref === '#audience-section'}
 					>
-						<Controller
-							control={control}
-							name="audienceSegments"
-							render={({ field, fieldState }) => (
-								<AudienceSegments
-									selected={field.value}
-									error={fieldState.error?.message}
-									onChange={field.onChange}
-								/>
-							)}
-						/>
+						<AudienceSegmentsFormField />
 					</NotificationFormSection>
 					<NotificationFormSection
 						id="delivery-timing-section"
 						isActive={activeSectionHref === '#delivery-timing-section'}
 					>
-						<Controller
-							control={control}
-							name="deliveryOption"
-							render={({ field }) => (
-								<DeliveryAndTimingSelector
-									selectedDeliveryTiming={field.value}
-									channel="email"
-									onChange={field.onChange}
-								/>
-							)}
-						/>
+						<DeliveryOptionFormField channel="email" />
 					</NotificationFormSection>
 					<NotificationFormSection
 						id="send-button-section"

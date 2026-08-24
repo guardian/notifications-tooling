@@ -4,11 +4,11 @@ import { APP_ALERT_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import type { AppAlertFormValues } from '../notification-forms';
 import { NotificationTextInput } from './NotificationTextInput';
 
-interface AppAlertFieldsProps {
+interface HeadlineFormFieldProps {
 	constraints?: ChannelConstraintsResponse;
 }
 
-export const AppAlertFields = ({ constraints }: AppAlertFieldsProps) => {
+export const HeadlineFormField = ({ constraints }: HeadlineFormFieldProps) => {
 	const { control } = useFormContext<AppAlertFormValues>();
 
 	const appPush = constraints?.channels['app-push'];
