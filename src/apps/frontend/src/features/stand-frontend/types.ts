@@ -4,7 +4,10 @@ import type {
 	ResolvedArticle,
 } from '@models';
 import type { ApiError } from '../../api/errors';
-import type { SendNotificationResponse } from './api/schemas';
+import type {
+	SendNotificationRequest,
+	SendNotificationResponse,
+} from './api/schemas';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
@@ -24,34 +27,15 @@ export type SendingResult =
 			response: ApiError;
 	  };
 
-export type EmailNotification = {
-	type: 'email';
-	kicker?: KickerId;
-	subject?: string;
-	preview?: string;
-	emailHtml?: string;
-	audienceSegments?: string[];
-	emailDeliveryOption?: DeliveryOption;
-};
-
-export type PushNotification = {
-	type: 'push';
-	alertType?: AlertType;
-	headline?: string;
-	pushDeliveryOption?: DeliveryOption;
-	editions?: Edition[];
-};
-
 export type NotificationState = {
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
 	content?: ResolvedArticle;
-	parameters?: EmailNotification | PushNotification;
-	hasAttemptedSend: boolean;
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
 	sendingResult?: SendingResult;
+	pendingRequest?: SendNotificationRequest;
 };
 
 export type RequestEmailHtml = {
@@ -59,22 +43,6 @@ export type RequestEmailHtml = {
 };
 
 export type NotificationAction =
-	| {
-			type: 'set-channel';
-			channel: ChannelOption;
-	  }
-	| {
-			type: 'set-delivery-timing';
-			deliveryOption: DeliveryOption;
-	  }
-	| {
-			type: 'modify-email-parameters';
-			mod: Partial<EmailNotification>;
-	  }
-	| {
-			type: 'modify-app-alert-parameters';
-			appMod: Partial<PushNotification>;
-	  }
 	| {
 			type: 'waiting-for-article';
 	  }
@@ -91,8 +59,8 @@ export type NotificationAction =
 			isOpen: boolean;
 	  }
 	| {
-			type: 'set-attempted-send';
-			hasAttemptedSend: boolean;
+			type: 'prepare-send';
+			request: SendNotificationRequest;
 	  }
 	| {
 			type: 'waiting-for-send';

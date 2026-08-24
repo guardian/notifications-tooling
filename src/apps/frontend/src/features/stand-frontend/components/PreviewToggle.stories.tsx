@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import {
 	completeEmailParams,
+	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -41,9 +42,16 @@ export const Expanded: Story = {
 	args: {
 		notificationState: {
 			...defaultState,
-			parameters: completeEmailParams,
 		},
 	},
+	render: ({ notificationState }) =>
+		WithNotificationContext(
+			<EmailPreviewToggle />,
+			notificationState,
+			{},
+			'email',
+			completeEmailParams,
+		),
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const toggle = canvas.getByRole('button', { name: 'Preview' });
@@ -66,6 +74,9 @@ export const AppExpanded: Story = {
 		WithNotificationContext(
 			<AppPreviewToggle topicTypes={FALLBACK_TOPIC_TYPES} />,
 			notificationState,
+			{},
+			'push',
+			completePushParams,
 		),
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

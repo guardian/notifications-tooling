@@ -1,29 +1,32 @@
 import { useContext } from 'react';
+import { useWatch } from 'react-hook-form';
+import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
+import {
+	defaultNewsletterFormValues,
+	type NewsletterFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import type { ChannelOption, DeliveryOption } from '../types';
-import { useAudienceEditions } from '../use-audience-editions';
 import { AudienceSegmentsPreviewPill } from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 import { TestEmailForm } from './TestEmailForm';
 
-interface EmailPreviewSectionProps {
-	selectedSegments: string[];
-	selectedChannel?: ChannelOption;
-	selectedDeliveryTiming?: DeliveryOption;
-}
-
-export const EmailPreviewSection = ({
-	selectedSegments,
-	selectedChannel,
-	selectedDeliveryTiming,
-}: EmailPreviewSectionProps) => {
-	const segments = useAudienceEditions('email');
-
+export const EmailPreviewSection = () => {
 	const {
 		notification: { fetchedArticleId },
 	} = useContext(NotificationFormContext);
+	const selectedSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
+		name: 'audienceSegments',
+		defaultValue: defaultNewsletterFormValues.audienceSegments,
+	});
+	const selectedDeliveryTiming = useWatch<
+		NewsletterFormValues,
+		'deliveryOption'
+	>({
+		name: 'deliveryOption',
+		defaultValue: defaultNewsletterFormValues.deliveryOption,
+	});
 	return (
 		<PreviewSection
 			title="Preview"
@@ -31,11 +34,11 @@ export const EmailPreviewSection = ({
 			isVisible={Boolean(fetchedArticleId)}
 		>
 			<SendInfoPreviewPill
-				channel={selectedChannel}
+				channel="email"
 				deliveryTiming={selectedDeliveryTiming}
 			/>
 			<AudienceSegmentsPreviewPill
-				segments={segments}
+				segments={FALLBACK_EDITIONS}
 				selected={selectedSegments}
 			/>
 			<HTMLPreview />
