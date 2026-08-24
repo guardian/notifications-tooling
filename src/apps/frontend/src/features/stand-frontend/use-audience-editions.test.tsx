@@ -3,6 +3,7 @@ import { beforeEach } from 'node:test';
 import { act } from '@testing-library/react';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
+import '../../../happydom-setup';
 import type { ChannelAudienceResponse } from './api/schemas';
 import type { ChannelOption } from './types';
 
