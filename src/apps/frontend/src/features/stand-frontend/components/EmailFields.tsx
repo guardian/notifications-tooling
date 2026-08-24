@@ -40,7 +40,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 	const { kicker, subject = '', preview = '' } = emailParameters;
 	const kickerLabel = kicker ? kickerNameMap[kicker] : undefined;
 	const placeholderText = kickerLabel
-		? `${kickerLabel} : Enter a subject line here...`
+		? `${kickerLabel}: Enter a subject line here...`
 		: 'Enter a subject line here...';
 
 	const newsletter = constraints?.channels.newsletter;
@@ -98,7 +98,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 						? 'Subject is required'
 						: undefined
 				}
-				prefix={kickerLabel ? `${kickerLabel} : ` : undefined}
+				prefix={kickerLabel ? `${kickerLabel}: ` : undefined}
 			/>
 
 			<NotificationTextInput

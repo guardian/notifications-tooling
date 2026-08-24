@@ -42,7 +42,7 @@ export const NotificationTextInput = ({
 		const kickerName = prefix ?? '';
 
 		const existingPrefix = Object.values(kickerNameMap)
-			.map((name) => `${name} : `)
+			.map((name) => `${name}: `)
 			.find((prefix) => value.startsWith(prefix));
 
 		const bareSubject = existingPrefix
