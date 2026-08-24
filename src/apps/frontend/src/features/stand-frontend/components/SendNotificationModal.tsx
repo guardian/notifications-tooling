@@ -2,28 +2,10 @@ import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { useContext } from 'react';
 import { getChannelDescription } from '../../../util/display-text-helpers';
-import type {
-	SendNotificationRequest,
-	SendNotificationResponse,
-} from '../api/schemas';
+import type { SendNotificationRequest } from '../api/schemas';
 import { buildRequest } from '../build-request-payloads';
 import { NotificationFormContext } from '../NotificationContext';
-import type { SendingResult } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
-
-// TEMP: app-alert sends have no request builder or backend contract yet, so
-// resolve a stubbed success to reach the confirmation page. Remove once
-// buildAppRequest and the push send path land.
-const stubbedAppAlertResult: SendingResult = {
-	ok: true,
-	response: {
-		notificationId: 'app-alert-local',
-		status: 'accepted',
-		plans: [{ channel: 'app-push', planId: 'local', status: 'accepted' }],
-		statusUrl: '',
-		cancellable: { cancelUrl: '', expiresAt: 0 },
-	} satisfies SendNotificationResponse,
-};
 
 export const SendNotificationModal = () => {
 	const { notification, updateNotification, sendNotification } = useContext(
@@ -44,17 +26,11 @@ export const SendNotificationModal = () => {
 			});
 		};
 
-	const handleSendingAppAlert = () => {
-		updateNotification({ type: 'waiting-for-send' });
-		void Promise.resolve(stubbedAppAlertResult).then((result) => {
-			updateNotification({ type: 'receive-send-result', result });
-		});
-	};
-
 	const confirmSend = sendNotificationRequest
 		? handleSendingEmailNotification(sendNotificationRequest)
 		: isAppAlert
-			? handleSendingAppAlert
+			? // App-alert send has no backend path yet, so nothing is wired here.
+				undefined
 			: undefined;
 
 	const canConfirmSend = Boolean(confirmSend);
