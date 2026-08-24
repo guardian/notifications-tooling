@@ -1,5 +1,5 @@
 import { Option, Select } from '@guardian/stand/Select';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
@@ -32,36 +32,6 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 		notification.parameters?.type === 'email'
 			? notification.parameters
 			: undefined;
-
-	useEffect(() => {
-		if (!emailParameters) {
-			return;
-		}
-
-		const { kicker, subject = '' } = emailParameters;
-		const kickerLabel = kicker ? kickerNameMap[kicker] : undefined;
-
-		if (subject === '') {
-			return;
-		}
-		const kickerName = kickerLabel ? `${kickerLabel} : ` : '';
-
-		const existingPrefix = Object.values(kickerNameMap)
-			.map((name) => `${name} : `)
-			.find((prefix) => subject.startsWith(prefix));
-
-		const bareSubject = existingPrefix
-			? subject.slice(existingPrefix.length)
-			: subject;
-		const nextSubject = `${kickerName}${bareSubject}`;
-
-		if (nextSubject !== subject) {
-			updateNotification({
-				type: 'modify-email-parameters',
-				mod: { subject: nextSubject },
-			});
-		}
-	}, [emailParameters, updateNotification]);
 
 	if (!emailParameters) {
 		return null;
@@ -128,6 +98,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 						? 'Subject is required'
 						: undefined
 				}
+				prefix={kickerLabel ? `${kickerLabel} : ` : undefined}
 			/>
 
 			<NotificationTextInput

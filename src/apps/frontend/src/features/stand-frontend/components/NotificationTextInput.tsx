@@ -1,6 +1,9 @@
 import { css } from '@emotion/react';
 import { baseSizing } from '@guardian/stand';
 import { TextArea } from '@guardian/stand/TextArea';
+import { useContext, useEffect } from 'react';
+import { NotificationFormContext } from '../NotificationContext';
+import { kickerNameMap } from '../option-values';
 import { CharacterCount } from './CharacterCount';
 
 type Props = {
@@ -14,6 +17,7 @@ type Props = {
 	allowLineBreak?: boolean;
 	isDisabled?: boolean;
 	error?: string;
+	prefix?: string;
 };
 
 export const NotificationTextInput = ({
@@ -27,7 +31,32 @@ export const NotificationTextInput = ({
 	allowLineBreak,
 	isDisabled,
 	error,
+	prefix,
 }: Props) => {
+	const { updateNotification } = useContext(NotificationFormContext);
+
+	useEffect(() => {
+		if (value === '') {
+			return;
+		}
+		const kickerName = prefix ?? '';
+
+		const existingPrefix = Object.values(kickerNameMap)
+			.map((name) => `${name} : `)
+			.find((prefix) => value.startsWith(prefix));
+
+		const bareSubject = existingPrefix
+			? value.slice(existingPrefix.length)
+			: value;
+		const nextSubject = `${kickerName}${bareSubject}`;
+		if (nextSubject !== value) {
+			updateNotification({
+				type: 'modify-email-parameters',
+				mod: { subject: nextSubject },
+			});
+		}
+	}, [value, updateNotification, prefix]);
+
 	return (
 		<div>
 			<TextArea
