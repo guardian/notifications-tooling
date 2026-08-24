@@ -4,18 +4,20 @@ import { z } from 'zod';
 export const kickerSchema = z.enum(['breaking-news', 'exclusive', 'none']);
 export type Kicker = z.infer<typeof kickerSchema>;
 
-const newsletterContentItemSchema = z.strictObject({
-	type: z.literal('newsletter'),
+const baseContentItemShape = z.strictObject({
 	title: z.string(),
 	body: z.string(),
 	link: z.string(),
 });
 
+const newsletterContentItemSchema = z.strictObject({
+	...baseContentItemShape,
+	type: z.literal('newsletter'),
+});
+
 const appPushContentItemSchema = z.strictObject({
+	...baseContentItemShape,
 	type: z.literal('app-push'),
-	title: z.string(),
-	body: z.string(),
-	link: z.string(),
 	media: z
 		.strictObject({
 			type: z.literal('image'),
