@@ -1,13 +1,24 @@
 import { Option, Select } from '@guardian/stand/Select';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
+import type { KickerId } from '../types';
 import { NotificationTextInput } from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
+
+const toKickerId = (value: string): KickerId | undefined => {
+	switch (value) {
+		case 'breaking-news':
+		case 'exclusive':
+			return value;
+		default:
+			return undefined;
+	}
+};
 
 interface EmailFieldsProps {
 	constraints?: ReturnType<typeof useChannelConstraints>['data'];
@@ -17,19 +28,56 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
+	const emailParameters =
+		notification.parameters?.type === 'email'
+			? notification.parameters
+			: undefined;
 
-	if (notification.parameters?.type !== 'email') {
+	useEffect(() => {
+		if (!emailParameters) {
+			return;
+		}
+
+		const { kicker, subject = '' } = emailParameters;
+		const kickerLabel = kicker ? kickerNameMap[kicker] : undefined;
+
+		if (subject === '') {
+			return;
+		}
+		const kickerName = kickerLabel ? `${kickerLabel} : ` : '';
+
+		const existingPrefix = Object.values(kickerNameMap)
+			.map((name) => `${name} : `)
+			.find((prefix) => subject.startsWith(prefix));
+
+		const bareSubject = existingPrefix
+			? subject.slice(existingPrefix.length)
+			: subject;
+		const nextSubject = `${kickerName}${bareSubject}`;
+
+		if (nextSubject !== subject) {
+			updateNotification({
+				type: 'modify-email-parameters',
+				mod: { subject: nextSubject },
+			});
+		}
+	}, [emailParameters, updateNotification]);
+
+	if (!emailParameters) {
 		return null;
 	}
+
+	const { kicker, subject = '', preview = '' } = emailParameters;
+	const kickerLabel = kicker ? kickerNameMap[kicker] : undefined;
+	const placeholderText = kickerLabel
+		? `${kickerLabel} : Enter a subject line here...`
+		: 'Enter a subject line here...';
 
 	const newsletter = constraints?.channels.newsletter;
 	const subjectLimits =
 		newsletter?.compose.subject ?? NEWSLETTER_LIMIT_FALLBACKS.title;
 	const previewLimits =
 		newsletter?.content.body ?? NEWSLETTER_LIMIT_FALLBACKS.body;
-	const kicker = notification.parameters.kicker;
-	const kickerName = kicker !== undefined ? kickerNameMap[kicker] + ` : ` : '';
-	const { subject = '', preview = '' } = notification.parameters;
 	const requiredFieldErrors = validateNotificationForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
 	return (
@@ -40,20 +88,13 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 				description="Choose the kicker for the email newsletter"
 				onChange={(key) => {
 					const kicker =
-						typeof key === 'string' ? key.split('//').at(1) : undefined;
-					switch (kicker) {
-						case 'breaking-news':
-						case 'exclusive':
-							return updateNotification({
-								type: 'modify-email-parameters',
-								mod: { kicker },
-							});
-						default:
-							return updateNotification({
-								type: 'modify-email-parameters',
-								mod: { kicker: undefined },
-							});
-					}
+						typeof key === 'string'
+							? toKickerId(key.split('//').at(1) ?? '')
+							: undefined;
+					updateNotification({
+						type: 'modify-email-parameters',
+						mod: { kicker },
+					});
 				}}
 				selectionMode="single"
 				value={toOptionKey(kicker ?? 'undefined')}
@@ -72,7 +113,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 			<NotificationTextInput
 				label="Subject"
 				description="Choose the subject line (kicker included in character count)"
-				placeholder={`${kickerName}${''}Enter a subject line here...`}
+				placeholder={placeholderText}
 				value={subject}
 				update={(subject) =>
 					updateNotification({
