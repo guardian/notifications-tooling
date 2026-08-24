@@ -1,12 +1,12 @@
 import type { ResolvedArticle } from '@models';
 import type { SendNotificationRequest } from './api/schemas';
+import { editionIds } from './edition-values';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
 } from './notification-forms';
 import { kickerNameMap } from './option-values';
 import { alertTypeNameMap } from './option-values';
-import type { Edition } from './types';
 
 type BuildRequestArgs<Values> = {
 	values: Values;
@@ -55,14 +55,6 @@ export const buildNewsletterRequest = ({
 			scheduledFor: null,
 		},
 	};
-};
-
-const editionIds: Record<Edition, string> = {
-	UK: 'uk',
-	US: 'us',
-	AU: 'au',
-	EU: 'europe',
-	INT: 'international',
 };
 
 export const buildAppAlertRequest = ({

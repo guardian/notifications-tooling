@@ -4,12 +4,12 @@ import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { TopicTypeOption } from '../api/schemas';
+import { editionIds } from '../edition-values';
 import {
 	type AppAlertFormValues,
 	defaultAppAlertFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import type { Edition } from '../types';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
 import { Editions } from './Editions';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
@@ -19,14 +19,6 @@ import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 interface AppPreviewSectionProps {
 	topicTypes: TopicTypeOption[];
 }
-
-const editionIds: Record<Edition, string> = {
-	UK: 'uk',
-	US: 'us',
-	AU: 'au',
-	EU: 'europe',
-	INT: 'international',
-};
 
 export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 	const { notification } = useContext(NotificationFormContext);
