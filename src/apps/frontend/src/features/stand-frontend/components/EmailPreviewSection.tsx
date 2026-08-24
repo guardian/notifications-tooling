@@ -1,6 +1,9 @@
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
-import type { NewsletterFormValues } from '../notification-forms';
+import {
+	defaultNewsletterFormValues,
+	type NewsletterFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import {
 	AudienceSegmentsPreviewPill,
@@ -17,14 +20,14 @@ export const EmailPreviewSection = () => {
 	} = useContext(NotificationFormContext);
 	const selectedSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
 		name: 'audienceSegments',
-		defaultValue: [],
+		defaultValue: defaultNewsletterFormValues.audienceSegments,
 	});
 	const selectedDeliveryTiming = useWatch<
 		NewsletterFormValues,
 		'deliveryOption'
 	>({
 		name: 'deliveryOption',
-		defaultValue: 'immediate',
+		defaultValue: defaultNewsletterFormValues.deliveryOption,
 	});
 	return (
 		<PreviewSection

@@ -15,6 +15,10 @@ import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
+import {
+	defaultAppAlertFormValues,
+	defaultNewsletterFormValues,
+} from '../notification-forms';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
@@ -66,7 +70,7 @@ const styles = {
 	}),
 };
 
-const ParameterDisplay = ({
+const ParameterLabel = ({
 	label,
 	children,
 }: {
@@ -98,7 +102,7 @@ const DeliveryParameter = ({
 	const temporaryDeliveryTime = `${tempTime} (ET), ${tempDate}`;
 
 	return (
-		<ParameterDisplay label="Delivery">
+		<ParameterLabel label="Delivery">
 			<div
 				css={{
 					display: 'flex',
@@ -130,32 +134,32 @@ const DeliveryParameter = ({
 					</Typography>
 				</div>
 			</div>
-		</ParameterDisplay>
+		</ParameterLabel>
 	);
 };
 
 export const NewsletterDispatchDetails = () => {
 	const audienceSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
 		name: 'audienceSegments',
-		defaultValue: [],
+		defaultValue: defaultNewsletterFormValues.audienceSegments,
 	});
 	const deliveryOption = useWatch<NewsletterFormValues, 'deliveryOption'>({
 		name: 'deliveryOption',
-		defaultValue: 'immediate',
+		defaultValue: defaultNewsletterFormValues.deliveryOption,
 	});
 
 	return (
 		<section>
-			<ParameterDisplay label="Channel">
+			<ParameterLabel label="Channel">
 				<SendInfoPreviewPill channel="email" isConfirmation={true} />
-			</ParameterDisplay>
-			<ParameterDisplay label="Audience segments">
+			</ParameterLabel>
+			<ParameterLabel label="Audience segments">
 				<AudienceSegmentsPreviewPill
 					segments={DEFAULT_SEGMENTS}
 					selected={audienceSegments}
 					isConfirmation={true}
 				/>
-			</ParameterDisplay>
+			</ParameterLabel>
 			<DeliveryParameter deliveryTiming={deliveryOption} />
 		</section>
 	);
@@ -164,18 +168,20 @@ export const NewsletterDispatchDetails = () => {
 export const AppAlertDispatchDetails = () => {
 	const editions = useWatch<AppAlertFormValues, 'editions'>({
 		name: 'editions',
-		defaultValue: [],
+		defaultValue: defaultAppAlertFormValues.editions,
 	});
 
 	return (
 		<section>
-			<ParameterDisplay label="Channel">
+			<ParameterLabel label="Channel">
 				<SendInfoPreviewPill channel="push" isConfirmation={true} />
-			</ParameterDisplay>
-			<ParameterDisplay label="Editions">
+			</ParameterLabel>
+			<ParameterLabel label="Editions">
 				<Typography>{editions.join(', ')}</Typography>
-			</ParameterDisplay>
-			<DeliveryParameter deliveryTiming="appImmediate" />
+			</ParameterLabel>
+			<DeliveryParameter
+				deliveryTiming={defaultAppAlertFormValues.deliveryOption}
+			/>
 		</section>
 	);
 };
