@@ -12,21 +12,23 @@ import { channelAudienceResponseSchema } from './schemas';
 
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
 
+export const FALLBACK_APP_ALERT_EDITIONS: EditionOption[] = [
+	{ id: editionIds.UK, label: 'UK' },
+	{ id: editionIds.US, label: 'US' },
+	{ id: editionIds.AU, label: 'AU' },
+	{ id: editionIds.INT, label: 'International' },
+	{ id: editionIds.EU, label: 'Europe' },
+];
+
 export const FALLBACK_TOPIC_TYPES: TopicTypeOption[] = [
 	{
 		id: 'breaking-news',
 		label: 'Breaking news',
-		editions: [
-			{ id: editionIds.UK, label: 'UK' },
-			{ id: editionIds.US, label: 'US' },
-			{ id: editionIds.AU, label: 'AU' },
-			{ id: editionIds.INT, label: 'International' },
-			{ id: editionIds.EU, label: 'Europe' },
-		],
+		editions: FALLBACK_APP_ALERT_EDITIONS,
 	},
 ];
 
-export const FALLBACK_EDITIONS: EditionOption[] = [
+export const FALLBACK_NEWSLETTER_EDITIONS: EditionOption[] = [
 	{ id: 'UK', label: 'United Kingdom' },
 	{ id: 'US', label: 'United States' },
 	{ id: 'AU', label: 'Australia' },

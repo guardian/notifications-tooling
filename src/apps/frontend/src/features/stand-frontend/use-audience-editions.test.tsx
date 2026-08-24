@@ -5,12 +5,21 @@ import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../../../happydom-setup';
 import type { ChannelAudienceResponse } from './api/schemas';
+import { editionIds } from './edition-values';
 import type { ChannelOption } from './types';
 
-const FALLBACK_EDITIONS = [
+const FALLBACK_NEWSLETTER_EDITIONS = [
 	{ id: 'UK', label: 'United Kingdom' },
 	{ id: 'US', label: 'United States' },
 	{ id: 'AU', label: 'Australia' },
+];
+
+const FALLBACK_APP_ALERT_EDITIONS = [
+	{ id: editionIds.UK, label: 'UK' },
+	{ id: editionIds.US, label: 'US' },
+	{ id: editionIds.AU, label: 'AU' },
+	{ id: editionIds.INT, label: 'International' },
+	{ id: editionIds.EU, label: 'Europe' },
 ];
 
 const TEST_NEWSLETTER_SEGMENTS = [
@@ -50,7 +59,8 @@ const testResponse: { data?: ChannelAudienceResponse } = { data: testData };
 const useChannelAudiences = mock(() => testResponse);
 
 void mock.module('./api/useChannelAudiences', () => ({
-	FALLBACK_EDITIONS,
+	FALLBACK_NEWSLETTER_EDITIONS,
+	FALLBACK_APP_ALERT_EDITIONS,
 	useChannelAudiences,
 }));
 
@@ -109,7 +119,7 @@ describe('useAudienceEditions', () => {
 			channel: 'email',
 		});
 
-		expect(output).toEqual(FALLBACK_EDITIONS);
+		expect(output).toEqual(FALLBACK_NEWSLETTER_EDITIONS);
 
 		cleanUp();
 	});
@@ -118,7 +128,7 @@ describe('useAudienceEditions', () => {
 			channel: 'push',
 		});
 
-		expect(output).toEqual(FALLBACK_EDITIONS);
+		expect(output).toEqual(FALLBACK_APP_ALERT_EDITIONS);
 
 		cleanUp();
 	});
@@ -128,7 +138,7 @@ describe('useAudienceEditions', () => {
 			topicId: 'not a topic',
 		});
 
-		expect(output).toEqual(FALLBACK_EDITIONS);
+		expect(output).toEqual(FALLBACK_APP_ALERT_EDITIONS);
 
 		cleanUp();
 	});
@@ -147,7 +157,7 @@ describe('useAudienceEditions', () => {
 			channel: 'push',
 			topicId: TEST_PUSH_TOPIC.id,
 		});
-		expect(output).toEqual(FALLBACK_EDITIONS);
+		expect(output).toEqual(FALLBACK_APP_ALERT_EDITIONS);
 
 		cleanUp();
 	});

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
+import { FALLBACK_NEWSLETTER_EDITIONS } from '../api/useChannelAudiences';
 import {
 	AudienceSegments,
 	AudienceSegmentsPreviewPill,
@@ -10,7 +10,7 @@ const meta = {
 	title: 'Stand Frontend/AudienceSegments',
 	component: AudienceSegments,
 	args: {
-		segments: FALLBACK_EDITIONS,
+		segments: FALLBACK_NEWSLETTER_EDITIONS,
 	},
 	parameters: {
 		docs: {
