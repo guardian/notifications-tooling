@@ -9,12 +9,14 @@ import type {
 } from './api/schemas';
 import type { TestEmailRequestFunction } from './api/send-test-email';
 import type {
+	ChannelOption,
 	NotificationAction,
 	NotificationState,
 	RequestEmailHtml,
 } from './types';
 
 export interface NotificationFormContextProps {
+	channel: ChannelOption;
 	notification: NotificationState;
 	updateNotification: ActionDispatch<[NotificationAction]>;
 	capiFetch: {
@@ -32,10 +34,10 @@ export interface NotificationFormContextProps {
 
 export const NotificationFormContext =
 	createContext<NotificationFormContextProps>({
+		channel: 'email',
 		notification: {
 			isFetchingContent: false,
 			isWaitingForSend: false,
-			hasAttemptedSend: false,
 			confirmSendModalOpen: false,
 		},
 		updateNotification: () => {},

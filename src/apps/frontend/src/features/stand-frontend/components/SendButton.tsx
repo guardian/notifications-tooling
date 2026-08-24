@@ -7,32 +7,16 @@ import {
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext } from 'react';
-import {
-	checkIfReadyToSend,
-	validateAppAlertForm,
-	validateNotificationForm,
-} from '../form-validation';
-import { NotificationFormContext } from '../NotificationContext';
+import { useFormContext } from 'react-hook-form';
 
 interface SendButtonProps {
 	children: React.ReactNode;
 }
 
 export const SendButton = ({ children }: SendButtonProps) => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
-	const { parameters } = notification;
-
-	if (!parameters) {
-		return null;
-	}
-	const isReady = checkIfReadyToSend(notification);
-	const hasFallbackError =
-		parameters.type === 'email'
-			? validateNotificationForm(notification).includes('cannotBuildRequest')
-			: validateAppAlertForm(notification).includes('cannotBuildRequest');
+	const {
+		formState: { errors },
+	} = useFormContext();
 
 	return (
 		<div
@@ -51,30 +35,12 @@ export const SendButton = ({ children }: SendButtonProps) => {
 			>
 				Before sending, review in the preview on the right
 			</Typography>
-			<Button
-				onClick={() => {
-					if (isReady) {
-						updateNotification({
-							type: 'set-attempted-send',
-							hasAttemptedSend: false,
-						});
-						updateNotification({ type: 'set-show-confirm-send', isOpen: true });
-						return;
-					}
-
-					updateNotification({
-						type: 'set-attempted-send',
-						hasAttemptedSend: true,
-					});
-					updateNotification({ type: 'set-show-confirm-send', isOpen: false });
-				}}
-				variant="primary"
-			>
+			<Button type="submit" variant="primary">
 				{children}
 			</Button>
-			{hasFallbackError && (
+			{errors.root?.request && (
 				<InlineMessage level="error">
-					The form contains some missing or invalid data
+					{errors.root.request.message}
 				</InlineMessage>
 			)}
 		</div>

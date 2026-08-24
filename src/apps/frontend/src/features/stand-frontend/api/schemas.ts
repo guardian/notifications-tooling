@@ -1,24 +1,43 @@
 import { z } from 'zod';
 
-/**
- * Presentation-only kicker choice from `CreateNotificationForm`. It drives the
- * local HTML preview only: no request builder exists yet, and the backend
- * contract has no field to carry it, so nothing sends it downstream. Whoever
- * wires the send will need a backend field before this can be represented.
- * See CONTEXT.md.
- */
+/** Presentation choice composed into the newsletter subject by the client. */
 export const kickerSchema = z.enum(['breaking-news', 'exclusive', 'none']);
 export type Kicker = z.infer<typeof kickerSchema>;
 
-const newsletterContentItemSchema = z.strictObject({
-	type: z.literal('newsletter'),
+const baseContentItemShape = z.strictObject({
 	title: z.string(),
 	body: z.string(),
 	link: z.string(),
 });
 
-export const sendNotificationRequestSchema = z.strictObject({
+const newsletterContentItemSchema = z.strictObject({
+	...baseContentItemShape.shape,
+	type: z.literal('newsletter'),
+});
+
+const appPushContentItemSchema = z.strictObject({
+	...baseContentItemShape.shape,
+	type: z.literal('app-push'),
+	media: z
+		.strictObject({
+			type: z.literal('image'),
+			imageUrl: z.string(),
+			thumbnailUrl: z.string().optional(),
+		})
+		.optional(),
+});
+
+const requestBaseShape = {
 	idempotencyKey: z.string(),
+	sender: z.string(),
+	options: z.strictObject({
+		dryRun: z.boolean(),
+		scheduledFor: z.null(),
+	}),
+};
+
+const newsletterSendRequestSchema = z.strictObject({
+	...requestBaseShape,
 	content: z.strictObject({
 		items: z.record(z.string(), newsletterContentItemSchema),
 	}),
@@ -34,12 +53,35 @@ export const sendNotificationRequestSchema = z.strictObject({
 			}),
 		}),
 	}),
-	sender: z.string(),
-	options: z.strictObject({
-		dryRun: z.boolean(),
-		scheduledFor: z.null(),
+});
+
+const appPushSendRequestSchema = z.strictObject({
+	...requestBaseShape,
+	content: z.strictObject({
+		items: z.record(z.string(), appPushContentItemSchema),
+	}),
+	channels: z.strictObject({
+		'app-push': z.strictObject({
+			audience: z.strictObject({
+				type: z.literal('topic'),
+				items: z.array(
+					z.strictObject({
+						type: z.string(),
+						name: z.string(),
+					}),
+				),
+			}),
+			compose: z.strictObject({
+				use: z.string(),
+			}),
+		}),
 	}),
 });
+
+export const sendNotificationRequestSchema = z.union([
+	newsletterSendRequestSchema,
+	appPushSendRequestSchema,
+]);
 export type SendNotificationRequest = z.infer<
 	typeof sendNotificationRequestSchema
 >;
@@ -90,9 +132,8 @@ export const channelConstraintsResponseSchema = z.object({
 			compose: z.object({
 				minItems: z.number().int().nonnegative(),
 				maxItems: z.number().int().positive(),
-				headline: contentFieldLimitsSchema,
 			}),
-			editions: z.object({
+			audience: z.object({
 				maxTopics: z.number().int().positive(),
 			}),
 		}),

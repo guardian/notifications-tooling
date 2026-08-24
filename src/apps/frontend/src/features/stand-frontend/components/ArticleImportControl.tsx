@@ -4,13 +4,11 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
+import type { ResolvedArticle } from '@models';
 import { useContext } from 'react';
+import { useFormContext } from 'react-hook-form';
 import type { ApiError } from '../../../api/errors';
-import {
-	parseArticleUrlInputToContentId,
-	validateAppAlertForm,
-	validateNotificationForm,
-} from '../form-validation';
+import { parseArticleUrlInputToContentId } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -41,24 +39,25 @@ export interface ArticleImportControlProps {
 	setArticleInputText: (setArticleInputText: string) => void;
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
+	onArticleImported: (article: ResolvedArticle) => void;
 }
 export const ArticleImportControl = ({
 	articleInputText,
 	setArticleInputText,
 	lockArticleInputText,
 	setLockArticleInputText,
+	onArticleImported,
 }: ArticleImportControlProps) => {
 	const { notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
 	);
-
 	const {
-		fetchedArticleId,
-		isFetchingContent,
-		fetchArticleError,
-		hasAttemptedSend,
-		content,
-	} = notification;
+		clearErrors,
+		formState: { submitCount },
+	} = useFormContext();
+
+	const { fetchedArticleId, isFetchingContent, fetchArticleError, content } =
+		notification;
 
 	const { failure, webUrl, articleId } =
 		parseArticleUrlInputToContentId(articleInputText);
@@ -87,9 +86,12 @@ export const ArticleImportControl = ({
 					errorMessage: getUserFacingError(result.failure),
 				});
 			}
+			const { article } = result.data;
+			onArticleImported(article);
+			clearErrors('root');
 			updateNotification({
 				type: 'receive-article',
-				content: result.data.article,
+				content: article,
 			});
 			setLockArticleInputText(true);
 		});
@@ -97,14 +99,9 @@ export const ArticleImportControl = ({
 
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
-
-	const requiredFieldErrors =
-		notification.parameters?.type === 'email'
-			? validateNotificationForm(notification)
-			: validateAppAlertForm(notification);
 	const showFieldErrors =
 		failure ??
-		(requiredFieldErrors.includes('article') && hasAttemptedSend
+		(!content && submitCount > 0
 			? 'Paste a URL to fetch an article'
 			: undefined);
 
@@ -158,6 +155,7 @@ export const ArticleImportControl = ({
 				</div>
 				{!lockArticleInputText && (
 					<Button
+						type="button"
 						isDisabled={isFetchingContent}
 						icon="upload"
 						size="sm"
@@ -169,6 +167,7 @@ export const ArticleImportControl = ({
 				)}
 				{lockArticleInputText && (
 					<Button
+						type="button"
 						isDisabled={isFetchingContent}
 						icon="refresh"
 						size="sm"

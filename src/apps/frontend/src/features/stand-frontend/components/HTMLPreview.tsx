@@ -2,21 +2,22 @@ import { css } from '@emotion/react';
 import { HtmlPreview } from '@guardian/stand/HtmlPreviewLoader';
 import { Typography } from '@guardian/stand/Typography';
 import { useCallback, useContext, useEffect, useState } from 'react';
+import { useWatch } from 'react-hook-form';
+import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
-import type { EmailNotification } from '../types';
 
 // TO DO - this function will work with the current format of the notifcation emails
 // but we shoudl modidify the template used in email-rendering to include attributes
 // to more robustly identify the elements to update
 const modifyContent = (
 	emailHtml: string,
-	parameters?: EmailNotification,
+	parameters: Partial<NewsletterFormValues>,
 ): string => {
 	const body = document.createElement('body');
 	body.innerHTML = emailHtml;
 
-	const { subject, kicker, preview } = parameters ?? {};
+	const { subject, kicker, preview } = parameters;
 	const headlineElement = body.querySelector('h2');
 	const kickerElement =
 		headlineElement?.parentElement?.querySelector<HTMLElement>(
@@ -43,14 +44,14 @@ const modifyContent = (
 
 export const HTMLPreview = () => {
 	const {
-		notification: { parameters, content },
+		notification: { content },
 		requestEmailHtml,
 	} = useContext(NotificationFormContext);
+	const parameters = useWatch<NewsletterFormValues>();
 	const [emailHtml, setEmailHtml] = useState<string>();
 	const [errorMessage, setErrorMessage] = useState<string>();
 	const [isLoading, setIsLoading] = useState(false);
-	const emailParameters = parameters?.type === 'email' ? parameters : undefined;
-	const stringifiedAudience = (emailParameters?.audienceSegments ?? []).join();
+	const stringifiedAudience = (parameters.audienceSegments ?? []).join();
 	const { webUrl } = content ?? {};
 
 	const fetchHtml = useCallback(async () => {
@@ -92,7 +93,7 @@ export const HTMLPreview = () => {
 		<HtmlPreview
 			html={
 				emailHtml
-					? modifyContent(emailHtml, emailParameters)
+					? modifyContent(emailHtml, parameters)
 					: `<div>no article html</div> `
 			}
 			errorMessage={errorMessage}

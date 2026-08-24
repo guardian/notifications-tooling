@@ -18,6 +18,7 @@ export const TextLinkButton = ({
 	return (
 		<>
 			<Button
+				type="button"
 				onClick={onClick}
 				variant="tertiary"
 				aria-label={text}

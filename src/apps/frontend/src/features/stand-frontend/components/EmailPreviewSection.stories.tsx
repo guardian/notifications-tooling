@@ -1,22 +1,32 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { WithNotificationContext } from '../../../stories/story-helpers';
-import { defaultState } from '../notification-reducer';
+import type { completeEmailParams } from '../../../stories/story-helpers';
+import {
+	populatedEmailState,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
+import type { NotificationState } from '../types';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
-const meta = {
+type StoryArgs = {
+	notificationState: NotificationState;
+	formValues?: Partial<typeof completeEmailParams>;
+};
+
+const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/EmailPreviewSection',
 	component: EmailPreviewSection,
 	args: {
-		selectedSegments: [],
-		selectedChannel: undefined,
-		selectedDeliveryTiming: undefined,
+		notificationState: populatedEmailState,
 	},
-	render: (args) =>
-		WithNotificationContext(<EmailPreviewSection {...args} />, {
-			...defaultState,
-			fetchedArticleId: 'article-id',
-		}),
+	render: ({ notificationState, formValues }) =>
+		WithNotificationContext(
+			<EmailPreviewSection />,
+			notificationState,
+			{},
+			'email',
+			formValues,
+		),
 	parameters: {
 		docs: {
 			description: {
@@ -25,17 +35,12 @@ const meta = {
 			},
 		},
 	},
-} satisfies Meta<typeof EmailPreviewSection>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Empty: Story = {
-	args: {
-		selectedSegments: [],
-		selectedChannel: undefined,
-		selectedDeliveryTiming: undefined,
-	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('Preview')).toBeVisible();
@@ -47,34 +52,20 @@ export const Empty: Story = {
 	},
 };
 
-export const WithChannel: Story = {
-	args: {
-		selectedSegments: [],
-		selectedChannel: 'email',
-		selectedDeliveryTiming: undefined,
-	},
-};
+export const WithChannel: Story = {};
 
-export const WithDeliveryTiming: Story = {
-	args: {
-		selectedSegments: [],
-		selectedChannel: undefined,
-		selectedDeliveryTiming: 'immediate',
-	},
-};
+export const WithDeliveryTiming: Story = {};
 
 export const WithSegments: Story = {
 	args: {
-		selectedSegments: ['UK', 'US'],
-		selectedChannel: undefined,
-		selectedDeliveryTiming: undefined,
+		notificationState: populatedEmailState,
+		formValues: { audienceSegments: ['UK', 'US'] },
 	},
 };
 
 export const FullyPopulated: Story = {
 	args: {
-		selectedSegments: ['UK', 'US', 'AU'],
-		selectedChannel: 'email',
-		selectedDeliveryTiming: 'immediate',
+		notificationState: populatedEmailState,
+		formValues: { audienceSegments: ['UK', 'US', 'AU'] },
 	},
 };

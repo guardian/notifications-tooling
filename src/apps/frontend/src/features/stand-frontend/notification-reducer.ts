@@ -1,37 +1,15 @@
-import { htmlToSingleLineText } from '../../util/html-helpers';
-import type {
-	EmailNotification,
-	NotificationAction,
-	NotificationState,
-	PushNotification,
-} from './types';
-
-export const defaultEmailParams: EmailNotification = {
-	type: 'email',
-	kicker: 'breaking-news',
-	emailDeliveryOption: 'immediate',
-};
-
-export const defaultPushParams: PushNotification = {
-	type: 'push',
-	alertType: 'breaking-news',
-	pushDeliveryOption: 'appImmediate',
-};
+import type { NotificationAction, NotificationState } from './types';
 
 export const defaultState: NotificationState = {
 	isFetchingContent: false,
 	isWaitingForSend: false,
-	hasAttemptedSend: false,
 	confirmSendModalOpen: false,
-	parameters: defaultEmailParams,
 };
 
 export const defaultAppAlertState: NotificationState = {
 	isFetchingContent: false,
 	isWaitingForSend: false,
-	hasAttemptedSend: false,
 	confirmSendModalOpen: false,
-	parameters: defaultPushParams,
 };
 
 export const notificationReducer = (
@@ -40,68 +18,6 @@ export const notificationReducer = (
 ): NotificationState => {
 	const state = structuredClone(prevState);
 	switch (action.type) {
-		case 'modify-email-parameters': {
-			if (state.parameters?.type !== 'email') {
-				return state;
-			}
-			return {
-				...state,
-				parameters: { ...state.parameters, ...action.mod },
-			};
-		}
-		case 'modify-app-alert-parameters': {
-			if (state.parameters?.type !== 'push') {
-				return state;
-			}
-			return {
-				...state,
-				parameters: { ...state.parameters, ...action.appMod },
-			};
-		}
-
-		case 'set-channel': {
-			switch (action.channel) {
-				case 'email':
-					return {
-						...state,
-						hasAttemptedSend: false,
-						parameters: defaultEmailParams,
-					};
-				case 'push': {
-					return {
-						...state,
-						hasAttemptedSend: false,
-						parameters: defaultPushParams,
-					};
-				}
-			}
-		}
-		// eslint-disable-next-line no-fallthrough -- previous case has exhaustive switch
-		case 'set-delivery-timing': {
-			switch (action.deliveryOption) {
-				case 'immediate':
-					return {
-						...state,
-						hasAttemptedSend: false,
-						parameters: defaultEmailParams,
-					};
-				case 'appImmediate': {
-					return {
-						...state,
-						hasAttemptedSend: false,
-						parameters: defaultPushParams,
-					};
-				}
-			}
-		}
-		// eslint-disable-next-line no-fallthrough -- previous case has exhaustive switch
-		case 'set-attempted-send': {
-			return {
-				...state,
-				hasAttemptedSend: action.hasAttemptedSend,
-			};
-		}
-
 		case 'waiting-for-article':
 			return {
 				...state,
@@ -110,18 +26,6 @@ export const notificationReducer = (
 			};
 
 		case 'receive-article': {
-			const { parameters } = state;
-			const { headline, standfirst } = action.content.fields ?? {};
-
-			if (parameters?.type === 'email') {
-				const standfirstText = htmlToSingleLineText(standfirst);
-				parameters.preview = standfirstText || parameters.preview;
-				parameters.subject = headline ?? parameters.subject;
-			}
-			if (parameters?.type === 'push') {
-				parameters.headline = headline ?? action.content.webTitle;
-			}
-
 			return {
 				...state,
 				fetchedArticleId: action.content.id,
@@ -135,6 +39,7 @@ export const notificationReducer = (
 			return {
 				...state,
 				fetchedArticleId: undefined,
+				content: undefined,
 				isFetchingContent: false,
 				fetchArticleError: action.errorMessage,
 			};
@@ -145,11 +50,18 @@ export const notificationReducer = (
 			return state;
 		}
 
+		case 'prepare-send': {
+			return {
+				...state,
+				confirmSendModalOpen: true,
+				pendingRequest: action.request,
+			};
+		}
+
 		case 'waiting-for-send': {
 			return {
 				...state,
 				isWaitingForSend: true,
-				hasAttemptedSend: false,
 			};
 		}
 

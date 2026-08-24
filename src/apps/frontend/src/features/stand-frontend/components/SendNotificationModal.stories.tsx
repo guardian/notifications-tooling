@@ -1,15 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
+	completeEmailParams,
+	completePushParams,
 	populatedEmailState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
+import {
+	buildAppAlertRequest,
+	buildNewsletterRequest,
+} from '../build-request-payloads';
 import { defaultAppAlertState } from '../notification-reducer';
-import type { NotificationState } from '../types';
+import type { ChannelOption, NotificationState } from '../types';
 import { SendNotificationModal } from './SendNotificationModal';
 
 type StoryArgs = {
 	notificationState: NotificationState;
+	channel: ChannelOption;
 };
 
 const meta = {
@@ -25,13 +33,24 @@ const meta = {
 		},
 	},
 	args: {
+		channel: 'email',
 		notificationState: {
 			...populatedEmailState,
 			confirmSendModalOpen: true,
+			pendingRequest: buildNewsletterRequest({
+				values: completeEmailParams,
+				content: articleFixture,
+				idempotencyKey: 'storybook-newsletter',
+			}),
 		},
 	},
-	render: (args: StoryArgs) =>
-		WithNotificationContext(<SendNotificationModal />, args.notificationState),
+	render: ({ channel, notificationState }: StoryArgs) =>
+		WithNotificationContext(
+			<SendNotificationModal />,
+			notificationState,
+			{},
+			channel,
+		),
 } satisfies Meta<StoryArgs>;
 
 export default meta;
@@ -55,9 +74,15 @@ export const NewsletterEmail: Story = {
 
 export const AppAlert: Story = {
 	args: {
+		channel: 'push',
 		notificationState: {
 			...defaultAppAlertState,
 			confirmSendModalOpen: true,
+			pendingRequest: buildAppAlertRequest({
+				values: completePushParams,
+				content: articleFixture,
+				idempotencyKey: 'storybook-app-alert',
+			}),
 		},
 	},
 	play: async ({ canvasElement }) => {

@@ -9,14 +9,22 @@ import {
 import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext } from 'react';
+import { type ReactNode, useContext } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
+import {
+	defaultAppAlertFormValues,
+	defaultNewsletterFormValues,
+} from '../notification-forms';
+import type {
+	AppAlertFormValues,
+	NewsletterFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { deliveryOptionNameMap } from '../option-values';
-import type { AudienceSegment } from '../types';
+import type { DeliveryOption } from '../types';
 import {
 	AudienceSegmentsPreviewPill,
 	DEFAULT_SEGMENTS,
@@ -62,12 +70,23 @@ const styles = {
 	}),
 };
 
-const ParameterDisplay = ({
-	keyName,
-	value,
+const ParameterLabel = ({
+	label,
+	children,
 }: {
-	keyName: string;
-	value: string | AudienceSegment[];
+	label: string;
+	children: ReactNode;
+}) => (
+	<div css={styles.parameter}>
+		<Typography variant="bodyBoldMd">{label}:</Typography>
+		{children}
+	</div>
+);
+
+const DeliveryParameter = ({
+	deliveryTiming,
+}: {
+	deliveryTiming: DeliveryOption;
 }) => {
 	//This is temporary solution to display the delivery time in the confirmation page.
 	const tempTime = new Date().toLocaleTimeString('en-GB', {
@@ -83,71 +102,108 @@ const ParameterDisplay = ({
 	const temporaryDeliveryTime = `${tempTime} (ET), ${tempDate}`;
 
 	return (
-		<div css={styles.parameter}>
-			<Typography variant="bodyBoldMd">{keyName}:</Typography>
-			{keyName === 'Channel' && (
-				<SendInfoPreviewPill channel={'email'} isConfirmation={true} />
-			)}
-			{keyName === 'Audience segments' && (
-				<AudienceSegmentsPreviewPill
-					segments={DEFAULT_SEGMENTS}
-					selected={value as AudienceSegment[]}
+		<ParameterLabel label="Delivery">
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'row',
+					gap: semanticSpacing.stackSm,
+				}}
+			>
+				<SendInfoPreviewPill
+					deliveryTiming={deliveryTiming}
 					isConfirmation={true}
 				/>
-			)}
-			{keyName === 'Delivery' && (
 				<div
 					css={{
 						display: 'flex',
 						flexDirection: 'row',
 						gap: semanticSpacing.stackSm,
+						alignItems: 'center',
+						height: semanticSizing.height.sm,
+						border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
+						borderRadius: semanticRadius.cornerSm,
+						padding: `0 ${semanticSpacing.stackSm}`,
 					}}
 				>
-					<SendInfoPreviewPill
-						deliveryTiming={'immediate'}
-						isConfirmation={true}
-					/>
-					<div
-						css={{
-							display: 'flex',
-							flexDirection: 'row',
-							gap: semanticSpacing.stackSm,
-							alignItems: 'center',
-							height: semanticSizing.height.sm,
-							border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
-							borderRadius: semanticRadius.cornerSm,
-							padding: `0 ${semanticSpacing.stackSm}`,
-						}}
-					>
-						<Icon
-							size="md"
-							css={{ paddingTop: '1.67px', paddingLeft: '1.67px' }}
-						>
-							{scheduleIcon}
-						</Icon>
-						<Typography variant="bodySm" css={{ height: '18px' }}>
-							{temporaryDeliveryTime}
-						</Typography>
-					</div>
+					<Icon size="md" css={{ paddingTop: '1.67px', paddingLeft: '1.67px' }}>
+						{scheduleIcon}
+					</Icon>
+					<Typography variant="bodySm" css={{ height: '18px' }}>
+						{temporaryDeliveryTime}
+					</Typography>
 				</div>
-			)}
-		</div>
+			</div>
+		</ParameterLabel>
 	);
 };
 
-export const DispatchReport = () => {
-	const { updateNotification, notification } = useContext(
-		NotificationFormContext,
+export const NewsletterDispatchDetails = () => {
+	const audienceSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
+		name: 'audienceSegments',
+		defaultValue: defaultNewsletterFormValues.audienceSegments,
+	});
+	const deliveryOption = useWatch<NewsletterFormValues, 'deliveryOption'>({
+		name: 'deliveryOption',
+		defaultValue: defaultNewsletterFormValues.deliveryOption,
+	});
+
+	return (
+		<section>
+			<ParameterLabel label="Channel">
+				<SendInfoPreviewPill channel="email" isConfirmation={true} />
+			</ParameterLabel>
+			<ParameterLabel label="Audience segments">
+				<AudienceSegmentsPreviewPill
+					segments={DEFAULT_SEGMENTS}
+					selected={audienceSegments}
+					isConfirmation={true}
+				/>
+			</ParameterLabel>
+			<DeliveryParameter deliveryTiming={deliveryOption} />
+		</section>
 	);
-	const { sendingResult, parameters } = notification;
+};
+
+export const AppAlertDispatchDetails = () => {
+	const editions = useWatch<AppAlertFormValues, 'editions'>({
+		name: 'editions',
+		defaultValue: defaultAppAlertFormValues.editions,
+	});
+
+	return (
+		<section>
+			<ParameterLabel label="Channel">
+				<SendInfoPreviewPill channel="push" isConfirmation={true} />
+			</ParameterLabel>
+			<ParameterLabel label="Editions">
+				<Typography>{editions.join(', ')}</Typography>
+			</ParameterLabel>
+			<DeliveryParameter
+				deliveryTiming={defaultAppAlertFormValues.deliveryOption}
+			/>
+		</section>
+	);
+};
+
+interface DispatchReportProps {
+	children: ReactNode;
+	onResetNotification: () => void;
+}
+
+export const DispatchReport = ({
+	children,
+	onResetNotification,
+}: DispatchReportProps) => {
+	const { channel, notification } = useContext(NotificationFormContext);
+	const { reset } = useFormContext();
+	const { sendingResult } = notification;
 
 	if (!sendingResult?.success) {
 		return null;
 	}
 
-	const notificationDescription = capitalise(
-		getChannelDescription(parameters?.type),
-	);
+	const notificationDescription = capitalise(getChannelDescription(channel));
 
 	return (
 		<section css={styles.container}>
@@ -180,24 +236,7 @@ export const DispatchReport = () => {
 					<Typography variant="headingMd">Details</Typography>
 				</header>
 
-				{parameters?.type === 'email' && (
-					<section>
-						<ParameterDisplay keyName="Channel" value="Email Newsletter" />
-						<ParameterDisplay
-							keyName="Audience segments"
-							value={parameters.audienceSegments ?? []}
-						/>
-						<div></div>
-						<ParameterDisplay
-							keyName="Delivery"
-							value={
-								parameters.emailDeliveryOption
-									? deliveryOptionNameMap[parameters.emailDeliveryOption].name
-									: ''
-							}
-						/>
-					</section>
-				)}
+				{children}
 			</div>
 			<div
 				css={{
@@ -209,16 +248,15 @@ export const DispatchReport = () => {
 					height: '40px',
 				}}
 			>
-				{parameters?.type === 'email' && (
-					<Button
-						variant="primary"
-						onClick={() =>
-							updateNotification({ type: 'reset-newsletter-email' })
-						}
-					>
-						Create new newsletter email
-					</Button>
-				)}
+				<Button
+					variant="primary"
+					onClick={() => {
+						reset();
+						onResetNotification();
+					}}
+				>
+					Create new {getChannelDescription(channel)}
+				</Button>
 			</div>
 		</section>
 	);

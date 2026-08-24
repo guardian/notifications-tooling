@@ -3,6 +3,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ApiError } from '../../../api/errors';
 import { mockFailingRequestTestEmailSend } from '../../../mocks/mock-request-test-email-send';
 import {
+	completeEmailParams,
 	populatedEmailState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -22,7 +23,13 @@ const meta: Meta<StoryArgs> = {
 		notificationState: populatedEmailState,
 	},
 	render: ({ notificationState }) =>
-		WithNotificationContext(<TestEmailForm />, notificationState),
+		WithNotificationContext(
+			<TestEmailForm />,
+			notificationState,
+			{},
+			'email',
+			completeEmailParams,
+		),
 };
 
 export default meta;
@@ -89,11 +96,20 @@ export const SentTestEmail: Story = {
 
 export const FailingTestEmail: Story = {
 	render: ({ notificationState }) =>
-		WithNotificationContext(<TestEmailForm />, notificationState, {
-			requestTestEmailSend: mockFailingRequestTestEmailSend(
-				new ApiError({ message: 'test error', failure: 'non-2xx-response' }),
-			),
-		}),
+		WithNotificationContext(
+			<TestEmailForm />,
+			notificationState,
+			{
+				requestTestEmailSend: mockFailingRequestTestEmailSend(
+					new ApiError({
+						message: 'test error',
+						failure: 'non-2xx-response',
+					}),
+				),
+			},
+			'email',
+			completeEmailParams,
+		),
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const input = canvas.getByPlaceholderText('name@theguardian.com');

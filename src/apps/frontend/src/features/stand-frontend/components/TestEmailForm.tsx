@@ -4,7 +4,9 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
+import type { ResolvedArticle } from '@models';
 import { useContext, useEffect, useState } from 'react';
+import { useWatch } from 'react-hook-form';
 import type { ApiError } from '../../../api/errors';
 import type {
 	TestEmailResponse,
@@ -12,9 +14,10 @@ import type {
 } from '../api/send-test-email';
 import { ConfigContext } from '../ConfigContext';
 import { validateGuardianEmail } from '../form-validation';
+import { composeNewsletterSubject } from '../newsletter-subject';
+import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { kickerNameMap } from '../option-values';
-import type { AudienceSegment, NotificationState } from '../types';
+import type { AudienceSegment } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 
 type TestSendParams = {
@@ -28,12 +31,9 @@ type TestSendParams = {
 
 const getSendParams = (
 	emailInput: string,
-	notificationState: NotificationState,
+	parameters: Partial<NewsletterFormValues>,
+	content?: ResolvedArticle,
 ): TestSendParams | undefined => {
-	const { parameters, content } = notificationState;
-	if (parameters?.type !== 'email') {
-		return undefined;
-	}
 	if (!content) {
 		return undefined;
 	}
@@ -48,9 +48,7 @@ const getSendParams = (
 		return;
 	}
 
-	const emailSubjectLine = kicker
-		? `${kickerNameMap[kicker]}: ${subject}`
-		: subject;
+	const emailSubjectLine = composeNewsletterSubject(subject, kicker);
 
 	return {
 		emailInput,
@@ -86,8 +84,7 @@ const makePayload = ({
 	options: {
 		dryRun: false,
 	},
-	// TO DO - what format?
-	idempotencyKey: `${emailInput}-${emailSubjectLine}-${Date.now()}`,
+	idempotencyKey: crypto.randomUUID(),
 	content: {
 		items: {
 			'lead-story': {
@@ -105,6 +102,7 @@ export const TestEmailForm = () => {
 	const { notification, requestTestEmailSend } = useContext(
 		NotificationFormContext,
 	);
+	const parameters = useWatch<NewsletterFormValues>();
 	const { user } = useContext(ConfigContext) ?? {};
 	const [emailInput, setEmailInput] = useState(user?.email ?? '');
 	const [sendInProgress, setSendInProgress] = useState(false);
@@ -113,7 +111,11 @@ export const TestEmailForm = () => {
 	const [sendError, setSendError] = useState<ApiError>();
 
 	const emailValidationIssue = validateGuardianEmail(emailInput);
-	const sendParams = getSendParams(emailInput, notification);
+	const sendParams = getSendParams(
+		emailInput,
+		parameters,
+		notification.content,
+	);
 
 	// remove the confirmation if the user changes anything that would
 	// affect the request payload
@@ -121,7 +123,11 @@ export const TestEmailForm = () => {
 		if (!confirmation || !paramsLastUsed) {
 			return;
 		}
-		const newSendParams = getSendParams(emailInput, notification);
+		const newSendParams = getSendParams(
+			emailInput,
+			parameters,
+			notification.content,
+		);
 		if (!newSendParams) {
 			// eslint-disable-next-line react-hooks/set-state-in-effect -- is ok
 			return setConfirmation(undefined);
@@ -134,7 +140,13 @@ export const TestEmailForm = () => {
 		) {
 			return setConfirmation(undefined);
 		}
-	}, [confirmation, paramsLastUsed, emailInput, notification]);
+	}, [
+		confirmation,
+		paramsLastUsed,
+		emailInput,
+		notification.content,
+		parameters,
+	]);
 
 	const handleSend = () => {
 		if (!sendParams || validateGuardianEmail(emailInput)) {

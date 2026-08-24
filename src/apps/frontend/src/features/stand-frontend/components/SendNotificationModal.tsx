@@ -3,19 +3,15 @@ import { Dialog, Modal } from '@guardian/stand/Modal';
 import { useContext } from 'react';
 import { getChannelDescription } from '../../../util/display-text-helpers';
 import type { SendNotificationRequest } from '../api/schemas';
-import { buildRequest } from '../build-request-payloads';
 import { NotificationFormContext } from '../NotificationContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
 export const SendNotificationModal = () => {
-	const { notification, updateNotification, sendNotification } = useContext(
-		NotificationFormContext,
-	);
-	const { confirmSendModalOpen, isWaitingForSend } = notification;
-	const sendNotificationRequest = buildRequest(notification);
-	const channelDescription = getChannelDescription(
-		notification.parameters?.type,
-	);
+	const { channel, notification, updateNotification, sendNotification } =
+		useContext(NotificationFormContext);
+	const { confirmSendModalOpen, isWaitingForSend, pendingRequest } =
+		notification;
+	const channelDescription = getChannelDescription(channel);
 
 	const handleSending =
 		(sendNotificationRequest: SendNotificationRequest) => () => {
@@ -62,13 +58,9 @@ export const SendNotificationModal = () => {
 						Cancel
 					</Button>
 					<Button
-						isDisabled={isWaitingForSend || !sendNotificationRequest}
+						isDisabled={isWaitingForSend || !pendingRequest}
 						icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
-						onPress={
-							sendNotificationRequest
-								? handleSending(sendNotificationRequest)
-								: undefined
-						}
+						onPress={pendingRequest ? handleSending(pendingRequest) : undefined}
 					>
 						Confirm send
 					</Button>
