@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { UserPermissions } from '@config';
+import type { NotificationWithDispatches } from '@database';
 import { httpLogger } from '@http-logger';
 import { AppNotificationApiError, BrazeApiError } from '@services';
 import express from 'express';
@@ -360,6 +361,158 @@ describe('POST /v1/notifications', () => {
 
 			const body = (await response.json()) as { error: string };
 			expect(body.error).toBe('validation_failed');
+		});
+	});
+});
+
+const notificationId = '11111111-1111-4111-8111-111111111111';
+
+/** A stored notification with a single successful app-push dispatch. */
+const storedNotification = (): NotificationWithDispatches => ({
+	id: notificationId,
+	idempotencyKey: 'push-2026-07-08',
+	kind: 'send',
+	status: 'delivered',
+	sender: 'notifications-tooling-spa/v1',
+	createdByEmail: 'editor@theguardian.com',
+	dryRun: false,
+	scheduledFor: null,
+	content: { items: { lead: { type: 'app-push', title: 'Ukraine summit' } } },
+	channels: { 'app-push': { compose: { use: 'lead' } } },
+	createdAt: new Date('2026-07-08T09:00:00.000Z'),
+	updatedAt: new Date('2026-07-08T09:00:05.000Z'),
+	dispatches: [
+		{
+			id: '22222222-2222-4222-8222-222222222222',
+			notificationId,
+			channel: 'app-push',
+			target: 'breaking-news',
+			providerRef: 'mob-123',
+			status: 'success',
+			failureReason: null,
+			detail: { editions: ['uk'] },
+			createdAt: new Date('2026-07-08T09:00:01.000Z'),
+			updatedAt: new Date('2026-07-08T09:00:01.000Z'),
+		},
+	],
+});
+
+const startLookupServer = (
+	findNotification: (id: string) => Promise<NotificationWithDispatches | null>,
+) => {
+	const testApp = express();
+	testApp.use(httpLogger);
+	testApp.use(express.json());
+	testApp.use(
+		'/v1/notifications',
+		createNotificationsRouter(
+			mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+			findNotification,
+		),
+	);
+	return startTestServer(testApp);
+};
+
+describe('GET /v1/notifications/:id', () => {
+	describe('authentication', () => {
+		it('blocks unauthenticated GET /v1/notifications/:id', async () => {
+			await assertUnauthenticatedRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: `/v1/notifications/${notificationId}`,
+			});
+		});
+	});
+
+	describe('permissions', () => {
+		it('blocks GET /v1/notifications/:id without the dispatch permission', async () => {
+			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: `/v1/notifications/${notificationId}`,
+			});
+		});
+	});
+
+	describe('happy path', () => {
+		it('returns the persisted notification and its dispatches', async () => {
+			const findNotification = mock(() =>
+				Promise.resolve(storedNotification()),
+			);
+			const lookupServer = await startLookupServer(findNotification);
+
+			try {
+				const response = await fetch(
+					`${lookupServer.baseUrl}/v1/notifications/${notificationId}`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(findNotification).toHaveBeenCalledWith(notificationId);
+
+				const body = (await response.json()) as {
+					id: string;
+					status: string;
+					createdAt: string;
+					dispatches: Array<Record<string, unknown>>;
+				};
+
+				expect(body.id).toBe(notificationId);
+				expect(body.status).toBe('delivered');
+				expect(body.createdAt).toBe('2026-07-08T09:00:00.000Z');
+				expect(body.dispatches).toHaveLength(1);
+				expect(body.dispatches[0]).toMatchObject({
+					channel: 'app-push',
+					target: 'breaking-news',
+					providerRef: 'mob-123',
+					status: 'success',
+				});
+				// The notificationId is redundant on each nested dispatch.
+				expect(body.dispatches[0]).not.toHaveProperty('notificationId');
+			} finally {
+				await lookupServer.close();
+			}
+		});
+	});
+
+	describe('not found', () => {
+		it('returns 404 when no notification exists with the id', async () => {
+			const lookupServer = await startLookupServer(() => Promise.resolve(null));
+
+			try {
+				const response = await fetch(
+					`${lookupServer.baseUrl}/v1/notifications/${notificationId}`,
+				);
+
+				expect(response.status).toBe(404);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('not_found');
+			} finally {
+				await lookupServer.close();
+			}
+		});
+	});
+
+	describe('bad request', () => {
+		it('returns 400 when the id is not a valid UUID', async () => {
+			const findNotification = mock(() =>
+				Promise.resolve(storedNotification()),
+			);
+			const lookupServer = await startLookupServer(findNotification);
+
+			try {
+				const response = await fetch(
+					`${lookupServer.baseUrl}/v1/notifications/not-a-uuid`,
+				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as {
+					error: string;
+					details: Array<{ path: string }>;
+				};
+				expect(body.error).toBe('bad_request');
+				expect(body.details.some((detail) => detail.path === '/id')).toBe(true);
+				expect(findNotification).not.toHaveBeenCalled();
+			} finally {
+				await lookupServer.close();
+			}
 		});
 	});
 });
