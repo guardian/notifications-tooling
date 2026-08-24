@@ -3,6 +3,7 @@ import type { ComponentProps } from 'react';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
+	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -19,7 +20,13 @@ const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/AppPreviewSection',
 	component: AppPreviewSection,
 	render: ({ notificationState, ...args }) =>
-		WithNotificationContext(<AppPreviewSection {...args} />, notificationState),
+		WithNotificationContext(
+			<AppPreviewSection {...args} />,
+			notificationState,
+			{},
+			'push',
+			completePushParams,
+		),
 	parameters: {
 		docs: {
 			description: {

@@ -2,9 +2,14 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { useContext } from 'react';
+import { useWatch } from 'react-hook-form';
 import type { TopicTypeOption } from '../api/schemas';
+import { editionIds } from '../edition-values';
+import {
+	type AppAlertFormValues,
+	defaultAppAlertFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import type { Edition } from '../types';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
 import { Editions } from './Editions';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
@@ -15,28 +20,26 @@ interface AppPreviewSectionProps {
 	topicTypes: TopicTypeOption[];
 }
 
-const editionIds: Record<Edition, string> = {
-	UK: 'uk',
-	US: 'us',
-	AU: 'au',
-	EU: 'europe',
-	INT: 'international',
-};
-
 export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 	const { notification } = useContext(NotificationFormContext);
-	const parameters =
-		notification.parameters?.type === 'push'
-			? notification.parameters
-			: undefined;
-	const alertType = parameters?.alertType ?? 'breaking-news';
+	const alertType = useWatch<AppAlertFormValues, 'alertType'>({
+		name: 'alertType',
+		defaultValue: defaultAppAlertFormValues.alertType,
+	});
+	const editions = useWatch<AppAlertFormValues, 'editions'>({
+		name: 'editions',
+		defaultValue: defaultAppAlertFormValues.editions,
+	});
+	const headline = useWatch<AppAlertFormValues, 'headline'>({
+		name: 'headline',
+		defaultValue: defaultAppAlertFormValues.headline,
+	});
 	const alertTypeLabel =
 		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
-	const selectedTopics = (parameters?.editions ?? []).map((edition) => ({
+	const selectedTopics = editions.map((edition) => ({
 		type: alertType,
 		name: editionIds[edition],
 	}));
-	const headline = parameters?.headline;
 	const thumbnailUrl = notification.content?.fields?.thumbnail;
 
 	return (
