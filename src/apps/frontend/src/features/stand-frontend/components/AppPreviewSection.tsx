@@ -4,7 +4,10 @@ import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { TopicTypeOption } from '../api/schemas';
-import type { AppAlertFormValues } from '../notification-forms';
+import {
+	type AppAlertFormValues,
+	defaultAppAlertFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import type { Edition } from '../types';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
@@ -29,15 +32,15 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 	const { notification } = useContext(NotificationFormContext);
 	const alertType = useWatch<AppAlertFormValues, 'alertType'>({
 		name: 'alertType',
-		defaultValue: 'breaking-news',
+		defaultValue: defaultAppAlertFormValues.alertType,
 	});
 	const editions = useWatch<AppAlertFormValues, 'editions'>({
 		name: 'editions',
-		defaultValue: [],
+		defaultValue: defaultAppAlertFormValues.editions,
 	});
 	const headline = useWatch<AppAlertFormValues, 'headline'>({
 		name: 'headline',
-		defaultValue: '',
+		defaultValue: defaultAppAlertFormValues.headline,
 	});
 	const alertTypeLabel =
 		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
