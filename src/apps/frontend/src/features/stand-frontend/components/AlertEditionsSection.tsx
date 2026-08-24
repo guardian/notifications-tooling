@@ -1,10 +1,14 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { Controller, useFormContext } from 'react-hook-form';
-import type { AppAlertFormValues } from '../notification-forms';
+import {
+	appAlertFormSchema,
+	type AppAlertFormValues,
+} from '../notification-forms';
 import { alertTypeNameMap } from '../option-values';
 import { SelectableEditions } from './SelectableEditions';
 
 const toOptionKey = (value: string, name = 'alertType') => `${name}//${value}`;
+const alertTypeSchema = appAlertFormSchema.shape.alertType;
 
 export const AlertEditionsSection = () => {
 	const { control } = useFormContext<AppAlertFormValues>();
@@ -21,30 +25,19 @@ export const AlertEditionsSection = () => {
 						onChange={(key) => {
 							const selectedAlertType =
 								typeof key === 'string' ? key.split('//').at(1) : undefined;
-							if (
-								selectedAlertType === 'breaking-news' ||
-								selectedAlertType === 'sport' ||
-								selectedAlertType === 'editors-picks' ||
-								selectedAlertType === 'one-not-to-miss'
-							) {
-								field.onChange(selectedAlertType);
+							const result = alertTypeSchema.safeParse(selectedAlertType);
+							if (result.success) {
+								field.onChange(result.data);
 							}
 						}}
 						selectionMode="single"
 						value={toOptionKey(field.value)}
 					>
-						<Option id={toOptionKey('breaking-news')}>
-							{alertTypeNameMap['breaking-news']}
-						</Option>
-						<Option id={toOptionKey('sport')}>
-							{alertTypeNameMap['sport']}
-						</Option>
-						<Option id={toOptionKey('editors-picks')}>
-							{alertTypeNameMap['editors-picks']}
-						</Option>
-						<Option id={toOptionKey('one-not-to-miss')}>
-							{alertTypeNameMap['one-not-to-miss']}
-						</Option>
+						{alertTypeSchema.options.map((alertType) => (
+							<Option key={alertType} id={toOptionKey(alertType)}>
+								{alertTypeNameMap[alertType]}
+							</Option>
+						))}
 					</Select>
 				)}
 			/>

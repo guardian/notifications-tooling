@@ -11,12 +11,12 @@ const baseContentItemShape = z.strictObject({
 });
 
 const newsletterContentItemSchema = z.strictObject({
-	...baseContentItemShape,
+	...baseContentItemShape.shape,
 	type: z.literal('newsletter'),
 });
 
 const appPushContentItemSchema = z.strictObject({
-	...baseContentItemShape,
+	...baseContentItemShape.shape,
 	type: z.literal('app-push'),
 	media: z
 		.strictObject({
