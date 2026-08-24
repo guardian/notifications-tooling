@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import type { ChannelConstraintsResponse } from '../api/schemas';
 import { APP_ALERT_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
+import { validateAppAlertForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { NotificationTextInput } from './NotificationTextInput';
 
@@ -22,8 +23,7 @@ export const AppAlertFields = ({ constraints }: AppAlertFieldsProps) => {
 			? notification.parameters
 			: undefined;
 	const headline = appPushParameters?.headline ?? '';
-	// const requiredFieldErrors = validateNotificationForm(notification);
-	const requiredFieldErrors: string[] = [];
+	const requiredFieldErrors = validateAppAlertForm(notification);
 	const shouldShowErrors = notification.hasAttemptedSend;
 
 	return (

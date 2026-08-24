@@ -1,5 +1,10 @@
 import { css } from '@emotion/react';
-import { baseColors, semanticColors, semanticSpacing } from '@guardian/stand';
+import {
+	baseColors,
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Checkbox } from '@guardian/stand/Checkbox';
 import type { CheckboxTheme } from '@guardian/stand/Checkbox';
 import { Grid, Item } from '@guardian/stand/Grid';
@@ -40,6 +45,7 @@ const customTheme: CheckboxTheme = {
 			indicator: {
 				selected: {
 					backgroundColor: baseColors.magenta[200],
+					border: `${semanticSizing.border.default} solid ${baseColors.magenta[200]}`,
 				},
 				check: {
 					height: '18px',

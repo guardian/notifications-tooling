@@ -4,7 +4,11 @@ import type { NotificationState } from './types';
 export type NotificationFormErrorField =
 	'article' | 'subject' | 'preview' | 'audienceSegments' | 'cannotBuildRequest';
 
+export type AppAlertFormErrorField =
+	'article' | 'headline' | 'editions' | 'cannotBuildRequest';
+
 export type NotificationFormErrors = NotificationFormErrorField[];
+export type AppAlertFormErrors = AppAlertFormErrorField[];
 
 const DEFAULT_ORIGIN = 'https://www.theguardian.com';
 
@@ -41,6 +45,36 @@ export const validateNotificationForm = (
 	return errors;
 };
 
+export const validateAppAlertForm = (
+	notification: NotificationState,
+): AppAlertFormErrors => {
+	const { content, parameters } = notification;
+
+	if (parameters?.type !== 'push') {
+		return [];
+	}
+
+	const { headline = '', editions = [] } = parameters;
+	const errors: AppAlertFormErrors = [];
+
+	if (content?.id === undefined) {
+		errors.push('article');
+	}
+	if (headline.trim().length === 0) {
+		errors.push('headline');
+	}
+	if (editions.length === 0) {
+		errors.push('editions');
+	}
+	// if none of the specific errors above are observed, but still cannot build the request body
+	// return a fallback error
+	// if (errors.length == 0 && !buildAppRequest(notification)) {
+	// errors.push('cannotBuildRequest');
+	// }TODO - implement buildAppRequest and uncomment this line
+
+	return errors;
+};
+
 export const checkIfReadyToSend = (
 	notification: NotificationState,
 ): boolean => {
@@ -51,8 +85,8 @@ export const checkIfReadyToSend = (
 		return errors.length === 0;
 	}
 	if (parameters?.type === 'push') {
-		// TODO - app alert form validation is not implemented yet
-		return true;
+		const errors = validateAppAlertForm(notification);
+		return errors.length === 0;
 	}
 
 	return false;

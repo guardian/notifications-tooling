@@ -10,6 +10,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import {
 	checkIfReadyToSend,
+	validateAppAlertForm,
 	validateNotificationForm,
 } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
@@ -29,7 +30,9 @@ export const SendButton = ({ children }: SendButtonProps) => {
 	}
 	const isReady = checkIfReadyToSend(notification);
 	const hasFallbackError =
-		validateNotificationForm(notification).includes('cannotBuildRequest');
+		parameters.type === 'email'
+			? validateNotificationForm(notification).includes('cannotBuildRequest')
+			: validateAppAlertForm(notification).includes('cannotBuildRequest');
 
 	return (
 		<div
