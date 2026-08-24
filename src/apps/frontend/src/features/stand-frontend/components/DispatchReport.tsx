@@ -16,15 +16,18 @@ import {
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
 import { NotificationFormContext } from '../NotificationContext';
-import type { DeliveryOption } from '../types';
-import {
-	AudienceSegmentsPreviewPill,
-	DEFAULT_SEGMENTS,
-} from './AudienceSegments';
-import { FlagAtom } from './FlagAtom';
+import type {
+	AudienceSegment,
+	ChannelOption,
+	DeliveryOption,
+	Edition,
+	EmailNotification,
+	PushNotification,
+} from '../types';
 import { scheduleIcon } from './FlagIcons';
-import { PreviewPillList } from './PreviewPillList';
-import { DEFAULT_EDITIONS } from './SelectableEditions';
+import { DEFAULT_EDITIONS, DEFAULT_SEGMENTS } from './segment-options';
+import { SegmentPreviewPill } from './SegmentPreviewPill';
+import type { SelectableOption } from './SelectablePillGrid';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const styles = {
@@ -132,6 +135,83 @@ const DeliveryDisplay = ({
 	);
 };
 
+const buildDetails = <Code extends AudienceSegment | Edition>({
+	channel,
+	segmentLabel,
+	options,
+	selected,
+	deliveryTiming,
+}: {
+	channel: ChannelOption;
+	segmentLabel: string;
+	options: Array<SelectableOption<Code>>;
+	selected: Code[];
+	deliveryTiming: DeliveryOption;
+}): Array<{ label: string; node: ReactNode }> => [
+	{
+		label: 'Channel',
+		node: <SendInfoPreviewPill channel={channel} isConfirmation={true} />,
+	},
+	{
+		label: segmentLabel,
+		node: (
+			<SegmentPreviewPill
+				title={segmentLabel}
+				options={options}
+				selected={selected}
+				isConfirmation={true}
+			/>
+		),
+	},
+	{
+		label: 'Delivery and time',
+		node: <DeliveryDisplay deliveryTiming={deliveryTiming} />,
+	},
+];
+
+type ChannelReport = {
+	details: Array<{ label: string; node: ReactNode }>;
+	reset: {
+		action: 'reset-newsletter-email' | 'reset-app-alert';
+		label: string;
+	};
+};
+
+const getChannelReport = (
+	parameters: EmailNotification | PushNotification,
+): ChannelReport => {
+	switch (parameters.type) {
+		case 'email':
+			return {
+				details: buildDetails({
+					channel: 'email',
+					segmentLabel: 'Audience segments',
+					options: DEFAULT_SEGMENTS,
+					selected: parameters.audienceSegments ?? [],
+					deliveryTiming: parameters.emailDeliveryOption ?? 'immediate',
+				}),
+				reset: {
+					action: 'reset-newsletter-email',
+					label: 'Create new newsletter email',
+				},
+			};
+		case 'push':
+			return {
+				details: buildDetails({
+					channel: 'push',
+					segmentLabel: 'Editions',
+					options: DEFAULT_EDITIONS,
+					selected: parameters.editions ?? [],
+					deliveryTiming: parameters.pushDeliveryOption ?? 'appImmediate',
+				}),
+				reset: {
+					action: 'reset-app-alert',
+					label: 'Create new app alert',
+				},
+			};
+	}
+};
+
 export const DispatchReport = () => {
 	const { updateNotification, notification } = useContext(
 		NotificationFormContext,
@@ -145,6 +225,10 @@ export const DispatchReport = () => {
 	const notificationDescription = capitalise(
 		getChannelDescription(parameters?.type),
 	);
+
+	const report = parameters ? getChannelReport(parameters) : undefined;
+	const details = report?.details ?? [];
+	const reset = report?.reset;
 
 	return (
 		<section css={styles.container}>
@@ -183,50 +267,13 @@ export const DispatchReport = () => {
 					<Typography variant="headingMd">Details</Typography>
 				</header>
 
-				{parameters?.type === 'email' && (
-					<section>
-						<ParameterDisplay keyName="Channel">
-							<SendInfoPreviewPill channel="email" isConfirmation={true} />
+				<section>
+					{details.map(({ label, node }) => (
+						<ParameterDisplay key={label} keyName={label}>
+							{node}
 						</ParameterDisplay>
-						<ParameterDisplay keyName="Audience segments">
-							<AudienceSegmentsPreviewPill
-								segments={DEFAULT_SEGMENTS}
-								selected={parameters.audienceSegments ?? []}
-								isConfirmation={true}
-							/>
-						</ParameterDisplay>
-						<ParameterDisplay keyName="Delivery and time">
-							<DeliveryDisplay
-								deliveryTiming={parameters.emailDeliveryOption ?? 'immediate'}
-							/>
-						</ParameterDisplay>
-					</section>
-				)}
-
-				{parameters?.type === 'push' && (
-					<section>
-						<ParameterDisplay keyName="Channel">
-							<SendInfoPreviewPill channel="push" isConfirmation={true} />
-						</ParameterDisplay>
-						<ParameterDisplay keyName="Editions">
-							<PreviewPillList
-								title="Editions"
-								options={DEFAULT_EDITIONS.map(({ code, label }) => ({
-									id: code,
-									label,
-								}))}
-								selected={parameters.editions ?? []}
-								isConfirmation={true}
-								renderIcon={(code) => <FlagAtom segmentCode={code} />}
-							/>
-						</ParameterDisplay>
-						<ParameterDisplay keyName="Delivery and time">
-							<DeliveryDisplay
-								deliveryTiming={parameters.pushDeliveryOption ?? 'appImmediate'}
-							/>
-						</ParameterDisplay>
-					</section>
-				)}
+					))}
+				</section>
 			</div>
 			<div
 				css={{
@@ -238,22 +285,12 @@ export const DispatchReport = () => {
 					height: '40px',
 				}}
 			>
-				{parameters?.type === 'email' && (
+				{reset && (
 					<Button
 						variant="primary"
-						onClick={() =>
-							updateNotification({ type: 'reset-newsletter-email' })
-						}
+						onClick={() => updateNotification({ type: reset.action })}
 					>
-						Create new newsletter email
-					</Button>
-				)}
-				{parameters?.type === 'push' && (
-					<Button
-						variant="primary"
-						onClick={() => updateNotification({ type: 'reset-app-alert' })}
-					>
-						Create new app alert
+						{reset.label}
 					</Button>
 				)}
 			</div>

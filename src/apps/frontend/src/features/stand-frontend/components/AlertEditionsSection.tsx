@@ -3,7 +3,8 @@ import { useContext } from 'react';
 import { validateAppAlertForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { alertTypeNameMap } from '../option-values';
-import { SelectableEditions } from './SelectableEditions';
+import { DEFAULT_EDITIONS } from './segment-options';
+import { SegmentPicker } from './SegmentPicker';
 
 const toOptionKey = (value: string, name = 'alertType') => `${name}//${value}`;
 
@@ -55,9 +56,10 @@ export const AlertEditionsSection = () => {
 					{alertTypeNameMap['one-not-to-miss']}
 				</Option>
 			</Select>
-			<SelectableEditions
+			<SegmentPicker
 				title={'Editions'}
 				description={'Choose the editions the app alert will be sent to'}
+				options={DEFAULT_EDITIONS}
 				selected={alertEditions}
 				onChange={(newEdition) => {
 					updateNotification({

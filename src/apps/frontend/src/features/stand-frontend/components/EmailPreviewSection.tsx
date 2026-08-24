@@ -1,12 +1,10 @@
 import { useContext } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import type { AudienceSegment, ChannelOption, DeliveryOption } from '../types';
-import {
-	AudienceSegmentsPreviewPill,
-	DEFAULT_SEGMENTS,
-} from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
+import { DEFAULT_SEGMENTS } from './segment-options';
+import { SegmentPreviewPill } from './SegmentPreviewPill';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 import { TestEmailForm } from './TestEmailForm';
 
@@ -34,8 +32,9 @@ export const EmailPreviewSection = ({
 				channel={selectedChannel}
 				deliveryTiming={selectedDeliveryTiming}
 			/>
-			<AudienceSegmentsPreviewPill
-				segments={DEFAULT_SEGMENTS}
+			<SegmentPreviewPill
+				title="Audience segments"
+				options={DEFAULT_SEGMENTS}
 				selected={selectedSegments}
 			/>
 			<HTMLPreview />

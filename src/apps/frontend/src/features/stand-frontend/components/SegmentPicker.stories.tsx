@@ -1,34 +1,35 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import {
-	AudienceSegments,
-	AudienceSegmentsPreviewPill,
-	DEFAULT_SEGMENTS,
-} from './AudienceSegments';
+import { DEFAULT_SEGMENTS } from './segment-options';
+import { SegmentPicker } from './SegmentPicker';
+import { SegmentPreviewPill } from './SegmentPreviewPill';
 
 const meta = {
-	title: 'Stand Frontend/AudienceSegments',
-	component: AudienceSegments,
+	title: 'Stand Frontend/SegmentPicker',
+	component: SegmentPicker,
+	args: {
+		title: 'Audience segments',
+		description: 'Choose the audience the email notification will be sent to',
+		options: DEFAULT_SEGMENTS,
+		onChange: () => {},
+	},
 	parameters: {
 		docs: {
 			description: {
 				component:
-					'Audience segment allows users to choose which audience to send notifications to.',
+					'SegmentPicker allows users to choose which audience segments or editions to send notifications to.',
 			},
 		},
 	},
-} satisfies Meta<typeof AudienceSegments>;
+} satisfies Meta<typeof SegmentPicker>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-type AudienceSegmentsPreviewPillStory = StoryObj<
-	typeof AudienceSegmentsPreviewPill
->;
+type SegmentPreviewPillStory = StoryObj<typeof SegmentPreviewPill>;
 
 export const NoSelection: Story = {
 	args: {
 		selected: [],
-		onChange: () => {},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -42,28 +43,26 @@ export const NoSelection: Story = {
 export const SingleSelection: Story = {
 	args: {
 		selected: ['UK'],
-		onChange: () => {},
 	},
 };
 
 export const MultipleSelection: Story = {
 	args: {
 		selected: ['UK', 'US'],
-		onChange: () => {},
 	},
 };
 
 export const AllSelected: Story = {
 	args: {
 		selected: ['UK', 'US', 'AU'],
-		onChange: () => {},
 	},
 };
 
-export const PreviewWithSingleSelection: AudienceSegmentsPreviewPillStory = {
+export const PreviewWithSingleSelection: SegmentPreviewPillStory = {
 	render: () => (
-		<AudienceSegmentsPreviewPill
-			segments={DEFAULT_SEGMENTS}
+		<SegmentPreviewPill
+			title="Audience segments"
+			options={DEFAULT_SEGMENTS}
 			selected={['AU']}
 		/>
 	),
@@ -72,10 +71,11 @@ export const PreviewWithSingleSelection: AudienceSegmentsPreviewPillStory = {
 	},
 };
 
-export const PreviewWithMultipleSelection: AudienceSegmentsPreviewPillStory = {
+export const PreviewWithMultipleSelection: SegmentPreviewPillStory = {
 	render: () => (
-		<AudienceSegmentsPreviewPill
-			segments={DEFAULT_SEGMENTS}
+		<SegmentPreviewPill
+			title="Audience segments"
+			options={DEFAULT_SEGMENTS}
 			selected={['UK', 'US']}
 		/>
 	),

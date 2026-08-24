@@ -6,12 +6,13 @@ import { validateNotificationForm } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import type { ChannelOption, DeliveryOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
-import { AudienceSegments } from './AudienceSegments';
 import { ChannelSelector } from './ChannelSelector';
 import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { EmailFields } from './EmailFields';
 import { NotificationFormSection } from './NotificationFormSection';
+import { DEFAULT_SEGMENTS } from './segment-options';
+import { SegmentPicker } from './SegmentPicker';
 import { SendButton } from './SendButton';
 import { SendFailedModal } from './SendFailedModal';
 import { SendNotificationModal } from './SendNotificationModal';
@@ -107,7 +108,10 @@ export const CreateNotificationForm = ({
 					id="audience-section"
 					isActive={activeSectionHref === '#audience-section'}
 				>
-					<AudienceSegments
+					<SegmentPicker
+						title="Audience segments"
+						description="Choose the audience the email notification will be sent to"
+						options={DEFAULT_SEGMENTS}
 						selected={audienceSegments}
 						error={
 							shouldShowErrors &&
