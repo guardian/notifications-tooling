@@ -50,3 +50,5 @@ export const buildRequest = (
 		},
 	};
 };
+
+export const buildAppRequest = () => {};

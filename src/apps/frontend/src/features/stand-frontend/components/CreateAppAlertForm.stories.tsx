@@ -71,6 +71,7 @@ export const WithImportedArticle: Story = {
 export const Empty: Story = {
 	args: {
 		notificationState: {
+			...defaultAppAlertState,
 			isFetchingContent: false,
 			confirmSendModalOpen: false,
 			isWaitingForSend: false,
