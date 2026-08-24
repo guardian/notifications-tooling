@@ -15,7 +15,6 @@ import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
-import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
@@ -26,6 +25,7 @@ import {
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import type { DeliveryOption } from '../types';
+import { useAudienceEditions } from '../use-audience-editions';
 import { AudienceSegmentsPreviewPill } from './AudienceSegments';
 import { scheduleIcon } from './FlagIcons';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
@@ -145,6 +145,7 @@ export const NewsletterDispatchDetails = () => {
 		name: 'deliveryOption',
 		defaultValue: defaultNewsletterFormValues.deliveryOption,
 	});
+	const segments = useAudienceEditions('email');
 
 	return (
 		<section>
@@ -153,7 +154,7 @@ export const NewsletterDispatchDetails = () => {
 			</ParameterLabel>
 			<ParameterLabel label="Audience segments">
 				<AudienceSegmentsPreviewPill
-					segments={FALLBACK_EDITIONS}
+					segments={segments}
 					selected={audienceSegments}
 					isConfirmation={true}
 				/>

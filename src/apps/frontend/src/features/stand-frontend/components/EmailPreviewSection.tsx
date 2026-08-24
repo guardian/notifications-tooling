@@ -1,11 +1,11 @@
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
-import { FALLBACK_EDITIONS } from '../api/useChannelAudiences';
 import {
 	defaultNewsletterFormValues,
 	type NewsletterFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
+import { useAudienceEditions } from '../use-audience-editions';
 import { AudienceSegmentsPreviewPill } from './AudienceSegments';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
@@ -16,6 +16,7 @@ export const EmailPreviewSection = () => {
 	const {
 		notification: { fetchedArticleId },
 	} = useContext(NotificationFormContext);
+	const segments = useAudienceEditions('email');
 	const selectedSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
 		name: 'audienceSegments',
 		defaultValue: defaultNewsletterFormValues.audienceSegments,
@@ -38,7 +39,7 @@ export const EmailPreviewSection = () => {
 				deliveryTiming={selectedDeliveryTiming}
 			/>
 			<AudienceSegmentsPreviewPill
-				segments={FALLBACK_EDITIONS}
+				segments={segments}
 				selected={selectedSegments}
 			/>
 			<HTMLPreview />
