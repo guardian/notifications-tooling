@@ -192,8 +192,8 @@ const buildErrorStory = (error: ApiError): Story => ({
 			...populatedEmailState,
 			isWaitingForSend: false,
 			sendingResult: {
-				ok: false,
-				response: error,
+				success: false,
+				failure: error,
 			},
 		},
 	},

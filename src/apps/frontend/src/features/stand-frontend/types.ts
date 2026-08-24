@@ -3,6 +3,7 @@ import type {
 	EmailPreviewResponse,
 	ResolvedArticle,
 } from '@models';
+import type { Result } from '../../api/client';
 import type { ApiError } from '../../api/errors';
 import type {
 	SendNotificationRequest,
@@ -18,6 +19,23 @@ export type DeliveryOption = 'immediate' | 'appImmediate';
 export type AudienceSegment = 'UK' | 'US' | 'AU';
 export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
 
+export type EmailNotification = {
+	type: 'email';
+	kicker?: KickerId;
+	subject?: string;
+	preview?: string;
+	emailHtml?: string;
+	audienceSegments?: AudienceSegment[];
+	emailDeliveryOption?: DeliveryOption;
+};
+
+export type PushNotification = {
+	type: 'push';
+	alertType?: AlertType;
+	headline?: string;
+	pushDeliveryOption?: DeliveryOption;
+	editions?: Edition[];
+};
 export type SendingResult =
 	| {
 			ok: true;
@@ -35,12 +53,12 @@ export type NotificationState = {
 	content?: ResolvedArticle;
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
-	sendingResult?: SendingResult;
+	sendingResult?: Result<SendNotificationResponse>;
 	pendingRequest?: SendNotificationRequest;
 };
 
 export type RequestEmailHtml = {
-	(request: EmailPreviewRequest): Promise<EmailPreviewResponse>;
+	(request: EmailPreviewRequest): Promise<Result<EmailPreviewResponse>>;
 };
 
 export type NotificationAction =
@@ -68,7 +86,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'receive-send-result';
-			result: SendingResult;
+			result: Result<SendNotificationResponse>;
 	  }
 	| {
 			type: 'dismiss-send-error';

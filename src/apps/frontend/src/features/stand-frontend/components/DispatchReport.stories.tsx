@@ -57,8 +57,8 @@ const meta: Meta<StoryArgs> = {
 		notificationState: {
 			...defaultState,
 			sendingResult: {
-				ok: true,
-				response: acceptedEmailSendResponse,
+				success: true,
+				data: acceptedEmailSendResponse,
 			},
 		},
 	},

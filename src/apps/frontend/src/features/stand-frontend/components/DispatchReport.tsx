@@ -199,7 +199,7 @@ export const DispatchReport = ({
 	const { reset } = useFormContext();
 	const { sendingResult } = notification;
 
-	if (!sendingResult?.ok) {
+	if (!sendingResult?.success) {
 		return null;
 	}
 

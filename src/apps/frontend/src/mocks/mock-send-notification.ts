@@ -1,24 +1,25 @@
+import type { Result } from '../api/client';
 import type { ApiError } from '../api/errors';
-import type { SendingResult } from '../features/stand-frontend/types';
+import type { SendNotificationResponse } from '../features/stand-frontend/api/schemas';
 import { acceptedEmailSendResponse } from './api-fixtures';
 
 export const mockSendNotification = () => {
-	return new Promise<SendingResult>((resolve) => {
+	return new Promise<Result<SendNotificationResponse>>((resolve) => {
 		setTimeout(() => {
 			resolve({
-				ok: true,
-				response: acceptedEmailSendResponse,
+				success: true,
+				data: acceptedEmailSendResponse,
 			});
 		}, 500);
 	});
 };
 
 export const mockSendRejectedNotification = (apiError: ApiError) => () => {
-	return new Promise<SendingResult>((resolve) => {
+	return new Promise<Result<SendNotificationResponse>>((resolve) => {
 		setTimeout(() => {
 			resolve({
-				ok: false,
-				response: apiError,
+				success: false,
+				failure: apiError,
 			});
 		}, 500);
 	});

@@ -7,7 +7,7 @@ import { Typography } from '@guardian/stand/Typography';
 import type { ResolvedArticle } from '@models';
 import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { ApiError } from '../../../api/errors';
+import type { ApiError } from '../../../api/errors';
 import { parseArticleUrlInputToContentId } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
@@ -15,11 +15,7 @@ import { LoadingSpinner } from './LoadingSpinner';
 
 // TO DO - more helpful error UI
 // can we capture when article was taken down?
-const getUserFacingError = (err: unknown): string => {
-	if (!(err instanceof ApiError)) {
-		return err instanceof Error ? err.message : 'UNKNOWN ERROR';
-	}
-
+const getUserFacingError = (err: ApiError): string => {
 	switch (err.failure) {
 		case 'unauthenticated':
 		case 'forbidden':
@@ -80,26 +76,25 @@ export const ArticleImportControl = ({
 		}
 
 		updateNotification({ type: 'waiting-for-article' });
-		capiFetch({
+		void capiFetch({
 			article: webUrl,
-		})
-			.then((responseBody) => {
-				const { article } = responseBody;
-				onArticleImported(article);
-				clearErrors('root');
-				updateNotification({
-					type: 'receive-article',
-					content: article,
-				});
-				setLockArticleInputText(true);
-			})
-			.catch((err) => {
+		}).then((result) => {
+			if (!result.success) {
 				// TO DO - error reporting/telemetry
-				updateNotification({
+				return updateNotification({
 					type: 'report-article-error',
-					errorMessage: getUserFacingError(err),
+					errorMessage: getUserFacingError(result.failure),
 				});
+			}
+			const { article } = result.data;
+			onArticleImported(article);
+			clearErrors('root');
+			updateNotification({
+				type: 'receive-article',
+				content: article,
 			});
+			setLockArticleInputText(true);
+		});
 	};
 
 	const showImportedArticle =
