@@ -32,6 +32,8 @@ export type NewsletterDispatchOutcome = {
 	dispatchId?: string;
 	status: 'success' | 'failure';
 	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
+	/** The Braze or email-rendering HTTP status when a failed send reached the provider. */
+	providerStatusCode?: number;
 };
 
 export const newsletterFailureReason = (
@@ -40,6 +42,11 @@ export const newsletterFailureReason = (
 	error instanceof BrazeApiError || error instanceof EmailRenderingError
 		? error.reason
 		: 'unknown';
+
+export const newsletterStatusCode = (error: unknown): number | undefined =>
+	error instanceof BrazeApiError || error instanceof EmailRenderingError
+		? error.status
+		: undefined;
 
 export const resolveNewsletterDispatch = (request: NotificationSendRequest) => {
 	const plan = request.channels[NotificationChannel.Newsletter];
@@ -144,6 +151,7 @@ export const dispatchNewsletter = async (
 			campaignId: brazeCampaignId,
 			status: 'failure',
 			failureReason: newsletterFailureReason(result.reason),
+			providerStatusCode: newsletterStatusCode(result.reason),
 		};
 	});
 

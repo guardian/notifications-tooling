@@ -34,6 +34,7 @@ export const createNotificationDispatchesRepository = (db: Database) => ({
 					providerRef: values.providerRef ?? null,
 					status: values.status,
 					failureReason: values.failureReason ?? null,
+					providerStatusCode: values.providerStatusCode ?? null,
 					detail: values.detail ?? null,
 					updatedAt: new Date(),
 				},

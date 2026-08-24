@@ -1,0 +1,1 @@
+ALTER TABLE "notification_dispatches" ADD COLUMN "provider_status_code" integer;

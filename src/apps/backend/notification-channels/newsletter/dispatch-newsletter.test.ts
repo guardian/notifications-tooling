@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { newsletterSegments, NotificationChannel } from '@config';
+import { BrazeApiError } from '@services';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import { dispatchNotification } from '../dispatch-notification';
 import {
@@ -8,6 +9,10 @@ import {
 	newsletterItem,
 	notificationId,
 } from '../test-support';
+import {
+	dispatchNewsletter,
+	resolveNewsletterDispatch,
+} from './dispatch-newsletter';
 
 describe('dispatchNotification (newsletter channel)', () => {
 	it('renders each newsletter segment and sends it through Braze', async () => {
@@ -80,5 +85,54 @@ describe('dispatchNotification (newsletter channel)', () => {
 				status: 'success',
 			},
 		]);
+	});
+
+	it('records the Braze HTTP status on a failed segment while still sending the others', async () => {
+		const { dependencies, sendBrazeCampaign } = createDependencies();
+		const brazeError = new BrazeApiError('campaign trigger', 'http_error', 502);
+		let call = 0;
+		sendBrazeCampaign.mockImplementation(() => {
+			call += 1;
+			return call === 1
+				? Promise.resolve({ message: 'success', dispatch_id: 'dispatch-123' })
+				: Promise.reject(brazeError);
+		});
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: { items: { lead: newsletterItem } },
+			channels: {
+				[NotificationChannel.Newsletter]: {
+					audience: { type: 'segment', items: ['UK', 'US'] },
+					compose: { items: ['lead'], subject: 'Daily briefing' },
+				},
+			},
+		};
+
+		const { outcomes, error } = await dispatchNewsletter(
+			resolveNewsletterDispatch(request),
+			notificationId,
+			dependencies,
+		);
+
+		// Both segments are attempted even though the second one failed.
+		expect(sendBrazeCampaign).toHaveBeenCalledTimes(2);
+		expect(outcomes).toEqual([
+			{
+				notificationId,
+				segmentId: 'UK',
+				campaignId: newsletterSegments.UK.brazeCampaignId,
+				dispatchId: 'dispatch-123',
+				status: 'success',
+			},
+			{
+				notificationId,
+				segmentId: 'US',
+				campaignId: newsletterSegments.US.brazeCampaignId,
+				status: 'failure',
+				failureReason: 'http_error',
+				providerStatusCode: 502,
+			},
+		]);
+		expect(error).toBe(brazeError);
 	});
 });

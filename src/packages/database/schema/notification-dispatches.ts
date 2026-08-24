@@ -1,4 +1,5 @@
 import {
+	integer,
 	jsonb,
 	pgEnum,
 	pgTable,
@@ -38,6 +39,9 @@ export const notificationDispatches = pgTable(
 		providerRef: text('provider_ref'),
 		status: dispatchStatusEnum('status').notNull(),
 		failureReason: text('failure_reason'),
+		// The external service's HTTP status when a failed call reached the
+		// provider (null for timeouts, network errors, or a success).
+		providerStatusCode: integer('provider_status_code'),
 		// Channel-specific extras (e.g. campaignId, importance, editions).
 		detail: jsonb('detail'),
 		createdAt: timestamp('created_at', {
