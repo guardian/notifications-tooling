@@ -14,9 +14,9 @@ import type {
 } from '../api/send-test-email';
 import { ConfigContext } from '../ConfigContext';
 import { validateGuardianEmail } from '../form-validation';
+import { composeNewsletterSubject } from '../newsletter-subject';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { kickerNameMap } from '../option-values';
 import type { AudienceSegment } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 
@@ -48,9 +48,7 @@ const getSendParams = (
 		return;
 	}
 
-	const emailSubjectLine = kicker
-		? `${kickerNameMap[kicker]}: ${subject}`
-		: subject;
+	const emailSubjectLine = composeNewsletterSubject(subject, kicker);
 
 	return {
 		emailInput,

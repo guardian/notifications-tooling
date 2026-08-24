@@ -1,11 +1,11 @@
 import type { ResolvedArticle } from '@models';
 import type { SendNotificationRequest } from './api/schemas';
 import { editionIds } from './edition-values';
+import { composeNewsletterSubject } from './newsletter-subject';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
 } from './notification-forms';
-import { kickerNameMap } from './option-values';
 import { alertTypeNameMap } from './option-values';
 
 type BuildRequestArgs<Values> = {
@@ -21,9 +21,7 @@ export const buildNewsletterRequest = ({
 }: BuildRequestArgs<NewsletterFormValues>): SendNotificationRequest => {
 	const { subject: headline, preview, audienceSegments, kicker } = values;
 
-	const emailSubjectLine = kicker
-		? `${kickerNameMap[kicker]}: ${headline}`
-		: headline;
+	const emailSubjectLine = composeNewsletterSubject(headline, kicker);
 
 	return {
 		idempotencyKey,
