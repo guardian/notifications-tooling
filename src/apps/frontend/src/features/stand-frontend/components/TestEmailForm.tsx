@@ -154,6 +154,7 @@ export const TestEmailForm = () => {
 		}
 
 		setConfirmation(undefined);
+		setSendError(undefined);
 		setSendInProgress(true);
 		setParamsLastUsed(sendParams);
 		void requestTestEmailSend(makePayload(sendParams))
