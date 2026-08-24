@@ -85,7 +85,7 @@ export const NotificationDraftsProvider = ({
 		resolver: zodResolver(
 			createAppAlertFormSchema({
 				headline:
-					appAlertLimits?.compose.headline.editorialLimit ??
+					appAlertLimits?.content.body.editorialLimit ??
 					APP_ALERT_LIMIT_FALLBACKS.headline.editorialLimit,
 			}),
 		),

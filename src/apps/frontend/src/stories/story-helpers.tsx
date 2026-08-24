@@ -74,7 +74,7 @@ export const WithNotificationContext = (
 		},
 		resolver: zodResolver(
 			createAppAlertFormSchema({
-				headline: appAlertConstraints.compose.headline.editorialLimit,
+				headline: appAlertConstraints.content.body.editorialLimit,
 			}),
 		),
 	});
