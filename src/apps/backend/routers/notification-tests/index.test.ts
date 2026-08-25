@@ -4,7 +4,10 @@ import { httpLogger } from '@http-logger';
 import { BrazeApiError, EmailRenderingError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
-import { installDatabaseMock } from '../../utils/test-utils/database';
+import {
+	installDatabaseMock,
+	mockPersistNotification,
+} from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -61,6 +64,7 @@ beforeAll(async () => {
 		'/v1/notification-tests',
 		createNotificationTestsRouter(
 			mock(() => Promise.resolve({ newsletter: [], appPush: [] })),
+			mockPersistNotification(),
 		),
 	);
 	server = await startTestServer(app);
@@ -103,7 +107,7 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest),
+			createNotificationTestsRouter(dispatchRequest, mockPersistNotification()),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -158,7 +162,7 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest),
+			createNotificationTestsRouter(dispatchRequest, mockPersistNotification()),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -194,7 +198,7 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest),
+			createNotificationTestsRouter(dispatchRequest, mockPersistNotification()),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -245,6 +249,83 @@ describe('POST /v1/notification-tests', () => {
 					channel: 'app-push',
 					planId: `${body.testId}#app-push`,
 					status: 'accepted',
+				},
+			]);
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
+	it('persists the test and exposes the recorded dispatches', async () => {
+		const dispatchRequest = mock(() =>
+			Promise.resolve({
+				newsletter: [
+					{
+						testId: 'ignored',
+						variant: 'UK',
+						dispatchId: 'dispatch-1',
+						status: 'success' as const,
+					},
+				],
+				appPush: [],
+			}),
+		);
+		const persistNotification = mockPersistNotification({
+			dispatches: [
+				{
+					id: 'd1',
+					notificationId: '00000000-0000-0000-0000-000000000000',
+					channel: 'newsletter',
+					target: 'UK',
+					providerRef: 'dispatch-1',
+					status: 'success',
+					failureReason: null,
+					providerStatusCode: null,
+					detail: null,
+					createdAt: new Date(0),
+					updatedAt: new Date(0),
+				},
+			],
+		});
+		const app = express();
+		app.use(httpLogger);
+		app.use(express.json());
+		app.use(
+			'/v1/notification-tests',
+			createNotificationTestsRouter(dispatchRequest, persistNotification),
+		);
+		const dispatchServer = await startTestServer(app);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notification-tests`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(validTestRequest()),
+				},
+			);
+
+			expect(response.status).toBe(202);
+			const body = (await response.json()) as {
+				testId: string;
+				dispatches: Array<Record<string, unknown>>;
+			};
+
+			expect(persistNotification).toHaveBeenCalledWith(
+				expect.objectContaining({
+					testId: body.testId,
+					createdByEmail: 'ada.lovelace@guardian.co.uk',
+				}),
+			);
+			expect(body.dispatches).toEqual([
+				{
+					channel: 'newsletter',
+					target: 'UK',
+					status: 'success',
+					providerRef: 'dispatch-1',
+					failureReason: null,
+					providerStatusCode: null,
 				},
 			]);
 		} finally {

@@ -8,6 +8,11 @@ import {
 	dispatchNotificationTest,
 	type TestDispatchOutcomes,
 } from '../../notification-channels/dispatch-notification-test';
+import {
+	type PersistTestNotification,
+	persistTestNotification,
+	toPublicDispatch,
+} from '../../persistence/persist-notification';
 import { handleValidationErrors } from '../notifications';
 import {
 	type NotificationTestSendRequest,
@@ -21,6 +26,7 @@ type DispatchValidatedNotificationTest = (
 
 export const createNotificationTestsRouter = (
 	dispatchRequest: DispatchValidatedNotificationTest = dispatchNotificationTest,
+	persistNotification: PersistTestNotification = persistTestNotification,
 ) =>
 	Router().post(
 		'/',
@@ -36,10 +42,23 @@ export const createNotificationTestsRouter = (
 			const testId = randomUUID();
 			const outcomes = await dispatchRequest(body, testId);
 
-			// Outcomes are not persisted yet; log them so tests can be introspected.
+			// Persist the envelope and each dispatch outcome, then expose the
+			// stored rows so the caller sees exactly what was recorded.
+			const { notification, dispatches } = await persistNotification({
+				testId,
+				request: body,
+				createdByEmail: req.user!.email,
+				outcomes,
+			});
+
 			req.log.info(
-				{ testId, dryRun: body.options.dryRun, ...outcomes },
-				'Dispatched notification test',
+				{
+					testId,
+					dryRun: body.options.dryRun,
+					status: notification.status,
+					...outcomes,
+				},
+				'Dispatched and recorded notification test',
 			);
 
 			res.status(202).json({
@@ -51,6 +70,7 @@ export const createNotificationTestsRouter = (
 					planId: `${testId}#${channel}`,
 					status: 'accepted',
 				})),
+				dispatches: dispatches.map(toPublicDispatch),
 				statusUrl: `/v1/notification-tests/${testId}/status`,
 			});
 		},

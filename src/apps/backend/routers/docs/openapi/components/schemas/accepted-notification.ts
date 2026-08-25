@@ -17,6 +17,12 @@ export const acceptedNotificationSchema = {
 			description: 'One entry per requested delivery channel.',
 			items: { $ref: '#/components/schemas/NotificationPlanAcceptance' },
 		},
+		dispatches: {
+			type: 'array',
+			description:
+				'The persisted per-target dispatch outcomes, one per addressed topic type or segment. Empty for a dry run.',
+			items: { $ref: '#/components/schemas/NotificationDispatchOutcome' },
+		},
 		statusUrl: {
 			type: 'string',
 			description:

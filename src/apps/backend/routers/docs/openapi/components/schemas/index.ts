@@ -11,6 +11,7 @@ import { emailRenderingContentErrorSchema } from './email-rendering-content-erro
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { notificationChannelSchema } from './notification-channel';
+import { notificationDispatchOutcomeSchema } from './notification-dispatch-outcome';
 import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
 import { notificationProviderErrorSchema } from './notification-provider-error';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
@@ -30,6 +31,7 @@ export const schemas = {
 	NotificationSendRequest: notificationSendRequestJsonSchema,
 	NotificationTestSendRequest: notificationTestSendRequestJsonSchema,
 	NotificationPlanAcceptance: notificationPlanAcceptanceSchema,
+	NotificationDispatchOutcome: notificationDispatchOutcomeSchema,
 	AcceptedNotification: acceptedNotificationSchema,
 	AcceptedTestNotification: acceptedTestNotificationSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,

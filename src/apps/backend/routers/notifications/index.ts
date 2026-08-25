@@ -10,6 +10,11 @@ import {
 	type DispatchOutcomes,
 } from '../../notification-channels/dispatch-notification';
 import {
+	type PersistSendNotification,
+	persistSendNotification,
+	toPublicDispatch,
+} from '../../persistence/persist-notification';
+import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
 } from './schemas/notification-send-request';
@@ -78,6 +83,7 @@ type DispatchValidatedNotification = (
 
 export const createNotificationsRouter = (
 	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
+	persistNotification: PersistSendNotification = persistSendNotification,
 ) => {
 	const notificationsRouter = Router();
 
@@ -95,15 +101,20 @@ export const createNotificationsRouter = (
 			// Mint the id before dispatch so each channel adapter can tag its
 			// downstream calls with it. Becomes the store's primary key later.
 			const notificationId = randomUUID();
-			const { appPush, newsletter } = await dispatchRequest(
-				body,
-				notificationId,
-			);
+			const outcomes = await dispatchRequest(body, notificationId);
 
-			// Outcomes are not persisted yet; log them so sends can be introspected.
+			// Persist the envelope and each dispatch outcome, then expose the
+			// stored rows so the caller sees exactly what was recorded.
+			const { notification, dispatches } = await persistNotification({
+				notificationId,
+				request: body,
+				createdByEmail: req.user!.email,
+				outcomes,
+			});
+
 			req.log.info(
-				{ notificationId, appPush, newsletter },
-				'Dispatched notification channels',
+				{ notificationId, status: notification.status, ...outcomes },
+				'Dispatched and recorded notification channels',
 			);
 
 			const statusUrl = `/v1/notifications/${notificationId}/status`;
@@ -121,6 +132,7 @@ export const createNotificationsRouter = (
 				notificationId,
 				status: 'accepted',
 				plans,
+				dispatches: dispatches.map(toPublicDispatch),
 				statusUrl,
 				cancellable: {
 					cancelUrl: `/v1/notifications/${notificationId}/cancel`,

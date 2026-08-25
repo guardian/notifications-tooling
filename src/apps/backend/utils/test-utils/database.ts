@@ -1,4 +1,5 @@
 import { mock } from 'bun:test';
+import type { PersistedNotification } from '../../persistence/persist-notification';
 
 export const dbExecuteMock = mock<(query: string) => Promise<void>>(() =>
 	Promise.resolve(),
@@ -13,3 +14,30 @@ export const installDatabaseMock = (): void => {
 		getDb: () => Promise.resolve(mockedDb),
 	}));
 };
+
+/** A canned persisted notification for router tests that inject persistence. */
+export const buildPersistedNotification = (
+	overrides: Partial<PersistedNotification> = {},
+): PersistedNotification => ({
+	notification: {
+		id: '00000000-0000-0000-0000-000000000000',
+		idempotencyKey: 'test-idempotency-key',
+		kind: 'send',
+		status: 'accepted',
+		sender: 'notifications-tooling-spa/v1',
+		createdByEmail: 'ada.lovelace@guardian.co.uk',
+		dryRun: false,
+		scheduledFor: null,
+		content: {},
+		channels: {},
+		createdAt: new Date(0),
+		updatedAt: new Date(0),
+		...overrides.notification,
+	},
+	dispatches: overrides.dispatches ?? [],
+});
+
+/** A persistence stub that records nothing and returns a canned envelope. */
+export const mockPersistNotification = (
+	overrides: Partial<PersistedNotification> = {},
+) => mock(() => Promise.resolve(buildPersistedNotification(overrides)));

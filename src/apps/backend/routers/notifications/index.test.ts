@@ -4,7 +4,10 @@ import { httpLogger } from '@http-logger';
 import { AppNotificationApiError, BrazeApiError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
-import { installDatabaseMock } from '../../utils/test-utils/database';
+import {
+	installDatabaseMock,
+	mockPersistNotification,
+} from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -107,7 +110,7 @@ describe('POST /v1/notifications', () => {
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
-				createNotificationsRouter(dispatchRequest),
+				createNotificationsRouter(dispatchRequest, mockPersistNotification()),
 			);
 			const dispatchServer = await startTestServer(testApp);
 
@@ -142,6 +145,7 @@ describe('POST /v1/notifications', () => {
 				'/v1/notifications',
 				createNotificationsRouter(
 					mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+					mockPersistNotification(),
 				),
 			);
 			const dispatchServer = await startTestServer(testApp);
@@ -185,6 +189,83 @@ describe('POST /v1/notifications', () => {
 					`/v1/notifications/${body.notificationId}/cancel`,
 				);
 				expect(typeof body.cancellable.expiresAt).toBe('number');
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+
+		it('persists the notification and exposes the recorded dispatches', async () => {
+			const dispatchRequest = mock(() =>
+				Promise.resolve({
+					appPush: [
+						{
+							notificationId: 'ignored',
+							id: 'push-1',
+							topicType: 'breaking-news',
+							status: 'success' as const,
+						},
+					],
+					newsletter: [],
+				}),
+			);
+			const persistNotification = mockPersistNotification({
+				dispatches: [
+					{
+						id: 'd1',
+						notificationId: '00000000-0000-0000-0000-000000000000',
+						channel: 'app-push',
+						target: 'breaking-news',
+						providerRef: 'push-1',
+						status: 'success',
+						failureReason: null,
+						providerStatusCode: null,
+						detail: null,
+						createdAt: new Date(0),
+						updatedAt: new Date(0),
+					},
+				],
+			});
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(dispatchRequest, persistNotification),
+			);
+			const dispatchServer = await startTestServer(testApp);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(202);
+				const body = (await response.json()) as {
+					notificationId: string;
+					dispatches: Array<Record<string, unknown>>;
+				};
+
+				expect(persistNotification).toHaveBeenCalledWith(
+					expect.objectContaining({
+						notificationId: body.notificationId,
+						createdByEmail: 'ada.lovelace@guardian.co.uk',
+					}),
+				);
+				expect(body.dispatches).toEqual([
+					{
+						channel: 'app-push',
+						target: 'breaking-news',
+						status: 'success',
+						providerRef: 'push-1',
+						failureReason: null,
+						providerStatusCode: null,
+					},
+				]);
 			} finally {
 				await dispatchServer.close();
 			}
