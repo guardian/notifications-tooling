@@ -138,12 +138,12 @@ export const RetryAfterFailure: Story = {
 				requestTestEmailSend: (request) => {
 					sendAttempts += 1;
 					return sendAttempts === 1
-						? Promise.reject(
+						? mockFailingRequestTestEmailSend(
 								new ApiError({
 									message: 'test error',
 									failure: 'non-2xx-response',
 								}),
-							)
+							)(request)
 						: mockRequestTestEmailSend(request);
 				},
 			},
