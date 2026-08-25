@@ -30,7 +30,7 @@ const modifyContent = (
 		headlineElement.innerText = subject;
 	}
 	if (kicker && kickerElement) {
-		kickerElement.innerText = kickerNameMap[kicker];
+		kickerElement.innerText = kicker === 'none' ? '' : kickerNameMap[kicker];
 	}
 	if (preview && previewElement) {
 		previewElement.innerText = preview;
