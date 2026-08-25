@@ -37,7 +37,10 @@ let baseUrl: string;
 
 beforeAll(async () => {
 	authenticateRequests();
-	grantPermissions([UserPermissions.DispatchAccess]);
+	grantPermissions([
+		UserPermissions.DispatchAccess,
+		UserPermissions.SendNotification,
+	]);
 	server = await startTestServer();
 	baseUrl = server.baseUrl;
 });

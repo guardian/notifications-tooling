@@ -53,7 +53,10 @@ const validTestRequest = () => ({
 
 beforeAll(async () => {
 	authenticateRequests();
-	grantPermissions([UserPermissions.DispatchAccess]);
+	grantPermissions([
+		UserPermissions.DispatchAccess,
+		UserPermissions.SendNotification,
+	]);
 	const app = express();
 	app.use(httpLogger);
 	app.use(express.json());
