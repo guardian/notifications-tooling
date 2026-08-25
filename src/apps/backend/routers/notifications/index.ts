@@ -116,6 +116,7 @@ const serializeDispatch = (dispatch: NotificationDispatch) => ({
 	providerRef: dispatch.providerRef,
 	status: dispatch.status,
 	failureReason: dispatch.failureReason,
+	providerStatusCode: dispatch.providerStatusCode,
 	detail: dispatch.detail,
 	createdAt: dispatch.createdAt,
 	updatedAt: dispatch.updatedAt,

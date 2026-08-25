@@ -390,6 +390,7 @@ const storedNotification = (): NotificationWithDispatches => ({
 			providerRef: 'mob-123',
 			status: 'success',
 			failureReason: null,
+			providerStatusCode: null,
 			detail: { editions: ['uk'] },
 			createdAt: new Date('2026-07-08T09:00:01.000Z'),
 			updatedAt: new Date('2026-07-08T09:00:01.000Z'),
@@ -463,6 +464,7 @@ describe('GET /v1/notifications/:id', () => {
 					target: 'breaking-news',
 					providerRef: 'mob-123',
 					status: 'success',
+					providerStatusCode: null,
 				});
 				// The notificationId is redundant on each nested dispatch.
 				expect(body.dispatches[0]).not.toHaveProperty('notificationId');

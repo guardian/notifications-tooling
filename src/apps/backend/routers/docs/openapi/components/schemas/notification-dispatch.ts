@@ -12,6 +12,7 @@ export const notificationDispatchSchema = {
 		'providerRef',
 		'status',
 		'failureReason',
+		'providerStatusCode',
 		'detail',
 		'createdAt',
 		'updatedAt',
@@ -42,6 +43,12 @@ export const notificationDispatchSchema = {
 		failureReason: {
 			type: ['string', 'null'],
 			description: 'A safe explanation of the failure when status is failure.',
+		},
+		providerStatusCode: {
+			type: ['integer', 'null'],
+			description:
+				"The provider's HTTP status when a failed call reached it (null for a success, timeout, or network error).",
+			example: 502,
 		},
 		detail: {
 			type: ['object', 'null'],
