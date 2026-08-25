@@ -25,7 +25,10 @@ export const createNotificationTestsRouter = (
 	Router().post(
 		'/',
 		authMiddleware,
-		requirePermissions([UserPermissions.DispatchAccess]),
+		requirePermissions([
+			UserPermissions.DispatchAccess,
+			UserPermissions.SendNotification,
+		]),
 		validate({
 			body: notificationTestSendRequestSchema,
 			handler: handleValidationErrors,

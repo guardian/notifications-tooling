@@ -162,7 +162,10 @@ export const createNotificationsRouter = (
 	notificationsRouter.post(
 		'/',
 		authMiddleware,
-		requirePermissions([UserPermissions.DispatchAccess]),
+		requirePermissions([
+			UserPermissions.DispatchAccess,
+			UserPermissions.SendNotification,
+		]),
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
