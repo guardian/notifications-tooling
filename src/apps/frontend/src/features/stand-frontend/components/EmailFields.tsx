@@ -1,4 +1,5 @@
 import { Option, Select } from '@guardian/stand/Select';
+import { useEffect } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { kickerSchema } from '../api/schemas';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
@@ -15,17 +16,48 @@ interface EmailFieldsProps {
 }
 
 export const EmailFields = ({ constraints }: EmailFieldsProps) => {
-	const { control } = useFormContext<NewsletterFormValues>();
+	const { control, setValue } = useFormContext<NewsletterFormValues>();
 	const kicker = useWatch<NewsletterFormValues, 'kicker'>({
 		control,
 		name: 'kicker',
 	});
 
+	const subject = useWatch<NewsletterFormValues, 'subject'>({
+		control,
+		name: 'subject',
+	});
+
+	const kickerLabel = ['breaking-news', 'exclusive'].includes(kicker)
+		? kickerNameMap[kicker]
+		: undefined;
+	const placeholderText = kickerLabel
+		? `${kickerLabel}: Enter a subject line here...`
+		: 'Enter a subject line here...';
 	const newsletter = constraints?.channels.newsletter;
 	const subjectLimits =
 		newsletter?.compose.subject ?? NEWSLETTER_LIMIT_FALLBACKS.title;
 	const previewLimits =
 		newsletter?.content.body ?? NEWSLETTER_LIMIT_FALLBACKS.body;
+
+	useEffect(() => {
+		if (subject === '') {
+			return;
+		}
+		const kickerName = kickerLabel ? `${kickerLabel}: ` : '';
+
+		const existingPrefix = Object.values(kickerNameMap)
+			.map((name) => `${name}: `)
+			.find((prefix) => subject.startsWith(prefix));
+
+		const bareSubject = existingPrefix
+			? subject.slice(existingPrefix.length)
+			: subject;
+		const nextSubject = `${kickerName}${bareSubject}`;
+
+		if (nextSubject !== subject) {
+			setValue('subject', nextSubject, { shouldValidate: true });
+		}
+	}, [subject, kickerLabel, setValue]);
 
 	return (
 		<>
@@ -66,7 +98,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 					<NotificationTextInput
 						label="Subject"
 						description="Choose the subject line (kicker included in character count)"
-						placeholder="Enter a subject line here..."
+						placeholder={placeholderText}
 						value={field.value}
 						update={field.onChange}
 						softLimit={subjectLimits.recommended}
