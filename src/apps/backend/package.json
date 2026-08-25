@@ -8,7 +8,7 @@
 		"dev": "bun run --hot index.ts",
 		"build": "bun build app.ts --minify --outfile=dist/handler.js --target=node --format=cjs -e @aws-sdk/* --production --external swagger-ui-dist",
 		"test": "bun test",
-		"test:db": "bun test ./**/*.dbtest.ts",
+		"test:db": "bun exec 'bun test ./**/*.dbtest.ts'",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
