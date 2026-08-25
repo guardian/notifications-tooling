@@ -27,7 +27,7 @@ export const DEFAULT_EDITIONS: Segment[] = [
 	{ code: 'UK', label: 'United Kingdom' },
 	{ code: 'US', label: 'United States' },
 	{ code: 'AU', label: 'Australia' },
-	{ code: 'EU', label: 'EU' },
+	{ code: 'EU', label: 'Europe' },
 	{ code: 'INT', label: 'International' },
 ];
 

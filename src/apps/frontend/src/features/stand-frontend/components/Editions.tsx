@@ -1,8 +1,10 @@
 import { Icon } from '@guardian/stand/Icon';
 import type { TopicTypeOption } from '../api/schemas';
-import type { AudienceSegment } from '../types';
+import { editionIds } from '../edition-values';
+import type { Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
+import { DEFAULT_EDITIONS } from './SelectableEditions';
 
 export interface AppPushTopicSelection {
 	type: string;
@@ -17,17 +19,23 @@ interface EditionsProps {
 const selectionId = ({ type, name }: AppPushTopicSelection) =>
 	`${type}:${name}`;
 
-const editionFlagCodes: Partial<Record<string, AudienceSegment>> = {
+const editionFlagCodes: Partial<Record<string, Edition>> = {
 	uk: 'UK',
 	us: 'US',
 	au: 'AU',
+	europe: 'EU',
+	int: 'INT',
 };
+
+const editionLabels = Object.fromEntries(
+	DEFAULT_EDITIONS.map(({ code, label }) => [editionIds[code], label]),
+);
 
 export const Editions = ({ topicTypes, selected }: EditionsProps) => {
 	const options = topicTypes.flatMap((topicType) =>
 		topicType.editions.map((edition) => ({
 			id: selectionId({ type: topicType.id, name: edition.id }),
-			label: edition.label,
+			label: editionLabels[edition.id] ?? edition.label,
 		})),
 	);
 	const selectedIds = selected.map(selectionId);
