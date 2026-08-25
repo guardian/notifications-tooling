@@ -81,8 +81,12 @@ export const createNotificationsRepository = (db: Database) => ({
 			.orderBy(desc(notifications.createdAt))
 			.$dynamic();
 
-		if (limit !== undefined) pageQuery = pageQuery.limit(limit);
-		if (offset !== undefined) pageQuery = pageQuery.offset(offset);
+		if (limit !== undefined) {
+			pageQuery = pageQuery.limit(limit);
+		}
+		if (offset !== undefined) {
+			pageQuery = pageQuery.offset(offset);
+		}
 
 		return { notifications: await pageQuery, total: totals?.total ?? 0 };
 	},

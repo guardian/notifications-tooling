@@ -1,7 +1,7 @@
 import { notificationSchema } from './notification';
 
-const { dispatches: _dispatches, ...summaryProperties } =
-	notificationSchema.properties;
+const { dispatches, ...summaryProperties } = notificationSchema.properties;
+void dispatches;
 
 /**
  * A persisted notification without its dispatch outcomes, as returned by the
