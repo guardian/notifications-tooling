@@ -1,10 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import { UserPermissions } from '@config';
 import type {
 	NotificationListPage,
 	NotificationWithDispatches,
 } from '@database';
 import { httpLogger } from '@http-logger';
+import { UserPermissions } from '@models';
 import { AppNotificationApiError, BrazeApiError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
@@ -43,7 +43,10 @@ let baseUrl: string;
 
 beforeAll(async () => {
 	authenticateRequests();
-	grantPermissions([UserPermissions.DispatchAccess]);
+	grantPermissions([
+		UserPermissions.DispatchAccess,
+		UserPermissions.SendNotification,
+	]);
 	server = await startTestServer();
 	baseUrl = server.baseUrl;
 });

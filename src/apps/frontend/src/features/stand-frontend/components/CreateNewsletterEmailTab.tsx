@@ -13,6 +13,7 @@ import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport, NewsletterDispatchDetails } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
+import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 import { EmailPreviewToggle } from './PreviewToggle';
 import {
 	DEFAULT_SIDE_NAV_HREF,
@@ -76,6 +77,7 @@ export const CreateNewsletterEmailTab = () => {
 									minWidth: 0,
 								})}
 							>
+								<NoSendPermissionWarning />
 								<EmailPreviewToggle />
 								<div
 									css={css({

@@ -1,4 +1,4 @@
-import { UserPermissions } from '@config';
+import { UserPermissions } from '@models';
 
 /**
  * The `200 OK` response body returned by `GET /v1/user`, mirroring the

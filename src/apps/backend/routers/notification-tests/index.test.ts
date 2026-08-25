@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import { UserPermissions } from '@config';
 import { httpLogger } from '@http-logger';
+import { UserPermissions } from '@models';
 import { BrazeApiError, EmailRenderingError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
@@ -56,7 +56,10 @@ const validTestRequest = () => ({
 
 beforeAll(async () => {
 	authenticateRequests();
-	grantPermissions([UserPermissions.DispatchAccess]);
+	grantPermissions([
+		UserPermissions.DispatchAccess,
+		UserPermissions.SendNotification,
+	]);
 	const app = express();
 	app.use(httpLogger);
 	app.use(express.json());
