@@ -6,7 +6,7 @@ import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
 import {
 	installDatabaseMock,
-	mockPersistNotification,
+	mockNotificationStore,
 } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
@@ -64,7 +64,7 @@ beforeAll(async () => {
 		'/v1/notification-tests',
 		createNotificationTestsRouter(
 			mock(() => Promise.resolve({ newsletter: [], appPush: [] })),
-			mockPersistNotification(),
+			mockNotificationStore({ notification: { kind: 'test' } }),
 		),
 	);
 	server = await startTestServer(app);
@@ -107,7 +107,10 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest, mockPersistNotification()),
+			createNotificationTestsRouter(
+				dispatchRequest,
+				mockNotificationStore({ notification: { kind: 'test' } }),
+			),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -155,7 +158,10 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest, mockPersistNotification()),
+			createNotificationTestsRouter(
+				dispatchRequest,
+				mockNotificationStore({ notification: { kind: 'test' } }),
+			),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -191,7 +197,10 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest, mockPersistNotification()),
+			createNotificationTestsRouter(
+				dispatchRequest,
+				mockNotificationStore({ notification: { kind: 'test' } }),
+			),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -258,7 +267,8 @@ describe('POST /v1/notification-tests', () => {
 				appPush: [],
 			}),
 		);
-		const persistNotification = mockPersistNotification({
+		const store = mockNotificationStore({
+			notification: { kind: 'test' },
 			dispatches: [
 				{
 					id: 'd1',
@@ -280,7 +290,7 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest, persistNotification),
+			createNotificationTestsRouter(dispatchRequest, store),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -294,18 +304,22 @@ describe('POST /v1/notification-tests', () => {
 				},
 			);
 
-			expect(response.status).toBe(202);
+			// Every target succeeded, so the test send reads as created + delivered.
+			expect(response.status).toBe(201);
 			const body = (await response.json()) as {
 				id: string;
+				status: string;
 				dispatches: Array<Record<string, unknown>>;
 			};
 
-			expect(persistNotification).toHaveBeenCalledWith(
+			expect(body.status).toBe('delivered');
+			expect(store.create).toHaveBeenCalledWith(
 				expect.objectContaining({
-					testId: body.id,
-					createdByEmail: 'ada.lovelace@guardian.co.uk',
+					idempotencyKey: 'test-newsletter-2026-07-31',
 				}),
+				'ada.lovelace@guardian.co.uk',
 			);
+			expect(dispatchRequest).toHaveBeenCalledWith(expect.anything(), body.id);
 			expect(body.dispatches).toEqual([
 				{
 					id: 'd1',
@@ -330,7 +344,10 @@ describe('POST /v1/notification-tests', () => {
 			app.use(express.json());
 			app.use(
 				'/v1/notification-tests',
-				createNotificationTestsRouter(mock(() => Promise.reject(rejection))),
+				createNotificationTestsRouter(
+					mock(() => Promise.reject(rejection)),
+					mockNotificationStore({ notification: { kind: 'test' } }),
+				),
 			);
 			app.use(errorMiddleware);
 			return startTestServer(app);

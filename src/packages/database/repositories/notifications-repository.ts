@@ -16,6 +16,20 @@ export const createNotificationsRepository = (db: Database) => ({
 		return row!;
 	},
 
+	/** Sets the rolled-up delivery status once the dispatch outcomes settle. */
+	async updateStatus(
+		id: string,
+		status: Notification['status'],
+	): Promise<Notification> {
+		const [row] = await db
+			.update(notifications)
+			.set({ status, updatedAt: new Date() })
+			.where(eq(notifications.id, id))
+			.returning();
+
+		return row!;
+	},
+
 	async findById(id: string): Promise<Notification | null> {
 		const [row] = await db
 			.select()

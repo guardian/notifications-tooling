@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { UserPermissions } from '@config';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
@@ -10,8 +9,9 @@ import {
 	type DispatchOutcomes,
 } from '../../notification-channels/dispatch-notification';
 import {
-	type PersistSendNotification,
-	persistSendNotification,
+	httpStatusForNotification,
+	type SendNotificationStore,
+	sendNotificationStore,
 	toNotificationResponse,
 } from '../../persistence/persist-notification';
 import {
@@ -80,7 +80,7 @@ type DispatchValidatedNotification = (
 
 export const createNotificationsRouter = (
 	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
-	persistNotification: PersistSendNotification = persistSendNotification,
+	store: SendNotificationStore = sendNotificationStore,
 ) => {
 	const notificationsRouter = Router();
 
@@ -95,27 +95,32 @@ export const createNotificationsRouter = (
 		async (req, res) => {
 			const body = req.body;
 
-			// Mint the id before dispatch so each channel adapter can tag its
-			// downstream calls with it. Becomes the store's primary key later.
-			const notificationId = randomUUID();
-			const outcomes = await dispatchRequest(body, notificationId);
+			// Record the envelope first so the DB mints the id; each channel
+			// adapter then tags its downstream calls with that same id.
+			const notification = await store.create(body, req.user!.email);
 
-			// Persist the envelope and each dispatch outcome, then return the
-			// stored notification resource so the caller sees exactly what was
-			// recorded and how each channel fared.
-			const persisted = await persistNotification({
-				notificationId,
-				request: body,
-				createdByEmail: req.user!.email,
-				outcomes,
-			});
+			try {
+				const outcomes = await dispatchRequest(body, notification.id);
+				const persisted = await store.recordOutcomes(notification, outcomes);
 
-			req.log.info(
-				{ notificationId, status: persisted.notification.status, ...outcomes },
-				'Dispatched and recorded notification channels',
-			);
+				req.log.info(
+					{
+						notificationId: notification.id,
+						status: persisted.notification.status,
+						...outcomes,
+					},
+					'Dispatched and recorded notification channels',
+				);
 
-			res.status(202).json(toNotificationResponse(persisted));
+				res
+					.status(httpStatusForNotification(persisted.notification.status))
+					.json(toNotificationResponse(persisted));
+			} catch (error) {
+				// The row is already stored; flag it failed before the provider
+				// error surfaces as the documented 502/504 via errorMiddleware.
+				await store.markFailed(notification).catch(() => undefined);
+				throw error;
+			}
 		},
 	);
 

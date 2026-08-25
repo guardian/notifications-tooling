@@ -6,7 +6,7 @@ import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
 import {
 	installDatabaseMock,
-	mockPersistNotification,
+	mockNotificationStore,
 } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
@@ -110,7 +110,7 @@ describe('POST /v1/notifications', () => {
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
-				createNotificationsRouter(dispatchRequest, mockPersistNotification()),
+				createNotificationsRouter(dispatchRequest, mockNotificationStore()),
 			);
 			const dispatchServer = await startTestServer(testApp);
 
@@ -145,7 +145,7 @@ describe('POST /v1/notifications', () => {
 				'/v1/notifications',
 				createNotificationsRouter(
 					mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
-					mockPersistNotification(),
+					mockNotificationStore(),
 				),
 			);
 			const dispatchServer = await startTestServer(testApp);
@@ -198,7 +198,7 @@ describe('POST /v1/notifications', () => {
 					newsletter: [],
 				}),
 			);
-			const persistNotification = mockPersistNotification({
+			const store = mockNotificationStore({
 				dispatches: [
 					{
 						id: 'd1',
@@ -220,7 +220,7 @@ describe('POST /v1/notifications', () => {
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
-				createNotificationsRouter(dispatchRequest, persistNotification),
+				createNotificationsRouter(dispatchRequest, store),
 			);
 			const dispatchServer = await startTestServer(testApp);
 
@@ -234,17 +234,22 @@ describe('POST /v1/notifications', () => {
 					},
 				);
 
-				expect(response.status).toBe(202);
+				// Every target succeeded, so the send reads as created + delivered.
+				expect(response.status).toBe(201);
 				const body = (await response.json()) as {
 					id: string;
+					status: string;
 					dispatches: Array<Record<string, unknown>>;
 				};
 
-				expect(persistNotification).toHaveBeenCalledWith(
-					expect.objectContaining({
-						notificationId: body.id,
-						createdByEmail: 'ada.lovelace@guardian.co.uk',
-					}),
+				expect(body.status).toBe('delivered');
+				expect(store.create).toHaveBeenCalledWith(
+					expect.objectContaining({ idempotencyKey: 'push-2026-07-08' }),
+					'ada.lovelace@guardian.co.uk',
+				);
+				expect(dispatchRequest).toHaveBeenCalledWith(
+					expect.anything(),
+					body.id,
 				);
 				expect(body.dispatches).toEqual([
 					{
@@ -271,7 +276,10 @@ describe('POST /v1/notifications', () => {
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
-				createNotificationsRouter(mock(() => Promise.reject(rejection))),
+				createNotificationsRouter(
+					mock(() => Promise.reject(rejection)),
+					mockNotificationStore(),
+				),
 			);
 			testApp.use(errorMiddleware);
 			return startTestServer(testApp);

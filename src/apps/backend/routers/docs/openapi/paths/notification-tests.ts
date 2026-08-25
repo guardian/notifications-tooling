@@ -24,9 +24,31 @@ export const notificationTestsPath = {
 			},
 		},
 		responses: {
+			'201': {
+				description:
+					'The test was recorded and every requested channel delivered. The body is the stored notification with its per-target dispatch outcomes.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/Notification',
+						},
+					},
+				},
+			},
 			'202': {
 				description:
-					'The test notification was recorded and processed. For a dry run, no recipient or message calls were made and no dispatches are recorded. The body is the stored notification with its per-target dispatch outcomes.',
+					'The test was recorded but nothing was delivered yet (a dry run): no recipient or message calls were made and no dispatches are recorded. The body is the stored notification.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/Notification',
+						},
+					},
+				},
+			},
+			'207': {
+				description:
+					'The test was recorded and some, but not all, targets delivered. Each outcome is listed under `dispatches`.',
 				content: {
 					'application/json': {
 						schema: {

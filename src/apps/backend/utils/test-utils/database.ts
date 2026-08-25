@@ -15,9 +15,15 @@ export const installDatabaseMock = (): void => {
 	}));
 };
 
+/** Partial overrides for the canned persisted notification used in tests. */
+type PersistedNotificationOverrides = {
+	notification?: Partial<PersistedNotification['notification']>;
+	dispatches?: PersistedNotification['dispatches'];
+};
+
 /** A canned persisted notification for router tests that inject persistence. */
 export const buildPersistedNotification = (
-	overrides: Partial<PersistedNotification> = {},
+	overrides: PersistedNotificationOverrides = {},
 ): PersistedNotification => ({
 	notification: {
 		id: '00000000-0000-0000-0000-000000000000',
@@ -37,25 +43,36 @@ export const buildPersistedNotification = (
 	dispatches: overrides.dispatches ?? [],
 });
 
-/** A persistence stub that records nothing and echoes back a canned envelope. */
-export const mockPersistNotification = (
-	overrides: Partial<PersistedNotification> = {},
-) =>
-	mock(
-		(input: {
-			notificationId?: string;
-			testId?: string;
-			request?: { options?: { dryRun?: boolean } };
-		}) =>
-			Promise.resolve(
-				buildPersistedNotification({
-					...overrides,
-					notification: {
-						id: input.notificationId ?? input.testId,
-						kind: input.testId ? 'test' : 'send',
-						dryRun: input.request?.options?.dryRun ?? false,
-						...overrides.notification,
-					} as PersistedNotification['notification'],
+/** A persistence stub for router tests: records nothing, echoes canned rows. */
+export const mockNotificationStore = (
+	overrides: PersistedNotificationOverrides = {},
+) => {
+	const base = buildPersistedNotification(overrides).notification;
+	const settledStatus =
+		overrides.notification?.status ??
+		((overrides.dispatches?.length ?? 0) > 0 ? 'delivered' : 'accepted');
+
+	return {
+		// Mirrors the DB minting the id and defaulting the status to 'accepted',
+		// echoing the request's dry-run flag onto the stored row.
+		create: mock((request: { options?: { dryRun?: boolean } }) =>
+			Promise.resolve({
+				...base,
+				status: 'accepted' as const,
+				dryRun: request.options?.dryRun ?? base.dryRun,
+			}),
+		),
+		// Preserves the created row's identity, applying the settled status and
+		// the canned dispatch rows.
+		recordOutcomes: mock(
+			(notification: PersistedNotification['notification']) =>
+				Promise.resolve({
+					notification: { ...notification, status: settledStatus },
+					dispatches: overrides.dispatches ?? [],
 				}),
-			),
-	);
+		),
+		markFailed: mock((notification: PersistedNotification['notification']) =>
+			Promise.resolve({ ...notification, status: 'failed' as const }),
+		),
+	};
+};

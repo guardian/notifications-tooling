@@ -3,6 +3,7 @@ import type { NotificationDispatch } from '@database';
 import type { DispatchOutcomes } from '../notification-channels/dispatch-notification';
 import type { TestDispatchOutcomes } from '../notification-channels/dispatch-notification-test';
 import {
+	httpStatusForNotification,
 	mapSendOutcomesToDispatches,
 	mapTestOutcomesToDispatches,
 	rollUpStatus,
@@ -11,6 +12,15 @@ import {
 } from './persist-notification';
 
 const notificationId = '11111111-1111-1111-1111-111111111111';
+
+describe('httpStatusForNotification', () => {
+	it('maps each rolled-up status to its HTTP code', () => {
+		expect(httpStatusForNotification('accepted')).toBe(202);
+		expect(httpStatusForNotification('delivered')).toBe(201);
+		expect(httpStatusForNotification('partially_delivered')).toBe(207);
+		expect(httpStatusForNotification('failed')).toBe(502);
+	});
+});
 
 describe('rollUpStatus', () => {
 	it('is accepted when there are no dispatches (e.g. a dry run)', () => {

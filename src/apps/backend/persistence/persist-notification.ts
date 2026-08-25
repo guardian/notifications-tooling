@@ -99,7 +99,7 @@ export const toPublicDispatch = (dispatch: NotificationDispatch) => ({
 });
 
 /**
- * The `202` response body for both send and test endpoints: the persisted
+ * The `2xx` response body for both send and test endpoints: the persisted
  * notification resource with its dispatch outcomes nested underneath. The
  * `status` is rolled up from those outcomes, so a caller sees what actually
  * happened rather than a fixed acknowledgement.
@@ -119,8 +119,28 @@ export const toNotificationResponse = ({
 	dispatches: dispatches.map(toPublicDispatch),
 });
 
+/** Maps a notification's rolled-up status to the response's HTTP status code. */
+export const httpStatusForNotification = (
+	status: NotificationStatus,
+): number => {
+	switch (status) {
+		// Created and every target delivered.
+		case 'delivered':
+			return 201;
+		// Some targets delivered, some failed — the body details each one.
+		case 'partially_delivered':
+			return 207;
+		// Every target failed at the provider.
+		case 'failed':
+			return 502;
+		// Recorded but nothing was delivered yet (e.g. a dry run).
+		case 'accepted':
+		default:
+			return 202;
+	}
+};
+
 type NotificationEnvelope = {
-	notificationId: string;
 	kind: 'send' | 'test';
 	idempotencyKey: string;
 	sender: string;
@@ -131,56 +151,73 @@ type NotificationEnvelope = {
 	channels: Record<string, unknown>;
 };
 
-/**
- * Inserts the notification envelope and upserts each dispatch outcome, deriving
- * the notification status from those outcomes. The id is minted before dispatch
- * so the persisted rows match the ids the channel adapters tagged downstream.
- */
-const writeNotification = async (
+/** Inserts the envelope with the default 'accepted' status; the DB mints the id. */
+const insertNotification = (
 	envelope: NotificationEnvelope,
+): Promise<Notification> =>
+	getDb().then((db) => createNotificationsRepository(db).create(envelope));
+
+/**
+ * Upserts each dispatch outcome and rolls the notification's status up from
+ * them, updating the stored row only when the status actually changed.
+ */
+const recordDispatches = async (
+	notification: Notification,
 	dispatches: NewNotificationDispatch[],
 ): Promise<PersistedNotification> => {
 	const db = await getDb();
 	const notificationsRepository = createNotificationsRepository(db);
 	const dispatchesRepository = createNotificationDispatchesRepository(db);
 
-	const notification = await notificationsRepository.create({
-		id: envelope.notificationId,
-		idempotencyKey: envelope.idempotencyKey,
-		kind: envelope.kind,
-		status: rollUpStatus(dispatches),
-		sender: envelope.sender,
-		createdByEmail: envelope.createdByEmail,
-		dryRun: envelope.dryRun,
-		scheduledFor: envelope.scheduledFor,
-		content: envelope.content,
-		channels: envelope.channels,
-	});
-
 	const persistedDispatches = await Promise.all(
 		dispatches.map((dispatch) => dispatchesRepository.upsert(dispatch)),
 	);
 
-	return { notification, dispatches: persistedDispatches };
+	const status = rollUpStatus(dispatches);
+	const updated =
+		status === notification.status
+			? notification
+			: await notificationsRepository.updateStatus(notification.id, status);
+
+	return { notification: updated, dispatches: persistedDispatches };
 };
 
-export type PersistSendNotification = (input: {
-	notificationId: string;
-	request: NotificationSendRequest;
-	createdByEmail: string;
-	outcomes: DispatchOutcomes;
-}) => Promise<PersistedNotification>;
+/** Flags a notification whose dispatch threw before any outcome was recorded. */
+const markNotificationFailed = (
+	notification: Notification,
+): Promise<Notification> =>
+	getDb().then((db) =>
+		createNotificationsRepository(db).updateStatus(notification.id, 'failed'),
+	);
 
-/** Persists a production `POST /v1/notifications` send and its outcomes. */
-export const persistSendNotification: PersistSendNotification = ({
-	notificationId,
-	request,
-	createdByEmail,
-	outcomes,
-}) =>
-	writeNotification(
-		{
-			notificationId,
+/**
+ * A two-phase persistence handle for one endpoint: `create` records the
+ * envelope before dispatch (the DB mints the id), `recordOutcomes` persists the
+ * dispatch results and the rolled-up status afterwards, and `markFailed` flags
+ * a notification whose dispatch threw before any outcome could be recorded.
+ */
+export type NotificationStore<Request, Outcomes> = {
+	create(request: Request, createdByEmail: string): Promise<Notification>;
+	recordOutcomes(
+		notification: Notification,
+		outcomes: Outcomes,
+	): Promise<PersistedNotification>;
+	markFailed(notification: Notification): Promise<Notification>;
+};
+
+export type SendNotificationStore = NotificationStore<
+	NotificationSendRequest,
+	DispatchOutcomes
+>;
+
+export type TestNotificationStore = NotificationStore<
+	NotificationTestSendRequest,
+	TestDispatchOutcomes
+>;
+
+export const sendNotificationStore: SendNotificationStore = {
+	create: (request, createdByEmail) =>
+		insertNotification({
 			kind: 'send',
 			idempotencyKey: request.idempotencyKey,
 			sender: request.sender,
@@ -191,27 +228,18 @@ export const persistSendNotification: PersistSendNotification = ({
 				: null,
 			content: request.content,
 			channels: request.channels,
-		},
-		mapSendOutcomesToDispatches(notificationId, outcomes),
-	);
+		}),
+	recordOutcomes: (notification, outcomes) =>
+		recordDispatches(
+			notification,
+			mapSendOutcomesToDispatches(notification.id, outcomes),
+		),
+	markFailed: markNotificationFailed,
+};
 
-export type PersistTestNotification = (input: {
-	testId: string;
-	request: NotificationTestSendRequest;
-	createdByEmail: string;
-	outcomes: TestDispatchOutcomes;
-}) => Promise<PersistedNotification>;
-
-/** Persists a `POST /v1/notification-tests` send and its outcomes. */
-export const persistTestNotification: PersistTestNotification = ({
-	testId,
-	request,
-	createdByEmail,
-	outcomes,
-}) =>
-	writeNotification(
-		{
-			notificationId: testId,
+export const testNotificationStore: TestNotificationStore = {
+	create: (request, createdByEmail) =>
+		insertNotification({
 			kind: 'test',
 			idempotencyKey: request.idempotencyKey,
 			sender: request.sender,
@@ -220,6 +248,11 @@ export const persistTestNotification: PersistTestNotification = ({
 			scheduledFor: null,
 			content: request.content,
 			channels: request.channels,
-		},
-		mapTestOutcomesToDispatches(testId, outcomes),
-	);
+		}),
+	recordOutcomes: (notification, outcomes) =>
+		recordDispatches(
+			notification,
+			mapTestOutcomesToDispatches(notification.id, outcomes),
+		),
+	markFailed: markNotificationFailed,
+};
