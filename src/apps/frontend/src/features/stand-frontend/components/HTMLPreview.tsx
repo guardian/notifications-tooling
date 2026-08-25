@@ -30,7 +30,7 @@ const modifyContent = (
 		headlineElement.innerText = subject;
 	}
 	if (kicker && kickerElement) {
-		kickerElement.innerText = kickerNameMap[kicker];
+		kickerElement.innerText = kicker === 'none' ? '' : kickerNameMap[kicker];
 	}
 	if (preview && previewElement) {
 		previewElement.innerText = preview;
@@ -66,11 +66,14 @@ export const HTMLPreview = () => {
 		if (audience.length === 0) {
 			return `<div>no audience</div>`;
 		}
-		const response = await requestEmailHtml({
+		const result = await requestEmailHtml({
 			article: webUrl,
 			audience: audience,
 		});
-		return response.html;
+		if (!result.success) {
+			throw result.failure;
+		}
+		return result.data.html;
 	}, [webUrl, requestEmailHtml, stringifiedAudience]);
 
 	useEffect(() => {

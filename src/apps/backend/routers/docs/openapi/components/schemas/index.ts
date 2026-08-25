@@ -10,7 +10,10 @@ import { emailPreviewErrorSchema } from './email-preview-error';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
+import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
+import { notificationDispatchSchema } from './notification-dispatch';
+import { notificationNotFoundSchema } from './notification-not-found';
 import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
 import { notificationProviderErrorSchema } from './notification-provider-error';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
@@ -27,6 +30,9 @@ import { userResponseSchema, userSchema } from './user';
 export const schemas = {
 	HealthStatus: healthStatusSchema,
 	NotificationChannel: notificationChannelSchema,
+	Notification: notificationSchema,
+	NotificationDispatch: notificationDispatchSchema,
+	NotificationNotFound: notificationNotFoundSchema,
 	NotificationSendRequest: notificationSendRequestJsonSchema,
 	NotificationTestSendRequest: notificationTestSendRequestJsonSchema,
 	NotificationPlanAcceptance: notificationPlanAcceptanceSchema,

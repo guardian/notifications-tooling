@@ -115,8 +115,8 @@ export const internationalGlobe = (
 			<line x1="1.8" y1="12" x2="22.2" y2="12" />
 			<line x1="2" y1="15.5" x2="22" y2="15.5" />
 			<line x1="12" y1="2" x2="12" y2="22" />
-			<path d="M 12 2 C 7 6.5 7 17.5 12 22" />
-			<path d="M 12 2 C 17 6.5 17 17.5 12 22" />
+			<path d="M 12 2 C 7 6.5 7 17.5 12 22" fill="none" />
+			<path d="M 12 2 C 17 6.5 17 17.5 12 22" fill="none" />
 		</g>
 	</svg>
 );

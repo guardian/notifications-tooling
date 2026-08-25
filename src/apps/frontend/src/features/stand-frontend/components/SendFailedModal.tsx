@@ -86,20 +86,17 @@ const getFailure = (
 	channel: ChannelOption,
 ) => {
 	const { sendingResult } = notification;
-	if (sendingResult?.ok !== false) {
+	if (sendingResult?.success !== false) {
 		return undefined;
 	}
 
 	const channelDescription = getChannelDescription(channel);
 
-	const { loginUrl, details } = sendingResult.response;
+	const { loginUrl, details } = sendingResult.failure;
 	return {
-		title: deriveErrorTitle(sendingResult.response, channelDescription),
-		message: deriveUserFacingMessage(
-			sendingResult.response,
-			channelDescription,
-		),
-		canRetry: checkIfCanRetry(sendingResult.response),
+		title: deriveErrorTitle(sendingResult.failure, channelDescription),
+		message: deriveUserFacingMessage(sendingResult.failure, channelDescription),
+		canRetry: checkIfCanRetry(sendingResult.failure),
 		loginUrl,
 		details,
 	};

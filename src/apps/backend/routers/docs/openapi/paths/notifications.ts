@@ -86,3 +86,50 @@ export const notificationsPath = {
 		},
 	},
 } as const;
+
+/**
+ * The `/v1/notifications/{id}` path item.
+ *
+ * `GET` returns the persisted notification and its dispatch outcomes, shaped as
+ * the named `#/components/schemas/Notification` component.
+ */
+export const notificationByIdPath = {
+	get: {
+		summary: 'Retrieve a persisted notification and its dispatches',
+		description:
+			'Returns the stored notification identified by `id`, including its per-target dispatch outcomes (oldest first).',
+		security: [{ pandaCookie: [] }],
+		parameters: [
+			{
+				name: 'id',
+				in: 'path',
+				required: true,
+				description: 'The broker-assigned notification id (UUID).',
+				schema: { type: 'string', format: 'uuid' },
+			},
+		],
+		responses: {
+			'200': {
+				description: 'The notification and its dispatch outcomes.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/Notification' },
+					},
+				},
+			},
+			'400': {
+				description: 'The id path parameter is not a valid UUID.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/NotificationValidationError',
+						},
+					},
+				},
+			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
+			'404': { $ref: '#/components/responses/NotificationNotFound' },
+		},
+	},
+} as const;

@@ -65,6 +65,39 @@ export const Default: Story = {
 		await expect(canvas.getByText('Kicker')).toBeInTheDocument();
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
 		await expect(canvas.getByText('Preview text')).toBeInTheDocument();
+		await expect(
+			canvas.getByText('The newsletter email is sent immediately'),
+		).toBeVisible();
+		await expect(canvas.getByText('Sends right now via Braze')).toBeVisible();
+	},
+};
+
+export const UpdatesFormFields: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const unitedKingdom = canvas.getByRole('checkbox', {
+			name: 'Select United Kingdom',
+		});
+
+		await userEvent.click(unitedKingdom);
+
+		await expect(unitedKingdom).toBeChecked();
+	},
+};
+
+export const SelectNoKicker: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const screen = within(canvasElement.ownerDocument.body);
+		const kicker = canvas.getByRole('button', { name: 'Breaking News Kicker' });
+
+		await userEvent.click(kicker);
+		await userEvent.click(screen.getByRole('option', { name: 'None' }));
+
+		await expect(kicker).toHaveAccessibleName('None Kicker');
+		await expect(
+			canvas.getByLabelText('Subject character count'),
+		).toHaveTextContent('0/46');
 	},
 };
 
@@ -192,8 +225,8 @@ const buildErrorStory = (error: ApiError): Story => ({
 			...populatedEmailState,
 			isWaitingForSend: false,
 			sendingResult: {
-				ok: false,
-				response: error,
+				success: false,
+				failure: error,
 			},
 		},
 	},

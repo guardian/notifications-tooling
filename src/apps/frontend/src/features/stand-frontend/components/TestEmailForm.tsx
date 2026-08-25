@@ -7,7 +7,7 @@ import { Typography } from '@guardian/stand/Typography';
 import type { ResolvedArticle } from '@models';
 import { useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import { ApiError } from '../../../api/errors';
+import type { ApiError } from '../../../api/errors';
 import type {
 	TestEmailResponse,
 	TestEmailSendRequest,
@@ -153,24 +153,16 @@ export const TestEmailForm = () => {
 		}
 
 		setConfirmation(undefined);
+		setSendError(undefined);
 		setSendInProgress(true);
 		setParamsLastUsed(sendParams);
 		void requestTestEmailSend(makePayload(sendParams))
-			.then((response) => {
-				setConfirmation(response);
-			})
-			.catch((apiError) => {
-				console.error(apiError);
-				if (apiError instanceof ApiError) {
-					setSendError(apiError);
-				} else {
-					setSendError(
-						new ApiError({
-							message: 'UNKNOWN ERROR',
-							failure: 'fetch-fail',
-						}),
-					);
+			.then((result) => {
+				if (!result.success) {
+					console.error(result.failure);
+					return setSendError(result.failure);
 				}
+				setConfirmation(result.data);
 			})
 			.finally(() => {
 				setSendInProgress(false);

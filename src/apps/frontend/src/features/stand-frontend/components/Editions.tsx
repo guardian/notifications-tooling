@@ -1,5 +1,8 @@
 import { Icon } from '@guardian/stand/Icon';
 import type { TopicTypeOption } from '../api/schemas';
+import { editionIds } from '../edition-values';
+import type { Edition } from '../types';
+import { EDITION_OPTIONS } from './EditionOptions';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
 
@@ -16,17 +19,23 @@ interface EditionsProps {
 const selectionId = ({ type, name }: AppPushTopicSelection) =>
 	`${type}:${name}`;
 
-const editionFlagCodes: Partial<Record<string, string>> = {
+const editionFlagCodes: Partial<Record<string, Edition>> = {
 	uk: 'UK',
 	us: 'US',
 	au: 'AU',
+	europe: 'EU',
+	international: 'INT',
 };
+
+const editionLabels = Object.fromEntries(
+	EDITION_OPTIONS.map(({ code, label }) => [editionIds[code], label]),
+);
 
 export const Editions = ({ topicTypes, selected }: EditionsProps) => {
 	const options = topicTypes.flatMap((topicType) =>
 		topicType.editions.map((edition) => ({
 			id: selectionId({ type: topicType.id, name: edition.id }),
-			label: edition.label,
+			label: editionLabels[edition.id] ?? edition.label,
 		})),
 	);
 	const selectedIds = selected.map(selectionId);

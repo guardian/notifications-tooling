@@ -1,35 +1,32 @@
 import { css } from '@emotion/react';
-import { baseColors, semanticColors, semanticSpacing } from '@guardian/stand';
-import { Checkbox } from '@guardian/stand/Checkbox';
+import {
+	baseColors,
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import type { CheckboxTheme } from '@guardian/stand/Checkbox';
+import { Checkbox } from '@guardian/stand/Checkbox';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { audienceSegmentStyles, previewPillStyles } from '../themes';
-import { type Edition } from '../types';
+import type { AudienceSegment, Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
 
-export interface Segment {
-	code: Edition;
+export interface SegmentOption<Code extends AudienceSegment | Edition> {
+	code: Code;
 	label: string;
 }
 
-interface SelectableEditionsPickerProps {
+interface SegmentPickerProps<Code extends AudienceSegment | Edition> {
 	title?: string;
 	description?: string;
-	segments?: Segment[];
-	selected: Edition[];
-	onChange: (selected: Edition[]) => void;
+	options: Array<SegmentOption<Code>>;
+	selected: Code[];
+	onChange: (selected: Code[]) => void;
 	error?: string;
 }
-
-export const DEFAULT_EDITIONS: Segment[] = [
-	{ code: 'UK', label: 'United Kingdom' },
-	{ code: 'US', label: 'United States' },
-	{ code: 'AU', label: 'Australia' },
-	{ code: 'EU', label: 'EU' },
-	{ code: 'INT', label: 'International' },
-];
 
 const customTheme: CheckboxTheme = {
 	input: {
@@ -37,6 +34,7 @@ const customTheme: CheckboxTheme = {
 			indicator: {
 				selected: {
 					backgroundColor: baseColors.magenta[200],
+					border: `${semanticSizing.border.default} solid ${baseColors.magenta[200]}`,
 				},
 				check: {
 					height: '18px',
@@ -47,18 +45,18 @@ const customTheme: CheckboxTheme = {
 	},
 };
 
-export const SelectableEditions = ({
+export const SegmentPicker = <Code extends AudienceSegment | Edition>({
 	title,
 	description,
-	segments = DEFAULT_EDITIONS,
+	options,
 	selected,
 	onChange,
 	error,
-}: SelectableEditionsPickerProps) => {
-	const onSegmentToggle = (segmentCode: Edition) => {
-		const next = selected.includes(segmentCode)
-			? selected.filter((code) => code !== segmentCode)
-			: [...selected, segmentCode];
+}: SegmentPickerProps<Code>) => {
+	const onToggle = (code: Code) => {
+		const next = selected.includes(code)
+			? selected.filter((selectedCode) => selectedCode !== code)
+			: [...selected, code];
 		onChange(next);
 	};
 
@@ -89,10 +87,10 @@ export const SelectableEditions = ({
 					lg: { gap: '12px', padding: `0px 0px 0px 0px` },
 				}}
 			>
-				{segments.map((segment) => {
-					const isSelected = selected.includes(segment.code);
+				{options.map((option) => {
+					const isSelected = selected.includes(option.code);
 					return (
-						<Item size={4} key={segment.code}>
+						<Item size={4} key={option.code}>
 							<div
 								css={audienceSegmentStyles.audienceSegmentCheckBoxTile(
 									isSelected,
@@ -102,8 +100,8 @@ export const SelectableEditions = ({
 									theme={customTheme}
 									size="sm"
 									isSelected={isSelected}
-									onChange={() => onSegmentToggle(segment.code)}
-									aria-label={`Select ${segment.label} audience segment`}
+									onChange={() => onToggle(option.code)}
+									aria-label={`Select ${option.label}`}
 									cssOverrides={css({
 										width: '100%',
 										flexDirection: 'row-reverse',
@@ -119,7 +117,7 @@ export const SelectableEditions = ({
 										})}
 									>
 										<div css={previewPillStyles.icon}>
-											<FlagAtom segmentCode={segment.code} />
+											<FlagAtom segmentCode={option.code} />
 										</div>
 										<Typography
 											variant="headingXs"
@@ -129,7 +127,7 @@ export const SelectableEditions = ({
 												height: '24px',
 											})}
 										>
-											{segment.label}
+											{option.label}
 										</Typography>
 									</div>
 								</Checkbox>

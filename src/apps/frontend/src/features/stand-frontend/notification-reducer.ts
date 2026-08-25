@@ -89,7 +89,7 @@ export const notificationReducer = (
 		}
 
 		case 'dismiss-send-error': {
-			if (state.sendingResult?.ok !== false) {
+			if (state.sendingResult?.success !== false) {
 				return state;
 			}
 			return {

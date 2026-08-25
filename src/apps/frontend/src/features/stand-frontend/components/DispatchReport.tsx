@@ -25,9 +25,10 @@ import {
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import type { DeliveryOption } from '../types';
-import { useAudienceEditions } from '../use-audience-editions';
-import { AudienceSegmentsPreviewPill } from './AudienceSegments';
+import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
+import { EDITION_OPTIONS } from './EditionOptions';
 import { scheduleIcon } from './FlagIcons';
+import { FlagPreviewPill } from './FlagPreviewPill';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const styles = {
@@ -48,6 +49,9 @@ const styles = {
 		borderWidth: semanticSizing.border.default,
 		borderStyle: 'solid',
 		borderColor: semanticColors.border.weak,
+		borderTopLeftRadius: semanticRadius.cornerSm,
+		borderTopRightRadius: semanticRadius.cornerSm,
+		overflow: 'hidden',
 		margin: `${semanticSpacing.stackLg} 0`,
 
 		header: {
@@ -100,7 +104,7 @@ const DeliveryParameter = ({
 	const temporaryDeliveryTime = `${tempTime} (ET), ${tempDate}`;
 
 	return (
-		<ParameterLabel label="Delivery">
+		<ParameterLabel label="Delivery and time">
 			<div
 				css={{
 					display: 'flex',
@@ -145,7 +149,6 @@ export const NewsletterDispatchDetails = () => {
 		name: 'deliveryOption',
 		defaultValue: defaultNewsletterFormValues.deliveryOption,
 	});
-	const segments = useAudienceEditions('email');
 
 	return (
 		<section>
@@ -153,8 +156,9 @@ export const NewsletterDispatchDetails = () => {
 				<SendInfoPreviewPill channel="email" isConfirmation={true} />
 			</ParameterLabel>
 			<ParameterLabel label="Audience segments">
-				<AudienceSegmentsPreviewPill
-					segments={segments}
+				<FlagPreviewPill
+					title="Audience segments"
+					options={SEGMENT_OPTIONS}
 					selected={audienceSegments}
 					isConfirmation={true}
 				/>
@@ -169,6 +173,10 @@ export const AppAlertDispatchDetails = () => {
 		name: 'editions',
 		defaultValue: defaultAppAlertFormValues.editions,
 	});
+	const deliveryOption = useWatch<AppAlertFormValues, 'deliveryOption'>({
+		name: 'deliveryOption',
+		defaultValue: defaultAppAlertFormValues.deliveryOption,
+	});
 
 	return (
 		<section>
@@ -176,11 +184,14 @@ export const AppAlertDispatchDetails = () => {
 				<SendInfoPreviewPill channel="push" isConfirmation={true} />
 			</ParameterLabel>
 			<ParameterLabel label="Editions">
-				<Typography>{editions.join(', ')}</Typography>
+				<FlagPreviewPill
+					title="Editions"
+					options={EDITION_OPTIONS}
+					selected={editions}
+					isConfirmation={true}
+				/>
 			</ParameterLabel>
-			<DeliveryParameter
-				deliveryTiming={defaultAppAlertFormValues.deliveryOption}
-			/>
+			<DeliveryParameter deliveryTiming={deliveryOption} />
 		</section>
 	);
 };
@@ -198,7 +209,7 @@ export const DispatchReport = ({
 	const { reset } = useFormContext();
 	const { sendingResult } = notification;
 
-	if (!sendingResult?.ok) {
+	if (!sendingResult?.success) {
 		return null;
 	}
 
@@ -206,7 +217,13 @@ export const DispatchReport = ({
 
 	return (
 		<section css={styles.container}>
-			<div>
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'column',
+					gap: semanticSpacing.stackSm,
+				}}
+			>
 				<div
 					css={{
 						display: 'flex',
@@ -226,7 +243,7 @@ export const DispatchReport = ({
 					</Typography>
 				</div>
 				<Typography variant="bodyMd" css={{ fontSize: '16px' }}>
-					Notification confirmation details below
+					Confirmation details below
 				</Typography>
 			</div>
 

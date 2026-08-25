@@ -56,6 +56,38 @@ export const Default: Story = {
 		await expect(canvas.getByText('Headline')).toBeInTheDocument();
 		await expect(canvas.getByText('Delivery and timing')).toBeInTheDocument();
 		await expect(canvas.getByText('Send')).toBeInTheDocument();
+		await expect(
+			canvas.getByText('The app alert is sent immediately'),
+		).toBeVisible();
+		await expect(canvas.getByText('Sends right now')).toBeVisible();
+	},
+};
+
+export const UpdatesFormFields: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const screen = within(canvasElement.ownerDocument.body);
+		const alertType = canvas.getByRole('button', {
+			name: 'Breaking News Alert type',
+		});
+		const unitedKingdom = canvas.getByRole('checkbox', {
+			name: 'Select United Kingdom',
+		});
+		const headline = canvas.getByLabelText('Headline');
+
+		await userEvent.click(alertType);
+		await userEvent.click(screen.getByRole('option', { name: 'Sport' }));
+		await userEvent.click(unitedKingdom);
+		await userEvent.type(headline, 'A developing story');
+
+		await expect(
+			canvas.getByRole('button', { name: 'Sport Alert type' }),
+		).toBeVisible();
+		await expect(unitedKingdom).toBeChecked();
+		await expect(headline).toHaveValue('A developing story');
+		await expect(
+			canvas.getByLabelText('Headline character count'),
+		).toHaveTextContent('18/');
 	},
 };
 
