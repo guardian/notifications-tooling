@@ -6,6 +6,7 @@ import {
 	mapSendOutcomesToDispatches,
 	mapTestOutcomesToDispatches,
 	rollUpStatus,
+	toNotificationResponse,
 	toPublicDispatch,
 } from './persist-notification';
 
@@ -160,6 +161,7 @@ describe('toPublicDispatch', () => {
 		};
 
 		expect(toPublicDispatch(row)).toEqual({
+			id: '22222222-2222-2222-2222-222222222222',
 			channel: 'newsletter',
 			target: 'UK',
 			status: 'success',
@@ -167,5 +169,85 @@ describe('toPublicDispatch', () => {
 			failureReason: null,
 			providerStatusCode: null,
 		});
+	});
+});
+
+describe('toNotificationResponse', () => {
+	it('serialises the persisted notification and its dispatches', () => {
+		expect(
+			toNotificationResponse({
+				notification: {
+					id: notificationId,
+					idempotencyKey: 'idem-1',
+					kind: 'send',
+					status: 'delivered',
+					sender: 'notifications-tooling-spa/v1',
+					createdByEmail: 'ada.lovelace@guardian.co.uk',
+					dryRun: false,
+					scheduledFor: null,
+					content: {},
+					channels: {},
+					createdAt: new Date('2026-08-25T00:00:00.000Z'),
+					updatedAt: new Date('2026-08-25T00:00:00.000Z'),
+				},
+				dispatches: [
+					{
+						id: '22222222-2222-2222-2222-222222222222',
+						notificationId,
+						channel: 'app-push',
+						target: 'breaking-news',
+						providerRef: 'push-1',
+						status: 'success',
+						failureReason: null,
+						providerStatusCode: null,
+						detail: null,
+						createdAt: new Date(0),
+						updatedAt: new Date(0),
+					},
+				],
+			}),
+		).toEqual({
+			id: notificationId,
+			idempotencyKey: 'idem-1',
+			kind: 'send',
+			status: 'delivered',
+			sender: 'notifications-tooling-spa/v1',
+			dryRun: false,
+			scheduledFor: null,
+			createdAt: '2026-08-25T00:00:00.000Z',
+			dispatches: [
+				{
+					id: '22222222-2222-2222-2222-222222222222',
+					channel: 'app-push',
+					target: 'breaking-news',
+					status: 'success',
+					providerRef: 'push-1',
+					failureReason: null,
+					providerStatusCode: null,
+				},
+			],
+		});
+	});
+
+	it('serialises scheduledFor as an ISO string when set', () => {
+		const response = toNotificationResponse({
+			notification: {
+				id: notificationId,
+				idempotencyKey: 'idem-1',
+				kind: 'send',
+				status: 'accepted',
+				sender: 'notifications-tooling-spa/v1',
+				createdByEmail: 'ada.lovelace@guardian.co.uk',
+				dryRun: false,
+				scheduledFor: new Date('2026-09-01T09:00:00.000Z'),
+				content: {},
+				channels: {},
+				createdAt: new Date('2026-08-25T00:00:00.000Z'),
+				updatedAt: new Date('2026-08-25T00:00:00.000Z'),
+			},
+			dispatches: [],
+		});
+
+		expect(response.scheduledFor).toBe('2026-09-01T09:00:00.000Z');
 	});
 });

@@ -11,7 +11,7 @@ import {
 import {
 	type PersistTestNotification,
 	persistTestNotification,
-	toPublicDispatch,
+	toNotificationResponse,
 } from '../../persistence/persist-notification';
 import { handleValidationErrors } from '../notifications';
 import {
@@ -42,9 +42,10 @@ export const createNotificationTestsRouter = (
 			const testId = randomUUID();
 			const outcomes = await dispatchRequest(body, testId);
 
-			// Persist the envelope and each dispatch outcome, then expose the
-			// stored rows so the caller sees exactly what was recorded.
-			const { notification, dispatches } = await persistNotification({
+			// Persist the envelope and each dispatch outcome, then return the
+			// stored notification resource so the caller sees exactly what was
+			// recorded and how each channel fared.
+			const persisted = await persistNotification({
 				testId,
 				request: body,
 				createdByEmail: req.user!.email,
@@ -55,24 +56,13 @@ export const createNotificationTestsRouter = (
 				{
 					testId,
 					dryRun: body.options.dryRun,
-					status: notification.status,
+					status: persisted.notification.status,
 					...outcomes,
 				},
 				'Dispatched and recorded notification test',
 			);
 
-			res.status(202).json({
-				testId,
-				status: 'accepted',
-				dryRun: body.options.dryRun,
-				plans: Object.keys(body.channels).map((channel) => ({
-					channel,
-					planId: `${testId}#${channel}`,
-					status: 'accepted',
-				})),
-				dispatches: dispatches.map(toPublicDispatch),
-				statusUrl: `/v1/notification-tests/${testId}/status`,
-			});
+			res.status(202).json(toNotificationResponse(persisted));
 		},
 	);
 

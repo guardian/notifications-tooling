@@ -26,11 +26,11 @@ export const notificationTestsPath = {
 		responses: {
 			'202': {
 				description:
-					'The test notification was processed successfully. For a dry run, no recipient or message calls were made.',
+					'The test notification was recorded and processed. For a dry run, no recipient or message calls were made and no dispatches are recorded. The body is the stored notification with its per-target dispatch outcomes.',
 				content: {
 					'application/json': {
 						schema: {
-							$ref: '#/components/schemas/AcceptedTestNotification',
+							$ref: '#/components/schemas/Notification',
 						},
 					},
 				},

@@ -12,15 +12,12 @@ import {
 import {
 	type PersistSendNotification,
 	persistSendNotification,
-	toPublicDispatch,
+	toNotificationResponse,
 } from '../../persistence/persist-notification';
 import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
 } from './schemas/notification-send-request';
-
-/** How long (seconds) an accepted notification may still be cancelled. */
-const CANCELLATION_WINDOW_SECONDS = 5 * 60;
 
 /**
  * Zod issue codes meaning the body is *structurally* wrong (a 400 per the
@@ -103,9 +100,10 @@ export const createNotificationsRouter = (
 			const notificationId = randomUUID();
 			const outcomes = await dispatchRequest(body, notificationId);
 
-			// Persist the envelope and each dispatch outcome, then expose the
-			// stored rows so the caller sees exactly what was recorded.
-			const { notification, dispatches } = await persistNotification({
+			// Persist the envelope and each dispatch outcome, then return the
+			// stored notification resource so the caller sees exactly what was
+			// recorded and how each channel fared.
+			const persisted = await persistNotification({
 				notificationId,
 				request: body,
 				createdByEmail: req.user!.email,
@@ -113,32 +111,11 @@ export const createNotificationsRouter = (
 			});
 
 			req.log.info(
-				{ notificationId, status: notification.status, ...outcomes },
+				{ notificationId, status: persisted.notification.status, ...outcomes },
 				'Dispatched and recorded notification channels',
 			);
 
-			const statusUrl = `/v1/notifications/${notificationId}/status`;
-
-			const plans = Object.keys(body.channels).map((channel) => ({
-				channel,
-				planId: `${notificationId}#${channel}`,
-				status: 'accepted' as const,
-			}));
-
-			const expiresAt =
-				Math.floor(Date.now() / 1000) + CANCELLATION_WINDOW_SECONDS;
-
-			res.status(202).json({
-				notificationId,
-				status: 'accepted',
-				plans,
-				dispatches: dispatches.map(toPublicDispatch),
-				statusUrl,
-				cancellable: {
-					cancelUrl: `/v1/notifications/${notificationId}/cancel`,
-					expiresAt,
-				},
-			});
+			res.status(202).json(toNotificationResponse(persisted));
 		},
 	);
 

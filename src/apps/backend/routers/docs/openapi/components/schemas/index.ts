@@ -1,5 +1,3 @@
-import { acceptedNotificationSchema } from './accepted-notification';
-import { acceptedTestNotificationSchema } from './accepted-test-notification';
 import { articleResolutionErrorSchema } from './article-resolution-error';
 import {
 	channelAudiencesSchema,
@@ -12,8 +10,8 @@ import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationDispatchOutcomeSchema } from './notification-dispatch-outcome';
-import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
 import { notificationProviderErrorSchema } from './notification-provider-error';
+import { notificationResourceSchema } from './notification-resource';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
@@ -30,10 +28,8 @@ export const schemas = {
 	NotificationChannel: notificationChannelSchema,
 	NotificationSendRequest: notificationSendRequestJsonSchema,
 	NotificationTestSendRequest: notificationTestSendRequestJsonSchema,
-	NotificationPlanAcceptance: notificationPlanAcceptanceSchema,
 	NotificationDispatchOutcome: notificationDispatchOutcomeSchema,
-	AcceptedNotification: acceptedNotificationSchema,
-	AcceptedTestNotification: acceptedTestNotificationSchema,
+	Notification: notificationResourceSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,
 	NotificationValidationError: notificationValidationErrorSchema,
 	EmailRenderingContentError: emailRenderingContentErrorSchema,

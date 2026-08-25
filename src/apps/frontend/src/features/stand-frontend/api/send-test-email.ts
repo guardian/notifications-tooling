@@ -1,6 +1,7 @@
-import z from 'zod';
+import type z from 'zod';
 import type { Result } from '../../../api/client';
 import { safeFetchJsonAndParse } from '../../../api/client';
+import { notificationResourceSchema } from './schemas';
 
 // TO DO - the types and schemas partially replicate the ones defined in the backend
 // because the backend schema rely on the actual config values for the segment ID etc for validation
@@ -46,19 +47,7 @@ export type TestEmailSendRequest = {
 	sender: string;
 };
 
-export const testEmailResponseSchema = z.object({
-	testId: z.string(),
-	status: z.string(),
-	dryRun: z.boolean(),
-	plans: z
-		.object({
-			channel: z.string(),
-			planId: z.string(),
-			status: z.string(),
-		})
-		.array(),
-	statusUrl: z.string(),
-});
+export const testEmailResponseSchema = notificationResourceSchema;
 export type TestEmailResponse = z.infer<typeof testEmailResponseSchema>;
 
 export type TestEmailRequestFunction = {

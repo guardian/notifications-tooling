@@ -121,11 +121,11 @@ describe('POST /v1/notification-tests', () => {
 				},
 			);
 			const body = (await response.json()) as {
-				testId: string;
+				id: string;
+				kind: string;
 				status: string;
 				dryRun: boolean;
-				plans: Array<{ channel: string; planId: string; status: string }>;
-				statusUrl: string;
+				dispatches: unknown[];
 			};
 
 			expect(response.status).toBe(202);
@@ -137,17 +137,10 @@ describe('POST /v1/notification-tests', () => {
 				},
 				expect.any(String),
 			);
+			expect(typeof body.id).toBe('string');
+			expect(body.kind).toBe('test');
 			expect(body.status).toBe('accepted');
-			expect(body.plans).toEqual([
-				{
-					channel: 'newsletter',
-					planId: `${body.testId}#newsletter`,
-					status: 'accepted',
-				},
-			]);
-			expect(body.statusUrl).toBe(
-				`/v1/notification-tests/${body.testId}/status`,
-			);
+			expect(body.dispatches).toEqual([]);
 		} finally {
 			await dispatchServer.close();
 		}
@@ -235,8 +228,8 @@ describe('POST /v1/notification-tests', () => {
 				},
 			);
 			const body = (await response.json()) as {
-				testId: string;
-				plans: Array<{ channel: string; planId: string; status: string }>;
+				id: string;
+				kind: string;
 			};
 
 			expect(response.status).toBe(202);
@@ -244,13 +237,8 @@ describe('POST /v1/notification-tests', () => {
 				{ ...request, options: { dryRun: false } },
 				expect.any(String),
 			);
-			expect(body.plans).toEqual([
-				{
-					channel: 'app-push',
-					planId: `${body.testId}#app-push`,
-					status: 'accepted',
-				},
-			]);
+			expect(typeof body.id).toBe('string');
+			expect(body.kind).toBe('test');
 		} finally {
 			await dispatchServer.close();
 		}
@@ -308,18 +296,19 @@ describe('POST /v1/notification-tests', () => {
 
 			expect(response.status).toBe(202);
 			const body = (await response.json()) as {
-				testId: string;
+				id: string;
 				dispatches: Array<Record<string, unknown>>;
 			};
 
 			expect(persistNotification).toHaveBeenCalledWith(
 				expect.objectContaining({
-					testId: body.testId,
+					testId: body.id,
 					createdByEmail: 'ada.lovelace@guardian.co.uk',
 				}),
 			);
 			expect(body.dispatches).toEqual([
 				{
+					id: 'd1',
 					channel: 'newsletter',
 					target: 'UK',
 					status: 'success',

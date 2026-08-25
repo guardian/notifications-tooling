@@ -89,12 +89,34 @@ export const mapTestOutcomesToDispatches = (
 
 /** The client-facing shape of one persisted dispatch outcome. */
 export const toPublicDispatch = (dispatch: NotificationDispatch) => ({
+	id: dispatch.id,
 	channel: dispatch.channel,
 	target: dispatch.target,
 	status: dispatch.status,
 	providerRef: dispatch.providerRef,
 	failureReason: dispatch.failureReason,
 	providerStatusCode: dispatch.providerStatusCode,
+});
+
+/**
+ * The `202` response body for both send and test endpoints: the persisted
+ * notification resource with its dispatch outcomes nested underneath. The
+ * `status` is rolled up from those outcomes, so a caller sees what actually
+ * happened rather than a fixed acknowledgement.
+ */
+export const toNotificationResponse = ({
+	notification,
+	dispatches,
+}: PersistedNotification) => ({
+	id: notification.id,
+	idempotencyKey: notification.idempotencyKey,
+	kind: notification.kind,
+	status: notification.status,
+	sender: notification.sender,
+	dryRun: notification.dryRun,
+	scheduledFor: notification.scheduledFor?.toISOString() ?? null,
+	createdAt: notification.createdAt.toISOString(),
+	dispatches: dispatches.map(toPublicDispatch),
 });
 
 type NotificationEnvelope = {

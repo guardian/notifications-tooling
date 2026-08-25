@@ -37,7 +37,25 @@ export const buildPersistedNotification = (
 	dispatches: overrides.dispatches ?? [],
 });
 
-/** A persistence stub that records nothing and returns a canned envelope. */
+/** A persistence stub that records nothing and echoes back a canned envelope. */
 export const mockPersistNotification = (
 	overrides: Partial<PersistedNotification> = {},
-) => mock(() => Promise.resolve(buildPersistedNotification(overrides)));
+) =>
+	mock(
+		(input: {
+			notificationId?: string;
+			testId?: string;
+			request?: { options?: { dryRun?: boolean } };
+		}) =>
+			Promise.resolve(
+				buildPersistedNotification({
+					...overrides,
+					notification: {
+						id: input.notificationId ?? input.testId,
+						kind: input.testId ? 'test' : 'send',
+						dryRun: input.request?.options?.dryRun ?? false,
+						...overrides.notification,
+					} as PersistedNotification['notification'],
+				}),
+			),
+	);

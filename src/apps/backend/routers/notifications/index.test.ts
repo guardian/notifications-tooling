@@ -137,7 +137,7 @@ describe('POST /v1/notifications', () => {
 			}
 		});
 
-		it('accepts a valid request with 202 and the acceptance envelope', async () => {
+		it('accepts a valid request with 202 and the stored notification resource', async () => {
 			const testApp = express();
 			testApp.use(httpLogger);
 			testApp.use(express.json());
@@ -163,32 +163,22 @@ describe('POST /v1/notifications', () => {
 				expect(response.status).toBe(202);
 
 				const body = (await response.json()) as {
-					notificationId: string;
+					id: string;
+					kind: string;
 					status: string;
-					plans: Array<{ channel: string; planId: string; status: string }>;
-					statusUrl: string;
-					cancellable: { cancelUrl: string; expiresAt: number };
+					dryRun: boolean;
+					scheduledFor: string | null;
+					createdAt: string;
+					dispatches: unknown[];
 				};
 
+				expect(typeof body.id).toBe('string');
+				expect(body.id.length).toBeGreaterThan(0);
+				expect(body.kind).toBe('send');
+				// No dispatches were returned, so the status stays accepted.
 				expect(body.status).toBe('accepted');
-				expect(typeof body.notificationId).toBe('string');
-				expect(body.notificationId.length).toBeGreaterThan(0);
-
-				expect(body.plans).toEqual([
-					{
-						channel: 'app-push',
-						planId: `${body.notificationId}#app-push`,
-						status: 'accepted',
-					},
-				]);
-
-				expect(body.statusUrl).toBe(
-					`/v1/notifications/${body.notificationId}/status`,
-				);
-				expect(body.cancellable.cancelUrl).toBe(
-					`/v1/notifications/${body.notificationId}/cancel`,
-				);
-				expect(typeof body.cancellable.expiresAt).toBe('number');
+				expect(body.dryRun).toBe(false);
+				expect(body.dispatches).toEqual([]);
 			} finally {
 				await dispatchServer.close();
 			}
@@ -246,18 +236,19 @@ describe('POST /v1/notifications', () => {
 
 				expect(response.status).toBe(202);
 				const body = (await response.json()) as {
-					notificationId: string;
+					id: string;
 					dispatches: Array<Record<string, unknown>>;
 				};
 
 				expect(persistNotification).toHaveBeenCalledWith(
 					expect.objectContaining({
-						notificationId: body.notificationId,
+						notificationId: body.id,
 						createdByEmail: 'ada.lovelace@guardian.co.uk',
 					}),
 				);
 				expect(body.dispatches).toEqual([
 					{
+						id: 'd1',
 						channel: 'app-push',
 						target: 'breaking-news',
 						status: 'success',

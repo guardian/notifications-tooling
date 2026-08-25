@@ -30,10 +30,10 @@ export const notificationsPath = {
 		responses: {
 			'202': {
 				description:
-					'The notification passed validation and every requested channel was dispatched successfully.',
+					'The notification passed validation, was recorded, and every requested channel was dispatched. The body is the stored notification with its per-target dispatch outcomes.',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/AcceptedNotification' },
+						schema: { $ref: '#/components/schemas/Notification' },
 					},
 				},
 			},

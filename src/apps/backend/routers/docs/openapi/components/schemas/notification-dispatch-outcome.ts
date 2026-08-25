@@ -6,8 +6,13 @@
  */
 export const notificationDispatchOutcomeSchema = {
 	type: 'object',
-	required: ['channel', 'target', 'status'],
+	required: ['id', 'channel', 'target', 'status'],
 	properties: {
+		id: {
+			type: 'string',
+			format: 'uuid',
+			description: 'The stored dispatch id.',
+		},
 		channel: { $ref: '#/components/schemas/NotificationChannel' },
 		target: {
 			type: 'string',
