@@ -68,6 +68,22 @@ export const Default: Story = {
 	},
 };
 
+export const SelectNoKicker: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const screen = within(canvasElement.ownerDocument.body);
+		const kicker = canvas.getByRole('button', { name: 'Breaking News Kicker' });
+
+		await userEvent.click(kicker);
+		await userEvent.click(screen.getByRole('option', { name: 'None' }));
+
+		await expect(kicker).toHaveAccessibleName('None Kicker');
+		await expect(
+			canvas.getByLabelText('Subject character count'),
+		).toHaveTextContent('0/46');
+	},
+};
+
 export const ValidationErrors: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

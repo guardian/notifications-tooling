@@ -37,7 +37,7 @@ describe('notification form hard limits', () => {
 	it('rejects newsletter preview text over its hard limit', () => {
 		const result = newsletterSchema.safeParse({
 			...defaultNewsletterFormValues,
-			kicker: undefined,
+			kicker: 'none',
 			subject: 'Subject',
 			preview: '12345678901',
 			audienceSegments: ['UK'],
