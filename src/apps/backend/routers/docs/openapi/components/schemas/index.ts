@@ -11,9 +11,11 @@ import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationDispatchSchema } from './notification-dispatch';
+import { notificationListSchema } from './notification-list';
 import { notificationNotFoundSchema } from './notification-not-found';
 import { notificationProviderErrorSchema } from './notification-provider-error';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
+import { notificationSummarySchema } from './notification-summary';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
 import { notificationValidationErrorSchema } from './notification-validation-error';
@@ -28,6 +30,8 @@ export const schemas = {
 	HealthStatus: healthStatusSchema,
 	NotificationChannel: notificationChannelSchema,
 	Notification: notificationSchema,
+	NotificationSummary: notificationSummarySchema,
+	NotificationList: notificationListSchema,
 	NotificationDispatch: notificationDispatchSchema,
 	NotificationNotFound: notificationNotFoundSchema,
 	NotificationSendRequest: notificationSendRequestJsonSchema,

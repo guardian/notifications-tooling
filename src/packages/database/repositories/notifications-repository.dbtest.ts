@@ -83,3 +83,58 @@ describe('notifications repository (real Postgres)', () => {
 		]);
 	});
 });
+
+const daysAgo = (days: number): Date =>
+	new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+describe('notifications repository listRecent (real Postgres)', () => {
+	it('returns only notifications from the last 14 days, newest first', async () => {
+		const recent = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		const alsoRecent = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(13),
+		});
+		// Older than the 14-day window: must be excluded.
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(20),
+		});
+
+		const page = await notifications.listRecent();
+
+		expect(page.total).toBe(2);
+		expect(page.notifications.map((row) => row.id)).toEqual([
+			recent.id,
+			alsoRecent.id,
+		]);
+	});
+
+	it('applies limit and offset while reporting the full window total', async () => {
+		const first = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		const second = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(2),
+		});
+		const third = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(3),
+		});
+
+		const firstPage = await notifications.listRecent({ limit: 2 });
+		expect(firstPage.total).toBe(3);
+		expect(firstPage.notifications.map((row) => row.id)).toEqual([
+			first.id,
+			second.id,
+		]);
+
+		const secondPage = await notifications.listRecent({ limit: 2, offset: 2 });
+		expect(secondPage.total).toBe(3);
+		expect(secondPage.notifications.map((row) => row.id)).toEqual([third.id]);
+	});
+});

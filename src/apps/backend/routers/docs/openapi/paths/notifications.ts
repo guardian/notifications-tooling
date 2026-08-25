@@ -6,6 +6,53 @@
  * inspected independently in the docs.
  */
 export const notificationsPath = {
+	get: {
+		summary: 'List recent notifications',
+		description:
+			'Returns notifications created within the last 14 days, newest first, without their dispatch outcomes. `total` reports the full count within that window regardless of pagination. `limit` and `offset` are all-or-nothing: supply both or neither.',
+		security: [{ pandaCookie: [] }],
+		parameters: [
+			{
+				name: 'limit',
+				in: 'query',
+				required: false,
+				description:
+					'Maximum number of notifications to return. Defaults to 10; must be sent together with `offset`.',
+				schema: { type: 'integer', minimum: 1, maximum: 50, default: 10 },
+			},
+			{
+				name: 'offset',
+				in: 'query',
+				required: false,
+				description:
+					'Number of notifications to skip before the page. Defaults to 0; must be sent together with `limit`. An offset past the end of the window returns an empty page.',
+				schema: { type: 'integer', minimum: 0, default: 0 },
+			},
+		],
+		responses: {
+			'200': {
+				description:
+					'A page of notifications from the last 14 days plus the total count within that window.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/NotificationList' },
+					},
+				},
+			},
+			'400': {
+				description: 'The pagination query parameters are invalid.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/NotificationValidationError',
+						},
+					},
+				},
+			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
+		},
+	},
 	post: {
 		summary: 'Validate and dispatch a notification',
 		description:
