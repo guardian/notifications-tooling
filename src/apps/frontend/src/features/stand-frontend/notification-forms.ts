@@ -77,7 +77,7 @@ export const newsletterFormSchema = createNewsletterFormSchema({
 });
 
 export const appAlertFormSchema = createAppAlertFormSchema({
-	headline: APP_ALERT_LIMIT_FALLBACKS.headline.editorialLimit,
+	headline: APP_ALERT_LIMIT_FALLBACKS.body.editorialLimit,
 });
 
 export type NewsletterFormValues = z.infer<typeof newsletterFormSchema>;

@@ -17,7 +17,8 @@ export const NEWSLETTER_LIMIT_FALLBACKS = {
 } as const;
 
 export const APP_ALERT_LIMIT_FALLBACKS = {
-	headline: { recommended: 90, editorialLimit: 200, validationCap: 300 },
+	title: { recommended: 50, editorialLimit: 50, validationCap: 50 },
+	body: { recommended: 90, editorialLimit: 200, validationCap: 300 },
 } as const;
 
 export const channelConstraintsQueryKey = ['channels', 'constraints'] as const;

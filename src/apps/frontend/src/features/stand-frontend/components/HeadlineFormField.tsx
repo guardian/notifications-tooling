@@ -13,7 +13,7 @@ export const HeadlineFormField = ({ constraints }: HeadlineFormFieldProps) => {
 
 	const appPush = constraints?.channels['app-push'];
 	const headlineLimits =
-		appPush?.content.body ?? APP_ALERT_LIMIT_FALLBACKS.headline;
+		appPush?.content.body ?? APP_ALERT_LIMIT_FALLBACKS.body;
 	return (
 		<Controller
 			control={control}

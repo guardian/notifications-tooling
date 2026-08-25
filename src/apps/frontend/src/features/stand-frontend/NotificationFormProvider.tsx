@@ -86,7 +86,7 @@ export const NotificationDraftsProvider = ({
 			createAppAlertFormSchema({
 				headline:
 					appAlertLimits?.content.body.editorialLimit ??
-					APP_ALERT_LIMIT_FALLBACKS.headline.editorialLimit,
+					APP_ALERT_LIMIT_FALLBACKS.body.editorialLimit,
 			}),
 		),
 	});
