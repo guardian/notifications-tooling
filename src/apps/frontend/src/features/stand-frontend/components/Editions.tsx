@@ -24,7 +24,7 @@ const editionFlagCodes: Partial<Record<string, Edition>> = {
 	us: 'US',
 	au: 'AU',
 	europe: 'EU',
-	int: 'INT',
+	international: 'INT',
 };
 
 const editionLabels = Object.fromEntries(
