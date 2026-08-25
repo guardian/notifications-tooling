@@ -193,6 +193,9 @@ export const notificationDispatchSchema = z.strictObject({
 	providerRef: z.string().nullable(),
 	failureReason: z.string().nullable(),
 	providerStatusCode: z.number().int().nullable(),
+	detail: z.record(z.string(), z.unknown()).nullable(),
+	createdAt: z.string(),
+	updatedAt: z.string(),
 });
 export type NotificationDispatch = z.infer<typeof notificationDispatchSchema>;
 
@@ -207,9 +210,13 @@ export const notificationResourceSchema = z.strictObject({
 	kind: z.enum(['send', 'test']),
 	status: z.enum(['accepted', 'delivered', 'partially_delivered', 'failed']),
 	sender: z.string(),
+	createdByEmail: z.string(),
 	dryRun: z.boolean(),
 	scheduledFor: z.string().nullable(),
+	content: z.record(z.string(), z.unknown()),
+	channels: z.record(z.string(), z.unknown()),
 	createdAt: z.string(),
+	updatedAt: z.string(),
 	dispatches: notificationDispatchSchema.array(),
 });
 export type NotificationResource = z.infer<typeof notificationResourceSchema>;

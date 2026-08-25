@@ -2,7 +2,6 @@ import { UserPermissions } from '@config';
 import {
 	createNotificationsRepository,
 	getDb,
-	type NotificationDispatch,
 	type NotificationWithDispatches,
 } from '@database';
 import { Router } from 'express';
@@ -111,36 +110,6 @@ export const handleNotificationIdValidationError: ErrorRequestHandler = (
 	});
 };
 
-const serializeDispatch = (dispatch: NotificationDispatch) => ({
-	id: dispatch.id,
-	channel: dispatch.channel,
-	target: dispatch.target,
-	providerRef: dispatch.providerRef,
-	status: dispatch.status,
-	failureReason: dispatch.failureReason,
-	providerStatusCode: dispatch.providerStatusCode,
-	detail: dispatch.detail,
-	createdAt: dispatch.createdAt,
-	updatedAt: dispatch.updatedAt,
-});
-
-/** Shapes a stored notification and its dispatches into the API response. */
-const serializeNotification = (notification: NotificationWithDispatches) => ({
-	id: notification.id,
-	idempotencyKey: notification.idempotencyKey,
-	kind: notification.kind,
-	status: notification.status,
-	sender: notification.sender,
-	createdByEmail: notification.createdByEmail,
-	dryRun: notification.dryRun,
-	scheduledFor: notification.scheduledFor,
-	content: notification.content,
-	channels: notification.channels,
-	createdAt: notification.createdAt,
-	updatedAt: notification.updatedAt,
-	dispatches: notification.dispatches.map(serializeDispatch),
-});
-
 type FindNotificationById = (
 	id: string,
 ) => Promise<NotificationWithDispatches | null>;
@@ -226,7 +195,12 @@ export const createNotificationsRouter = (
 				return;
 			}
 
-			res.status(200).json(serializeNotification(notification));
+			res.status(200).json(
+				toNotificationResponse({
+					notification,
+					dispatches: notification.dispatches,
+				}),
+			);
 		},
 	);
 

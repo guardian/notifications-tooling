@@ -56,9 +56,13 @@ export const acceptedEmailSendResponse: SendNotificationResponse = {
 	kind: 'send',
 	status: 'delivered',
 	sender: 'notifications-tooling-spa/v1',
+	createdByEmail: 'ada.lovelace@guardian.co.uk',
 	dryRun: false,
 	scheduledFor: null,
+	content: {},
+	channels: {},
 	createdAt: '2026-08-25T00:00:00.000Z',
+	updatedAt: '2026-08-25T00:00:00.000Z',
 	dispatches: [
 		{
 			id: 'dispatch-1234-abcd',
@@ -68,6 +72,9 @@ export const acceptedEmailSendResponse: SendNotificationResponse = {
 			providerRef: 'braze-dispatch-1',
 			failureReason: null,
 			providerStatusCode: null,
+			detail: null,
+			createdAt: '2026-08-25T00:00:00.000Z',
+			updatedAt: '2026-08-25T00:00:00.000Z',
 		},
 	],
 };

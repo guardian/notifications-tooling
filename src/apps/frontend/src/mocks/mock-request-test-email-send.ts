@@ -12,9 +12,13 @@ export const mockRequestTestEmailSend: TestEmailRequestFunction = () => {
 					kind: 'test',
 					status: 'accepted',
 					sender: 'notifications-tooling-spa/v1',
+					createdByEmail: 'ada.lovelace@guardian.co.uk',
 					dryRun: true,
 					scheduledFor: null,
+					content: {},
+					channels: {},
 					createdAt: '2026-08-25T00:00:00.000Z',
+					updatedAt: '2026-08-25T00:00:00.000Z',
 					dispatches: [],
 				},
 			});

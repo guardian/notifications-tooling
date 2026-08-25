@@ -178,6 +178,9 @@ describe('toPublicDispatch', () => {
 			providerRef: 'dispatch-1',
 			failureReason: null,
 			providerStatusCode: null,
+			detail: { campaignId: 'campaign-1' },
+			createdAt: '1970-01-01T00:00:00.000Z',
+			updatedAt: '1970-01-01T00:00:00.000Z',
 		});
 	});
 });
@@ -222,9 +225,13 @@ describe('toNotificationResponse', () => {
 			kind: 'send',
 			status: 'delivered',
 			sender: 'notifications-tooling-spa/v1',
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
 			dryRun: false,
 			scheduledFor: null,
+			content: {},
+			channels: {},
 			createdAt: '2026-08-25T00:00:00.000Z',
+			updatedAt: '2026-08-25T00:00:00.000Z',
 			dispatches: [
 				{
 					id: '22222222-2222-2222-2222-222222222222',
@@ -234,6 +241,9 @@ describe('toNotificationResponse', () => {
 					providerRef: 'push-1',
 					failureReason: null,
 					providerStatusCode: null,
+					detail: null,
+					createdAt: '1970-01-01T00:00:00.000Z',
+					updatedAt: '1970-01-01T00:00:00.000Z',
 				},
 			],
 		});

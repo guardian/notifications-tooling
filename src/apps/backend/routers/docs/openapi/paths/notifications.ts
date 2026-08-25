@@ -33,7 +33,7 @@ export const notificationsPath = {
 					'The notification was recorded and every requested channel delivered. The body is the stored notification with its per-target dispatch outcomes.',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/NotificationResource' },
+						schema: { $ref: '#/components/schemas/Notification' },
 					},
 				},
 			},
@@ -42,7 +42,7 @@ export const notificationsPath = {
 					'The notification was recorded but nothing was delivered yet (a dry run). The body is the stored notification.',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/NotificationResource' },
+						schema: { $ref: '#/components/schemas/Notification' },
 					},
 				},
 			},
@@ -51,7 +51,7 @@ export const notificationsPath = {
 					'The notification was recorded and some, but not all, targets delivered. Each outcome is listed under `dispatches`.',
 				content: {
 					'application/json': {
-						schema: { $ref: '#/components/schemas/NotificationResource' },
+						schema: { $ref: '#/components/schemas/Notification' },
 					},
 				},
 			},

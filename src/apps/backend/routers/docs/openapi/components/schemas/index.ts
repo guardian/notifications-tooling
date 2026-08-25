@@ -11,10 +11,8 @@ import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationDispatchSchema } from './notification-dispatch';
-import { notificationDispatchOutcomeSchema } from './notification-dispatch-outcome';
 import { notificationNotFoundSchema } from './notification-not-found';
 import { notificationProviderErrorSchema } from './notification-provider-error';
-import { notificationResourceSchema } from './notification-resource';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
@@ -32,8 +30,6 @@ export const schemas = {
 	Notification: notificationSchema,
 	NotificationDispatch: notificationDispatchSchema,
 	NotificationNotFound: notificationNotFoundSchema,
-	NotificationResource: notificationResourceSchema,
-	NotificationDispatchOutcome: notificationDispatchOutcomeSchema,
 	NotificationSendRequest: notificationSendRequestJsonSchema,
 	NotificationTestSendRequest: notificationTestSendRequestJsonSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,

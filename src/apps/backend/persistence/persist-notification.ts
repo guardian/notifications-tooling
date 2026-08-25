@@ -96,6 +96,9 @@ export const toPublicDispatch = (dispatch: NotificationDispatch) => ({
 	providerRef: dispatch.providerRef,
 	failureReason: dispatch.failureReason,
 	providerStatusCode: dispatch.providerStatusCode,
+	detail: dispatch.detail,
+	createdAt: dispatch.createdAt.toISOString(),
+	updatedAt: dispatch.updatedAt.toISOString(),
 });
 
 /**
@@ -113,9 +116,13 @@ export const toNotificationResponse = ({
 	kind: notification.kind,
 	status: notification.status,
 	sender: notification.sender,
+	createdByEmail: notification.createdByEmail,
 	dryRun: notification.dryRun,
 	scheduledFor: notification.scheduledFor?.toISOString() ?? null,
+	content: notification.content,
+	channels: notification.channels,
 	createdAt: notification.createdAt.toISOString(),
+	updatedAt: notification.updatedAt.toISOString(),
 	dispatches: dispatches.map(toPublicDispatch),
 });
 
