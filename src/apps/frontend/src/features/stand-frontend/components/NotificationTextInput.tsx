@@ -4,6 +4,7 @@ import { TextArea } from '@guardian/stand/TextArea';
 import { CharacterCount } from './CharacterCount';
 
 type Props = {
+	name: string;
 	label: string;
 	description: string;
 	placeholder?: string;
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export const NotificationTextInput = ({
+	name,
 	label,
 	description,
 	placeholder,
@@ -33,6 +35,7 @@ export const NotificationTextInput = ({
 	return (
 		<div>
 			<TextArea
+				name={name}
 				label={label}
 				description={description}
 				placeholder={placeholder}

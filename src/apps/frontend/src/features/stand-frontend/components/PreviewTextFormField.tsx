@@ -22,6 +22,7 @@ export const PreviewTextFormField = ({
 			name="preview"
 			render={({ field, fieldState }) => (
 				<NotificationTextInput
+					name={field.name}
 					label="Preview text"
 					description="Choose the preview text for the email newsletter"
 					placeholder="Enter preview text here..."

@@ -50,6 +50,8 @@ export const NotificationFormWrapper = ({
 		<>
 			<form
 				aria-label={formLabel}
+				method="post"
+				noValidate
 				onSubmit={onSubmit}
 				css={{
 					marginTop: semanticSpacing.stackXl,

@@ -25,6 +25,7 @@ export const SubjectFormField = ({ constraints }: SubjectFormFieldProps) => {
 			name="subject"
 			render={({ field, fieldState }) => (
 				<NotificationTextInput
+					name={field.name}
 					label="Subject"
 					description="Choose the subject line (kicker included in character count)"
 					placeholder="Enter a subject line here..."
