@@ -10,5 +10,8 @@ export const mockAppConfig: AppConfig = {
 		expires: 0,
 		multifactor: false,
 	},
-	permissions: [UserPermissions.DispatchAccess],
+	permissions: [
+		UserPermissions.DispatchAccess,
+		UserPermissions.SendNotification,
+	],
 };
