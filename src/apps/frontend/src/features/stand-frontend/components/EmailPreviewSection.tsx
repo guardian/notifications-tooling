@@ -5,7 +5,7 @@ import {
 	type NewsletterFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { DEFAULT_SEGMENTS } from './AudienceSegmentOptions';
+import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
 import { FlagPreviewPill } from './FlagPreviewPill';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
@@ -39,7 +39,7 @@ export const EmailPreviewSection = () => {
 			/>
 			<FlagPreviewPill
 				title="Audience segments"
-				options={DEFAULT_SEGMENTS}
+				options={SEGMENT_OPTIONS}
 				selected={selectedSegments}
 			/>
 			<HTMLPreview />

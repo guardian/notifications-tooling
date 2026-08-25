@@ -25,7 +25,7 @@ import type {
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import type { DeliveryOption } from '../types';
-import { DEFAULT_SEGMENTS } from './AudienceSegmentOptions';
+import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
 import { DEFAULT_EDITIONS } from './EditionOptions';
 import { scheduleIcon } from './FlagIcons';
 import { FlagPreviewPill } from './FlagPreviewPill';
@@ -158,7 +158,7 @@ export const NewsletterDispatchDetails = () => {
 			<ParameterLabel label="Audience segments">
 				<FlagPreviewPill
 					title="Audience segments"
-					options={DEFAULT_SEGMENTS}
+					options={SEGMENT_OPTIONS}
 					selected={audienceSegments}
 					isConfirmation={true}
 				/>
