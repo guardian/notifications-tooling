@@ -99,12 +99,20 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 						description="Choose the subject line (kicker included in character count)"
 						placeholder={placeholderText}
 						value={field.value}
-						update={(value) =>
-							setValue('subject', value, {
+						update={(value) => {
+							const prefix = kickerLabel ? `${kickerLabel}: ` : '';
+							// Never allow the value to erode the enforced prefix itself.
+							const nextValue =
+								prefix &&
+								(value.length < prefix.length || !value.startsWith(prefix))
+									? prefix
+									: value;
+
+							setValue('subject', nextValue, {
 								shouldDirty: true,
 								shouldValidate: true,
-							})
-						}
+							});
+						}}
 						softLimit={subjectLimits.recommended}
 						hardLimit={subjectLimits.editorialLimit}
 						error={fieldState.error?.message}
