@@ -15,6 +15,13 @@
       "when": 1787567065607,
       "tag": "0001_add_dispatch_provider_status_code",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787671324348,
+      "tag": "0002_add_notifications_created_at_index",
+      "breakpoints": true
     }
   ]
 }

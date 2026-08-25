@@ -1,5 +1,6 @@
 import {
 	boolean,
+	index,
 	jsonb,
 	pgEnum,
 	pgTable,
@@ -67,5 +68,7 @@ export const notifications = pgTable(
 		uniqueIndex('notifications_idempotency_key_unique').on(
 			table.idempotencyKey,
 		),
+		// Serves the list endpoint's 14-day window filter + newest-first order.
+		index('notifications_created_at_idx').on(table.createdAt.desc()),
 	],
 );
