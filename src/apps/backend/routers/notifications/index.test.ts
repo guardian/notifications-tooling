@@ -488,6 +488,7 @@ const startLookupServer = (
 		'/v1/notifications',
 		createNotificationsRouter(
 			mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+			mockNotificationStore(),
 			findNotification,
 		),
 	);

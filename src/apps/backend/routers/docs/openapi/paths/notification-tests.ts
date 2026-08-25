@@ -30,7 +30,7 @@ export const notificationTestsPath = {
 				content: {
 					'application/json': {
 						schema: {
-							$ref: '#/components/schemas/Notification',
+							$ref: '#/components/schemas/NotificationResource',
 						},
 					},
 				},
@@ -41,7 +41,7 @@ export const notificationTestsPath = {
 				content: {
 					'application/json': {
 						schema: {
-							$ref: '#/components/schemas/Notification',
+							$ref: '#/components/schemas/NotificationResource',
 						},
 					},
 				},
@@ -52,7 +52,7 @@ export const notificationTestsPath = {
 				content: {
 					'application/json': {
 						schema: {
-							$ref: '#/components/schemas/Notification',
+							$ref: '#/components/schemas/NotificationResource',
 						},
 					},
 				},

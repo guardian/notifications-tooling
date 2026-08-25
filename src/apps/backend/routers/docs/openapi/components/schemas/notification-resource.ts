@@ -2,7 +2,7 @@
  * The `202` response body for `POST /v1/notifications` and
  * `POST /v1/notification-tests`: the persisted notification resource with its
  * dispatch outcomes nested underneath. Referenced via
- * `#/components/schemas/Notification`.
+ * `#/components/schemas/NotificationResource`.
  */
 export const notificationResourceSchema = {
 	type: 'object',
