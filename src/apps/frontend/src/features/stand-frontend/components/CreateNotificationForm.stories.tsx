@@ -65,6 +65,23 @@ export const Default: Story = {
 		await expect(canvas.getByText('Kicker')).toBeInTheDocument();
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
 		await expect(canvas.getByText('Preview text')).toBeInTheDocument();
+		await expect(
+			canvas.getByText('The newsletter email is sent immediately'),
+		).toBeVisible();
+		await expect(canvas.getByText('Sends right now via Braze')).toBeVisible();
+	},
+};
+
+export const UpdatesFormFields: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const unitedKingdom = canvas.getByRole('checkbox', {
+			name: 'Select United Kingdom',
+		});
+
+		await userEvent.click(unitedKingdom);
+
+		await expect(unitedKingdom).toBeChecked();
 	},
 };
 

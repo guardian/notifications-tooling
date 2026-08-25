@@ -6,11 +6,12 @@ import { useChannelConstraints } from '../api/useChannelConstraints';
 import { buildAppAlertRequest } from '../build-request-payloads';
 import type { AppAlertFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { AlertEditionsSection } from './AlertEditionsSection';
+import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelDisplay } from './ChannelDisplay';
 import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryOptionFormField } from './DeliveryOptionFormField';
+import { EditionsFormField } from './EditionsFormField';
 import { HeadlineFormField } from './HeadlineFormField';
 import { NotificationFormSection } from './NotificationFormSection';
 import { SendButton } from './SendButton';
@@ -115,7 +116,8 @@ export const CreateAppAlertForm = ({
 						id="alert-section"
 						isActive={activeSectionHref === '#alert-section'}
 					>
-						<AlertEditionsSection />
+						<AlertTypeFormField />
+						<EditionsFormField />
 					</NotificationFormSection>
 					<NotificationFormSection
 						id="content-section"
