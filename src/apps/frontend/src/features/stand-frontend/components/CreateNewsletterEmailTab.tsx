@@ -18,6 +18,7 @@ import {
 	DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
 } from './SideNavigationPanel';
+import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 
 export const CreateNewsletterEmailTab = () => {
 	const {
@@ -76,6 +77,7 @@ export const CreateNewsletterEmailTab = () => {
 									minWidth: 0,
 								})}
 							>
+								<NoSendPermissionWarning />
 								<EmailPreviewToggle />
 								<div
 									css={css({

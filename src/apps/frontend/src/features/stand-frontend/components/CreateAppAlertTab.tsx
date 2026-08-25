@@ -22,6 +22,7 @@ import {
 	APP_DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
 } from './SideNavigationPanel';
+import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 
 export const CreateAppAlertTab = () => {
 	const {
@@ -85,6 +86,7 @@ export const CreateAppAlertTab = () => {
 									minWidth: 0,
 								})}
 							>
+								<NoSendPermissionWarning />
 								<AppPreviewToggle topicTypes={topicTypes} />
 								<div
 									css={css({
