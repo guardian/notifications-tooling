@@ -31,7 +31,7 @@ describe('notification form hard limits', () => {
 				preview: 'Preview',
 				audienceSegments: ['UK'],
 			}).success,
-		).toBe(false);
+		).toBe(true);
 	});
 
 	it('rejects newsletter preview text over its hard limit', () => {

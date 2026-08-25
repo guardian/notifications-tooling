@@ -1,11 +1,6 @@
 import type { Kicker } from './api/schemas';
 import { kickerNameMap } from './option-values';
 
-export const composeNewsletterSubject = (subject: string, kicker?: Kicker) =>
-	kicker && kicker !== 'none'
-		? `${kickerNameMap[kicker]}: ${subject}`
-		: subject;
-
 export const stripKickerPrefix = (subject: string, kicker?: Kicker): string => {
 	const prefixes = Object.values(kickerNameMap);
 	const match =

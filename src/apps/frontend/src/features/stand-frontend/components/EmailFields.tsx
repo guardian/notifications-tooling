@@ -4,7 +4,6 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { kickerSchema } from '../api/schemas';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
-import { composeNewsletterSubject } from '../newsletter-subject';
 import type { NewsletterFormValues } from '../notification-forms';
 import { kickerNameMap } from '../option-values';
 import { NotificationTextInput } from './NotificationTextInput';
@@ -100,12 +99,14 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 						description="Choose the subject line (kicker included in character count)"
 						placeholder={placeholderText}
 						value={field.value}
-						update={field.onChange}
+						update={(value) =>
+							setValue('subject', value, {
+								shouldDirty: true,
+								shouldValidate: true,
+							})
+						}
 						softLimit={subjectLimits.recommended}
 						hardLimit={subjectLimits.editorialLimit}
-						characterCount={
-							composeNewsletterSubject(field.value, kicker).length
-						}
 						error={fieldState.error?.message}
 					/>
 				)}

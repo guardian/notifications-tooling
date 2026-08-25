@@ -14,7 +14,7 @@ import type {
 } from '../api/send-test-email';
 import { ConfigContext } from '../ConfigContext';
 import { validateGuardianEmail } from '../form-validation';
-import { composeNewsletterSubject } from '../newsletter-subject';
+import { stripKickerPrefix } from '../newsletter-subject';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import type { AudienceSegment } from '../types';
@@ -24,7 +24,7 @@ type TestSendParams = {
 	emailInput: string;
 	audienceSegments: AudienceSegment[];
 	emailSubjectLine: string;
-	subject: string;
+	newsletterSubject: string;
 	preview: string;
 	webUrl: string;
 };
@@ -48,13 +48,14 @@ const getSendParams = (
 		return;
 	}
 
-	const emailSubjectLine = composeNewsletterSubject(subject, kicker);
+	const emailSubjectLine = subject;
+	const newsletterSubject = stripKickerPrefix(subject, kicker);
 
 	return {
 		emailInput,
 		audienceSegments,
 		emailSubjectLine,
-		subject,
+		newsletterSubject,
 		preview,
 		webUrl: content.webUrl,
 	};
@@ -64,7 +65,7 @@ const makePayload = ({
 	emailInput,
 	emailSubjectLine,
 	audienceSegments,
-	subject,
+	newsletterSubject,
 	preview,
 	webUrl,
 }: TestSendParams): TestEmailSendRequest => ({
@@ -89,7 +90,7 @@ const makePayload = ({
 		items: {
 			'lead-story': {
 				type: 'newsletter',
-				title: subject,
+				title: newsletterSubject,
 				body: preview,
 				link: webUrl,
 			},
