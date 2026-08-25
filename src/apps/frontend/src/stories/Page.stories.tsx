@@ -1,3 +1,4 @@
+import { UserPermissions } from '@models';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { mockAppConfig } from '../mocks/app-config';
@@ -30,7 +31,26 @@ export const NotificationsPage: Story = {
 	},
 };
 
-export const NotificationsPageWithoutPermission: Story = {
+export const NotificationsPageWithoutSendPermission: Story = {
+	beforeEach() {
+		window.__APP_CONFIG__ = {
+			...mockAppConfig,
+			permissions: [UserPermissions.DispatchAccess],
+		};
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const CreateNotificationHeading = canvas.getByText(
+			'Create newsletter email',
+			{
+				selector: 'h2',
+			},
+		);
+		await expect(CreateNotificationHeading).toBeInTheDocument();
+	},
+};
+
+export const NotificationsPageWithoutAccessPermission: Story = {
 	beforeEach() {
 		window.__APP_CONFIG__ = { ...mockAppConfig, permissions: [] };
 	},

@@ -25,12 +25,10 @@ import type {
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import type { DeliveryOption } from '../types';
-import {
-	AudienceSegmentsPreviewPill,
-	DEFAULT_SEGMENTS,
-} from './AudienceSegments';
+import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
+import { EDITION_OPTIONS } from './EditionOptions';
 import { scheduleIcon } from './FlagIcons';
-import { EditionsPreviewPill } from './SelectableEditions';
+import { FlagPreviewPill } from './FlagPreviewPill';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const styles = {
@@ -158,8 +156,9 @@ export const NewsletterDispatchDetails = () => {
 				<SendInfoPreviewPill channel="email" isConfirmation={true} />
 			</ParameterLabel>
 			<ParameterLabel label="Audience segments">
-				<AudienceSegmentsPreviewPill
-					segments={DEFAULT_SEGMENTS}
+				<FlagPreviewPill
+					title="Audience segments"
+					options={SEGMENT_OPTIONS}
 					selected={audienceSegments}
 					isConfirmation={true}
 				/>
@@ -185,7 +184,12 @@ export const AppAlertDispatchDetails = () => {
 				<SendInfoPreviewPill channel="push" isConfirmation={true} />
 			</ParameterLabel>
 			<ParameterLabel label="Editions">
-				<EditionsPreviewPill selected={editions} isConfirmation={true} />
+				<FlagPreviewPill
+					title="Editions"
+					options={EDITION_OPTIONS}
+					selected={editions}
+					isConfirmation={true}
+				/>
 			</ParameterLabel>
 			<DeliveryParameter deliveryTiming={deliveryOption} />
 		</section>

@@ -1,10 +1,10 @@
-import { UserPermissions } from '@config';
 import { getSSMParameter } from '@config/ssm';
 import type { ResolveArticleRequest, ResolveArticleResponse } from '@models';
 import {
 	CapiError,
 	resolveArticleRequestSchema,
 	type ResolvedArticle,
+	UserPermissions,
 } from '@models';
 import { fetchArticle } from '@services';
 import { determineArticleId } from '@utils';

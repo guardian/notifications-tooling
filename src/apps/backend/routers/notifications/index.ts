@@ -1,7 +1,14 @@
 import { randomUUID } from 'node:crypto';
-import { UserPermissions } from '@config';
+import {
+	createNotificationsRepository,
+	getDb,
+	type NotificationDispatch,
+	type NotificationWithDispatches,
+} from '@database';
+import { UserPermissions } from '@models';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
+import { z } from 'zod';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
@@ -71,6 +78,76 @@ export const handleValidationErrors: ErrorRequestHandler = (
 	});
 };
 
+/** Route param: the stored notification's UUID primary key. */
+const notificationIdParamsSchema = { id: z.uuid() };
+
+/**
+ * express-zod-safe error hook for `GET /v1/notifications/:id`. A non-UUID id
+ * can never match a stored notification, so it is a structural `400` rather
+ * than a `404`.
+ */
+export const handleNotificationIdValidationError: ErrorRequestHandler = (
+	errors,
+	req,
+	res,
+) => {
+	const details = errors.flatMap((item) =>
+		item.errors.issues.map((issue) => ({
+			code: issue.code,
+			path: toJsonPointer(issue.path),
+			message: issue.message,
+		})),
+	);
+
+	res.status(400).json({
+		...buildErrorEnvelope(
+			req,
+			'bad_request',
+			'The notification id must be a valid UUID.',
+		),
+		details,
+	});
+};
+
+const serializeDispatch = (dispatch: NotificationDispatch) => ({
+	id: dispatch.id,
+	channel: dispatch.channel,
+	target: dispatch.target,
+	providerRef: dispatch.providerRef,
+	status: dispatch.status,
+	failureReason: dispatch.failureReason,
+	providerStatusCode: dispatch.providerStatusCode,
+	detail: dispatch.detail,
+	createdAt: dispatch.createdAt,
+	updatedAt: dispatch.updatedAt,
+});
+
+/** Shapes a stored notification and its dispatches into the API response. */
+const serializeNotification = (notification: NotificationWithDispatches) => ({
+	id: notification.id,
+	idempotencyKey: notification.idempotencyKey,
+	kind: notification.kind,
+	status: notification.status,
+	sender: notification.sender,
+	createdByEmail: notification.createdByEmail,
+	dryRun: notification.dryRun,
+	scheduledFor: notification.scheduledFor,
+	content: notification.content,
+	channels: notification.channels,
+	createdAt: notification.createdAt,
+	updatedAt: notification.updatedAt,
+	dispatches: notification.dispatches.map(serializeDispatch),
+});
+
+type FindNotificationById = (
+	id: string,
+) => Promise<NotificationWithDispatches | null>;
+
+const findNotificationByIdWithDispatches: FindNotificationById = async (id) => {
+	const db = await getDb();
+	return createNotificationsRepository(db).findByIdWithDispatches(id);
+};
+
 type DispatchValidatedNotification = (
 	request: NotificationSendRequest,
 	notificationId: string,
@@ -78,13 +155,17 @@ type DispatchValidatedNotification = (
 
 export const createNotificationsRouter = (
 	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
+	findNotification: FindNotificationById = findNotificationByIdWithDispatches,
 ) => {
 	const notificationsRouter = Router();
 
 	notificationsRouter.post(
 		'/',
 		authMiddleware,
-		requirePermissions([UserPermissions.DispatchAccess]),
+		requirePermissions([
+			UserPermissions.DispatchAccess,
+			UserPermissions.SendNotification,
+		]),
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
@@ -127,6 +208,34 @@ export const createNotificationsRouter = (
 					expiresAt,
 				},
 			});
+		},
+	);
+
+	notificationsRouter.get(
+		'/:id',
+		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
+		validate({
+			params: notificationIdParamsSchema,
+			handler: handleNotificationIdValidationError,
+		}),
+		async (req, res) => {
+			const notification = await findNotification(req.params.id);
+
+			if (!notification) {
+				res
+					.status(404)
+					.json(
+						buildErrorEnvelope(
+							req,
+							'not_found',
+							'No notification exists with the given id.',
+						),
+					);
+				return;
+			}
+
+			res.status(200).json(serializeNotification(notification));
 		},
 	);
 

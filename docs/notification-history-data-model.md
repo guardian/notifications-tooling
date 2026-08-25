@@ -74,6 +74,7 @@ erDiagram
         text provider_ref "mobile-n10n POST id or Braze dispatch id"
         enum status "success | failure"
         text failure_reason "nullable"
+        integer provider_status_code "nullable; provider HTTP status on failure"
         jsonb detail "nullable; channel-specific extras"
         timestamptz created_at
         timestamptz updated_at
@@ -127,9 +128,9 @@ From those rows the UI can show:
   JSON, i.e. the exact payload the editor composed.
 - **What happened, per call** — each `notification_dispatches` row is one
   provider call: `channel` + `target` say _what_ was addressed, `status` /
-  `failure_reason` say _how it went_, and `provider_ref` links out to the
-  downstream id (mobile-n10n POST id or Braze dispatch id) for cross-system
-  tracing.
+  `failure_reason` / `provider_status_code` say _how it went_, and `provider_ref`
+  links out to the downstream id (mobile-n10n POST id or Braze dispatch id) for
+  cross-system tracing.
 
 Because retries upsert on `(notification_id, channel, target)`, the detail view
 always reflects the _latest_ outcome per target — a target that failed and then
