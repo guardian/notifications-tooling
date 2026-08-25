@@ -5,3 +5,6 @@ docker/**
 !docker/docker-compose.local.yml
 src/apps/frontend/public/mockServiceWorker.js
 src/apps/frontend/storybook-static/**
+
+# Drizzle-generated SQL and snapshots
+src/packages/database/migrations/**

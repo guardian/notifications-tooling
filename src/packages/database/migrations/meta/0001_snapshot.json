@@ -1,6 +1,6 @@
 {
-  "id": "75205fe6-da5a-4a55-82ac-717f95379583",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "332511b6-7332-4543-8dd1-93bb4e035204",
+  "prevId": "75205fe6-da5a-4a55-82ac-717f95379583",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -50,6 +50,12 @@
         "failure_reason": {
           "name": "failure_reason",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_status_code": {
+          "name": "provider_status_code",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
