@@ -1,63 +1,4 @@
-import { buildRequest } from './build-request-payloads';
-import type { NotificationState } from './types';
-
-export type NotificationFormErrorField =
-	'article' | 'subject' | 'preview' | 'audienceSegments' | 'cannotBuildRequest';
-
-export type NotificationFormErrors = NotificationFormErrorField[];
-
 const DEFAULT_ORIGIN = 'https://www.theguardian.com';
-
-export const validateNotificationForm = (
-	notification: NotificationState,
-): NotificationFormErrors => {
-	const { content, parameters } = notification;
-
-	if (parameters?.type !== 'email') {
-		return [];
-	}
-
-	const { subject = '', preview = '', audienceSegments = [] } = parameters;
-	const errors: NotificationFormErrors = [];
-
-	if (content?.id === undefined) {
-		errors.push('article');
-	}
-	if (subject.trim().length === 0) {
-		errors.push('subject');
-	}
-	if (preview.trim().length === 0) {
-		errors.push('preview');
-	}
-	if (audienceSegments.length === 0) {
-		errors.push('audienceSegments');
-	}
-	// if none of the specific errors above are observed, but still cannot build the request body
-	// return a fallback error
-	if (errors.length == 0 && !buildRequest(notification)) {
-		errors.push('cannotBuildRequest');
-	}
-
-	return errors;
-};
-
-export const checkIfReadyToSend = (
-	notification: NotificationState,
-): boolean => {
-	const { parameters } = notification;
-
-	if (parameters?.type === 'email') {
-		const errors = validateNotificationForm(notification);
-		return errors.length === 0;
-	}
-	if (parameters?.type === 'push') {
-		// TODO - app alert form validation is not implemented yet
-		return true;
-	}
-
-	return false;
-};
-
 // the path to a guardian article is made up at least two segments, usually in the format
 // /section-name/YYYY/MMM/DD/article-headline-converted-to-kebab-case
 const articleUrlPathPattern = /^(\/([\w-]+)){2,}$/;
@@ -107,7 +48,7 @@ export const parseArticleUrlInputToContentId = (
 				webUrl: `${DEFAULT_ORIGIN}/${maybeInputtedArticleId}`,
 			};
 		}
-		return { failure: 'not valid url' };
+		return { failure: 'not a valid url' };
 	}
 };
 

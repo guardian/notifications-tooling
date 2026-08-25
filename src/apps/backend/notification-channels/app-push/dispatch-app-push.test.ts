@@ -168,6 +168,7 @@ describe('dispatchNotification (app-push channel)', () => {
 				topicType: 'sport',
 				status: 'failure',
 				failureReason: 'http_error',
+				providerStatusCode: 400,
 			},
 		]);
 		// The failure is surfaced so the orchestrator can rethrow it as a 502/504.

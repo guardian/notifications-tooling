@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
+	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -36,6 +37,9 @@ const meta: Meta<StoryArgs> = {
 		return WithNotificationContext(
 			<CreateAppAlertForm activeSectionHref={activeSectionHref} />,
 			notificationState,
+			{},
+			'push',
+			notificationState.content ? completePushParams : undefined,
 		);
 	},
 };
@@ -55,6 +59,44 @@ export const Default: Story = {
 	},
 };
 
+export const ValidationErrors: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		);
+
+		await expect(canvas.getByText('Headline is required')).toBeVisible();
+		await expect(canvas.getByText('Please select an edition')).toBeVisible();
+		await expect(
+			canvas.getByText('Paste a URL to fetch an article'),
+		).toBeVisible();
+	},
+};
+
+export const HardLimitBlocksSend: Story = {
+	args: {
+		notificationState: populatedPushState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const headline = canvas.getByLabelText('Headline');
+		await userEvent.clear(headline);
+		await userEvent.type(headline, 'a'.repeat(121));
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		);
+
+		await expect(
+			canvas.getByText('Headline must be 120 characters or fewer'),
+		).toBeVisible();
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			screen.queryByText('Are you sure you want to send the app alert?'),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const WithImportedArticle: Story = {
 	args: {
 		notificationState: populatedPushState,
@@ -68,13 +110,32 @@ export const WithImportedArticle: Story = {
 	},
 };
 
+export const SubmitWithNativeForm: Story = {
+	args: {
+		notificationState: populatedPushState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const form = canvas.getByRole<HTMLFormElement>('form', {
+			name: 'Create app alert',
+		});
+		await expect(form).toBeVisible();
+		form.requestSubmit();
+
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			await screen.findByText('Are you sure you want to send the app alert?'),
+		).toBeVisible();
+	},
+};
+
 export const Empty: Story = {
 	args: {
 		notificationState: {
+			...defaultAppAlertState,
 			isFetchingContent: false,
 			confirmSendModalOpen: false,
 			isWaitingForSend: false,
-			hasAttemptedSend: false,
 		},
 	},
 };

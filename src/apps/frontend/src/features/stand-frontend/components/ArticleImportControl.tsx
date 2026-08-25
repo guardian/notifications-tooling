@@ -4,23 +4,18 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
+import type { ResolvedArticle } from '@models';
 import { useContext } from 'react';
-import { ApiError } from '../../../api/errors';
-import {
-	parseArticleUrlInputToContentId,
-	validateNotificationForm,
-} from '../form-validation';
+import { useFormContext } from 'react-hook-form';
+import type { ApiError } from '../../../api/errors';
+import { parseArticleUrlInputToContentId } from '../form-validation';
 import { NotificationFormContext } from '../NotificationContext';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { LoadingSpinner } from './LoadingSpinner';
 
 // TO DO - more helpful error UI
 // can we capture when article was taken down?
-const getUserFacingError = (err: unknown): string => {
-	if (!(err instanceof ApiError)) {
-		return err instanceof Error ? err.message : 'UNKNOWN ERROR';
-	}
-
+const getUserFacingError = (err: ApiError): string => {
 	switch (err.failure) {
 		case 'unauthenticated':
 		case 'forbidden':
@@ -44,24 +39,25 @@ export interface ArticleImportControlProps {
 	setArticleInputText: (setArticleInputText: string) => void;
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
+	onArticleImported: (article: ResolvedArticle) => void;
 }
 export const ArticleImportControl = ({
 	articleInputText,
 	setArticleInputText,
 	lockArticleInputText,
 	setLockArticleInputText,
+	onArticleImported,
 }: ArticleImportControlProps) => {
 	const { notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
 	);
-
 	const {
-		fetchedArticleId,
-		isFetchingContent,
-		fetchArticleError,
-		hasAttemptedSend,
-		content,
-	} = notification;
+		clearErrors,
+		formState: { submitCount },
+	} = useFormContext();
+
+	const { fetchedArticleId, isFetchingContent, fetchArticleError, content } =
+		notification;
 
 	const { failure, webUrl, articleId } =
 		parseArticleUrlInputToContentId(articleInputText);
@@ -80,32 +76,32 @@ export const ArticleImportControl = ({
 		}
 
 		updateNotification({ type: 'waiting-for-article' });
-		capiFetch({
+		void capiFetch({
 			article: webUrl,
-		})
-			.then((responseBody) => {
-				updateNotification({
-					type: 'receive-article',
-					content: responseBody.article,
-				});
-				setLockArticleInputText(true);
-			})
-			.catch((err) => {
+		}).then((result) => {
+			if (!result.success) {
 				// TO DO - error reporting/telemetry
-				updateNotification({
+				return updateNotification({
 					type: 'report-article-error',
-					errorMessage: getUserFacingError(err),
+					errorMessage: getUserFacingError(result.failure),
 				});
+			}
+			const { article } = result.data;
+			onArticleImported(article);
+			clearErrors('root');
+			updateNotification({
+				type: 'receive-article',
+				content: article,
 			});
+			setLockArticleInputText(true);
+		});
 	};
 
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
-
-	const requiredFieldErrors = validateNotificationForm(notification);
 	const showFieldErrors =
 		failure ??
-		(requiredFieldErrors.includes('article') && hasAttemptedSend
+		(!content && submitCount > 0
 			? 'Paste a URL to fetch an article'
 			: undefined);
 
@@ -134,7 +130,7 @@ export const ArticleImportControl = ({
 					<Typography variant="bodyBoldMd" element="h3">
 						Article
 					</Typography>
-					{/* 
+					{/*
 						NOTE - we are not using the "description" field of the TextInput for this text
 						as design does not want the colour shade to change when the TextInput is in the
 						disabled state.
@@ -159,6 +155,7 @@ export const ArticleImportControl = ({
 				</div>
 				{!lockArticleInputText && (
 					<Button
+						type="button"
 						isDisabled={isFetchingContent}
 						icon="upload"
 						size="sm"
@@ -170,6 +167,7 @@ export const ArticleImportControl = ({
 				)}
 				{lockArticleInputText && (
 					<Button
+						type="button"
 						isDisabled={isFetchingContent}
 						icon="refresh"
 						size="sm"

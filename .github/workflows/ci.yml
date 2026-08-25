@@ -73,9 +73,8 @@ jobs:
         working-directory: src/packages/database
         run: bun run db:migration:check
 
-      - name: Apply migrations
-        working-directory: src/packages/database
-        run: bun run db:migration:apply
+      - name: Run DB related tests
+        run: bun run test:db
 
       - name: Build application
         working-directory: src/apps/backend

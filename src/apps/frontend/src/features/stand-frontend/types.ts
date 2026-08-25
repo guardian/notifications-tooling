@@ -3,8 +3,12 @@ import type {
 	EmailPreviewResponse,
 	ResolvedArticle,
 } from '@models';
+import type { Result } from '../../api/client';
 import type { ApiError } from '../../api/errors';
-import type { SendNotificationResponse } from './api/schemas';
+import type {
+	SendNotificationRequest,
+	SendNotificationResponse,
+} from './api/schemas';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
@@ -14,16 +18,6 @@ export type AlertType =
 export type DeliveryOption = 'immediate' | 'appImmediate';
 export type AudienceSegment = 'UK' | 'US' | 'AU';
 export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
-
-export type SendingResult =
-	| {
-			ok: true;
-			response: SendNotificationResponse;
-	  }
-	| {
-			ok: false;
-			response: ApiError;
-	  };
 
 export type EmailNotification = {
 	type: 'email';
@@ -42,40 +36,32 @@ export type PushNotification = {
 	pushDeliveryOption?: DeliveryOption;
 	editions?: Edition[];
 };
+export type SendingResult =
+	| {
+			ok: true;
+			response: SendNotificationResponse;
+	  }
+	| {
+			ok: false;
+			response: ApiError;
+	  };
 
 export type NotificationState = {
 	isFetchingContent: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
 	content?: ResolvedArticle;
-	parameters?: EmailNotification | PushNotification;
-	hasAttemptedSend: boolean;
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
-	sendingResult?: SendingResult;
+	sendingResult?: Result<SendNotificationResponse>;
+	pendingRequest?: SendNotificationRequest;
 };
 
 export type RequestEmailHtml = {
-	(request: EmailPreviewRequest): Promise<EmailPreviewResponse>;
+	(request: EmailPreviewRequest): Promise<Result<EmailPreviewResponse>>;
 };
 
 export type NotificationAction =
-	| {
-			type: 'set-channel';
-			channel: ChannelOption;
-	  }
-	| {
-			type: 'set-delivery-timing';
-			deliveryOption: DeliveryOption;
-	  }
-	| {
-			type: 'modify-email-parameters';
-			mod: Partial<EmailNotification>;
-	  }
-	| {
-			type: 'modify-app-alert-parameters';
-			appMod: Partial<PushNotification>;
-	  }
 	| {
 			type: 'waiting-for-article';
 	  }
@@ -92,15 +78,15 @@ export type NotificationAction =
 			isOpen: boolean;
 	  }
 	| {
-			type: 'set-attempted-send';
-			hasAttemptedSend: boolean;
+			type: 'prepare-send';
+			request: SendNotificationRequest;
 	  }
 	| {
 			type: 'waiting-for-send';
 	  }
 	| {
 			type: 'receive-send-result';
-			result: SendingResult;
+			result: Result<SendNotificationResponse>;
 	  }
 	| {
 			type: 'dismiss-send-error';

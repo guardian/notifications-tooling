@@ -10,9 +10,8 @@ import { from } from '@guardian/stand/utils';
 import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
-import { useTabChannel } from '../use-tab-channel';
 import { CreateNotificationForm } from './CreateNotificationForm';
-import { DispatchReport } from './DispatchReport';
+import { DispatchReport, NewsletterDispatchDetails } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
 import { EmailPreviewToggle } from './PreviewToggle';
 import {
@@ -22,16 +21,14 @@ import {
 
 export const CreateNewsletterEmailTab = () => {
 	const {
-		notification: { sendingResult, parameters },
+		notification: { sendingResult },
+		updateNotification,
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(DEFAULT_SIDE_NAV_HREF);
-	const emailParameters = parameters?.type === 'email' ? parameters : undefined;
-
-	useTabChannel('email');
 
 	return (
 		<>
-			{!sendingResult?.ok && (
+			{!sendingResult?.success && (
 				<Layout.Sidebar layoutSmBreakpoint="hidden">
 					<SideNavigationPanel
 						selectedHref={selectedHref}
@@ -53,7 +50,7 @@ export const CreateNewsletterEmailTab = () => {
 						lg: { gap: '0px', padding: `0px 0px 0px` },
 					}}
 				>
-					{sendingResult?.ok === true ? (
+					{sendingResult?.success === true ? (
 						<Item
 							size={12}
 							cssOverrides={css({
@@ -62,7 +59,13 @@ export const CreateNewsletterEmailTab = () => {
 								paddingRight: semanticSpacing.stackLg,
 							})}
 						>
-							<DispatchReport />
+							<DispatchReport
+								onResetNotification={() =>
+									updateNotification({ type: 'reset-newsletter-email' })
+								}
+							>
+								<NewsletterDispatchDetails />
+							</DispatchReport>
 						</Item>
 					) : (
 						<>
@@ -104,13 +107,7 @@ export const CreateNewsletterEmailTab = () => {
 									},
 								})}
 							>
-								<EmailPreviewSection
-									selectedSegments={emailParameters?.audienceSegments ?? []}
-									selectedChannel={emailParameters?.type}
-									selectedDeliveryTiming={
-										emailParameters?.emailDeliveryOption ?? undefined
-									}
-								/>
+								<EmailPreviewSection />
 							</Item>
 						</>
 					)}

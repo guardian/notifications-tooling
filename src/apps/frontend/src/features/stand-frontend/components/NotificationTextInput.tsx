@@ -14,6 +14,7 @@ type Props = {
 	update: { (value: string): void };
 	hardLimit?: number;
 	softLimit: number;
+	characterCount?: number;
 	allowLineBreak?: boolean;
 	isDisabled?: boolean;
 	error?: string;
@@ -28,6 +29,7 @@ export const NotificationTextInput = ({
 	update,
 	hardLimit,
 	softLimit,
+	characterCount,
 	allowLineBreak,
 	isDisabled,
 	error,
@@ -86,7 +88,7 @@ export const NotificationTextInput = ({
 				}}
 			/>
 			<CharacterCount
-				count={value.length}
+				count={characterCount ?? value.length}
 				softLimit={softLimit}
 				hardLimit={hardLimit}
 				fieldDescription={label}

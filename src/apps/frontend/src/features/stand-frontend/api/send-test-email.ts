@@ -1,5 +1,6 @@
 import z from 'zod';
-import { fetchJsonAndParse } from '../../../api/client';
+import type { Result } from '../../../api/client';
+import { safeFetchJsonAndParse } from '../../../api/client';
 
 // TO DO - the types and schemas partially replicate the ones defined in the backend
 // because the backend schema rely on the actual config values for the segment ID etc for validation
@@ -61,11 +62,11 @@ export const testEmailResponseSchema = z.object({
 export type TestEmailResponse = z.infer<typeof testEmailResponseSchema>;
 
 export type TestEmailRequestFunction = {
-	(request: TestEmailSendRequest): Promise<TestEmailResponse>;
+	(request: TestEmailSendRequest): Promise<Result<TestEmailResponse>>;
 };
 
 export const requestTestEmailSend: TestEmailRequestFunction = (request) =>
-	fetchJsonAndParse(testEmailResponseSchema, '/v1/notification-tests', {
+	safeFetchJsonAndParse(testEmailResponseSchema, '/v1/notification-tests', {
 		method: 'POST',
 		body: JSON.stringify(request),
 		headers: { 'Content-Type': 'application/json' },

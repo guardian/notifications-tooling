@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import type { ApiError } from '../../../api/errors';
 import {
 	badRequestError,
@@ -11,6 +11,7 @@ import {
 } from '../../../mocks/api-fixtures';
 import { mockSendRejectedNotification } from '../../../mocks/mock-send-notification';
 import {
+	completeEmailParams,
 	populatedEmailState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -45,6 +46,9 @@ const meta: Meta<StoryArgs> = {
 		return WithNotificationContext(
 			<CreateNotificationForm activeSectionHref={activeSectionHref} />,
 			notificationState,
+			{},
+			'email',
+			notificationState.content ? completeEmailParams : undefined,
 		);
 	},
 };
@@ -64,13 +68,55 @@ export const Default: Story = {
 	},
 };
 
+export const ValidationErrors: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send newsletter email' }),
+		);
+
+		await expect(canvas.getByText('Subject is required')).toBeVisible();
+		await expect(canvas.getByText('Preview text is required')).toBeVisible();
+		await expect(
+			canvas.getByText('Please select an audience segment'),
+		).toBeVisible();
+		await expect(
+			canvas.getByText('Paste a URL to fetch an article'),
+		).toBeVisible();
+	},
+};
+
+export const HardLimitBlocksSend: Story = {
+	args: {
+		notificationState: populatedEmailState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const subject = canvas.getByLabelText('Subject');
+		await userEvent.clear(subject);
+		await userEvent.type(subject, 'a'.repeat(60));
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send newsletter email' }),
+		);
+
+		await expect(
+			canvas.getByText(
+				'Subject must be 70 characters or fewer including the kicker',
+			),
+		).toBeVisible();
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			screen.queryByText('Are you sure you want to send the newsletter email?'),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const Empty: Story = {
 	args: {
 		notificationState: {
 			isFetchingContent: false,
 			confirmSendModalOpen: false,
 			isWaitingForSend: false,
-			hasAttemptedSend: false,
 		},
 	},
 };
@@ -100,6 +146,27 @@ export const PopulatedEmail: Story = {
 	},
 };
 
+export const SubmitWithNativeForm: Story = {
+	args: {
+		notificationState: populatedEmailState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const form = canvas.getByRole<HTMLFormElement>('form', {
+			name: 'Create newsletter email',
+		});
+		await expect(form).toBeVisible();
+		form.requestSubmit();
+
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			await screen.findByText(
+				'Are you sure you want to send the newsletter email?',
+			),
+		).toBeVisible();
+	},
+};
+
 export const ConfirmationStep: Story = {
 	args: {
 		notificationState: {
@@ -125,8 +192,8 @@ const buildErrorStory = (error: ApiError): Story => ({
 			...populatedEmailState,
 			isWaitingForSend: false,
 			sendingResult: {
-				ok: false,
-				response: error,
+				success: false,
+				failure: error,
 			},
 		},
 	},
@@ -138,6 +205,8 @@ const buildErrorStory = (error: ApiError): Story => ({
 			{
 				sendNotification: mockSendRejectedNotification(error),
 			},
+			'email',
+			completeEmailParams,
 		);
 	},
 });

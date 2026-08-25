@@ -3,12 +3,13 @@ import {
 	type ResolveArticleResponse,
 	resolveArticleResponseSchema,
 } from '@models';
-import { fetchJsonAndParse } from '../../../api/client';
+import type { Result } from '../../../api/client';
+import { safeFetchJsonAndParse } from '../../../api/client';
 
-export const fetchCapiDataFromApi = async (
+export const fetchCapiDataFromApi = (
 	request: ResolveArticleRequest,
-): Promise<ResolveArticleResponse> => {
-	return await fetchJsonAndParse(
+): Promise<Result<ResolveArticleResponse>> =>
+	safeFetchJsonAndParse(
 		resolveArticleResponseSchema,
 		'/v1/content/articles/resolve',
 		{
@@ -17,4 +18,3 @@ export const fetchCapiDataFromApi = async (
 			headers: { 'Content-Type': 'application/json' },
 		},
 	);
-};

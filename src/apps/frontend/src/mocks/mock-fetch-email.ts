@@ -48,10 +48,13 @@ export const mockRequestEmailHtml: RequestEmailHtml = (request) => {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			resolve({
-				html: buildHtml(request.audience),
-				articleId:
-					'technology/2026/jul/28/apple-second-ever-5tn-company-as-investors-flee-ai-stocks',
-				newsletterId: 'some-newsletter',
+				success: true,
+				data: {
+					html: buildHtml(request.audience),
+					articleId:
+						'technology/2026/jul/28/apple-second-ever-5tn-company-as-investors-flee-ai-stocks',
+					newsletterId: 'some-newsletter',
+				},
 			});
 		}, 500);
 	});

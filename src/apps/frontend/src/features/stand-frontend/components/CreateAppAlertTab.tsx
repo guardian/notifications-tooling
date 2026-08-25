@@ -14,10 +14,9 @@ import {
 } from '../api/useChannelAudiences';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
-import { useTabChannel } from '../use-tab-channel';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
-import { DispatchReport } from './DispatchReport';
+import { AppAlertDispatchDetails, DispatchReport } from './DispatchReport';
 import { AppPreviewToggle } from './PreviewToggle';
 import {
 	APP_DEFAULT_SIDE_NAV_HREF,
@@ -27,6 +26,7 @@ import {
 export const CreateAppAlertTab = () => {
 	const {
 		notification: { sendingResult },
+		updateNotification,
 	} = useContext(NotificationFormContext);
 	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
 	const { data: audiences } = useChannelAudiences();
@@ -34,11 +34,9 @@ export const CreateAppAlertTab = () => {
 	const topicTypes =
 		audiences?.channels['app-push'].topicTypes ?? FALLBACK_TOPIC_TYPES;
 
-	useTabChannel('push');
-
 	return (
 		<>
-			{!sendingResult?.ok && (
+			{!sendingResult?.success && (
 				<Layout.Sidebar layoutSmBreakpoint="hidden">
 					<SideNavigationPanel
 						selectedHref={selectedHref}
@@ -61,7 +59,7 @@ export const CreateAppAlertTab = () => {
 						lg: { gap: '0px', padding: `0px 0px 0px` },
 					}}
 				>
-					{sendingResult?.ok === true ? (
+					{sendingResult?.success === true ? (
 						<Item
 							size={12}
 							cssOverrides={css({
@@ -70,7 +68,13 @@ export const CreateAppAlertTab = () => {
 								paddingRight: semanticSpacing.stackLg,
 							})}
 						>
-							<DispatchReport />
+							<DispatchReport
+								onResetNotification={() =>
+									updateNotification({ type: 'reset-app-alert' })
+								}
+							>
+								<AppAlertDispatchDetails />
+							</DispatchReport>
 						</Item>
 					) : (
 						<>

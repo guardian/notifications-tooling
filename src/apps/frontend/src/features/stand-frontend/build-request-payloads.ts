@@ -1,23 +1,27 @@
+import type { ResolvedArticle } from '@models';
 import type { SendNotificationRequest } from './api/schemas';
-import { kickerNameMap } from './option-values';
-import type { NotificationState } from './types';
+import { editionIds } from './edition-values';
+import { composeNewsletterSubject } from './newsletter-subject';
+import type {
+	AppAlertFormValues,
+	NewsletterFormValues,
+} from './notification-forms';
+import { alertTypeNameMap } from './option-values';
 
-export const buildRequest = (
-	notification: NotificationState,
-): SendNotificationRequest | undefined => {
-	const { parameters, content } = notification;
-	if (!content || parameters?.type !== 'email') {
-		return undefined;
-	}
-	const { subject: headline, preview, audienceSegments, kicker } = parameters;
-	if (!headline || !preview || !audienceSegments?.length) {
-		return undefined;
-	}
-	const idempotencyKey = `email-notification:${content.id}`;
+type BuildRequestArgs<Values> = {
+	values: Values;
+	content: ResolvedArticle;
+	idempotencyKey: string;
+};
 
-	const emailSubjectLine = kicker
-		? `${kickerNameMap[kicker]}: ${headline}`
-		: headline;
+export const buildNewsletterRequest = ({
+	values,
+	content,
+	idempotencyKey,
+}: BuildRequestArgs<NewsletterFormValues>): SendNotificationRequest => {
+	const { subject: headline, preview, audienceSegments, kicker } = values;
+
+	const emailSubjectLine = composeNewsletterSubject(headline, kicker);
 
 	return {
 		idempotencyKey,
@@ -44,6 +48,55 @@ export const buildRequest = (
 			},
 		},
 		sender: 'editorial-newsletters',
+		options: {
+			dryRun: false,
+			scheduledFor: null,
+		},
+	};
+};
+
+export const buildAppAlertRequest = ({
+	values,
+	content,
+	idempotencyKey,
+}: BuildRequestArgs<AppAlertFormValues>): SendNotificationRequest => {
+	const { alertType, editions, headline } = values;
+	const thumbnailUrl = content.fields?.thumbnail;
+
+	return {
+		idempotencyKey,
+		content: {
+			items: {
+				'lead-story': {
+					type: 'app-push',
+					title: alertTypeNameMap[alertType],
+					body: headline,
+					link: content.webUrl,
+					...(thumbnailUrl
+						? {
+								media: {
+									type: 'image' as const,
+									imageUrl: thumbnailUrl,
+									thumbnailUrl,
+								},
+							}
+						: {}),
+				},
+			},
+		},
+		channels: {
+			'app-push': {
+				audience: {
+					type: 'topic',
+					items: editions.map((edition) => ({
+						type: alertType,
+						name: editionIds[edition],
+					})),
+				},
+				compose: { use: 'lead-story' },
+			},
+		},
+		sender: 'notifications-tooling-spa/v1',
 		options: {
 			dryRun: false,
 			scheduledFor: null,
