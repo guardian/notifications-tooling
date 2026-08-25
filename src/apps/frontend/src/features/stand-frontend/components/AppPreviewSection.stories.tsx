@@ -55,7 +55,7 @@ export const Default: Story = {
 		await expect(canvas.getByText('App alert')).toBeVisible();
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
 		await expect(canvas.getByText('Editions')).toBeVisible();
-		await expect(canvas.getByText('UK')).toBeVisible();
+		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
 		await expect(canvas.queryByText('US')).not.toBeInTheDocument();
 		await expect(canvas.queryByText('AU')).not.toBeInTheDocument();

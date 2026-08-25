@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { kickerSchema } from './api/schemas';
 import {
 	APP_ALERT_LIMIT_FALLBACKS,
 	NEWSLETTER_LIMIT_FALLBACKS,
@@ -20,7 +21,7 @@ export const createNewsletterFormSchema = ({
 }: NewsletterFormLimits) =>
 	z
 		.object({
-			kicker: z.enum(['breaking-news', 'exclusive']).optional(),
+			kicker: kickerSchema,
 			subject: z.string().trim().min(1, 'Subject is required'),
 			preview: z
 				.string()

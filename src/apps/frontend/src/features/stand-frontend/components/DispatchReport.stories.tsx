@@ -97,7 +97,8 @@ export const AppAlertSuccess: Story = {
 			canvas.getByRole('heading', { name: 'App alert sent' }),
 		).toBeVisible();
 		await expect(canvas.getByText('App alert')).toBeVisible();
-		await expect(canvas.getByText('UK, INT')).toBeVisible();
+		await expect(canvas.getByText('United Kingdom')).toBeVisible();
+		await expect(canvas.getByText('International')).toBeVisible();
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
 
 		await userEvent.click(

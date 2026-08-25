@@ -1,5 +1,6 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { kickerSchema } from '../api/schemas';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import { composeNewsletterSubject } from '../newsletter-subject';
@@ -37,16 +38,15 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 						label="Kicker"
 						description="Choose the kicker for the email newsletter"
 						onChange={(key) => {
-							const kicker =
-								typeof key === 'string' ? key.split('//').at(1) : undefined;
-							field.onChange(
-								kicker === 'breaking-news' || kicker === 'exclusive'
-									? kicker
-									: undefined,
+							const result = kickerSchema.safeParse(
+								typeof key === 'string' ? key.split('//').at(1) : undefined,
 							);
+							if (result.success) {
+								field.onChange(result.data);
+							}
 						}}
 						selectionMode="single"
-						value={toOptionKey(field.value ?? 'undefined')}
+						value={toOptionKey(field.value)}
 					>
 						<Option id={toOptionKey('breaking-news')}>
 							{kickerNameMap['breaking-news']}
@@ -54,9 +54,7 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 						<Option id={toOptionKey('exclusive')}>
 							{kickerNameMap['exclusive']}
 						</Option>
-						<Option id={toOptionKey('undefined')}>
-							{kickerNameMap['undefined']}
-						</Option>
+						<Option id={toOptionKey('none')}>{kickerNameMap.none}</Option>
 					</Select>
 				)}
 			/>

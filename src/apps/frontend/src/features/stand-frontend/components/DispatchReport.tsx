@@ -30,6 +30,7 @@ import {
 	DEFAULT_SEGMENTS,
 } from './AudienceSegments';
 import { scheduleIcon } from './FlagIcons';
+import { EditionsPreviewPill } from './SelectableEditions';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const styles = {
@@ -50,6 +51,9 @@ const styles = {
 		borderWidth: semanticSizing.border.default,
 		borderStyle: 'solid',
 		borderColor: semanticColors.border.weak,
+		borderTopLeftRadius: semanticRadius.cornerSm,
+		borderTopRightRadius: semanticRadius.cornerSm,
+		overflow: 'hidden',
 		margin: `${semanticSpacing.stackLg} 0`,
 
 		header: {
@@ -102,7 +106,7 @@ const DeliveryParameter = ({
 	const temporaryDeliveryTime = `${tempTime} (ET), ${tempDate}`;
 
 	return (
-		<ParameterLabel label="Delivery">
+		<ParameterLabel label="Delivery and time">
 			<div
 				css={{
 					display: 'flex',
@@ -170,6 +174,10 @@ export const AppAlertDispatchDetails = () => {
 		name: 'editions',
 		defaultValue: defaultAppAlertFormValues.editions,
 	});
+	const deliveryOption = useWatch<AppAlertFormValues, 'deliveryOption'>({
+		name: 'deliveryOption',
+		defaultValue: defaultAppAlertFormValues.deliveryOption,
+	});
 
 	return (
 		<section>
@@ -177,11 +185,9 @@ export const AppAlertDispatchDetails = () => {
 				<SendInfoPreviewPill channel="push" isConfirmation={true} />
 			</ParameterLabel>
 			<ParameterLabel label="Editions">
-				<Typography>{editions.join(', ')}</Typography>
+				<EditionsPreviewPill selected={editions} isConfirmation={true} />
 			</ParameterLabel>
-			<DeliveryParameter
-				deliveryTiming={defaultAppAlertFormValues.deliveryOption}
-			/>
+			<DeliveryParameter deliveryTiming={deliveryOption} />
 		</section>
 	);
 };
@@ -207,7 +213,13 @@ export const DispatchReport = ({
 
 	return (
 		<section css={styles.container}>
-			<div>
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'column',
+					gap: semanticSpacing.stackSm,
+				}}
+			>
 				<div
 					css={{
 						display: 'flex',
@@ -227,7 +239,7 @@ export const DispatchReport = ({
 					</Typography>
 				</div>
 				<Typography variant="bodyMd" css={{ fontSize: '16px' }}>
-					Notification confirmation details below
+					Confirmation details below
 				</Typography>
 			</div>
 

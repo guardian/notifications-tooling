@@ -46,7 +46,7 @@ export const MultipleSelections: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('Editions')).toBeVisible();
-		await expect(canvas.getByText('UK')).toBeVisible();
+		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
 	},
 };
