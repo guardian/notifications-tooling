@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { UserPermissions } from '@config';
+import { UserPermissions } from '@models';
 import { Router } from 'express';
 import validate from 'express-zod-safe';
 import { authMiddleware } from '../../middleware/auth-middleware';

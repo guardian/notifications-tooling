@@ -6,7 +6,6 @@ import {
 	expect,
 	it,
 } from 'bun:test';
-import { UserPermissions } from '@config';
 import {
 	createNotificationDispatchesRepository,
 	createNotificationsRepository,
@@ -16,6 +15,7 @@ import {
 	buildNotification,
 	setupTestDatabase,
 } from '@database/test-helpers';
+import { UserPermissions } from '@models';
 import {
 	authenticateRequests,
 	installPandaAuthMock,

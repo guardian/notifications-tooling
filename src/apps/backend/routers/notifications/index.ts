@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { UserPermissions } from '@config';
 import {
 	createNotificationsRepository,
 	getDb,
 	type NotificationDispatch,
 	type NotificationWithDispatches,
 } from '@database';
+import { UserPermissions } from '@models';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { z } from 'zod';

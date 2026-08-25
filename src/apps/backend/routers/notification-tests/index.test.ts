@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import { UserPermissions } from '@config';
 import { httpLogger } from '@http-logger';
+import { UserPermissions } from '@models';
 import { BrazeApiError, EmailRenderingError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';

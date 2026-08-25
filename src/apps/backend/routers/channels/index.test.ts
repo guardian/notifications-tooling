@@ -7,8 +7,8 @@ import {
 	newsletterSegments,
 	NotificationChannel,
 	notificationChannelContentLimits,
-	UserPermissions,
 } from '@config';
+import { UserPermissions } from '@models';
 import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,

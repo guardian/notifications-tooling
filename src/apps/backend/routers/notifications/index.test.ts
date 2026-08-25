@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import { UserPermissions } from '@config';
 import type { NotificationWithDispatches } from '@database';
 import { httpLogger } from '@http-logger';
+import { UserPermissions } from '@models';
 import { AppNotificationApiError, BrazeApiError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';

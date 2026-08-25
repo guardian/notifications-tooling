@@ -1,4 +1,4 @@
-import type { AppConfig } from '@models';
+import { type AppConfig, UserPermissions } from '@models';
 
 export const mockAppConfig: AppConfig = {
 	user: {
@@ -10,5 +10,5 @@ export const mockAppConfig: AppConfig = {
 		expires: 0,
 		multifactor: false,
 	},
-	permissions: ['dispatch_access'],
+	permissions: [UserPermissions.DispatchAccess],
 };
