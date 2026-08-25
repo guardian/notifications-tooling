@@ -1,6 +1,7 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import type { NewsletterFormValues } from '../notification-forms';
-import { AudienceSegments } from './AudienceSegments';
+import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
+import { SegmentPicker } from './SegmentPicker';
 
 export const AudienceSegmentsFormField = () => {
 	const { control } = useFormContext<NewsletterFormValues>();
@@ -10,7 +11,10 @@ export const AudienceSegmentsFormField = () => {
 			control={control}
 			name="audienceSegments"
 			render={({ field, fieldState }) => (
-				<AudienceSegments
+				<SegmentPicker
+					title="Audience segments"
+					description="Choose the audience the email notification will be sent to"
+					options={SEGMENT_OPTIONS}
 					selected={field.value}
 					error={fieldState.error?.message}
 					onChange={field.onChange}
