@@ -8,7 +8,9 @@ import { NotificationDraftsProvider } from './NotificationFormProvider';
 
 export const EmailNotificationPage = () => {
 	const config = useContext(ConfigContext);
-	const hasAccess = config?.permissions.includes(UserPermissions.DispatchAccess);
+	const hasAccess = config?.permissions.includes(
+		UserPermissions.DispatchAccess,
+	);
 
 	return (
 		<>

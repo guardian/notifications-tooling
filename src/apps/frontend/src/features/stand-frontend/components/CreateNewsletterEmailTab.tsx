@@ -13,12 +13,12 @@ import { layoutMainTheme } from '../themes';
 import { CreateNotificationForm } from './CreateNotificationForm';
 import { DispatchReport, NewsletterDispatchDetails } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
+import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 import { EmailPreviewToggle } from './PreviewToggle';
 import {
 	DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
 } from './SideNavigationPanel';
-import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 
 export const CreateNewsletterEmailTab = () => {
 	const {

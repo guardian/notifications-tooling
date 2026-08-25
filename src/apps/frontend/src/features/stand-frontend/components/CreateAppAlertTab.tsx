@@ -17,12 +17,12 @@ import { layoutMainTheme } from '../themes';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { AppAlertDispatchDetails, DispatchReport } from './DispatchReport';
+import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 import { AppPreviewToggle } from './PreviewToggle';
 import {
 	APP_DEFAULT_SIDE_NAV_HREF,
 	SideNavigationPanel,
 } from './SideNavigationPanel';
-import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 
 export const CreateAppAlertTab = () => {
 	const {

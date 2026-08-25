@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
-import { UserPermissions } from '@models';
 import type { User } from '@guardian/pan-domain-node';
+import { UserPermissions } from '@models';
 import type { Request, Response } from 'express';
 import { buildTestUser } from '../utils/test-utils/panda-auth';
 import {

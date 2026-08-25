@@ -1,7 +1,4 @@
-import {
-	isRunningLocally,
-	permissionsStoreStage,
-} from '@config';
+import { isRunningLocally, permissionsStoreStage } from '@config';
 import { init } from '@guardian/permissions-client';
 import { UserPermissions } from '@models';
 
