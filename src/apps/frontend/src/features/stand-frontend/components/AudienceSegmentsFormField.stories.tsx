@@ -32,7 +32,7 @@ export const UpdatesSelection: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const unitedKingdom = canvas.getByRole('checkbox', {
-			name: 'Select United Kingdom audience segment',
+			name: 'Select United Kingdom',
 		});
 
 		await userEvent.click(unitedKingdom);
