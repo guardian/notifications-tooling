@@ -30,14 +30,16 @@ import {
 	installPermissionsStoreMock,
 } from '../../utils/test-utils/permissions';
 import type { TestServer } from '../../utils/test-utils/server';
-import { createNotificationsRouter } from '.';
 
 // Stub Panda verification and the permissions store before the app (and its
-// real clients) are imported. The database is deliberately NOT mocked: this
+// real clients) are imported. The router is imported dynamically below so the
+// real pan-domain auth module (which polls S3 on construction) never loads
+// before the mock is installed. The database is deliberately NOT mocked: this
 // suite drives the endpoint against a real Postgres via the app's own `getDb`.
 installPandaAuthMock();
 installPermissionsStoreMock();
 const { startTestServer } = await import('../../utils/test-utils/server');
+const { createNotificationsRouter } = await import('.');
 
 let database: Awaited<ReturnType<typeof setupTestDatabase>>;
 let notifications: ReturnType<typeof createNotificationsRepository>;
