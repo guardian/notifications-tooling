@@ -2,9 +2,9 @@ import { Icon } from '@guardian/stand/Icon';
 import type { TopicTypeOption } from '../api/schemas';
 import { editionIds } from '../edition-values';
 import type { Edition } from '../types';
+import { DEFAULT_EDITIONS } from './EditionOptions';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
-import { DEFAULT_EDITIONS } from './SelectableEditions';
 
 export interface AppPushTopicSelection {
 	type: string;
