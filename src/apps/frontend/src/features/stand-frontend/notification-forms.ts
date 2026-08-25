@@ -72,12 +72,12 @@ export const createAppAlertFormSchema = ({
 	});
 
 export const newsletterFormSchema = createNewsletterFormSchema({
-	subject: NEWSLETTER_LIMIT_FALLBACKS.title.editorialLimit,
-	preview: NEWSLETTER_LIMIT_FALLBACKS.body.editorialLimit,
+	subject: NEWSLETTER_LIMIT_FALLBACKS.title.validationCap,
+	preview: NEWSLETTER_LIMIT_FALLBACKS.body.validationCap,
 });
 
 export const appAlertFormSchema = createAppAlertFormSchema({
-	headline: APP_ALERT_LIMIT_FALLBACKS.headline.editorialLimit,
+	headline: APP_ALERT_LIMIT_FALLBACKS.headline.validationCap,
 });
 
 export type NewsletterFormValues = z.infer<typeof newsletterFormSchema>;
