@@ -1,6 +1,5 @@
-import { fetchJsonAndParse } from '../../../api/client';
-import type { ApiError } from '../../../api/errors';
-import type { SendingResult } from '../types';
+import type { Result } from '../../../api/client';
+import { safeFetchJsonAndParse } from '../../../api/client';
 import type {
 	SendNotificationRequest,
 	SendNotificationResponse,
@@ -9,30 +8,18 @@ import { sendNotificationResponseSchema } from './schemas';
 
 export const sendNotification = async (
 	sendNotificationRequest: SendNotificationRequest,
-): Promise<SendingResult> => {
+): Promise<Result<SendNotificationResponse>> => {
 	const headers = new Headers();
 	headers.append('Content-Type', 'application/json');
 
-	try {
-		const confirmation: SendNotificationResponse = await fetchJsonAndParse(
-			sendNotificationResponseSchema,
-			'/v1/notifications',
-			{
-				method: 'POST',
-				headers,
-				body: JSON.stringify(sendNotificationRequest),
-				credentials: 'include',
-			},
-		);
-		return {
-			ok: true,
-			response: confirmation,
-		};
-	} catch (err: unknown) {
-		const apiError = err as ApiError; // fetchJsonAndParse only throws ApiError
-		return {
-			ok: false,
-			response: apiError,
-		};
-	}
+	return safeFetchJsonAndParse(
+		sendNotificationResponseSchema,
+		'/v1/notifications',
+		{
+			method: 'POST',
+			headers,
+			body: JSON.stringify(sendNotificationRequest),
+			credentials: 'include',
+		},
+	);
 };

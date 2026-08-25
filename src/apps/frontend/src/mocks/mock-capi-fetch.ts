@@ -1,11 +1,13 @@
 import type { ResolveArticleResponse } from '@models';
+import type { Result } from '../api/client';
 import { articleFixture } from './capi-fixtures';
 
-export const mockCapiFetch = (): Promise<ResolveArticleResponse> => {
-	return new Promise<ResolveArticleResponse>((resolve) => {
+export const mockCapiFetch = (): Promise<Result<ResolveArticleResponse>> => {
+	return new Promise<Result<ResolveArticleResponse>>((resolve) => {
 		setTimeout(() => {
 			resolve({
-				article: { ...articleFixture },
+				success: true,
+				data: { article: { ...articleFixture } },
 			});
 		}, 500);
 	});

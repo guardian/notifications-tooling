@@ -3,9 +3,8 @@ import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import type { TopicTypeOption } from '../api/schemas';
-import { NotificationFormContext } from '../NotificationContext';
 import { AppPreviewSection } from './AppPreviewSection';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
@@ -64,24 +63,8 @@ export const AppPreviewToggle = ({
 	</PreviewToggle>
 );
 
-export const EmailPreviewToggle = () => {
-	const { notification } = useContext(NotificationFormContext);
-	const emailParameters =
-		notification.parameters?.type === 'email'
-			? notification.parameters
-			: undefined;
-	const selectedSegments = emailParameters?.audienceSegments ?? [];
-	const selectedChannel = emailParameters?.type;
-	const selectedDeliveryTiming =
-		emailParameters?.emailDeliveryOption ?? undefined;
-
-	return (
-		<PreviewToggle>
-			<EmailPreviewSection
-				selectedSegments={selectedSegments}
-				selectedChannel={selectedChannel}
-				selectedDeliveryTiming={selectedDeliveryTiming}
-			/>
-		</PreviewToggle>
-	);
-};
+export const EmailPreviewToggle = () => (
+	<PreviewToggle>
+		<EmailPreviewSection />
+	</PreviewToggle>
+);

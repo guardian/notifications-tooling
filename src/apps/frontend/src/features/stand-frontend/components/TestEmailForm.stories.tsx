@@ -1,8 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ApiError } from '../../../api/errors';
-import { mockFailingRequestTestEmailSend } from '../../../mocks/mock-request-test-email-send';
 import {
+	mockFailingRequestTestEmailSend,
+	mockRequestTestEmailSend,
+} from '../../../mocks/mock-request-test-email-send';
+import {
+	completeEmailParams,
 	populatedEmailState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
@@ -22,7 +26,13 @@ const meta: Meta<StoryArgs> = {
 		notificationState: populatedEmailState,
 	},
 	render: ({ notificationState }) =>
-		WithNotificationContext(<TestEmailForm />, notificationState),
+		WithNotificationContext(
+			<TestEmailForm />,
+			notificationState,
+			{},
+			'email',
+			completeEmailParams,
+		),
 };
 
 export default meta;
@@ -89,11 +99,20 @@ export const SentTestEmail: Story = {
 
 export const FailingTestEmail: Story = {
 	render: ({ notificationState }) =>
-		WithNotificationContext(<TestEmailForm />, notificationState, {
-			requestTestEmailSend: mockFailingRequestTestEmailSend(
-				new ApiError({ message: 'test error', failure: 'non-2xx-response' }),
-			),
-		}),
+		WithNotificationContext(
+			<TestEmailForm />,
+			notificationState,
+			{
+				requestTestEmailSend: mockFailingRequestTestEmailSend(
+					new ApiError({
+						message: 'test error',
+						failure: 'non-2xx-response',
+					}),
+				),
+			},
+			'email',
+			completeEmailParams,
+		),
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
@@ -106,5 +125,50 @@ export const FailingTestEmail: Story = {
 		await waitFor(() =>
 			expect(canvas.getByText(/^Test email failed/)).toBeInTheDocument(),
 		);
+	},
+};
+
+export const RetryAfterFailure: Story = {
+	render: ({ notificationState }) => {
+		let sendAttempts = 0;
+		return WithNotificationContext(
+			<TestEmailForm />,
+			notificationState,
+			{
+				requestTestEmailSend: (request) => {
+					sendAttempts += 1;
+					return sendAttempts === 1
+						? Promise.reject(
+								new ApiError({
+									message: 'test error',
+									failure: 'non-2xx-response',
+								}),
+							)
+						: mockRequestTestEmailSend(request);
+				},
+			},
+			'email',
+			completeEmailParams,
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const input = canvas.getByPlaceholderText('name@theguardian.com');
+		const button = canvas.getByRole('button', { name: BUTTON_TEXT });
+		await userEvent.type(input, 'joe.blogs@theguardian.com');
+		await userEvent.click(button);
+
+		await expect(
+			canvas.findByText(/^Test email failed/),
+		).resolves.toBeVisible();
+
+		await userEvent.click(button);
+		await expect(
+			canvas.queryByText(/^Test email failed/),
+		).not.toBeInTheDocument();
+		await expect(canvas.findByText('Test email sent')).resolves.toBeVisible();
+		await expect(
+			canvas.queryByText(/^Test email failed/),
+		).not.toBeInTheDocument();
 	},
 };

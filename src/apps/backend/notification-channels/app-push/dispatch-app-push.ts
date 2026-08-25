@@ -36,6 +36,8 @@ export type AppPushDispatchOutcome = {
 	topicType: string;
 	status: 'success' | 'failure';
 	failureReason?: AppNotificationFailureReason | 'unknown';
+	/** The mobile-n10n HTTP status when a failed push reached the provider. */
+	providerStatusCode?: number;
 };
 
 /** One resolved push: a topic type, its importance, and its mobile-n10n topics. */
@@ -168,6 +170,10 @@ export const dispatchAppPush = async (
 				result.reason instanceof AppNotificationApiError
 					? result.reason.reason
 					: 'unknown',
+			providerStatusCode:
+				result.reason instanceof AppNotificationApiError
+					? result.reason.status
+					: undefined,
 		};
 	});
 

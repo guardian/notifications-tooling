@@ -23,18 +23,36 @@ interface FetchJsonAndParseInit extends RequestInit {
 	timeoutMs?: number;
 }
 
-/**
- * The single fetch + Zod parse choke point for the frontend. Throws a typed
- * `ApiError` on any failure (network, non-2xx, bad JSON, or schema
- * mismatch) instead of returning a `Result`, since every current caller
- * (TanStack Query mutations/queries) is throw-based.
- */
+export type Result<DataType> =
+	| {
+			success: true;
+			data: DataType;
+	  }
+	| {
+			success: false;
+			failure: ApiError;
+	  };
 
-export async function fetchJsonAndParse<Schema extends z.ZodType>(
+const failWith = (
+	failure: ApiError,
+): {
+	success: false;
+	failure: ApiError;
+} => ({
+	success: false,
+	failure,
+});
+
+/**
+ * The single fetch + Zod parse choke point for the frontend. Returns a `Result`
+ * of the parsed response or a typed `ApiError` on any failure (network, non-2xx,
+ * bad JSON, or schema  mismatch)
+ */
+export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 	schema: Schema,
 	path: string,
 	init: FetchJsonAndParseInit = {},
-): Promise<z.infer<Schema>> {
+): Promise<Result<z.infer<Schema>>> {
 	const { timeoutMs = DEFAULT_TIMEOUT_MS, signal, ...requestInit } = init;
 	const url = `${getApiBaseUrl()}${path}`;
 
@@ -46,17 +64,21 @@ export async function fetchJsonAndParse<Schema extends z.ZodType>(
 		});
 	} catch (cause) {
 		if (cause instanceof DOMException && cause.name === 'TimeoutError') {
-			throw new ApiError({
-				message: `Request to ${path} timed out after ${timeoutMs}ms`,
-				failure: 'timeout',
-				cause,
-			});
+			return failWith(
+				new ApiError({
+					message: `Request to ${path} timed out after ${timeoutMs}ms`,
+					failure: 'timeout',
+					cause,
+				}),
+			);
 		}
-		throw new ApiError({
-			message: `Network request to ${path} failed`,
-			failure: 'fetch-fail',
-			cause,
-		});
+		return failWith(
+			new ApiError({
+				message: `Network request to ${path} failed`,
+				failure: 'fetch-fail',
+				cause,
+			}),
+		);
 	}
 
 	if (!response.ok) {
@@ -68,27 +90,31 @@ export async function fetchJsonAndParse<Schema extends z.ZodType>(
 			// doing, and a future caller (the send) would inherit that without
 			// asking for it. The login URL is carried on the error instead, so
 			// each call site decides. See docs/ADRs/login-redirect-ownership.md.
-			throw new ApiError({
-				message:
-					envelope?.message ?? `Request to ${path} was not authenticated`,
-				failure: 'unauthenticated',
-				status: response.status,
-				requestId: envelope?.requestId,
-				loginUrl: envelope?.loginUrl,
-			});
+			return failWith(
+				new ApiError({
+					message:
+						envelope?.message ?? `Request to ${path} was not authenticated`,
+					failure: 'unauthenticated',
+					status: response.status,
+					requestId: envelope?.requestId,
+					loginUrl: envelope?.loginUrl,
+				}),
+			);
 		}
 
 		if (response.status === 403) {
 			// Authenticated but not permitted. Deliberately not a login redirect:
 			// the cookie is valid, so bouncing through login would loop.
-			throw new ApiError({
-				message:
-					envelope?.message ??
-					`Request to ${path} was not permitted for this user`,
-				failure: 'forbidden',
-				status: response.status,
-				requestId: envelope?.requestId,
-			});
+			return failWith(
+				new ApiError({
+					message:
+						envelope?.message ??
+						`Request to ${path} was not permitted for this user`,
+					failure: 'forbidden',
+					status: response.status,
+					requestId: envelope?.requestId,
+				}),
+			);
 		}
 
 		if (envelope?.details?.length) {
@@ -99,27 +125,31 @@ export async function fetchJsonAndParse<Schema extends z.ZodType>(
 			console.error(`Validation details for ${path}:`, envelope.details);
 		}
 
-		throw new ApiError({
-			message:
-				envelope?.message ??
-				`Request to ${path} responded with ${response.status}`,
-			failure: 'non-2xx-response',
-			status: response.status,
-			details: envelope?.details,
-			requestId: envelope?.requestId,
-		});
+		return failWith(
+			new ApiError({
+				message:
+					envelope?.message ??
+					`Request to ${path} responded with ${response.status}`,
+				failure: 'non-2xx-response',
+				status: response.status,
+				details: envelope?.details,
+				requestId: envelope?.requestId,
+			}),
+		);
 	}
 
 	let json: unknown;
 	try {
 		json = await response.json();
 	} catch (cause) {
-		throw new ApiError({
-			message: `Response from ${path} was not valid JSON`,
-			failure: 'json-parse-fail',
-			status: response.status,
-			cause,
-		});
+		return failWith(
+			new ApiError({
+				message: `Response from ${path} was not valid JSON`,
+				failure: 'json-parse-fail',
+				status: response.status,
+				cause,
+			}),
+		);
 	}
 
 	const result = schema.safeParse(json);
@@ -127,13 +157,33 @@ export async function fetchJsonAndParse<Schema extends z.ZodType>(
 		const prettyError = z.prettifyError(result.error);
 		// Loud early warning of backend contract drift.
 		console.error(`Schema parse failed for ${path}:`, prettyError);
-		throw new ApiError({
-			message: `Response from ${path} did not match the expected schema`,
-			failure: 'schema-parse-fail',
-			status: response.status,
-			cause: prettyError,
-		});
+		return failWith(
+			new ApiError({
+				message: `Response from ${path} did not match the expected schema`,
+				failure: 'schema-parse-fail',
+				status: response.status,
+				cause: prettyError,
+			}),
+		);
 	}
 
+	return result;
+}
+
+/**
+ * The single fetch + Zod parse choke point for the frontend. Throws a typed
+ * `ApiError` on any failure (network, non-2xx, bad JSON, or schema
+ * mismatch) instead of returning a `Result`, since every current caller
+ * (TanStack Query mutations/queries) is throw-based.
+ */
+export async function fetchJsonAndParse<Schema extends z.ZodType>(
+	schema: Schema,
+	path: string,
+	init: FetchJsonAndParseInit = {},
+): Promise<z.infer<Schema>> {
+	const result = await safeFetchJsonAndParse(schema, path, init);
+	if (!result.success) {
+		throw result.failure;
+	}
 	return result.data;
 }

@@ -13,6 +13,7 @@ interface SendInfoPreviewPillProps {
 const getLabel = (value: ChannelOption | DeliveryOption) => {
 	switch (value) {
 		case 'immediate':
+		case 'appImmediate':
 			return 'Immediate send';
 		case 'email':
 			return 'Newsletter email';
@@ -26,6 +27,7 @@ const getLabel = (value: ChannelOption | DeliveryOption) => {
 const getIcon = (value: ChannelOption | DeliveryOption) => {
 	switch (value) {
 		case 'immediate':
+		case 'appImmediate':
 			return 'bolt';
 		case 'email':
 			return 'mail';

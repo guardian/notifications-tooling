@@ -35,7 +35,8 @@ describe('notification dispatches repository (real Postgres)', () => {
 		const first = await dispatches.upsert(
 			buildDispatch(notification.id, {
 				status: 'failure',
-				failureReason: 'unknown',
+				failureReason: 'http_error',
+				providerStatusCode: 502,
 			}),
 		);
 
@@ -49,6 +50,9 @@ describe('notification dispatches repository (real Postgres)', () => {
 		expect(retried.id).toBe(first.id);
 		expect(retried.status).toBe('success');
 		expect(retried.failureReason).toBeNull();
+		// A successful retry clears the prior failure's HTTP status.
+		expect(first.providerStatusCode).toBe(502);
+		expect(retried.providerStatusCode).toBeNull();
 
 		expect(await dispatches.findByNotificationId(notification.id)).toHaveLength(
 			1,
