@@ -1,22 +1,24 @@
-import { css } from '@emotion/react';
-import { HtmlPreview } from '@guardian/stand/HtmlPreviewLoader';
+import {
+	baseColors,
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
+import { LoadingSpinner } from './LoadingSpinner';
 
 // TO DO - this function will work with the current format of the notifcation emails
 // but we shoudl modidify the template used in email-rendering to include attributes
 // to more robustly identify the elements to update
 const modifyContent = (
-	emailHtml: string,
+	body: HTMLElement,
 	parameters: Partial<NewsletterFormValues>,
-): string => {
-	const body = document.createElement('body');
-	body.innerHTML = emailHtml;
-
+) => {
 	const { subject, kicker, preview } = parameters;
 	const headlineElement = body.querySelector('h2');
 	const kickerElement =
@@ -38,8 +40,6 @@ const modifyContent = (
 	Array.from(body.querySelectorAll('a')).forEach((link) =>
 		link.removeAttribute('href'),
 	);
-
-	return body.innerHTML;
 };
 
 export const HTMLPreview = () => {
@@ -49,6 +49,10 @@ export const HTMLPreview = () => {
 	} = useContext(NotificationFormContext);
 	const parameters = useWatch<NewsletterFormValues>();
 	const [emailHtml, setEmailHtml] = useState<string>();
+
+	const [previewContainerElement, setPreviewContainerElement] =
+		useState<HTMLElement | null>(null);
+
 	const [errorMessage, setErrorMessage] = useState<string>();
 	const [isLoading, setIsLoading] = useState(false);
 	const stringifiedAudience = (parameters.audienceSegments ?? []).join();
@@ -73,8 +77,29 @@ export const HTMLPreview = () => {
 		if (!result.success) {
 			throw result.failure;
 		}
+
 		return result.data.html;
 	}, [webUrl, requestEmailHtml, stringifiedAudience]);
+
+	useEffect(() => {
+		if (!previewContainerElement || !emailHtml) {
+			return;
+		}
+
+		const articleElement = previewContainerElement.querySelector('article');
+		if (!articleElement) {
+			return;
+		}
+		articleElement.innerHTML = emailHtml;
+	}, [previewContainerElement, emailHtml]);
+
+	useEffect(() => {
+		if (!previewContainerElement) {
+			return;
+		}
+
+		modifyContent(previewContainerElement, parameters);
+	}, [parameters, previewContainerElement]);
 
 	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect -- ok
@@ -90,20 +115,25 @@ export const HTMLPreview = () => {
 	}, [fetchHtml]);
 
 	return (
-		<HtmlPreview
-			html={
-				emailHtml
-					? modifyContent(emailHtml, parameters)
-					: `<div>no article html</div> `
-			}
-			errorMessage={errorMessage}
-			isLoading={isLoading}
-			title={
+		<figure>
+			<figcaption css={{ paddingBottom: semanticSpacing.stackSm }}>
 				<Typography variant="labelFormMd">Newsletter email preview</Typography>
-			}
-			widthOptions={[]}
-			defaultWidth={400}
-			cssOverrides={css({ width: '440px' })}
-		/>
+			</figcaption>
+			{!emailHtml && <div>no article html</div>}
+			{errorMessage && <div>{errorMessage}</div>}
+			{isLoading && <LoadingSpinner />}
+			<div
+				ref={setPreviewContainerElement}
+				css={{
+					width: 440,
+					borderWidth: semanticSizing.border.default,
+					borderColor: semanticColors.border.strong,
+					borderStyle: 'solid',
+					backgroundColor: baseColors.neutral[900],
+				}}
+			>
+				<article></article>
+			</div>
+		</figure>
 	);
 };
