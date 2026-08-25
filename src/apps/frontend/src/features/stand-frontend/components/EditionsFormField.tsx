@@ -1,6 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import type { AppAlertFormValues } from '../notification-forms';
-import { DEFAULT_EDITIONS } from './EditionOptions';
+import { EDITION_OPTIONS } from './EditionOptions';
 import { SegmentPicker } from './SegmentPicker';
 
 export const EditionsFormField = () => {
@@ -14,7 +14,7 @@ export const EditionsFormField = () => {
 				<SegmentPicker
 					title="Editions"
 					description="Choose the editions the app alert will be sent to"
-					options={DEFAULT_EDITIONS}
+					options={EDITION_OPTIONS}
 					selected={field.value}
 					onChange={field.onChange}
 					error={fieldState.error?.message}

@@ -26,7 +26,7 @@ import type {
 import { NotificationFormContext } from '../NotificationContext';
 import type { DeliveryOption } from '../types';
 import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
-import { DEFAULT_EDITIONS } from './EditionOptions';
+import { EDITION_OPTIONS } from './EditionOptions';
 import { scheduleIcon } from './FlagIcons';
 import { FlagPreviewPill } from './FlagPreviewPill';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
@@ -186,7 +186,7 @@ export const AppAlertDispatchDetails = () => {
 			<ParameterLabel label="Editions">
 				<FlagPreviewPill
 					title="Editions"
-					options={DEFAULT_EDITIONS}
+					options={EDITION_OPTIONS}
 					selected={editions}
 					isConfirmation={true}
 				/>

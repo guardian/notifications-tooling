@@ -2,7 +2,7 @@ import { Icon } from '@guardian/stand/Icon';
 import type { TopicTypeOption } from '../api/schemas';
 import { editionIds } from '../edition-values';
 import type { Edition } from '../types';
-import { DEFAULT_EDITIONS } from './EditionOptions';
+import { EDITION_OPTIONS } from './EditionOptions';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
 
@@ -28,7 +28,7 @@ const editionFlagCodes: Partial<Record<string, Edition>> = {
 };
 
 const editionLabels = Object.fromEntries(
-	DEFAULT_EDITIONS.map(({ code, label }) => [editionIds[code], label]),
+	EDITION_OPTIONS.map(({ code, label }) => [editionIds[code], label]),
 );
 
 export const Editions = ({ topicTypes, selected }: EditionsProps) => {
