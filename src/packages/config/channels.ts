@@ -30,11 +30,11 @@ export const notificationChannelContentLimits = {
 	// the same number until editorial supplies distinct ones.
 	[NotificationChannel.AppPushNotification]: {
 		title: { recommended: 50, editorialLimit: 50, validationCap: 50 },
-		body: { recommended: 90, editorialLimit: 120, validationCap: 200 },
+		body: { recommended: 90, editorialLimit: 200, validationCap: 300 },
 	},
 	[NotificationChannel.Newsletter]: {
-		title: { recommended: 46, editorialLimit: 70, validationCap: 150 },
-		body: { recommended: 85, editorialLimit: 140, validationCap: 250 },
+		title: { recommended: 46, editorialLimit: 150, validationCap: 250 },
+		body: { recommended: 85, editorialLimit: 250, validationCap: 350 },
 	},
 } as const satisfies Record<
 	NotificationChannel,
