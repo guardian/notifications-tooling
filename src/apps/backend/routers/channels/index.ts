@@ -6,8 +6,8 @@ import {
 	newsletterSegments,
 	NotificationChannel,
 	notificationChannelContentLimits,
-	UserPermissions,
 } from '@config';
+import { UserPermissions } from '@models';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';

@@ -7,10 +7,10 @@ import {
 	it,
 	mock,
 } from 'bun:test';
-import { UserPermissions } from '@config';
 import { createNotificationsRepository } from '@database';
 import { setupTestDatabase } from '@database/test-helpers';
 import { httpLogger } from '@http-logger';
+import { UserPermissions } from '@models';
 import { BrazeApiError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
@@ -41,7 +41,10 @@ beforeAll(async () => {
 	notifications = createNotificationsRepository(database.db);
 
 	authenticateRequests();
-	grantPermissions([UserPermissions.DispatchAccess]);
+	grantPermissions([
+		UserPermissions.DispatchAccess,
+		UserPermissions.SendNotification,
+	]);
 });
 
 afterAll(() => database.close());

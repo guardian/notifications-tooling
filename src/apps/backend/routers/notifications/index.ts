@@ -1,9 +1,9 @@
-import { UserPermissions } from '@config';
 import {
 	createNotificationsRepository,
 	getDb,
 	type NotificationWithDispatches,
 } from '@database';
+import { UserPermissions } from '@models';
 import { Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { z } from 'zod';
@@ -134,7 +134,10 @@ export const createNotificationsRouter = (
 	notificationsRouter.post(
 		'/',
 		authMiddleware,
-		requirePermissions([UserPermissions.DispatchAccess]),
+		requirePermissions([
+			UserPermissions.DispatchAccess,
+			UserPermissions.SendNotification,
+		]),
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
