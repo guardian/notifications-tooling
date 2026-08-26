@@ -1,12 +1,14 @@
 import { Option, Select } from '@guardian/stand/Select';
-import { useEffect } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { kickerSchema } from '../api/schemas';
 import type { useChannelConstraints } from '../api/useChannelConstraints';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
 import type { NewsletterFormValues } from '../notification-forms';
 import { kickerNameMap } from '../option-values';
-import { NotificationTextInput } from './NotificationTextInput';
+import {
+	NotificationTextInput,
+	NotificationTextInputWithPrefix,
+} from './NotificationTextInput';
 
 const toOptionKey = (value: string, name = 'kicker') => `${name}//${value}`;
 
@@ -15,15 +17,10 @@ interface EmailFieldsProps {
 }
 
 export const EmailFields = ({ constraints }: EmailFieldsProps) => {
-	const { control, setValue } = useFormContext<NewsletterFormValues>();
+	const { control } = useFormContext<NewsletterFormValues>();
 	const kicker = useWatch<NewsletterFormValues, 'kicker'>({
 		control,
 		name: 'kicker',
-	});
-
-	const subject = useWatch<NewsletterFormValues, 'subject'>({
-		control,
-		name: 'subject',
 	});
 
 	const kickerLabel = ['breaking-news', 'exclusive'].includes(kicker)
@@ -37,26 +34,6 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 		newsletter?.compose.subject ?? NEWSLETTER_LIMIT_FALLBACKS.title;
 	const previewLimits =
 		newsletter?.content.body ?? NEWSLETTER_LIMIT_FALLBACKS.body;
-
-	useEffect(() => {
-		if (subject === '') {
-			return;
-		}
-		const kickerName = kickerLabel ? `${kickerLabel}: ` : '';
-
-		const existingPrefix = Object.values(kickerNameMap)
-			.map((name) => `${name}: `)
-			.find((prefix) => subject.startsWith(prefix));
-
-		const bareSubject = existingPrefix
-			? subject.slice(existingPrefix.length)
-			: subject;
-		const nextSubject = `${kickerName}${bareSubject}`;
-
-		if (nextSubject !== subject) {
-			setValue('subject', nextSubject, { shouldValidate: true });
-		}
-	}, [subject, kickerLabel, setValue]);
 
 	return (
 		<>
@@ -94,28 +71,16 @@ export const EmailFields = ({ constraints }: EmailFieldsProps) => {
 				control={control}
 				name="subject"
 				render={({ field, fieldState }) => (
-					<NotificationTextInput
+					<NotificationTextInputWithPrefix
 						label="Subject"
 						description="Choose the subject line (kicker included in character count)"
 						placeholder={placeholderText}
 						value={field.value}
-						update={(value) => {
-							const prefix = kickerLabel ? `${kickerLabel}: ` : '';
-							// Never allow the value to erode the enforced prefix itself.
-							const nextValue =
-								prefix &&
-								(value.length < prefix.length || !value.startsWith(prefix))
-									? prefix
-									: value;
-
-							setValue('subject', nextValue, {
-								shouldDirty: true,
-								shouldValidate: true,
-							});
-						}}
+						update={field.onChange}
 						softLimit={subjectLimits.recommended}
 						hardLimit={subjectLimits.editorialLimit}
 						error={fieldState.error?.message}
+						prefix={kickerLabel ? `${kickerLabel}: ` : undefined}
 					/>
 				)}
 			/>

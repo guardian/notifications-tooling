@@ -4,6 +4,7 @@ import {
 	APP_ALERT_LIMIT_FALLBACKS,
 	NEWSLETTER_LIMIT_FALLBACKS,
 } from './api/useChannelConstraints';
+import { composeNewsletterSubject } from './newsletter-subject';
 
 interface NewsletterFormLimits {
 	subject: number;
@@ -35,8 +36,9 @@ export const createNewsletterFormSchema = ({
 				.min(1, 'Please select an audience segment'),
 			deliveryOption: z.literal('immediate'),
 		})
-		.superRefine(({ subject }, context) => {
-			if (subject.length > subjectLimit) {
+		.superRefine(({ kicker, subject }, context) => {
+			const composedSubject = composeNewsletterSubject(subject, kicker);
+			if (composedSubject.length > subjectLimit) {
 				context.addIssue({
 					code: 'custom',
 					path: ['subject'],

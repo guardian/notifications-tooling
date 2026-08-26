@@ -1,7 +1,7 @@
 import type { ResolvedArticle } from '@models';
 import type { SendNotificationRequest } from './api/schemas';
 import { editionIds } from './edition-values';
-import { stripKickerPrefix } from './newsletter-subject';
+import { composeNewsletterSubject } from './newsletter-subject';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
@@ -21,7 +21,7 @@ export const buildNewsletterRequest = ({
 }: BuildRequestArgs<NewsletterFormValues>): SendNotificationRequest => {
 	const { subject: headline, preview, audienceSegments, kicker } = values;
 
-	const newsletterHeadlineWithoutPrefix = stripKickerPrefix(headline, kicker);
+	const emailSubjectLine = composeNewsletterSubject(headline, kicker);
 
 	return {
 		idempotencyKey,
@@ -29,7 +29,7 @@ export const buildNewsletterRequest = ({
 			items: {
 				'lead-story': {
 					type: 'newsletter',
-					title: newsletterHeadlineWithoutPrefix,
+					title: headline,
 					body: preview,
 					link: content.webUrl,
 				},
@@ -43,7 +43,7 @@ export const buildNewsletterRequest = ({
 				},
 				compose: {
 					items: ['lead-story'],
-					subject: headline,
+					subject: emailSubjectLine,
 				},
 			},
 		},

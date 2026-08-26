@@ -11,7 +11,7 @@ describe('notification request builders', () => {
 		const request = buildNewsletterRequest({
 			values: {
 				kicker: 'exclusive',
-				subject: 'Exclusive: A developing story',
+				subject: 'A developing story',
 				preview: 'What readers need to know.',
 				audienceSegments: ['UK', 'AU'],
 				deliveryOption: 'immediate',

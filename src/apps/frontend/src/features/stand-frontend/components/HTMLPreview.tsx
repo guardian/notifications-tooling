@@ -3,7 +3,6 @@ import { HtmlPreview } from '@guardian/stand/HtmlPreviewLoader';
 import { Typography } from '@guardian/stand/Typography';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import { stripKickerPrefix } from '../newsletter-subject';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { kickerNameMap } from '../option-values';
@@ -27,8 +26,8 @@ const modifyContent = (
 	const previewElement =
 		headlineElement?.parentElement?.querySelector<HTMLElement>('h2~div');
 
-	if (subject && headlineElement && kicker) {
-		headlineElement.innerText = stripKickerPrefix(subject, kicker);
+	if (subject && headlineElement) {
+		headlineElement.innerText = subject;
 	}
 	if (kicker && kickerElement) {
 		kickerElement.innerText = kicker === 'none' ? '' : kickerNameMap[kicker];
