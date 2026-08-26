@@ -32,7 +32,7 @@ export const SubjectFormField = ({ constraints }: SubjectFormFieldProps) => {
 					value={field.value}
 					update={field.onChange}
 					softLimit={subjectLimits.recommended}
-					hardLimit={subjectLimits.editorialLimit}
+					hardLimit={subjectLimits.validationCap}
 					characterCount={composeNewsletterSubject(field.value, kicker).length}
 					error={fieldState.error?.message}
 				/>

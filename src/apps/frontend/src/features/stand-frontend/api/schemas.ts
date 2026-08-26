@@ -86,16 +86,6 @@ export type SendNotificationRequest = z.infer<
 	typeof sendNotificationRequestSchema
 >;
 
-/**
- * The three limits that apply to one text field. Hand-written to mirror
- * `@config`'s `ContentFieldLimits` rather than imported from it: the frontend
- * ships to a browser and must not take a dependency on a backend workspace.
- * `channels.contract.test.ts` in the backend guards the two against drift.
- *
- * The UI drives its counters from `recommended` and `editorialLimit` only.
- * `validationCap` is the length the broker rejects past — wiring it to a
- * counter would erase the editorial guidance the counter exists to show.
- */
 const contentFieldLimitsSchema = z.object({
 	recommended: z.number(),
 	editorialLimit: z.number(),
