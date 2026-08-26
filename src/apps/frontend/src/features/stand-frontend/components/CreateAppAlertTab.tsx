@@ -32,7 +32,6 @@ export const CreateAppAlertTab = () => {
 	const [selectedHref, setSelectedHref] = useState(APP_DEFAULT_SIDE_NAV_HREF);
 	const { data: audiences } = useChannelAudiences();
 
-	console.log(audiences);
 	const topicTypes =
 		audiences?.channels['app-push'].topicTypes ?? FALLBACK_TOPIC_TYPES;
 

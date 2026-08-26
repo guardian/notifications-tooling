@@ -1,4 +1,5 @@
 import type {
+	AppAlertTopicEditionId,
 	NewsletterEditionOption,
 	NewsletterSegmentId,
 	TopicTypeEditionOption,
@@ -8,8 +9,9 @@ import {
 	FALLBACK_NEWSLETTER_EDITIONS,
 	useChannelAudiences,
 } from './api/useChannelAudiences';
+import { EDITION_OPTIONS } from './components/EditionOptions';
 import type { SegmentOption } from './components/SegmentPicker';
-import type { ChannelOption } from './types';
+import type { ChannelOption, Edition } from './types';
 
 export const useAudienceEditions = (
 	channel: ChannelOption,
@@ -50,4 +52,35 @@ export const useNewsletterSegmentOptions = (): Array<
 	return segments
 		? segments.map(({ id, label }) => ({ code: id, label }))
 		: FALLBACK_SEGMENT_OPTIONS;
+};
+
+const topicIdToCodeMap: Record<AppAlertTopicEditionId, Edition> = {
+	uk: 'UK',
+	us: 'US',
+	au: 'AU',
+	europe: 'EU',
+	international: 'INT',
+};
+
+export const useTopicEditionOptions = (
+	topicId: string,
+): Array<SegmentOption<Edition>> => {
+	const { data: audiences } = useChannelAudiences();
+	const topics = audiences?.channels['app-push'].topicTypes;
+	if (!topics) {
+		return EDITION_OPTIONS;
+	}
+
+	const editionsForTopic = topics.find(
+		(topic) => topic.id === topicId,
+	)?.editions;
+
+	if (!editionsForTopic) {
+		return EDITION_OPTIONS;
+	}
+
+	return editionsForTopic.map(({ id, label }) => ({
+		code: topicIdToCodeMap[id],
+		label,
+	}));
 };
