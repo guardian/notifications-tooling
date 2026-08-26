@@ -20,6 +20,7 @@ export const HeadlineFormField = ({ constraints }: HeadlineFormFieldProps) => {
 			name="headline"
 			render={({ field, fieldState }) => (
 				<NotificationTextInput
+					name={field.name}
 					label="Headline"
 					description="Choose the headline for the app alert"
 					placeholder="Enter a headline here..."
