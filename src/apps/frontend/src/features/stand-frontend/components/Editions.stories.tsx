@@ -1,8 +1,9 @@
+import type { AppAlertTopicOption } from '@models';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { Editions } from './Editions';
 
-const topicTypes = [
+const topicTypes: AppAlertTopicOption[] = [
 	{
 		id: 'breaking-news',
 		label: 'Breaking news',
