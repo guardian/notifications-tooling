@@ -1,5 +1,5 @@
 import { Icon } from '@guardian/stand/Icon';
-import type { TopicTypeOption } from '../api/schemas';
+import type { AppAlertTopicOption } from '@models';
 import { editionIds } from '../edition-values';
 import type { Edition } from '../types';
 import { EDITION_OPTIONS } from './EditionOptions';
@@ -12,7 +12,7 @@ export interface AppPushTopicSelection {
 }
 
 interface EditionsProps {
-	topicTypes: TopicTypeOption[];
+	topicTypes: AppAlertTopicOption[];
 	selected: AppPushTopicSelection[];
 }
 

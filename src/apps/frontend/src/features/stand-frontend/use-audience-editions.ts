@@ -1,4 +1,4 @@
-import type { EditionOption } from './api/schemas';
+import type { NewsletterEditionOption, TopicTypeEditionOption } from '@models';
 import {
 	FALLBACK_APP_ALERT_EDITIONS,
 	FALLBACK_NEWSLETTER_EDITIONS,
@@ -9,7 +9,7 @@ import type { ChannelOption } from './types';
 export const useAudienceEditions = (
 	channel: ChannelOption,
 	topicId?: string,
-): EditionOption[] => {
+): NewsletterEditionOption[] | TopicTypeEditionOption[] => {
 	const { data: audiences } = useChannelAudiences();
 
 	if (channel === 'email') {

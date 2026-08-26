@@ -1,9 +1,9 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
+import type { AppAlertTopicOption } from '@models';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
-import type { TopicTypeOption } from '../api/schemas';
 import { editionIds } from '../edition-values';
 import {
 	type AppAlertFormValues,
@@ -17,7 +17,7 @@ import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 interface AppPreviewSectionProps {
-	topicTypes: TopicTypeOption[];
+	topicTypes: AppAlertTopicOption[];
 }
 
 export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {

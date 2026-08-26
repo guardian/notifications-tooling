@@ -143,44 +143,6 @@ export type ChannelConstraintsResponse = z.infer<
 	typeof channelConstraintsResponseSchema
 >;
 
-const editionOptionSchema = z.object({
-	id: z.string(),
-	label: z.string(),
-});
-export type EditionOption = z.infer<typeof editionOptionSchema>;
-
-const topicTypeOptionSchema = z.object({
-	id: z.string(),
-	label: z.string(),
-	editions: editionOptionSchema.array(),
-});
-export type TopicTypeOption = z.infer<typeof topicTypeOptionSchema>;
-
-/**
- * `GET /v1/channels/audiences`. Non-strict throughout, so the backend can add
- * a channel, a field, or an audience cap without breaking a deployed SPA — the
- * client only fails on something it asked for going missing or changing type.
- */
-export const channelAudienceResponseSchema = z.object({
-	channels: z
-		.object({
-			newsletter: z
-				.object({
-					segments: z.array(editionOptionSchema),
-				})
-				.loose(),
-			'app-push': z
-				.object({
-					topicTypes: topicTypeOptionSchema.array(),
-				})
-				.loose(),
-		})
-		.loose(),
-});
-export type ChannelAudienceResponse = z.infer<
-	typeof channelAudienceResponseSchema
->;
-
 export const sendNotificationResponseSchema = z.strictObject({
 	notificationId: z.string(),
 	status: z.literal('accepted'),

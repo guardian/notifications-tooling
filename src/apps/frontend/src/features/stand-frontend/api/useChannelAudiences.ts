@@ -1,26 +1,26 @@
+import type { TopicTypeEditionOption } from '@models';
+import {
+	type AppAlertTopicOption,
+	type ChannelAudienceResponse,
+	channelAudienceResponseSchema,
+	type NewsletterEditionOption,
+} from '@models';
 import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../../../api/client';
 import { ApiError } from '../../../api/errors';
 import { redirectToLogin } from '../../../api/redirectToLogin';
-import { editionIds } from '../edition-values';
-import type {
-	ChannelAudienceResponse,
-	EditionOption,
-	TopicTypeOption,
-} from './schemas';
-import { channelAudienceResponseSchema } from './schemas';
 
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
 
-export const FALLBACK_APP_ALERT_EDITIONS: EditionOption[] = [
-	{ id: editionIds.UK, label: 'UK' },
-	{ id: editionIds.US, label: 'US' },
-	{ id: editionIds.AU, label: 'AU' },
-	{ id: editionIds.INT, label: 'International' },
-	{ id: editionIds.EU, label: 'Europe' },
+export const FALLBACK_APP_ALERT_EDITIONS: TopicTypeEditionOption[] = [
+	{ id: 'uk', label: 'UK' },
+	{ id: 'us', label: 'US' },
+	{ id: 'au', label: 'AU' },
+	{ id: 'international', label: 'International' },
+	{ id: 'europe', label: 'Europe' },
 ];
 
-export const FALLBACK_TOPIC_TYPES: TopicTypeOption[] = [
+export const FALLBACK_TOPIC_TYPES: AppAlertTopicOption[] = [
 	{
 		id: 'breaking-news',
 		label: 'Breaking news',
@@ -28,7 +28,7 @@ export const FALLBACK_TOPIC_TYPES: TopicTypeOption[] = [
 	},
 ];
 
-export const FALLBACK_NEWSLETTER_EDITIONS: EditionOption[] = [
+export const FALLBACK_NEWSLETTER_EDITIONS: NewsletterEditionOption[] = [
 	{ id: 'UK', label: 'United Kingdom' },
 	{ id: 'US', label: 'United States' },
 	{ id: 'AU', label: 'Australia' },
