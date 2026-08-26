@@ -1,40 +1,8 @@
-import type {
-	AppAlertTopicEditionId,
-	NewsletterEditionOption,
-	NewsletterSegmentId,
-	TopicTypeEditionOption,
-} from '@models';
-import {
-	FALLBACK_APP_ALERT_EDITIONS,
-	FALLBACK_NEWSLETTER_EDITIONS,
-	useChannelAudiences,
-} from './api/useChannelAudiences';
+import type { AppAlertTopicEditionId, NewsletterSegmentId } from '@models';
+import { useChannelAudiences } from './api/useChannelAudiences';
 import { EDITION_OPTIONS } from './components/EditionOptions';
 import type { SegmentOption } from './components/SegmentPicker';
-import type { ChannelOption, Edition } from './types';
-
-export const useAudienceEditions = (
-	channel: ChannelOption,
-	topicId?: string,
-): NewsletterEditionOption[] | TopicTypeEditionOption[] => {
-	const { data: audiences } = useChannelAudiences();
-
-	if (channel === 'email') {
-		return (
-			audiences?.channels.newsletter.segments ?? FALLBACK_NEWSLETTER_EDITIONS
-		);
-	}
-
-	if (!topicId) {
-		return FALLBACK_APP_ALERT_EDITIONS;
-	}
-
-	return (
-		audiences?.channels['app-push'].topicTypes.find(
-			(topic) => topic.id === topicId,
-		)?.editions ?? FALLBACK_APP_ALERT_EDITIONS
-	);
-};
+import type { Edition } from './types';
 
 export const FALLBACK_SEGMENT_OPTIONS: Array<
 	SegmentOption<NewsletterSegmentId>

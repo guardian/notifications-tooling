@@ -4,10 +4,6 @@ import { act } from '@testing-library/react';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../../../happydom-setup';
-import {
-	FALLBACK_APP_ALERT_EDITIONS,
-	FALLBACK_NEWSLETTER_EDITIONS,
-} from './api/useChannelAudiences';
 import { EDITION_OPTIONS } from './components/EditionOptions';
 import {
 	FALLBACK_SEGMENT_OPTIONS,
@@ -52,8 +48,6 @@ const testResponse: { data?: ChannelAudienceResponse } = { data: testData };
 const useChannelAudiences = mock(() => testResponse);
 
 void mock.module('./api/useChannelAudiences', () => ({
-	FALLBACK_NEWSLETTER_EDITIONS,
-	FALLBACK_APP_ALERT_EDITIONS,
 	useChannelAudiences,
 }));
 
