@@ -7,13 +7,8 @@
  * Hard-coded stub until resolved from the downstream services.
  */
 
+import type { NewsletterSegment, NewsletterSegmentId } from '@models';
 import { configurationStage, type Env } from './env';
-
-export interface NewsletterSegment {
-	label: string;
-	brazeCampaignId: string;
-	emailRenderingNewsletterId: string;
-}
 
 /**
  * ID of a test campaign created in the live Braze account for dry-runs on PROD.
@@ -22,7 +17,10 @@ export interface NewsletterSegment {
 const LIVE_ACCOUNT_TEST_CAMPAIGN_ID = '79a123db-4bec-413b-a20c-207ff285adfd';
 
 // TODO: Move this configuration into settings backed by JSON in S3 or RDS.
-const newsletterSegmentsByStage = {
+const newsletterSegmentsByStage: Record<
+	'CODE' | 'PROD',
+	Record<NewsletterSegmentId, NewsletterSegment>
+> = {
 	CODE: {
 		UK: {
 			label: 'UK',
@@ -58,9 +56,7 @@ const newsletterSegmentsByStage = {
 			emailRenderingNewsletterId: '',
 		},
 	},
-} as const satisfies Record<'CODE' | 'PROD', Record<string, NewsletterSegment>>;
-
-type NewsletterSegmentId = keyof typeof newsletterSegmentsByStage.CODE;
+} as const;
 
 export const getNewsletterSegments = (
 	stage: Env['STAGE'],

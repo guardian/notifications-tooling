@@ -7,6 +7,7 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
+import type { NewsletterSegment, NewsletterSegmentId } from '@models';
 import { UserPermissions } from '@models';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
@@ -65,6 +66,15 @@ const toSegmentOptions = (
 ): Array<{ id: string; label: string }> =>
 	Object.entries(segments).map(([id, { label }]) => ({ id, label }));
 
+/** Reduces a segment config record to the public `{ id, label }` pairs. */
+const toNewsletterSegmentOptions = (
+	segments: Record<NewsletterSegmentId, NewsletterSegment>,
+): Array<{ id: NewsletterSegmentId; label: string }> =>
+	Object.entries(segments).map(([id, { label }]) => ({
+		id: id as NewsletterSegmentId,
+		label,
+	}));
+
 /**
  * Reduces the curated app-push topic types to the public `{ id, label }` pairs,
  * each carrying its selectable `editions` (also `{ id, label }`). The
@@ -100,7 +110,7 @@ export const channelAudiences = {
 			topicTypes: toTopicTypeOptions(appPushTopicTypes),
 		},
 		[NotificationChannel.Newsletter]: {
-			segments: toSegmentOptions(newsletterSegments),
+			segments: toNewsletterSegmentOptions(newsletterSegments),
 		},
 	},
 } as const;

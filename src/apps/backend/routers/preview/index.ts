@@ -1,7 +1,10 @@
-import type { NewsletterSegment } from '@config';
 import { newsletterSegments } from '@config';
 import { getSSMParameter } from '@config/ssm';
-import type { EmailPreviewRequest, EmailPreviewResponse } from '@models';
+import type {
+	EmailPreviewRequest,
+	EmailPreviewResponse,
+	NewsletterSegment,
+} from '@models';
 import { emailPreviewRequestSchema, UserPermissions } from '@models';
 import { EmailRenderingError, renderEmail } from '@services';
 import { determineArticleId } from '@utils';

@@ -1,8 +1,8 @@
 import type { Icon } from '@guardian/stand/Icon';
+import type { NewsletterSegmentId } from '@models';
 import type { ComponentProps } from 'react';
 import type { Kicker } from './api/schemas';
-import type { AlertType, AudienceSegment, DeliveryOption } from './types';
-import type { ChannelOption } from './types';
+import type { AlertType, ChannelOption, DeliveryOption } from './types';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 
@@ -39,7 +39,7 @@ export const alertTypeNameMap: Record<AlertType | 'undefined', string> = {
 	undefined: 'None',
 };
 
-export const audienceSegmentNameMap: Record<AudienceSegment, string> = {
+export const audienceSegmentNameMap: Record<NewsletterSegmentId, string> = {
 	UK: 'United Kingdom',
 	US: 'United States',
 	AU: 'Australia',

@@ -1,6 +1,7 @@
 import type {
 	EmailPreviewRequest,
 	EmailPreviewResponse,
+	NewsletterSegmentId,
 	ResolvedArticle,
 } from '@models';
 import type { Result } from '../../api/client';
@@ -18,15 +19,13 @@ export type AlertType =
 export type DeliveryOption = 'immediate' | 'appImmediate';
 export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
 
-export type AudienceSegment = 'UK' | 'US' | 'AU';
-
 export type EmailNotification = {
 	type: 'email';
 	kicker?: KickerId;
 	subject?: string;
 	preview?: string;
 	emailHtml?: string;
-	audienceSegments?: AudienceSegment[];
+	audienceSegments?: NewsletterSegmentId[];
 	emailDeliveryOption?: DeliveryOption;
 };
 
