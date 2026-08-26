@@ -12,12 +12,12 @@ import {
  * read.
  */
 export const NEWSLETTER_LIMIT_FALLBACKS = {
-	title: { recommended: 46, editorialLimit: 70 },
-	body: { recommended: 85, editorialLimit: 140 },
+	title: { recommended: 46, editorialLimit: 70, validationCap: 150 },
+	body: { recommended: 85, editorialLimit: 140, validationCap: 250 },
 } as const;
 
 export const APP_ALERT_LIMIT_FALLBACKS = {
-	headline: { recommended: 90, editorialLimit: 120 },
+	headline: { recommended: 90, editorialLimit: 120, validationCap: 200 },
 } as const;
 
 export const channelConstraintsQueryKey = ['channels', 'constraints'] as const;
