@@ -1,3 +1,4 @@
+import { DuplicateIdempotencyKeyError } from '@database';
 import {
 	AppNotificationApiError,
 	BrazeApiError,
@@ -9,6 +10,19 @@ import { buildErrorEnvelope } from '../error-envelope';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express detects error middleware by its 4-arg signature
 export const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
 	req.log.error(err);
+
+	if (err instanceof DuplicateIdempotencyKeyError) {
+		res
+			.status(409)
+			.json(
+				buildErrorEnvelope(
+					req,
+					'idempotency_key_conflict',
+					`idempotencyKey '${err.idempotencyKey}' has already been used.`,
+				),
+			);
+		return;
+	}
 
 	if (err instanceof EmailRenderingError && err.status === 404) {
 		res.status(422).json({

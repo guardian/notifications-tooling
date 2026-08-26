@@ -10,10 +10,49 @@ export type NotificationWithDispatches = Notification & {
 	dispatches: NotificationDispatch[];
 };
 
+/** Thrown when a create hits the `idempotency_key` unique index. */
+export class DuplicateIdempotencyKeyError extends Error {
+	constructor(public readonly idempotencyKey: string) {
+		super(
+			`A notification with idempotencyKey '${idempotencyKey}' already exists.`,
+		);
+		this.name = 'DuplicateIdempotencyKeyError';
+	}
+}
+
+/** Postgres `unique_violation` SQLSTATE and the idempotency-key index name. */
+const uniqueViolationCode = '23505';
+const idempotencyKeyConstraint = 'notifications_idempotency_key_unique';
+
+/** Drizzle wraps driver errors, so walk the `cause` chain to find the pg error. */
+const isIdempotencyKeyViolation = (error: unknown): boolean => {
+	for (let cursor = error; cursor != null;) {
+		if (
+			typeof cursor === 'object' &&
+			(cursor as { code?: unknown }).code === uniqueViolationCode &&
+			(cursor as { constraint?: unknown }).constraint ===
+				idempotencyKeyConstraint
+		) {
+			return true;
+		}
+
+		cursor = cursor instanceof Error ? (cursor.cause ?? null) : null;
+	}
+
+	return false;
+};
+
 export const createNotificationsRepository = (db: Database) => ({
 	async create(values: NewNotification): Promise<Notification> {
-		const [row] = await db.insert(notifications).values(values).returning();
-		return row!;
+		try {
+			const [row] = await db.insert(notifications).values(values).returning();
+			return row!;
+		} catch (error) {
+			if (isIdempotencyKeyViolation(error)) {
+				throw new DuplicateIdempotencyKeyError(values.idempotencyKey);
+			}
+			throw error;
+		}
 	},
 
 	/** Sets the rolled-up delivery status once the dispatch outcomes settle. */

@@ -81,6 +81,7 @@ export const notificationTestsPath = {
 					},
 				},
 			},
+			'409': { $ref: '#/components/responses/IdempotencyKeyConflict' },
 			'502': {
 				description:
 					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) rejected the request or returned an invalid response.',

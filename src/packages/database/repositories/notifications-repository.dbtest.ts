@@ -14,6 +14,7 @@ import {
 import { createNotificationDispatchesRepository } from './notification-dispatches-repository';
 import {
 	createNotificationsRepository,
+	DuplicateIdempotencyKeyError,
 	type NotificationsRepository,
 } from './notifications-repository';
 
@@ -81,5 +82,17 @@ describe('notifications repository (real Postgres)', () => {
 			'breaking-news',
 			'morning-briefing-uk',
 		]);
+	});
+
+	it('rejects a second notification reusing an idempotency key', async () => {
+		const input = buildNotification();
+		await notifications.create(input);
+
+		return expect(
+			notifications.create({
+				...buildNotification(),
+				idempotencyKey: input.idempotencyKey,
+			}),
+		).rejects.toBeInstanceOf(DuplicateIdempotencyKeyError);
 	});
 });

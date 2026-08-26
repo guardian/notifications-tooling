@@ -1,5 +1,6 @@
-import { describe, expect, it, mock } from 'bun:test';
+import { DuplicateIdempotencyKeyError } from '@database';
 import { BrazeApiError, EmailRenderingError } from '@services';
+import { describe, expect, it, mock } from 'bun:test';
 import type { Request, Response } from 'express';
 import { errorMiddleware } from './error-middleware';
 
@@ -97,6 +98,25 @@ describe('errorMiddleware', () => {
 		expect(json).toHaveBeenCalledWith({
 			error: 'braze_request_failed',
 			message: 'Braze could not complete the request.',
+		});
+	});
+
+	it('returns a conflict when the idempotency key was already used', () => {
+		const { response, status, json } = createResponse();
+
+		errorMiddleware(
+			new DuplicateIdempotencyKeyError('morning-briefing-2026-07-08'),
+			request,
+			response,
+			mock(() => undefined),
+		);
+
+		expect(status).toHaveBeenCalledWith(409);
+		expect(json).toHaveBeenCalledWith({
+			error: 'idempotency_key_conflict',
+			message:
+				"idempotencyKey 'morning-briefing-2026-07-08' has already been used.",
+			requestId: undefined,
 		});
 	});
 
