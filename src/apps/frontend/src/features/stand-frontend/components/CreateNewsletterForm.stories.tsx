@@ -189,6 +189,8 @@ export const SubmitWithNativeForm: Story = {
 			name: 'Create newsletter email',
 		});
 		await expect(form).toBeVisible();
+		await expect(form).toHaveAttribute('method', 'post');
+		await expect(form).toHaveAttribute('novalidate');
 		form.requestSubmit();
 
 		const screen = within(canvasElement.ownerDocument.body);

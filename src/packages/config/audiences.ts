@@ -10,12 +10,6 @@
 import type { NewsletterSegment, NewsletterSegmentId } from '@models';
 import { configurationStage, type Env } from './env';
 
-/**
- * ID of a test campaign created in the live Braze account for dry-runs on PROD.
- * The audience should be restricted to internal Guardian users
- * */
-const LIVE_ACCOUNT_TEST_CAMPAIGN_ID = '79a123db-4bec-413b-a20c-207ff285adfd';
-
 // TODO: Move this configuration into settings backed by JSON in S3 or RDS.
 const newsletterSegmentsByStage: Record<
 	'CODE' | 'PROD',
@@ -47,7 +41,7 @@ const newsletterSegmentsByStage: Record<
 		},
 		US: {
 			label: 'US',
-			brazeCampaignId: LIVE_ACCOUNT_TEST_CAMPAIGN_ID,
+			brazeCampaignId: '93b0c12d-8c7e-43be-b3b5-88a149ba511f',
 			emailRenderingNewsletterId: 'breaking-news-us',
 		},
 		AU: {

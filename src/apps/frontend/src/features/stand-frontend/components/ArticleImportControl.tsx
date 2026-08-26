@@ -143,6 +143,7 @@ export const ArticleImportControl = ({
 					</Typography>
 
 					<TextInput
+						name="articleUrl"
 						aria-label="article URL"
 						isInvalid={!!showFieldErrors}
 						size="sm"
