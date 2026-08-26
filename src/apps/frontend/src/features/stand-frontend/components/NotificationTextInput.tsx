@@ -6,6 +6,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { CharacterCount } from './CharacterCount';
 
 type Props = {
+	name: string;
 	label: string;
 	description: string;
 	placeholder?: string;
@@ -37,6 +38,7 @@ const styles = {
 };
 
 export const NotificationTextInput = ({
+	name,
 	label,
 	description,
 	placeholder,
@@ -51,6 +53,7 @@ export const NotificationTextInput = ({
 	return (
 		<div>
 			<TextArea
+				name={name}
 				label={label}
 				description={description}
 				placeholder={placeholder}

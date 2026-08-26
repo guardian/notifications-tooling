@@ -5,6 +5,7 @@ const meta = {
 	title: 'Stand Frontend/NotificationTextInput',
 	component: NotificationTextInput,
 	args: {
+		name: 'subject',
 		label: 'Subject',
 		description: 'Choose the subject line for the email newsletter',
 		value: 'this is my subject text',
