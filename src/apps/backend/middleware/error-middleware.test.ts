@@ -1,6 +1,6 @@
+import { describe, expect, it, mock } from 'bun:test';
 import { DuplicateIdempotencyKeyError } from '@database';
 import { BrazeApiError, EmailRenderingError } from '@services';
-import { describe, expect, it, mock } from 'bun:test';
 import type { Request, Response } from 'express';
 import { errorMiddleware } from './error-middleware';
 
