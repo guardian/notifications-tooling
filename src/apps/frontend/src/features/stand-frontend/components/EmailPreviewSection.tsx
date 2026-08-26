@@ -5,7 +5,7 @@ import {
 	type NewsletterFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
+import { useNewsletterSegmentOptions } from '../use-audience-editions';
 import { FlagPreviewPill } from './FlagPreviewPill';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
@@ -16,6 +16,7 @@ export const EmailPreviewSection = () => {
 	const {
 		notification: { fetchedArticleId },
 	} = useContext(NotificationFormContext);
+	const segments = useNewsletterSegmentOptions();
 	const selectedSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
 		name: 'audienceSegments',
 		defaultValue: defaultNewsletterFormValues.audienceSegments,
@@ -39,7 +40,7 @@ export const EmailPreviewSection = () => {
 			/>
 			<FlagPreviewPill
 				title="Audience segments"
-				options={SEGMENT_OPTIONS}
+				options={segments}
 				selected={selectedSegments}
 			/>
 			<HTMLPreview />

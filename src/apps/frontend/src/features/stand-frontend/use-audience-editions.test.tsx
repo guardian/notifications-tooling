@@ -1,10 +1,10 @@
 import { describe, expect, it, mock } from 'bun:test';
 import { beforeEach } from 'node:test';
+import type { ChannelAudienceResponse } from '@models';
 import { act } from '@testing-library/react';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../../../happydom-setup';
-import type { ChannelAudienceResponse } from './api/schemas';
 import { editionIds } from './edition-values';
 import type { ChannelOption } from './types';
 
@@ -52,7 +52,7 @@ const testData: ChannelAudienceResponse = {
 			topicTypes: [TEST_PUSH_TOPIC],
 		},
 	},
-};
+} as ChannelAudienceResponse;
 
 const testResponse: { data?: ChannelAudienceResponse } = { data: testData };
 
