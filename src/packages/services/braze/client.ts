@@ -28,13 +28,37 @@ type RegisterBrazeTestEmailRecipientsRequest = Pick<
 	'apiKey' | 'restEndpoint' | 'timeoutMs' | 'recipientEmails'
 >;
 
+type FindBrazePushRecipientRequest = {
+	apiKey: string;
+	restEndpoint: string;
+	timeoutMs: number;
+	recipientEmail: string;
+};
+
+type SendBrazeTestPushRequest = {
+	apiKey: string;
+	restEndpoint: string;
+	timeoutMs: number;
+	externalUserIds: string[];
+	notificationId: string;
+	title: string;
+	body: string;
+	link: string;
+	appleDeepLink: string;
+	imageUrl?: string;
+};
+
 export type BrazeCampaignTriggerResponse = {
 	dispatch_id?: string;
 	message: string;
 };
 
 export type BrazeOperation =
-	'campaign trigger' | 'test user tracking' | 'test email send';
+	| 'campaign trigger'
+	| 'test user tracking'
+	| 'test email send'
+	| 'test push recipient lookup'
+	| 'test push send';
 
 export type BrazeFailureReason =
 	| 'http_error'
@@ -72,6 +96,13 @@ export class BrazeApiError extends Error {
 	}
 }
 
+export class BrazePushRecipientNotFoundError extends Error {
+	constructor(readonly recipientEmail: string) {
+		super(`No push-capable Braze profile was found for '${recipientEmail}'.`);
+		this.name = 'BrazePushRecipientNotFoundError';
+	}
+}
+
 const brazeCampaignTriggerResponseSchema = z.object({
 	dispatch_id: z.string().optional(),
 	message: z.literal('success'),
@@ -80,6 +111,23 @@ const brazeCampaignTriggerResponseSchema = z.object({
 const brazeUserTrackResponseSchema = z.object({
 	message: z.string(),
 	errors: z.array(z.unknown()).optional(),
+});
+
+const brazeUserExportResponseSchema = z.object({
+	message: z.literal('success'),
+	users: z.array(
+		z.object({
+			external_id: z.string().optional(),
+			push_tokens: z.array(z.object({ token: z.string() })).optional(),
+			apps: z
+				.array(
+					z.object({
+						last_used: z.iso.datetime().nullable().optional(),
+					}),
+				)
+				.optional(),
+		}),
+	),
 });
 
 const testEmailUserAliasLabel = 'dispatch-tool-test-email';
@@ -267,5 +315,109 @@ export const sendBrazeTestEmail = async ({
 		messageResponse,
 		brazeCampaignTriggerResponseSchema,
 		'test email send',
+	);
+};
+
+export const findBrazePushRecipient = async ({
+	apiKey,
+	restEndpoint,
+	timeoutMs,
+	recipientEmail,
+}: FindBrazePushRecipientRequest): Promise<string | undefined> => {
+	const response = await requestBraze(
+		new URL('/users/export/ids', restEndpoint).toString(),
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				email_address: recipientEmail,
+				fields_to_export: ['external_id', 'push_tokens', 'apps'],
+			}),
+			signal: AbortSignal.timeout(timeoutMs),
+		},
+		'test push recipient lookup',
+	);
+
+	const { users } = await parseBrazeResponse(
+		response,
+		brazeUserExportResponseSchema,
+		'test push recipient lookup',
+	);
+	const candidates = users.filter(
+		(user) => user.external_id && user.push_tokens?.length,
+	);
+
+	const mostRecent = candidates.sort((left, right) => {
+		const latestUse = (apps: typeof left.apps): number =>
+			Math.max(
+				...(apps ?? []).map(({ last_used }) =>
+					last_used ? Date.parse(last_used) : Number.NEGATIVE_INFINITY,
+				),
+			);
+		return latestUse(right.apps) - latestUse(left.apps);
+	})[0];
+
+	return mostRecent?.external_id;
+};
+
+export const sendBrazeTestPush = async ({
+	apiKey,
+	restEndpoint,
+	timeoutMs,
+	externalUserIds,
+	notificationId,
+	title,
+	body,
+	link,
+	appleDeepLink,
+	imageUrl,
+}: SendBrazeTestPushRequest): Promise<BrazeCampaignTriggerResponse> => {
+	const response = await requestBraze(
+		new URL('/messages/send', restEndpoint).toString(),
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				external_user_ids: externalUserIds,
+				recipient_subscription_state: 'all',
+				messages: {
+					apple_push: {
+						alert: { title, body },
+						custom_uri: appleDeepLink,
+						use_webview: false,
+						mutable_content: true,
+						extra: {
+							uniqueIdentifier: notificationId,
+							notificationType: 'news',
+							uri: link,
+							...(imageUrl ? { imageUrl } : {}),
+						},
+					},
+					android_push: {
+						title,
+						alert: body,
+						custom_uri: link,
+						use_webview: false,
+						...(imageUrl
+							? { extra: { appboy_image_url: imageUrl } }
+							: {}),
+					},
+				},
+			}),
+			signal: AbortSignal.timeout(timeoutMs),
+		},
+		'test push send',
+	);
+
+	return parseBrazeResponse(
+		response,
+		brazeCampaignTriggerResponseSchema,
+		'test push send',
 	);
 };

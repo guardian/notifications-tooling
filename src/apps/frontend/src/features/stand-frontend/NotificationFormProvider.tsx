@@ -10,6 +10,7 @@ import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
 import { fetchCapiDataFromApi } from './api/fetch-capi-content';
 import { requestEmailHtml } from './api/fetch-email-preview';
 import { sendNotification } from './api/send-notification';
+import { requestTestAppPushSend } from './api/send-test-app-push';
 import { requestTestEmailSend } from './api/send-test-email';
 import {
 	APP_ALERT_LIMIT_FALLBACKS,
@@ -128,6 +129,7 @@ const NotificationFormProvider = ({
 			requestEmailHtml,
 			sendNotification,
 			requestTestEmailSend,
+			requestTestAppPushSend,
 		}}
 	>
 		{children}

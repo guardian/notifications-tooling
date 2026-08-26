@@ -1,7 +1,5 @@
 import {
 	appPushEditionIdsByTopicType,
-	appPushTestEditionIdsByTopicType,
-	appPushTestTopicTypeIds,
 	appPushTopicTypeIds,
 	MAX_APP_PUSH_TOPICS,
 	MAX_NEWSLETTER_SEGMENTS,
@@ -219,17 +217,6 @@ const productionAppPushTopicAudience = appPushTopicAudience(
 	`Up to ${MAX_APP_PUSH_TOPICS} topic-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
 );
 
-/** Test push may only target the internal test topic, never a production one. */
-const testAppPushTopicAudience = appPushTopicAudience(
-	appPushTestTopicTypeIds,
-	appPushTestEditionIdsByTopicType,
-	{
-		type: appPushTestTopicTypeIds[0],
-		name: appPushTestEditionIdsByTopicType[appPushTestTopicTypeIds[0]][0],
-	},
-	`Up to ${MAX_APP_PUSH_TOPICS} internal test topic pairs. Test sends may only target the internal test topic; production topics are rejected.`,
-);
-
 /** Ad-hoc test recipients addressed by email. */
 const testEmailAudience = z.strictObject({
 	type: z.literal('email'),
@@ -298,9 +285,9 @@ const appPushPlan = z.strictObject({
 	compose: appPushCompose,
 });
 
-/** A test app-push plan targets the internal test topic only. */
+/** A test app-push plan resolves explicit email recipients through Braze. */
 const appPushTestPlan = z.strictObject({
-	audience: testAppPushTopicAudience,
+	audience: testEmailAudience,
 	compose: appPushCompose,
 });
 
@@ -331,7 +318,7 @@ const testChannelsSchema = z
 	})
 	.meta({
 		description:
-			'Test delivery plans keyed by channel. Newsletter targets explicit email recipients; app-push targets the internal test topic only. A channel may appear at most once; provide at least one.',
+			'Test delivery plans keyed by channel. Both channels target explicit email recipients; app-push resolves each email to the most recently active push-capable Braze profile. A channel may appear at most once; provide at least one.',
 	});
 
 const requestBaseShape = {

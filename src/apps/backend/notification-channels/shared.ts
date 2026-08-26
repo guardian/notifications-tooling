@@ -1,11 +1,13 @@
 import type { NotificationChannel } from '@config';
 import { getSSMParameter } from '@config/ssm';
 import {
+	findBrazePushRecipient,
 	registerBrazeTestEmailRecipients,
 	renderEmail,
 	sendAppNotification,
 	sendBrazeCampaign,
 	sendBrazeTestEmail,
+	sendBrazeTestPush,
 } from '@services';
 import type {
 	NotificationSendRequest,
@@ -23,6 +25,8 @@ export type DispatchNotificationDependencies = {
 	sendBrazeCampaign: typeof sendBrazeCampaign;
 	registerBrazeTestEmailRecipients: typeof registerBrazeTestEmailRecipients;
 	sendBrazeTestEmail: typeof sendBrazeTestEmail;
+	findBrazePushRecipient: typeof findBrazePushRecipient;
+	sendBrazeTestPush: typeof sendBrazeTestPush;
 };
 
 export const defaultDependencies: DispatchNotificationDependencies = {
@@ -32,6 +36,8 @@ export const defaultDependencies: DispatchNotificationDependencies = {
 	sendBrazeCampaign,
 	registerBrazeTestEmailRecipients,
 	sendBrazeTestEmail,
+	findBrazePushRecipient,
+	sendBrazeTestPush,
 };
 
 /**

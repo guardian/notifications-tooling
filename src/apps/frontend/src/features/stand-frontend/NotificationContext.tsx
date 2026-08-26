@@ -7,6 +7,7 @@ import type {
 	SendNotificationRequest,
 	SendNotificationResponse,
 } from './api/schemas';
+import type { TestAppPushRequestFunction } from './api/send-test-app-push';
 import type { TestEmailRequestFunction } from './api/send-test-email';
 import type {
 	ChannelOption,
@@ -30,6 +31,7 @@ export interface NotificationFormContextProps {
 	};
 	requestEmailHtml: RequestEmailHtml;
 	requestTestEmailSend: TestEmailRequestFunction;
+	requestTestAppPushSend: TestAppPushRequestFunction;
 }
 
 export const NotificationFormContext =
@@ -70,6 +72,14 @@ export const NotificationFormContext =
 				success: false,
 				failure: new ApiError({
 					message: 'no requestTestEmailSend implementation provided',
+					failure: 'fetch-fail',
+				}),
+			}),
+		requestTestAppPushSend: () =>
+			Promise.resolve({
+				success: false,
+				failure: new ApiError({
+					message: 'no requestTestAppPushSend implementation provided',
 					failure: 'fetch-fail',
 				}),
 			}),

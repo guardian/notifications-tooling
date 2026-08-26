@@ -1,6 +1,4 @@
 import {
-	appPushTestEditionIdsByTopicType,
-	appPushTestTopicTypeIds,
 	newsletterSegmentIds,
 	NotificationChannel,
 } from '@config';
@@ -43,7 +41,7 @@ export const notificationTestNewsletterExample = {
 } as const;
 
 export const notificationTestAppPushExample = {
-	summary: 'Test app-push to the internal test topic',
+	summary: 'Test app-push to an existing Braze user',
 	value: {
 		idempotencyKey: 'test-9c1d5b2a-1f3e-4b7a-8c2d-5e6f7a8b9c0d',
 		content: {
@@ -59,15 +57,8 @@ export const notificationTestAppPushExample = {
 		channels: {
 			[NotificationChannel.AppPushNotification]: {
 				audience: {
-					type: 'topic',
-					items: [
-						{
-							type: appPushTestTopicTypeIds[0],
-							name: appPushTestEditionIdsByTopicType[
-								appPushTestTopicTypeIds[0]
-							][0],
-						},
-					],
+					type: 'email',
+					items: ['editor@theguardian.com'],
 				},
 				compose: { use: 'lead-story' },
 			},

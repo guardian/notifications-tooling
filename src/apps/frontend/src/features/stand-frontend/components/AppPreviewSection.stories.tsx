@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ComponentProps } from 'react';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
 	completePushParams,
@@ -74,6 +74,16 @@ export const Default: Story = {
 		await expect(
 			canvas.getByAltText('Android article thumbnail'),
 		).toBeVisible();
+		const emailInput = canvas.getByLabelText(
+			'email address for app-push test send',
+		);
+		await userEvent.type(emailInput, '353@gu.fake.com');
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send test notification' }),
+		);
+		await expect(
+			canvas.findByText('Test notification sent'),
+		).resolves.toBeVisible();
 	},
 };
 

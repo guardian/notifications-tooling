@@ -54,6 +54,13 @@ export const createDependencies = () => {
 	const sendBrazeTestEmail = mock(() =>
 		Promise.resolve({ message: 'success', dispatch_id: 'test-dispatch-123' }),
 	);
+	const findBrazePushRecipient = mock(
+		({ recipientEmail }: { recipientEmail: string }): Promise<string | undefined> =>
+			Promise.resolve(`external-${recipientEmail}`),
+	);
+	const sendBrazeTestPush = mock(() =>
+		Promise.resolve({ message: 'success', dispatch_id: 'push-dispatch-123' }),
+	);
 	const dependencies: DispatchNotificationDependencies = {
 		getSSMParameter,
 		renderEmail,
@@ -61,6 +68,8 @@ export const createDependencies = () => {
 		sendBrazeCampaign,
 		registerBrazeTestEmailRecipients,
 		sendBrazeTestEmail,
+		findBrazePushRecipient,
+		sendBrazeTestPush,
 	};
 
 	return {
@@ -71,5 +80,7 @@ export const createDependencies = () => {
 		sendBrazeCampaign,
 		registerBrazeTestEmailRecipients,
 		sendBrazeTestEmail,
+		findBrazePushRecipient,
+		sendBrazeTestPush,
 	};
 };

@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import {
+	findBrazePushRecipient,
 	MAX_BRAZE_TRIGGER_PROPERTIES_BYTES,
 	registerBrazeTestEmailRecipients,
 	sendBrazeCampaign,
 	sendBrazeTestEmail,
+	sendBrazeTestPush,
 } from './client';
 
 afterEach(() => {
@@ -316,5 +318,134 @@ describe('sendBrazeTestEmail', () => {
 			}),
 		).rejects.toThrow('Braze test email send failed with status 400.');
 		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('findBrazePushRecipient', () => {
+	it('returns the push-capable external user with the most recent app activity', () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({
+				message: 'success',
+				users: [
+					{
+						external_id: 'older-user',
+						push_tokens: [{ token: 'older-token' }],
+						apps: [{ last_used: '2026-08-01T12:00:00Z' }],
+					},
+					{
+						external_id: 'email-only-user',
+						apps: [{ last_used: '2026-08-24T12:00:00Z' }],
+					},
+					{
+						external_id: 'recent-user',
+						push_tokens: [{ token: 'recent-token' }],
+						apps: [
+							{ last_used: null },
+							{ last_used: '2026-08-20T12:00:00Z' },
+						],
+					},
+				],
+			}),
+		);
+
+		expect(
+			findBrazePushRecipient({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				timeoutMs: 10_000,
+				recipientEmail: 'editor@guardian.co.uk',
+			}),
+		).resolves.toBe('recent-user');
+		const requestBody = fetcher.mock.calls[0]?.[1]?.body;
+		expect(typeof requestBody).toBe('string');
+		expect(JSON.parse(requestBody as string)).toEqual({
+			email_address: 'editor@guardian.co.uk',
+			fields_to_export: ['external_id', 'push_tokens', 'apps'],
+		});
+	});
+
+	it('returns undefined when no push-capable external user exists', () => {
+		spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({
+				message: 'success',
+				users: [{ external_id: 'email-only-user' }],
+			}),
+		);
+
+		expect(
+			findBrazePushRecipient({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				timeoutMs: 10_000,
+				recipientEmail: 'editor@guardian.co.uk',
+			}),
+		).resolves.toBeUndefined();
+	});
+});
+
+describe('sendBrazeTestPush', () => {
+	it('sends Apple and Android pushes to existing external users', () => {
+		const timeoutSignal = new AbortController().signal;
+		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ message: 'success', dispatch_id: 'push-dispatch-123' }),
+		);
+
+		expect(
+			sendBrazeTestPush({
+				apiKey: 'secret-api-key',
+				restEndpoint: 'https://rest.example.braze.eu',
+				timeoutMs: 10_000,
+				externalUserIds: ['guardian-user-id'],
+				notificationId: 'test-notification-id',
+				title: 'Breaking news',
+				body: 'Lead summary',
+				link: 'https://www.theguardian.com/world/2026/aug/24/story',
+				appleDeepLink: 'gnmguardian://world/2026/aug/24/story',
+				imageUrl: 'https://media.guim.co.uk/lead.jpg',
+			}),
+		).resolves.toEqual({
+			message: 'success',
+			dispatch_id: 'push-dispatch-123',
+		});
+		expect(fetcher).toHaveBeenCalledWith(
+			'https://rest.example.braze.eu/messages/send',
+			{
+				method: 'POST',
+				headers: {
+					Authorization: 'Bearer secret-api-key',
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					external_user_ids: ['guardian-user-id'],
+					recipient_subscription_state: 'all',
+					messages: {
+						apple_push: {
+							alert: { title: 'Breaking news', body: 'Lead summary' },
+							custom_uri: 'gnmguardian://world/2026/aug/24/story',
+							use_webview: false,
+							mutable_content: true,
+							extra: {
+								uniqueIdentifier: 'test-notification-id',
+								notificationType: 'news',
+								uri: 'https://www.theguardian.com/world/2026/aug/24/story',
+								imageUrl: 'https://media.guim.co.uk/lead.jpg',
+							},
+						},
+						android_push: {
+							title: 'Breaking news',
+							alert: 'Lead summary',
+							custom_uri:
+								'https://www.theguardian.com/world/2026/aug/24/story',
+							use_webview: false,
+							extra: {
+								appboy_image_url: 'https://media.guim.co.uk/lead.jpg',
+							},
+						},
+					},
+				}),
+				signal: timeoutSignal,
+			},
+		);
 	});
 });

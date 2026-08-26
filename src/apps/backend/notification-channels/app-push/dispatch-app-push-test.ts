@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto';
 import { NotificationChannel } from '@config';
 import {
-	AppNotificationApiError,
-	type AppNotificationFailureReason,
+	BrazeApiError,
+	type BrazeFailureReason,
+	BrazePushRecipientNotFoundError,
 } from '@services';
 import { determineArticleId } from '@utils';
 import { z } from 'zod';
@@ -11,34 +11,28 @@ import {
 	type ChannelDispatchResult,
 	defaultDependencies,
 	type DispatchNotificationDependencies,
-	firstSettledError,
 	PROVIDER_REQUEST_TIMEOUT_MS,
 	requireContentItem,
 } from '../shared';
-import { groupAppPushTopicsByType } from './dispatch-app-push';
 
-const appNotificationEnvironmentSchema = z.object({
-	MOBILE_N10N_ENDPOINT: z.url(),
-	MOBILE_N10N_API_KEY: z.string().trim().min(1),
+const brazeEnvironmentSchema = z.object({
+	BRAZE_API_KEY: z.string().trim().min(1),
+	BRAZE_REST_ENDPOINT: z.url(),
 });
 
-/**
- * The outcome of one test push to the internal test topic (one per topic type).
- * `id` is the mobile-n10n POST id, kept for tracking once a store exists.
- */
+/** The outcome of a Braze test push for one requested email recipient. */
 export type AppPushTestDispatchOutcome = {
 	testId: string;
-	id: string;
-	topicType: string;
+	recipientEmail: string;
+	externalUserId: string;
+	dispatchId?: string;
 	status: 'success' | 'failure';
-	failureReason?: AppNotificationFailureReason | 'unknown';
+	failureReason?: BrazeFailureReason | 'unknown';
 };
 
 /**
- * Sends a test app-push to the internal test topic via mobile-n10n. The schema
- * guarantees only the internal test topic can reach here, so production devices
- * are never targeted. Dry-run gating lives in the orchestrator
- * (`dispatchNotificationTest`), so reaching here always dispatches.
+ * Resolves test recipients by email and sends app-push content through Braze.
+ * Dry-run gating lives in `dispatchNotificationTest`.
  */
 export const dispatchAppPushTest = async (
 	request: NotificationTestSendRequest,
@@ -55,65 +49,65 @@ export const dispatchAppPushTest = async (
 		plan.compose.use,
 		NotificationChannel.AppPushNotification,
 	);
-	const pushes = groupAppPushTopicsByType(plan.audience.items);
-
-	const [endpoint, apiKey] = await Promise.all([
-		dependencies.getSSMParameter('MOBILE_N10N_ENDPOINT'),
-		dependencies.getSSMParameter('MOBILE_N10N_API_KEY'),
+	const [apiKey, restEndpoint] = await Promise.all([
+		dependencies.getSSMParameter('BRAZE_API_KEY'),
+		dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
 	]);
 
-	const environment = appNotificationEnvironmentSchema.parse({
-		MOBILE_N10N_ENDPOINT: endpoint,
-		MOBILE_N10N_API_KEY: apiKey,
+	const environment = brazeEnvironmentSchema.parse({
+		BRAZE_API_KEY: apiKey,
+		BRAZE_REST_ENDPOINT: restEndpoint,
 	});
-
-	// Derive the CAPI content id so the apps deep-link; falls back to the raw URL.
+	const recipients = await Promise.all(
+		plan.audience.items.map(async (recipientEmail) => {
+			const normalizedEmail = recipientEmail.toLowerCase();
+			const externalUserId = await dependencies.findBrazePushRecipient({
+				apiKey: environment.BRAZE_API_KEY,
+				restEndpoint: environment.BRAZE_REST_ENDPOINT,
+				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+				recipientEmail: normalizedEmail,
+			});
+			if (!externalUserId) {
+				throw new BrazePushRecipientNotFoundError(normalizedEmail);
+			}
+			return { recipientEmail: normalizedEmail, externalUserId };
+		}),
+	);
 	const contentApiId = determineArticleId(item.link);
 
-	// A fresh id per topic-type push; returned so each POST can be persisted.
-	const dispatched = pushes.map((push) => ({ id: randomUUID(), push }));
-
-	// allSettled so one failed push does not abort the others.
-	const settled = await Promise.allSettled(
-		dispatched.map(({ id, push }) =>
-			dependencies.sendAppNotification({
-				endpoint: environment.MOBILE_N10N_ENDPOINT,
-				apiKey: environment.MOBILE_N10N_API_KEY,
-				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-				id,
-				sender: request.sender,
-				title: item.title,
-				body: item.body,
-				link: item.link,
-				contentApiId,
-				importance: push.importance,
-				topics: push.topics,
-				media: item.media,
-			}),
-		),
-	);
-
-	const outcomes = settled.map((result, index): AppPushTestDispatchOutcome => {
-		const { id, push } = dispatched[index]!;
-		if (result.status === 'fulfilled') {
-			return {
-				testId,
-				id,
-				topicType: push.topicType,
-				status: 'success',
-			};
-		}
+	try {
+		const response = await dependencies.sendBrazeTestPush({
+			apiKey: environment.BRAZE_API_KEY,
+			restEndpoint: environment.BRAZE_REST_ENDPOINT,
+			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+			externalUserIds: recipients.map(({ externalUserId }) => externalUserId),
+			notificationId: testId,
+			title: item.title,
+			body: item.body,
+			link: item.link,
+			appleDeepLink: contentApiId
+				? `gnmguardian://${contentApiId}`
+				: item.link,
+			imageUrl: item.media?.thumbnailUrl ?? item.media?.imageUrl,
+		});
 		return {
-			testId,
-			id,
-			topicType: push.topicType,
-			status: 'failure',
-			failureReason:
-				result.reason instanceof AppNotificationApiError
-					? result.reason.reason
-					: 'unknown',
+			outcomes: recipients.map((recipient): AppPushTestDispatchOutcome => ({
+				testId,
+				...recipient,
+				dispatchId: response.dispatch_id,
+				status: 'success',
+			})),
 		};
-	});
-
-	return { outcomes, error: firstSettledError(settled) };
+	} catch (error) {
+		return {
+			outcomes: recipients.map((recipient): AppPushTestDispatchOutcome => ({
+				testId,
+				...recipient,
+				status: 'failure',
+				failureReason:
+					error instanceof BrazeApiError ? error.reason : 'unknown',
+			})),
+			error,
+		};
+	}
 };

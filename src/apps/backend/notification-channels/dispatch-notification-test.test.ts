@@ -1,19 +1,13 @@
 import { describe, expect, it } from 'bun:test';
 import { NotificationChannel } from '@config';
-import { AppNotificationApiError } from '@services';
+import { BrazeApiError } from '@services';
 import type { NotificationTestSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import { dispatchNotificationTest } from './dispatch-notification-test';
-import {
-	anyString,
-	createDependencies,
-	newsletterItem,
-	pushItem,
-	testId,
-} from './test-support';
+import { createDependencies, newsletterItem, pushItem, testId } from './test-support';
 
 describe('dispatchNotificationTest', () => {
 	it('dispatches newsletter and app-push test channels together', async () => {
-		const { dependencies, sendBrazeTestEmail, sendAppNotification } =
+		const { dependencies, sendBrazeTestEmail, sendBrazeTestPush } =
 			createDependencies();
 		const request: NotificationTestSendRequest = {
 			idempotencyKey: 'test-combined',
@@ -27,7 +21,7 @@ describe('dispatchNotificationTest', () => {
 					compose: { items: ['news'], subject: '[TEST] Briefing' },
 				},
 				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+					audience: { type: 'email', items: ['editor@theguardian.com'] },
 					compose: { use: 'push' },
 				},
 			},
@@ -40,7 +34,7 @@ describe('dispatchNotificationTest', () => {
 		);
 
 		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(1);
-		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+		expect(sendBrazeTestPush).toHaveBeenCalledTimes(1);
 		expect(outcomes.newsletter).toEqual([
 			{
 				testId,
@@ -50,12 +44,18 @@ describe('dispatchNotificationTest', () => {
 			},
 		]);
 		expect(outcomes.appPush).toEqual([
-			{ testId, id: anyString, topicType: 'test', status: 'success' },
+			{
+				testId,
+				recipientEmail: 'editor@theguardian.com',
+				externalUserId: 'external-editor@theguardian.com',
+				dispatchId: 'push-dispatch-123',
+				status: 'success',
+			},
 		]);
 	});
 
 	it('returns empty per-channel outcomes when only one channel is present', async () => {
-		const { dependencies, sendAppNotification } = createDependencies();
+		const { dependencies, sendBrazeTestPush } = createDependencies();
 		const request: NotificationTestSendRequest = {
 			idempotencyKey: 'test-push-only',
 			sender: 'dispatch-test',
@@ -63,7 +63,7 @@ describe('dispatchNotificationTest', () => {
 			content: { items: { push: pushItem } },
 			channels: {
 				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+					audience: { type: 'email', items: ['editor@theguardian.com'] },
 					compose: { use: 'push' },
 				},
 			},
@@ -76,7 +76,7 @@ describe('dispatchNotificationTest', () => {
 		);
 
 		expect(outcomes.newsletter).toEqual([]);
-		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+		expect(sendBrazeTestPush).toHaveBeenCalledTimes(1);
 		expect(outcomes.appPush).toHaveLength(1);
 	});
 
@@ -86,7 +86,8 @@ describe('dispatchNotificationTest', () => {
 			renderEmail,
 			registerBrazeTestEmailRecipients,
 			sendBrazeTestEmail,
-			sendAppNotification,
+			findBrazePushRecipient,
+			sendBrazeTestPush,
 		} = createDependencies();
 		const request: NotificationTestSendRequest = {
 			idempotencyKey: 'test-dry-run',
@@ -100,7 +101,7 @@ describe('dispatchNotificationTest', () => {
 					compose: { items: ['news'], subject: '[TEST] Briefing' },
 				},
 				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+					audience: { type: 'email', items: ['editor@theguardian.com'] },
 					compose: { use: 'push' },
 				},
 			},
@@ -116,14 +117,15 @@ describe('dispatchNotificationTest', () => {
 		expect(renderEmail).not.toHaveBeenCalled();
 		expect(registerBrazeTestEmailRecipients).not.toHaveBeenCalled();
 		expect(sendBrazeTestEmail).not.toHaveBeenCalled();
-		expect(sendAppNotification).not.toHaveBeenCalled();
+		expect(findBrazePushRecipient).not.toHaveBeenCalled();
+		expect(sendBrazeTestPush).not.toHaveBeenCalled();
 	});
 
 	it('surfaces a provider failure while still attempting the other channel', async () => {
-		const { dependencies, sendBrazeTestEmail, sendAppNotification } =
+		const { dependencies, sendBrazeTestEmail, sendBrazeTestPush } =
 			createDependencies();
-		const pushError = new AppNotificationApiError('timeout');
-		sendAppNotification.mockRejectedValue(pushError);
+		const pushError = new BrazeApiError('test push send', 'timeout');
+		sendBrazeTestPush.mockRejectedValue(pushError);
 		const request: NotificationTestSendRequest = {
 			idempotencyKey: 'test-combined',
 			sender: 'dispatch-test',
@@ -136,7 +138,7 @@ describe('dispatchNotificationTest', () => {
 					compose: { items: ['news'], subject: '[TEST] Briefing' },
 				},
 				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+					audience: { type: 'email', items: ['editor@theguardian.com'] },
 					compose: { use: 'push' },
 				},
 			},
@@ -155,6 +157,6 @@ describe('dispatchNotificationTest', () => {
 
 		// Neither channel aborts the other: the newsletter is still attempted.
 		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(1);
-		expect(sendAppNotification).toHaveBeenCalledTimes(1);
+		expect(sendBrazeTestPush).toHaveBeenCalledTimes(1);
 	});
 });

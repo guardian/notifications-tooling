@@ -3,7 +3,7 @@ export const notificationTestsPath = {
 	post: {
 		summary: 'Send a notification to explicit test recipients',
 		description:
-			'Sends immediately to direct test recipients. Segment audiences and scheduling are not accepted. App-push tests may only target the internal test topic. A dry run validates and renders content without registering recipients or sending messages.',
+			'Sends immediately to direct test recipients. Segment audiences and scheduling are not accepted. For app-push, each email is resolved to its most recently active push-capable Braze profile. A dry run validates and renders content without looking up recipients or sending messages.',
 		security: [{ pandaCookie: [] }],
 		requestBody: {
 			required: true,
@@ -50,7 +50,7 @@ export const notificationTestsPath = {
 			},
 			'422': {
 				description:
-					'The request body failed semantic validation or the article could not be rendered.',
+					'The request body failed semantic validation, the article could not be rendered, or no push-capable Braze profile matched a recipient.',
 				content: {
 					'application/json': {
 						schema: {
@@ -61,7 +61,7 @@ export const notificationTestsPath = {
 			},
 			'502': {
 				description:
-					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) rejected the request or returned an invalid response.',
+					'An upstream provider (email rendering or Braze) rejected the request or returned an invalid response.',
 				content: {
 					'application/json': {
 						schema: {
@@ -72,7 +72,7 @@ export const notificationTestsPath = {
 			},
 			'504': {
 				description:
-					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) timed out.',
+					'An upstream provider (email rendering or Braze) timed out.',
 				content: {
 					'application/json': {
 						schema: {

@@ -15,6 +15,7 @@ import { Editions } from './Editions';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
+import { TestAppPushForm } from './TestAppPushForm';
 
 interface AppPreviewSectionProps {
 	topicTypes: TopicTypeOption[];
@@ -69,6 +70,10 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 			<AndroidAlertPreview
 				alertType={alertTypeLabel}
 				headline={headline}
+				thumbnailUrl={thumbnailUrl}
+			/>
+			<TestAppPushForm
+				title={alertTypeLabel}
 				thumbnailUrl={thumbnailUrl}
 			/>
 		</PreviewSection>

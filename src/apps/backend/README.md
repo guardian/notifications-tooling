@@ -11,8 +11,8 @@ using the `composer` AWS profile. Fetch fresh Composer credentials through Janus
 before starting the backend. An ignored `.env.local` file may define any of the
 variables in `.env.example` when a local override is needed.
 
-- `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send`, `users.track`, and
-  `messages.send` permissions.
+- `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send`, `users.track`,
+  `users.export.ids`, and `messages.send` permissions.
 - `BRAZE_REST_ENDPOINT` is the Braze REST instance URL.
 - `BRAZE_APP_ID` identifies the Braze app used for direct test emails.
 - `BRAZE_TEST_EMAIL_FROM` is the approved sender used for direct test emails. It
@@ -43,6 +43,16 @@ and the `dispatch_access` permission; the recipient policy must be reviewed
 before production. Each selected variant is rendered and sent through Braze's
 `/messages/send` endpoint; the production campaign is not triggered. Recipient
 addresses are normalized to lowercase.
+
+## Test app-push behaviour
+
+`POST /v1/notification-tests` also accepts explicit email recipients for an
+app-push plan. Each email is looked up through Braze's `/users/export/ids`
+endpoint. Profiles without an external user ID or push token are ignored; when
+multiple push-capable profiles match, the profile with the most recent app
+activity is selected. The resolved external user IDs receive both Apple and
+Android payloads through Braze's `/messages/send` endpoint. Production
+app-pushes continue to use mobile-n10n.
 After all selected variants render, the client creates or updates the
 stable alias-only test profiles once under the `dispatch-tool-test-email` alias
 label through `/users/track`, then sends each rendered variant. Braze matches

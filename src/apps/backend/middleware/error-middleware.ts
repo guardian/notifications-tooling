@@ -1,6 +1,7 @@
 import {
 	AppNotificationApiError,
 	BrazeApiError,
+	BrazePushRecipientNotFoundError,
 	EmailRenderingError,
 } from '@services';
 import type { ErrorRequestHandler } from 'express';
@@ -30,6 +31,14 @@ export const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
 		res.status(err.reason === 'timeout' ? 504 : 502).json({
 			error: 'braze_request_failed',
 			message: 'Braze could not complete the request.',
+		});
+		return;
+	}
+
+	if (err instanceof BrazePushRecipientNotFoundError) {
+		res.status(422).json({
+			error: 'braze_push_recipient_not_found',
+			message: 'No push-capable Braze profile matched a recipient.',
 		});
 		return;
 	}

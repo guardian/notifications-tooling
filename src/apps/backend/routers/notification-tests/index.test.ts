@@ -188,7 +188,7 @@ describe('POST /v1/notification-tests', () => {
 		}
 	});
 
-	it('accepts and dispatches an internal test app-push', async () => {
+	it('accepts and dispatches an app-push to explicit test recipients', async () => {
 		const dispatchRequest = mock(() =>
 			Promise.resolve({ newsletter: [], appPush: [] }),
 		);
@@ -218,8 +218,8 @@ describe('POST /v1/notification-tests', () => {
 				channels: {
 					'app-push': {
 						audience: {
-							type: 'topic',
-							items: [{ type: 'test', name: 'test' }],
+							type: 'email',
+							items: ['editor@theguardian.com'],
 						},
 						compose: { use: 'lead' },
 					},

@@ -129,7 +129,10 @@ const pushTestRequest = (overrides: Record<string, unknown> = {}) => ({
 	content: { items: { lead: pushItem() } },
 	channels: {
 		[NotificationChannel.AppPushNotification]: {
-			audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+			audience: {
+				type: 'email',
+				items: ['notifications.test@theguardian.com'],
+			},
 			compose: { use: 'lead' },
 		},
 	},
@@ -1145,7 +1148,7 @@ describe('notificationTestSendRequestSchema', () => {
 		).toContain('options');
 	});
 
-	it('accepts an app-push test to the internal test topic', () => {
+	it('accepts an app-push test to an explicit email recipient', () => {
 		const result =
 			notificationTestSendRequestSchema.safeParse(pushTestRequest());
 		expect(result.success).toBe(true);
@@ -1166,7 +1169,10 @@ describe('notificationTestSendRequestSchema', () => {
 					compose: { items: ['news'], subject: '[TEST] Briefing' },
 				},
 				[NotificationChannel.AppPushNotification]: {
-					audience: { type: 'topic', items: [{ type: 'test', name: 'test' }] },
+					audience: {
+						type: 'email',
+						items: ['notifications.test@theguardian.com'],
+					},
 					compose: { use: 'push' },
 				},
 			},
@@ -1174,23 +1180,27 @@ describe('notificationTestSendRequestSchema', () => {
 		expect(result.success).toBe(true);
 	});
 
-	it('rejects a production topic type in an app-push test', () => {
+	it('rejects a topic audience in an app-push test', () => {
 		const request = pushTestRequest();
-		request.channels[NotificationChannel.AppPushNotification].audience.items = [
-			{ type: 'breaking-news', name: 'uk' },
-		];
+		const appPushPlan = request.channels[
+			NotificationChannel.AppPushNotification
+		] as { audience: unknown };
+		appPushPlan.audience = {
+			type: 'topic',
+			items: [{ type: 'breaking-news', name: 'uk' }],
+		};
 		expect(rejectionPathsOf(request)).toContain(
-			'channels/app-push/audience/items/0/type',
+			'channels/app-push/audience/type',
 		);
 	});
 
-	it('rejects an unknown edition for the internal test topic', () => {
+	it('rejects an invalid app-push test recipient email', () => {
 		const request = pushTestRequest();
 		request.channels[NotificationChannel.AppPushNotification].audience.items = [
-			{ type: 'test', name: 'ghost' },
+			'not-an-email',
 		];
 		expect(rejectionPathsOf(request)).toContain(
-			'channels/app-push/audience/items/0/name',
+			'channels/app-push/audience/items/0',
 		);
 	});
 

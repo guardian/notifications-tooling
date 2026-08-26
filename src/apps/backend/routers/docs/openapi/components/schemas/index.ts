@@ -1,6 +1,7 @@
 import { acceptedNotificationSchema } from './accepted-notification';
 import { acceptedTestNotificationSchema } from './accepted-test-notification';
 import { articleResolutionErrorSchema } from './article-resolution-error';
+import { brazePushRecipientErrorSchema } from './braze-push-recipient-error';
 import {
 	channelAudiencesSchema,
 	emailChannelConfigSchema,
@@ -41,6 +42,7 @@ export const schemas = {
 	NotificationValidationIssue: notificationValidationIssueSchema,
 	NotificationValidationError: notificationValidationErrorSchema,
 	EmailRenderingContentError: emailRenderingContentErrorSchema,
+	BrazePushRecipientError: brazePushRecipientErrorSchema,
 	NotificationUnprocessableError: notificationUnprocessableErrorSchema,
 	NotificationProviderError: notificationProviderErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,

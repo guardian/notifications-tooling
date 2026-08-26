@@ -1,5 +1,9 @@
 import { describe, expect, it, mock } from 'bun:test';
-import { BrazeApiError, EmailRenderingError } from '@services';
+import {
+	BrazeApiError,
+	BrazePushRecipientNotFoundError,
+	EmailRenderingError,
+} from '@services';
 import type { Request, Response } from 'express';
 import { errorMiddleware } from './error-middleware';
 
@@ -97,6 +101,23 @@ describe('errorMiddleware', () => {
 		expect(json).toHaveBeenCalledWith({
 			error: 'braze_request_failed',
 			message: 'Braze could not complete the request.',
+		});
+	});
+
+	it('returns an unprocessable error when no push-capable Braze profile matches', () => {
+		const { response, status, json } = createResponse();
+
+		errorMiddleware(
+			new BrazePushRecipientNotFoundError('editor@theguardian.com'),
+			request,
+			response,
+			mock(() => undefined),
+		);
+
+		expect(status).toHaveBeenCalledWith(422);
+		expect(json).toHaveBeenCalledWith({
+			error: 'braze_push_recipient_not_found',
+			message: 'No push-capable Braze profile matched a recipient.',
 		});
 	});
 

@@ -25,6 +25,7 @@ import { articleFixture } from '../mocks/capi-fixtures';
 import { channelConstraints } from '../mocks/handlers/channels';
 import { mockCapiFetch } from '../mocks/mock-capi-fetch';
 import { mockRequestEmailHtml } from '../mocks/mock-fetch-email';
+import { mockRequestTestAppPushSend } from '../mocks/mock-request-test-app-push-send';
 import { mockRequestTestEmailSend } from '../mocks/mock-request-test-email-send';
 import { mockSendNotification } from '../mocks/mock-send-notification';
 import { parseHtml } from '../util/html-helpers';
@@ -84,6 +85,7 @@ export const WithNotificationContext = (
 		sendNotification = mockSendNotification,
 		requestEmailHtml = mockRequestEmailHtml,
 		requestTestEmailSend = mockRequestTestEmailSend,
+		requestTestAppPushSend = mockRequestTestAppPushSend,
 	} = functions;
 
 	const context = (
@@ -96,6 +98,7 @@ export const WithNotificationContext = (
 				sendNotification,
 				requestEmailHtml,
 				requestTestEmailSend,
+				requestTestAppPushSend,
 			}}
 		>
 			{reactNode}
