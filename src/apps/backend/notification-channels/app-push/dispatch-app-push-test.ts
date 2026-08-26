@@ -85,9 +85,7 @@ export const dispatchAppPushTest = async (
 			title: item.title,
 			body: item.body,
 			link: item.link,
-			appleDeepLink: contentApiId
-				? `gnmguardian://${contentApiId}`
-				: item.link,
+			appleDeepLink: contentApiId ? `gnmguardian://${contentApiId}` : item.link,
 			imageUrl: item.media?.thumbnailUrl ?? item.media?.imageUrl,
 		});
 		return {

@@ -404,9 +404,7 @@ export const sendBrazeTestPush = async ({
 						alert: body,
 						custom_uri: link,
 						use_webview: false,
-						...(imageUrl
-							? { extra: { appboy_image_url: imageUrl } }
-							: {}),
+						...(imageUrl ? { extra: { appboy_image_url: imageUrl } } : {}),
 					},
 				},
 			}),

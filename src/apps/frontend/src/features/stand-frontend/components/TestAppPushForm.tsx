@@ -27,7 +27,9 @@ export const TestAppPushForm = ({
 		NotificationFormContext,
 	);
 	const { user } = useContext(ConfigContext) ?? {};
-	const headline = useWatch<AppAlertFormValues, 'headline'>({ name: 'headline' });
+	const headline = useWatch<AppAlertFormValues, 'headline'>({
+		name: 'headline',
+	});
 	const [emailInput, setEmailInput] = useState(user?.email ?? '');
 	const [sendInProgress, setSendInProgress] = useState(false);
 	const [sent, setSent] = useState(false);

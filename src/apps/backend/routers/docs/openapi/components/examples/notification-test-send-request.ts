@@ -1,7 +1,4 @@
-import {
-	newsletterSegmentIds,
-	NotificationChannel,
-} from '@config';
+import { newsletterSegmentIds, NotificationChannel } from '@config';
 
 /**
  * Named request-body examples for `POST /v1/notification-tests`, referenced from

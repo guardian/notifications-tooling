@@ -72,10 +72,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 				headline={headline}
 				thumbnailUrl={thumbnailUrl}
 			/>
-			<TestAppPushForm
-				title={alertTypeLabel}
-				thumbnailUrl={thumbnailUrl}
-			/>
+			<TestAppPushForm title={alertTypeLabel} thumbnailUrl={thumbnailUrl} />
 		</PreviewSection>
 	);
 };

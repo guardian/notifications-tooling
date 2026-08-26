@@ -339,10 +339,7 @@ describe('findBrazePushRecipient', () => {
 					{
 						external_id: 'recent-user',
 						push_tokens: [{ token: 'recent-token' }],
-						apps: [
-							{ last_used: null },
-							{ last_used: '2026-08-20T12:00:00Z' },
-						],
+						apps: [{ last_used: null }, { last_used: '2026-08-20T12:00:00Z' }],
 					},
 				],
 			}),
@@ -435,8 +432,7 @@ describe('sendBrazeTestPush', () => {
 						android_push: {
 							title: 'Breaking news',
 							alert: 'Lead summary',
-							custom_uri:
-								'https://www.theguardian.com/world/2026/aug/24/story',
+							custom_uri: 'https://www.theguardian.com/world/2026/aug/24/story',
 							use_webview: false,
 							extra: {
 								appboy_image_url: 'https://media.guim.co.uk/lead.jpg',

@@ -3,7 +3,12 @@ import { NotificationChannel } from '@config';
 import { BrazeApiError } from '@services';
 import type { NotificationTestSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import { dispatchNotificationTest } from './dispatch-notification-test';
-import { createDependencies, newsletterItem, pushItem, testId } from './test-support';
+import {
+	createDependencies,
+	newsletterItem,
+	pushItem,
+	testId,
+} from './test-support';
 
 describe('dispatchNotificationTest', () => {
 	it('dispatches newsletter and app-push test channels together', async () => {

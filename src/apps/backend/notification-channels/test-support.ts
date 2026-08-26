@@ -55,7 +55,11 @@ export const createDependencies = () => {
 		Promise.resolve({ message: 'success', dispatch_id: 'test-dispatch-123' }),
 	);
 	const findBrazePushRecipient = mock(
-		({ recipientEmail }: { recipientEmail: string }): Promise<string | undefined> =>
+		({
+			recipientEmail,
+		}: {
+			recipientEmail: string;
+		}): Promise<string | undefined> =>
 			Promise.resolve(`external-${recipientEmail}`),
 	);
 	const sendBrazeTestPush = mock(() =>

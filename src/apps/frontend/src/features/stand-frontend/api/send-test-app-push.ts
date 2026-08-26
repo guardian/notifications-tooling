@@ -57,12 +57,8 @@ export type TestAppPushRequestFunction = {
 };
 
 export const requestTestAppPushSend: TestAppPushRequestFunction = (request) =>
-	safeFetchJsonAndParse(
-		testAppPushResponseSchema,
-		'/v1/notification-tests',
-		{
-			method: 'POST',
-			body: JSON.stringify(request),
-			headers: { 'Content-Type': 'application/json' },
-		},
-	);
+	safeFetchJsonAndParse(testAppPushResponseSchema, '/v1/notification-tests', {
+		method: 'POST',
+		body: JSON.stringify(request),
+		headers: { 'Content-Type': 'application/json' },
+	});
