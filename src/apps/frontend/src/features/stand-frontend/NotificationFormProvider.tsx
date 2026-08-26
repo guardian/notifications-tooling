@@ -72,11 +72,11 @@ export const NotificationDraftsProvider = ({
 		resolver: zodResolver(
 			createNewsletterFormSchema({
 				subject:
-					newsletterLimits?.compose.subject.editorialLimit ??
-					NEWSLETTER_LIMIT_FALLBACKS.title.editorialLimit,
+					newsletterLimits?.compose.subject.validationCap ??
+					NEWSLETTER_LIMIT_FALLBACKS.title.validationCap,
 				preview:
-					newsletterLimits?.content.body.editorialLimit ??
-					NEWSLETTER_LIMIT_FALLBACKS.body.editorialLimit,
+					newsletterLimits?.content.body.validationCap ??
+					NEWSLETTER_LIMIT_FALLBACKS.body.validationCap,
 			}),
 		),
 	});
@@ -85,8 +85,8 @@ export const NotificationDraftsProvider = ({
 		resolver: zodResolver(
 			createAppAlertFormSchema({
 				headline:
-					appAlertLimits?.content.body.editorialLimit ??
-					APP_ALERT_LIMIT_FALLBACKS.headline.editorialLimit,
+					appAlertLimits?.content.body.validationCap ??
+					APP_ALERT_LIMIT_FALLBACKS.headline.validationCap,
 			}),
 		),
 	});
