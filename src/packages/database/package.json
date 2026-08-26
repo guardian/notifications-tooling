@@ -5,7 +5,7 @@
 	"private": true,
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"test:db": "bun exec 'bun test ./**/*.dbtest.ts'",
+		"test:db": "bun --env-file=../../../.env --env-file=../../../.env.local exec 'bun test ./**/*.dbtest.ts'",
 		"db:migration:create": "bun run scripts/env/development/create-db-migration.ts",
 		"db:migration:apply": "bun x drizzle-kit migrate --config=drizzle.config.ts",
 		"db:migration:tunnel": "bun run scripts/env/remote/start-remote-db-port-forward.ts",

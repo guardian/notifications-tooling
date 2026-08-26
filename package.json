@@ -30,8 +30,8 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"typecheck": "bun run --filter '*' typecheck",
-		"db:start": "docker compose --env-file src/packages/database/.env -f docker/docker-compose.local.yml up -d --wait",
-		"db:stop": "docker compose --env-file src/packages/database/.env -f docker/docker-compose.local.yml down",
+		"db:start": "bash scripts/db-compose.sh up -d --wait",
+		"db:stop": "bash scripts/db-compose.sh down",
 		"storybook": "bun run --filter='frontend' storybook"
 	},
 	"devDependencies": {

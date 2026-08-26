@@ -5,9 +5,10 @@ set -euo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 database_dir="$(cd "$script_dir/../../.." && pwd)"
 repo_root="$(cd "$script_dir/../../../../../.." && pwd)"
-compose_file="$repo_root/docker/docker-compose.local.yml"
-compose_env_file="$database_dir/.env"
-compose_env_example_file="$database_dir/.env.example"
+compose_helper="$repo_root/scripts/db-compose.sh"
+env_file="$repo_root/.env"
+env_local_file="$repo_root/.env.local"
+env_example_file="$repo_root/.env.example"
 bun_bin="${BUN_BIN:-$(command -v bun 2>/dev/null || true)}"
 
 fail() {
@@ -17,23 +18,23 @@ fail() {
 
 cd "$repo_root"
 
-if [ ! -f "$compose_env_file" ]; then
-	if [ ! -f "$compose_env_example_file" ]; then
-		fail "Missing $compose_env_example_file; cannot create $compose_env_file."
+if [ ! -f "$env_file" ] && [ ! -f "$env_local_file" ]; then
+	if [ ! -f "$env_example_file" ]; then
+		fail "Missing $env_example_file; cannot create $env_file."
 	fi
 
-	echo "No .env file found, creating one from .env.example..."
-	cp "$compose_env_example_file" "$compose_env_file"
+	echo "No .env or .env.local found, creating .env from .env.example..."
+	cp "$env_example_file" "$env_file"
 fi
 
 echo "Recreating local database..."
-docker compose --env-file "$compose_env_file" -f "$compose_file" down -v
+bash "$compose_helper" down -v
 
 echo "Removing database files..."
 rm -rf "$repo_root/docker/postgres_data"
 
 echo "Starting database..."
-docker compose --env-file "$compose_env_file" -f "$compose_file" up -d --wait
+bash "$compose_helper" up -d --wait
 
 echo "Applying migrations..."
 cd "$database_dir"

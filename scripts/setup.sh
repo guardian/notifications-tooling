@@ -4,9 +4,9 @@ set -e
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 ROOT_DIR=$DIR/..
-DATABASE_DIR="$ROOT_DIR/src/packages/database"
-COMPOSE_ENV_FILE="$DATABASE_DIR/.env"
-COMPOSE_ENV_EXAMPLE_FILE="$DATABASE_DIR/.env.example"
+ENV_FILE="$ROOT_DIR/.env"
+ENV_LOCAL_FILE="$ROOT_DIR/.env.local"
+ENV_EXAMPLE_FILE="$ROOT_DIR/.env.example"
 
 setupNginx() {
 	echo "Setting up Nginx"
@@ -20,14 +20,14 @@ setupBun() {
 
 setupPostgres() {
 	echo "Setting up Postgres"
-	if [ ! -f "$COMPOSE_ENV_FILE" ]; then
-		if [ ! -f "$COMPOSE_ENV_EXAMPLE_FILE" ]; then
-			echo "Missing $COMPOSE_ENV_EXAMPLE_FILE; cannot create $COMPOSE_ENV_FILE." >&2
+	if [ ! -f "$ENV_FILE" ] && [ ! -f "$ENV_LOCAL_FILE" ]; then
+		if [ ! -f "$ENV_EXAMPLE_FILE" ]; then
+			echo "Missing $ENV_EXAMPLE_FILE; cannot create $ENV_FILE." >&2
 			exit 1
 		fi
 
-		echo "No .env found, creating one from .env.example..."
-		cp "$COMPOSE_ENV_EXAMPLE_FILE" "$COMPOSE_ENV_FILE"
+		echo "No .env or .env.local found, creating .env from .env.example..."
+		cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
 	fi
 	bun run db:start
 }

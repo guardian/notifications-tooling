@@ -11,14 +11,15 @@ configuration, and package-level database scripts.
 
 ## Environment
 
-Bun and local Docker load environment variables from `.env` in this package
-directory.
+Bun, Drizzle Kit, and local Docker load environment variables from the root
+`.env` and `.env.local` files. When both exist, `.env.local` takes precedence,
+matching Bun's loading order.
 
 This applies when commands are run directly from `src/packages/database` and
 when they are run from the repository root with Bun workspace filtering, for
 example `bun run --filter @database db:reset`.
 
-If this file does not exist, the setup script will try to create it by copying
+If neither file exists, the setup script will create `.env` by copying the root
 `.env.example`.
 
 Runtime and tooling load database configuration differently:
@@ -26,9 +27,9 @@ Runtime and tooling load database configuration differently:
 - The application runtime uses `runtime-db-config.ts`. In Lambda it fetches
   managed database credentials from Secrets Manager; outside Lambda it falls
   back to the local `DB_*` environment variables.
-- Drizzle CLI tooling uses `drizzle.config.ts`, which always reads the local
-  `DB_*` environment variables synchronously. This keeps migration commands
-  compatible with Drizzle's config loader in local development and CI.
+- Drizzle CLI tooling uses `drizzle.config.ts`, which loads the root env files
+  itself and reads the local `DB_*` environment variables synchronously. This
+  keeps migration commands working regardless of how Drizzle Kit is launched.
 
 ## Database migrations
 
