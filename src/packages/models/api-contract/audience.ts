@@ -1,4 +1,28 @@
+import type { Schema } from 'zod';
 import z from 'zod';
+
+function filterInvalidMembers<T>(
+	schema: Schema<T>,
+	warning = 'invalid member of array filtered out',
+) {
+	return (val: unknown) => {
+		if (schema.array().safeParse(val).success) {
+			return val;
+		}
+		if (!Array.isArray(val)) {
+			return val;
+		}
+		const filtered = val.flatMap((member) => {
+			const parseMember = schema.safeParse(member);
+			if (!parseMember.success) {
+				console.warn(warning, member);
+				return [];
+			}
+			return parseMember.data;
+		});
+		return filtered;
+	};
+}
 
 const newsletterSegmentId = z.enum(['UK', 'US', 'AU']);
 export type NewsletterSegmentId = z.infer<typeof newsletterSegmentId>;
@@ -33,7 +57,14 @@ export type TopicTypeEditionOption = z.infer<
 const appAlertTopicOptionSchema = z.object({
 	id: z.string(),
 	label: z.string(),
-	editions: topicTypeEditionOptionSchema.array(),
+	editions: z.preprocess(
+		// if the editions contain invalid members, filter those out rather than failing the whole response
+		filterInvalidMembers(
+			topicTypeEditionOptionSchema,
+			'invalid app alert topic edition option filtered out',
+		),
+		topicTypeEditionOptionSchema.array(),
+	),
 });
 export type AppAlertTopicOption = z.infer<typeof appAlertTopicOptionSchema>;
 
@@ -47,7 +78,13 @@ export const channelAudienceResponseSchema = z.object({
 		.object({
 			newsletter: z
 				.object({
-					segments: z.array(newsletterEditionOptionSchema),
+					segments: z.preprocess(
+						filterInvalidMembers(
+							newsletterEditionOptionSchema,
+							'invalid newsletter edition option filtered out',
+						),
+						z.array(newsletterEditionOptionSchema),
+					),
 				})
 				.loose(),
 			'app-push': z
