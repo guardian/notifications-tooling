@@ -164,7 +164,8 @@ describe('GET /v1/channels/audiences', () => {
 		const body = (await response.json()) as typeof channelAudiences;
 
 		expect(
-			body.channels[NotificationChannel.AppPushNotification].topicTypes,
+			body.channels[NotificationChannel.AppPushNotification]
+				.topicTypes as unknown,
 		).toEqual(
 			Object.entries(appPushTopicTypes).map(([id, { label, editions }]) => ({
 				id,

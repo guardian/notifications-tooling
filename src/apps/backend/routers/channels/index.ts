@@ -7,7 +7,13 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import type { NewsletterSegment, NewsletterSegmentId } from '@models';
+import type {
+	AppAlertTopicEditionId,
+	AppAlertTopicOption,
+	NewsletterSegment,
+	NewsletterSegmentId,
+	TopicTypeEditionOption,
+} from '@models';
 import { UserPermissions } from '@models';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
@@ -61,10 +67,13 @@ export const channelConstraints = {
 } as const;
 
 /** Reduces a segment config record to the public `{ id, label }` pairs. */
-const toSegmentOptions = (
-	segments: Record<string, { label: string }>,
-): Array<{ id: string; label: string }> =>
-	Object.entries(segments).map(([id, { label }]) => ({ id, label }));
+const toAppAlertTopicSegmentOptions = (
+	segments: Record<AppAlertTopicEditionId, { label: string }>,
+): TopicTypeEditionOption[] =>
+	Object.entries(segments).map(([id, { label }]) => ({
+		id: id as AppAlertTopicEditionId,
+		label,
+	}));
 
 /** Reduces a segment config record to the public `{ id, label }` pairs. */
 const toNewsletterSegmentOptions = (
@@ -85,15 +94,11 @@ const toTopicTypeOptions = (
 		string,
 		{ label: string; editions: Record<string, { label: string }> }
 	>,
-): Array<{
-	id: string;
-	label: string;
-	editions: Array<{ id: string; label: string }>;
-}> =>
+): AppAlertTopicOption[] =>
 	Object.entries(topicTypes).map(([id, { label, editions }]) => ({
 		id,
 		label,
-		editions: toSegmentOptions(editions),
+		editions: toAppAlertTopicSegmentOptions(editions),
 	}));
 
 /**
