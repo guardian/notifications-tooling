@@ -355,6 +355,9 @@ describe('POST /v1/notifications (real Postgres)', () => {
 const daysAgo = (days: number): Date =>
 	new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
+/** The `since` cut-off (Unix seconds) used by the list-endpoint tests. */
+const sinceParam = Math.floor(daysAgo(14).getTime() / 1000);
+
 describe('GET /v1/notifications (real Postgres)', () => {
 	type ListResponse = {
 		total: number;
@@ -363,7 +366,7 @@ describe('GET /v1/notifications (real Postgres)', () => {
 		notifications: Array<{ id: string; dispatches?: unknown }>;
 	};
 
-	it('lists notifications from the last 14 days, newest first, without dispatches', async () => {
+	it('lists notifications at or after the since cut-off, newest first, without dispatches', async () => {
 		const recent = await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(1),
@@ -373,13 +376,15 @@ describe('GET /v1/notifications (real Postgres)', () => {
 			...buildNotification(),
 			createdAt: daysAgo(13),
 		});
-		// Older than the 14-day window: excluded from the list and the total.
+		// Created before the cut-off: excluded from the list and the total.
 		await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(20),
 		});
 
-		const response = await fetch(`${baseUrl}/v1/notifications`);
+		const response = await fetch(
+			`${baseUrl}/v1/notifications?since=${sinceParam}`,
+		);
 
 		expect(response.status).toBe(200);
 		const body = (await response.json()) as ListResponse;
@@ -395,7 +400,7 @@ describe('GET /v1/notifications (real Postgres)', () => {
 		expect(body.notifications[0]).not.toHaveProperty('dispatches');
 	});
 
-	it('paginates with limit and offset while reporting the full window total', async () => {
+	it('paginates with limit and offset while reporting the full cut-off total', async () => {
 		const first = await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(1),
@@ -410,7 +415,9 @@ describe('GET /v1/notifications (real Postgres)', () => {
 		});
 
 		const firstPage = (await (
-			await fetch(`${baseUrl}/v1/notifications?limit=2&offset=0`)
+			await fetch(
+				`${baseUrl}/v1/notifications?limit=2&offset=0&since=${sinceParam}`,
+			)
 		).json()) as ListResponse;
 		expect(firstPage.total).toBe(3);
 		expect(firstPage.limit).toBe(2);
@@ -420,21 +427,25 @@ describe('GET /v1/notifications (real Postgres)', () => {
 		]);
 
 		const secondPage = (await (
-			await fetch(`${baseUrl}/v1/notifications?limit=2&offset=2`)
+			await fetch(
+				`${baseUrl}/v1/notifications?limit=2&offset=2&since=${sinceParam}`,
+			)
 		).json()) as ListResponse;
 		expect(secondPage.total).toBe(3);
 		expect(secondPage.offset).toBe(2);
 		expect(secondPage.notifications.map((row) => row.id)).toEqual([third.id]);
 	});
 
-	it('returns an empty page but the full total when offset exceeds the window', async () => {
+	it('returns an empty page but the full total when offset exceeds the range', async () => {
 		await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(1),
 		});
 
 		const body = (await (
-			await fetch(`${baseUrl}/v1/notifications?limit=10&offset=50`)
+			await fetch(
+				`${baseUrl}/v1/notifications?limit=10&offset=50&since=${sinceParam}`,
+			)
 		).json()) as ListResponse;
 
 		expect(body.total).toBe(1);
@@ -443,7 +454,7 @@ describe('GET /v1/notifications (real Postgres)', () => {
 
 	it('rejects an invalid limit with a 400', async () => {
 		const response = await fetch(
-			`${baseUrl}/v1/notifications?limit=nope&offset=0`,
+			`${baseUrl}/v1/notifications?limit=nope&offset=0&since=${sinceParam}`,
 		);
 
 		expect(response.status).toBe(400);

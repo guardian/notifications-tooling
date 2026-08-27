@@ -1,7 +1,7 @@
 /**
- * The paginated `GET /v1/notifications` response: a page of notifications from
- * the last 14 days plus the total count within that window. Referenced via
- * `#/components/schemas/NotificationList`.
+ * The paginated `GET /v1/notifications` response: a page of notifications
+ * created at or after the requested `since` cut-off plus the total count within
+ * that range. Referenced via `#/components/schemas/NotificationList`.
  */
 export const notificationListSchema = {
 	type: 'object',
@@ -10,7 +10,7 @@ export const notificationListSchema = {
 		total: {
 			type: 'integer',
 			description:
-				'The number of notifications created within the last 14 days, ignoring pagination.',
+				'The number of notifications created at or after the `since` cut-off, ignoring pagination.',
 		},
 		limit: {
 			type: 'integer',

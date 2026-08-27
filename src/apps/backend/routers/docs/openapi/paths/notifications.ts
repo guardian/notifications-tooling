@@ -9,9 +9,17 @@ export const notificationsPath = {
 	get: {
 		summary: 'List recent notifications',
 		description:
-			'Returns notifications created within the last 14 days, newest first, without their dispatch outcomes. `total` reports the full count within that window regardless of pagination. `limit` and `offset` are all-or-nothing: supply both or neither.',
+			'Returns notifications created at or after the required `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. `total` reports the full count at or after that cut-off regardless of pagination. `limit` and `offset` are all-or-nothing: supply both or neither.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
+			{
+				name: 'since',
+				in: 'query',
+				required: true,
+				description:
+					'Cut-off as a Unix timestamp in seconds. Only notifications created at or after this instant are returned.',
+				schema: { type: 'integer', minimum: 0 },
+			},
 			{
 				name: 'limit',
 				in: 'query',
@@ -25,14 +33,14 @@ export const notificationsPath = {
 				in: 'query',
 				required: false,
 				description:
-					'Number of notifications to skip before the page. Defaults to 0; must be sent together with `limit`. An offset past the end of the window returns an empty page.',
+					'Number of notifications to skip before the page. Defaults to 0; must be sent together with `limit`. An offset past the end of the range returns an empty page.',
 				schema: { type: 'integer', minimum: 0, default: 0 },
 			},
 		],
 		responses: {
 			'200': {
 				description:
-					'A page of notifications from the last 14 days plus the total count within that window.',
+					'A page of notifications created at or after the `since` cut-off plus the total count within that range.',
 				content: {
 					'application/json': {
 						schema: { $ref: '#/components/schemas/NotificationList' },

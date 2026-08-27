@@ -3,15 +3,23 @@ import { z } from 'zod';
 const defaultLimit = 10;
 const defaultOffset = 0;
 
+/** Validates a Unix timestamp (seconds) and decodes it to a `Date`. */
+const epochSecondsToDate = z.codec(z.coerce.number().int().min(0), z.date(), {
+	decode: (seconds) => new Date(seconds * 1000),
+	encode: (date) => Math.floor(date.getTime() / 1000),
+});
+
 /**
- * Pagination for `GET /v1/notifications`. Query values arrive as strings, so
- * both params are coerced. `limit` and `offset` are all-or-nothing: supply both
- * or neither. When omitted they default to limit 10 / offset 0. An `offset`
- * past the end of the window yields an empty page — `total` still reports the
- * full 14-day count.
+ * Query for `GET /v1/notifications`. Values arrive as strings, so all params
+ * are coerced. `since` is required: a Unix timestamp (seconds) acting as the
+ * cut-off — only notifications created at or after it are returned. `limit` and
+ * `offset` are all-or-nothing: supply both or neither. When omitted they default
+ * to limit 10 / offset 0. An `offset` past the end of the range yields an empty
+ * page — `total` still reports the full count at or after `since`.
  */
 export const notificationListQuerySchema = z
 	.strictObject({
+		since: epochSecondsToDate,
 		limit: z.coerce.number().int().min(1).max(50).optional(),
 		offset: z.coerce.number().int().min(0).optional(),
 	})
@@ -23,6 +31,7 @@ export const notificationListQuerySchema = z
 		},
 	)
 	.transform((query) => ({
+		since: query.since,
 		limit: query.limit ?? defaultLimit,
 		offset: query.offset ?? defaultOffset,
 	}));

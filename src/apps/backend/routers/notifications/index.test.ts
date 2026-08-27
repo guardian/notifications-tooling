@@ -632,6 +632,7 @@ const storedListPage = (): NotificationListPage => ({
 
 const startListServer = (
 	listNotifications: (options: {
+		since?: Date;
 		limit?: number;
 		offset?: number;
 	}) => Promise<NotificationListPage>,
@@ -677,11 +678,15 @@ describe('GET /v1/notifications', () => {
 
 			try {
 				const response = await fetch(
-					`${listServer.baseUrl}/v1/notifications?limit=5&offset=2`,
+					`${listServer.baseUrl}/v1/notifications?limit=5&offset=2&since=1700000000`,
 				);
 
 				expect(response.status).toBe(200);
-				expect(listNotifications).toHaveBeenCalledWith({ limit: 5, offset: 2 });
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 5,
+					offset: 2,
+				});
 
 				const body = (await response.json()) as {
 					total: number;
@@ -711,10 +716,13 @@ describe('GET /v1/notifications', () => {
 			const listServer = await startListServer(listNotifications);
 
 			try {
-				const response = await fetch(`${listServer.baseUrl}/v1/notifications`);
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?since=1700000000`,
+				);
 
 				expect(response.status).toBe(200);
 				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
 					limit: 10,
 					offset: 0,
 				});
@@ -738,7 +746,7 @@ describe('GET /v1/notifications', () => {
 
 			try {
 				const response = await fetch(
-					`${listServer.baseUrl}/v1/notifications?limit=51&offset=0`,
+					`${listServer.baseUrl}/v1/notifications?limit=51&offset=0&since=1700000000`,
 				);
 
 				expect(response.status).toBe(400);
@@ -756,8 +764,24 @@ describe('GET /v1/notifications', () => {
 
 			try {
 				const response = await fetch(
-					`${listServer.baseUrl}/v1/notifications?limit=5`,
+					`${listServer.baseUrl}/v1/notifications?limit=5&since=1700000000`,
 				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('bad_request');
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('returns 400 when the required since cut-off is missing', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(`${listServer.baseUrl}/v1/notifications`);
 
 				expect(response.status).toBe(400);
 				const body = (await response.json()) as { error: string };

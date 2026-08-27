@@ -10,18 +10,17 @@ export type NotificationWithDispatches = Notification & {
 	dispatches: NotificationDispatch[];
 };
 
-/** Notifications older than this window are excluded from the list endpoint. */
-const recentNotificationWindowDays = 14;
-
-/** Optional pagination for {@link NotificationsRepository.listRecent}. */
+/** Pagination plus the caller-supplied cut-off for {@link NotificationsRepository.listRecent}. */
 export type ListRecentNotificationsOptions = {
+	/** Only notifications created at or after this instant are returned. */
+	since: Date;
 	limit?: number;
 	offset?: number;
 };
 
 export type NotificationListPage = {
 	notifications: Notification[];
-	/** Rows within the 14-day window, independent of any limit/offset page. */
+	/** Rows created at or after `since`, independent of any limit/offset page. */
 	total: number;
 };
 
@@ -95,18 +94,16 @@ export const createNotificationsRepository = (db: Database) => ({
 	},
 
 	/**
-	 * The notifications created within the last 14 days, newest first. `total`
-	 * counts every row within that window, ignoring the limit/offset page.
+	 * The notifications created at or after `since`, newest first. `total`
+	 * counts every row within that cut-off, ignoring the limit/offset page.
 	 * Dispatch outcomes are intentionally not joined here.
 	 */
 	async listRecent({
+		since,
 		limit,
 		offset,
-	}: ListRecentNotificationsOptions = {}): Promise<NotificationListPage> {
-		const createdSince = new Date(
-			Date.now() - recentNotificationWindowDays * 24 * 60 * 60 * 1000,
-		);
-		const withinWindow = gte(notifications.createdAt, createdSince);
+	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
+		const withinWindow = gte(notifications.createdAt, since);
 
 		const [totals] = await db
 			.select({ total: count() })
