@@ -139,7 +139,11 @@ export const HistoryTab = ({ alerts = [] }: HistoryTabProps) => {
 									>
 										<div css={styles.alert}>
 											{alert.thumbnailUrl ? (
-												<img src={alert.thumbnailUrl} alt="" css={styles.thumbnail} />
+												<img
+													src={alert.thumbnailUrl}
+													alt=""
+													css={styles.thumbnail}
+												/>
 											) : (
 												<div css={styles.thumbnailFallback}>
 													<Typography variant="bodyXs">No image</Typography>
@@ -147,10 +151,15 @@ export const HistoryTab = ({ alerts = [] }: HistoryTabProps) => {
 											)}
 											<div css={styles.alertDetails}>
 												<Link href={alert.href}>{alert.title}</Link>
-												<Typography variant="bodyXs" cssOverrides={styles.channel}>
+												<Typography
+													variant="bodyXs"
+													cssOverrides={styles.channel}
+												>
 													<Icon
 														size="sm"
-														symbol={alert.channel === 'push' ? 'mobile_3' : 'mail'}
+														symbol={
+															alert.channel === 'push' ? 'mobile_3' : 'mail'
+														}
 													/>
 													{getChannelName(alert.channel)} | {alert.alertType}
 												</Typography>
