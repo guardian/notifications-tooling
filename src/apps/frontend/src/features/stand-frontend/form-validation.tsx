@@ -24,13 +24,13 @@ export const parseArticleUrlInputToContentId = (
 
 		if (!hostWhitelist.includes(url.host)) {
 			return {
-				failure: 'not a Guardian URL',
+				failure: 'Not a Guardian URL',
 			};
 		}
 		const pathname = trimTrailingSlash(url.pathname);
 		if (!articleUrlPathPattern.test(pathname)) {
 			return {
-				failure: 'not a Guardian article URL',
+				failure: 'Not a Guardian article URL',
 			};
 		}
 
@@ -48,7 +48,7 @@ export const parseArticleUrlInputToContentId = (
 				webUrl: `${DEFAULT_ORIGIN}/${maybeInputtedArticleId}`,
 			};
 		}
-		return { failure: 'not a valid url' };
+		return { failure: 'Not a valid url' };
 	}
 };
 

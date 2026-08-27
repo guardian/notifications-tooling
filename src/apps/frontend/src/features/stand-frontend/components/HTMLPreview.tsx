@@ -48,7 +48,7 @@ export const HTMLPreview = () => {
 
 	const fetchHtml = useCallback(async () => {
 		if (!webUrl) {
-			return `<div>no article loaded</div>`;
+			return `<div>No article loaded</div>`;
 		}
 		const audience = stringifiedAudience
 			.split(',')
@@ -56,7 +56,7 @@ export const HTMLPreview = () => {
 			.filter((item) => item.length > 0);
 
 		if (audience.length === 0) {
-			return `<div>no audience</div>`;
+			return `<div>Choose an audience in order to preview the newsletter email</div>`;
 		}
 		const result = await requestEmailHtml({
 			article: webUrl,
