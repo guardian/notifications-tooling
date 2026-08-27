@@ -2,9 +2,13 @@ import { css } from '@emotion/react';
 import { baseColors, semanticColors } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import type { ResolvedArticle } from '@models';
 import { useState } from 'react';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 
+interface ToggleSwitchProps {
+	content: ResolvedArticle;
+}
 const ToggleButtonTheme = {
 	baseStyle: (selected: boolean) =>
 		css({
@@ -26,8 +30,11 @@ const ToggleButtonTheme = {
 		color: semanticColors.bg.base,
 	}),
 };
-export const ToggleSwitch = () => {
-	const [selected, setSelection] = useState(false);
+export const ToggleSwitch = ({content}: ToggleSwitchProps) => {
+	const { fields } = content;
+	const thumbnailImage = fields?.thumbnail ?? undefined;
+	const [selected, setSelected] = useState(thumbnailImage !== undefined);
+
 	return (
 		<div
 			css={css({
@@ -39,7 +46,7 @@ export const ToggleSwitch = () => {
 		>
 			<ToggleButton
 				isSelected={selected}
-				onChange={setSelection}
+				onChange={setSelected}
 				css={ToggleButtonTheme.baseStyle(selected)}
 			>
 				{selected && (
