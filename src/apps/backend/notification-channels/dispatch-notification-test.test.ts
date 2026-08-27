@@ -47,10 +47,17 @@ describe('dispatchNotificationTest', () => {
 				variant: 'UK',
 				dispatchId: 'test-dispatch-123',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 		]);
 		expect(outcomes.appPush).toEqual([
-			{ testId, id: anyString, topicType: 'test', status: 'success' },
+			{
+				testId,
+				id: anyString,
+				topicType: 'test',
+				status: 'success',
+				providerStatusCode: 201,
+			},
 		]);
 	});
 
@@ -142,16 +149,15 @@ describe('dispatchNotificationTest', () => {
 			},
 		};
 
-		// The push failure is rethrown so the endpoint returns the documented
-		// 502/504 instead of a false 202.
-		let dispatchError: unknown;
-		try {
-			await dispatchNotificationTest(request, testId, dependencies);
-		} catch (error) {
-			dispatchError = error;
-		}
+		// The push failure is returned (not thrown) so the router can persist every
+		// outcome, then surface the documented 502/504 instead of a false 202.
+		const { error } = await dispatchNotificationTest(
+			request,
+			testId,
+			dependencies,
+		);
 
-		expect(dispatchError).toBe(pushError);
+		expect(error).toBe(pushError);
 
 		// Neither channel aborts the other: the newsletter is still attempted.
 		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(1);

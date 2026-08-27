@@ -51,18 +51,30 @@ export const fetchFailError = new ApiError({
 });
 
 export const acceptedEmailSendResponse: SendNotificationResponse = {
-	status: 'accepted',
-	notificationId: 'email-1234-abcd',
-	plans: [
+	id: 'email-1234-abcd',
+	idempotencyKey: 'email-1234-abcd',
+	kind: 'send',
+	status: 'delivered',
+	sender: 'notifications-tooling-spa/v1',
+	createdByEmail: 'ada.lovelace@guardian.co.uk',
+	dryRun: false,
+	scheduledFor: null,
+	content: {},
+	channels: {},
+	createdAt: '2026-08-25T00:00:00.000Z',
+	updatedAt: '2026-08-25T00:00:00.000Z',
+	dispatches: [
 		{
+			id: 'dispatch-1234-abcd',
 			channel: 'newsletter',
-			planId: 'plan9',
-			status: 'accepted',
+			target: 'UK',
+			status: 'success',
+			providerRef: 'braze-dispatch-1',
+			failureReason: null,
+			providerStatusCode: null,
+			detail: null,
+			createdAt: '2026-08-25T00:00:00.000Z',
+			updatedAt: '2026-08-25T00:00:00.000Z',
 		},
 	],
-	statusUrl: 'example.com/status/email-1234-abcd',
-	cancellable: {
-		cancelUrl: 'example.com/cancel/email-1234-abcd',
-		expiresAt: 0,
-	},
 };

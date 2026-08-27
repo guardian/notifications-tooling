@@ -33,8 +33,8 @@ export type SendAppNotificationRequest = {
 	dryRun?: boolean;
 };
 
-/** mobile-n10n's `POST /push/topic` success body (`PushResult`). */
-export type AppNotificationResult = { id: string };
+/** mobile-n10n's `POST /push/topic` success (`PushResult`) plus its HTTP status. */
+export type AppNotificationResult = { id: string; status: number };
 
 export type AppNotificationFailureReason =
 	'http_error' | 'timeout' | 'network_error' | 'invalid_response';
@@ -153,7 +153,8 @@ export const sendAppNotification = async ({
 	}
 
 	try {
-		return pushResultSchema.parse(await response.json());
+		const result = pushResultSchema.parse(await response.json());
+		return { ...result, status: response.status };
 	} catch (error) {
 		throw new AppNotificationApiError('invalid_response', response.status, {
 			cause: error,

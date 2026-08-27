@@ -1,8 +1,6 @@
-import { randomUUID } from 'node:crypto';
 import {
 	createNotificationsRepository,
 	getDb,
-	type NotificationDispatch,
 	type NotificationWithDispatches,
 } from '@database';
 import { UserPermissions } from '@models';
@@ -17,12 +15,15 @@ import {
 	type DispatchOutcomes,
 } from '../../notification-channels/dispatch-notification';
 import {
+	httpStatusForNotification,
+	type SendNotificationStore,
+	sendNotificationStore,
+	toNotificationResponse,
+} from '../../persistence/persist-notification';
+import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
 } from './schemas/notification-send-request';
-
-/** How long (seconds) an accepted notification may still be cancelled. */
-const CANCELLATION_WINDOW_SECONDS = 5 * 60;
 
 /**
  * Zod issue codes meaning the body is *structurally* wrong (a 400 per the
@@ -109,36 +110,6 @@ export const handleNotificationIdValidationError: ErrorRequestHandler = (
 	});
 };
 
-const serializeDispatch = (dispatch: NotificationDispatch) => ({
-	id: dispatch.id,
-	channel: dispatch.channel,
-	target: dispatch.target,
-	providerRef: dispatch.providerRef,
-	status: dispatch.status,
-	failureReason: dispatch.failureReason,
-	providerStatusCode: dispatch.providerStatusCode,
-	detail: dispatch.detail,
-	createdAt: dispatch.createdAt,
-	updatedAt: dispatch.updatedAt,
-});
-
-/** Shapes a stored notification and its dispatches into the API response. */
-const serializeNotification = (notification: NotificationWithDispatches) => ({
-	id: notification.id,
-	idempotencyKey: notification.idempotencyKey,
-	kind: notification.kind,
-	status: notification.status,
-	sender: notification.sender,
-	createdByEmail: notification.createdByEmail,
-	dryRun: notification.dryRun,
-	scheduledFor: notification.scheduledFor,
-	content: notification.content,
-	channels: notification.channels,
-	createdAt: notification.createdAt,
-	updatedAt: notification.updatedAt,
-	dispatches: notification.dispatches.map(serializeDispatch),
-});
-
 type FindNotificationById = (
 	id: string,
 ) => Promise<NotificationWithDispatches | null>;
@@ -155,6 +126,7 @@ type DispatchValidatedNotification = (
 
 export const createNotificationsRouter = (
 	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
+	store: SendNotificationStore = sendNotificationStore,
 	findNotification: FindNotificationById = findNotificationByIdWithDispatches,
 ) => {
 	const notificationsRouter = Router();
@@ -173,41 +145,65 @@ export const createNotificationsRouter = (
 		async (req, res) => {
 			const body = req.body;
 
-			// Mint the id before dispatch so each channel adapter can tag its
-			// downstream calls with it. Becomes the store's primary key later.
-			const notificationId = randomUUID();
-			const { appPush, newsletter } = await dispatchRequest(
-				body,
-				notificationId,
-			);
+			// Record the envelope first so the DB mints the id; each channel
+			// adapter then tags its downstream calls with that same id.
+			const notification = await store.create(body, req.user!.email);
 
-			// Outcomes are not persisted yet; log them so sends can be introspected.
-			req.log.info(
-				{ notificationId, appPush, newsletter },
-				'Dispatched notification channels',
-			);
+			let outcomesRecorded = false;
+			try {
+				const { error, ...outcomes } = await dispatchRequest(
+					body,
+					notification.id,
+				);
+				const persisted = await store.recordOutcomes(notification, outcomes);
+				outcomesRecorded = true;
 
-			const statusUrl = `/v1/notifications/${notificationId}/status`;
+				if (error !== undefined) {
+					req.log.warn(
+						{
+							notificationId: notification.id,
+							status: persisted.notification.status,
+							err: error,
+							...outcomes,
+						},
+						'Recorded notification with provider failures',
+					);
+				} else {
+					req.log.info(
+						{
+							notificationId: notification.id,
+							status: persisted.notification.status,
+							...outcomes,
+						},
+						'Dispatched and recorded notification channels',
+					);
+				}
 
-			const plans = Object.keys(body.channels).map((channel) => ({
-				channel,
-				planId: `${notificationId}#${channel}`,
-				status: 'accepted' as const,
-			}));
+				res
+					.status(httpStatusForNotification(persisted.notification.status))
+					.json(toNotificationResponse(persisted));
+			} catch (error) {
+				// Dispatch or persistence threw before any outcome was recorded (e.g.
+				// a config, SSM, or DB failure); flag the stored row failed and return
+				// it so the caller sees the failure rather than a terse error
+				// envelope. When outcomes were recorded the status is already
+				// accurate, so rethrow to surface anything unexpected.
+				if (!outcomesRecorded) {
+					const failed = await store
+						.markFailed(notification)
+						.catch(() => notification);
 
-			const expiresAt =
-				Math.floor(Date.now() / 1000) + CANCELLATION_WINDOW_SECONDS;
+					res
+						.status(httpStatusForNotification(failed.status))
+						.json(
+							toNotificationResponse({ notification: failed, dispatches: [] }),
+						);
 
-			res.status(202).json({
-				notificationId,
-				status: 'accepted',
-				plans,
-				statusUrl,
-				cancellable: {
-					cancelUrl: `/v1/notifications/${notificationId}/cancel`,
-					expiresAt,
-				},
-			});
+					return;
+				}
+
+				throw error;
+			}
 		},
 	);
 
@@ -235,7 +231,12 @@ export const createNotificationsRouter = (
 				return;
 			}
 
-			res.status(200).json(serializeNotification(notification));
+			res.status(200).json(
+				toNotificationResponse({
+					notification,
+					dispatches: notification.dispatches,
+				}),
+			);
 		},
 	);
 

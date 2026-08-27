@@ -14,6 +14,7 @@ import {
 import { createNotificationDispatchesRepository } from './notification-dispatches-repository';
 import {
 	createNotificationsRepository,
+	DuplicateIdempotencyKeyError,
 	type NotificationsRepository,
 } from './notifications-repository';
 
@@ -47,6 +48,21 @@ describe('notifications repository (real Postgres)', () => {
 		expect(found?.channels).toEqual(input.channels);
 	});
 
+	it('rolls the status up once the dispatch outcomes settle', async () => {
+		const created = await notifications.create(buildNotification());
+		expect(created.status).toBe('accepted');
+
+		const updated = await notifications.updateStatus(created.id, 'delivered');
+
+		expect(updated.status).toBe('delivered');
+		expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(
+			created.updatedAt.getTime(),
+		);
+
+		const found = await notifications.findById(created.id);
+		expect(found?.status).toBe('delivered');
+	});
+
 	it('loads a notification together with its dispatches, oldest first', async () => {
 		const notification = await notifications.create(buildNotification());
 
@@ -66,5 +82,17 @@ describe('notifications repository (real Postgres)', () => {
 			'breaking-news',
 			'morning-briefing-uk',
 		]);
+	});
+
+	it('rejects a second notification reusing an idempotency key', async () => {
+		const input = buildNotification();
+		await notifications.create(input);
+
+		return expect(
+			notifications.create({
+				...buildNotification(),
+				idempotencyKey: input.idempotencyKey,
+			}),
+		).rejects.toBeInstanceOf(DuplicateIdempotencyKeyError);
 	});
 });

@@ -1,7 +1,8 @@
 /**
- * The persisted notification and its dispatch outcomes returned by
- * `GET /v1/notifications/{id}`. Referenced via
- * `#/components/schemas/Notification`.
+ * The persisted notification and its dispatch outcomes. The single
+ * representation returned by `POST /v1/notifications`,
+ * `POST /v1/notification-tests`, and `GET /v1/notifications/{id}`. Referenced
+ * via `#/components/schemas/Notification`.
  */
 export const notificationSchema = {
 	type: 'object',
