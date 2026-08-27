@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { httpLogger } from '@http-logger';
 import { UserPermissions } from '@models';
-import { BrazeApiError, EmailRenderingError } from '@services';
+import { BrazeApiError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
 import {
@@ -343,8 +343,12 @@ describe('POST /v1/notification-tests', () => {
 	});
 
 	describe('provider failures surface as the documented HTTP codes', () => {
-		// Dispatch rethrows the underlying provider error; errorMiddleware maps it.
-		const startFailingServer = (rejection: Error) => {
+		// Dispatch that throws before any outcome is recorded (a config, SSM, or
+		// DB failure) leaves the row flagged failed and returns it, not a 202.
+		const startFailingServer = (
+			rejection: Error,
+			store = mockNotificationStore({ notification: { kind: 'test' } }),
+		) => {
 			const app = express();
 			app.use(httpLogger);
 			app.use(express.json());
@@ -352,16 +356,18 @@ describe('POST /v1/notification-tests', () => {
 				'/v1/notification-tests',
 				createNotificationTestsRouter(
 					mock(() => Promise.reject(rejection)),
-					mockNotificationStore({ notification: { kind: 'test' } }),
+					store,
 				),
 			);
 			app.use(errorMiddleware);
 			return startTestServer(app);
 		};
 
-		it('maps an upstream provider rejection to 502', async () => {
+		it('records the row as failed and returns a 502 when dispatch throws before recording outcomes', async () => {
+			const store = mockNotificationStore({ notification: { kind: 'test' } });
 			const dispatchServer = await startFailingServer(
-				new EmailRenderingError(500, 'http_error'),
+				new BrazeApiError('test email send', 'http_error', 503),
+				store,
 			);
 
 			try {
@@ -375,31 +381,16 @@ describe('POST /v1/notification-tests', () => {
 				);
 
 				expect(response.status).toBe(502);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('email_rendering_failed');
-			} finally {
-				await dispatchServer.close();
-			}
-		});
+				const body = (await response.json()) as {
+					status: string;
+					dispatches: unknown[];
+				};
+				expect(body.status).toBe('failed');
+				expect(body.dispatches).toEqual([]);
 
-		it('maps an upstream provider timeout to 504', async () => {
-			const dispatchServer = await startFailingServer(
-				new BrazeApiError('test email send', 'timeout'),
-			);
-
-			try {
-				const response = await fetch(
-					`${dispatchServer.baseUrl}/v1/notification-tests`,
-					{
-						method: 'POST',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify(validTestRequest()),
-					},
-				);
-
-				expect(response.status).toBe(504);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('braze_request_failed');
+				// The row is flagged failed; no outcomes could be recorded.
+				expect(store.markFailed).toHaveBeenCalledTimes(1);
+				expect(store.recordOutcomes).not.toHaveBeenCalled();
 			} finally {
 				await dispatchServer.close();
 			}

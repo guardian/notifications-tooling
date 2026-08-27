@@ -267,7 +267,7 @@ describe('POST /v1/notifications (real Postgres)', () => {
 				},
 			);
 
-			expect(response.status).toBe(207);
+			expect(response.status).toBe(502);
 			const body = (await response.json()) as { id: string; status: string };
 			expect(body.status).toBe('partially_delivered');
 

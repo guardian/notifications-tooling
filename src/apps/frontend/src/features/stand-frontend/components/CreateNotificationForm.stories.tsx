@@ -127,14 +127,14 @@ export const HardLimitBlocksSend: Story = {
 		const canvas = within(canvasElement);
 		const subject = canvas.getByLabelText('Subject');
 		await userEvent.clear(subject);
-		await userEvent.type(subject, 'a'.repeat(60));
+		await userEvent.type(subject, 'a'.repeat(140));
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Send newsletter email' }),
 		);
 
 		await expect(
 			canvas.getByText(
-				'Subject must be 70 characters or fewer including the kicker',
+				'Subject must be 150 characters or fewer including the kicker',
 			),
 		).toBeVisible();
 		const screen = within(canvasElement.ownerDocument.body);
@@ -189,6 +189,8 @@ export const SubmitWithNativeForm: Story = {
 			name: 'Create newsletter email',
 		});
 		await expect(form).toBeVisible();
+		await expect(form).toHaveAttribute('method', 'post');
+		await expect(form).toHaveAttribute('novalidate');
 		form.requestSubmit();
 
 		const screen = within(canvasElement.ownerDocument.body);

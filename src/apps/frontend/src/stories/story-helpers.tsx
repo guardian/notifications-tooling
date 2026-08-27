@@ -62,8 +62,8 @@ export const WithNotificationContext = (
 		},
 		resolver: zodResolver(
 			createNewsletterFormSchema({
-				subject: newsletterConstraints.compose.subject.editorialLimit,
-				preview: newsletterConstraints.content.body.editorialLimit,
+				subject: newsletterConstraints.compose.subject.validationCap,
+				preview: newsletterConstraints.content.body.validationCap,
 			}),
 		),
 	});
@@ -74,7 +74,7 @@ export const WithNotificationContext = (
 		},
 		resolver: zodResolver(
 			createAppAlertFormSchema({
-				headline: appAlertConstraints.content.body.editorialLimit,
+				headline: appAlertConstraints.content.body.validationCap,
 			}),
 		),
 	});

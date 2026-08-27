@@ -5,7 +5,7 @@ import type {
 } from '@database';
 import { httpLogger } from '@http-logger';
 import { UserPermissions } from '@models';
-import { AppNotificationApiError, BrazeApiError } from '@services';
+import { BrazeApiError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
 import {
@@ -279,8 +279,12 @@ describe('POST /v1/notifications', () => {
 	});
 
 	describe('provider failures surface as the documented HTTP codes', () => {
-		// Dispatch rethrows the underlying provider error; errorMiddleware maps it.
-		const startFailingServer = (rejection: Error) => {
+		// Dispatch that throws before any outcome is recorded (a config, SSM, or
+		// DB failure) leaves the row flagged failed and returns it, not a 202.
+		const startFailingServer = (
+			rejection: Error,
+			store = mockNotificationStore(),
+		) => {
 			const testApp = express();
 			testApp.use(httpLogger);
 			testApp.use(express.json());
@@ -288,16 +292,18 @@ describe('POST /v1/notifications', () => {
 				'/v1/notifications',
 				createNotificationsRouter(
 					mock(() => Promise.reject(rejection)),
-					mockNotificationStore(),
+					store,
 				),
 			);
 			testApp.use(errorMiddleware);
 			return startTestServer(testApp);
 		};
 
-		it('maps an upstream provider rejection to 502', async () => {
+		it('records the row as failed and returns a 502 when dispatch throws before recording outcomes', async () => {
+			const store = mockNotificationStore();
 			const dispatchServer = await startFailingServer(
 				new BrazeApiError('campaign trigger', 'http_error', 500),
+				store,
 			);
 
 			try {
@@ -311,17 +317,69 @@ describe('POST /v1/notifications', () => {
 				);
 
 				expect(response.status).toBe(502);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('braze_request_failed');
+				const body = (await response.json()) as {
+					status: string;
+					dispatches: unknown[];
+				};
+				expect(body.status).toBe('failed');
+				expect(body.dispatches).toEqual([]);
+
+				// The row is flagged failed; no outcomes could be recorded.
+				expect(store.markFailed).toHaveBeenCalledTimes(1);
+				expect(store.recordOutcomes).not.toHaveBeenCalled();
 			} finally {
 				await dispatchServer.close();
 			}
 		});
 
-		it('maps an upstream provider timeout to 504', async () => {
-			const dispatchServer = await startFailingServer(
-				new AppNotificationApiError('timeout'),
+		it('records outcomes and returns the notification body with a 502 when every target failed', async () => {
+			const rejection = new BrazeApiError(
+				'campaign trigger',
+				'http_error',
+				500,
 			);
+			// The error is returned alongside the outcomes rather than thrown.
+			const dispatchRequest = mock(() =>
+				Promise.resolve({
+					appPush: [],
+					newsletter: [
+						{
+							notificationId: 'ignored',
+							segmentId: 'UK',
+							campaignId: 'campaign-1',
+							status: 'failure' as const,
+						},
+					],
+					error: rejection,
+				}),
+			);
+			const store = mockNotificationStore({
+				notification: { status: 'failed' },
+				dispatches: [
+					{
+						id: 'd1',
+						notificationId: '00000000-0000-0000-0000-000000000000',
+						channel: 'newsletter',
+						target: 'UK',
+						providerRef: null,
+						status: 'failure',
+						failureReason: 'http_error',
+						providerStatusCode: 500,
+						detail: null,
+						createdAt: new Date(0),
+						updatedAt: new Date(0),
+					},
+				],
+			});
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(dispatchRequest, store),
+			);
+			testApp.use(errorMiddleware);
+			const dispatchServer = await startTestServer(testApp);
 
 			try {
 				const response = await fetch(
@@ -333,9 +391,91 @@ describe('POST /v1/notifications', () => {
 					},
 				);
 
-				expect(response.status).toBe(504);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('app_notification_failed');
+				expect(response.status).toBe(502);
+
+				// The recorded notification is returned, not the terse error envelope,
+				// so the caller sees each target's outcome.
+				const body = (await response.json()) as {
+					status: string;
+					dispatches: Array<Record<string, unknown>>;
+				};
+				expect(body.status).toBe('failed');
+				expect(body.dispatches).toHaveLength(1);
+				expect(body.dispatches[0]).toMatchObject({
+					status: 'failure',
+					failureReason: 'http_error',
+					providerStatusCode: 500,
+				});
+
+				// Outcomes are persisted and the rolled-up status is left intact.
+				expect(store.recordOutcomes).toHaveBeenCalledTimes(1);
+				expect(store.markFailed).not.toHaveBeenCalled();
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+
+		it('records outcomes and returns the notification body with a 502 on partial delivery', async () => {
+			const rejection = new BrazeApiError(
+				'campaign trigger',
+				'http_error',
+				500,
+			);
+			// One target succeeded, one was rejected; the error rides alongside the
+			// outcomes rather than being thrown.
+			const dispatchRequest = mock(() =>
+				Promise.resolve({
+					appPush: [
+						{
+							notificationId: 'ignored',
+							id: 'push-1',
+							topicType: 'breaking-news',
+							status: 'success' as const,
+						},
+					],
+					newsletter: [
+						{
+							notificationId: 'ignored',
+							segmentId: 'UK',
+							campaignId: 'campaign-1',
+							status: 'failure' as const,
+						},
+					],
+					error: rejection,
+				}),
+			);
+			const store = mockNotificationStore({
+				notification: { status: 'partially_delivered' },
+			});
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(dispatchRequest, store),
+			);
+			testApp.use(errorMiddleware);
+			const dispatchServer = await startTestServer(testApp);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(502);
+				const body = (await response.json()) as { status: string };
+				expect(body.status).toBe('partially_delivered');
+
+				// Outcomes are persisted (successful and failed targets alike) so a
+				// re-send can skip what already succeeded.
+				expect(store.recordOutcomes).toHaveBeenCalledTimes(1);
+				// The rolled-up status is left intact, not clobbered to 'failed'.
+				expect(store.markFailed).not.toHaveBeenCalled();
 			} finally {
 				await dispatchServer.close();
 			}
