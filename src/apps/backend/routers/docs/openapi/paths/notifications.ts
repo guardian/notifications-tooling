@@ -46,15 +46,6 @@ export const notificationsPath = {
 					},
 				},
 			},
-			'207': {
-				description:
-					'The notification was recorded and some, but not all, targets delivered. Each outcome is listed under `dispatches`.',
-				content: {
-					'application/json': {
-						schema: { $ref: '#/components/schemas/Notification' },
-					},
-				},
-			},
 			'401': { $ref: '#/components/responses/Unauthenticated' },
 			'403': { $ref: '#/components/responses/InsufficientPermissions' },
 			'400': {
@@ -70,7 +61,7 @@ export const notificationsPath = {
 			},
 			'422': {
 				description:
-					'The request body is well-formed but failed semantic validation (content past the validation cap, unknown references, or cross-field rules), or the article could not be rendered.',
+					'The request body is well-formed but failed semantic validation (content past the validation cap, unknown references, or cross-field rules).',
 				content: {
 					'application/json': {
 						schema: {
@@ -82,23 +73,10 @@ export const notificationsPath = {
 			'409': { $ref: '#/components/responses/IdempotencyKeyConflict' },
 			'502': {
 				description:
-					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) rejected the request or returned an invalid response.',
+					'At least one target failed — whether at an upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) or before any outcome could be recorded — a partial or total failure is treated as a failure. The body is the stored notification with its per-target `dispatches` (empty when the failure occurred before anything could be recorded).',
 				content: {
 					'application/json': {
-						schema: {
-							$ref: '#/components/schemas/NotificationProviderError',
-						},
-					},
-				},
-			},
-			'504': {
-				description:
-					'An upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) timed out.',
-				content: {
-					'application/json': {
-						schema: {
-							$ref: '#/components/schemas/NotificationProviderError',
-						},
+						schema: { $ref: '#/components/schemas/Notification' },
 					},
 				},
 			},

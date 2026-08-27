@@ -17,7 +17,7 @@ describe('httpStatusForNotification', () => {
 	it('maps each rolled-up status to its HTTP code', () => {
 		expect(httpStatusForNotification('accepted')).toBe(202);
 		expect(httpStatusForNotification('delivered')).toBe(201);
-		expect(httpStatusForNotification('partially_delivered')).toBe(207);
+		expect(httpStatusForNotification('partially_delivered')).toBe(502);
 		expect(httpStatusForNotification('failed')).toBe(502);
 	});
 });

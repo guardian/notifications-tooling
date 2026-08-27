@@ -13,7 +13,6 @@ import { notificationChannelSchema } from './notification-channel';
 import { notificationConflictErrorSchema } from './notification-conflict-error';
 import { notificationDispatchSchema } from './notification-dispatch';
 import { notificationNotFoundSchema } from './notification-not-found';
-import { notificationProviderErrorSchema } from './notification-provider-error';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
@@ -38,7 +37,6 @@ export const schemas = {
 	NotificationValidationError: notificationValidationErrorSchema,
 	EmailRenderingContentError: emailRenderingContentErrorSchema,
 	NotificationUnprocessableError: notificationUnprocessableErrorSchema,
-	NotificationProviderError: notificationProviderErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
 	EmailChannelConfig: emailChannelConfigSchema,

@@ -136,10 +136,9 @@ export const httpStatusForNotification = (
 		// Created and every target delivered.
 		case 'delivered':
 			return 201;
-		// Some targets delivered, some failed — the body details each one.
+		// Any target failed — partial or total — reads as a provider failure; the
+		// body still details each target's outcome under `dispatches`.
 		case 'partially_delivered':
-			return 207;
-		// Every target failed at the provider.
 		case 'failed':
 			return 502;
 		// Recorded but nothing was delivered yet (e.g. a dry run).

@@ -149,26 +149,59 @@ export const createNotificationsRouter = (
 			// adapter then tags its downstream calls with that same id.
 			const notification = await store.create(body, req.user!.email);
 
+			let outcomesRecorded = false;
 			try {
-				const outcomes = await dispatchRequest(body, notification.id);
-				const persisted = await store.recordOutcomes(notification, outcomes);
-
-				req.log.info(
-					{
-						notificationId: notification.id,
-						status: persisted.notification.status,
-						...outcomes,
-					},
-					'Dispatched and recorded notification channels',
+				const { error, ...outcomes } = await dispatchRequest(
+					body,
+					notification.id,
 				);
+				const persisted = await store.recordOutcomes(notification, outcomes);
+				outcomesRecorded = true;
+
+				if (error !== undefined) {
+					req.log.warn(
+						{
+							notificationId: notification.id,
+							status: persisted.notification.status,
+							err: error,
+							...outcomes,
+						},
+						'Recorded notification with provider failures',
+					);
+				} else {
+					req.log.info(
+						{
+							notificationId: notification.id,
+							status: persisted.notification.status,
+							...outcomes,
+						},
+						'Dispatched and recorded notification channels',
+					);
+				}
 
 				res
 					.status(httpStatusForNotification(persisted.notification.status))
 					.json(toNotificationResponse(persisted));
 			} catch (error) {
-				// The row is already stored; flag it failed before the provider
-				// error surfaces as the documented 502/504 via errorMiddleware.
-				await store.markFailed(notification).catch(() => undefined);
+				// Dispatch or persistence threw before any outcome was recorded (e.g.
+				// a config, SSM, or DB failure); flag the stored row failed and return
+				// it so the caller sees the failure rather than a terse error
+				// envelope. When outcomes were recorded the status is already
+				// accurate, so rethrow to surface anything unexpected.
+				if (!outcomesRecorded) {
+					const failed = await store
+						.markFailed(notification)
+						.catch(() => notification);
+
+					res
+						.status(httpStatusForNotification(failed.status))
+						.json(
+							toNotificationResponse({ notification: failed, dispatches: [] }),
+						);
+
+					return;
+				}
+
 				throw error;
 			}
 		},
