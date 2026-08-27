@@ -159,6 +159,7 @@ export const dispatchAppPush = async (
 				id,
 				topicType: push.topicType,
 				status: 'success',
+				providerStatusCode: result.value.status,
 			};
 		}
 		return {

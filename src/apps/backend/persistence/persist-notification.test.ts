@@ -121,6 +121,7 @@ describe('mapTestOutcomesToDispatches', () => {
 					id: 'push-1',
 					topicType: 'test',
 					status: 'success',
+					providerStatusCode: 201,
 				},
 			],
 			newsletter: [
@@ -129,6 +130,7 @@ describe('mapTestOutcomesToDispatches', () => {
 					variant: 'UK',
 					dispatchId: 'dispatch-1',
 					status: 'success',
+					providerStatusCode: 201,
 				},
 			],
 		};
@@ -141,6 +143,7 @@ describe('mapTestOutcomesToDispatches', () => {
 				providerRef: 'push-1',
 				status: 'success',
 				failureReason: null,
+				providerStatusCode: 201,
 			},
 			{
 				notificationId,
@@ -149,6 +152,7 @@ describe('mapTestOutcomesToDispatches', () => {
 				providerRef: 'dispatch-1',
 				status: 'success',
 				failureReason: null,
+				providerStatusCode: 201,
 			},
 		]);
 	});

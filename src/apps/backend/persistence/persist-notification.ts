@@ -76,6 +76,7 @@ export const mapTestOutcomesToDispatches = (
 		providerRef: outcome.id,
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
+		providerStatusCode: outcome.providerStatusCode ?? null,
 	})),
 	...newsletter.map((outcome): NewNotificationDispatch => ({
 		notificationId,
@@ -84,6 +85,7 @@ export const mapTestOutcomesToDispatches = (
 		providerRef: outcome.dispatchId ?? null,
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
+		providerStatusCode: outcome.providerStatusCode ?? null,
 	})),
 ];
 

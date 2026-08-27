@@ -16,6 +16,7 @@ import {
 import {
 	newsletterEnvironmentSchema,
 	newsletterFailureReason,
+	newsletterStatusCode,
 } from './dispatch-newsletter';
 
 const testEmailEnvironmentSchema = z.object({
@@ -44,6 +45,8 @@ export type NewsletterTestDispatchOutcome = {
 	dispatchId?: string;
 	status: 'success' | 'failure';
 	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
+	/** The Braze or email-rendering HTTP status once the send reached the provider. */
+	providerStatusCode?: number;
 };
 
 export const dispatchNewsletterTest = async (
@@ -143,6 +146,7 @@ export const dispatchNewsletterTest = async (
 					variant: segmentId,
 					dispatchId: result.value.dispatch_id,
 					status: 'success',
+					providerStatusCode: result.value.status,
 				};
 			}
 			return {
@@ -150,6 +154,7 @@ export const dispatchNewsletterTest = async (
 				variant: segmentId,
 				status: 'failure',
 				failureReason: newsletterFailureReason(result.reason),
+				providerStatusCode: newsletterStatusCode(result.reason),
 			};
 		},
 	);

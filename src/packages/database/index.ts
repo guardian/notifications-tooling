@@ -7,6 +7,7 @@ export {
 } from './repositories/notification-dispatches-repository';
 export {
 	createNotificationsRepository,
+	DuplicateIdempotencyKeyError,
 	type ListRecentNotificationsOptions,
 	type NewNotification,
 	type Notification,

@@ -10,6 +10,7 @@ import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
+import { notificationConflictErrorSchema } from './notification-conflict-error';
 import { notificationDispatchSchema } from './notification-dispatch';
 import { notificationListSchema } from './notification-list';
 import { notificationNotFoundSchema } from './notification-not-found';
@@ -34,6 +35,7 @@ export const schemas = {
 	NotificationList: notificationListSchema,
 	NotificationDispatch: notificationDispatchSchema,
 	NotificationNotFound: notificationNotFoundSchema,
+	NotificationConflictError: notificationConflictErrorSchema,
 	NotificationSendRequest: notificationSendRequestJsonSchema,
 	NotificationTestSendRequest: notificationTestSendRequestJsonSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,

@@ -38,7 +38,7 @@ describe('sendAppNotification', () => {
 
 		const result = await sendAppNotification(request);
 
-		expect(result).toEqual({ id: 'n10n-uuid' });
+		expect(result).toEqual({ id: 'n10n-uuid', status: 201 });
 		expect(fetcher).toHaveBeenCalledWith(
 			'https://n10n.example.com/push/topic',
 			{

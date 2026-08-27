@@ -33,6 +33,11 @@ export type BrazeCampaignTriggerResponse = {
 	message: string;
 };
 
+/** A successful campaign trigger response plus the Braze HTTP status. */
+export type BrazeCampaignTriggerResult = BrazeCampaignTriggerResponse & {
+	status: number;
+};
+
 export type BrazeOperation =
 	'campaign trigger' | 'test user tracking' | 'test email send';
 
@@ -147,7 +152,7 @@ export const sendBrazeCampaign = async ({
 	html,
 	subject,
 	timeoutMs,
-}: SendBrazeCampaignRequest): Promise<BrazeCampaignTriggerResponse> => {
+}: SendBrazeCampaignRequest): Promise<BrazeCampaignTriggerResult> => {
 	const triggerProperties = { body: html, subject };
 	const triggerPropertiesSize = Buffer.byteLength(
 		JSON.stringify(triggerProperties),
@@ -183,11 +188,12 @@ export const sendBrazeCampaign = async ({
 		'campaign trigger',
 	);
 
-	return parseBrazeResponse(
+	const result = await parseBrazeResponse(
 		response,
 		brazeCampaignTriggerResponseSchema,
 		'campaign trigger',
 	);
+	return { ...result, status: response.status };
 };
 
 export const registerBrazeTestEmailRecipients = async ({
@@ -236,7 +242,7 @@ export const sendBrazeTestEmail = async ({
 	subject,
 	timeoutMs,
 	recipientEmails,
-}: SendBrazeTestEmailRequest): Promise<BrazeCampaignTriggerResponse> => {
+}: SendBrazeTestEmailRequest): Promise<BrazeCampaignTriggerResult> => {
 	const messageResponse = await requestBraze(
 		new URL('/messages/send', restEndpoint).toString(),
 		{
@@ -263,9 +269,10 @@ export const sendBrazeTestEmail = async ({
 		'test email send',
 	);
 
-	return parseBrazeResponse(
+	const result = await parseBrazeResponse(
 		messageResponse,
 		brazeCampaignTriggerResponseSchema,
 		'test email send',
 	);
+	return { ...result, status: messageResponse.status };
 };

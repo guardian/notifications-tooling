@@ -77,12 +77,14 @@ describe('dispatchNewsletterTest', () => {
 				variant: 'UK',
 				dispatchId: 'test-dispatch-123',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 			{
 				testId,
 				variant: 'US',
 				dispatchId: 'test-dispatch-123',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 		]);
 	});
