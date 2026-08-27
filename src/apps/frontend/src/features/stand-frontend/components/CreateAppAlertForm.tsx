@@ -5,6 +5,7 @@ import { buildAppAlertRequest } from '../build-request-payloads';
 import type { AppAlertFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { AlertTypeFormField } from './AlertTypeFormField';
+import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
 import { EditionsFormField } from './EditionsFormField';
 import { HeadlineFormField } from './HeadlineFormField';
 import { NotificationFormSection } from './NotificationFormSection';
@@ -73,6 +74,7 @@ export const CreateAppAlertForm = ({
 				isActive={activeSectionHref === '#content-section'}
 			>
 				<HeadlineFormField constraints={constraints} />
+				<ArticleThumbnailImageFormField />
 			</NotificationFormSection>
 		</NotificationFormWrapper>
 	);
