@@ -76,6 +76,7 @@ describe('dispatchNotification (newsletter channel)', () => {
 				campaignId: newsletterSegments.UK.brazeCampaignId,
 				dispatchId: 'dispatch-123',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 			{
 				notificationId,
@@ -83,6 +84,7 @@ describe('dispatchNotification (newsletter channel)', () => {
 				campaignId: newsletterSegments.US.brazeCampaignId,
 				dispatchId: 'dispatch-123',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 		]);
 	});
@@ -94,7 +96,11 @@ describe('dispatchNotification (newsletter channel)', () => {
 		sendBrazeCampaign.mockImplementation(() => {
 			call += 1;
 			return call === 1
-				? Promise.resolve({ message: 'success', dispatch_id: 'dispatch-123' })
+				? Promise.resolve({
+						message: 'success',
+						dispatch_id: 'dispatch-123',
+						status: 201,
+					})
 				: Promise.reject(brazeError);
 		});
 		const request: NotificationSendRequest = {
@@ -123,6 +129,7 @@ describe('dispatchNotification (newsletter channel)', () => {
 				campaignId: newsletterSegments.UK.brazeCampaignId,
 				dispatchId: 'dispatch-123',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 			{
 				notificationId,

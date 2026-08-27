@@ -47,10 +47,17 @@ describe('dispatchNotificationTest', () => {
 				variant: 'UK',
 				dispatchId: 'test-dispatch-123',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 		]);
 		expect(outcomes.appPush).toEqual([
-			{ testId, id: anyString, topicType: 'test', status: 'success' },
+			{
+				testId,
+				id: anyString,
+				topicType: 'test',
+				status: 'success',
+				providerStatusCode: 201,
+			},
 		]);
 	});
 
