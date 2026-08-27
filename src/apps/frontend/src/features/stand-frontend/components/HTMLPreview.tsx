@@ -9,7 +9,6 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { kickerNameMap } from '../option-values';
 import { LoadingSpinner } from './LoadingSpinner';
 
 // TO DO - this function will work with the current format of the notifcation emails
@@ -19,20 +18,13 @@ const modifyContent = (
 	body: HTMLElement,
 	parameters: Partial<NewsletterFormValues>,
 ) => {
-	const { subject, kicker, preview } = parameters;
+	const { subject, preview } = parameters;
 	const headlineElement = body.querySelector('h2');
-	const kickerElement =
-		headlineElement?.parentElement?.querySelector<HTMLElement>(
-			'div:first-child',
-		);
 	const previewElement =
 		headlineElement?.parentElement?.querySelector<HTMLElement>('h2~div');
 
 	if (subject && headlineElement) {
 		headlineElement.innerText = subject;
-	}
-	if (kicker && kickerElement) {
-		kickerElement.innerText = kickerNameMap[kicker];
 	}
 	if (preview && previewElement) {
 		previewElement.innerText = preview;
