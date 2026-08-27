@@ -21,8 +21,8 @@ export interface ContentFieldLimits {
 	 */
 	editorialLimit: number;
 	/**
-	 * The length the broker rejects past. Guards against absurd input only, so
-	 * most fields have none.
+	 * The length the broker rejects past. Present only where a downstream
+	 * provider imposes one, so most fields have none.
 	 */
 	validationCap?: number;
 }
