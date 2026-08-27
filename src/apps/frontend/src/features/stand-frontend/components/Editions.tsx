@@ -1,7 +1,9 @@
 import { Icon } from '@guardian/stand/Icon';
-import type { AppAlertTopicOption } from '@models';
+import type {
+	AppAlertTopicOption,
+	FrontendAppAlertTopicEditionId,
+} from '@models';
 import { editionIds } from '../edition-values';
-import type { Edition } from '../types';
 import { EDITION_OPTIONS } from './EditionOptions';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
@@ -19,7 +21,9 @@ interface EditionsProps {
 const selectionId = ({ type, name }: AppPushTopicSelection) =>
 	`${type}:${name}`;
 
-const editionFlagCodes: Partial<Record<string, Edition>> = {
+const editionFlagCodes: Partial<
+	Record<string, FrontendAppAlertTopicEditionId>
+> = {
 	uk: 'UK',
 	us: 'US',
 	au: 'AU',

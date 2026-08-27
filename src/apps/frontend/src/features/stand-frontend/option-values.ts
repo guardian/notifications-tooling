@@ -1,5 +1,4 @@
 import type { Icon } from '@guardian/stand/Icon';
-import type { NewsletterSegmentId } from '@models';
 import type { ComponentProps } from 'react';
 import type { Kicker } from './api/schemas';
 import type { AlertType, ChannelOption, DeliveryOption } from './types';
@@ -37,12 +36,6 @@ export const alertTypeNameMap: Record<AlertType | 'undefined', string> = {
 	'editors-picks': 'Editors’ Picks',
 	'one-not-to-miss': 'One Not to Miss',
 	undefined: 'None',
-};
-
-export const audienceSegmentNameMap: Record<NewsletterSegmentId, string> = {
-	UK: 'United Kingdom',
-	US: 'United States',
-	AU: 'Australia',
 };
 
 export const deliveryOptionNameMap: Record<DeliveryOption, OptionDisplayInfo> =

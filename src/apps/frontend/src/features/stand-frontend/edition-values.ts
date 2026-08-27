@@ -1,6 +1,12 @@
-import type { Edition } from './types';
+import type {
+	AppAlertTopicEditionId,
+	FrontendAppAlertTopicEditionId,
+} from '@models';
 
-export const editionIds: Record<Edition, string> = {
+export const editionIds: Record<
+	FrontendAppAlertTopicEditionId,
+	AppAlertTopicEditionId
+> = {
 	UK: 'uk',
 	US: 'us',
 	AU: 'au',

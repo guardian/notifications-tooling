@@ -24,7 +24,11 @@ function filterInvalidMembers<T>(
 	};
 }
 
-const newsletterSegmentId = z.enum(['UK', 'US', 'AU']);
+// FIX ME: Do we need a separate enum for newsletter segments, or can this be the same
+// as app alert topics?
+// We happen not to be using 'EU' and 'INT' for newsletters, but that's just the current
+// config rather than a hard rule.
+export const newsletterSegmentId = z.enum(['UK', 'US', 'AU']);
 export type NewsletterSegmentId = z.infer<typeof newsletterSegmentId>;
 export interface NewsletterSegment {
 	label: string;
@@ -39,7 +43,24 @@ export type NewsletterEditionOption = z.infer<
 	typeof newsletterEditionOptionSchema
 >;
 
-const appAlertTopicEditionId = z.enum([
+// FIX ME: we use the FrontendAppAlertTopicEditionId to reference the
+// editions in the frontend, but the data from the backend keys the topic editions
+// on the AppAlertTopicEditionId, so we need to convert the string in a number of
+// places.
+// The keys used in the audience data could be changed to align to FrontendAppAlertTopicEditionId
+// which would simplify a lot of the modeling and frontend code
+// see: src/packages/config/audiences.ts
+export const frontendAppAlertTopicEditionId = z.enum([
+	'UK',
+	'US',
+	'AU',
+	'EU',
+	'INT',
+]);
+export type FrontendAppAlertTopicEditionId = z.infer<
+	typeof frontendAppAlertTopicEditionId
+>;
+export const appAlertTopicEditionId = z.enum([
 	'uk',
 	'us',
 	'au',

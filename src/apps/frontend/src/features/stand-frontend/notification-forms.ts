@@ -1,3 +1,4 @@
+import { frontendAppAlertTopicEditionId, newsletterSegmentId } from '@models';
 import { z } from 'zod';
 import { kickerSchema } from './api/schemas';
 import {
@@ -32,7 +33,7 @@ export const createNewsletterFormSchema = ({
 					`Preview text must be ${previewLimit} characters or fewer`,
 				),
 			audienceSegments: z
-				.array(z.enum(['UK', 'US', 'AU']))
+				.array(newsletterSegmentId)
 				.min(1, 'Please select an audience segment'),
 			deliveryOption: z.literal('immediate'),
 		})
@@ -66,7 +67,7 @@ export const createAppAlertFormSchema = ({
 				`Headline must be ${headlineLimit} characters or fewer`,
 			),
 		editions: z
-			.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT']))
+			.array(frontendAppAlertTopicEditionId)
 			.min(1, 'Please select an edition'),
 		deliveryOption: z.literal('appImmediate'),
 	});

@@ -1,8 +1,11 @@
-import type { AppAlertTopicEditionId, NewsletterSegmentId } from '@models';
+import type {
+	AppAlertTopicEditionId,
+	FrontendAppAlertTopicEditionId,
+	NewsletterSegmentId,
+} from '@models';
 import { useChannelAudiences } from './api/useChannelAudiences';
 import { EDITION_OPTIONS } from './components/EditionOptions';
 import type { SegmentOption } from './components/SegmentPicker';
-import type { Edition } from './types';
 
 export const FALLBACK_SEGMENT_OPTIONS: Array<
 	SegmentOption<NewsletterSegmentId>
@@ -22,7 +25,10 @@ export const useNewsletterSegmentOptions = (): Array<
 		: FALLBACK_SEGMENT_OPTIONS;
 };
 
-const topicIdToCodeMap: Record<AppAlertTopicEditionId, Edition> = {
+const topicIdToCodeMap: Record<
+	AppAlertTopicEditionId,
+	FrontendAppAlertTopicEditionId
+> = {
 	uk: 'UK',
 	us: 'US',
 	au: 'AU',
@@ -32,7 +38,7 @@ const topicIdToCodeMap: Record<AppAlertTopicEditionId, Edition> = {
 
 export const useTopicEditionOptions = (
 	topicId: string,
-): Array<SegmentOption<Edition>> => {
+): Array<SegmentOption<FrontendAppAlertTopicEditionId>> => {
 	const { data: audiences } = useChannelAudiences();
 	const topics = audiences?.channels['app-push'].topicTypes;
 	if (!topics) {

@@ -1,6 +1,7 @@
 import type {
 	EmailPreviewRequest,
 	EmailPreviewResponse,
+	FrontendAppAlertTopicEditionId,
 	NewsletterSegmentId,
 	ResolvedArticle,
 } from '@models';
@@ -17,7 +18,6 @@ export type KickerId = 'breaking-news' | 'exclusive';
 export type AlertType =
 	'breaking-news' | 'sport' | 'editors-picks' | 'one-not-to-miss';
 export type DeliveryOption = 'immediate' | 'appImmediate';
-export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
 
 export type EmailNotification = {
 	type: 'email';
@@ -34,7 +34,7 @@ export type PushNotification = {
 	alertType?: AlertType;
 	headline?: string;
 	pushDeliveryOption?: DeliveryOption;
-	editions?: Edition[];
+	editions?: FrontendAppAlertTopicEditionId[];
 };
 export type SendingResult =
 	| {

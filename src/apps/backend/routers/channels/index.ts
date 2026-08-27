@@ -68,7 +68,7 @@ export const channelConstraints = {
 
 /** Reduces a segment config record to the public `{ id, label }` pairs. */
 const toAppAlertTopicSegmentOptions = (
-	segments: Record<AppAlertTopicEditionId, { label: string }>,
+	segments: Partial<Record<AppAlertTopicEditionId, { label: string }>>,
 ): TopicTypeEditionOption[] =>
 	Object.entries(segments).map(([id, { label }]) => ({
 		id: id as AppAlertTopicEditionId,
@@ -77,7 +77,7 @@ const toAppAlertTopicSegmentOptions = (
 
 /** Reduces a segment config record to the public `{ id, label }` pairs. */
 const toNewsletterSegmentOptions = (
-	segments: Record<NewsletterSegmentId, NewsletterSegment>,
+	segments: Partial<Record<NewsletterSegmentId, NewsletterSegment>>,
 ): Array<{ id: NewsletterSegmentId; label: string }> =>
 	Object.entries(segments).map(([id, { label }]) => ({
 		id: id as NewsletterSegmentId,
