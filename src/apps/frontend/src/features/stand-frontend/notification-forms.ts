@@ -1,83 +1,33 @@
 import { z } from 'zod';
 import { kickerSchema } from './api/schemas';
-import {
-	APP_ALERT_LIMIT_FALLBACKS,
-	NEWSLETTER_LIMIT_FALLBACKS,
-} from './api/useChannelConstraints';
-import { composeNewsletterSubject } from './newsletter-subject';
 
-interface NewsletterFormLimits {
-	subject: number;
-	preview: number;
-}
-
-interface AppAlertFormLimits {
-	headline: number;
-}
-
-export const createNewsletterFormSchema = ({
-	subject: subjectLimit,
-	preview: previewLimit,
-}: NewsletterFormLimits) =>
-	z
-		.object({
-			kicker: kickerSchema,
-			subject: z.string().trim().min(1, 'Subject is required'),
-			preview: z
-				.string()
-				.trim()
-				.min(1, 'Preview text is required')
-				.max(
-					previewLimit,
-					`Preview text must be ${previewLimit} characters or fewer`,
-				),
-			audienceSegments: z
-				.array(z.enum(['UK', 'US', 'AU']))
-				.min(1, 'Please select an audience segment'),
-			deliveryOption: z.literal('immediate'),
-		})
-		.superRefine(({ kicker, subject }, context) => {
-			const composedSubject = composeNewsletterSubject(subject, kicker);
-			if (composedSubject.length > subjectLimit) {
-				context.addIssue({
-					code: 'custom',
-					path: ['subject'],
-					message: `Subject must be ${subjectLimit} characters or fewer including the kicker`,
-				});
-			}
-		});
-
-export const createAppAlertFormSchema = ({
-	headline: headlineLimit,
-}: AppAlertFormLimits) =>
-	z.object({
-		alertType: z.enum([
-			'breaking-news',
-			'sport',
-			'editors-picks',
-			'one-not-to-miss',
-		]),
-		headline: z
-			.string()
-			.trim()
-			.min(1, 'Headline is required')
-			.max(
-				headlineLimit,
-				`Headline must be ${headlineLimit} characters or fewer`,
-			),
-		editions: z
-			.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT']))
-			.min(1, 'Please select an edition'),
-		deliveryOption: z.literal('appImmediate'),
-	});
-
-export const newsletterFormSchema = createNewsletterFormSchema({
-	subject: NEWSLETTER_LIMIT_FALLBACKS.title.validationCap,
-	preview: NEWSLETTER_LIMIT_FALLBACKS.body.validationCap,
+/**
+ * No length blocks composition: the character counter is guidance and the
+ * broker caps nothing an editor can type. These schemas therefore check
+ * presence and shape only.
+ */
+export const newsletterFormSchema = z.object({
+	kicker: kickerSchema,
+	subject: z.string().trim().min(1, 'Subject is required'),
+	preview: z.string().trim().min(1, 'Preview text is required'),
+	audienceSegments: z
+		.array(z.enum(['UK', 'US', 'AU']))
+		.min(1, 'Please select an audience segment'),
+	deliveryOption: z.literal('immediate'),
 });
 
-export const appAlertFormSchema = createAppAlertFormSchema({
-	headline: APP_ALERT_LIMIT_FALLBACKS.headline.validationCap,
+export const appAlertFormSchema = z.object({
+	alertType: z.enum([
+		'breaking-news',
+		'sport',
+		'editors-picks',
+		'one-not-to-miss',
+	]),
+	headline: z.string().trim().min(1, 'Headline is required'),
+	editions: z
+		.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT']))
+		.min(1, 'Please select an edition'),
+	deliveryOption: z.literal('appImmediate'),
 });
 
 export type NewsletterFormValues = z.infer<typeof newsletterFormSchema>;
