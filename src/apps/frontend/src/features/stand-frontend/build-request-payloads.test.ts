@@ -50,9 +50,9 @@ describe('notification request builders', () => {
 				audience: {
 					type: 'topic',
 					items: [
-						{ type: 'breaking-news', name: 'uk' },
-						{ type: 'breaking-news', name: 'europe' },
-						{ type: 'breaking-news', name: 'international' },
+						{ type: 'breaking-news', name: 'UK' },
+						{ type: 'breaking-news', name: 'EU' },
+						{ type: 'breaking-news', name: 'INT' },
 					],
 				},
 				compose: { use: 'lead-story' },

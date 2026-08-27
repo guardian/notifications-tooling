@@ -10,22 +10,19 @@ import { Checkbox } from '@guardian/stand/Checkbox';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
-import type {
-	FrontendAppAlertTopicEditionId,
-	NewsletterSegmentId,
-} from '@models';
+import type { AppAlertTopicEditionId, NewsletterSegmentId } from '@models';
 import { audienceSegmentStyles, previewPillStyles } from '../themes';
 import { FlagAtom } from './FlagAtom';
 
 export interface SegmentOption<
-	Code extends NewsletterSegmentId | FrontendAppAlertTopicEditionId,
+	Code extends NewsletterSegmentId | AppAlertTopicEditionId,
 > {
 	code: Code;
 	label: string;
 }
 
 interface SegmentPickerProps<
-	Code extends NewsletterSegmentId | FrontendAppAlertTopicEditionId,
+	Code extends NewsletterSegmentId | AppAlertTopicEditionId,
 > {
 	title?: string;
 	description?: string;
@@ -53,7 +50,7 @@ const customTheme: CheckboxTheme = {
 };
 
 export const SegmentPicker = <
-	Code extends NewsletterSegmentId | FrontendAppAlertTopicEditionId,
+	Code extends NewsletterSegmentId | AppAlertTopicEditionId,
 >({
 	title,
 	description,

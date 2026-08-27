@@ -21,11 +21,11 @@ const TEST_PUSH_TOPIC = {
 	label: 'a daily regional joke',
 	editions: [
 		{
-			id: 'uk',
+			id: 'UK',
 			label: 'Jokes for the United Kingdom',
 		},
 		{
-			id: 'europe',
+			id: 'EU',
 			label: 'European jokes',
 		},
 	],

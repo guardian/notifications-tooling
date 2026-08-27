@@ -43,7 +43,7 @@ const newsletterItem = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const pushPlan = (overrides: Record<string, unknown> = {}) => ({
-	audience: { type: 'topic', items: [{ type: 'breaking-news', name: 'uk' }] },
+	audience: { type: 'topic', items: [{ type: 'breaking-news', name: 'UK' }] },
 	compose: { use: 'lead' },
 	...overrides,
 });
@@ -219,7 +219,7 @@ describe('notificationSendRequestSchema', () => {
 					'app-push': {
 						audience: {
 							type: 'topic',
-							items: [{ type: 'breaking-news', name: 'uk' }],
+							items: [{ type: 'breaking-news', name: 'UK' }],
 						},
 						compose: { use: 'lead' },
 					},
@@ -256,7 +256,7 @@ describe('notificationSendRequestSchema', () => {
 					'app-push': {
 						audience: {
 							type: 'topic',
-							items: [{ type: 'breaking-news', name: 'uk' }],
+							items: [{ type: 'breaking-news', name: 'UK' }],
 						},
 						compose: { use: 'pushLead' },
 					},
@@ -713,7 +713,7 @@ describe('notificationSendRequestSchema', () => {
 						pushPlan({
 							audience: {
 								type: 'topic',
-								items: [{ type: 'ghost-topic', name: 'uk' }],
+								items: [{ type: 'ghost-topic', name: 'UK' }],
 							},
 						}),
 					),
@@ -764,7 +764,7 @@ describe('notificationSendRequestSchema', () => {
 		it(`rejects more than ${MAX_APP_PUSH_TOPICS} topics`, () => {
 			const items = Array.from({ length: MAX_APP_PUSH_TOPICS + 1 }, () => ({
 				type: 'breaking-news',
-				name: 'uk',
+				name: 'UK',
 			}));
 			expect(
 				pathsOf(
@@ -781,8 +781,8 @@ describe('notificationSendRequestSchema', () => {
 							audience: {
 								type: 'topic',
 								items: [
-									{ type: 'breaking-news', name: 'uk' },
-									{ type: 'breaking-news', name: 'uk' },
+									{ type: 'breaking-news', name: 'UK' },
+									{ type: 'breaking-news', name: 'UK' },
 								],
 							},
 						}),
@@ -862,7 +862,7 @@ describe('notificationSendRequestSchema', () => {
 							sms: {
 								audience: {
 									type: 'topic',
-									items: [{ type: 'breaking-news', name: 'uk' }],
+									items: [{ type: 'breaking-news', name: 'UK' }],
 								},
 								compose: { use: 'lead' },
 							},
@@ -894,7 +894,7 @@ describe('notificationSendRequestSchema', () => {
 						newsletterPlan({
 							audience: {
 								type: 'topic',
-								topics: [{ type: 'breaking', name: 'uk' }],
+								topics: [{ type: 'breaking', name: 'UK' }],
 							},
 						}),
 					),
@@ -1002,7 +1002,7 @@ describe('notificationSendRequestSchema', () => {
 						pushPlan({
 							audience: {
 								type: 'topic',
-								items: [{ type: 'breaking-news', name: 'uk' }],
+								items: [{ type: 'breaking-news', name: 'UK' }],
 								surprise: true,
 							},
 						}),
@@ -1177,7 +1177,7 @@ describe('notificationTestSendRequestSchema', () => {
 	it('rejects a production topic type in an app-push test', () => {
 		const request = pushTestRequest();
 		request.channels[NotificationChannel.AppPushNotification].audience.items = [
-			{ type: 'breaking-news', name: 'uk' },
+			{ type: 'breaking-news', name: 'UK' },
 		];
 		expect(rejectionPathsOf(request)).toContain(
 			'channels/app-push/audience/items/0/type',

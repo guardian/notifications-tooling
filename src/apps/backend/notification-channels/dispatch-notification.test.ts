@@ -26,7 +26,7 @@ describe('dispatchNotification', () => {
 				[NotificationChannel.AppPushNotification]: {
 					audience: {
 						type: 'topic',
-						items: [{ type: 'breaking-news', name: 'uk' }],
+						items: [{ type: 'breaking-news', name: 'UK' }],
 					},
 					compose: { use: 'push' },
 				},
@@ -55,7 +55,7 @@ describe('dispatchNotification', () => {
 				[NotificationChannel.AppPushNotification]: {
 					audience: {
 						type: 'topic',
-						items: [{ type: 'breaking-news', name: 'uk' }],
+						items: [{ type: 'breaking-news', name: 'UK' }],
 					},
 					compose: { use: 'push' },
 				},
@@ -97,7 +97,7 @@ describe('dispatchNotification', () => {
 				[NotificationChannel.AppPushNotification]: {
 					audience: {
 						type: 'topic',
-						items: [{ type: 'breaking-news', name: 'uk' }],
+						items: [{ type: 'breaking-news', name: 'UK' }],
 					},
 					compose: { use: 'lead' },
 				},

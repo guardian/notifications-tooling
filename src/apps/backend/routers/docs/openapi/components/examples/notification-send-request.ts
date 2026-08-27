@@ -52,7 +52,7 @@ export const notificationSendAppPushExample = {
 			[NotificationChannel.AppPushNotification]: {
 				audience: {
 					type: 'topic',
-					items: [{ type: appPushTopicTypeIds[0], name: 'uk' }],
+					items: [{ type: appPushTopicTypeIds[0], name: 'UK' }],
 				},
 				compose: { use: 'lead-story' },
 			},

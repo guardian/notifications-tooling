@@ -4,9 +4,9 @@ import { expect, within } from 'storybook/test';
 import { PreviewPillList } from './PreviewPillList';
 
 const options = [
-	{ id: 'uk', label: 'UK' },
-	{ id: 'us', label: 'US' },
-	{ id: 'international', label: 'International' },
+	{ id: 'UK', label: 'UK' },
+	{ id: 'US', label: 'US' },
+	{ id: 'INT', label: 'International' },
 ];
 
 const meta = {
@@ -15,7 +15,7 @@ const meta = {
 	args: {
 		title: 'Editions',
 		options,
-		selected: ['uk', 'international'],
+		selected: ['UK', 'INT'],
 	},
 } satisfies Meta<typeof PreviewPillList>;
 
