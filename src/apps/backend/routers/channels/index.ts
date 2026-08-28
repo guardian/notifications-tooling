@@ -7,7 +7,6 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import { getSSMParameter } from '@config/ssm';
 import type {
 	AppAlertTopicEditionId,
 	AppAlertTopicOption,
@@ -16,7 +15,6 @@ import type {
 	TopicTypeEditionOption,
 } from '@models';
 import { UserPermissions } from '@models';
-import { getBrazeCampaignDetails } from '@services';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
@@ -152,43 +150,6 @@ export const channelsRouter = Router()
 	// not requiring permissions for this endpoint as could be
 	// needed for troubleshooting by engineers on rota
 	// who wouldn't necessarily have DispatchAccess
-	.get(
-		'/config/email',
-		authMiddleware,
-		async (_req: Request, res: Response) => {
-			const [apiKey, restEndpoint] = await Promise.all([
-				getSSMParameter('BRAZE_API_KEY'),
-				getSSMParameter('BRAZE_REST_ENDPOINT'),
-			]);
-
-			const editions = ['UK', 'US', 'AU'] as Array<
-				keyof typeof newsletterSegments
-			>;
-
-			const [ukDetails, usDetails, auDetails] = await Promise.all(
-				editions.map((key) =>
-					getBrazeCampaignDetails({
-						campaignId: newsletterSegments[key].brazeCampaignId,
-						restEndpoint,
-						apiKey,
-						timeoutMs: 2000,
-					}),
-				),
-			);
-
-			res.json({
-				UK: {
-					...newsletterSegments.UK,
-					campaignDetails: ukDetails?.data,
-				},
-				US: {
-					...newsletterSegments.US,
-					campaignDetails: usDetails?.data,
-				},
-				AU: {
-					...newsletterSegments.AU,
-					campaignDetails: auDetails?.data,
-				},
-			});
-		},
-	);
+	.get('/config/email', authMiddleware, (_req: Request, res: Response) => {
+		res.json(newsletterSegments);
+	});
