@@ -1,19 +1,19 @@
 import type {
-	FrontendAppAlertTopicEditionId,
+	DisplayAppAlertTopicEditionId,
 	NewsletterSegmentId,
 } from '@models';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
 
 interface FlagPreviewPillOption<
-	Code extends NewsletterSegmentId | FrontendAppAlertTopicEditionId,
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
 > {
 	code: Code;
 	label: string;
 }
 
 interface FlagPreviewPillProps<
-	Code extends NewsletterSegmentId | FrontendAppAlertTopicEditionId,
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
 > {
 	title: string;
 	options: Array<FlagPreviewPillOption<Code>>;
@@ -22,7 +22,7 @@ interface FlagPreviewPillProps<
 }
 
 export const FlagPreviewPill = <
-	Code extends NewsletterSegmentId | FrontendAppAlertTopicEditionId,
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
 >({
 	title,
 	options,

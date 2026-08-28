@@ -1,9 +1,10 @@
 import { Icon } from '@guardian/stand/Icon';
-import type {
-	AppAlertTopicOption,
-	FrontendAppAlertTopicEditionId,
+import {
+	appAlertTopicEditionId,
+	type AppAlertTopicOption,
+	toApiEditionId,
+	toDisplayEditionId,
 } from '@models';
-import { editionIds } from '../edition-values';
 import { EDITION_OPTIONS } from './EditionOptions';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
@@ -21,18 +22,8 @@ interface EditionsProps {
 const selectionId = ({ type, name }: AppPushTopicSelection) =>
 	`${type}:${name}`;
 
-const editionFlagCodes: Partial<
-	Record<string, FrontendAppAlertTopicEditionId>
-> = {
-	uk: 'UK',
-	us: 'US',
-	au: 'AU',
-	europe: 'EU',
-	international: 'INT',
-};
-
 const editionLabels = Object.fromEntries(
-	EDITION_OPTIONS.map(({ code, label }) => [editionIds[code], label]),
+	EDITION_OPTIONS.map(({ code, label }) => [toApiEditionId(code), label]),
 );
 
 export const Editions = ({ topicTypes, selected }: EditionsProps) => {
@@ -49,8 +40,12 @@ export const Editions = ({ topicTypes, selected }: EditionsProps) => {
 			options={options}
 			selected={selectedIds}
 			renderIcon={(id) => {
-				const editionId = id.slice(id.indexOf(':') + 1);
-				const flagCode = editionFlagCodes[editionId];
+				const nameInId = id.slice(id.indexOf(':') + 1);
+				const nameParsedToEditionId =
+					appAlertTopicEditionId.safeParse(nameInId);
+				const flagCode = nameParsedToEditionId.success
+					? toDisplayEditionId(nameParsedToEditionId.data)
+					: undefined;
 				return flagCode ? (
 					<FlagAtom segmentCode={flagCode} />
 				) : (

@@ -1,7 +1,7 @@
-import type {
-	AppAlertTopicEditionId,
-	FrontendAppAlertTopicEditionId,
-	NewsletterSegmentId,
+import {
+	type DisplayAppAlertTopicEditionId,
+	type NewsletterSegmentId,
+	toDisplayEditionId,
 } from '@models';
 import { useChannelAudiences } from './api/useChannelAudiences';
 import { EDITION_OPTIONS } from './components/EditionOptions';
@@ -25,20 +25,9 @@ export const useNewsletterSegmentOptions = (): Array<
 		: FALLBACK_SEGMENT_OPTIONS;
 };
 
-const topicIdToCodeMap: Record<
-	AppAlertTopicEditionId,
-	FrontendAppAlertTopicEditionId
-> = {
-	uk: 'UK',
-	us: 'US',
-	au: 'AU',
-	europe: 'EU',
-	international: 'INT',
-};
-
 export const useTopicEditionOptions = (
 	topicId: string,
-): Array<SegmentOption<FrontendAppAlertTopicEditionId>> => {
+): Array<SegmentOption<DisplayAppAlertTopicEditionId>> => {
 	const { data: audiences } = useChannelAudiences();
 	const topics = audiences?.channels['app-push'].topicTypes;
 	if (!topics) {
@@ -54,7 +43,7 @@ export const useTopicEditionOptions = (
 	}
 
 	return editionsForTopic.map(({ id, label }) => ({
-		code: topicIdToCodeMap[id],
+		code: toDisplayEditionId(id),
 		label,
 	}));
 };

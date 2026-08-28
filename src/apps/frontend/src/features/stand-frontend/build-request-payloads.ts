@@ -1,6 +1,5 @@
-import type { ResolvedArticle } from '@models';
+import { type ResolvedArticle, toApiEditionId } from '@models';
 import type { SendNotificationRequest } from './api/schemas';
-import { editionIds } from './edition-values';
 import { composeNewsletterSubject } from './newsletter-subject';
 import type {
 	AppAlertFormValues,
@@ -90,7 +89,7 @@ export const buildAppAlertRequest = ({
 					type: 'topic',
 					items: editions.map((edition) => ({
 						type: alertType,
-						name: editionIds[edition],
+						name: toApiEditionId(edition),
 					})),
 				},
 				compose: { use: 'lead-story' },

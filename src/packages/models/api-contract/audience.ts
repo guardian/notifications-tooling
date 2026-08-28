@@ -57,7 +57,7 @@ export const frontendAppAlertTopicEditionId = z.enum([
 	'EU',
 	'INT',
 ]);
-export type FrontendAppAlertTopicEditionId = z.infer<
+export type DisplayAppAlertTopicEditionId = z.infer<
 	typeof frontendAppAlertTopicEditionId
 >;
 export const appAlertTopicEditionId = z.enum([
@@ -119,3 +119,40 @@ export const channelAudienceResponseSchema = z.object({
 export type ChannelAudienceResponse = z.infer<
 	typeof channelAudienceResponseSchema
 >;
+
+// FIX ME - if we change the audience API data to use the
+// DisplayAppAlertTopicEditionId format for edition keys,
+// these functiosn won't be needed
+const topicIdToDisplayIdMap: Record<
+	AppAlertTopicEditionId,
+	DisplayAppAlertTopicEditionId
+> = {
+	uk: 'UK',
+	us: 'US',
+	au: 'AU',
+	europe: 'EU',
+	international: 'INT',
+} as const;
+
+const displayIdToTopicIdMap: Record<
+	DisplayAppAlertTopicEditionId,
+	AppAlertTopicEditionId
+> = {
+	UK: 'uk',
+	US: 'us',
+	AU: 'au',
+	EU: 'europe',
+	INT: 'international',
+} as const;
+
+export const toDisplayEditionId = (
+	id: AppAlertTopicEditionId,
+): DisplayAppAlertTopicEditionId => {
+	return topicIdToDisplayIdMap[id];
+};
+
+export const toApiEditionId = (
+	id: DisplayAppAlertTopicEditionId,
+): AppAlertTopicEditionId => {
+	return displayIdToTopicIdMap[id];
+};
