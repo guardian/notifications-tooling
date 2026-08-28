@@ -10,21 +10,22 @@ const baseContentItemShape = z.strictObject({
 	link: z.string(),
 });
 
+const imageMediaSchema = z.strictObject({
+	type: z.literal('image'),
+	imageUrl: z.string(),
+	thumbnailUrl: z.string().optional(),
+});
+
 const newsletterContentItemSchema = z.strictObject({
 	...baseContentItemShape.shape,
 	type: z.literal('newsletter'),
+	media: imageMediaSchema.optional(),
 });
 
 const appPushContentItemSchema = z.strictObject({
 	...baseContentItemShape.shape,
 	type: z.literal('app-push'),
-	media: z
-		.strictObject({
-			type: z.literal('image'),
-			imageUrl: z.string(),
-			thumbnailUrl: z.string().optional(),
-		})
-		.optional(),
+	media: imageMediaSchema.optional(),
 });
 
 const requestBaseShape = {

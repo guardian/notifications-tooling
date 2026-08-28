@@ -20,6 +20,7 @@ export const buildNewsletterRequest = ({
 	idempotencyKey,
 }: BuildRequestArgs<NewsletterFormValues>): SendNotificationRequest => {
 	const { subject: headline, preview, audienceSegments, kicker } = values;
+	const thumbnailUrl = content.fields?.thumbnail;
 
 	const emailSubjectLine = composeNewsletterSubject(headline, kicker);
 
@@ -32,6 +33,15 @@ export const buildNewsletterRequest = ({
 					title: headline,
 					body: preview,
 					link: content.webUrl,
+					...(thumbnailUrl
+						? {
+							media: {
+								type: 'image' as const,
+								imageUrl: thumbnailUrl,
+								thumbnailUrl,
+							},
+						}
+						: {}),
 				},
 			},
 		},
@@ -74,12 +84,12 @@ export const buildAppAlertRequest = ({
 					link: content.webUrl,
 					...(thumbnailUrl
 						? {
-								media: {
-									type: 'image' as const,
-									imageUrl: thumbnailUrl,
-									thumbnailUrl,
-								},
-							}
+							media: {
+								type: 'image' as const,
+								imageUrl: thumbnailUrl,
+								thumbnailUrl,
+							},
+						}
 						: {}),
 				},
 			},
