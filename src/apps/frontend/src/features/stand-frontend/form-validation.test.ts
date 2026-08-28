@@ -19,7 +19,7 @@ describe('parseArticleUrlInputToContentId', () => {
 				'https://www.example.com/film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change',
 			),
 		).toEqual({
-			failure: 'not a Guardian URL',
+			failure: 'Not a Guardian URL',
 		});
 	});
 	it('ignores query params and hash', () => {
@@ -37,7 +37,7 @@ describe('parseArticleUrlInputToContentId', () => {
 		expect(
 			parseArticleUrlInputToContentId('https://www.theguardian.com/uk'),
 		).toEqual({
-			failure: 'not a Guardian article URL',
+			failure: 'Not a Guardian article URL',
 		});
 	});
 	it('rejects paths with characters other than letters, numbers and dashes between in the segments', () => {
@@ -46,7 +46,7 @@ describe('parseArticleUrlInputToContentId', () => {
 				'https://www.theguardian.com/film/****/jul/23/ryan-gosling-hand-la-la-land-poster-change',
 			),
 		).toEqual({
-			failure: 'not a Guardian article URL',
+			failure: 'Not a Guardian article URL',
 		});
 	});
 	it('will accept an article id and use the default domain', () => {

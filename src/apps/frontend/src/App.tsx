@@ -15,6 +15,7 @@ import {
 	NewsletterNotificationFormProvider,
 } from './features/stand-frontend/NotificationFormProvider';
 import { getAppRoutes } from './features/stand-frontend/routes';
+import { notificationHistoryResponse } from './mocks/api-fixtures';
 
 export function App() {
 	const [config] = useState<AppConfig | undefined>(getAppConfig());
@@ -46,7 +47,10 @@ export function App() {
 							}
 						/>
 					)}
-					<Route path={appRoutes.history} element={<HistoryTab />} />
+					<Route
+						path={appRoutes.history}
+						element={<HistoryTab alerts={notificationHistoryResponse.alerts} />}
+					/>
 					<Route path="*" element={<NotFoundTab />} />
 				</Route>
 			</Routes>
