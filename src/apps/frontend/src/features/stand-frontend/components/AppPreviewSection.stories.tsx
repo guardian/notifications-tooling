@@ -14,18 +14,19 @@ import { AppPreviewSection } from './AppPreviewSection';
 
 type StoryArgs = ComponentProps<typeof AppPreviewSection> & {
 	notificationState: NotificationState;
+	includeThumbnail: boolean;
 };
 
 const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/AppPreviewSection',
 	component: AppPreviewSection,
-	render: ({ notificationState, ...args }) =>
+	render: ({ notificationState, includeThumbnail, ...args }) =>
 		WithNotificationContext(
 			<AppPreviewSection {...args} />,
 			notificationState,
 			{},
 			'push',
-			completePushParams,
+			{ ...completePushParams, includeThumbnail },
 		),
 	parameters: {
 		docs: {
@@ -38,6 +39,7 @@ const meta: Meta<StoryArgs> = {
 	args: {
 		topicTypes: FALLBACK_TOPIC_TYPES,
 		notificationState: populatedPushState,
+		includeThumbnail: true,
 	},
 };
 
@@ -74,6 +76,27 @@ export const Default: Story = {
 		await expect(
 			canvas.getByAltText('Android article thumbnail'),
 		).toBeVisible();
+	},
+};
+
+export const WithoutThumbnail: Story = {
+	args: {
+		includeThumbnail: false,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByLabelText('iPhone notification preview'),
+		).toBeVisible();
+		await expect(
+			canvas.getByLabelText('Android notification preview'),
+		).toBeVisible();
+		await expect(
+			canvas.queryByAltText('Article thumbnail'),
+		).not.toBeInTheDocument();
+		await expect(
+			canvas.queryByAltText('Android article thumbnail'),
+		).not.toBeInTheDocument();
 	},
 };
 
