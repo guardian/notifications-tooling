@@ -42,8 +42,13 @@ const PANEL_ITEMS_BY_CHANNEL: Record<ChannelOption, StepNavStep[]> = {
 	push: PUSH_STEPS,
 };
 
-export const DEFAULT_SIDE_NAV_HREF = EMAIL_STEPS[0]!.id;
-export const APP_DEFAULT_SIDE_NAV_HREF = PUSH_STEPS[0]!.id;
+export const DEFAULT_SIDE_NAV_HREF_BY_CHANNEL: Record<ChannelOption, string> = {
+	email: EMAIL_STEPS[0]!.id,
+	push: PUSH_STEPS[0]!.id,
+};
+
+export const DEFAULT_SIDE_NAV_HREF = DEFAULT_SIDE_NAV_HREF_BY_CHANNEL.email;
+export const APP_DEFAULT_SIDE_NAV_HREF = DEFAULT_SIDE_NAV_HREF_BY_CHANNEL.push;
 
 const theme: SidebarStepperNavigationTheme = {
 	navigation: {
@@ -88,8 +93,7 @@ export const SideNavigationPanel = ({
 	channel = 'email',
 }: SideNavigationPanelProps) => {
 	const PANEL_ITEMS = PANEL_ITEMS_BY_CHANNEL[channel];
-	const DEFAULT_HREF =
-		channel === 'push' ? APP_DEFAULT_SIDE_NAV_HREF : DEFAULT_SIDE_NAV_HREF;
+	const DEFAULT_HREF = DEFAULT_SIDE_NAV_HREF_BY_CHANNEL[channel];
 
 	const { hash } = useLocation();
 	const navigate = useNavigate();
