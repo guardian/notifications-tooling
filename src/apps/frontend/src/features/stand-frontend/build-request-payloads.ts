@@ -35,12 +35,12 @@ export const buildNewsletterRequest = ({
 					link: content.webUrl,
 					...(thumbnailUrl
 						? {
-							media: {
-								type: 'image' as const,
-								imageUrl: thumbnailUrl,
-								thumbnailUrl,
-							},
-						}
+								media: {
+									type: 'image' as const,
+									imageUrl: thumbnailUrl,
+									thumbnailUrl,
+								},
+							}
 						: {}),
 				},
 			},
@@ -84,12 +84,12 @@ export const buildAppAlertRequest = ({
 					link: content.webUrl,
 					...(thumbnailUrl
 						? {
-							media: {
-								type: 'image' as const,
-								imageUrl: thumbnailUrl,
-								thumbnailUrl,
-							},
-						}
+								media: {
+									type: 'image' as const,
+									imageUrl: thumbnailUrl,
+									thumbnailUrl,
+								},
+							}
 						: {}),
 				},
 			},
