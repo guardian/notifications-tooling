@@ -9,15 +9,15 @@ export const notificationsPath = {
 	get: {
 		summary: 'List recent notifications',
 		description:
-			'Returns notifications created at or after the required `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. `total` reports the full count at or after that cut-off regardless of pagination. `limit` and `offset` are all-or-nothing: supply both or neither.',
+			'Returns notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. `total` reports the full count at or after that cut-off regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{
 				name: 'since',
 				in: 'query',
-				required: true,
+				required: false,
 				description:
-					'Cut-off as a Unix timestamp in seconds. Only notifications created at or after this instant are returned.',
+					'Cut-off as a Unix timestamp in seconds. Only notifications created at or after this instant are returned. Defaults to 14 days ago when omitted.',
 				schema: { type: 'integer', minimum: 0 },
 			},
 			{

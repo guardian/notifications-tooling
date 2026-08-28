@@ -916,17 +916,24 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
-		it('returns 400 when the required since cut-off is missing', async () => {
+		it('defaults since to 14 days ago when it is missing', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
 
 			try {
+				const before = Date.now();
 				const response = await fetch(`${listServer.baseUrl}/v1/notifications`);
+				const after = Date.now();
 
-				expect(response.status).toBe(400);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('bad_request');
-				expect(listNotifications).not.toHaveBeenCalled();
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledTimes(1);
+				const { since, limit, offset } = listNotifications.mock.calls[0][0];
+				expect(limit).toBe(10);
+				expect(offset).toBe(0);
+
+				const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+				expect(since.getTime()).toBeGreaterThanOrEqual(before - fourteenDaysMs);
+				expect(since.getTime()).toBeLessThanOrEqual(after - fourteenDaysMs);
 			} finally {
 				await listServer.close();
 			}
