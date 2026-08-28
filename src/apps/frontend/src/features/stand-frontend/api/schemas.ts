@@ -212,6 +212,21 @@ export const notificationResourceSchema = z.strictObject({
 });
 export type NotificationResource = z.infer<typeof notificationResourceSchema>;
 
+export const notificationSummarySchema = notificationResourceSchema.omit({
+	dispatches: true,
+});
+export type NotificationSummary = z.infer<typeof notificationSummarySchema>;
+
+export const notificationListResponseSchema = z.strictObject({
+	total: z.number().int().nonnegative(),
+	limit: z.number().int().min(1).max(50),
+	offset: z.number().int().nonnegative(),
+	notifications: notificationSummarySchema.array(),
+});
+export type NotificationListResponse = z.infer<
+	typeof notificationListResponseSchema
+>;
+
 export const sendNotificationResponseSchema = notificationResourceSchema;
 export type SendNotificationResponse = z.infer<
 	typeof sendNotificationResponseSchema
