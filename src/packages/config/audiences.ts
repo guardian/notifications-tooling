@@ -103,22 +103,37 @@ interface AppPushTopicType {
  * News tool emits. The raw topic coordinates are kept out of the public
  * contract. The internal test topic lives in `internalAppPushTestTopicTypes`,
  * not here, so it can never be targeted by a production send.
+ *
+ * Duplicated per stage (`codeAppPushTopicTypes` / `prodAppPushTopicTypes`) so
+ * CODE and PROD can be configured independently.
  */
-const curatedAppPushTopicTypes = {
+const codeAppPushTopicTypes = {
 	'breaking-news': {
 		label: 'Breaking news',
 		importance: AppPushImportance.Major,
 		editions: {
-			uk: { label: 'UK', mobileN10nTopic: { type: 'breaking', name: 'uk' } },
-			us: { label: 'US', mobileN10nTopic: { type: 'breaking', name: 'us' } },
-			au: { label: 'AU', mobileN10nTopic: { type: 'breaking', name: 'au' } },
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk-dispatch-test' },
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'us-dispatch-test' },
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'au-dispatch-test' },
+			},
 			international: {
 				label: 'International',
-				mobileN10nTopic: { type: 'breaking', name: 'international' },
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'international-dispatch-test',
+				},
 			},
 			europe: {
 				label: 'Europe',
-				mobileN10nTopic: { type: 'breaking', name: 'europe' },
+				mobileN10nTopic: { type: 'breaking', name: 'europe-dispatch-test' },
 			},
 		},
 	},
@@ -128,27 +143,166 @@ const curatedAppPushTopicTypes = {
 		editions: {
 			uk: {
 				label: 'UK',
-				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
+				mobileN10nTopic: { type: 'breaking', name: 'uk-sport-dispatch-test' },
 			},
 			us: {
 				label: 'US',
-				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
+				mobileN10nTopic: { type: 'breaking', name: 'us-sport-dispatch-test' },
 				titleOverride: 'Sports news',
 			},
 			au: {
 				label: 'AU',
-				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
+				mobileN10nTopic: { type: 'breaking', name: 'au-sport-dispatch-test' },
 			},
 			international: {
 				label: 'International',
-				mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'international-sport-dispatch-test',
+				},
 			},
 			europe: {
 				label: 'Europe',
-				mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'europe-sport-dispatch-test',
+				},
 			},
 		},
 	},
+	'editors-picks': {
+		label: "Editors' picks",
+		importance: AppPushImportance.Minor,
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'uk-editors-picks-dispatch-test',
+				},
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'us-editors-picks-dispatch-test',
+				},
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'au-editors-picks-dispatch-test',
+				},
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'international-editors-picks-dispatch-test',
+				},
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'europe-editors-picks-dispatch-test',
+				},
+			},
+		},
+	},
+	'one-not-to-miss': {
+		label: 'One not to miss',
+		importance: AppPushImportance.Minor,
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'uk-one-not-to-miss-dispatch-test',
+				},
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'us-one-not-to-miss-dispatch-test',
+				},
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'au-one-not-to-miss-dispatch-test',
+				},
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'international-one-not-to-miss-dispatch-test',
+				},
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'europe-one-not-to-miss-dispatch-test',
+				},
+			},
+		},
+	},
+} as const satisfies Record<string, AppPushTopicType>;
+
+/**
+ * PROD duplicate of {@link codeAppPushTopicTypes}. Currently identical, but kept
+ * separate so PROD topic coordinates can diverge without affecting CODE.
+ */
+const prodAppPushTopicTypes = {
+	// 'breaking-news': {
+	// 	label: 'Breaking news',
+	// 	importance: AppPushImportance.Major,
+	// 	editions: {
+	// 		uk: { label: 'UK', mobileN10nTopic: { type: 'breaking', name: 'uk' } },
+	// 		us: { label: 'US', mobileN10nTopic: { type: 'breaking', name: 'us' } },
+	// 		au: { label: 'AU', mobileN10nTopic: { type: 'breaking', name: 'au' } },
+	// 		international: {
+	// 			label: 'International',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'international' },
+	// 		},
+	// 		europe: {
+	// 			label: 'Europe',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'europe' },
+	// 		},
+	// 	},
+	// },
+	// sport: {
+	// 	label: 'Sport news',
+	// 	importance: AppPushImportance.Minor,
+	// 	editions: {
+	// 		uk: {
+	// 			label: 'UK',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
+	// 		},
+	// 		us: {
+	// 			label: 'US',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
+	// 			titleOverride: 'Sports news',
+	// 		},
+	// 		au: {
+	// 			label: 'AU',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
+	// 		},
+	// 		international: {
+	// 			label: 'International',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
+	// 		},
+	// 		europe: {
+	// 			label: 'Europe',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
+	// 		},
+	// 	},
+	// },
 	'editors-picks': {
 		label: "Editors' picks",
 		importance: AppPushImportance.Minor,
@@ -178,41 +332,41 @@ const curatedAppPushTopicTypes = {
 			},
 		},
 	},
-	'one-not-to-miss': {
-		label: 'One not to miss',
-		importance: AppPushImportance.Minor,
-		editions: {
-			uk: {
-				label: 'UK',
-				mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
-			},
-			us: {
-				label: 'US',
-				mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
-			},
-			au: {
-				label: 'AU',
-				mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
-			},
-			international: {
-				label: 'International',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'international-one-not-to-miss',
-				},
-			},
-			europe: {
-				label: 'Europe',
-				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
-			},
-		},
-	},
+	// 'one-not-to-miss': {
+	// 	label: 'One not to miss',
+	// 	importance: AppPushImportance.Minor,
+	// 	editions: {
+	// 		uk: {
+	// 			label: 'UK',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
+	// 		},
+	// 		us: {
+	// 			label: 'US',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
+	// 		},
+	// 		au: {
+	// 			label: 'AU',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
+	// 		},
+	// 		international: {
+	// 			label: 'International',
+	// 			mobileN10nTopic: {
+	// 				type: 'breaking',
+	// 				name: 'international-one-not-to-miss',
+	// 			},
+	// 		},
+	// 		europe: {
+	// 			label: 'Europe',
+	// 			mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
+	// 		},
+	// 	},
+	// },
 } as const satisfies Record<string, AppPushTopicType>;
 
 /**
  * The internal test topic type. Its single edition resolves to mobile-n10n's
  * `internal-test` topic, which only internal test devices subscribe to. Kept out
- * of `curatedAppPushTopicTypes` so it is accepted solely by
+ * of the curated topic types so it is accepted solely by
  * `POST /v1/notification-tests`, never the production notifications endpoint.
  */
 const internalAppPushTestTopicTypes = {
@@ -229,14 +383,13 @@ const internalAppPushTestTopicTypes = {
 } as const satisfies Record<string, AppPushTopicType>;
 
 /**
- * Separated per stage to mirror newsletter segments. mobile-n10n topic
- * coordinates are the same across environments (unlike Braze campaign ids), so
- * CODE and PROD currently share the same curated set; the split lets either
- * stage diverge without disturbing the other.
+ * Separated per stage to mirror newsletter segments. CODE and PROD hold
+ * duplicate curated sets so either stage can be configured independently
+ * without disturbing the other.
  */
 const appPushTopicTypesByStage = {
-	CODE: curatedAppPushTopicTypes,
-	PROD: curatedAppPushTopicTypes,
+	CODE: codeAppPushTopicTypes,
+	PROD: prodAppPushTopicTypes,
 } as const satisfies Record<'CODE' | 'PROD', Record<string, AppPushTopicType>>;
 
 export type AppPushTopicTypeId = keyof typeof appPushTopicTypesByStage.CODE;
