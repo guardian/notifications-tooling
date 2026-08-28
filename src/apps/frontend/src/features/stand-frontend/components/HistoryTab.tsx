@@ -13,9 +13,9 @@ import {
 	TableRow,
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
+import type { DisplayAppAlertTopicEditionId } from '@models';
 import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';
-import type { Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
 
 type Office = 'UK' | 'US';
@@ -29,7 +29,7 @@ export interface HistoryAlert {
 	alertType: string;
 	sentFrom: Office;
 	sentBy: string;
-	sentTo: Edition[];
+	sentTo: DisplayAppAlertTopicEditionId[];
 	sentAt: string;
 	status: 'Sent' | 'Failed';
 }
@@ -95,7 +95,7 @@ const styles = {
 const getChannelName = (channel: HistoryAlert['channel']) =>
 	channel === 'push' ? 'App alert' : 'Newsletter email';
 
-const editionNames: Record<Edition, string> = {
+const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
 	UK: 'United Kingdom',
 	US: 'United States',
 	AU: 'Australia',
