@@ -394,9 +394,11 @@ const appPushTopicTypesByStage = {
 
 export type AppPushTopicTypeId = keyof typeof appPushTopicTypesByStage.CODE;
 
+// Keyed by string, not the full `AppPushTopicTypeId` union: a stage may expose a
+// subset of the curated topic types (e.g. PROD while others are still rolling out).
 export const getAppPushTopicTypes = (
 	stage: Env['STAGE'],
-): Record<AppPushTopicTypeId, AppPushTopicType> =>
+): Record<string, AppPushTopicType> =>
 	appPushTopicTypesByStage[stage === 'PROD' ? 'PROD' : 'CODE'];
 
 export const appPushTopicTypes = getAppPushTopicTypes(configurationStage);
@@ -410,10 +412,10 @@ export type AppPushTestTopicTypeId = keyof typeof internalAppPushTestTopicTypes;
 export const appPushTestTopicTypes = internalAppPushTestTopicTypes;
 
 /** Production and internal-test topic types share a resolver. */
-const resolvableAppPushTopicTypes: Record<
-	AppPushTopicTypeId | AppPushTestTopicTypeId,
-	AppPushTopicType
-> = { ...appPushTopicTypes, ...appPushTestTopicTypes };
+const resolvableAppPushTopicTypes: Record<string, AppPushTopicType> = {
+	...appPushTopicTypes,
+	...appPushTestTopicTypes,
+};
 
 /** Resolves a (topic type, edition) pair to its downstream topic and importance. */
 export const resolveAppPushTopic = (
@@ -427,7 +429,7 @@ export const resolveAppPushTopic = (
 	  }
 	| undefined => {
 	const topicType = resolvableAppPushTopicTypes[topicTypeId];
-	const edition = topicType.editions[editionId];
+	const edition = topicType?.editions[editionId];
 	if (!edition) {
 		return undefined;
 	}

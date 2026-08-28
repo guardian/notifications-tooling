@@ -27,7 +27,7 @@ describe('resolveAppPushTopic', () => {
 
 	it('resolves a production topic edition', () => {
 		expect(resolveAppPushTopic('breaking-news', 'uk')).toEqual({
-			topic: { type: 'breaking', name: 'uk' },
+			topic: { type: 'breaking', name: 'uk-dispatch-test' },
 			importance: AppPushImportance.Major,
 			titleOverride: undefined,
 		});
@@ -35,7 +35,7 @@ describe('resolveAppPushTopic', () => {
 
 	it('surfaces the title override for the US sport edition', () => {
 		expect(resolveAppPushTopic('sport', 'us')).toEqual({
-			topic: { type: 'breaking', name: 'us-sport' },
+			topic: { type: 'breaking', name: 'us-sport-dispatch-test' },
 			importance: AppPushImportance.Minor,
 			titleOverride: 'Sports news',
 		});
@@ -43,7 +43,7 @@ describe('resolveAppPushTopic', () => {
 
 	it('leaves other sport editions without a title override', () => {
 		expect(resolveAppPushTopic('sport', 'uk')).toEqual({
-			topic: { type: 'breaking', name: 'uk-sport' },
+			topic: { type: 'breaking', name: 'uk-sport-dispatch-test' },
 			importance: AppPushImportance.Minor,
 			titleOverride: undefined,
 		});
