@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import {
+	getBrazeCampaignDetails,
 	MAX_BRAZE_TRIGGER_PROPERTIES_BYTES,
 	registerBrazeTestEmailRecipients,
 	sendBrazeCampaign,
@@ -324,5 +325,68 @@ describe('sendBrazeTestEmail', () => {
 			}),
 		).rejects.toThrow('Braze test email send failed with status 400.');
 		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('getBrazeCampaignDetails', () => {
+	const campaignRequest = {
+		apiKey: 'secret-api-key',
+		restEndpoint: 'https://rest.example.braze.eu',
+		campaignId: 'campaign-uk',
+		timeoutMs: 10_000,
+	};
+
+	const campaignDetails = {
+		name: 'Breaking news UK',
+		created_at: '2026-08-01T12:00:00Z',
+		updated_at: '2026-08-02T12:00:00Z',
+		description: 'UK breaking news',
+		archived: false,
+		enabled: true,
+		draft: false,
+		schedule_type: 'triggered',
+		channels: ['email'],
+		first_sent: '2026-08-01T12:00:00Z',
+		last_sent: '2026-08-02T12:00:00Z',
+	};
+
+	it('returns campaign details and the Braze response status', () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json(campaignDetails, { status: 200 }),
+		);
+
+		expect(getBrazeCampaignDetails(campaignRequest)).resolves.toEqual({
+			data: campaignDetails,
+			status: 200,
+		});
+		expect(fetcher).toHaveBeenCalledWith(
+			'https://rest.example.braze.eu/campaigns/details?campaign_id=campaign-uk',
+			expect.objectContaining({ method: 'GET' }),
+		);
+	});
+
+	it('returns the provider error when Braze responds with status 500', () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			new Response('service unavailable', { status: 500 }),
+		);
+
+		expect(getBrazeCampaignDetails(campaignRequest)).resolves.toEqual({
+			data: undefined,
+			status: 500,
+			errorMessage: 'Braze get campaign details failed with status 500.',
+		});
+		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+
+	it('returns a parsing error when Braze responds with the wrong format', () => {
+		spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ name: 'Incomplete campaign' }, { status: 200 }),
+		);
+
+		expect(getBrazeCampaignDetails(campaignRequest)).resolves.toEqual({
+			data: undefined,
+			status: 200,
+			errorMessage: 'Braze get campaign details returned an invalid response.',
+		});
 	});
 });
