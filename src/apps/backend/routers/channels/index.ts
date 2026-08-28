@@ -7,7 +7,10 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
+import { getSSMParameter } from '@config/ssm';
 import { UserPermissions } from '@models';
+import type { BrazeCampaignDetails } from '@services';
+import { getBrazeCampaignDetails } from '@services';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
@@ -105,6 +108,9 @@ export const channelAudiences = {
 	},
 } as const;
 
+const isCampaignLive = (data?: BrazeCampaignDetails): boolean =>
+	!!data && !data.archived && !data.draft && data.enabled;
+
 /**
  * `GET /v1/channels/constraints`. Returns the per-channel validation rules
  * (content length limits, compose shape, audience caps) the SPA uses to drive
@@ -135,6 +141,46 @@ export const channelsRouter = Router()
 	// not requiring permissions for this endpoint as could be
 	// needed for troubleshooting by engineers on rota
 	// who wouldn't necessarily have DispatchAccess
-	.get('/config/email', authMiddleware, (_req: Request, res: Response) => {
-		res.json(newsletterSegments);
-	});
+	.get(
+		'/config/email',
+		authMiddleware,
+		async (_req: Request, res: Response) => {
+			const [apiKey, restEndpoint] = await Promise.all([
+				getSSMParameter('BRAZE_API_KEY'),
+				getSSMParameter('BRAZE_REST_ENDPOINT'),
+			]);
+
+			const editions = ['UK', 'US', 'AU'] as Array<
+				keyof typeof newsletterSegments
+			>;
+
+			const [ukDetails, usDetails, auDetails] = await Promise.all(
+				editions.map((key) =>
+					getBrazeCampaignDetails({
+						campaignId: newsletterSegments[key].brazeCampaignId,
+						restEndpoint,
+						apiKey,
+						timeoutMs: 2000,
+					}),
+				),
+			);
+
+			res.json({
+				UK: {
+					...newsletterSegments.UK,
+					campaignLive: isCampaignLive(ukDetails?.data),
+					...ukDetails,
+				},
+				US: {
+					...newsletterSegments.US,
+					campaignLive: isCampaignLive(usDetails?.data),
+					...usDetails,
+				},
+				AU: {
+					...newsletterSegments.AU,
+					campaignLive: isCampaignLive(auDetails?.data),
+					...auDetails,
+				},
+			});
+		},
+	);
