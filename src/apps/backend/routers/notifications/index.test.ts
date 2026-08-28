@@ -1,4 +1,3 @@
-import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import type {
 	NotificationListPage,
 	NotificationWithDispatches,
@@ -6,6 +5,7 @@ import type {
 import { httpLogger } from '@http-logger';
 import { UserPermissions } from '@models';
 import { BrazeApiError } from '@services';
+import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
 import {
@@ -917,7 +917,14 @@ describe('GET /v1/notifications', () => {
 		});
 
 		it('defaults since to 14 days ago when it is missing', async () => {
-			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			let calledWith:
+				{ since?: Date; limit?: number; offset?: number } | undefined;
+			const listNotifications = mock(
+				(options: { since?: Date; limit?: number; offset?: number }) => {
+					calledWith = options;
+					return Promise.resolve(storedListPage());
+				},
+			);
 			const listServer = await startListServer(listNotifications);
 
 			try {
@@ -927,13 +934,16 @@ describe('GET /v1/notifications', () => {
 
 				expect(response.status).toBe(200);
 				expect(listNotifications).toHaveBeenCalledTimes(1);
-				const { since, limit, offset } = listNotifications.mock.calls[0][0];
-				expect(limit).toBe(10);
-				expect(offset).toBe(0);
+				expect(calledWith?.limit).toBe(10);
+				expect(calledWith?.offset).toBe(0);
 
 				const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
-				expect(since.getTime()).toBeGreaterThanOrEqual(before - fourteenDaysMs);
-				expect(since.getTime()).toBeLessThanOrEqual(after - fourteenDaysMs);
+				const since = calledWith?.since;
+				expect(since).toBeInstanceOf(Date);
+				expect(since!.getTime()).toBeGreaterThanOrEqual(
+					before - fourteenDaysMs,
+				);
+				expect(since!.getTime()).toBeLessThanOrEqual(after - fourteenDaysMs);
 			} finally {
 				await listServer.close();
 			}
