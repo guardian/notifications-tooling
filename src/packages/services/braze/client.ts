@@ -112,7 +112,6 @@ const brazeCampaignDetailsSchema = z.object({
 	first_sent: z.string().optional(),
 	last_sent: z.string().optional(),
 });
-export type BrazeCampaignDetails = z.infer<typeof brazeCampaignDetailsSchema>;
 
 const testEmailUserAliasLabel = 'dispatch-tool-test-email';
 
@@ -312,40 +311,28 @@ export const getBrazeCampaignDetails = async ({
 	restEndpoint,
 	apiKey,
 	timeoutMs,
-}: GetBrazeCampaignDetailsRequest): Promise<{
-	data?: BrazeCampaignDetails;
-	errorMessage?: string;
-	status?: number;
-}> => {
-	try {
-		const detailsResponse = await requestBraze(
-			new URL(
-				`/campaigns/details?campaign_id=${campaignId}`,
-				restEndpoint,
-			).toString(),
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${apiKey}`,
-					'Content-Type': 'application/json',
-				},
-				signal: AbortSignal.timeout(timeoutMs),
+}: GetBrazeCampaignDetailsRequest) => {
+	const messageResponse = await requestBraze(
+		new URL(
+			`/campaigns/details?campaign_id=${campaignId}`,
+			restEndpoint,
+		).toString(),
+		{
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				'Content-Type': 'application/json',
 			},
-			'get campaign details',
-		);
+			signal: AbortSignal.timeout(timeoutMs),
+		},
+		'get campaign details',
+	);
 
-		const result = await parseBrazeResponse(
-			detailsResponse,
-			brazeCampaignDetailsSchema,
-			'test email send',
-		);
+	const result = await parseBrazeResponse(
+		messageResponse,
+		brazeCampaignDetailsSchema,
+		'test email send',
+	);
 
-		return { data: result, status: detailsResponse.status };
-	} catch (err) {
-		if (!(err instanceof BrazeApiError)) {
-			throw err;
-		}
-
-		return { data: undefined, status: err.status, errorMessage: err.message };
-	}
+	return { data: result, status: messageResponse.status };
 };
