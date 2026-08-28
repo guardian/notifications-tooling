@@ -1,13 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { WithNotificationContext } from '../../../stories/story-helpers';
+import { acceptedEmailSendResponse } from '../../../mocks/api-fixtures';
+import {
+	completeEmailParams,
+	populatedEmailState,
+	WithNotificationContext,
+} from '../../../stories/story-helpers';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
+import type { NewsletterFormValues } from '../notification-forms';
 import { defaultState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
 
 type StoryArgs = {
 	notificationState: NotificationState;
+	formValues?: Partial<NewsletterFormValues>;
+	containerMinWidth: string;
 };
 
 const meta: Meta<StoryArgs> = {
@@ -15,6 +23,14 @@ const meta: Meta<StoryArgs> = {
 	component: CreateNewsletterEmailTab,
 	args: {
 		notificationState: defaultState,
+		containerMinWidth: '1600px',
+	},
+	argTypes: {
+		containerMinWidth: {
+			control: 'text',
+			description:
+				'Width of the story container, used to exercise the tab layout breakpoints at 1310px and 1500px.',
+		},
 	},
 	parameters: {
 		layout: 'fullscreen',
@@ -26,12 +42,12 @@ const meta: Meta<StoryArgs> = {
 		},
 	},
 	render: (args) => {
-		const { notificationState } = args;
+		const { notificationState, formValues, containerMinWidth } = args;
 		return (
 			<div
 				style={{
 					display: 'flex',
-					minWidth: '1600px',
+					minWidth: containerMinWidth,
 					minHeight: '100vh',
 					boxSizing: 'border-box',
 				}}
@@ -39,6 +55,9 @@ const meta: Meta<StoryArgs> = {
 				{WithNotificationContext(
 					<CreateNewsletterEmailTab />,
 					notificationState,
+					{},
+					'email',
+					formValues,
 				)}
 			</div>
 		);
@@ -59,6 +78,31 @@ export const Default: Story = {
 				'The preview for the newsletter email will be shown below.',
 			),
 		).toBeInTheDocument();
+	},
+};
+
+export const Sent: Story = {
+	args: {
+		notificationState: {
+			...populatedEmailState,
+			sendingResult: {
+				success: true,
+				data: acceptedEmailSendResponse,
+			},
+		},
+		formValues: completeEmailParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+		).toBeVisible();
+		await expect(
+			canvas.queryByRole('button', { name: 'Content' }),
+		).not.toBeInTheDocument();
 	},
 };
 
