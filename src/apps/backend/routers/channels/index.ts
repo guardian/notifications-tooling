@@ -108,8 +108,8 @@ export const channelAudiences = {
 	},
 } as const;
 
-const isCampaignLive = (data?: BrazeCampaignDetails): boolean =>
-	!!data && !data.archived && !data.draft && data.enabled;
+const isCampaignLive = (data?: BrazeCampaignDetails): boolean | null =>
+	data ? !data.archived && !data.draft && data.enabled : null;
 
 /**
  * `GET /v1/channels/constraints`. Returns the per-channel validation rules

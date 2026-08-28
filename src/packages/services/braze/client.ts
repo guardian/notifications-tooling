@@ -334,7 +334,7 @@ export const getBrazeCampaignDetails = async ({
 		const result = await parseBrazeResponse(
 			detailsResponse,
 			brazeCampaignDetailsSchema,
-			'test email send',
+			'get campaign details',
 		);
 
 		return { data: result, status: detailsResponse.status };
