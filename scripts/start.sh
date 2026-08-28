@@ -4,6 +4,7 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR=$DIR/..
+DATABASE_DIR=$ROOT_DIR/src/packages/database
 
 PIDS=()
 
@@ -27,7 +28,7 @@ start_frontend() {
 start_backend() {
   echo "Starting backend..."
   pushd $ROOT_DIR/src/apps/backend
-  bun run dev &
+  bun --env-file="$DATABASE_DIR/.env" run dev &
   PIDS+=($!)
   popd
 }
