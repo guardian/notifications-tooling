@@ -2,8 +2,13 @@ import { css } from '@emotion/react';
 import { baseColors, semanticColors, semanticSizing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
+import { useFormContext, useWatch } from 'react-hook-form';
+import {
+	type AppAlertFormValues,
+	defaultAppAlertFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 
 const ToggleButtonTheme = {
@@ -31,24 +36,15 @@ const ToggleButtonTheme = {
 		}),
 };
 export const ToggleSwitch = () => {
-	const { notification, updateNotification } = useContext(
-		NotificationFormContext,
-	);
-	const contentId = notification.content?.id;
-	const thumbnailImage = notification.content?.fields?.thumbnail;
-	const [selection, setSelection] = useState({
-		contentId,
-		selected: Boolean(thumbnailImage),
-		thumbnail: thumbnailImage,
+	const { notification } = useContext(NotificationFormContext);
+	const { setValue } = useFormContext<AppAlertFormValues>();
+	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
+		name: 'includeThumbnail',
+		defaultValue: defaultAppAlertFormValues.includeThumbnail,
 	});
-	const isCurrentArticle = selection.contentId === contentId;
-	const availableThumbnail = isCurrentArticle
-		? selection.thumbnail
-		: thumbnailImage;
-	const hasThumbnail = Boolean(availableThumbnail);
-	const selected = isCurrentArticle
-		? selection.selected
-		: Boolean(thumbnailImage);
+	const thumbnailImage = notification.content?.fields?.thumbnail;
+	const hasThumbnail = Boolean(thumbnailImage);
+	const selected = hasThumbnail && includeThumbnail;
 
 	return (
 		<div
@@ -64,19 +60,7 @@ export const ToggleSwitch = () => {
 				isDisabled={!hasThumbnail}
 				isSelected={selected}
 				onChange={(isSelected) => {
-					if (!contentId || !availableThumbnail) {
-						return;
-					}
-					setSelection({
-						contentId,
-						selected: isSelected,
-						thumbnail: availableThumbnail,
-					});
-					updateNotification({
-						type: 'set-thumbnail-image',
-						contentId,
-						thumbnail: isSelected ? availableThumbnail : '',
-					});
+					setValue('includeThumbnail', isSelected, { shouldDirty: true });
 				}}
 				css={ToggleButtonTheme.baseStyle(selected)}
 			>

@@ -35,40 +35,4 @@ describe('notificationReducer article lifecycle', () => {
 			fetchArticleError: 'Article not found',
 		});
 	});
-
-	it('disables and restores the current article thumbnail', () => {
-		const disabledState = notificationReducer(
-			{ ...defaultState, content: articleFixture },
-			{
-				type: 'set-thumbnail-image',
-				contentId: articleFixture.id,
-				thumbnail: '',
-			},
-		);
-
-		expect(disabledState.content?.fields?.thumbnail).toBe('');
-
-		const restoredState = notificationReducer(disabledState, {
-			type: 'set-thumbnail-image',
-			contentId: articleFixture.id,
-			thumbnail: articleFixture.fields?.thumbnail ?? '',
-		});
-
-		expect(restoredState.content?.fields?.thumbnail).toBe(
-			articleFixture.fields?.thumbnail,
-		);
-	});
-
-	it('ignores thumbnail updates for a stale article', () => {
-		const state = notificationReducer(
-			{ ...defaultState, content: articleFixture },
-			{
-				type: 'set-thumbnail-image',
-				contentId: 'different/article',
-				thumbnail: '',
-			},
-		);
-
-		expect(state.content).toEqual(articleFixture);
-	});
 });

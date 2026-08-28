@@ -142,6 +142,33 @@ export const WithImportedArticle: Story = {
 	},
 };
 
+export const ThumbnailToggle: Story = {
+	args: {
+		notificationState: populatedPushState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(
+			canvas.getByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+		).toBeVisible();
+
+		await userEvent.click(thumbnailToggle);
+
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(
+			canvas.queryByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const SubmitWithNativeForm: Story = {
 	args: {
 		notificationState: populatedPushState,

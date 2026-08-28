@@ -74,11 +74,6 @@ export type NotificationAction =
 			errorMessage: string;
 	  }
 	| {
-			type: 'set-thumbnail-image';
-			contentId: string;
-			thumbnail: string;
-	  }
-	| {
 			type: 'set-show-confirm-send';
 			isOpen: boolean;
 	  }

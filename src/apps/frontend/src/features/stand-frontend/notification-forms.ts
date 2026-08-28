@@ -68,6 +68,7 @@ export const createAppAlertFormSchema = ({
 		editions: z
 			.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT']))
 			.min(1, 'Please select an edition'),
+		includeThumbnail: z.boolean(),
 		deliveryOption: z.literal('appImmediate'),
 	});
 
@@ -95,5 +96,6 @@ export const defaultAppAlertFormValues: AppAlertFormValues = {
 	alertType: 'breaking-news',
 	headline: '',
 	editions: [],
+	includeThumbnail: true,
 	deliveryOption: 'appImmediate',
 };

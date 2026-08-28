@@ -38,6 +38,7 @@ describe('notification request builders', () => {
 				alertType: 'breaking-news',
 				headline: 'A developing story',
 				editions: ['UK', 'EU', 'INT'],
+				includeThumbnail: true,
 				deliveryOption: 'appImmediate',
 			},
 			content: articleFixture,
@@ -70,6 +71,22 @@ describe('notification request builders', () => {
 		});
 	});
 
+	it('removes app-push media when the thumbnail is disabled', () => {
+		const request = buildAppAlertRequest({
+			values: {
+				alertType: 'breaking-news',
+				headline: 'A developing story',
+				editions: ['UK'],
+				includeThumbnail: false,
+				deliveryOption: 'appImmediate',
+			},
+			content: articleFixture,
+			idempotencyKey: 'app-alert-without-thumbnail',
+		});
+
+		expect(request.content.items['lead-story']).not.toHaveProperty('media');
+	});
+
 	it('rejects content that does not match the request channel', () => {
 		const newsletterRequest = buildNewsletterRequest({
 			values: {
@@ -87,6 +104,7 @@ describe('notification request builders', () => {
 				alertType: 'breaking-news',
 				headline: 'A developing story',
 				editions: ['UK'],
+				includeThumbnail: false,
 				deliveryOption: 'appImmediate',
 			},
 			content: articleFixture,
