@@ -43,16 +43,26 @@ export const createDependencies = () => {
 	const getSSMParameter = mock((key: string) =>
 		Promise.resolve(ssmParameters[key] ?? ''),
 	);
-	const sendAppNotification = mock(() => Promise.resolve({ id: 'n10n-id' }));
+	const sendAppNotification = mock(() =>
+		Promise.resolve({ id: 'n10n-id', status: 201 }),
+	);
 	const renderEmail = mock(() =>
 		Promise.resolve('<html>Rendered newsletter</html>'),
 	);
 	const sendBrazeCampaign = mock(() =>
-		Promise.resolve({ message: 'success', dispatch_id: 'dispatch-123' }),
+		Promise.resolve({
+			message: 'success',
+			dispatch_id: 'dispatch-123',
+			status: 201,
+		}),
 	);
 	const registerBrazeTestEmailRecipients = mock(() => Promise.resolve());
 	const sendBrazeTestEmail = mock(() =>
-		Promise.resolve({ message: 'success', dispatch_id: 'test-dispatch-123' }),
+		Promise.resolve({
+			message: 'success',
+			dispatch_id: 'test-dispatch-123',
+			status: 201,
+		}),
 	);
 	const dependencies: DispatchNotificationDependencies = {
 		getSSMParameter,

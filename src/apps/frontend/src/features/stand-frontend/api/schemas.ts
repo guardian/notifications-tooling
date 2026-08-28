@@ -133,22 +133,85 @@ export type ChannelConstraintsResponse = z.infer<
 	typeof channelConstraintsResponseSchema
 >;
 
-export const sendNotificationResponseSchema = z.strictObject({
-	notificationId: z.string(),
-	status: z.literal('accepted'),
-	plans: z.array(
-		z.strictObject({
-			channel: z.enum(['newsletter', 'app-push']),
-			planId: z.string(),
-			status: z.literal('accepted'),
-		}),
-	),
-	statusUrl: z.string(),
-	cancellable: z.strictObject({
-		cancelUrl: z.string(),
-		expiresAt: z.number().int(),
-	}),
+const editionOptionSchema = z.object({
+	id: z.string(),
+	label: z.string(),
 });
+
+const topicTypeOptionSchema = z.object({
+	id: z.string(),
+	label: z.string(),
+	editions: editionOptionSchema.array(),
+});
+export type TopicTypeOption = z.infer<typeof topicTypeOptionSchema>;
+
+/**
+ * `GET /v1/channels/audiences`. Non-strict throughout, so the backend can add
+ * a channel, a field, or an audience cap without breaking a deployed SPA — the
+ * client only fails on something it asked for going missing or changing type.
+ */
+export const channelAudienceResponseSchema = z.object({
+	channels: z
+		.object({
+			newsletter: z
+				.object({
+					segments: z.array(
+						z.object({
+							id: z.string(),
+							label: z.string(),
+						}),
+					),
+				})
+				.loose(),
+			'app-push': z
+				.object({
+					topicTypes: topicTypeOptionSchema.array(),
+				})
+				.loose(),
+		})
+		.loose(),
+});
+export type ChannelAudienceResponse = z.infer<
+	typeof channelAudienceResponseSchema
+>;
+
+export const notificationDispatchSchema = z.strictObject({
+	id: z.string(),
+	channel: z.enum(['newsletter', 'app-push']),
+	target: z.string(),
+	status: z.enum(['success', 'failure']),
+	providerRef: z.string().nullable(),
+	failureReason: z.string().nullable(),
+	providerStatusCode: z.number().int().nullable(),
+	detail: z.record(z.string(), z.unknown()).nullable(),
+	createdAt: z.string(),
+	updatedAt: z.string(),
+});
+export type NotificationDispatch = z.infer<typeof notificationDispatchSchema>;
+
+/**
+ * The stored notification resource returned by both `POST /v1/notifications`
+ * and `POST /v1/notification-tests`: envelope fields plus the per-target
+ * dispatch outcomes. `status` is rolled up from those outcomes.
+ */
+export const notificationResourceSchema = z.strictObject({
+	id: z.string(),
+	idempotencyKey: z.string(),
+	kind: z.enum(['send', 'test']),
+	status: z.enum(['accepted', 'delivered', 'partially_delivered', 'failed']),
+	sender: z.string(),
+	createdByEmail: z.string(),
+	dryRun: z.boolean(),
+	scheduledFor: z.string().nullable(),
+	content: z.record(z.string(), z.unknown()),
+	channels: z.record(z.string(), z.unknown()),
+	createdAt: z.string(),
+	updatedAt: z.string(),
+	dispatches: notificationDispatchSchema.array(),
+});
+export type NotificationResource = z.infer<typeof notificationResourceSchema>;
+
+export const sendNotificationResponseSchema = notificationResourceSchema;
 export type SendNotificationResponse = z.infer<
 	typeof sendNotificationResponseSchema
 >;

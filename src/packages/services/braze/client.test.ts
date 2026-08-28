@@ -26,12 +26,16 @@ describe('sendBrazeCampaign', () => {
 			timeoutSignal,
 		);
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
-			Response.json({ message: 'success', dispatch_id: 'dispatch-123' }),
+			Response.json(
+				{ message: 'success', dispatch_id: 'dispatch-123' },
+				{ status: 201 },
+			),
 		);
 
 		expect(sendBrazeCampaign(request)).resolves.toEqual({
 			message: 'success',
 			dispatch_id: 'dispatch-123',
+			status: 201,
 		});
 		expect(fetcher).toHaveBeenCalledWith(
 			'https://rest.example.braze.eu/campaigns/trigger/send',
@@ -240,7 +244,10 @@ describe('sendBrazeTestEmail', () => {
 		const timeoutSignal = new AbortController().signal;
 		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
-			Response.json({ message: 'success', dispatch_id: 'dispatch-456' }),
+			Response.json(
+				{ message: 'success', dispatch_id: 'dispatch-456' },
+				{ status: 201 },
+			),
 		);
 
 		expect(
@@ -261,6 +268,7 @@ describe('sendBrazeTestEmail', () => {
 		).resolves.toEqual({
 			message: 'success',
 			dispatch_id: 'dispatch-456',
+			status: 201,
 		});
 		expect(fetcher).toHaveBeenCalledWith(
 			'https://rest.example.braze.eu/messages/send',

@@ -1,5 +1,3 @@
-import { acceptedNotificationSchema } from './accepted-notification';
-import { acceptedTestNotificationSchema } from './accepted-test-notification';
 import { articleResolutionErrorSchema } from './article-resolution-error';
 import {
 	channelAudiencesSchema,
@@ -12,10 +10,9 @@ import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
+import { notificationConflictErrorSchema } from './notification-conflict-error';
 import { notificationDispatchSchema } from './notification-dispatch';
 import { notificationNotFoundSchema } from './notification-not-found';
-import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
-import { notificationProviderErrorSchema } from './notification-provider-error';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
@@ -33,16 +30,13 @@ export const schemas = {
 	Notification: notificationSchema,
 	NotificationDispatch: notificationDispatchSchema,
 	NotificationNotFound: notificationNotFoundSchema,
+	NotificationConflictError: notificationConflictErrorSchema,
 	NotificationSendRequest: notificationSendRequestJsonSchema,
 	NotificationTestSendRequest: notificationTestSendRequestJsonSchema,
-	NotificationPlanAcceptance: notificationPlanAcceptanceSchema,
-	AcceptedNotification: acceptedNotificationSchema,
-	AcceptedTestNotification: acceptedTestNotificationSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,
 	NotificationValidationError: notificationValidationErrorSchema,
 	EmailRenderingContentError: emailRenderingContentErrorSchema,
 	NotificationUnprocessableError: notificationUnprocessableErrorSchema,
-	NotificationProviderError: notificationProviderErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
 	EmailChannelConfig: emailChannelConfigSchema,

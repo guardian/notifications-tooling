@@ -121,16 +121,17 @@ export const dispatchNewsletter = async (
 			});
 
 			// Braze returns one dispatch_id per send; kept for tracking.
-			const { dispatch_id: dispatchId } = await dependencies.sendBrazeCampaign({
-				apiKey: environment.BRAZE_API_KEY,
-				restEndpoint: environment.BRAZE_REST_ENDPOINT,
-				campaignId: brazeCampaignId,
-				html,
-				subject: plan.compose.subject,
-				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-			});
+			const { dispatch_id: dispatchId, status } =
+				await dependencies.sendBrazeCampaign({
+					apiKey: environment.BRAZE_API_KEY,
+					restEndpoint: environment.BRAZE_REST_ENDPOINT,
+					campaignId: brazeCampaignId,
+					html,
+					subject: plan.compose.subject,
+					timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+				});
 
-			return dispatchId;
+			return { dispatchId, status };
 		}),
 	);
 
@@ -141,8 +142,9 @@ export const dispatchNewsletter = async (
 				notificationId,
 				segmentId,
 				campaignId: brazeCampaignId,
-				dispatchId: result.value,
+				dispatchId: result.value.dispatchId,
 				status: 'success',
+				providerStatusCode: result.value.status,
 			};
 		}
 		return {

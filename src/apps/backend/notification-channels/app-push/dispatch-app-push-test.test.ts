@@ -45,7 +45,13 @@ describe('dispatchAppPushTest', () => {
 			}),
 		);
 		expect(outcomes).toEqual([
-			{ testId, id: anyString, topicType: 'test', status: 'success' },
+			{
+				testId,
+				id: anyString,
+				topicType: 'test',
+				status: 'success',
+				providerStatusCode: 201,
+			},
 		]);
 	});
 
@@ -60,7 +66,13 @@ describe('dispatchAppPushTest', () => {
 
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 		expect(outcomes).toEqual([
-			{ testId, id: anyString, topicType: 'test', status: 'success' },
+			{
+				testId,
+				id: anyString,
+				topicType: 'test',
+				status: 'success',
+				providerStatusCode: 201,
+			},
 		]);
 	});
 
@@ -82,6 +94,7 @@ describe('dispatchAppPushTest', () => {
 				topicType: 'test',
 				status: 'failure',
 				failureReason: 'http_error',
+				providerStatusCode: 400,
 			},
 		]);
 		// The failure is surfaced so the orchestrator can rethrow it as a 502/504.

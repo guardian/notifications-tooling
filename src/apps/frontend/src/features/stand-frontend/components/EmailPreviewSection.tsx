@@ -39,7 +39,7 @@ export const EmailPreviewSection = () => {
 				deliveryTiming={selectedDeliveryTiming}
 			/>
 			<FlagPreviewPill
-				title="Audience segments"
+				title="Audience"
 				options={segments}
 				selected={selectedSegments}
 			/>

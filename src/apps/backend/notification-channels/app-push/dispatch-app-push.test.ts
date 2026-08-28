@@ -61,6 +61,7 @@ describe('dispatchNotification (app-push channel)', () => {
 				id: anyString,
 				topicType: 'breaking-news',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 		]);
 	});
@@ -110,12 +111,14 @@ describe('dispatchNotification (app-push channel)', () => {
 				id: anyString,
 				topicType: 'breaking-news',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 			{
 				notificationId,
 				id: anyString,
 				topicType: 'sport',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 		]);
 	});
@@ -127,7 +130,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		sendAppNotification.mockImplementation(() => {
 			call += 1;
 			return call === 1
-				? Promise.resolve({ id: 'n10n-id' })
+				? Promise.resolve({ id: 'n10n-id', status: 201 })
 				: Promise.reject(pushError);
 		});
 		const request: NotificationSendRequest = {
@@ -161,6 +164,7 @@ describe('dispatchNotification (app-push channel)', () => {
 				id: anyString,
 				topicType: 'breaking-news',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 			{
 				notificationId,
@@ -317,12 +321,14 @@ describe('dispatchNotification (app-push channel)', () => {
 				id: anyString,
 				topicType: 'sport',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 			{
 				notificationId,
 				id: anyString,
 				topicType: 'sport',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 		]);
 	});
@@ -386,18 +392,21 @@ describe('dispatchNotification (app-push channel)', () => {
 				id: anyString,
 				topicType: 'breaking-news',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 			{
 				notificationId,
 				id: anyString,
 				topicType: 'sport',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 			{
 				notificationId,
 				id: anyString,
 				topicType: 'sport',
 				status: 'success',
+				providerStatusCode: 201,
 			},
 		]);
 	});
