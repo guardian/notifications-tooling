@@ -16,6 +16,7 @@ import type {
 	TopicTypeEditionOption,
 } from '@models';
 import { UserPermissions } from '@models';
+import type { BrazeCampaignDetails } from '@services';
 import { getBrazeCampaignDetails } from '@services';
 import { type Request, type Response, Router } from 'express';
 import { authMiddleware } from '../../middleware/auth-middleware';
@@ -122,6 +123,9 @@ export const channelAudiences = {
 	},
 } as const;
 
+const isCampaignLive = (data?: BrazeCampaignDetails): boolean =>
+	!!data && !data.archived && !data.draft && data.enabled;
+
 /**
  * `GET /v1/channels/constraints`. Returns the per-channel validation rules
  * (content length limits, compose shape, audience caps) the SPA uses to drive
@@ -179,15 +183,18 @@ export const channelsRouter = Router()
 			res.json({
 				UK: {
 					...newsletterSegments.UK,
-					campaignDetails: ukDetails?.data,
+					campaignLive: isCampaignLive(ukDetails?.data),
+					...ukDetails,
 				},
 				US: {
 					...newsletterSegments.US,
-					campaignDetails: usDetails?.data,
+					campaignLive: isCampaignLive(usDetails?.data),
+					...usDetails,
 				},
 				AU: {
 					...newsletterSegments.AU,
-					campaignDetails: auDetails?.data,
+					campaignLive: isCampaignLive(auDetails?.data),
+					...auDetails,
 				},
 			});
 		},
