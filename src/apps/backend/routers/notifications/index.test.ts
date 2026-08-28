@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import type {
 	NotificationListPage,
 	NotificationWithDispatches,
@@ -5,7 +6,6 @@ import type {
 import { httpLogger } from '@http-logger';
 import { UserPermissions } from '@models';
 import { BrazeApiError } from '@services';
-import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
 import {
