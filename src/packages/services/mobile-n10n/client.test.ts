@@ -21,8 +21,8 @@ const request: SendAppNotificationRequest = {
 	contentApiId: 'world/2026/jul/08/ukraine-summit',
 	importance: 'Major',
 	topics: [
-		{ type: 'breaking', name: 'uk' },
-		{ type: 'breaking', name: 'us' },
+		{ type: 'breaking', name: 'UK' },
+		{ type: 'breaking', name: 'US' },
 	],
 };
 
@@ -60,8 +60,8 @@ describe('sendAppNotification', () => {
 					},
 					importance: 'Major',
 					topic: [
-						{ type: 'breaking', name: 'uk' },
-						{ type: 'breaking', name: 'us' },
+						{ type: 'breaking', name: 'UK' },
+						{ type: 'breaking', name: 'US' },
 					],
 					debug: false,
 					dryRun: false,

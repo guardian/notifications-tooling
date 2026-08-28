@@ -215,7 +215,7 @@ const appPushTopicAudience = <
 const productionAppPushTopicAudience = appPushTopicAudience(
 	appPushTopicTypeIds,
 	appPushEditionIdsByTopicType,
-	{ type: appPushTopicTypeIds[0], name: 'uk' },
+	{ type: appPushTopicTypeIds[0], name: 'UK' },
 	`Up to ${MAX_APP_PUSH_TOPICS} topic-type/edition pairs to deliver to. The valid set is served by GET /v1/channels/audiences.`,
 );
 

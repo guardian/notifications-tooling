@@ -8,9 +8,9 @@ const topicTypes: AppAlertTopicOption[] = [
 		id: 'breaking-news',
 		label: 'Breaking news',
 		editions: [
-			{ id: 'uk', label: 'UK' },
-			{ id: 'us', label: 'US' },
-			{ id: 'international', label: 'International' },
+			{ id: 'UK', label: 'UK' },
+			{ id: 'US', label: 'US' },
+			{ id: 'INT', label: 'International' },
 		],
 	},
 ];
@@ -40,7 +40,7 @@ export const NoSelection: Story = {};
 export const MultipleSelections: Story = {
 	args: {
 		selected: [
-			{ type: 'breaking-news', name: 'uk' },
+			{ type: 'breaking-news', name: 'UK' },
 			{ type: 'breaking-news', name: 'international' },
 		],
 	},

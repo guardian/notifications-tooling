@@ -26,7 +26,7 @@ export const buildNotification = (): NewNotification => ({
 		'app-push': {
 			audience: {
 				type: 'topic',
-				items: [{ type: 'breaking-news', name: 'uk' }],
+				items: [{ type: 'breaking-news', name: 'UK' }],
 			},
 			compose: { use: 'lead-story' },
 		},

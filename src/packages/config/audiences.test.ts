@@ -26,15 +26,15 @@ describe('resolveAppPushTopic', () => {
 	});
 
 	it('resolves a production topic edition', () => {
-		expect(resolveAppPushTopic('breaking-news', 'uk')).toEqual({
-			topic: { type: 'breaking', name: 'uk' },
+		expect(resolveAppPushTopic('breaking-news', 'UK')).toEqual({
+			topic: { type: 'breaking', name: 'UK' },
 			importance: AppPushImportance.Major,
 			titleOverride: undefined,
 		});
 	});
 
 	it('surfaces the title override for the US sport edition', () => {
-		expect(resolveAppPushTopic('sport', 'us')).toEqual({
+		expect(resolveAppPushTopic('sport', 'US')).toEqual({
 			topic: { type: 'breaking', name: 'us-sport' },
 			importance: AppPushImportance.Minor,
 			titleOverride: 'Sports news',
@@ -42,7 +42,7 @@ describe('resolveAppPushTopic', () => {
 	});
 
 	it('leaves other sport editions without a title override', () => {
-		expect(resolveAppPushTopic('sport', 'uk')).toEqual({
+		expect(resolveAppPushTopic('sport', 'UK')).toEqual({
 			topic: { type: 'breaking', name: 'uk-sport' },
 			importance: AppPushImportance.Minor,
 			titleOverride: undefined,
@@ -50,7 +50,7 @@ describe('resolveAppPushTopic', () => {
 	});
 
 	it('returns undefined for an edition the topic type does not define', () => {
-		expect(resolveAppPushTopic('test', 'uk')).toBeUndefined();
+		expect(resolveAppPushTopic('test', 'UK')).toBeUndefined();
 	});
 });
 

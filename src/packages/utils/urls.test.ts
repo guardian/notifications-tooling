@@ -50,7 +50,7 @@ describe('determineArticleId', () => {
 		expect(
 			determineArticleId('https://www.theguardian.com/uk'),
 		).toBeUndefined();
-		expect(determineArticleId('uk')).toBeUndefined();
+		expect(determineArticleId('UK')).toBeUndefined();
 	});
 
 	it('rejects a non-http(s) scheme', () => {

@@ -13,11 +13,11 @@ import { redirectToLogin } from '../../../api/redirectToLogin';
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
 
 export const FALLBACK_APP_ALERT_EDITIONS: TopicTypeEditionOption[] = [
-	{ id: 'uk', label: 'UK' },
-	{ id: 'us', label: 'US' },
-	{ id: 'au', label: 'AU' },
-	{ id: 'international', label: 'International' },
-	{ id: 'europe', label: 'Europe' },
+	{ id: 'UK', label: 'UK' },
+	{ id: 'US', label: 'US' },
+	{ id: 'AU', label: 'AU' },
+	{ id: 'INT', label: 'International' },
+	{ id: 'EU', label: 'Europe' },
 ];
 
 export const FALLBACK_TOPIC_TYPES: AppAlertTopicOption[] = [

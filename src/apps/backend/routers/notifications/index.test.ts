@@ -77,7 +77,7 @@ const validPushRequest = () => ({
 		'app-push': {
 			audience: {
 				type: 'topic',
-				items: [{ type: 'breaking-news', name: 'uk' }],
+				items: [{ type: 'breaking-news', name: 'UK' }],
 			},
 			compose: { use: 'lead' },
 		},
@@ -617,7 +617,7 @@ const storedNotification = (): NotificationWithDispatches => ({
 			status: 'success',
 			failureReason: null,
 			providerStatusCode: null,
-			detail: { editions: ['uk'] },
+			detail: { editions: ['UK'] },
 			createdAt: new Date('2026-07-08T09:00:01.000Z'),
 			updatedAt: new Date('2026-07-08T09:00:01.000Z'),
 		},

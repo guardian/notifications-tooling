@@ -23,8 +23,8 @@ describe('dispatchNotification (app-push channel)', () => {
 					audience: {
 						type: 'topic',
 						items: [
-							{ type: 'breaking-news', name: 'uk' },
-							{ type: 'breaking-news', name: 'us' },
+							{ type: 'breaking-news', name: 'UK' },
+							{ type: 'breaking-news', name: 'US' },
 						],
 					},
 					compose: { use: 'lead' },
@@ -50,8 +50,8 @@ describe('dispatchNotification (app-push channel)', () => {
 			contentApiId: 'world/2026/jul/22/lead',
 			importance: 'Major',
 			topics: [
-				{ type: 'breaking', name: 'uk' },
-				{ type: 'breaking', name: 'us' },
+				{ type: 'breaking', name: 'UK' },
+				{ type: 'breaking', name: 'US' },
 			],
 			media: undefined,
 		});
@@ -76,8 +76,8 @@ describe('dispatchNotification (app-push channel)', () => {
 					audience: {
 						type: 'topic',
 						items: [
-							{ type: 'breaking-news', name: 'uk' },
-							{ type: 'sport', name: 'uk' },
+							{ type: 'breaking-news', name: 'UK' },
+							{ type: 'sport', name: 'UK' },
 						],
 					},
 					compose: { use: 'lead' },
@@ -95,7 +95,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Major',
-				topics: [{ type: 'breaking', name: 'uk' }],
+				topics: [{ type: 'breaking', name: 'UK' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
@@ -141,8 +141,8 @@ describe('dispatchNotification (app-push channel)', () => {
 					audience: {
 						type: 'topic',
 						items: [
-							{ type: 'breaking-news', name: 'uk' },
-							{ type: 'sport', name: 'uk' },
+							{ type: 'breaking-news', name: 'UK' },
+							{ type: 'sport', name: 'UK' },
 						],
 					},
 					compose: { use: 'lead' },
@@ -188,7 +188,7 @@ describe('dispatchNotification (app-push channel)', () => {
 				[NotificationChannel.AppPushNotification]: {
 					audience: {
 						type: 'topic',
-						items: [{ type: 'sport', name: 'uk' }],
+						items: [{ type: 'sport', name: 'UK' }],
 					},
 					compose: { use: 'lead' },
 				},
@@ -219,7 +219,7 @@ describe('dispatchNotification (app-push channel)', () => {
 				[NotificationChannel.AppPushNotification]: {
 					audience: {
 						type: 'topic',
-						items: [{ type: 'breaking-news', name: 'uk' }],
+						items: [{ type: 'breaking-news', name: 'UK' }],
 					},
 					compose: { use: 'lead' },
 				},
@@ -238,7 +238,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			link: pushItem.link,
 			contentApiId: 'world/2026/jul/22/lead',
 			importance: 'Major',
-			topics: [{ type: 'breaking', name: 'uk' }],
+			topics: [{ type: 'breaking', name: 'UK' }],
 			media,
 		});
 	});
@@ -284,8 +284,8 @@ describe('dispatchNotification (app-push channel)', () => {
 					audience: {
 						type: 'topic',
 						items: [
-							{ type: 'sport', name: 'uk' },
-							{ type: 'sport', name: 'us' },
+							{ type: 'sport', name: 'UK' },
+							{ type: 'sport', name: 'US' },
 						],
 					},
 					compose: { use: 'lead' },
@@ -343,10 +343,10 @@ describe('dispatchNotification (app-push channel)', () => {
 					audience: {
 						type: 'topic',
 						items: [
-							{ type: 'breaking-news', name: 'uk' },
-							{ type: 'sport', name: 'uk' },
-							{ type: 'sport', name: 'us' },
-							{ type: 'sport', name: 'au' },
+							{ type: 'breaking-news', name: 'UK' },
+							{ type: 'sport', name: 'UK' },
+							{ type: 'sport', name: 'US' },
+							{ type: 'sport', name: 'AU' },
 						],
 					},
 					compose: { use: 'lead' },
@@ -366,7 +366,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				title: pushItem.title,
 				importance: 'Major',
-				topics: [{ type: 'breaking', name: 'uk' }],
+				topics: [{ type: 'breaking', name: 'UK' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(

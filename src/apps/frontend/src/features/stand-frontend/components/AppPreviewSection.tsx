@@ -4,7 +4,6 @@ import { AlertBanner } from '@guardian/stand/AlertBanner';
 import type { AppAlertTopicOption } from '@models';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
-import { editionIds } from '../edition-values';
 import {
 	type AppAlertFormValues,
 	defaultAppAlertFormValues,
@@ -38,7 +37,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
 	const selectedTopics = editions.map((edition) => ({
 		type: alertType,
-		name: editionIds[edition],
+		name: edition,
 	}));
 	const thumbnailUrl = notification.content?.fields?.thumbnail;
 

@@ -1,7 +1,7 @@
 import type {
+	AppAlertTopicEditionId,
 	EmailPreviewRequest,
 	EmailPreviewResponse,
-	FrontendAppAlertTopicEditionId,
 	NewsletterSegmentId,
 	ResolvedArticle,
 } from '@models';
@@ -34,7 +34,7 @@ export type PushNotification = {
 	alertType?: AlertType;
 	headline?: string;
 	pushDeliveryOption?: DeliveryOption;
-	editions?: FrontendAppAlertTopicEditionId[];
+	editions?: AppAlertTopicEditionId[];
 };
 export type SendingResult =
 	| {
