@@ -107,12 +107,13 @@ const editionNames: Record<Edition, string> = {
 	INT: 'International',
 };
 
-const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> = {
-	Accepted: 'grey',
-	Sent: 'green',
-	'Partially sent': 'yellow',
-	Failed: 'red',
-};
+const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
+	{
+		Accepted: 'grey',
+		Sent: 'green',
+		'Partially sent': 'yellow',
+		Failed: 'red',
+	};
 
 export const HistoryTab = ({
 	alerts = [],
@@ -125,7 +126,9 @@ export const HistoryTab = ({
 				<Typography id="history-heading" element="h1" variant="headingLg">
 					History
 				</Typography>
-				{isLoading && <Typography variant="bodyMd">Loading history...</Typography>}
+				{isLoading && (
+					<Typography variant="bodyMd">Loading history...</Typography>
+				)}
 				{error}
 				{!isLoading && !error && (
 					<Table
