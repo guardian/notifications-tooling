@@ -106,12 +106,12 @@ const editionNames: Record<Edition, string> = {
 };
 
 const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
-{
-	Accepted: 'grey',
-	Sent: 'green',
-	'Partially sent': 'yellow',
-	Failed: 'red',
-};
+	{
+		Accepted: 'grey',
+		Sent: 'green',
+		'Partially sent': 'yellow',
+		Failed: 'red',
+	};
 
 export const HistoryTab = ({
 	alerts = [],
