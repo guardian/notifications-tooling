@@ -6,6 +6,61 @@
  * inspected independently in the docs.
  */
 export const notificationsPath = {
+	get: {
+		summary: 'List recent notifications',
+		description:
+			'Returns notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. `total` reports the full count at or after that cut-off regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
+		security: [{ pandaCookie: [] }],
+		parameters: [
+			{
+				name: 'since',
+				in: 'query',
+				required: false,
+				description:
+					'Cut-off as a Unix timestamp in seconds. Only notifications created at or after this instant are returned. Defaults to 14 days ago when omitted.',
+				schema: { type: 'integer', minimum: 0 },
+			},
+			{
+				name: 'limit',
+				in: 'query',
+				required: false,
+				description:
+					'Maximum number of notifications to return. Defaults to 10; must be sent together with `offset`.',
+				schema: { type: 'integer', minimum: 1, maximum: 50, default: 10 },
+			},
+			{
+				name: 'offset',
+				in: 'query',
+				required: false,
+				description:
+					'Number of notifications to skip before the page. Defaults to 0; must be sent together with `limit`. An offset past the end of the range returns an empty page.',
+				schema: { type: 'integer', minimum: 0, default: 0 },
+			},
+		],
+		responses: {
+			'200': {
+				description:
+					'A page of notifications created at or after the `since` cut-off plus the total count within that range.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/NotificationList' },
+					},
+				},
+			},
+			'400': {
+				description: 'The pagination query parameters are invalid.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/NotificationValidationError',
+						},
+					},
+				},
+			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
+		},
+	},
 	post: {
 		summary: 'Validate and dispatch a notification',
 		description:

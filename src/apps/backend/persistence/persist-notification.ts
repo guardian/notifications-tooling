@@ -104,15 +104,11 @@ export const toPublicDispatch = (dispatch: NotificationDispatch) => ({
 });
 
 /**
- * The `2xx` response body for both send and test endpoints: the persisted
- * notification resource with its dispatch outcomes nested underneath. The
- * `status` is rolled up from those outcomes, so a caller sees what actually
- * happened rather than a fixed acknowledgement.
+ * The client-facing shape of one persisted notification, without its dispatch
+ * outcomes. Used by the list endpoint, which deliberately does not join
+ * dispatches.
  */
-export const toNotificationResponse = ({
-	notification,
-	dispatches,
-}: PersistedNotification) => ({
+export const toNotificationSummary = (notification: Notification) => ({
 	id: notification.id,
 	idempotencyKey: notification.idempotencyKey,
 	kind: notification.kind,
@@ -125,6 +121,19 @@ export const toNotificationResponse = ({
 	channels: notification.channels,
 	createdAt: notification.createdAt.toISOString(),
 	updatedAt: notification.updatedAt.toISOString(),
+});
+
+/**
+ * The `2xx` response body for both send and test endpoints: the persisted
+ * notification resource with its dispatch outcomes nested underneath. The
+ * `status` is rolled up from those outcomes, so a caller sees what actually
+ * happened rather than a fixed acknowledgement.
+ */
+export const toNotificationResponse = ({
+	notification,
+	dispatches,
+}: PersistedNotification) => ({
+	...toNotificationSummary(notification),
 	dispatches: dispatches.map(toPublicDispatch),
 });
 

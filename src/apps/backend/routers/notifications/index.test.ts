@@ -1,5 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import type { NotificationWithDispatches } from '@database';
+import type {
+	NotificationListPage,
+	NotificationWithDispatches,
+} from '@database';
 import { httpLogger } from '@http-logger';
 import { UserPermissions } from '@models';
 import { BrazeApiError } from '@services';
@@ -741,6 +744,208 @@ describe('GET /v1/notifications/:id', () => {
 				expect(findNotification).not.toHaveBeenCalled();
 			} finally {
 				await lookupServer.close();
+			}
+		});
+	});
+});
+
+/** A one-notification page (no dispatches) for the list endpoint tests. */
+const storedListPage = (): NotificationListPage => ({
+	total: 3,
+	notifications: [
+		{
+			id: notificationId,
+			idempotencyKey: 'push-2026-07-08',
+			kind: 'send',
+			status: 'delivered',
+			sender: 'notifications-tooling-spa/v1',
+			createdByEmail: 'editor@theguardian.com',
+			dryRun: false,
+			scheduledFor: null,
+			content: { items: { lead: { type: 'app-push' } } },
+			channels: { 'app-push': { compose: { use: 'lead' } } },
+			createdAt: new Date('2026-07-08T09:00:00.000Z'),
+			updatedAt: new Date('2026-07-08T09:00:05.000Z'),
+		},
+	],
+});
+
+const startListServer = (
+	listNotifications: (options: {
+		since?: Date;
+		limit?: number;
+		offset?: number;
+	}) => Promise<NotificationListPage>,
+) => {
+	const testApp = express();
+	testApp.use(httpLogger);
+	testApp.use(express.json());
+	testApp.use(
+		'/v1/notifications',
+		createNotificationsRouter(
+			mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+			mockNotificationStore(),
+			mock(() => Promise.resolve(null)),
+			listNotifications,
+		),
+	);
+	return startTestServer(testApp);
+};
+
+describe('GET /v1/notifications', () => {
+	describe('authentication', () => {
+		it('blocks unauthenticated GET /v1/notifications', async () => {
+			await assertUnauthenticatedRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: '/v1/notifications',
+			});
+		});
+	});
+
+	describe('permissions', () => {
+		it('blocks GET /v1/notifications without the dispatch permission', async () => {
+			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: '/v1/notifications',
+			});
+		});
+	});
+
+	describe('happy path', () => {
+		it('returns the window total and a page of notifications without dispatches', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=5&offset=2&since=1700000000`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 5,
+					offset: 2,
+				});
+
+				const body = (await response.json()) as {
+					total: number;
+					limit: number;
+					offset: number;
+					notifications: Array<Record<string, unknown>>;
+				};
+
+				expect(body.total).toBe(3);
+				expect(body.limit).toBe(5);
+				expect(body.offset).toBe(2);
+				expect(body.notifications).toHaveLength(1);
+				expect(body.notifications[0]).toMatchObject({
+					id: notificationId,
+					status: 'delivered',
+					createdAt: '2026-07-08T09:00:00.000Z',
+				});
+				// The list endpoint does not join dispatches.
+				expect(body.notifications[0]).not.toHaveProperty('dispatches');
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('defaults to limit 10 / offset 0 when neither is supplied', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?since=1700000000`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+				});
+
+				const body = (await response.json()) as {
+					limit: number;
+					offset: number;
+				};
+				expect(body.limit).toBe(10);
+				expect(body.offset).toBe(0);
+			} finally {
+				await listServer.close();
+			}
+		});
+	});
+
+	describe('bad request', () => {
+		it('returns 400 when limit is out of the 1–50 range', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=51&offset=0&since=1700000000`,
+				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('bad_request');
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('returns 400 when only one of limit/offset is supplied', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=5&since=1700000000`,
+				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('bad_request');
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('defaults since to 14 days ago when it is missing', async () => {
+			let calledWith:
+				{ since?: Date; limit?: number; offset?: number } | undefined;
+			const listNotifications = mock(
+				(options: { since?: Date; limit?: number; offset?: number }) => {
+					calledWith = options;
+					return Promise.resolve(storedListPage());
+				},
+			);
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const before = Date.now();
+				const response = await fetch(`${listServer.baseUrl}/v1/notifications`);
+				const after = Date.now();
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledTimes(1);
+				expect(calledWith?.limit).toBe(10);
+				expect(calledWith?.offset).toBe(0);
+
+				const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+				const since = calledWith?.since;
+				expect(since).toBeInstanceOf(Date);
+				expect(since!.getTime()).toBeGreaterThanOrEqual(
+					before - fourteenDaysMs,
+				);
+				expect(since!.getTime()).toBeLessThanOrEqual(after - fourteenDaysMs);
+			} finally {
+				await listServer.close();
 			}
 		});
 	});
