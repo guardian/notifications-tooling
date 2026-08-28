@@ -45,6 +45,22 @@ export const notificationReducer = (
 			};
 		}
 
+		case 'set-thumbnail-image': {
+			if (state.content?.id !== action.contentId) {
+				return state;
+			}
+			return {
+				...state,
+				content: {
+					...state.content,
+					fields: {
+						...state.content.fields,
+						thumbnail: action.thumbnail,
+					},
+				},
+			};
+		}
+
 		case 'set-show-confirm-send': {
 			state.confirmSendModalOpen = action.isOpen;
 			return state;

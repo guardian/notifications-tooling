@@ -31,17 +31,24 @@ const ToggleButtonTheme = {
 		}),
 };
 export const ToggleSwitch = () => {
-	const { notification } = useContext(NotificationFormContext);
+	const { notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
+	const contentId = notification.content?.id;
 	const thumbnailImage = notification.content?.fields?.thumbnail;
-	const hasThumbnail = thumbnailImage !== undefined;
 	const [selection, setSelection] = useState({
-		thumbnailImage,
-		selected: hasThumbnail,
+		contentId,
+		selected: Boolean(thumbnailImage),
+		thumbnail: thumbnailImage,
 	});
-	const selected =
-		selection.thumbnailImage === thumbnailImage
-			? selection.selected
-			: hasThumbnail;
+	const isCurrentArticle = selection.contentId === contentId;
+	const availableThumbnail = isCurrentArticle
+		? selection.thumbnail
+		: thumbnailImage;
+	const hasThumbnail = Boolean(availableThumbnail);
+	const selected = isCurrentArticle
+		? selection.selected
+		: Boolean(thumbnailImage);
 
 	return (
 		<div
@@ -56,9 +63,21 @@ export const ToggleSwitch = () => {
 				aria-label="Show article thumbnail image"
 				isDisabled={!hasThumbnail}
 				isSelected={selected}
-				onChange={(isSelected) =>
-					setSelection({ selected: isSelected, thumbnailImage })
-				}
+				onChange={(isSelected) => {
+					if (!contentId || !availableThumbnail) {
+						return;
+					}
+					setSelection({
+						contentId,
+						selected: isSelected,
+						thumbnail: availableThumbnail,
+					});
+					updateNotification({
+						type: 'set-thumbnail-image',
+						contentId,
+						thumbnail: isSelected ? availableThumbnail : '',
+					});
+				}}
 				css={ToggleButtonTheme.baseStyle(selected)}
 			>
 				<Icon
