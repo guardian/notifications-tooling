@@ -101,8 +101,8 @@ export const mapNotificationToHistoryAlert = (
 	const topicTypeId = appPushAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(
-				({ id }) => id === topicTypeId,
-			)?.label ?? topicTypeId)
+			({ id }) => id === topicTypeId,
+		)?.label ?? topicTypeId)
 		: getNewsletterAlertType(newsletter?.compose.subject ?? '');
 
 	return {
@@ -112,7 +112,6 @@ export const mapNotificationToHistoryAlert = (
 		thumbnailUrl: content.media?.thumbnailUrl ?? content.media?.imageUrl,
 		channel,
 		alertType,
-		sentFrom: 'Unknown',
 		sentBy: notification.createdByEmail,
 		sentTo,
 		sentAt: notification.createdAt,

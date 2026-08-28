@@ -80,7 +80,6 @@ describe('mapNotificationToHistoryAlert', () => {
 			href: 'https://www.theguardian.com/environment/2026/aug/26/deaths-england-hottest-days-extreme-weather',
 			channel: 'email',
 			alertType: 'Breaking News',
-			sentFrom: 'Unknown',
 			sentBy: 'joshua.anderson@guardian.co.uk',
 			sentTo: ['US'],
 			sentAt: '2026-08-26T14:52:16.143Z',

@@ -19,7 +19,6 @@ import { layoutMainTheme } from '../themes';
 import type { Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
 
-type Office = 'UK' | 'US' | 'Unknown';
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
 export interface HistoryAlert {
@@ -29,7 +28,6 @@ export interface HistoryAlert {
 	thumbnailUrl?: string;
 	channel: 'email' | 'push';
 	alertType: string;
-	sentFrom: Office;
 	sentBy: string;
 	sentTo: Edition[];
 	sentAt: string;
@@ -108,12 +106,12 @@ const editionNames: Record<Edition, string> = {
 };
 
 const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
-	{
-		Accepted: 'grey',
-		Sent: 'green',
-		'Partially sent': 'yellow',
-		Failed: 'red',
-	};
+{
+	Accepted: 'grey',
+	Sent: 'green',
+	'Partially sent': 'yellow',
+	Failed: 'red',
+};
 
 export const HistoryTab = ({
 	alerts = [],
@@ -136,13 +134,12 @@ export const HistoryTab = ({
 						columns={{
 							sm: 'minmax(0, 1fr)',
 							md: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
-							lg: 'minmax(280px, 2.4fr) minmax(140px, 1fr) minmax(180px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1fr) 88px',
+							lg: 'minmax(280px, 2.4fr) minmax(180px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1fr) 88px',
 						}}
 						headerVisibleFrom="lg"
 					>
 						<TableHeader>
 							<TableColumnHeader isRowHeader>Sent alerts</TableColumnHeader>
-							<TableColumnHeader>Sent from</TableColumnHeader>
 							<TableColumnHeader>Sent by</TableColumnHeader>
 							<TableColumnHeader>Sent to</TableColumnHeader>
 							<TableColumnHeader>Send time</TableColumnHeader>
@@ -156,7 +153,7 @@ export const HistoryTab = ({
 									<TableRow key={alert.id} id={alert.id}>
 										<TableCell
 											gridColumn={{ sm: '1', md: '1', lg: '1' }}
-											gridRow={{ md: '1 / span 5', lg: 'auto' }}
+											gridRow={{ md: '1 / span 4', lg: 'auto' }}
 										>
 											<div css={styles.alert}>
 												{alert.thumbnailUrl ? (
@@ -188,23 +185,16 @@ export const HistoryTab = ({
 											</div>
 										</TableCell>
 										<TableCell
-											compactLabel="Sent from: "
+											compactLabel="Sent by: "
 											gridColumn={{ md: '2', lg: '2' }}
 											gridRow={{ md: '1', lg: 'auto' }}
-										>
-											{alert.sentFrom}
-										</TableCell>
-										<TableCell
-											compactLabel="Sent by: "
-											gridColumn={{ md: '2', lg: '3' }}
-											gridRow={{ md: '2', lg: 'auto' }}
 										>
 											{alert.sentBy}
 										</TableCell>
 										<TableCell
 											compactLabel="Sent to: "
-											gridColumn={{ md: '2', lg: '4' }}
-											gridRow={{ md: '3', lg: 'auto' }}
+											gridColumn={{ md: '2', lg: '3' }}
+											gridRow={{ md: '2', lg: 'auto' }}
 										>
 											<span css={styles.regions}>
 												{alert.sentTo.map((edition) => (
@@ -220,8 +210,8 @@ export const HistoryTab = ({
 										</TableCell>
 										<TableCell
 											compactLabel="Send time: "
-											gridColumn={{ md: '2', lg: '5' }}
-											gridRow={{ md: '4', lg: 'auto' }}
+											gridColumn={{ md: '2', lg: '4' }}
+											gridRow={{ md: '3', lg: 'auto' }}
 										>
 											<Typography
 												variant={sendTime.isRecent ? 'bodyBoldSm' : 'bodySm'}
@@ -231,8 +221,8 @@ export const HistoryTab = ({
 										</TableCell>
 										<TableCell
 											compactLabel="Status: "
-											gridColumn={{ md: '2', lg: '6' }}
-											gridRow={{ md: '5', lg: 'auto' }}
+											gridColumn={{ md: '2', lg: '5' }}
+											gridRow={{ md: '4', lg: 'auto' }}
 										>
 											<Badge
 												color={statusColors[alert.status]}

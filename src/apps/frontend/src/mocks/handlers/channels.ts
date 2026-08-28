@@ -1,6 +1,9 @@
 import { http, HttpResponse } from 'msw';
 import { getApiBaseUrl } from '../../api/config';
-import type { ChannelConstraintsResponse } from '../../features/stand-frontend/api/schemas';
+import type {
+	ChannelAudienceResponse,
+	ChannelConstraintsResponse,
+} from '../../features/stand-frontend/api/schemas';
 
 /**
  * Mirrors what `@config` currently serves. Typed as the response so a contract
@@ -46,4 +49,35 @@ export const channelConstraintsFailureHandler = http.get(
 	() => HttpResponse.json({ error: 'internal_error' }, { status: 500 }),
 );
 
-export const channelHandlers = [channelConstraintsHandler];
+export const channelAudiences: ChannelAudienceResponse = {
+	channels: {
+		newsletter: {
+			segments: [
+				{ id: 'UK', label: 'United Kingdom' },
+				{ id: 'US', label: 'United States' },
+			],
+		},
+		'app-push': {
+			topicTypes: [
+				{
+					id: 'breaking-news',
+					label: 'Breaking news',
+					editions: [
+						{ id: 'uk', label: 'UK' },
+						{ id: 'us', label: 'US' },
+					],
+				},
+			],
+		},
+	},
+};
+
+export const channelAudiencesHandler = http.get(
+	`${getApiBaseUrl()}/v1/channels/audiences`,
+	() => HttpResponse.json(channelAudiences),
+);
+
+export const channelHandlers = [
+	channelConstraintsHandler,
+	channelAudiencesHandler,
+];
