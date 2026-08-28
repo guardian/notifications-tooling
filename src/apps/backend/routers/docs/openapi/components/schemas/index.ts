@@ -12,8 +12,10 @@ import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationConflictErrorSchema } from './notification-conflict-error';
 import { notificationDispatchSchema } from './notification-dispatch';
+import { notificationListSchema } from './notification-list';
 import { notificationNotFoundSchema } from './notification-not-found';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
+import { notificationSummarySchema } from './notification-summary';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
 import { notificationValidationErrorSchema } from './notification-validation-error';
@@ -28,6 +30,8 @@ export const schemas = {
 	HealthStatus: healthStatusSchema,
 	NotificationChannel: notificationChannelSchema,
 	Notification: notificationSchema,
+	NotificationSummary: notificationSummarySchema,
+	NotificationList: notificationListSchema,
 	NotificationDispatch: notificationDispatchSchema,
 	NotificationNotFound: notificationNotFoundSchema,
 	NotificationConflictError: notificationConflictErrorSchema,

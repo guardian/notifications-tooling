@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { count, desc, eq, gte } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { NotificationDispatch } from './notification-dispatches-repository';
@@ -8,6 +8,20 @@ export type NewNotification = typeof notifications.$inferInsert;
 
 export type NotificationWithDispatches = Notification & {
 	dispatches: NotificationDispatch[];
+};
+
+/** Pagination plus the caller-supplied cut-off for {@link NotificationsRepository.listRecent}. */
+export type ListRecentNotificationsOptions = {
+	/** Only notifications created at or after this instant are returned. */
+	since: Date;
+	limit?: number;
+	offset?: number;
+};
+
+export type NotificationListPage = {
+	notifications: Notification[];
+	/** Rows created at or after `since`, independent of any limit/offset page. */
+	total: number;
 };
 
 /** Thrown when a create hits the `idempotency_key` unique index. */
@@ -77,6 +91,40 @@ export const createNotificationsRepository = (db: Database) => ({
 			.limit(1);
 
 		return row ?? null;
+	},
+
+	/**
+	 * The notifications created at or after `since`, newest first. `total`
+	 * counts every row within that cut-off, ignoring the limit/offset page.
+	 * Dispatch outcomes are intentionally not joined here.
+	 */
+	async listRecent({
+		since,
+		limit,
+		offset,
+	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
+		const withinWindow = gte(notifications.createdAt, since);
+
+		const [totals] = await db
+			.select({ total: count() })
+			.from(notifications)
+			.where(withinWindow);
+
+		let pageQuery = db
+			.select()
+			.from(notifications)
+			.where(withinWindow)
+			.orderBy(desc(notifications.createdAt))
+			.$dynamic();
+
+		if (limit !== undefined) {
+			pageQuery = pageQuery.limit(limit);
+		}
+		if (offset !== undefined) {
+			pageQuery = pageQuery.offset(offset);
+		}
+
+		return { notifications: await pageQuery, total: totals?.total ?? 0 };
 	},
 
 	/** The notification plus its dispatch outcomes, oldest first, or null. */

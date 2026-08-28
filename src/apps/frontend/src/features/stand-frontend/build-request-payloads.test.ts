@@ -7,7 +7,7 @@ import {
 } from './build-request-payloads';
 
 describe('notification request builders', () => {
-	it('builds a valid newsletter request from form values', () => {
+	it('builds a valid newsletter request with article media', () => {
 		const request = buildNewsletterRequest({
 			values: {
 				kicker: 'exclusive',
@@ -28,6 +28,17 @@ describe('notification request builders', () => {
 					items: ['lead-story'],
 					subject: 'Exclusive: A developing story',
 				},
+			},
+		});
+		expect(request.content.items['lead-story']).toMatchObject({
+			type: 'newsletter',
+			title: 'A developing story',
+			body: 'What readers need to know.',
+			link: articleFixture.webUrl,
+			media: {
+				type: 'image',
+				imageUrl: articleFixture.fields?.thumbnail,
+				thumbnailUrl: articleFixture.fields?.thumbnail,
 			},
 		});
 	});

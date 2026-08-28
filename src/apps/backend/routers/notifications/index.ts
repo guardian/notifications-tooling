@@ -1,10 +1,12 @@
 import {
 	createNotificationsRepository,
 	getDb,
+	type ListRecentNotificationsOptions,
+	type NotificationListPage,
 	type NotificationWithDispatches,
 } from '@database';
 import { UserPermissions } from '@models';
-import { Router } from 'express';
+import { type RequestHandler, Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { z } from 'zod';
 import { buildErrorEnvelope } from '../../error-envelope';
@@ -19,7 +21,10 @@ import {
 	type SendNotificationStore,
 	sendNotificationStore,
 	toNotificationResponse,
+	toNotificationSummary,
 } from '../../persistence/persist-notification';
+import { notificationListQuerySchema } from './schemas/notification-list-query';
+import type { NotificationListQuery } from './schemas/notification-list-query';
 import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
@@ -110,6 +115,33 @@ export const handleNotificationIdValidationError: ErrorRequestHandler = (
 	});
 };
 
+/**
+ * express-zod-safe error hook for `GET /v1/notifications`. Malformed pagination
+ * query params are always a structural `400`.
+ */
+export const handleNotificationListValidationError: ErrorRequestHandler = (
+	errors,
+	req,
+	res,
+) => {
+	const details = errors.flatMap((item) =>
+		item.errors.issues.map((issue) => ({
+			code: issue.code,
+			path: toJsonPointer(issue.path),
+			message: issue.message,
+		})),
+	);
+
+	res.status(400).json({
+		...buildErrorEnvelope(
+			req,
+			'bad_request',
+			'The pagination query parameters are invalid.',
+		),
+		details,
+	});
+};
+
 type FindNotificationById = (
 	id: string,
 ) => Promise<NotificationWithDispatches | null>;
@@ -117,6 +149,15 @@ type FindNotificationById = (
 const findNotificationByIdWithDispatches: FindNotificationById = async (id) => {
 	const db = await getDb();
 	return createNotificationsRepository(db).findByIdWithDispatches(id);
+};
+
+type ListRecentNotifications = (
+	options: ListRecentNotificationsOptions,
+) => Promise<NotificationListPage>;
+
+const listRecentNotifications: ListRecentNotifications = async (options) => {
+	const db = await getDb();
+	return createNotificationsRepository(db).listRecent(options);
 };
 
 type DispatchValidatedNotification = (
@@ -128,6 +169,7 @@ export const createNotificationsRouter = (
 	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
 	store: SendNotificationStore = sendNotificationStore,
 	findNotification: FindNotificationById = findNotificationByIdWithDispatches,
+	listNotifications: ListRecentNotifications = listRecentNotifications,
 ) => {
 	const notificationsRouter = Router();
 
@@ -204,6 +246,35 @@ export const createNotificationsRouter = (
 
 				throw error;
 			}
+		},
+	);
+
+	notificationsRouter.get(
+		'/',
+		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
+		// Cast to a plain handler: the schema's transform narrows `query` to
+		// numbers, which is not assignable from Express's `ParsedQs` overload.
+		validate({
+			query: notificationListQuerySchema,
+			handler: handleNotificationListValidationError,
+		}) as unknown as RequestHandler,
+		async (req, res) => {
+			// express-zod-safe has coerced the query and applied the defaults.
+			const { since, limit, offset } =
+				req.query as unknown as NotificationListQuery;
+			const { notifications, total } = await listNotifications({
+				since,
+				limit,
+				offset,
+			});
+
+			res.status(200).json({
+				total,
+				limit,
+				offset,
+				notifications: notifications.map(toNotificationSummary),
+			});
 		},
 	);
 
