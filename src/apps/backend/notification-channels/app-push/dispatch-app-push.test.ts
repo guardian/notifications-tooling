@@ -50,8 +50,8 @@ describe('dispatchNotification (app-push channel)', () => {
 			contentApiId: 'world/2026/jul/22/lead',
 			importance: 'Major',
 			topics: [
-				{ type: 'breaking', name: 'uk-dispatch-test' },
-				{ type: 'breaking', name: 'us-dispatch-test' },
+				{ type: 'breaking', name: 'internal-dispatch-test' },
+				{ type: 'breaking', name: 'internal-dispatch-test' },
 			],
 			media: undefined,
 		});
@@ -95,14 +95,14 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Major',
-				topics: [{ type: 'breaking', name: 'uk-dispatch-test' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'uk-sport-dispatch-test' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(outcomes.appPush).toEqual([
@@ -200,7 +200,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'uk-sport-dispatch-test' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 	});
@@ -238,7 +238,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			link: pushItem.link,
 			contentApiId: 'world/2026/jul/22/lead',
 			importance: 'Major',
-			topics: [{ type: 'breaking', name: 'uk-dispatch-test' }],
+			topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			media,
 		});
 	});
@@ -305,14 +305,14 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				title: pushItem.title,
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'uk-sport-dispatch-test' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
 				title: 'Sports news',
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'us-sport-dispatch-test' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(outcomes.appPush).toEqual([
@@ -366,7 +366,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				title: pushItem.title,
 				importance: 'Major',
-				topics: [{ type: 'breaking', name: 'uk-dispatch-test' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
@@ -374,8 +374,8 @@ describe('dispatchNotification (app-push channel)', () => {
 				title: pushItem.title,
 				importance: 'Minor',
 				topics: [
-					{ type: 'breaking', name: 'uk-sport-dispatch-test' },
-					{ type: 'breaking', name: 'au-sport-dispatch-test' },
+					{ type: 'breaking', name: 'internal-dispatch-test' },
+					{ type: 'breaking', name: 'internal-dispatch-test' },
 				],
 			}),
 		);
@@ -383,7 +383,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				title: 'Sports news',
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'us-sport-dispatch-test' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(outcomes.appPush).toEqual([
