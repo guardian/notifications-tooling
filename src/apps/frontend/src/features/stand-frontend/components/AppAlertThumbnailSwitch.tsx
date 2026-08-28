@@ -1,5 +1,4 @@
 import { css } from '@emotion/react';
-import { baseColors, semanticColors, semanticSizing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
@@ -10,32 +9,9 @@ import {
 	defaultAppAlertFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
+import { ToggleSwitchTheme } from '../themes';
 
-const ToggleButtonTheme = {
-	baseStyle: (selected: boolean) =>
-		css({
-			display: 'flex',
-			alignItems: 'center',
-			width: '44px',
-			height: '24px',
-			borderRadius: '100px',
-			padding: '3px',
-			gap: '10px',
-			backgroundColor: selected
-				? baseColors.magenta[200]
-				: semanticColors.bg.raisedLevel3Inverse,
-			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		}),
-	thumb: (selected: boolean) =>
-		css({
-			width: '18px',
-			height: '18px',
-			paddingLeft: selected ? '16px' : '0px',
-			alignItems: 'center',
-			color: semanticColors.bg.base,
-		}),
-};
-export const ToggleSwitch = () => {
+export const AppAlertThumbnailSwitch = () => {
 	const { notification } = useContext(NotificationFormContext);
 	const { setValue } = useFormContext<AppAlertFormValues>();
 	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
@@ -62,11 +38,11 @@ export const ToggleSwitch = () => {
 				onChange={(isSelected) => {
 					setValue('includeThumbnail', isSelected, { shouldDirty: true });
 				}}
-				css={ToggleButtonTheme.baseStyle(selected)}
+				css={ToggleSwitchTheme.baseStyle(selected)}
 			>
 				<Icon
 					symbol={selected ? 'check_circle' : 'circle'}
-					cssOverrides={ToggleButtonTheme.thumb(selected)}
+					cssOverrides={ToggleSwitchTheme.thumb(selected)}
 				/>
 			</ToggleButton>
 			<Typography variant="labelFormInlineSm">

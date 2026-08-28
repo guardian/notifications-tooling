@@ -1,6 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-import { ToggleSwitch } from './ToggleSwitch';
+import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
 
 export const ArticleThumbnailImageFormField = () => {
 	return (
@@ -12,7 +12,7 @@ export const ArticleThumbnailImageFormField = () => {
 			}}
 		>
 			<Typography variant="labelFormMd">Article thumbnail image</Typography>
-			<ToggleSwitch />
+			<AppAlertThumbnailSwitch />
 		</div>
 	);
 };
