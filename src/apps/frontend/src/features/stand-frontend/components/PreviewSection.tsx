@@ -52,6 +52,9 @@ export const PreviewSection = ({
 				display: 'flex',
 				flexDirection: 'column',
 				gap: semanticSpacing.stackLg,
+				'@media (min-width: 1310px)': {
+					paddingBottom: topBarHeight,
+				},
 			})}
 		>
 			<header
