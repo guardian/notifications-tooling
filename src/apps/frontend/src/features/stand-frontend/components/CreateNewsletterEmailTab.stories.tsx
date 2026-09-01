@@ -74,10 +74,10 @@ export const Default: Story = {
 			canvas.getByText('Create newsletter email'),
 		).toBeInTheDocument();
 		await expect(
-			canvas.getByText(
+			canvas.queryByText(
 				'The preview for the newsletter email will be shown below.',
 			),
-		).toBeInTheDocument();
+		).not.toBeInTheDocument();
 	},
 };
 

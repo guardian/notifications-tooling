@@ -46,7 +46,6 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		<PreviewSection
 			title="Preview"
 			description="The preview for the app alert will be shown below."
-			isVisible={Boolean(notification.fetchedArticleId)}
 		>
 			<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
 			<Editions topicTypes={topicTypes} selected={selectedTopics} />

@@ -72,6 +72,9 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Create app alert' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.queryByText('The preview for the app alert will be shown below.'),
+		).not.toBeInTheDocument();
 	},
 };
 

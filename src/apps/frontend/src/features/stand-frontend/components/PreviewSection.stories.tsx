@@ -8,7 +8,6 @@ const meta = {
 	args: {
 		title: 'Preview',
 		description: 'A configurable preview description.',
-		isVisible: true,
 		children: <div>Preview content</div>,
 	},
 	parameters: {
@@ -32,15 +31,5 @@ export const Visible: Story = {
 			canvas.getByText('A configurable preview description.'),
 		).toBeVisible();
 		await expect(canvas.getByText('Preview content')).toBeVisible();
-	},
-};
-
-export const Hidden: Story = {
-	args: {
-		isVisible: false,
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Preview content')).not.toBeVisible();
 	},
 };
