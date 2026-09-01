@@ -103,6 +103,8 @@ export const sendAppNotification = async ({
 		);
 	}
 
+	const thumbnailUrl = media?.thumbnailUrl ?? media?.imageUrl;
+
 	const payload = {
 		id: id ?? crypto.randomUUID(),
 		type: 'news',
@@ -123,8 +125,13 @@ export const sendAppNotification = async ({
 		topic: topics.map(({ type, name }) => ({ type, name })),
 		debug: false,
 		dryRun,
-		...(media ? { imageUrl: media.imageUrl } : {}),
-		...(media?.thumbnailUrl ? { thumbnailUrl: media.thumbnailUrl } : {}),
+		// Always send media as `thumbnailUrl`, never `imageUrl`. On Android, an
+		// `imageUrl` routes the push into a big-picture notification path that builds
+		// the notification before attaching the tap intent, so it arrives without a
+		// click action and the article can't be opened; `thumbnailUrl` uses the path
+		// that attaches the intent. Prefer the thumbnail crop, falling back to the
+		// lead image, and send nothing when neither is supplied.
+		...(thumbnailUrl ? { thumbnailUrl } : {}),
 	};
 
 	const url = new URL('/push/topic', endpoint).toString();
