@@ -87,23 +87,25 @@ export const NotificationTabLayout = ({
 								{renderForm(selectedHref)}
 							</div>
 						</Item>
-						{hasPreview && <Item
-							size={'grow'}
-							cssOverrides={css({
-								display: 'none',
-								justifyContent: 'center',
-								alignItems: 'flex-start',
-								flow: 'vertical',
-								['@media (min-width: 1310px)']: {
-									display: 'flex',
-									flex: '0 0 474px',
-									marginLeft: 'auto',
-									maxWidth: '474px',
-								},
-							})}
-						>
-							{previewSection}
-						</Item>}
+						{hasPreview && (
+							<Item
+								size={'grow'}
+								cssOverrides={css({
+									display: 'none',
+									justifyContent: 'center',
+									alignItems: 'flex-start',
+									flow: 'vertical',
+									['@media (min-width: 1310px)']: {
+										display: 'flex',
+										flex: '0 0 474px',
+										marginLeft: 'auto',
+										maxWidth: '474px',
+									},
+								})}
+							>
+								{previewSection}
+							</Item>
+						)}
 					</>
 				</Grid>
 			</Layout.Main>
