@@ -263,10 +263,7 @@ export const DispatchReport = ({
 					height: '40px',
 				}}
 			>
-				<Button
-					variant="primary"
-					onClick={onCreateNew}
-				>
+				<Button variant="primary" onClick={onCreateNew}>
 					Create new {getChannelDescription(channel)}
 				</Button>
 			</div>
@@ -283,7 +280,7 @@ const DispatchReportTab = ({
 	dispatchId?: string;
 	children: ReactNode;
 }) => {
-	const { reset } = useFormContext();
+	const { reset, setValue } = useFormContext<{ dispatchId?: string }>();
 	const navigate = useNavigate();
 
 	if (!dispatchId) {
@@ -305,6 +302,7 @@ const DispatchReportTab = ({
 						channel={channel}
 						onCreateNew={() => {
 							reset();
+							setValue('dispatchId', undefined);
 							void navigate(notificationRoutes[channel].create);
 						}}
 					>

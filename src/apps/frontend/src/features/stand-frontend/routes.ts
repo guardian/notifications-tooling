@@ -34,18 +34,15 @@ export const getTopBarNavigationItems = (
 		{
 			text: 'Create newsletter email',
 			path: routes.createNewsletterEmail,
-			activePaths: [
-				routes.createNewsletterEmail,
-				routes.newsletterEmailReport,
-			],
+			activePaths: [routes.createNewsletterEmail, routes.newsletterEmailReport],
 		},
 		!routes.createAppAlert
 			? []
 			: {
-				text: 'Create app alert',
-				path: routes.createAppAlert,
-				activePaths: [routes.createAppAlert, routes.appAlertReport!],
-			},
+					text: 'Create app alert',
+					path: routes.createAppAlert,
+					activePaths: [routes.createAppAlert, routes.appAlertReport!],
+				},
 		{ text: 'History', path: routes.history, activePaths: [routes.history] },
 	].flat();
 };

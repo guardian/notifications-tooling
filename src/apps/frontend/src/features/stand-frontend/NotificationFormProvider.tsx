@@ -1,9 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-	type ActionDispatch,
-	type ReactNode,
-	useReducer,
-} from 'react';
+import { type ActionDispatch, type ReactNode, useReducer } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { fetchCapiDataFromApi } from './api/fetch-capi-content';
 import { requestEmailHtml } from './api/fetch-email-preview';

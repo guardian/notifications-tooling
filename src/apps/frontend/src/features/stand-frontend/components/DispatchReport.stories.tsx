@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import {
 	completeEmailParams,
 	completePushParams,
@@ -8,11 +8,11 @@ import {
 import { defaultState } from '../notification-reducer';
 import type { ChannelOption, NotificationState } from '../types';
 import {
-	AppAlertDispatchReportTab,
 	AppAlertDispatchDetails,
+	AppAlertDispatchReportTab,
 	DispatchReport,
-	NewsletterDispatchReportTab,
 	NewsletterDispatchDetails,
+	NewsletterDispatchReportTab,
 } from './DispatchReport';
 
 type StoryArgs = {
@@ -117,6 +117,15 @@ export const NewsletterReportRoute: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
 		).toBeVisible();
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+		);
+		await waitFor(() =>
+			expect(
+				canvas.queryByRole('heading', { name: 'Newsletter email sent' }),
+			).not.toBeInTheDocument(),
+		);
 	},
 };
 
@@ -137,3 +146,19 @@ export const AppAlertReportRoute: Story = {
 	},
 };
 
+export const ReportRouteRequiresSuccessfulDispatch: Story = {
+	render: () =>
+		WithNotificationContext(
+			<NewsletterDispatchReportTab />,
+			defaultState,
+			{},
+			'email',
+			completeEmailParams,
+		),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.queryByRole('heading', { name: 'Newsletter email sent' }),
+		).not.toBeInTheDocument();
+	},
+};

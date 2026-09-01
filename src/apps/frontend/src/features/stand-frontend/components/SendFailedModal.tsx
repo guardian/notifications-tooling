@@ -104,8 +104,9 @@ const getFailure = (
 };
 
 export const SendFailedModal = () => {
-	const { channel, notification, updateNotification } =
-		useContext(NotificationFormContext);
+	const { channel, notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 	const sendNotification = useSendNotification();
 
 	const { isWaitingForSend, pendingRequest } = notification;

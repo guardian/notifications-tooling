@@ -8,12 +8,12 @@ import { NotificationFormContext } from './NotificationContext';
 import { notificationRoutes } from './routes';
 
 export const useSendNotification = () => {
-    const { channel, sendNotification, updateNotification } = useContext(
-        NotificationFormContext,
-    );
-    const { setValue } = useFormContext<{ dispatchId?: string }>();
-    const navigate = useNavigate();
-    const queryClient = useQueryClient();
+	const { channel, sendNotification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
+	const { setValue } = useFormContext<{ dispatchId?: string }>();
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 
     return (request: SendNotificationRequest) => {
         updateNotification({ type: 'waiting-for-send' });
@@ -25,13 +25,12 @@ export const useSendNotification = () => {
                 });
                 return;
             }
-
-            setValue('dispatchId', result.data.id);
-            void queryClient.invalidateQueries({
-                queryKey: notificationHistoryQueryKey,
-            });
-            updateNotification({ type: 'complete-send' });
-            void navigate(notificationRoutes[channel].report);
-        });
-    };
+			setValue('dispatchId', result.data.id);
+			void queryClient.invalidateQueries({
+				queryKey: notificationHistoryQueryKey,
+			});
+			updateNotification({ type: 'complete-send' });
+			void navigate(notificationRoutes[channel].report);
+		});
+	};
 };

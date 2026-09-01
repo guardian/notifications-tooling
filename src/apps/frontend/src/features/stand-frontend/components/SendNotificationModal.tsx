@@ -8,8 +8,9 @@ import { useSendNotification } from '../use-send-notification';
 import { LoadingSpinner } from './LoadingSpinner';
 
 export const SendNotificationModal = () => {
-	const { channel, notification, updateNotification } =
-		useContext(NotificationFormContext);
+	const { channel, notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
 	const sendNotification = useSendNotification();
 	const { confirmSendModalOpen, isWaitingForSend, pendingRequest } =
 		notification;
