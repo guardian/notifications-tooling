@@ -33,7 +33,7 @@ export const notificationDispatches = pgTable(
 			.notNull()
 			.references(() => notifications.id, { onDelete: 'cascade' }),
 		channel: notificationChannelEnum('channel').notNull(),
-		// topicType (app-push) or segmentId (newsletter): the unit one call addresses.
+		// '<topic type>/<edition>' (app-push) or segmentId (newsletter): the unit one call addresses.
 		target: text('target').notNull(),
 		// mobile-n10n POST id or Braze dispatchId.
 		providerRef: text('provider_ref'),
@@ -42,7 +42,8 @@ export const notificationDispatches = pgTable(
 		// The external service's HTTP status when a failed call reached the
 		// provider (null for timeouts, network errors, or a success).
 		providerStatusCode: integer('provider_status_code'),
-		// Channel-specific extras (e.g. campaignId, importance, editions).
+		// Channel-specific extras: the actual values sent downstream — app-push
+		// `{ topics, importance }`, newsletter `{ campaignId?, emailRenderingId }`.
 		detail: jsonb('detail'),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,

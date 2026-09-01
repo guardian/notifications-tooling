@@ -38,10 +38,14 @@ const testEmailEnvironmentSchema = z.object({
 /**
  * The outcome of one test-email send (one per rendering variant). `dispatchId`
  * is Braze's `dispatch_id` from the test send, kept for tracking.
+ * `emailRenderingId` is the actual email-rendering newsletter id used to render
+ * the variant (not the internal segment mapping key), so persisted rows and logs
+ * record what was really dispatched.
  */
 export type NewsletterTestDispatchOutcome = {
 	testId: string;
 	variant: string;
+	emailRenderingId: string;
 	dispatchId?: string;
 	status: 'success' | 'failure';
 	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
@@ -98,14 +102,21 @@ export const dispatchNewsletterTest = async (
 	);
 
 	// All variants must render before any Braze call; a render failure aborts.
-	const renderedVariants: Array<{ segmentId: string; html: string }> = [];
+	const renderedVariants: Array<{
+		segmentId: string;
+		emailRenderingId: string;
+		html: string;
+	}> = [];
 	for (const segmentId of plan.variants) {
+		const emailRenderingId =
+			newsletterSegments[segmentId].emailRenderingNewsletterId;
 		renderedVariants.push({
 			segmentId,
+			emailRenderingId,
 			html: await dependencies.renderEmail({
 				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 				articleUrl: item.link,
-				newsletterId: newsletterSegments[segmentId].emailRenderingNewsletterId,
+				newsletterId: emailRenderingId,
 				headlineOverride: item.title,
 				previewText: item.body,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
@@ -139,11 +150,12 @@ export const dispatchNewsletterTest = async (
 
 	const outcomes = settled.map(
 		(result, index): NewsletterTestDispatchOutcome => {
-			const { segmentId } = renderedVariants[index]!;
+			const { segmentId, emailRenderingId } = renderedVariants[index]!;
 			if (result.status === 'fulfilled') {
 				return {
 					testId,
 					variant: segmentId,
+					emailRenderingId,
 					dispatchId: result.value.dispatch_id,
 					status: 'success',
 					providerStatusCode: result.value.status,
@@ -152,6 +164,7 @@ export const dispatchNewsletterTest = async (
 			return {
 				testId,
 				variant: segmentId,
+				emailRenderingId,
 				status: 'failure',
 				failureReason: newsletterFailureReason(result.reason),
 				providerStatusCode: newsletterStatusCode(result.reason),

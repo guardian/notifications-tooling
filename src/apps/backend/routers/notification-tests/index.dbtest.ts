@@ -105,6 +105,7 @@ describe('POST /v1/notification-tests (real Postgres)', () => {
 					{
 						testId,
 						variant: 'UK',
+						emailRenderingId: 'braze-newsletter-1',
 						dispatchId: 'braze-dispatch-1',
 						status: 'success' as const,
 					},

@@ -72,6 +72,9 @@ describe('mapSendOutcomesToDispatches', () => {
 					notificationId,
 					id: 'push-1',
 					topicType: 'breaking-news',
+					editions: ['uk'],
+					topics: [{ type: 'breaking', name: 'uk' }],
+					importance: 'Major',
 					status: 'failure',
 					failureReason: 'http_error',
 					providerStatusCode: 500,
@@ -82,6 +85,7 @@ describe('mapSendOutcomesToDispatches', () => {
 					notificationId,
 					segmentId: 'UK',
 					campaignId: 'campaign-1',
+					emailRenderingId: 'newsletter-1',
 					dispatchId: 'dispatch-1',
 					status: 'success',
 				},
@@ -92,11 +96,15 @@ describe('mapSendOutcomesToDispatches', () => {
 			{
 				notificationId,
 				channel: 'app-push',
-				target: 'breaking-news',
+				target: 'breaking-news/uk',
 				providerRef: 'push-1',
 				status: 'failure',
 				failureReason: 'http_error',
 				providerStatusCode: 500,
+				detail: {
+					topics: [{ type: 'breaking', name: 'uk' }],
+					importance: 'Major',
+				},
 			},
 			{
 				notificationId,
@@ -106,7 +114,10 @@ describe('mapSendOutcomesToDispatches', () => {
 				status: 'success',
 				failureReason: null,
 				providerStatusCode: null,
-				detail: { campaignId: 'campaign-1' },
+				detail: {
+					campaignId: 'campaign-1',
+					emailRenderingId: 'newsletter-1',
+				},
 			},
 		]);
 	});
@@ -120,6 +131,9 @@ describe('mapTestOutcomesToDispatches', () => {
 					testId: notificationId,
 					id: 'push-1',
 					topicType: 'test',
+					editions: ['test'],
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
 					status: 'success',
 					providerStatusCode: 201,
 				},
@@ -128,6 +142,7 @@ describe('mapTestOutcomesToDispatches', () => {
 				{
 					testId: notificationId,
 					variant: 'UK',
+					emailRenderingId: 'newsletter-1',
 					dispatchId: 'dispatch-1',
 					status: 'success',
 					providerStatusCode: 201,
@@ -139,11 +154,15 @@ describe('mapTestOutcomesToDispatches', () => {
 			{
 				notificationId,
 				channel: 'app-push',
-				target: 'test',
+				target: 'test/test',
 				providerRef: 'push-1',
 				status: 'success',
 				failureReason: null,
 				providerStatusCode: 201,
+				detail: {
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 			},
 			{
 				notificationId,
@@ -153,6 +172,7 @@ describe('mapTestOutcomesToDispatches', () => {
 				status: 'success',
 				failureReason: null,
 				providerStatusCode: 201,
+				detail: { emailRenderingId: 'newsletter-1' },
 			},
 		]);
 	});
