@@ -106,7 +106,7 @@ export const ValidationErrors: Story = {
 	},
 };
 
-export const HardLimitBlocksSend: Story = {
+export const PastRecommendedStillSends: Story = {
 	args: {
 		notificationState: populatedPushState,
 	},
@@ -115,17 +115,21 @@ export const HardLimitBlocksSend: Story = {
 		const headline = canvas.getByLabelText('Headline');
 		await userEvent.clear(headline);
 		await userEvent.type(headline, 'a'.repeat(201));
+
+		await expect(canvas.queryByText('Recommended')).not.toBeInTheDocument();
+		await expect(canvas.getByText('Warning')).toBeVisible();
+		await expect(
+			canvas.getByText('90 characters or fewer preferred'),
+		).toBeVisible();
+
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Send app alert' }),
 		);
 
-		await expect(
-			canvas.getByText('Headline must be 200 characters or fewer'),
-		).toBeVisible();
 		const screen = within(canvasElement.ownerDocument.body);
 		await expect(
-			screen.queryByText('Are you sure you want to send the app alert?'),
-		).not.toBeInTheDocument();
+			await screen.findByText('Are you sure you want to send the app alert?'),
+		).toBeVisible();
 	},
 };
 

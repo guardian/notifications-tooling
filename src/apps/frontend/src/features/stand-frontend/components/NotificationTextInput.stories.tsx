@@ -15,7 +15,6 @@ const meta = {
 		value: 'this is my subject text',
 		update: () => {},
 		softLimit: 46,
-		hardLimit: 100,
 	},
 } satisfies Meta<typeof NotificationTextInput>;
 
@@ -31,12 +30,13 @@ export const Disabled: Story = {
 	args: { isDisabled: true },
 };
 
-export const PastSoftLimit: Story = {
+export const PastRecommended: Story = {
 	args: {
 		value: 'All work and no play makes Jack a dull boy. '.repeat(2),
 	},
 };
-export const PastHardLimit: Story = {
+
+export const WellPastRecommended: Story = {
 	args: {
 		value: 'All work and no play makes Jack a dull boy. '.repeat(6),
 	},
