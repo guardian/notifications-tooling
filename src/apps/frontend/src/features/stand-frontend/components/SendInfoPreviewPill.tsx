@@ -8,6 +8,7 @@ interface SendInfoPreviewPillProps {
 	channel?: ChannelOption;
 	deliveryTiming?: DeliveryOption;
 	isConfirmation?: boolean;
+	includeThumbnail?: boolean;
 }
 
 const getLabel = (value: ChannelOption | DeliveryOption) => {
@@ -51,6 +52,7 @@ export const SendInfoPreviewPill = ({
 	channel,
 	deliveryTiming,
 	isConfirmation = false,
+	includeThumbnail = false,
 }: SendInfoPreviewPillProps) => {
 	const selectedValues = [channel, deliveryTiming].filter(
 		(value): value is ChannelOption | DeliveryOption => Boolean(value),
@@ -104,6 +106,25 @@ export const SendInfoPreviewPill = ({
 							<Typography variant={'bodySm'}>{getLabel(value)}</Typography>
 						</div>
 					))}
+					{includeThumbnail && channel === 'push' && (
+						<div
+							css={
+								isConfirmation
+									? activePillTheme.isConfirmationStyle
+									: activePillTheme.activePill
+							}
+						>
+							<Icon
+								size="md"
+								alt="Show article thumbnail image icon"
+								cssOverrides={activePillTheme.activePillIcon}
+								symbol="image"
+							/>
+							<Typography variant="bodySm">
+								Show article thumbnail image
+							</Typography>
+						</div>
+					)}
 				</div>
 			)}
 		</div>

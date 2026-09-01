@@ -177,11 +177,19 @@ export const AppAlertDispatchDetails = () => {
 		name: 'deliveryOption',
 		defaultValue: defaultAppAlertFormValues.deliveryOption,
 	});
+	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
+		name: 'includeThumbnail',
+		defaultValue: defaultAppAlertFormValues.includeThumbnail,
+	});
 
 	return (
 		<section>
 			<ParameterLabel label="Channel">
-				<SendInfoPreviewPill channel="push" isConfirmation={true} />
+				<SendInfoPreviewPill
+					channel="push"
+					includeThumbnail={includeThumbnail}
+					isConfirmation={true}
+				/>
 			</ParameterLabel>
 			<ParameterLabel label="Editions">
 				<FlagPreviewPill
