@@ -7,17 +7,19 @@ export const mockRequestTestEmailSend: TestEmailRequestFunction = () => {
 			resolve({
 				success: true,
 				data: {
-					testId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+					id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+					idempotencyKey: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+					kind: 'test',
 					status: 'accepted',
+					sender: 'notifications-tooling-spa/v1',
+					createdByEmail: 'ada.lovelace@guardian.co.uk',
 					dryRun: true,
-					plans: [
-						{
-							channel: 'newsletter',
-							planId: '<notificationId>#newsletter',
-							status: 'accepted',
-						},
-					],
-					statusUrl: '/v1/notification-tests/<testId>/status',
+					scheduledFor: null,
+					content: {},
+					channels: {},
+					createdAt: '2026-08-25T00:00:00.000Z',
+					updatedAt: '2026-08-25T00:00:00.000Z',
+					dispatches: [],
 				},
 			});
 		}, 500);

@@ -5,10 +5,9 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import { kickerNameMap } from '../option-values';
 
-// TO DO - this function will work with the current format of the notifcation emails
-// but we shoudl modidify the template used in email-rendering to include attributes
+// TO DO - this function will work with the current format of the notification emails
+// but we should modidify the template used in email-rendering to include attributes
 // to more robustly identify the elements to update
 const modifyContent = (
 	emailHtml: string,
@@ -17,20 +16,13 @@ const modifyContent = (
 	const body = document.createElement('body');
 	body.innerHTML = emailHtml;
 
-	const { subject, kicker, preview } = parameters;
+	const { subject, preview } = parameters;
 	const headlineElement = body.querySelector('h2');
-	const kickerElement =
-		headlineElement?.parentElement?.querySelector<HTMLElement>(
-			'div:first-child',
-		);
 	const previewElement =
 		headlineElement?.parentElement?.querySelector<HTMLElement>('h2~div');
 
 	if (subject && headlineElement) {
 		headlineElement.innerText = subject;
-	}
-	if (kicker && kickerElement) {
-		kickerElement.innerText = kicker === 'none' ? '' : kickerNameMap[kicker];
 	}
 	if (preview && previewElement) {
 		previewElement.innerText = preview;
@@ -56,7 +48,7 @@ export const HTMLPreview = () => {
 
 	const fetchHtml = useCallback(async () => {
 		if (!webUrl) {
-			return `<div>no article loaded</div>`;
+			return `<div>No article loaded</div>`;
 		}
 		const audience = stringifiedAudience
 			.split(',')
@@ -64,7 +56,7 @@ export const HTMLPreview = () => {
 			.filter((item) => item.length > 0);
 
 		if (audience.length === 0) {
-			return `<div>no audience</div>`;
+			return `<div>Choose an audience in order to preview the newsletter email</div>`;
 		}
 		const result = await requestEmailHtml({
 			article: webUrl,

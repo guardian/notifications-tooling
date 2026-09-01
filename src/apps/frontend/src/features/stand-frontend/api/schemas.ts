@@ -10,21 +10,22 @@ const baseContentItemShape = z.strictObject({
 	link: z.string(),
 });
 
+const imageMediaSchema = z.strictObject({
+	type: z.literal('image'),
+	imageUrl: z.string(),
+	thumbnailUrl: z.string().optional(),
+});
+
 const newsletterContentItemSchema = z.strictObject({
 	...baseContentItemShape.shape,
 	type: z.literal('newsletter'),
+	media: imageMediaSchema.optional(),
 });
 
 const appPushContentItemSchema = z.strictObject({
 	...baseContentItemShape.shape,
 	type: z.literal('app-push'),
-	media: z
-		.strictObject({
-			type: z.literal('image'),
-			imageUrl: z.string(),
-			thumbnailUrl: z.string().optional(),
-		})
-		.optional(),
+	media: imageMediaSchema.optional(),
 });
 
 const requestBaseShape = {
@@ -175,22 +176,43 @@ export type ChannelAudienceResponse = z.infer<
 	typeof channelAudienceResponseSchema
 >;
 
-export const sendNotificationResponseSchema = z.strictObject({
-	notificationId: z.string(),
-	status: z.literal('accepted'),
-	plans: z.array(
-		z.strictObject({
-			channel: z.enum(['newsletter', 'app-push']),
-			planId: z.string(),
-			status: z.literal('accepted'),
-		}),
-	),
-	statusUrl: z.string(),
-	cancellable: z.strictObject({
-		cancelUrl: z.string(),
-		expiresAt: z.number().int(),
-	}),
+export const notificationDispatchSchema = z.strictObject({
+	id: z.string(),
+	channel: z.enum(['newsletter', 'app-push']),
+	target: z.string(),
+	status: z.enum(['success', 'failure']),
+	providerRef: z.string().nullable(),
+	failureReason: z.string().nullable(),
+	providerStatusCode: z.number().int().nullable(),
+	detail: z.record(z.string(), z.unknown()).nullable(),
+	createdAt: z.string(),
+	updatedAt: z.string(),
 });
+export type NotificationDispatch = z.infer<typeof notificationDispatchSchema>;
+
+/**
+ * The stored notification resource returned by both `POST /v1/notifications`
+ * and `POST /v1/notification-tests`: envelope fields plus the per-target
+ * dispatch outcomes. `status` is rolled up from those outcomes.
+ */
+export const notificationResourceSchema = z.strictObject({
+	id: z.string(),
+	idempotencyKey: z.string(),
+	kind: z.enum(['send', 'test']),
+	status: z.enum(['accepted', 'delivered', 'partially_delivered', 'failed']),
+	sender: z.string(),
+	createdByEmail: z.string(),
+	dryRun: z.boolean(),
+	scheduledFor: z.string().nullable(),
+	content: z.record(z.string(), z.unknown()),
+	channels: z.record(z.string(), z.unknown()),
+	createdAt: z.string(),
+	updatedAt: z.string(),
+	dispatches: notificationDispatchSchema.array(),
+});
+export type NotificationResource = z.infer<typeof notificationResourceSchema>;
+
+export const sendNotificationResponseSchema = notificationResourceSchema;
 export type SendNotificationResponse = z.infer<
 	typeof sendNotificationResponseSchema
 >;

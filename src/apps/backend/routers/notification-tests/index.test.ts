@@ -1,10 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { httpLogger } from '@http-logger';
 import { UserPermissions } from '@models';
-import { BrazeApiError, EmailRenderingError } from '@services';
+import { BrazeApiError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
-import { installDatabaseMock } from '../../utils/test-utils/database';
+import {
+	installDatabaseMock,
+	mockNotificationStore,
+} from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -64,6 +67,7 @@ beforeAll(async () => {
 		'/v1/notification-tests',
 		createNotificationTestsRouter(
 			mock(() => Promise.resolve({ newsletter: [], appPush: [] })),
+			mockNotificationStore({ notification: { kind: 'test' } }),
 		),
 	);
 	server = await startTestServer(app);
@@ -106,7 +110,10 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest),
+			createNotificationTestsRouter(
+				dispatchRequest,
+				mockNotificationStore({ notification: { kind: 'test' } }),
+			),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -120,11 +127,11 @@ describe('POST /v1/notification-tests', () => {
 				},
 			);
 			const body = (await response.json()) as {
-				testId: string;
+				id: string;
+				kind: string;
 				status: string;
 				dryRun: boolean;
-				plans: Array<{ channel: string; planId: string; status: string }>;
-				statusUrl: string;
+				dispatches: unknown[];
 			};
 
 			expect(response.status).toBe(202);
@@ -136,17 +143,10 @@ describe('POST /v1/notification-tests', () => {
 				},
 				expect.any(String),
 			);
+			expect(typeof body.id).toBe('string');
+			expect(body.kind).toBe('test');
 			expect(body.status).toBe('accepted');
-			expect(body.plans).toEqual([
-				{
-					channel: 'newsletter',
-					planId: `${body.testId}#newsletter`,
-					status: 'accepted',
-				},
-			]);
-			expect(body.statusUrl).toBe(
-				`/v1/notification-tests/${body.testId}/status`,
-			);
+			expect(body.dispatches).toEqual([]);
 		} finally {
 			await dispatchServer.close();
 		}
@@ -161,7 +161,10 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest),
+			createNotificationTestsRouter(
+				dispatchRequest,
+				mockNotificationStore({ notification: { kind: 'test' } }),
+			),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -197,7 +200,10 @@ describe('POST /v1/notification-tests', () => {
 		app.use(express.json());
 		app.use(
 			'/v1/notification-tests',
-			createNotificationTestsRouter(dispatchRequest),
+			createNotificationTestsRouter(
+				dispatchRequest,
+				mockNotificationStore({ notification: { kind: 'test' } }),
+			),
 		);
 		const dispatchServer = await startTestServer(app);
 
@@ -234,8 +240,8 @@ describe('POST /v1/notification-tests', () => {
 				},
 			);
 			const body = (await response.json()) as {
-				testId: string;
-				plans: Array<{ channel: string; planId: string; status: string }>;
+				id: string;
+				kind: string;
 			};
 
 			expect(response.status).toBe(202);
@@ -243,11 +249,92 @@ describe('POST /v1/notification-tests', () => {
 				{ ...request, options: { dryRun: false } },
 				expect.any(String),
 			);
-			expect(body.plans).toEqual([
+			expect(typeof body.id).toBe('string');
+			expect(body.kind).toBe('test');
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
+	it('persists the test and exposes the recorded dispatches', async () => {
+		const dispatchRequest = mock(() =>
+			Promise.resolve({
+				newsletter: [
+					{
+						testId: 'ignored',
+						variant: 'UK',
+						dispatchId: 'dispatch-1',
+						status: 'success' as const,
+					},
+				],
+				appPush: [],
+			}),
+		);
+		const store = mockNotificationStore({
+			notification: { kind: 'test' },
+			dispatches: [
 				{
-					channel: 'app-push',
-					planId: `${body.testId}#app-push`,
-					status: 'accepted',
+					id: 'd1',
+					notificationId: '00000000-0000-0000-0000-000000000000',
+					channel: 'newsletter',
+					target: 'UK',
+					providerRef: 'dispatch-1',
+					status: 'success',
+					failureReason: null,
+					providerStatusCode: null,
+					detail: null,
+					createdAt: new Date(0),
+					updatedAt: new Date(0),
+				},
+			],
+		});
+		const app = express();
+		app.use(httpLogger);
+		app.use(express.json());
+		app.use(
+			'/v1/notification-tests',
+			createNotificationTestsRouter(dispatchRequest, store),
+		);
+		const dispatchServer = await startTestServer(app);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notification-tests`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(validTestRequest()),
+				},
+			);
+
+			// Every target succeeded, so the test send reads as created + delivered.
+			expect(response.status).toBe(201);
+			const body = (await response.json()) as {
+				id: string;
+				status: string;
+				dispatches: Array<Record<string, unknown>>;
+			};
+
+			expect(body.status).toBe('delivered');
+			expect(store.create).toHaveBeenCalledWith(
+				expect.objectContaining({
+					idempotencyKey: 'test-newsletter-2026-07-31',
+				}),
+				'ada.lovelace@guardian.co.uk',
+			);
+			expect(dispatchRequest).toHaveBeenCalledWith(expect.anything(), body.id);
+			expect(body.dispatches).toEqual([
+				{
+					id: 'd1',
+					channel: 'newsletter',
+					target: 'UK',
+					status: 'success',
+					providerRef: 'dispatch-1',
+					failureReason: null,
+					providerStatusCode: null,
+					detail: null,
+					createdAt: '1970-01-01T00:00:00.000Z',
+					updatedAt: '1970-01-01T00:00:00.000Z',
 				},
 			]);
 		} finally {
@@ -256,22 +343,31 @@ describe('POST /v1/notification-tests', () => {
 	});
 
 	describe('provider failures surface as the documented HTTP codes', () => {
-		// Dispatch rethrows the underlying provider error; errorMiddleware maps it.
-		const startFailingServer = (rejection: Error) => {
+		// Dispatch that throws before any outcome is recorded (a config, SSM, or
+		// DB failure) leaves the row flagged failed and returns it, not a 202.
+		const startFailingServer = (
+			rejection: Error,
+			store = mockNotificationStore({ notification: { kind: 'test' } }),
+		) => {
 			const app = express();
 			app.use(httpLogger);
 			app.use(express.json());
 			app.use(
 				'/v1/notification-tests',
-				createNotificationTestsRouter(mock(() => Promise.reject(rejection))),
+				createNotificationTestsRouter(
+					mock(() => Promise.reject(rejection)),
+					store,
+				),
 			);
 			app.use(errorMiddleware);
 			return startTestServer(app);
 		};
 
-		it('maps an upstream provider rejection to 502', async () => {
+		it('records the row as failed and returns a 502 when dispatch throws before recording outcomes', async () => {
+			const store = mockNotificationStore({ notification: { kind: 'test' } });
 			const dispatchServer = await startFailingServer(
-				new EmailRenderingError(500, 'http_error'),
+				new BrazeApiError('test email send', 'http_error', 503),
+				store,
 			);
 
 			try {
@@ -285,31 +381,16 @@ describe('POST /v1/notification-tests', () => {
 				);
 
 				expect(response.status).toBe(502);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('email_rendering_failed');
-			} finally {
-				await dispatchServer.close();
-			}
-		});
+				const body = (await response.json()) as {
+					status: string;
+					dispatches: unknown[];
+				};
+				expect(body.status).toBe('failed');
+				expect(body.dispatches).toEqual([]);
 
-		it('maps an upstream provider timeout to 504', async () => {
-			const dispatchServer = await startFailingServer(
-				new BrazeApiError('test email send', 'timeout'),
-			);
-
-			try {
-				const response = await fetch(
-					`${dispatchServer.baseUrl}/v1/notification-tests`,
-					{
-						method: 'POST',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify(validTestRequest()),
-					},
-				);
-
-				expect(response.status).toBe(504);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('braze_request_failed');
+				// The row is flagged failed; no outcomes could be recorded.
+				expect(store.markFailed).toHaveBeenCalledTimes(1);
+				expect(store.recordOutcomes).not.toHaveBeenCalled();
 			} finally {
 				await dispatchServer.close();
 			}

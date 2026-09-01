@@ -12,7 +12,7 @@ export const AudienceSegmentsFormField = () => {
 			name="audienceSegments"
 			render={({ field, fieldState }) => (
 				<SegmentPicker
-					title="Audience segments"
+					title="Audience"
 					description="Choose the audience the email notification will be sent to"
 					options={SEGMENT_OPTIONS}
 					selected={field.value}

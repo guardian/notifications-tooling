@@ -31,4 +31,13 @@ export const responses = {
 			},
 		},
 	},
+	IdempotencyKeyConflict: {
+		description:
+			'The idempotencyKey has already been used by an earlier request.',
+		content: {
+			'application/json': {
+				schema: { $ref: '#/components/schemas/NotificationConflictError' },
+			},
+		},
+	},
 } as const;

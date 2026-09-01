@@ -98,3 +98,17 @@ Run from `src/apps/backend`:
 - `bun test` — run the test suite.
 - `bun run typecheck` — type-check without emitting.
 - `bun run dev` — run the server locally with hot reload.
+
+## Database-backed tests (`*.dbtest.ts`)
+
+`bun test` does **not** run `*.dbtest.ts` files — they need a real Postgres.
+Run them with `bun run test:db`.
+
+- Run it from the package that owns the tests: `src/apps/backend` for the
+  router/endpoint dbtests, `src/packages/database` for the repository dbtests.
+- The connection string is loaded automatically from the repo's `.env.local`
+  (Bun reads it). Do **not** create a `.env`, export env vars, or ask for one —
+  just `cd` to the right package and run `bun run test:db`.
+- A local Postgres must be up (see `docker/docker-compose.local.yml`). Migrations
+  are applied idempotently by the test harness, so new migrations run on first
+  invocation.

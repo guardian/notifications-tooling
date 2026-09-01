@@ -60,10 +60,11 @@ export const setupTestDatabase = async () => {
 
 	return {
 		db,
-		truncate: () =>
-			db.execute(
+		truncate: async () => {
+			await db.execute(
 				sql`TRUNCATE TABLE ${schema.notificationDispatches}, ${schema.notifications} RESTART IDENTITY CASCADE`,
-			),
+			);
+		},
 		close: () => pool.end(),
 	};
 };
