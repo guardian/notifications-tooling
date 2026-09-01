@@ -18,7 +18,6 @@ import type {
 import {
 	AppAlertNotificationFormProvider,
 	NewsletterNotificationFormProvider,
-	NotificationDraftsProvider,
 } from './NotificationFormProvider';
 
 const resolveArticleHandler = http.post(
@@ -88,7 +87,7 @@ const ProviderHarness = () => {
 	const [appAlertLockArticleInputText, setAppAlertLockArticleInputText] =
 		useState(false);
 	return (
-		<NotificationDraftsProvider>
+		<>
 			<button onClick={() => setChannel('newsletter')}>Newsletter</button>
 			<button onClick={() => setChannel('app-alert')}>App alert</button>
 			{channel === 'newsletter' ? (
@@ -112,7 +111,7 @@ const ProviderHarness = () => {
 					/>
 				</AppAlertNotificationFormProvider>
 			)}
-		</NotificationDraftsProvider>
+		</>
 	);
 };
 
@@ -133,7 +132,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const ArticleStateIsSeparateByTab: Story = {
+export const ArticleStateIsOwnedByChannel: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const articleInput = canvas.getByLabelText('article URL');
@@ -154,11 +153,8 @@ export const ArticleStateIsSeparateByTab: Story = {
 		).toBeEmptyDOMElement();
 
 		await userEvent.click(canvas.getByRole('button', { name: 'Newsletter' }));
-		await expect(canvas.getByLabelText('article URL')).toHaveValue(
-			articleFixture.webUrl,
-		);
-		await expect(canvas.getByLabelText('Newsletter subject')).toHaveTextContent(
-			articleFixture.fields?.headline ?? '',
-		);
+		await expect(
+			canvas.getByLabelText('Newsletter subject'),
+		).toBeEmptyDOMElement();
 	},
 };

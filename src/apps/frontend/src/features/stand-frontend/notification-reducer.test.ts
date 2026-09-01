@@ -36,3 +36,20 @@ describe('notificationReducer article lifecycle', () => {
 		});
 	});
 });
+
+describe('notificationReducer send lifecycle', () => {
+	it('clears transient notification state after a successful send', () => {
+		const state = notificationReducer(
+			{
+				...defaultState,
+				content: articleFixture,
+				fetchedArticleId: articleFixture.id,
+				confirmSendModalOpen: true,
+				isWaitingForSend: true,
+			},
+			{ type: 'complete-send' },
+		);
+
+		expect(state).toEqual(defaultState);
+	});
+});

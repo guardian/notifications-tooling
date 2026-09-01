@@ -1,33 +1,23 @@
 import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
-import { useQueryClient } from '@tanstack/react-query';
 import { useContext } from 'react';
 import { getChannelDescription } from '../../../util/display-text-helpers';
 import type { SendNotificationRequest } from '../api/schemas';
-import { notificationHistoryQueryKey } from '../api/useNotificationHistory';
 import { NotificationFormContext } from '../NotificationContext';
+import { useSendNotification } from '../use-send-notification';
 import { LoadingSpinner } from './LoadingSpinner';
 
 export const SendNotificationModal = () => {
-	const queryClient = useQueryClient();
-	const { channel, notification, updateNotification, sendNotification } =
+	const { channel, notification, updateNotification } =
 		useContext(NotificationFormContext);
+	const sendNotification = useSendNotification();
 	const { confirmSendModalOpen, isWaitingForSend, pendingRequest } =
 		notification;
 	const channelDescription = getChannelDescription(channel);
 
 	const handleSending =
-		(sendNotificationRequest: SendNotificationRequest) => () => {
-			updateNotification({ type: 'waiting-for-send' });
-			void sendNotification(sendNotificationRequest).then((result) => {
-				if (result.success) {
-					void queryClient.invalidateQueries({
-						queryKey: notificationHistoryQueryKey,
-					});
-				}
-				updateNotification({ type: 'receive-send-result', result });
-			});
-		};
+		(sendNotificationRequest: SendNotificationRequest) => () =>
+			sendNotification(sendNotificationRequest);
 
 	return (
 		<Modal

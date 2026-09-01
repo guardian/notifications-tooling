@@ -44,11 +44,11 @@ export const MainLayout = ({ children }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{getTopBarNavigationItems(config).map(({ text, path }) => (
+						{getTopBarNavigationItems(config).map(({ text, path, activePaths }) => (
 							<TopBarNavigation
 								key={path}
 								text={text}
-								isSelected={pathname === path}
+								isSelected={activePaths.includes(pathname)}
 								href={path}
 							/>
 						))}

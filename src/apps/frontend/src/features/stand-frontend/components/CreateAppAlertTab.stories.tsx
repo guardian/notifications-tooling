@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { acceptedEmailSendResponse } from '../../../mocks/api-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -102,27 +101,3 @@ export const ConfirmationStep: Story = {
 	},
 };
 
-export const Sent: Story = {
-	args: {
-		notificationState: {
-			...populatedPushState,
-			sendingResult: {
-				success: true,
-				data: acceptedEmailSendResponse,
-			},
-		},
-		formValues: completePushParams,
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByRole('heading', { name: 'App alert sent' }),
-		).toBeVisible();
-		await expect(
-			canvas.getByRole('button', { name: 'Create new app alert' }),
-		).toBeVisible();
-		await expect(
-			canvas.queryByRole('button', { name: 'Content' }),
-		).not.toBeInTheDocument();
-	},
-};

@@ -12,7 +12,6 @@ import { useContext, useState } from 'react';
 import { NotificationFormContext } from '../NotificationContext';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
-import { DispatchReport } from './DispatchReport';
 import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 import {
 	DEFAULT_SIDE_NAV_HREF_BY_CHANNEL,
@@ -21,23 +20,19 @@ import {
 
 interface NotificationTabLayoutProps {
 	channel: ChannelOption;
-	onResetNotification: () => void;
 	previewToggle: ReactNode;
 	renderForm: (activeSectionHref: string) => ReactNode;
 	previewSection: ReactNode;
-	dispatchDetails: ReactNode;
 }
 
 export const NotificationTabLayout = ({
 	channel,
-	onResetNotification,
 	previewToggle,
 	renderForm,
 	previewSection,
-	dispatchDetails,
 }: NotificationTabLayoutProps) => {
 	const {
-		notification: { content, sendingResult },
+		notification: { content },
 	} = useContext(NotificationFormContext);
 	const hasPreview = Boolean(content);
 	const [selectedHref, setSelectedHref] = useState(
@@ -46,15 +41,13 @@ export const NotificationTabLayout = ({
 
 	return (
 		<>
-			{!sendingResult?.success && (
-				<Layout.Sidebar layoutSmBreakpoint="hidden">
-					<SideNavigationPanel
-						selectedHref={selectedHref}
-						onSelectedHrefChange={setSelectedHref}
-						channel={channel}
-					/>
-				</Layout.Sidebar>
-			)}
+			<Layout.Sidebar layoutSmBreakpoint="hidden">
+				<SideNavigationPanel
+					selectedHref={selectedHref}
+					onSelectedHrefChange={setSelectedHref}
+					channel={channel}
+				/>
+			</Layout.Sidebar>
 			<Layout.Main theme={layoutMainTheme}>
 				<Grid
 					cssOverrides={css({
@@ -69,66 +62,49 @@ export const NotificationTabLayout = ({
 						lg: { gap: '0px', padding: `0px 0px 0px` },
 					}}
 				>
-					{sendingResult?.success === true ? (
+					<>
 						<Item
-							size={12}
+							size={'grow'}
 							cssOverrides={css({
-								paddingTop: semanticSpacing.stackXl,
-								paddingLeft: semanticSpacing.stackLg,
-								paddingRight: semanticSpacing.stackLg,
+								maxWidth: '826px',
+								minWidth: 0,
 							})}
 						>
-							<DispatchReport onResetNotification={onResetNotification}>
-								{dispatchDetails}
-							</DispatchReport>
-						</Item>
-					) : (
-						<>
-							<Item
-								size={'grow'}
-								cssOverrides={css({
-									maxWidth: '826px',
-									minWidth: 0,
+							<NoSendPermissionWarning />
+							{hasPreview && previewToggle}
+							<div
+								css={css({
+									position: 'relative',
+									display: 'flex',
+									paddingLeft: semanticSpacing.stackMd,
+									borderLeft: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
+									[from.md]: { paddingLeft: semanticSpacing.stackXl },
+									'@media (min-width: 1500px)': {
+										paddingLeft: '147px',
+									},
 								})}
 							>
-								<NoSendPermissionWarning />
-								{hasPreview && previewToggle}
-								<div
-									css={css({
-										position: 'relative',
-										display: 'flex',
-										paddingLeft: semanticSpacing.stackMd,
-										borderLeft: `${semanticSizing.border.default} solid  ${semanticColors.border.weak}`,
-										[from.md]: { paddingLeft: semanticSpacing.stackXl },
-										'@media (min-width: 1500px)': {
-											paddingLeft: '147px',
-										},
-									})}
-								>
-									{renderForm(selectedHref)}
-								</div>
-							</Item>
-							{hasPreview && (
-								<Item
-									size={'grow'}
-									cssOverrides={css({
-										display: 'none',
-										justifyContent: 'center',
-										alignItems: 'flex-start',
-										flow: 'vertical',
-										['@media (min-width: 1310px)']: {
-											display: 'flex',
-											flex: '0 0 474px',
-											marginLeft: 'auto',
-											maxWidth: '474px',
-										},
-									})}
-								>
-									{previewSection}
-								</Item>
-							)}
-						</>
-					)}
+								{renderForm(selectedHref)}
+							</div>
+						</Item>
+						{hasPreview && <Item
+							size={'grow'}
+							cssOverrides={css({
+								display: 'none',
+								justifyContent: 'center',
+								alignItems: 'flex-start',
+								flow: 'vertical',
+								['@media (min-width: 1310px)']: {
+									display: 'flex',
+									flex: '0 0 474px',
+									marginLeft: 'auto',
+									maxWidth: '474px',
+								},
+							})}
+						>
+							{previewSection}
+						</Item>}
+					</>
 				</Grid>
 			</Layout.Main>
 		</>
