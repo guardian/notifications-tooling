@@ -4,6 +4,7 @@ import { Badge } from '@guardian/stand/Badge';
 import { Icon } from '@guardian/stand/Icon';
 import { Layout } from '@guardian/stand/Layout';
 import { Link } from '@guardian/stand/Link';
+import { Pagination } from '@guardian/stand/Pagination';
 import {
 	Table,
 	TableBody,
@@ -13,6 +14,8 @@ import {
 	TableRow,
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
+import { from } from '@guardian/stand/utils';
+import { useState } from 'react';
 import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';
 import type { Edition } from '../types';
@@ -44,6 +47,35 @@ const styles = {
 		flexDirection: 'column',
 		gap: semanticSpacing.stackLg,
 		padding: semanticSpacing.stackLg,
+	}),
+	header: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackMd,
+		paddingBottom: semanticSpacing.stackSm,
+		borderBottom: `1px solid ${semanticColors.border.weak}`,
+		[from.md]: {
+			flexDirection: 'row',
+			alignItems: 'center',
+		},
+	}),
+	titleBlock: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXxs,
+	}),
+	paginationWrapper: css({
+		width: '100%',
+		display: 'flex',
+		justifyContent: 'flex-end',
+		[from.md]: {
+			marginLeft: 'auto',
+			width: 'auto',
+		},
+	}),
+	pagination: css({
+		marginLeft: 'auto',
+		maxWidth: '100%',
 	}),
 	alert: css({
 		display: 'flex',
@@ -92,6 +124,8 @@ const styles = {
 	}),
 };
 
+const PAGE_SIZE = 10;
+
 const getChannelName = (channel: HistoryAlert['channel']) =>
 	channel === 'push' ? 'App alert' : 'Newsletter email';
 
@@ -104,12 +138,45 @@ const editionNames: Record<Edition, string> = {
 };
 
 export const HistoryTab = ({ alerts = [] }: HistoryTabProps) => {
+	const [currentPage, setCurrentPage] = useState(1);
+	const totalPages = Math.max(1, Math.ceil(alerts.length / PAGE_SIZE));
+	const activePage = Math.min(currentPage, totalPages);
+	const pageStart = (activePage - 1) * PAGE_SIZE;
+	const visibleAlerts = alerts.slice(pageStart, pageStart + PAGE_SIZE);
+
+	const handlePageChange = (page: number) => {
+		setCurrentPage(Math.min(page, totalPages));
+	};
+
+	const pageEnd = Math.min(pageStart + PAGE_SIZE, alerts.length);
+
 	return (
 		<Layout.Main theme={layoutMainTheme}>
 			<section aria-labelledby="history-heading" css={styles.container}>
-				<Typography id="history-heading" element="h1" variant="headingLg">
-					History
-				</Typography>
+				<div css={styles.header}>
+					<div css={styles.titleBlock}>
+						<Typography id="history-heading" element="h1" variant="headingLg">
+							History
+						</Typography>
+						<Typography variant="bodySm">
+							{alerts.length === 0
+								? 'No sent alerts yet.'
+								: `Showing ${pageStart + 1}-${pageEnd} of ${alerts.length} alerts`}
+						</Typography>
+					</div>
+					{alerts.length > PAGE_SIZE && (
+						<div css={styles.paginationWrapper}>
+							<Pagination
+								currentPage={activePage}
+								totalItems={alerts.length}
+								pageSize={PAGE_SIZE}
+								onPageChange={handlePageChange}
+								cssOverrides={styles.pagination}
+								collapseBelow="sm"
+							/>
+						</div>
+					)}
+				</div>
 				<Table
 					aria-label="Sent alerts"
 					columns={{
@@ -128,7 +195,7 @@ export const HistoryTab = ({ alerts = [] }: HistoryTabProps) => {
 						<TableColumnHeader>Status</TableColumnHeader>
 					</TableHeader>
 					<TableBody>
-						{alerts.map((alert) => {
+						{visibleAlerts.map((alert) => {
 							const sendTime = formatHistorySendTime(alert.sentAt);
 
 							return (
