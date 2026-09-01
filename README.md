@@ -46,6 +46,19 @@ Then:
 ./scripts/setup.sh
 ```
 
+### Environment files
+
+Local development currently uses two package-level env files, but they serve
+different purposes:
+
+- `src/packages/database/.env` is required for the local Postgres container and
+    local database tooling such as `bun run db:start` and migrations.
+    `./scripts/setup.sh` creates it automatically from
+    `src/packages/database/.env.example` if it is missing.
+- `src/apps/backend/.env` or `src/apps/backend/.env.local` can be used for
+    values that the backend process must see when it starts locally. Use
+    `src/apps/backend/.env.example` as the reference for supported overrides.
+    
 ### Run locally
 
 Dispatch protects its endpoints with two independent checks, and both must be
