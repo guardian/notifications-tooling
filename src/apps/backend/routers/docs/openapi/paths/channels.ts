@@ -3,7 +3,7 @@ export const channelsConstraintsPath = {
 	get: {
 		summary: 'Retrieve per-channel content limits and caps',
 		description:
-			'Returns the per-channel content limits, compose shape and audience caps the SPA uses to drive its UI. Each text field carries three limits: `recommended` and `editorialLimit` are editorial guidance the SPA renders and this service does not enforce; only `validationCap` is enforced, on POST /v1/notifications.',
+			'Returns the per-channel content limits, compose shape and audience caps the SPA uses to drive its UI. Each text field carries `recommended` and `editorialLimit` as editorial guidance the SPA renders and this service does not enforce. `validationCap` appears only where a downstream provider imposes a limit; it is the only one enforced, on POST /v1/notifications.',
 		security: [{ pandaCookie: [] }],
 		responses: {
 			'200': {

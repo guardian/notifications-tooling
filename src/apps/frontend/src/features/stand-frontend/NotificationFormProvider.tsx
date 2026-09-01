@@ -12,16 +12,11 @@ import { requestEmailHtml } from './api/fetch-email-preview';
 import { sendNotification } from './api/send-notification';
 import { requestTestEmailSend } from './api/send-test-email';
 import {
-	APP_ALERT_LIMIT_FALLBACKS,
-	NEWSLETTER_LIMIT_FALLBACKS,
-	useChannelConstraints,
-} from './api/useChannelConstraints';
-import {
+	appAlertFormSchema,
 	type AppAlertFormValues,
-	createAppAlertFormSchema,
-	createNewsletterFormSchema,
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
+	newsletterFormSchema,
 	type NewsletterFormValues,
 } from './notification-forms';
 import {
@@ -56,7 +51,6 @@ export const NotificationDraftsProvider = ({
 }: {
 	children: ReactNode;
 }) => {
-	const { data: constraints } = useChannelConstraints();
 	const newsletter = useReducer<NotificationState, [NotificationAction]>(
 		notificationReducer,
 		defaultState,
@@ -65,30 +59,13 @@ export const NotificationDraftsProvider = ({
 		notificationReducer,
 		defaultAppAlertState,
 	);
-	const newsletterLimits = constraints?.channels.newsletter;
-	const appAlertLimits = constraints?.channels['app-push'];
 	const newsletterForm = useForm<NewsletterFormValues>({
 		defaultValues: defaultNewsletterFormValues,
-		resolver: zodResolver(
-			createNewsletterFormSchema({
-				subject:
-					newsletterLimits?.compose.subject.validationCap ??
-					NEWSLETTER_LIMIT_FALLBACKS.title.validationCap,
-				preview:
-					newsletterLimits?.content.body.validationCap ??
-					NEWSLETTER_LIMIT_FALLBACKS.body.validationCap,
-			}),
-		),
+		resolver: zodResolver(newsletterFormSchema),
 	});
 	const appAlertForm = useForm<AppAlertFormValues>({
 		defaultValues: defaultAppAlertFormValues,
-		resolver: zodResolver(
-			createAppAlertFormSchema({
-				headline:
-					appAlertLimits?.content.body.validationCap ??
-					APP_ALERT_LIMIT_FALLBACKS.headline.validationCap,
-			}),
-		),
+		resolver: zodResolver(appAlertFormSchema),
 	});
 
 	return (

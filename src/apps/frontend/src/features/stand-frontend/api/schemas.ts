@@ -90,7 +90,7 @@ export type SendNotificationRequest = z.infer<
 const contentFieldLimitsSchema = z.object({
 	recommended: z.number(),
 	editorialLimit: z.number(),
-	validationCap: z.number(),
+	validationCap: z.number().optional(),
 });
 export type ContentFieldLimits = z.infer<typeof contentFieldLimitsSchema>;
 

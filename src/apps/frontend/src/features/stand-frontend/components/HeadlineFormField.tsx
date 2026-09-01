@@ -27,7 +27,6 @@ export const HeadlineFormField = ({ constraints }: HeadlineFormFieldProps) => {
 					value={field.value}
 					update={field.onChange}
 					softLimit={headlineLimits.recommended}
-					hardLimit={headlineLimits.editorialLimit}
 					error={fieldState.error?.message}
 				/>
 			)}
