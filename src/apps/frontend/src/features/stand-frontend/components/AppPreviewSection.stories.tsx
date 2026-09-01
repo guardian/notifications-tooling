@@ -8,7 +8,6 @@ import {
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
 import { FALLBACK_TOPIC_TYPES } from '../api/useChannelAudiences';
-import { defaultAppAlertState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { AppPreviewSection } from './AppPreviewSection';
 
@@ -74,17 +73,5 @@ export const Default: Story = {
 		await expect(
 			canvas.getByAltText('Android article thumbnail'),
 		).toBeVisible();
-	},
-};
-
-export const BeforeArticleImport: Story = {
-	args: {
-		notificationState: defaultAppAlertState,
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByText('The preview for the app alert will be shown below.'),
-		).not.toBeVisible();
 	},
 };

@@ -3,11 +3,13 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
+import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useContext } from 'react';
 import type { ApiError } from '../../../api/errors';
 import { getChannelDescription } from '../../../util/display-text-helpers';
 import type { SendNotificationRequest } from '../api/schemas';
+import { notificationHistoryQueryKey } from '../api/useNotificationHistory';
 import { NotificationFormContext } from '../NotificationContext';
 import type { ChannelOption } from '../types';
 import type { NotificationState } from '../types';
@@ -103,6 +105,7 @@ const getFailure = (
 };
 
 export const SendFailedModal = () => {
+	const queryClient = useQueryClient();
 	const { channel, notification, updateNotification, sendNotification } =
 		useContext(NotificationFormContext);
 
@@ -113,6 +116,11 @@ export const SendFailedModal = () => {
 		(sendNotificationRequest: SendNotificationRequest) => () => {
 			updateNotification({ type: 'waiting-for-send' });
 			void sendNotification(sendNotificationRequest).then((result) => {
+				if (result.success) {
+					void queryClient.invalidateQueries({
+						queryKey: notificationHistoryQueryKey,
+					});
+				}
 				updateNotification({ type: 'receive-send-result', result });
 			});
 		};

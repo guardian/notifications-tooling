@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import { acceptedEmailSendResponse } from '../../../mocks/api-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -13,6 +14,7 @@ import { CreateAppAlertTab } from './CreateAppAlertTab';
 type StoryArgs = {
 	notificationState: NotificationState;
 	formValues?: Partial<AppAlertFormValues>;
+	containerMinWidth: string;
 };
 
 const meta = {
@@ -20,6 +22,14 @@ const meta = {
 	component: CreateAppAlertTab,
 	args: {
 		notificationState: defaultAppAlertState,
+		containerMinWidth: '1600px',
+	},
+	argTypes: {
+		containerMinWidth: {
+			control: 'text',
+			description:
+				'Width of the story container, used to exercise the tab layout breakpoints at 1310px and 1500px.',
+		},
 	},
 	parameters: {
 		layout: 'fullscreen',
@@ -31,12 +41,12 @@ const meta = {
 		},
 	},
 	render: (args: StoryArgs) => {
-		const { formValues, notificationState } = args;
+		const { formValues, notificationState, containerMinWidth } = args;
 		return (
 			<div
 				style={{
 					display: 'flex',
-					minWidth: '1600px',
+					minWidth: containerMinWidth,
 					minHeight: '100vh',
 					boxSizing: 'border-box',
 				}}
@@ -62,6 +72,9 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Create app alert' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.queryByText('The preview for the app alert will be shown below.'),
+		).not.toBeInTheDocument();
 	},
 };
 
@@ -85,6 +98,31 @@ export const ConfirmationStep: Story = {
 		await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 		await expect(
 			screen.queryByText('Are you sure you want to send the app alert?'),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const Sent: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			sendingResult: {
+				success: true,
+				data: acceptedEmailSendResponse,
+			},
+		},
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'App alert sent' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('button', { name: 'Create new app alert' }),
+		).toBeVisible();
+		await expect(
+			canvas.queryByRole('button', { name: 'Content' }),
 		).not.toBeInTheDocument();
 	},
 };

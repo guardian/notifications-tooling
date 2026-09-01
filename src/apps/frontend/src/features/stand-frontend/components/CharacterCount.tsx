@@ -9,7 +9,6 @@ import { Typography } from '@guardian/stand/Typography';
 
 interface Props {
 	count: number;
-	hardLimit?: number;
 	softLimit: number;
 	fieldDescription: string;
 }
@@ -35,18 +34,11 @@ const styles = {
 		flexShrink: 0,
 	}),
 
-	count: (level?: 'warn' | 'error') => {
+	count: (level?: 'warn') => {
 		const base = {
 			display: 'inline-block',
 		};
 		switch (level) {
-			case 'error':
-				return css({
-					...base,
-					fontWeight: 'bold',
-					color: semanticColors.text.error,
-				});
-
 			case 'warn':
 				return css({
 					...base,
@@ -63,12 +55,11 @@ const styles = {
 
 export const CharacterCount = ({
 	count,
-	hardLimit = Infinity,
+
 	softLimit,
 	fieldDescription,
 }: Props) => {
-	const warningLevel =
-		count <= softLimit ? undefined : count <= hardLimit ? 'warn' : 'error';
+	const warningLevel = count < softLimit ? undefined : 'warn';
 
 	return (
 		<div css={styles.container}>
@@ -81,11 +72,6 @@ export const CharacterCount = ({
 				{warningLevel === 'warn' && (
 					<Badge size="xs" weight="light" color="yellow">
 						Warning
-					</Badge>
-				)}
-				{warningLevel === 'error' && (
-					<Badge size="xs" weight="light" color="red">
-						Limit Reached
 					</Badge>
 				)}
 				<Typography variant="bodySm">

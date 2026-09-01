@@ -1,6 +1,9 @@
 import { http, HttpResponse } from 'msw';
 import { getApiBaseUrl } from '../../api/config';
-import type { ChannelConstraintsResponse } from '../../features/stand-frontend/api/schemas';
+import type {
+	ChannelAudienceResponse,
+	ChannelConstraintsResponse,
+} from '../../features/stand-frontend/api/schemas';
 
 /**
  * Mirrors what `@config` currently serves. Typed as the response so a contract
@@ -11,20 +14,20 @@ export const channelConstraints: ChannelConstraintsResponse = {
 	channels: {
 		newsletter: {
 			content: {
-				title: { recommended: 46, editorialLimit: 70, validationCap: 150 },
-				body: { recommended: 85, editorialLimit: 140, validationCap: 250 },
+				title: { recommended: 46, editorialLimit: 70 },
+				body: { recommended: 85, editorialLimit: 140 },
 			},
 			compose: {
 				minItems: 1,
 				maxItems: 1,
-				subject: { recommended: 46, editorialLimit: 70, validationCap: 150 },
+				subject: { recommended: 46, editorialLimit: 70 },
 			},
 			audience: { maxSegments: 20, maxTestRecipients: 20 },
 		},
 		'app-push': {
 			content: {
 				title: { recommended: 50, editorialLimit: 50, validationCap: 50 },
-				body: { recommended: 90, editorialLimit: 120, validationCap: 200 },
+				body: { recommended: 90, editorialLimit: 120 },
 			},
 			compose: {
 				minItems: 1,
@@ -46,4 +49,35 @@ export const channelConstraintsFailureHandler = http.get(
 	() => HttpResponse.json({ error: 'internal_error' }, { status: 500 }),
 );
 
-export const channelHandlers = [channelConstraintsHandler];
+export const channelAudiences: ChannelAudienceResponse = {
+	channels: {
+		newsletter: {
+			segments: [
+				{ id: 'UK', label: 'United Kingdom' },
+				{ id: 'US', label: 'United States' },
+			],
+		},
+		'app-push': {
+			topicTypes: [
+				{
+					id: 'breaking-news',
+					label: 'Breaking news',
+					editions: [
+						{ id: 'uk', label: 'UK' },
+						{ id: 'us', label: 'US' },
+					],
+				},
+			],
+		},
+	},
+};
+
+export const channelAudiencesHandler = http.get(
+	`${getApiBaseUrl()}/v1/channels/audiences`,
+	() => HttpResponse.json(channelAudiences),
+);
+
+export const channelHandlers = [
+	channelConstraintsHandler,
+	channelAudiencesHandler,
+];
