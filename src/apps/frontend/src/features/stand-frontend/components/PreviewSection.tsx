@@ -42,7 +42,7 @@ export const PreviewSection = ({
 				zIndex: layer.stickyContent,
 			},
 			'@media (min-width: 1310px)': {
-				height: '100vh',
+				height: `calc(100vh - ${topBarHeight})`,
 				overflowY: 'auto',
 			},
 		})}
@@ -52,9 +52,6 @@ export const PreviewSection = ({
 				display: 'flex',
 				flexDirection: 'column',
 				gap: semanticSpacing.stackLg,
-				'@media (min-width: 1310px)': {
-					paddingBottom: topBarHeight,
-				},
 			})}
 		>
 			<header
