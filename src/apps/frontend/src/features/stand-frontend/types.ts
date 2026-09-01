@@ -50,40 +50,40 @@ export type RequestEmailHtml = {
 
 export type NotificationAction =
 	| {
-		type: 'waiting-for-article';
-	}
+			type: 'waiting-for-article';
+	  }
 	| {
-		type: 'receive-article';
-		content: ResolvedArticle;
-	}
+			type: 'receive-article';
+			content: ResolvedArticle;
+	  }
 	| {
-		type: 'report-article-error';
-		errorMessage: string;
-	}
+			type: 'report-article-error';
+			errorMessage: string;
+	  }
 	| {
-		type: 'set-show-confirm-send';
-		isOpen: boolean;
-	}
+			type: 'set-show-confirm-send';
+			isOpen: boolean;
+	  }
 	| {
-		type: 'prepare-send';
-		request: SendNotificationRequest;
-	}
+			type: 'prepare-send';
+			request: SendNotificationRequest;
+	  }
 	| {
-		type: 'waiting-for-send';
-	}
+			type: 'waiting-for-send';
+	  }
 	| {
-		type: 'receive-send-failure';
-		failure: ApiError;
-	}
+			type: 'receive-send-failure';
+			failure: ApiError;
+	  }
 	| {
-		type: 'complete-send';
-	}
+			type: 'complete-send';
+	  }
 	| {
-		type: 'dismiss-send-error';
-	}
+			type: 'dismiss-send-error';
+	  }
 	| {
-		type: 'reset-newsletter-email';
-	}
+			type: 'reset-newsletter-email';
+	  }
 	| {
-		type: 'reset-app-alert';
-	};
+			type: 'reset-app-alert';
+	  };

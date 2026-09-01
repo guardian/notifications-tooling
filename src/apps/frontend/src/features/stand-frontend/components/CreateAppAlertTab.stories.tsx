@@ -100,4 +100,3 @@ export const ConfirmationStep: Story = {
 		).not.toBeInTheDocument();
 	},
 };
-
