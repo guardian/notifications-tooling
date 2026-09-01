@@ -7,6 +7,7 @@ import {
 	semanticSizing,
 	semanticSpacing,
 } from '@guardian/stand';
+import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
@@ -243,4 +244,25 @@ export const previewPillStyles = {
 		gap: `${baseSpacing['8Px']}`,
 		height: '32px',
 	}),
+};
+
+export const alertBannerCss = css({
+	border: `${semanticSizing.border.default} solid ${semanticColors.border.information}`,
+	height: 'auto',
+	backgroundColor: semanticColors.fill.weak,
+	paddingBlock: '12px',
+	paddingTop: '12px',
+	paddingRight: '16px',
+	paddingBottom: '12px',
+	paddingLeft: '8px',
+});
+
+export const customAlertBannerTheme: NonNullable<AlertBannerProps['theme']> = {
+	shared: {
+		content: {
+			icon: {
+				color: semanticColors.text.blue,
+			},
+		},
+	},
 };

@@ -1,3 +1,7 @@
+import { css } from '@emotion/react';
+import { semanticColors } from '@guardian/stand';
+import { AlertBanner } from '@guardian/stand/AlertBanner';
+import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
 import {
@@ -5,6 +9,7 @@ import {
 	type NewsletterFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
+import { alertBannerCss, customAlertBannerTheme } from '../themes';
 import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
 import { FlagPreviewPill } from './FlagPreviewPill';
 import { HTMLPreview } from './HTMLPreview';
@@ -42,6 +47,19 @@ export const EmailPreviewSection = () => {
 				options={SEGMENT_OPTIONS}
 				selected={selectedSegments}
 			/>
+			<AlertBanner
+				level="information"
+				showIcon
+				cssOverrides={alertBannerCss}
+				theme={customAlertBannerTheme}
+			>
+				<Typography
+					variant={'bodyBoldSm'}
+					cssOverrides={css({ color: semanticColors.text.blue })}
+				>
+					Email appearance may vary across different email clients and devices
+				</Typography>
+			</AlertBanner>
 			<HTMLPreview />
 			<TestEmailForm />
 		</PreviewSection>
