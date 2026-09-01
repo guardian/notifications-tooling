@@ -37,8 +37,9 @@ export const NotificationTabLayout = ({
 	dispatchDetails,
 }: NotificationTabLayoutProps) => {
 	const {
-		notification: { sendingResult },
+		notification: { content, sendingResult },
 	} = useContext(NotificationFormContext);
+	const hasPreview = Boolean(content);
 	const [selectedHref, setSelectedHref] = useState(
 		DEFAULT_SIDE_NAV_HREF_BY_CHANNEL[channel],
 	);
@@ -91,7 +92,7 @@ export const NotificationTabLayout = ({
 								})}
 							>
 								<NoSendPermissionWarning />
-								{previewToggle}
+								{hasPreview && previewToggle}
 								<div
 									css={css({
 										position: 'relative',
@@ -107,23 +108,25 @@ export const NotificationTabLayout = ({
 									{renderForm(selectedHref)}
 								</div>
 							</Item>
-							<Item
-								size={'grow'}
-								cssOverrides={css({
-									display: 'none',
-									justifyContent: 'center',
-									alignItems: 'flex-start',
-									flow: 'vertical',
-									['@media (min-width: 1310px)']: {
-										display: 'flex',
-										flex: '0 0 474px',
-										marginLeft: 'auto',
-										maxWidth: '474px',
-									},
-								})}
-							>
-								{previewSection}
-							</Item>
+							{hasPreview && (
+								<Item
+									size={'grow'}
+									cssOverrides={css({
+										display: 'none',
+										justifyContent: 'center',
+										alignItems: 'flex-start',
+										flow: 'vertical',
+										['@media (min-width: 1310px)']: {
+											display: 'flex',
+											flex: '0 0 474px',
+											marginLeft: 'auto',
+											maxWidth: '474px',
+										},
+									})}
+								>
+									{previewSection}
+								</Item>
+							)}
 						</>
 					)}
 				</Grid>
