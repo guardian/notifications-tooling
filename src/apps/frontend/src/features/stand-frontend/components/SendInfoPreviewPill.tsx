@@ -75,6 +75,8 @@ export const SendInfoPreviewPill = ({
 					css={{
 						display: 'flex',
 						flexDirection: 'row',
+						alignItems: 'center',
+						flexWrap: 'nowrap',
 						gap: semanticSpacing.stackSm,
 					}}
 				>

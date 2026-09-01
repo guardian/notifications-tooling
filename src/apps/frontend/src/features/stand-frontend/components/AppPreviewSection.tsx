@@ -55,7 +55,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		>
 			<SendInfoPreviewPill
 				channel="push"
-				deliveryTiming="immediate"
+				deliveryTiming="appImmediate"
 				includeThumbnail={includeThumbnail}
 			/>
 			<Editions topicTypes={topicTypes} selected={selectedTopics} />

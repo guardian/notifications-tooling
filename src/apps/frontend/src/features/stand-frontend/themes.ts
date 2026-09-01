@@ -123,6 +123,7 @@ export const activePillTheme = {
 		gap: semanticSpacing.stackXs,
 		alignItems: 'center',
 		justifyContent: 'center',
+		whiteSpace: 'nowrap',
 	}),
 	activePillIcon: css({
 		height: '20px',
