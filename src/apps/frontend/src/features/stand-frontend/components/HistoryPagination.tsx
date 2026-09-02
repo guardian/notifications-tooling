@@ -84,11 +84,11 @@ interface HistoryPaginationProps {
 export const useHistoryPagination = <T,>(items: T[]) => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
-	const activePage = Math.min(currentPage, totalPages);
+	const activePage = Math.max(1, Math.min(currentPage, totalPages));
 	const pageStart = (activePage - 1) * PAGE_SIZE;
 
 	const handlePageChange = (page: number) => {
-		setCurrentPage(Math.min(page, totalPages));
+		setCurrentPage(Math.max(1, Math.min(page, totalPages)));
 	};
 
 	return {
