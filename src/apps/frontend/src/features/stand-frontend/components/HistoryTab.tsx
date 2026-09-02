@@ -135,12 +135,8 @@ export const HistoryTab = ({
 	isLoading = false,
 	error,
 }: HistoryTabProps) => {
-	const {
-		activePage,
-		handlePageChange,
-		shouldShowPagination,
-		visibleItems,
-	} = useHistoryPagination(alerts);
+	const { activePage, handlePageChange, shouldShowPagination, visibleItems } =
+		useHistoryPagination(alerts);
 	const visibleAlerts = visibleItems;
 
 	return (
@@ -153,11 +149,11 @@ export const HistoryTab = ({
 						</Typography>
 					</div>
 					{!isLoading && !error && shouldShowPagination && (
-							<HistoryPagination
-								currentPage={activePage}
-								totalItems={alerts.length}
-								onPageChange={handlePageChange}
-							/>
+						<HistoryPagination
+							currentPage={activePage}
+							totalItems={alerts.length}
+							onPageChange={handlePageChange}
+						/>
 					)}
 				</div>
 				{isLoading ? (
