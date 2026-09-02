@@ -44,14 +44,16 @@ export const MainLayout = ({ children }: Props) => {
 						}}
 					/>
 					<TopBarContainerLeft>
-						{getTopBarNavigationItems(config).map(({ text, path }) => (
-							<TopBarNavigation
-								key={path}
-								text={text}
-								isSelected={pathname === path}
-								href={path}
-							/>
-						))}
+						{getTopBarNavigationItems(config).map(
+							({ text, path, activePaths }) => (
+								<TopBarNavigation
+									key={path}
+									text={text}
+									isSelected={activePaths.includes(pathname)}
+									href={path}
+								/>
+							),
+						)}
 					</TopBarContainerLeft>
 					{user && (
 						<Avatar
