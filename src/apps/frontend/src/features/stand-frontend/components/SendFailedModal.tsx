@@ -11,6 +11,7 @@ import type { SendNotificationRequest } from '../api/schemas';
 import { NotificationFormContext } from '../NotificationContext';
 import type { ChannelOption } from '../types';
 import type { NotificationState } from '../types';
+import { useSendNotification } from '../use-send-notification';
 import { LoadingSpinner } from './LoadingSpinner';
 
 const deriveUserFacingMessage = (
@@ -85,37 +86,35 @@ const getFailure = (
 	notification: NotificationState,
 	channel: ChannelOption,
 ) => {
-	const { sendingResult } = notification;
-	if (sendingResult?.success !== false) {
+	const { sendFailure } = notification;
+	if (!sendFailure) {
 		return undefined;
 	}
 
 	const channelDescription = getChannelDescription(channel);
 
-	const { loginUrl, details } = sendingResult.failure;
+	const { loginUrl, details } = sendFailure;
 	return {
-		title: deriveErrorTitle(sendingResult.failure, channelDescription),
-		message: deriveUserFacingMessage(sendingResult.failure, channelDescription),
-		canRetry: checkIfCanRetry(sendingResult.failure),
+		title: deriveErrorTitle(sendFailure, channelDescription),
+		message: deriveUserFacingMessage(sendFailure, channelDescription),
+		canRetry: checkIfCanRetry(sendFailure),
 		loginUrl,
 		details,
 	};
 };
 
 export const SendFailedModal = () => {
-	const { channel, notification, updateNotification, sendNotification } =
-		useContext(NotificationFormContext);
+	const { channel, notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
+	const sendNotification = useSendNotification();
 
 	const { isWaitingForSend, pendingRequest } = notification;
 	const failure = getFailure(notification, channel);
 
 	const handleRetry =
-		(sendNotificationRequest: SendNotificationRequest) => () => {
-			updateNotification({ type: 'waiting-for-send' });
-			void sendNotification(sendNotificationRequest).then((result) => {
-				updateNotification({ type: 'receive-send-result', result });
-			});
-		};
+		(sendNotificationRequest: SendNotificationRequest) => () =>
+			sendNotification(sendNotificationRequest);
 
 	return (
 		<Modal

@@ -60,35 +60,30 @@ const appPushContentItem = z.strictObject({
 			description: `Short push notification title (1-${pushLimits.title.validationCap} characters).`,
 			example: 'Breaking news',
 		}),
-	body: z
-		.string()
-		.min(1)
-		.max(pushLimits.body.validationCap)
-		.meta({
-			description: `Push notification body (1-${pushLimits.body.validationCap} characters).`,
-			example: 'Historic global climate deal reached at the COP summit',
-		}),
+	body: z.string().min(1).meta({
+		description:
+			'Push notification body. Lengths past the recommended 90 characters are accepted; FCM/APNS truncate them on the device.',
+		example: 'Historic global climate deal reached at the COP summit',
+	}),
 	link: guardianArticleLink,
 	media: mediaSchema.optional(),
 });
 
-/** A content item for the `newsletter` channel (more generous limits). */
+/** A content item for the `newsletter` channel (no length caps). */
 const newsletterContentItem = z.strictObject({
 	type: z.literal(NotificationChannel.Newsletter),
 	title: z
 		.string()
 		.min(1)
-		.max(newsletterLimits.title.validationCap)
 		.meta({
-			description: `Headline shown in the email (1-${newsletterLimits.title.validationCap} characters).`,
+			description: `Headline shown in the email. Editorial recommends ${newsletterLimits.title.recommended} characters or fewer; longer titles are accepted.`,
 			example: 'Your morning briefing',
 		}),
 	body: z
 		.string()
 		.min(1)
-		.max(newsletterLimits.body.validationCap)
 		.meta({
-			description: `Email body copy (1-${newsletterLimits.body.validationCap} characters).`,
+			description: `Email body copy. Editorial recommends ${newsletterLimits.body.recommended} characters or fewer; longer copy is accepted.`,
 			example:
 				'The three stories shaping the day, plus what to keep an eye on.',
 		}),
@@ -264,7 +259,7 @@ const newsletterCompose = z.strictObject({
 				'Id of the single content item (from `content.items`) to include, provided as a one-element array.',
 			example: ['lead-story'],
 		}),
-	subject: z.string().min(1).max(newsletterLimits.title.validationCap).meta({
+	subject: z.string().min(1).meta({
 		description: 'The email subject line.',
 		example: 'Your morning briefing',
 	}),

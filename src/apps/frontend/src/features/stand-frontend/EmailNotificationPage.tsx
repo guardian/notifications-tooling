@@ -4,7 +4,6 @@ import { UserPermissions } from '../../../../../packages/models';
 import { MainLayout } from './components/MainLayout';
 import { NoPermissionsTab } from './components/NoPermissionsTab';
 import { ConfigContext } from './ConfigContext';
-import { NotificationDraftsProvider } from './NotificationFormProvider';
 
 export const EmailNotificationPage = () => {
 	const config = useContext(ConfigContext);
@@ -15,11 +14,9 @@ export const EmailNotificationPage = () => {
 	return (
 		<>
 			{hasAccess ? (
-				<NotificationDraftsProvider>
-					<MainLayout>
-						<Outlet />
-					</MainLayout>
-				</NotificationDraftsProvider>
+				<MainLayout>
+					<Outlet />
+				</MainLayout>
 			) : (
 				<MainLayout>
 					<NoPermissionsTab />

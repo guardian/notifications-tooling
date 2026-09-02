@@ -24,14 +24,12 @@ import { requirePermissions } from '../../middleware/permissions-middleware';
  * drive its UI (character counters, segment caps). Keyed by channel under
  * `channels`.
  *
- * Each text field carries all three limits. The SPA drives its counters from
- * `recommended` and `editorialLimit`; `validationCap` is the only one this
- * service enforces, and wiring it to a character counter would erase the
- * editorial guidance the counter exists to show.
+ * The SPA drives its counters from `recommended` alone. A field only carries a
+ * `validationCap` if the broker rejects past it, so most fields now omit one.
  *
  * Derived from the very same config the backend validates incoming
- * `POST /v1/notifications` requests against, so the client-side hints and the
- * server-side rules can never drift apart.
+ * `POST /v1/notifications` requests against, so where a cap does exist the
+ * client-side hints and the server-side rules can never drift apart.
  */
 export const channelConstraints = {
 	channels: {

@@ -7,28 +7,29 @@ const newsletterConstraints =
 	channelConstraints.channels[NotificationChannel.Newsletter];
 
 /**
- * The three limits applied to a single text field. Only `validationCap` is
- * enforced by this service; the other two are editorial guidance the SPA
- * renders.
+ * The limits applied to a single text field. `recommended` and
+ * `editorialLimit` are editorial guidance the SPA renders. `validationCap` is
+ * present only where a downstream provider imposes a limit, and is the only
+ * one this service enforces.
  */
 const contentFieldLimitsSchema = {
 	type: 'object',
-	required: ['recommended', 'editorialLimit', 'validationCap'],
+	required: ['recommended', 'editorialLimit'],
 	properties: {
 		recommended: {
 			type: 'integer',
 			description:
-				"Editorial's preferred length. The SPA warns past this, but the value is not enforced.",
+				"Editorial's preferred length. The SPA badges text within it, but the value is not enforced.",
 		},
 		editorialLimit: {
 			type: 'integer',
 			description:
-				"Editorial's stated maximum. The SPA badges it as reached, but deliberately does not block, and this service does not enforce it.",
+				"Editorial's stated maximum. Guidance only: neither the SPA nor this service blocks past it.",
 		},
 		validationCap: {
 			type: 'integer',
 			description:
-				'The maximum number of characters this service accepts. Past this the request is rejected with a 422. Guards against absurd input rather than expressing editorial preference.',
+				'Optional. The maximum number of characters this service accepts, present only where a downstream provider imposes one. Past this the request is rejected with a 422. Absent means the field is unbounded.',
 		},
 	},
 } as const;

@@ -38,7 +38,6 @@ export const SubjectFormField = ({ constraints }: SubjectFormFieldProps) => {
 					value={field.value}
 					update={field.onChange}
 					softLimit={subjectLimits.recommended}
-					hardLimit={subjectLimits.editorialLimit}
 					error={fieldState.error?.message}
 					prefix={kickerLabel ? `${kickerLabel}: ` : undefined}
 				/>
