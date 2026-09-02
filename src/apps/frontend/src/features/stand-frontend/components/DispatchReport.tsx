@@ -18,6 +18,7 @@ import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
+import { composeNewsletterSubject } from '../newsletter-subject';
 import {
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
@@ -26,6 +27,7 @@ import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
 } from '../notification-forms';
+import { alertTypeNameMap } from '../option-values';
 import { notificationRoutes } from '../routes';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
@@ -146,6 +148,10 @@ const DeliveryParameter = ({
 };
 
 export const NewsletterDispatchDetails = () => {
+	const kicker = useWatch<NewsletterFormValues, 'kicker'>({
+		name: 'kicker',
+		defaultValue: defaultNewsletterFormValues.kicker,
+	});
 	const subject = useWatch<NewsletterFormValues, 'subject'>({
 		name: 'subject',
 		defaultValue: '',
@@ -162,7 +168,9 @@ export const NewsletterDispatchDetails = () => {
 	return (
 		<section>
 			<ParameterLabel label="Subject">
-				<Typography variant={'bodySm'}>{subject}</Typography>
+				<Typography variant="bodySm">
+					{composeNewsletterSubject(subject, kicker)}
+				</Typography>
 			</ParameterLabel>
 			<ParameterLabel label="Channel">
 				<SendInfoPreviewPill channel="email" isConfirmation={true} />
@@ -181,6 +189,10 @@ export const NewsletterDispatchDetails = () => {
 };
 
 export const AppAlertDispatchDetails = () => {
+	const alertType = useWatch<AppAlertFormValues, 'alertType'>({
+		name: 'alertType',
+		defaultValue: defaultAppAlertFormValues.alertType,
+	});
 	const headline = useWatch<AppAlertFormValues, 'headline'>({
 		name: 'headline',
 		defaultValue: '',
@@ -197,7 +209,9 @@ export const AppAlertDispatchDetails = () => {
 	return (
 		<section>
 			<ParameterLabel label="Headline">
-				<Typography variant={'bodySm'}>{headline}</Typography>
+				<Typography variant="bodySm">
+					{alertTypeNameMap[alertType]}: {headline}
+				</Typography>
 			</ParameterLabel>
 			<ParameterLabel label="Channel">
 				<SendInfoPreviewPill channel="push" isConfirmation={true} />
