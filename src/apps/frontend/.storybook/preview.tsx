@@ -23,7 +23,9 @@ const preview: Preview = {
 	decorators: [
 		(Story) => {
 			// A fresh QueryClient per story avoids cache bleed between stories.
-			const queryClient = new QueryClient();
+			const queryClient = new QueryClient({
+				defaultOptions: { queries: { retry: false } },
+			});
 			return (
 				<BrowserRouter basename={window.location.pathname}>
 					<QueryClientProvider client={queryClient}>

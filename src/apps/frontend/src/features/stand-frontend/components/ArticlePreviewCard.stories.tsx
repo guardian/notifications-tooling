@@ -104,6 +104,20 @@ export const WithoutThumbnail: PreviewCardStory = {
 	},
 };
 
+export const HiddenThumbnail: PreviewCardStory = {
+	args: {
+		content: articleFixture,
+		showThumbnail: false,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText('A rhyme to recall rising temperatures'),
+		).toBeInTheDocument();
+		await expect(canvas.queryByRole('img')).not.toBeInTheDocument();
+	},
+};
+
 export const WithoutHeadlineField: PreviewCardStory = {
 	args: {
 		content: { ...articleFixture, fields: undefined },

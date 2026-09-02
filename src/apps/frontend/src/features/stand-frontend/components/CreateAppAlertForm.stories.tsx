@@ -6,6 +6,7 @@ import {
 	populatedPushState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
+import type { AppAlertFormValues } from '../notification-forms';
 import { defaultAppAlertState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
@@ -13,6 +14,7 @@ import { CreateAppAlertForm } from './CreateAppAlertForm';
 type StoryArgs = {
 	notificationState: NotificationState;
 	activeSectionHref: string;
+	formValues?: Partial<AppAlertFormValues>;
 };
 type Story = StoryObj<StoryArgs>;
 
@@ -33,13 +35,14 @@ const meta: Meta<StoryArgs> = {
 		activeSectionHref: '#article-section',
 	},
 	render: (args) => {
-		const { activeSectionHref, notificationState } = args;
+		const { activeSectionHref, formValues, notificationState } = args;
 		return WithNotificationContext(
 			<CreateAppAlertForm activeSectionHref={activeSectionHref} />,
 			notificationState,
 			{},
 			'push',
-			notificationState.content ? completePushParams : undefined,
+			formValues ??
+				(notificationState.content ? completePushParams : undefined),
 		);
 	},
 };
@@ -106,7 +109,7 @@ export const ValidationErrors: Story = {
 	},
 };
 
-export const HardLimitBlocksSend: Story = {
+export const PastRecommendedStillSends: Story = {
 	args: {
 		notificationState: populatedPushState,
 	},
@@ -115,17 +118,21 @@ export const HardLimitBlocksSend: Story = {
 		const headline = canvas.getByLabelText('Headline');
 		await userEvent.clear(headline);
 		await userEvent.type(headline, 'a'.repeat(201));
+
+		await expect(canvas.queryByText('Recommended')).not.toBeInTheDocument();
+		await expect(canvas.getByText('Warning')).toBeVisible();
+		await expect(
+			canvas.getByText('90 characters or fewer preferred'),
+		).toBeVisible();
+
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Send app alert' }),
 		);
 
-		await expect(
-			canvas.getByText('Headline must be 200 characters or fewer'),
-		).toBeVisible();
 		const screen = within(canvasElement.ownerDocument.body);
 		await expect(
-			screen.queryByText('Are you sure you want to send the app alert?'),
-		).not.toBeInTheDocument();
+			await screen.findByText('Are you sure you want to send the app alert?'),
+		).toBeVisible();
 	},
 };
 
@@ -139,6 +146,75 @@ export const WithImportedArticle: Story = {
 		await expect(canvas.getByLabelText('Headline')).toHaveValue(
 			articleFixture.fields?.headline,
 		);
+	},
+};
+
+export const WithThumbnail: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+		await expect(thumbnailToggle).toBeEnabled();
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(
+			canvas.getByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+		).toBeVisible();
+	},
+};
+
+export const WithThumbnailTurnedOff: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: { ...completePushParams, includeThumbnail: false },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+
+		await expect(thumbnailToggle).toBeEnabled();
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(
+			canvas.queryByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const WithoutThumbnail: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			content: {
+				...articleFixture,
+				fields: { ...articleFixture.fields, thumbnail: '' },
+			},
+		},
+		formValues: { ...completePushParams, includeThumbnail: false },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+
+		await expect(canvas.getByText('Article imported')).toBeVisible();
+		await expect(thumbnailToggle).toBeDisabled();
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(
+			canvas.queryByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+		).not.toBeInTheDocument();
 	},
 };
 

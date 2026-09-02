@@ -246,6 +246,31 @@ export const previewPillStyles = {
 	}),
 };
 
+export const ToggleSwitchTheme = {
+	baseStyle: (selected: boolean) =>
+		css({
+			display: 'flex',
+			alignItems: 'center',
+			width: '44px',
+			height: '24px',
+			borderRadius: '100px',
+			padding: '3px',
+			gap: '10px',
+			backgroundColor: selected
+				? baseColors.magenta[200]
+				: semanticColors.bg.raisedLevel3Inverse,
+			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		}),
+	thumb: (selected: boolean) =>
+		css({
+			width: '18px',
+			height: '18px',
+			paddingLeft: selected ? '16px' : '0px',
+			alignItems: 'center',
+			color: semanticColors.bg.base,
+		}),
+};
+
 export const alertBannerCss = css({
 	border: `${semanticSizing.border.default} solid ${semanticColors.border.information}`,
 	height: 'auto',

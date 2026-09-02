@@ -29,7 +29,6 @@ export const PreviewTextFormField = ({
 					value={field.value}
 					update={field.onChange}
 					softLimit={previewLimits.recommended}
-					hardLimit={previewLimits.validationCap}
 					error={fieldState.error?.message}
 				/>
 			)}

@@ -36,19 +36,24 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		name: 'headline',
 		defaultValue: defaultAppAlertFormValues.headline,
 	});
+	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
+		name: 'includeThumbnail',
+		defaultValue: defaultAppAlertFormValues.includeThumbnail,
+	});
 	const alertTypeLabel =
 		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
 	const selectedTopics = editions.map((edition) => ({
 		type: alertType,
 		name: editionIds[edition],
 	}));
-	const thumbnailUrl = notification.content?.fields?.thumbnail;
+	const thumbnailUrl = includeThumbnail
+		? notification.content?.fields?.thumbnail
+		: undefined;
 
 	return (
 		<PreviewSection
 			title="Preview"
 			description="The preview for the app alert will be shown below."
-			isVisible={Boolean(notification.fetchedArticleId)}
 		>
 			<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
 			<Editions topicTypes={topicTypes} selected={selectedTopics} />
