@@ -6,6 +6,7 @@ import {
 	populatedPushState,
 	WithNotificationContext,
 } from '../../../stories/story-helpers';
+import type { AppAlertFormValues } from '../notification-forms';
 import { defaultAppAlertState } from '../notification-reducer';
 import type { NotificationState } from '../types';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
@@ -13,6 +14,7 @@ import { CreateAppAlertForm } from './CreateAppAlertForm';
 type StoryArgs = {
 	notificationState: NotificationState;
 	activeSectionHref: string;
+	formValues?: Partial<AppAlertFormValues>;
 };
 type Story = StoryObj<StoryArgs>;
 
@@ -33,13 +35,14 @@ const meta: Meta<StoryArgs> = {
 		activeSectionHref: '#article-section',
 	},
 	render: (args) => {
-		const { activeSectionHref, notificationState } = args;
+		const { activeSectionHref, formValues, notificationState } = args;
 		return WithNotificationContext(
 			<CreateAppAlertForm activeSectionHref={activeSectionHref} />,
 			notificationState,
 			{},
 			'push',
-			notificationState.content ? completePushParams : undefined,
+			formValues ??
+				(notificationState.content ? completePushParams : undefined),
 		);
 	},
 };
@@ -146,24 +149,66 @@ export const WithImportedArticle: Story = {
 	},
 };
 
-export const ThumbnailToggle: Story = {
+export const WithThumbnail: Story = {
 	args: {
 		notificationState: populatedPushState,
+		formValues: completePushParams,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const thumbnailToggle = canvas.getByRole('button', {
 			name: 'Show article thumbnail image',
 		});
+		await expect(thumbnailToggle).toBeEnabled();
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
 		await expect(
 			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
 		).toBeVisible();
+	},
+};
 
-		await userEvent.click(thumbnailToggle);
+export const WithThumbnailTurnedOff: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: { ...completePushParams, includeThumbnail: false },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
 
+		await expect(thumbnailToggle).toBeEnabled();
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(
+			canvas.queryByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const WithoutThumbnail: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			content: {
+				...articleFixture,
+				fields: { ...articleFixture.fields, thumbnail: '' },
+			},
+		},
+		formValues: { ...completePushParams, includeThumbnail: false },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+
+		await expect(canvas.getByText('Article imported')).toBeVisible();
+		await expect(thumbnailToggle).toBeDisabled();
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
 		await expect(
 			canvas.queryByAltText(

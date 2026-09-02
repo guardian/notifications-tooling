@@ -65,13 +65,17 @@ export const notificationReducer = (
 			};
 		}
 
-		case 'receive-send-result': {
+		case 'receive-send-failure': {
 			return {
 				...state,
 				isWaitingForSend: false,
 				confirmSendModalOpen: false,
-				sendingResult: action.result,
+				sendFailure: action.failure,
 			};
+		}
+
+		case 'complete-send': {
+			return structuredClone(defaultState);
 		}
 
 		case 'reset-newsletter-email': {
@@ -89,12 +93,12 @@ export const notificationReducer = (
 		}
 
 		case 'dismiss-send-error': {
-			if (state.sendingResult?.success !== false) {
+			if (!state.sendFailure) {
 				return state;
 			}
 			return {
 				...state,
-				sendingResult: undefined,
+				sendFailure: undefined,
 			};
 		}
 	}

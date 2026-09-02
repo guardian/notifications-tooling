@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
-import { acceptedEmailSendResponse } from '../../../mocks/api-fixtures';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import {
 	completeEmailParams,
 	completePushParams,
@@ -10,24 +9,26 @@ import { defaultState } from '../notification-reducer';
 import type { ChannelOption, NotificationState } from '../types';
 import {
 	AppAlertDispatchDetails,
+	AppAlertDispatchReportTab,
 	DispatchReport,
 	NewsletterDispatchDetails,
+	NewsletterDispatchReportTab,
 } from './DispatchReport';
 
 type StoryArgs = {
 	notificationState: NotificationState;
 	channel: ChannelOption;
-	onResetNotification: () => void;
+	onStartNew: () => void;
 };
 type Story = StoryObj<StoryArgs>;
 
 const DispatchReportStory = ({
 	notificationState,
 	channel,
-	onResetNotification,
+	onStartNew,
 }: StoryArgs) =>
 	WithNotificationContext(
-		<DispatchReport onResetNotification={onResetNotification}>
+		<DispatchReport channel={channel} onCreateNew={onStartNew}>
 			{channel === 'email' ? (
 				<NewsletterDispatchDetails />
 			) : (
@@ -53,14 +54,8 @@ const meta: Meta<StoryArgs> = {
 	},
 	args: {
 		channel: 'email',
-		onResetNotification: fn(),
-		notificationState: {
-			...defaultState,
-			sendingResult: {
-				success: true,
-				data: acceptedEmailSendResponse,
-			},
-		},
+		onStartNew: fn(),
+		notificationState: defaultState,
 	},
 };
 
@@ -81,14 +76,14 @@ export const EmailSuccess: Story = {
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Create new newsletter email' }),
 		);
-		await expect(args.onResetNotification).toHaveBeenCalledOnce();
+		await expect(args.onStartNew).toHaveBeenCalledOnce();
 	},
 };
 
 export const AppAlertSuccess: Story = {
 	args: {
 		channel: 'push',
-		onResetNotification: fn(),
+		onStartNew: fn(),
 	},
 	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -107,16 +102,66 @@ export const AppAlertSuccess: Story = {
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Create new app alert' }),
 		);
-		await expect(args.onResetNotification).toHaveBeenCalledOnce();
+		await expect(args.onStartNew).toHaveBeenCalledOnce();
 	},
 };
 
-export const HiddenWithoutSuccessfulResult: Story = {
-	args: {
-		notificationState: defaultState,
-	},
+export const NewsletterReportRoute: Story = {
+	render: () =>
+		WithNotificationContext(
+			<NewsletterDispatchReportTab />,
+			defaultState,
+			{},
+			'email',
+			{ ...completeEmailParams, dispatchId: 'newsletter-dispatch-id' },
+		),
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(canvas.queryByText('Details')).not.toBeInTheDocument();
+		await expect(
+			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
+		).toBeVisible();
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+		);
+		await waitFor(() =>
+			expect(
+				canvas.queryByRole('heading', { name: 'Newsletter email sent' }),
+			).not.toBeInTheDocument(),
+		);
+	},
+};
+
+export const AppAlertReportRoute: Story = {
+	render: () =>
+		WithNotificationContext(
+			<AppAlertDispatchReportTab />,
+			defaultState,
+			{},
+			'push',
+			{ ...completePushParams, dispatchId: 'app-alert-dispatch-id' },
+		),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'App alert sent' }),
+		).toBeVisible();
+	},
+};
+
+export const ReportRouteRequiresSuccessfulDispatch: Story = {
+	render: () =>
+		WithNotificationContext(
+			<NewsletterDispatchReportTab />,
+			defaultState,
+			{},
+			'email',
+			completeEmailParams,
+		),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.queryByRole('heading', { name: 'Newsletter email sent' }),
+		).not.toBeInTheDocument();
 	},
 };

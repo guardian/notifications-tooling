@@ -70,6 +70,11 @@ export const Default: Story = {
 		await expect(
 			canvas.getByLabelText('Android notification preview'),
 		).toBeVisible();
+		await expect(
+			canvas.getByText(
+				'App alert formats might differ across platforms and devices',
+			),
+		).toBeVisible();
 		await expect(canvas.getAllByText('Breaking news')).toHaveLength(2);
 		await expect(
 			canvas.getAllByText(articleFixture.fields?.headline ?? ''),

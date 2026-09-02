@@ -7,6 +7,7 @@ import { kickerSchema } from './api/schemas';
  * presence and shape only.
  */
 export const newsletterFormSchema = z.object({
+	dispatchId: z.string().optional(),
 	kicker: kickerSchema,
 	subject: z.string().trim().min(1, 'Subject is required'),
 	preview: z.string().trim().min(1, 'Preview text is required'),
@@ -17,6 +18,7 @@ export const newsletterFormSchema = z.object({
 });
 
 export const appAlertFormSchema = z.object({
+	dispatchId: z.string().optional(),
 	alertType: z.enum([
 		'breaking-news',
 		'sport',
