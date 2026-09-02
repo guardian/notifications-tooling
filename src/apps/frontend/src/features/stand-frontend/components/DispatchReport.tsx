@@ -146,6 +146,10 @@ const DeliveryParameter = ({
 };
 
 export const NewsletterDispatchDetails = () => {
+	const subject = useWatch<NewsletterFormValues, 'subject'>({
+		name: 'subject',
+		defaultValue: '',
+	});
 	const audienceSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
 		name: 'audienceSegments',
 		defaultValue: defaultNewsletterFormValues.audienceSegments,
@@ -157,6 +161,9 @@ export const NewsletterDispatchDetails = () => {
 
 	return (
 		<section>
+			<ParameterLabel label="Subject">
+				<Typography variant={'bodySm'}>{subject}</Typography>
+			</ParameterLabel>
 			<ParameterLabel label="Channel">
 				<SendInfoPreviewPill channel="email" isConfirmation={true} />
 			</ParameterLabel>
@@ -174,6 +181,10 @@ export const NewsletterDispatchDetails = () => {
 };
 
 export const AppAlertDispatchDetails = () => {
+	const headline = useWatch<AppAlertFormValues, 'headline'>({
+		name: 'headline',
+		defaultValue: '',
+	});
 	const editions = useWatch<AppAlertFormValues, 'editions'>({
 		name: 'editions',
 		defaultValue: defaultAppAlertFormValues.editions,
@@ -185,6 +196,9 @@ export const AppAlertDispatchDetails = () => {
 
 	return (
 		<section>
+			<ParameterLabel label="Headline">
+				<Typography variant={'bodySm'}>{headline}</Typography>
+			</ParameterLabel>
 			<ParameterLabel label="Channel">
 				<SendInfoPreviewPill channel="push" isConfirmation={true} />
 			</ParameterLabel>
