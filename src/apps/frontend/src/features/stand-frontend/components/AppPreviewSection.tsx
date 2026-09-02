@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
-import { semanticColors, semanticSizing } from '@guardian/stand';
+import { semanticColors } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
+import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { TopicTypeOption } from '../api/schemas';
@@ -10,6 +11,7 @@ import {
 	defaultAppAlertFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
+import { alertBannerCss, customAlertBannerTheme } from '../themes';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
 import { Editions } from './Editions';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
@@ -58,13 +60,15 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 			<AlertBanner
 				level="information"
 				showIcon
-				cssOverrides={css({
-					border: `${semanticSizing.border.default} solid ${semanticColors.border.information}`,
-					height: 'auto',
-					paddingBlock: '12px',
-				})}
+				cssOverrides={alertBannerCss}
+				theme={customAlertBannerTheme}
 			>
-				App alert formats might differ across platforms and devices
+				<Typography
+					variant={'bodyBoldSm'}
+					cssOverrides={css({ color: semanticColors.text.blue })}
+				>
+					App alert formats might differ across platforms and devices
+				</Typography>
 			</AlertBanner>
 			<IPhoneAlertPreview
 				alertType={alertTypeLabel}

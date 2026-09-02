@@ -49,6 +49,11 @@ export const Empty: Story = {
 				'The preview for the newsletter email will be shown below.',
 			),
 		).toBeVisible();
+		await expect(
+			canvas.getByText(
+				'Email appearance may vary across different email clients and devices',
+			),
+		).toBeVisible();
 	},
 };
 
