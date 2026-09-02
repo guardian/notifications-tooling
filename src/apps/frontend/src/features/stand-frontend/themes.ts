@@ -9,6 +9,7 @@ import {
 } from '@guardian/stand';
 import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
+import type { IconButtonTheme } from '@guardian/stand/IconButton';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 
@@ -287,6 +288,20 @@ export const customAlertBannerTheme: NonNullable<AlertBannerProps['theme']> = {
 		content: {
 			icon: {
 				color: semanticColors.text.blue,
+			},
+		},
+	},
+};
+export const customIconButtonTheme: IconButtonTheme = {
+	tertiary: {
+		shared: {
+			border: 'none',
+			backgroundColor: 'transparent',
+			color: semanticColors.text.weak,
+			hover: {
+				border: 'none',
+				backgroundColor: 'transparent',
+				color: semanticColors.text.weak,
 			},
 		},
 	},

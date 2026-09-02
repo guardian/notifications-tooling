@@ -2,10 +2,11 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
+import { IconButton } from '@guardian/stand/IconButton';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
-import { ToggleSwitchTheme } from '../themes';
+import { customIconButtonTheme, ToggleSwitchTheme } from '../themes';
 
 interface AppAlertThumbnailSwitchProps {
 	isSelected: boolean;
@@ -19,7 +20,13 @@ export const AppAlertThumbnailSwitch = ({
 	onChange,
 }: AppAlertThumbnailSwitchProps) => {
 	return (
-		<section>
+		<section
+			css={css({
+				display: 'flex',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackSm,
+			})}
+		>
 			<div
 				css={css({
 					display: 'flex',
@@ -44,48 +51,67 @@ export const AppAlertThumbnailSwitch = ({
 					Show article thumbnail image
 				</Typography>
 			</div>
-			<div
-				css={{
-					display: 'flex',
-					flexDirection: 'column',
-					gap: semanticSpacing.stackXs,
-				}}
-			>
-				<Typography variant="labelFormSm">Replace image</Typography>
-				<Typography
-					variant="helpTextFormMd"
-					cssOverrides={css({ color: semanticColors.text.weak })}
-				>
-					Copy and paste a Guardian image URL to replace the existing image
-				</Typography>
+			{isSelected && (
 				<div
 					css={{
 						display: 'flex',
-						flexDirection: 'row',
-						gap: semanticSpacing.stackXs,
-						alignItems: 'center',
+						flexDirection: 'column',
+						paddingLeft: '12px',
 					}}
 				>
-					<TextInput
-						name="replacementImageUrl"
-						aria-label="replacement image URL"
-						size="md"
-						value={''}
-						placeholder="Enter replacement image URL..."
-						isDisabled={false}
-					/>
-					<Button
-						type="button"
-						isDisabled={false}
-						icon="refresh"
-						size="md"
-						variant="secondary"
-						onClick={() => {}}
+					<div
+						css={{
+							display: 'flex',
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: semanticSpacing.stackXs,
+						}}
 					>
-						Update
-					</Button>
+						<Typography variant="labelFormSm">Replace image</Typography>
+						<IconButton
+							variant="tertiary"
+							size="md"
+							symbol={'expand_more'}
+							ariaLabel="add replacement image URL"
+							theme={customIconButtonTheme}
+							width="12px"
+						/>
+					</div>
+					<Typography
+						variant="helpTextFormMd"
+						cssOverrides={css({ color: semanticColors.text.weak })}
+					>
+						Copy and paste a Guardian image URL to replace the existing image
+					</Typography>
+					<div
+						css={{
+							display: 'flex',
+							flexDirection: 'row',
+							gap: semanticSpacing.stackXs,
+							alignItems: 'center',
+						}}
+					>
+						<TextInput
+							name="replacementImageUrl"
+							aria-label="replacement image URL"
+							size="md"
+							value={''}
+							placeholder="Enter replacement image URL..."
+							isDisabled={false}
+						/>
+						<Button
+							type="button"
+							isDisabled={false}
+							icon="refresh"
+							size="md"
+							variant="secondary"
+							onClick={() => {}}
+						>
+							Update
+						</Button>
+					</div>
 				</div>
-			</div>
+			)}
 		</section>
 	);
 };
