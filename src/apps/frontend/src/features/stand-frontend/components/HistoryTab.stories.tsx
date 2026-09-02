@@ -29,6 +29,20 @@ const alerts: HistoryAlert[] = [
 	},
 ];
 
+const paginatedAlerts: HistoryAlert[] = Array.from(
+	{ length: 80 },
+	(_, index) => {
+		const alert = alerts[index % alerts.length]!;
+
+		return {
+			...alert,
+			id: `${alert.id}-${index + 1}`,
+			href: `${alert.href}?story=${index + 1}`,
+			title: `${alert.title} (${index + 1})`,
+		};
+	},
+);
+
 const meta = {
 	title: 'Stand Frontend/HistoryTab',
 	component: HistoryTab,
@@ -68,5 +82,20 @@ export const Empty: Story = {
 		await expect(
 			canvas.getByText('No alerts have been sent yet.'),
 		).toBeInTheDocument();
+	},
+};
+
+export const WithPagination: Story = {
+	args: { alerts: paginatedAlerts },
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('navigation', { name: 'Pagination' }),
+		).toBeInTheDocument();
+		await expect(canvas.getByText('Results: 1–10 of 80')).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', { name: 'Go to page 2' }),
+		).toBeInTheDocument();
+		await expect(canvas.getByText('…')).toBeInTheDocument();
 	},
 };
