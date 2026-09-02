@@ -19,7 +19,7 @@ import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';
 import type { Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
-import { HistoryPagination, useHistoryPagination } from './Pagination';
+import { HistoryPagination, useHistoryPagination } from './HistoryPagination';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
