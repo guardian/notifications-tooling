@@ -18,11 +18,11 @@ import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
+import { composeNewsletterSubject } from '../newsletter-subject';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
 } from '../notification-forms';
-import { composeNewsletterSubject } from '../newsletter-subject';
 import {
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,

@@ -13,8 +13,8 @@ import {
 	TableRow,
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
-import type { ReactNode } from 'react';
 import type { DisplayAppAlertTopicEditionId } from '@models';
+import type { ReactNode } from 'react';
 import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';
 import { FlagAtom } from './FlagAtom';

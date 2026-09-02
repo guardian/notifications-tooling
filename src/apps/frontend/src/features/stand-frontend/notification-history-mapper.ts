@@ -1,11 +1,14 @@
+import {
+	appAlertTopicEditionId,
+	type DisplayAppAlertTopicEditionId,
+	toDisplayEditionId,
+} from '@models';
 import { z } from 'zod';
 import type {
 	ChannelAudienceResponse,
 	NotificationSummary,
 } from './api/schemas';
 import type { HistoryAlert } from './components/HistoryTab';
-import { editionIds } from './edition-values';
-import type { Edition } from './types';
 
 const contentItemSchema = z.object({
 	title: z.string(),
@@ -42,16 +45,15 @@ const notificationPayloadSchema = z.object({
 	}),
 });
 
-const editionsById = Object.fromEntries(
-	Object.entries(editionIds).map(([edition, id]) => [id, edition]),
-) as Record<string, Edition>;
-
-const toEdition = (id: string): Edition | undefined => {
+const toEdition = (id: string): DisplayAppAlertTopicEditionId | undefined => {
 	const upperCaseId = id.toUpperCase();
 	if (['UK', 'US', 'AU', 'EU', 'INT'].includes(upperCaseId)) {
-		return upperCaseId as Edition;
+		return upperCaseId as DisplayAppAlertTopicEditionId;
 	}
-	return editionsById[id];
+	const parsedEditionId = appAlertTopicEditionId.safeParse(id);
+	return parsedEditionId.success
+		? toDisplayEditionId(parsedEditionId.data)
+		: undefined;
 };
 
 const statusDisplay: Record<
@@ -97,7 +99,10 @@ export const mapNotificationToHistoryAlert = (
 		newsletter?.audience.items ?? appPushAudience.map(({ name }) => name);
 	const sentTo = destinationIds
 		.map(toEdition)
-		.filter((edition): edition is Edition => edition !== undefined);
+		.filter(
+			(edition): edition is DisplayAppAlertTopicEditionId =>
+				edition !== undefined,
+		);
 	const topicTypeId = appPushAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(
