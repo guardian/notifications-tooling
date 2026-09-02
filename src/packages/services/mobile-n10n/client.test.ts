@@ -89,7 +89,7 @@ describe('sendAppNotification', () => {
 		});
 	});
 
-	it('includes image and thumbnail when media is provided', async () => {
+	it('prefers the thumbnail crop and always sends it as thumbnailUrl', async () => {
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({ id: 'n10n-uuid' }, { status: 201 }),
 		);
@@ -106,8 +106,42 @@ describe('sendAppNotification', () => {
 		const sentBody = JSON.parse(
 			fetcher.mock.calls[0]?.[1]?.body as string,
 		) as Record<string, unknown>;
-		expect(sentBody.imageUrl).toBe('https://i.guim.co.uk/lead.jpg');
 		expect(sentBody.thumbnailUrl).toBe('https://i.guim.co.uk/thumb.jpg');
+		expect(sentBody).not.toHaveProperty('imageUrl');
+	});
+
+	it('falls back to the lead image, still sent as thumbnailUrl', async () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ id: 'n10n-uuid' }, { status: 201 }),
+		);
+
+		await sendAppNotification({
+			...request,
+			media: {
+				type: 'image',
+				imageUrl: 'https://i.guim.co.uk/lead.jpg',
+			},
+		});
+
+		const sentBody = JSON.parse(
+			fetcher.mock.calls[0]?.[1]?.body as string,
+		) as Record<string, unknown>;
+		expect(sentBody.thumbnailUrl).toBe('https://i.guim.co.uk/lead.jpg');
+		expect(sentBody).not.toHaveProperty('imageUrl');
+	});
+
+	it('sends no media keys when none is provided', async () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ id: 'n10n-uuid' }, { status: 201 }),
+		);
+
+		await sendAppNotification(request);
+
+		const sentBody = JSON.parse(
+			fetcher.mock.calls[0]?.[1]?.body as string,
+		) as Record<string, unknown>;
+		expect(sentBody).not.toHaveProperty('thumbnailUrl');
+		expect(sentBody).not.toHaveProperty('imageUrl');
 	});
 
 	it('generates a UUID id when none is supplied', async () => {

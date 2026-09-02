@@ -13,6 +13,7 @@ import { CreateAppAlertTab } from './CreateAppAlertTab';
 type StoryArgs = {
 	notificationState: NotificationState;
 	formValues?: Partial<AppAlertFormValues>;
+	containerMinWidth: string;
 };
 
 const meta = {
@@ -20,6 +21,14 @@ const meta = {
 	component: CreateAppAlertTab,
 	args: {
 		notificationState: defaultAppAlertState,
+		containerMinWidth: '1600px',
+	},
+	argTypes: {
+		containerMinWidth: {
+			control: 'text',
+			description:
+				'Width of the story container, used to exercise the tab layout breakpoints at 1310px and 1500px.',
+		},
 	},
 	parameters: {
 		layout: 'fullscreen',
@@ -31,12 +40,12 @@ const meta = {
 		},
 	},
 	render: (args: StoryArgs) => {
-		const { formValues, notificationState } = args;
+		const { formValues, notificationState, containerMinWidth } = args;
 		return (
 			<div
 				style={{
 					display: 'flex',
-					minWidth: '1600px',
+					minWidth: containerMinWidth,
 					minHeight: '100vh',
 					boxSizing: 'border-box',
 				}}
@@ -62,6 +71,9 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Create app alert' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.queryByText('The preview for the app alert will be shown below.'),
+		).not.toBeInTheDocument();
 	},
 };
 
