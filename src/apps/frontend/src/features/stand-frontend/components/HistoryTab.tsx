@@ -17,8 +17,8 @@ import {
 	TableRow,
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
-import type { DisplayAppAlertTopicEditionId } from '@models';
 import { from, until } from '@guardian/stand/utils';
+import type { DisplayAppAlertTopicEditionId } from '@models';
 import type { ReactNode } from 'react';
 import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';

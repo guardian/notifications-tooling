@@ -104,9 +104,9 @@ export const mapNotificationToHistoryNotification = (
 		: appPushAudience
 				.map(({ name }) => toEdition(name))
 				.filter(
-			(edition): edition is DisplayAppAlertTopicEditionId =>
-				edition !== undefined,
-		);
+					(edition): edition is DisplayAppAlertTopicEditionId =>
+						edition !== undefined,
+				);
 	const topicTypeId = appPushAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(
