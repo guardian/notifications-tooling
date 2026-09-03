@@ -23,6 +23,7 @@ import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';
 import type { Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
+import { phoneIphoneIcon } from './FlagIcons';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
@@ -282,14 +283,11 @@ export const HistoryTab = ({
 														variant="bodyXs"
 														cssOverrides={styles.channel}
 													>
-														<Icon
-															size="sm"
-															symbol={
-																notification.channel === 'push'
-																	? 'mobile_3'
-																	: 'mail'
-															}
-														/>
+														{notification.channel === 'push' ? (
+															<Icon size="sm">{phoneIphoneIcon}</Icon>
+														) : (
+															<Icon size="sm" symbol="mail" />
+														)}
 														{getChannelName(notification.channel)}
 														<span css={styles.notificationType}>
 															{' '}
