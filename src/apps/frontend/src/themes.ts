@@ -301,7 +301,6 @@ export const customIconButtonTheme: IconButtonTheme = {
 			hover: {
 				border: 'none',
 				backgroundColor: 'transparent',
-				color: semanticColors.text.weak,
 			},
 		},
 	},
