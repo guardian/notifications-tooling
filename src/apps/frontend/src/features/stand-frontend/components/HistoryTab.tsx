@@ -288,10 +288,12 @@ export const HistoryTab = ({
 														) : (
 															<Icon size="sm" symbol="mail" />
 														)}
-														{getChannelName(notification.channel)}
-														<span css={styles.notificationType}>
-															{' '}
-															| {notification.alertType}
+														<span>
+															{getChannelName(notification.channel)}
+															<span css={styles.notificationType}>
+																{' | '}
+																{notification.alertType}
+															</span>
 														</span>
 													</Typography>
 												</div>
