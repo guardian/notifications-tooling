@@ -23,7 +23,7 @@ import type { ReactNode } from 'react';
 import { layoutMainTheme } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
-import { formatHistorySendTime } from './history-send-time';
+import { formatHistorySendTime } from '../utils/history-send-time';
 import { HistoryPagination } from './HistoryPagination';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';

@@ -1,9 +1,9 @@
 import { Link } from '@guardian/stand/Link';
 import { Typography } from '@guardian/stand/Typography';
 import type { ResolvedArticle } from '@models';
-import { useRelativeTime } from '../history/use-relative-time';
+import { useRelativeTime } from '../hooks/use-relative-time';
 import { articlePreviewCardTheme } from '../themes';
-import { getPillarColor } from '../ui/pillar-colors';
+import { getPillarColor } from '../utils/pillar-colors';
 
 interface ArticlePreviewCardProps {
 	content: ResolvedArticle;

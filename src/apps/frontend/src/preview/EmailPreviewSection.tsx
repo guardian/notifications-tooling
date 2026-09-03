@@ -3,17 +3,17 @@ import { semanticColors } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Typography } from '@guardian/stand/Typography';
 import { useWatch } from 'react-hook-form';
+import { useNewsletterSegmentOptions } from '../segment/use-audience-editions';
+import { FlagPreviewPill } from '../segment/FlagPreviewPill';
+import { SendInfoPreviewPill } from '../send/SendInfoPreviewPill';
+import { TestEmailForm } from '../send/TestEmailForm';
+import { alertBannerCss, customAlertBannerTheme } from '../themes';
 import {
 	defaultNewsletterFormValues,
 	type NewsletterFormValues,
-} from '../compose/notification-forms';
-import { alertBannerCss, customAlertBannerTheme } from '../themes';
-import { useNewsletterSegmentOptions } from '../segment/use-audience-editions';
-import { FlagPreviewPill } from '../segment/FlagPreviewPill';
+} from '../utils/notification-forms';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
-import { SendInfoPreviewPill } from '../send/SendInfoPreviewPill';
-import { TestEmailForm } from '../send/TestEmailForm';
 
 export const EmailPreviewSection = () => {
 	const segments = useNewsletterSegmentOptions();

@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import type { NewsletterFormValues } from '../compose/notification-forms';
+import type { NewsletterFormValues } from '../utils/notification-forms';
 import { useNewsletterSegmentOptions } from './use-audience-editions';
 import { SegmentPicker } from './SegmentPicker';
 

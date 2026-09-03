@@ -3,9 +3,9 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
 import { WithNotificationContext } from '../testing/story-helpers';
 import type { NotificationState } from '../types';
+import type { NewsletterFormValues } from '../utils/notification-forms';
+import { defaultState } from '../utils/notification-reducer';
 import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
-import type { NewsletterFormValues } from './notification-forms';
-import { defaultState } from './notification-reducer';
 
 type StoryArgs = {
 	notificationState: NotificationState;

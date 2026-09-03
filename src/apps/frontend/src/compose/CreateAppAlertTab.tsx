@@ -4,9 +4,9 @@ import { AppPreviewSection } from '../preview/AppPreviewSection';
 import { AppPreviewToggle } from '../preview/PreviewToggle';
 import { FALLBACK_TOPIC_TYPES } from '../segment/audience-fallbacks';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
+import type { AppAlertFormValues } from '../utils/notification-forms';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
-import type { AppAlertFormValues } from './notification-forms';
 
 export const CreateAppAlertTab = () => {
 	const { reset } = useFormContext<AppAlertFormValues>();

@@ -5,14 +5,14 @@ import { Typography } from '@guardian/stand/Typography';
 import { type AppAlertTopicOption, toApiEditionId } from '@models';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
-import {
-	type AppAlertFormValues,
-	defaultAppAlertFormValues,
-} from '../compose/notification-forms';
 import { NotificationFormContext } from '../compose/NotificationContext';
 import { Editions } from '../segment/Editions';
 import { SendInfoPreviewPill } from '../send/SendInfoPreviewPill';
 import { alertBannerCss, customAlertBannerTheme } from '../themes';
+import {
+	type AppAlertFormValues,
+	defaultAppAlertFormValues,
+} from '../utils/notification-forms';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 import { PreviewSection } from './PreviewSection';

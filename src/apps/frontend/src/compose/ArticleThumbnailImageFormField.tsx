@@ -2,8 +2,8 @@ import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
-import type { AppAlertFormValues } from './notification-forms';
 import { NotificationFormContext } from './NotificationContext';
 
 export const ArticleThumbnailImageFormField = () => {

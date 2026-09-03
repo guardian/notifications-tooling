@@ -1,16 +1,16 @@
 import { type FormEvent, useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { AudienceSegmentsFormField } from '../segment/AudienceSegmentsFormField';
-import { htmlToSingleLineText } from '../ui/html-helpers';
-import { buildNewsletterRequest } from './build-request-payloads';
+import { buildNewsletterRequest } from '../utils/build-request-payloads';
+import { htmlToSingleLineText } from '../utils/html-helpers';
+import type { NewsletterFormValues } from '../utils/notification-forms';
 import { KickerFormField } from './KickerFormField';
-import type { NewsletterFormValues } from './notification-forms';
 import { NotificationFormContext } from './NotificationContext';
 import { NotificationFormSection } from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 import { PreviewTextFormField } from './PreviewTextFormField';
 import { SubjectFormField } from './SubjectFormField';
-import { useChannelConstraints } from './useChannelConstraints';
 
 interface CreateNewsletterFormProps {
 	activeSectionHref: string;

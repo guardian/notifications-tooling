@@ -7,13 +7,13 @@ import type {
 	SendNotificationRequest,
 	SendNotificationResponse,
 } from '../schemas';
-import type { TestEmailRequestFunction } from '../send/send-test-email';
 import type {
 	ChannelOption,
 	NotificationAction,
 	NotificationState,
 	RequestEmailHtml,
 } from '../types';
+import type { TestEmailRequestFunction } from '../utils/send-test-email';
 
 export interface NotificationFormContextProps {
 	channel: ChannelOption;

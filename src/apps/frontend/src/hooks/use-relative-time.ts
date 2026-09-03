@@ -4,7 +4,7 @@ import {
 	formatRelativeTime,
 	getRefreshIntervalMs,
 	parsePublicationDate,
-} from './relative-time';
+} from '../utils/relative-time';
 
 interface RelativeTime {
 	/** Short relative label, e.g. `2m ago`. */

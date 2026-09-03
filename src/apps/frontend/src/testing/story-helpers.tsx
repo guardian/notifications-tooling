@@ -1,19 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ReactNode, useReducer } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import {
-	appAlertFormSchema,
-	type AppAlertFormValues,
-	defaultAppAlertFormValues,
-	defaultNewsletterFormValues,
-	newsletterFormSchema,
-	type NewsletterFormValues,
-} from '../compose/notification-forms';
-import {
-	defaultAppAlertState,
-	defaultState,
-	notificationReducer,
-} from '../compose/notification-reducer';
 import type { NotificationFormContextProps } from '../compose/NotificationContext';
 import { NotificationFormContext } from '../compose/NotificationContext';
 import type {
@@ -21,7 +8,20 @@ import type {
 	NotificationAction,
 	NotificationState,
 } from '../types';
-import { parseHtml } from '../ui/html-helpers';
+import { parseHtml } from '../utils/html-helpers';
+import {
+	appAlertFormSchema,
+	type AppAlertFormValues,
+	defaultAppAlertFormValues,
+	defaultNewsletterFormValues,
+	newsletterFormSchema,
+	type NewsletterFormValues,
+} from '../utils/notification-forms';
+import {
+	defaultAppAlertState,
+	defaultState,
+	notificationReducer,
+} from '../utils/notification-reducer';
 import { articleFixture } from './capi-fixtures';
 import { mockCapiFetch } from './mock-capi-fetch';
 import { mockRequestEmailHtml } from './mock-fetch-email';

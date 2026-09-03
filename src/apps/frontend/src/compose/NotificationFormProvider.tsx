@@ -1,15 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ActionDispatch, type ReactNode, useReducer } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { requestEmailHtml } from '../preview/fetch-email-preview';
-import { sendNotification } from '../send/send-notification';
-import { requestTestEmailSend } from '../send/send-test-email';
 import type {
 	ChannelOption,
 	NotificationAction,
 	NotificationState,
 } from '../types';
-import { fetchCapiDataFromApi } from './fetch-capi-content';
+import { fetchCapiDataFromApi } from '../utils/fetch-capi-content';
+import { requestEmailHtml } from '../utils/fetch-email-preview';
 import {
 	appAlertFormSchema,
 	type AppAlertFormValues,
@@ -17,12 +15,14 @@ import {
 	defaultNewsletterFormValues,
 	newsletterFormSchema,
 	type NewsletterFormValues,
-} from './notification-forms';
+} from '../utils/notification-forms';
 import {
 	defaultAppAlertState,
 	defaultState,
 	notificationReducer,
-} from './notification-reducer';
+} from '../utils/notification-reducer';
+import { sendNotification } from '../utils/send-notification';
+import { requestTestEmailSend } from '../utils/send-test-email';
 import { NotificationFormContext } from './NotificationContext';
 
 type NotificationDraft = readonly [

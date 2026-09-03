@@ -1,18 +1,18 @@
 import { type FormEvent, useContext } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
-import { AlertTypeFormField } from './AlertTypeFormField';
-import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
-import { buildAppAlertRequest } from './build-request-payloads';
-import { HeadlineFormField } from './HeadlineFormField';
+import { buildAppAlertRequest } from '../utils/build-request-payloads';
 import {
 	type AppAlertFormValues,
 	defaultAppAlertFormValues,
-} from './notification-forms';
+} from '../utils/notification-forms';
+import { AlertTypeFormField } from './AlertTypeFormField';
+import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
+import { HeadlineFormField } from './HeadlineFormField';
 import { NotificationFormContext } from './NotificationContext';
 import { NotificationFormSection } from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
-import { useChannelConstraints } from './useChannelConstraints';
 
 interface CreateAppAlertFormProps {
 	activeSectionHref: string;

@@ -2,10 +2,10 @@ import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../compose/NotificationContext';
+import { useSendNotification } from '../hooks/use-send-notification';
 import type { SendNotificationRequest } from '../schemas';
-import { getChannelDescription } from '../ui/display-text-helpers';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { useSendNotification } from './use-send-notification';
+import { getChannelDescription } from '../utils/display-text-helpers';
 
 export const SendNotificationModal = () => {
 	const { channel, notification, updateNotification } = useContext(

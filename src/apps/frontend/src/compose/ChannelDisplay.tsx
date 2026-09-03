@@ -3,9 +3,9 @@ import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { useId } from 'react';
-import { channelOptionNameMap } from '../option-values';
 import { selectableTileTheme } from '../themes';
 import type { ChannelOption } from '../types';
+import { channelOptionNameMap } from '../utils/option-values';
 
 interface ChannelDisplayProps {
 	channel: ChannelOption;

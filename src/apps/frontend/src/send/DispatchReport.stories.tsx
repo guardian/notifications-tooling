@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { defaultState } from '../compose/notification-reducer';
 import {
 	completeEmailParams,
 	completePushParams,
 	WithNotificationContext,
 } from '../testing/story-helpers';
 import type { ChannelOption, NotificationState } from '../types';
+import { defaultState } from '../utils/notification-reducer';
 import {
 	AppAlertDispatchDetails,
 	AppAlertDispatchReportTab,

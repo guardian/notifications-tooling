@@ -15,8 +15,8 @@ import {
 	populatedEmailState,
 	WithNotificationContext,
 } from '../testing/story-helpers';
-import { defaultState } from './notification-reducer';
 import type { NotificationState } from '../types';
+import { defaultState } from '../utils/notification-reducer';
 import { CreateNewsletterForm } from './CreateNewsletterForm';
 
 type StoryArgs = {

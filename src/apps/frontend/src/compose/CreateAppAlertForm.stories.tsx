@@ -7,9 +7,9 @@ import {
 	WithNotificationContext,
 } from '../testing/story-helpers';
 import type { NotificationState } from '../types';
+import type { AppAlertFormValues } from '../utils/notification-forms';
+import { defaultAppAlertState } from '../utils/notification-reducer';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
-import type { AppAlertFormValues } from './notification-forms';
-import { defaultAppAlertState } from './notification-reducer';
 
 type StoryArgs = {
 	notificationState: NotificationState;

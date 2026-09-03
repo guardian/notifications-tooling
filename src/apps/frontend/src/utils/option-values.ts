@@ -1,8 +1,8 @@
 import type { Icon } from '@guardian/stand/Icon';
 import type { ComponentProps, ReactNode } from 'react';
-import type { Kicker } from './schemas';
-import type { AlertType, ChannelOption, DeliveryOption } from './types';
-import { phoneIphoneIcon } from './ui/FlagIcons';
+import type { Kicker } from '../schemas';
+import type { AlertType, ChannelOption, DeliveryOption } from '../types';
+import { phoneIphoneIcon } from '../ui/FlagIcons';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 

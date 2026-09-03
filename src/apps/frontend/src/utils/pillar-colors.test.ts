@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { getPillarColor } from './pillar-colors';
+import { getPillarColor } from '../utils/pillar-colors';
 
 describe('getPillarColor', () => {
 	it('returns the news pillar colour', () => {

@@ -9,12 +9,12 @@ import {
 	channelAudiencesHandler,
 	channelConstraintsHandler,
 } from '../testing/handlers/channels';
-import { htmlToSingleLineText } from '../ui/html-helpers';
-import { ArticleImportControl } from './ArticleImportControl';
+import { htmlToSingleLineText } from '../utils/html-helpers';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
-} from './notification-forms';
+} from '../utils/notification-forms';
+import { ArticleImportControl } from './ArticleImportControl';
 import {
 	AppAlertNotificationFormProvider,
 	NewsletterNotificationFormProvider,

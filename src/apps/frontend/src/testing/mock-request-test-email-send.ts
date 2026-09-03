@@ -1,5 +1,5 @@
 import type { ApiError } from '../api-client/errors';
-import type { TestEmailRequestFunction } from '../send/send-test-email';
+import type { TestEmailRequestFunction } from '../utils/send-test-email';
 
 export const mockRequestTestEmailSend: TestEmailRequestFunction = () => {
 	return new Promise((resolve) => {

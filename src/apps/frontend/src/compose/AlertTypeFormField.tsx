@@ -1,10 +1,10 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { Controller, useFormContext } from 'react-hook-form';
-import { alertTypeNameMap } from '../option-values';
 import {
 	appAlertFormSchema,
 	type AppAlertFormValues,
-} from './notification-forms';
+} from '../utils/notification-forms';
+import { alertTypeNameMap } from '../utils/option-values';
 
 const toOptionKey = (value: string) => `alertType//${value}`;
 const alertTypeSchema = appAlertFormSchema.shape.alertType;

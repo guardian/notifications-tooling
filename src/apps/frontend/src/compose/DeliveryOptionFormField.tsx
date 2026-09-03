@@ -4,7 +4,7 @@ import type { ChannelOption } from '../types';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
-} from './notification-forms';
+} from '../utils/notification-forms';
 
 interface DeliveryOptionFormFieldProps {
 	channel: ChannelOption;

@@ -8,16 +8,16 @@ import type { NewsletterSegmentId, ResolvedArticle } from '@models';
 import { useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';
+import { NotificationFormContext } from '../compose/NotificationContext';
+import { ConfigContext } from '../config/ConfigContext';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { validateGuardianEmail } from '../utils/form-validation';
+import { composeNewsletterSubject } from '../utils/newsletter-subject';
+import type { NewsletterFormValues } from '../utils/notification-forms';
 import type {
 	TestEmailResponse,
 	TestEmailSendRequest,
-} from './send-test-email';
-import { NotificationFormContext } from '../compose/NotificationContext';
-import { validateGuardianEmail } from '../compose/form-validation';
-import { composeNewsletterSubject } from '../compose/newsletter-subject';
-import type { NewsletterFormValues } from '../compose/notification-forms';
-import { ConfigContext } from '../config/ConfigContext';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
+} from '../utils/send-test-email';
 
 type TestSendParams = {
 	emailInput: string;

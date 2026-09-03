@@ -5,7 +5,7 @@ import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
 } from './notification-forms';
-import { alertTypeNameMap } from '../option-values';
+import { alertTypeNameMap } from './option-values';
 
 type BuildRequestArgs<Values> = {
 	values: Values;

@@ -7,12 +7,12 @@ import type { ReactNode } from 'react';
 import { useContext } from 'react';
 import type { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from '../compose/NotificationContext';
+import { useSendNotification } from '../hooks/use-send-notification';
 import type { SendNotificationRequest } from '../schemas';
 import type { ChannelOption } from '../types';
 import type { NotificationState } from '../types';
-import { getChannelDescription } from '../ui/display-text-helpers';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { useSendNotification } from './use-send-notification';
+import { getChannelDescription } from '../utils/display-text-helpers';
 
 const deriveUserFacingMessage = (
 	apiError: ApiError,

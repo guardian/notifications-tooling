@@ -5,9 +5,9 @@ import {
 	toApiEditionId,
 	toDisplayEditionId,
 } from '@models';
-import { EDITION_OPTIONS } from './EditionOptions';
 import { FlagAtom } from '../ui/FlagAtom';
 import { PreviewPillList } from '../ui/PreviewPillList';
+import { EDITION_OPTIONS } from './EditionOptions';
 
 export interface AppPushTopicSelection {
 	type: string;

@@ -1,10 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import {
-	buildAppAlertRequest,
-	buildNewsletterRequest,
-} from '../compose/build-request-payloads';
-import { defaultAppAlertState } from '../compose/notification-reducer';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeEmailParams,
@@ -13,6 +8,11 @@ import {
 	WithNotificationContext,
 } from '../testing/story-helpers';
 import type { ChannelOption, NotificationState } from '../types';
+import {
+	buildAppAlertRequest,
+	buildNewsletterRequest,
+} from '../utils/build-request-payloads';
+import { defaultAppAlertState } from '../utils/notification-reducer';
 import { SendNotificationModal } from './SendNotificationModal';
 
 type StoryArgs = {

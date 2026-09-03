@@ -9,8 +9,8 @@ import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { parseArticleUrlInputToContentId } from '../utils/form-validation';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
-import { parseArticleUrlInputToContentId } from './form-validation';
 import { NotificationFormContext } from './NotificationContext';
 
 // TO DO - more helpful error UI
