@@ -43,7 +43,14 @@ export const ArticleThumbnailImageFormField = () => {
 						<AppAlertThumbnailSwitch
 							isDisabled={!hasThumbnail}
 							isSelected={hasThumbnail && field.value}
-							onChange={field.onChange}
+							onChange={(isSelected) => {
+								field.onChange(isSelected);
+
+								if (!isSelected) {
+									setReplacementImageUrl('');
+									setOpenReplaceSection(false);
+								}
+							}}
 						/>
 						{hasThumbnail && field.value && (
 							<div
@@ -98,6 +105,7 @@ export const ArticleThumbnailImageFormField = () => {
 												value={replacementImageUrl}
 												placeholder="Enter replacement image URL..."
 												onChange={setReplacementImageUrl}
+												id="replacement-image-URL"
 											/>
 											<Button
 												type="button"
