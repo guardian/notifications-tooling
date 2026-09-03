@@ -13,7 +13,8 @@ interface ChannelDisplayProps {
 
 export const ChannelDisplay = ({ channel }: ChannelDisplayProps) => {
 	const headingId = useId();
-	const { description, name, symbol } = channelOptionNameMap[channel];
+	const { customIcon, description, name, symbol } =
+		channelOptionNameMap[channel];
 
 	return (
 		<section
@@ -40,9 +41,13 @@ export const ChannelDisplay = ({ channel }: ChannelDisplayProps) => {
 					})}
 				>
 					<div css={selectableTileTheme.iconRow}>
-						{symbol && (
+						{customIcon ? (
+							<Icon size="md" alt={`${name} channel`}>
+								{customIcon}
+							</Icon>
+						) : symbol ? (
 							<Icon size="md" symbol={symbol} alt={`${name} channel`} />
-						)}
+						) : null}
 						<Typography
 							variant="headingCompactSm"
 							css={selectableTileTheme.titleStyle}

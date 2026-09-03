@@ -101,6 +101,9 @@ export const AppAlertSuccess: Story = {
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
+		await expect(
+			canvas.getByText('Show article thumbnail image'),
+		).toBeVisible();
 
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Create new app alert' }),
