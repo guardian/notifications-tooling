@@ -1,5 +1,6 @@
-const defaultLimit = 20;
-const maximumLimit = 50;
+export const DEFAULT_LIMIT = 20;
+export const MAXIMUM_LIMIT = 50;
+export const DEFAULT_OFFSET = 0;
 
 const parseBoundedInteger = (
 	value: string | null,
@@ -18,11 +19,11 @@ const parseBoundedInteger = (
 export const parseHistorySearchParams = (searchParams: URLSearchParams) => ({
 	limit: parseBoundedInteger(
 		searchParams.get('limit'),
-		defaultLimit,
+		DEFAULT_LIMIT,
 		1,
-		maximumLimit,
+		MAXIMUM_LIMIT,
 	),
-	offset: parseBoundedInteger(searchParams.get('offset'), 0, 0),
+	offset: parseBoundedInteger(searchParams.get('offset'), DEFAULT_OFFSET, 0),
 	since: (() => {
 		const value = searchParams.get('since');
 		if (value === null) {

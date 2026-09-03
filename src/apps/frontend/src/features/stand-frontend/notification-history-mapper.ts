@@ -3,7 +3,7 @@ import type {
 	ChannelAudienceResponse,
 	NotificationSummary,
 } from './api/schemas';
-import type { HistoryAlert } from './components/HistoryTab';
+import type { HistoryAlert } from './components/HistoryView';
 import { editionIds } from './edition-values';
 import type { Edition } from './types';
 

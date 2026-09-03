@@ -5,9 +5,6 @@ import {
 	Pagination as StandPagination,
 } from '@guardian/stand/Pagination';
 import { from } from '@guardian/stand/utils';
-import { useState } from 'react';
-
-const PAGE_SIZE = 10;
 
 const styles = {
 	wrapper: css({
@@ -78,31 +75,14 @@ const paginationTheme: PaginationTheme = {
 interface HistoryPaginationProps {
 	currentPage: number;
 	totalItems: number;
+	limit: number;
 	onPageChange: (page: number) => void;
 }
-
-export const useHistoryPagination = <T,>(items: T[]) => {
-	const [currentPage, setCurrentPage] = useState(1);
-	const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
-	const activePage = Math.max(1, Math.min(currentPage, totalPages));
-	const pageStart = (activePage - 1) * PAGE_SIZE;
-
-	const handlePageChange = (page: number) => {
-		setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-	};
-
-	return {
-		activePage,
-		handlePageChange,
-		pageSize: PAGE_SIZE,
-		shouldShowPagination: items.length > PAGE_SIZE,
-		visibleItems: items.slice(pageStart, pageStart + PAGE_SIZE),
-	};
-};
 
 export const HistoryPagination = ({
 	currentPage,
 	totalItems,
+	limit,
 	onPageChange,
 }: HistoryPaginationProps) => {
 	return (
@@ -110,7 +90,7 @@ export const HistoryPagination = ({
 			<StandPagination
 				currentPage={currentPage}
 				totalItems={totalItems}
-				pageSize={PAGE_SIZE}
+				pageSize={limit}
 				onPageChange={onPageChange}
 				theme={paginationTheme}
 				cssOverrides={styles.pagination}

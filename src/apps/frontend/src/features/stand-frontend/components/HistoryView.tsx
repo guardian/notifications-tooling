@@ -19,7 +19,7 @@ import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';
 import type { Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
-import { HistoryPagination, useHistoryPagination } from './HistoryPagination';
+import { HistoryPagination } from './HistoryPagination';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
@@ -36,10 +36,14 @@ export interface HistoryAlert {
 	status: HistoryStatus;
 }
 
-interface HistoryTabProps {
+interface HistoryViewProps {
 	alerts?: HistoryAlert[];
+	totalItems?: number;
+	limit: number;
+	currentPage: number;
 	isLoading?: boolean;
 	error?: ReactNode;
+	handlePageChange: (page: number) => void;
 }
 
 const styles = {
@@ -130,15 +134,15 @@ const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
 		Failed: 'red',
 	};
 
-export const HistoryTab = ({
+export const HistoryView = ({
 	alerts = [],
+	totalItems = 0,
 	isLoading = false,
+	limit,
 	error,
-}: HistoryTabProps) => {
-	const { activePage, handlePageChange, shouldShowPagination, visibleItems } =
-		useHistoryPagination(alerts);
-	const visibleAlerts = visibleItems;
-
+	currentPage,
+	handlePageChange,
+}: HistoryViewProps) => {
 	return (
 		<Layout.Main theme={layoutMainTheme}>
 			<section aria-labelledby="history-heading" css={styles.container}>
@@ -148,11 +152,12 @@ export const HistoryTab = ({
 							History
 						</Typography>
 					</div>
-					{!isLoading && !error && shouldShowPagination && (
+					{!isLoading && !error && totalItems > limit && (
 						<HistoryPagination
-							currentPage={activePage}
-							totalItems={alerts.length}
+							currentPage={currentPage}
+							totalItems={totalItems}
 							onPageChange={handlePageChange}
+							limit={limit}
 						/>
 					)}
 				</div>
@@ -178,7 +183,7 @@ export const HistoryTab = ({
 									<TableColumnHeader>Status</TableColumnHeader>
 								</TableHeader>
 								<TableBody>
-									{visibleAlerts.map((alert) => {
+									{alerts.map((alert: HistoryAlert) => {
 										const sendTime = formatHistorySendTime(alert.sentAt);
 
 										return (
@@ -234,7 +239,7 @@ export const HistoryTab = ({
 													gridRow={{ md: '2', lg: 'auto' }}
 												>
 													<span css={styles.regions}>
-														{alert.sentTo.map((edition) => (
+														{alert.sentTo.map((edition: Edition) => (
 															<span
 																key={edition}
 																aria-label={editionNames[edition]}

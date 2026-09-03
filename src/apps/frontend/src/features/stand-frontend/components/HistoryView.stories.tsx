@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
-import { type HistoryAlert, HistoryTab } from './HistoryTab';
+import { type HistoryAlert, HistoryView } from './HistoryView';
 
 const alerts: HistoryAlert[] = [
 	{
@@ -44,18 +44,23 @@ const paginatedAlerts: HistoryAlert[] = Array.from(
 );
 
 const meta = {
-	title: 'Stand Frontend/HistoryTab',
-	component: HistoryTab,
+	title: 'Stand Frontend/HistoryView',
+	component: HistoryView,
 	parameters: {
 		layout: 'fullscreen',
 	},
-} satisfies Meta<typeof HistoryTab>;
+} satisfies Meta<typeof HistoryView>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	args: { alerts },
+	args: {
+		alerts,
+		totalItems: alerts.length,
+		currentPage: 1,
+		handlePageChange: () => undefined,
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -77,6 +82,12 @@ export const Default: Story = {
 };
 
 export const Empty: Story = {
+	args: {
+		alerts: [],
+		totalItems: 0,
+		currentPage: 1,
+		handlePageChange: () => undefined,
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -86,7 +97,14 @@ export const Empty: Story = {
 };
 
 export const WithPagination: Story = {
-	args: { alerts: paginatedAlerts },
+	args: {
+		alerts: paginatedAlerts.slice(0, 10),
+		totalItems: paginatedAlerts.length,
+		limit: 10,
+		offset: 0,
+		currentPage: 1,
+		handlePageChange: () => undefined,
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
