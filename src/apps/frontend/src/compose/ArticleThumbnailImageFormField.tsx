@@ -21,6 +21,7 @@ export const ArticleThumbnailImageFormField = () => {
 		}) ?? '';
 	const hasThumbnail = Boolean(articleThumbnailUrl);
 	const [replacementImageUrl, setReplacementImageUrl] = useState('');
+	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	const thumbnailReplaced =
 		hasThumbnail &&
 		articleThumbnailUrl === replacementImageUrl &&
@@ -65,51 +66,63 @@ export const ArticleThumbnailImageFormField = () => {
 									<IconButton
 										variant="tertiary"
 										size="md"
-										symbol="keyboard_arrow_down"
+										symbol={
+											openReplaceSection
+												? 'keyboard_arrow_up'
+												: 'keyboard_arrow_down'
+										}
 										ariaLabel="add replacement image URL"
 										theme={customIconButtonTheme}
+										onClick={() => setOpenReplaceSection(!openReplaceSection)}
 									/>
 								</div>
-								<Typography
-									variant="helpTextFormMd"
-									cssOverrides={css({ color: semanticColors.text.weak })}
-								>
-									Copy and paste a Guardian image URL to replace the existing
-									image
-								</Typography>
-								<div
-									css={{
-										display: 'flex',
-										flexDirection: 'row',
-										gap: semanticSpacing.stackXs,
-										alignItems: 'center',
-									}}
-								>
-									<TextInput
-										name="replacementImageUrl"
-										aria-label="replacement image URL"
-										size="md"
-										value={replacementImageUrl}
-										placeholder="Enter replacement image URL..."
-										onChange={setReplacementImageUrl}
-									/>
-									<Button
-										type="button"
-										icon="refresh"
-										size="md"
-										variant="secondary"
-										onClick={() => {
-											setValue('articleThumbnailUrl', replacementImageUrl, {
-												shouldDirty: true,
-												shouldValidate: true,
-											});
-										}}
-									>
-										Update
-									</Button>
-								</div>
-								{thumbnailReplaced && (
-									<InlineMessage level="success">Image updated</InlineMessage>
+								{openReplaceSection && (
+									<>
+										<Typography
+											variant="helpTextFormMd"
+											cssOverrides={css({ color: semanticColors.text.weak })}
+										>
+											Copy and paste a Guardian image URL to replace the
+											existing image
+										</Typography>
+
+										<div
+											css={{
+												display: 'flex',
+												flexDirection: 'row',
+												gap: semanticSpacing.stackXs,
+												alignItems: 'center',
+											}}
+										>
+											<TextInput
+												name="replacementImageUrl"
+												aria-label="replacement image URL"
+												size="md"
+												value={replacementImageUrl}
+												placeholder="Enter replacement image URL..."
+												onChange={setReplacementImageUrl}
+											/>
+											<Button
+												type="button"
+												icon="refresh"
+												size="md"
+												variant="secondary"
+												onClick={() => {
+													setValue('articleThumbnailUrl', replacementImageUrl, {
+														shouldDirty: true,
+														shouldValidate: true,
+													});
+												}}
+											>
+												Update
+											</Button>
+										</div>
+										{thumbnailReplaced && (
+											<InlineMessage level="success">
+												Image updated
+											</InlineMessage>
+										)}
+									</>
 								)}
 							</div>
 						)}
