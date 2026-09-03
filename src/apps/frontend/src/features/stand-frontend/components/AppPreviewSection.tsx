@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
-import { semanticColors, semanticSizing } from '@guardian/stand';
+import { semanticColors } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
+import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { TopicTypeOption } from '../api/schemas';
@@ -10,6 +11,7 @@ import {
 	defaultAppAlertFormValues,
 } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
+import { alertBannerCss, customAlertBannerTheme } from '../themes';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
 import { Editions } from './Editions';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
@@ -34,32 +36,43 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		name: 'headline',
 		defaultValue: defaultAppAlertFormValues.headline,
 	});
+	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
+		name: 'includeThumbnail',
+		defaultValue: defaultAppAlertFormValues.includeThumbnail,
+	});
 	const alertTypeLabel =
 		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
 	const selectedTopics = editions.map((edition) => ({
 		type: alertType,
 		name: editionIds[edition],
 	}));
-	const thumbnailUrl = notification.content?.fields?.thumbnail;
+	const thumbnailUrl = includeThumbnail
+		? notification.content?.fields?.thumbnail
+		: undefined;
 
 	return (
 		<PreviewSection
 			title="Preview"
 			description="The preview for the app alert will be shown below."
-			isVisible={Boolean(notification.fetchedArticleId)}
 		>
-			<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
+			<SendInfoPreviewPill
+				channel="push"
+				deliveryTiming="appImmediate"
+				includeThumbnail={includeThumbnail}
+			/>
 			<Editions topicTypes={topicTypes} selected={selectedTopics} />
 			<AlertBanner
 				level="information"
 				showIcon
-				cssOverrides={css({
-					border: `${semanticSizing.border.default} solid ${semanticColors.border.information}`,
-					height: 'auto',
-					paddingBlock: '12px',
-				})}
+				cssOverrides={alertBannerCss}
+				theme={customAlertBannerTheme}
 			>
-				App alert formats might differ across platforms and devices
+				<Typography
+					variant={'bodyBoldSm'}
+					cssOverrides={css({ color: semanticColors.text.blue })}
+				>
+					App alert formats might differ across platforms and devices
+				</Typography>
 			</AlertBanner>
 			<IPhoneAlertPreview
 				alertType={alertTypeLabel}

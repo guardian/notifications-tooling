@@ -7,9 +7,13 @@ import { useRelativeTime } from '../use-relative-time';
 
 interface ArticlePreviewCardProps {
 	content: ResolvedArticle;
+	showThumbnail?: boolean;
 }
 
-export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
+export const ArticlePreviewCard = ({
+	content,
+	showThumbnail = true,
+}: ArticlePreviewCardProps) => {
 	const {
 		sectionName,
 		pillarId,
@@ -79,7 +83,7 @@ export const ArticlePreviewCard = ({ content }: ArticlePreviewCardProps) => {
 				</Link>
 			</div>
 
-			{thumbnail && (
+			{thumbnail && showThumbnail && (
 				<img
 					src={thumbnail}
 					alt={`Thumbnail for ${headline}`}

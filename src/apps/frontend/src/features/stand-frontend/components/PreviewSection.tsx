@@ -9,14 +9,12 @@ import { layer, topBarHeight } from '../themes';
 interface PreviewSectionProps {
 	title: string;
 	description: string;
-	isVisible: boolean;
 	children?: ReactNode;
 }
 
 export const PreviewSection = ({
 	title,
 	description,
-	isVisible,
 	children,
 }: PreviewSectionProps) => (
 	<section
@@ -43,6 +41,10 @@ export const PreviewSection = ({
 				top: topBarHeight,
 				zIndex: layer.stickyContent,
 			},
+			'@media (min-width: 1310px)': {
+				height: `calc(100vh - ${topBarHeight})`,
+				overflowY: 'auto',
+			},
 		})}
 	>
 		<div
@@ -50,7 +52,6 @@ export const PreviewSection = ({
 				display: 'flex',
 				flexDirection: 'column',
 				gap: semanticSpacing.stackLg,
-				visibility: isVisible ? 'visible' : 'hidden',
 			})}
 		>
 			<header

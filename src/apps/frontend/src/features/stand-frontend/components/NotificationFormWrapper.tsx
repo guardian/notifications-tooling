@@ -27,6 +27,7 @@ interface NotificationFormWrapperProps {
 	onSubmit: FormEventHandler<HTMLFormElement>;
 	onResetNotification: () => void;
 	onArticleImported: (article: ResolvedArticle) => void;
+	showArticleThumbnail?: boolean;
 }
 
 export const NotificationFormWrapper = ({
@@ -38,6 +39,7 @@ export const NotificationFormWrapper = ({
 	onSubmit,
 	onResetNotification,
 	onArticleImported,
+	showArticleThumbnail,
 	children,
 }: PropsWithChildren<NotificationFormWrapperProps>) => {
 	const { notification } = useContext(NotificationFormContext);
@@ -89,6 +91,7 @@ export const NotificationFormWrapper = ({
 							lockArticleInputText={lockArticleInputText}
 							setLockArticleInputText={setLockArticleInputText}
 							onArticleImported={onArticleImported}
+							showThumbnail={showArticleThumbnail}
 						/>
 						<ChannelDisplay channel={channel} />
 					</NotificationFormSection>

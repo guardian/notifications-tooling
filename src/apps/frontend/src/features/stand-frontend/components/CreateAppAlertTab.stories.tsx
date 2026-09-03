@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { acceptedEmailSendResponse } from '../../../mocks/api-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -72,6 +71,9 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Create app alert' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.queryByText('The preview for the app alert will be shown below.'),
+		).not.toBeInTheDocument();
 	},
 };
 
@@ -95,31 +97,6 @@ export const ConfirmationStep: Story = {
 		await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 		await expect(
 			screen.queryByText('Are you sure you want to send the app alert?'),
-		).not.toBeInTheDocument();
-	},
-};
-
-export const Sent: Story = {
-	args: {
-		notificationState: {
-			...populatedPushState,
-			sendingResult: {
-				success: true,
-				data: acceptedEmailSendResponse,
-			},
-		},
-		formValues: completePushParams,
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByRole('heading', { name: 'App alert sent' }),
-		).toBeVisible();
-		await expect(
-			canvas.getByRole('button', { name: 'Create new app alert' }),
-		).toBeVisible();
-		await expect(
-			canvas.queryByRole('button', { name: 'Content' }),
 		).not.toBeInTheDocument();
 	},
 };

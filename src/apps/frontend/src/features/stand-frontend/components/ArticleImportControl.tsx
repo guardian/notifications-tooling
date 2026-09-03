@@ -40,6 +40,7 @@ export interface ArticleImportControlProps {
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
 	onArticleImported: (article: ResolvedArticle) => void;
+	showThumbnail?: boolean;
 }
 export const ArticleImportControl = ({
 	articleInputText,
@@ -47,6 +48,7 @@ export const ArticleImportControl = ({
 	lockArticleInputText,
 	setLockArticleInputText,
 	onArticleImported,
+	showThumbnail,
 }: ArticleImportControlProps) => {
 	const { notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
@@ -99,8 +101,9 @@ export const ArticleImportControl = ({
 
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
-	const showFieldErrors =
+	const articleError =
 		failure ??
+		fetchArticleError ??
 		(!content && submitCount > 0
 			? 'Paste a URL to fetch an article'
 			: undefined);
@@ -145,7 +148,7 @@ export const ArticleImportControl = ({
 					<TextInput
 						name="articleUrl"
 						aria-label="article URL"
-						isInvalid={!!showFieldErrors}
+						isInvalid={!!articleError}
 						size="sm"
 						value={articleInputText}
 						placeholder="https://www.theguardian.com/..."
@@ -196,17 +199,13 @@ export const ArticleImportControl = ({
 					<InlineMessage level="success">Article imported</InlineMessage>
 				)}
 
-				{fetchArticleError && (
-					<InlineMessage level="error">{fetchArticleError}</InlineMessage>
-				)}
-
-				{showFieldErrors && (
-					<InlineMessage level="error">{showFieldErrors}</InlineMessage>
+				{articleError && (
+					<InlineMessage level="error">{articleError}</InlineMessage>
 				)}
 			</div>
 
 			{showImportedArticle && content && (
-				<ArticlePreviewCard content={content} />
+				<ArticlePreviewCard content={content} showThumbnail={showThumbnail} />
 			)}
 		</div>
 	);

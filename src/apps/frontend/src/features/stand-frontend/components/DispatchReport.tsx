@@ -7,14 +7,18 @@ import {
 	semanticSpacing,
 } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
+import { Grid, Item } from '@guardian/stand/Grid';
 import { Icon } from '@guardian/stand/Icon';
+import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
-import { type ReactNode, useContext } from 'react';
+import type { ReactNode } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { Navigate, useNavigate } from 'react-router-dom';
 import {
 	capitalise,
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
+import { composeNewsletterSubject } from '../newsletter-subject';
 import {
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
@@ -23,7 +27,10 @@ import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
 } from '../notification-forms';
-import { NotificationFormContext } from '../NotificationContext';
+import { alertTypeNameMap } from '../option-values';
+import { notificationRoutes } from '../routes';
+import { layoutMainTheme } from '../themes';
+import type { ChannelOption } from '../types';
 import type { DeliveryOption } from '../types';
 import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
 import { EDITION_OPTIONS } from './EditionOptions';
@@ -141,6 +148,14 @@ const DeliveryParameter = ({
 };
 
 export const NewsletterDispatchDetails = () => {
+	const kicker = useWatch<NewsletterFormValues, 'kicker'>({
+		name: 'kicker',
+		defaultValue: defaultNewsletterFormValues.kicker,
+	});
+	const subject = useWatch<NewsletterFormValues, 'subject'>({
+		name: 'subject',
+		defaultValue: '',
+	});
 	const audienceSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
 		name: 'audienceSegments',
 		defaultValue: defaultNewsletterFormValues.audienceSegments,
@@ -152,6 +167,11 @@ export const NewsletterDispatchDetails = () => {
 
 	return (
 		<section>
+			<ParameterLabel label="Subject">
+				<Typography variant="bodySm">
+					{composeNewsletterSubject(subject, kicker)}
+				</Typography>
+			</ParameterLabel>
 			<ParameterLabel label="Channel">
 				<SendInfoPreviewPill channel="email" isConfirmation={true} />
 			</ParameterLabel>
@@ -169,6 +189,14 @@ export const NewsletterDispatchDetails = () => {
 };
 
 export const AppAlertDispatchDetails = () => {
+	const alertType = useWatch<AppAlertFormValues, 'alertType'>({
+		name: 'alertType',
+		defaultValue: defaultAppAlertFormValues.alertType,
+	});
+	const headline = useWatch<AppAlertFormValues, 'headline'>({
+		name: 'headline',
+		defaultValue: '',
+	});
 	const editions = useWatch<AppAlertFormValues, 'editions'>({
 		name: 'editions',
 		defaultValue: defaultAppAlertFormValues.editions,
@@ -177,11 +205,24 @@ export const AppAlertDispatchDetails = () => {
 		name: 'deliveryOption',
 		defaultValue: defaultAppAlertFormValues.deliveryOption,
 	});
+	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
+		name: 'includeThumbnail',
+		defaultValue: defaultAppAlertFormValues.includeThumbnail,
+	});
 
 	return (
 		<section>
+			<ParameterLabel label="Headline">
+				<Typography variant="bodySm">
+					{alertTypeNameMap[alertType]}: {headline}
+				</Typography>
+			</ParameterLabel>
 			<ParameterLabel label="Channel">
-				<SendInfoPreviewPill channel="push" isConfirmation={true} />
+				<SendInfoPreviewPill
+					channel="push"
+					includeThumbnail={includeThumbnail}
+					isConfirmation={true}
+				/>
 			</ParameterLabel>
 			<ParameterLabel label="Editions">
 				<FlagPreviewPill
@@ -197,22 +238,16 @@ export const AppAlertDispatchDetails = () => {
 };
 
 interface DispatchReportProps {
+	channel: ChannelOption;
 	children: ReactNode;
-	onResetNotification: () => void;
+	onCreateNew: () => void;
 }
 
 export const DispatchReport = ({
+	channel,
 	children,
-	onResetNotification,
+	onCreateNew,
 }: DispatchReportProps) => {
-	const { channel, notification } = useContext(NotificationFormContext);
-	const { reset } = useFormContext();
-	const { sendingResult } = notification;
-
-	if (!sendingResult?.success) {
-		return null;
-	}
-
 	const notificationDescription = capitalise(getChannelDescription(channel));
 
 	return (
@@ -264,16 +299,75 @@ export const DispatchReport = ({
 					height: '40px',
 				}}
 			>
-				<Button
-					variant="primary"
-					onClick={() => {
-						reset();
-						onResetNotification();
-					}}
-				>
+				<Button variant="primary" onClick={onCreateNew}>
 					Create new {getChannelDescription(channel)}
 				</Button>
 			</div>
 		</section>
+	);
+};
+
+const DispatchReportTab = ({
+	channel,
+	dispatchId,
+	children,
+}: {
+	channel: ChannelOption;
+	dispatchId?: string;
+	children: ReactNode;
+}) => {
+	const { reset, setValue } = useFormContext<{ dispatchId?: string }>();
+	const navigate = useNavigate();
+
+	if (!dispatchId) {
+		return <Navigate to={notificationRoutes[channel].create} replace />;
+	}
+
+	return (
+		<Layout.Main theme={layoutMainTheme}>
+			<Grid>
+				<Item
+					size={12}
+					cssOverrides={css({
+						paddingTop: semanticSpacing.stackXl,
+						paddingLeft: semanticSpacing.stackLg,
+						paddingRight: semanticSpacing.stackLg,
+					})}
+				>
+					<DispatchReport
+						channel={channel}
+						onCreateNew={() => {
+							reset();
+							setValue('dispatchId', undefined);
+							void navigate(notificationRoutes[channel].create);
+						}}
+					>
+						{children}
+					</DispatchReport>
+				</Item>
+			</Grid>
+		</Layout.Main>
+	);
+};
+
+export const NewsletterDispatchReportTab = () => {
+	const dispatchId = useWatch<NewsletterFormValues, 'dispatchId'>({
+		name: 'dispatchId',
+	});
+	return (
+		<DispatchReportTab channel="email" dispatchId={dispatchId}>
+			<NewsletterDispatchDetails />
+		</DispatchReportTab>
+	);
+};
+
+export const AppAlertDispatchReportTab = () => {
+	const dispatchId = useWatch<AppAlertFormValues, 'dispatchId'>({
+		name: 'dispatchId',
+	});
+	return (
+		<DispatchReportTab channel="push" dispatchId={dispatchId}>
+			<AppAlertDispatchDetails />
+		</DispatchReportTab>
 	);
 };

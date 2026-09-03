@@ -30,8 +30,8 @@ fetch.
 
 Related error-handling decision: a failed request surfaces as a generic message
 plus its `requestId`. The envelope's per-field `details` are parsed onto
-`ApiError` and logged, but never mapped onto form fields. With the broker
-validating against the validation cap rather than the editorial limit — see
+`ApiError` and logged, but never mapped onto form fields. With no length an
+editor can reach by typing that the broker rejects — see
 [content-limits.md](./content-limits.md) — a 422 means a client bug, not
 something an editor can fix by rewording a field, so a pointer-to-field mapping
 layer would be built for a case that should never reach a user.

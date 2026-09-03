@@ -1,10 +1,14 @@
 import { type FormEvent, useContext } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { useChannelConstraints } from '../api/useChannelConstraints';
 import { buildAppAlertRequest } from '../build-request-payloads';
-import type { AppAlertFormValues } from '../notification-forms';
+import {
+	type AppAlertFormValues,
+	defaultAppAlertFormValues,
+} from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
 import { AlertTypeFormField } from './AlertTypeFormField';
+import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
 import { EditionsFormField } from './EditionsFormField';
 import { HeadlineFormField } from './HeadlineFormField';
 import { NotificationFormSection } from './NotificationFormSection';
@@ -22,6 +26,10 @@ export const CreateAppAlertForm = ({
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
+	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
+		name: 'includeThumbnail',
+		defaultValue: defaultAppAlertFormValues.includeThumbnail,
+	});
 
 	const { data: constraints } = useChannelConstraints();
 	const prepareSend = (values: AppAlertFormValues) => {
@@ -57,9 +65,11 @@ export const CreateAppAlertForm = ({
 			onResetNotification={() =>
 				updateNotification({ type: 'reset-app-alert' })
 			}
-			onArticleImported={(article) =>
-				setValue('headline', article.fields?.headline ?? article.webTitle)
-			}
+			onArticleImported={(article) => {
+				setValue('headline', article.fields?.headline ?? article.webTitle);
+				setValue('includeThumbnail', Boolean(article.fields?.thumbnail));
+			}}
+			showArticleThumbnail={includeThumbnail}
 		>
 			<NotificationFormSection
 				id="alert-section"
@@ -73,6 +83,7 @@ export const CreateAppAlertForm = ({
 				isActive={activeSectionHref === '#content-section'}
 			>
 				<HeadlineFormField constraints={constraints} />
+				<ArticleThumbnailImageFormField />
 			</NotificationFormSection>
 		</NotificationFormWrapper>
 	);

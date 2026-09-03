@@ -1,11 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { acceptedEmailSendResponse } from '../../../mocks/api-fixtures';
-import {
-	completeEmailParams,
-	populatedEmailState,
-	WithNotificationContext,
-} from '../../../stories/story-helpers';
+import { WithNotificationContext } from '../../../stories/story-helpers';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import type { NewsletterFormValues } from '../notification-forms';
 import { defaultState } from '../notification-reducer';
@@ -74,34 +69,9 @@ export const Default: Story = {
 			canvas.getByText('Create newsletter email'),
 		).toBeInTheDocument();
 		await expect(
-			canvas.getByText(
+			canvas.queryByText(
 				'The preview for the newsletter email will be shown below.',
 			),
-		).toBeInTheDocument();
-	},
-};
-
-export const Sent: Story = {
-	args: {
-		notificationState: {
-			...populatedEmailState,
-			sendingResult: {
-				success: true,
-				data: acceptedEmailSendResponse,
-			},
-		},
-		formValues: completeEmailParams,
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
-		).toBeVisible();
-		await expect(
-			canvas.getByRole('button', { name: 'Create new newsletter email' }),
-		).toBeVisible();
-		await expect(
-			canvas.queryByRole('button', { name: 'Content' }),
 		).not.toBeInTheDocument();
 	},
 };

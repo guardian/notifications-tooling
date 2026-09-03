@@ -1,26 +1,24 @@
-import { useContext } from 'react';
-import { NotificationFormContext } from '../NotificationContext';
+import { useEffect } from 'react';
+import { useFormContext } from 'react-hook-form';
+import type { NewsletterFormValues } from '../notification-forms';
 import { CreateNotificationForm } from './CreateNotificationForm';
-import { NewsletterDispatchDetails } from './DispatchReport';
 import { EmailPreviewSection } from './EmailPreviewSection';
 import { NotificationTabLayout } from './NotificationTabLayout';
 import { EmailPreviewToggle } from './PreviewToggle';
 
 export const CreateNewsletterEmailTab = () => {
-	const { updateNotification } = useContext(NotificationFormContext);
+	const { reset } = useFormContext<NewsletterFormValues>();
+
+	useEffect(() => reset(), [reset]);
 
 	return (
 		<NotificationTabLayout
 			channel="email"
-			onResetNotification={() =>
-				updateNotification({ type: 'reset-newsletter-email' })
-			}
 			previewToggle={<EmailPreviewToggle />}
 			renderForm={(activeSectionHref) => (
 				<CreateNotificationForm activeSectionHref={activeSectionHref} />
 			)}
 			previewSection={<EmailPreviewSection />}
-			dispatchDetails={<NewsletterDispatchDetails />}
 		/>
 	);
 };

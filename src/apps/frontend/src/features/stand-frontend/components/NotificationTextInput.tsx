@@ -12,7 +12,6 @@ type Props = {
 	placeholder?: string;
 	value: string;
 	update: { (value: string): void };
-	hardLimit?: number;
 	softLimit: number;
 	allowLineBreak?: boolean;
 	isDisabled?: boolean;
@@ -44,7 +43,6 @@ export const NotificationTextInput = ({
 	placeholder,
 	value,
 	update,
-	hardLimit,
 	softLimit,
 	allowLineBreak,
 	isDisabled,
@@ -82,7 +80,6 @@ export const NotificationTextInput = ({
 			<CharacterCount
 				count={value.length}
 				softLimit={softLimit}
-				hardLimit={hardLimit}
 				fieldDescription={label}
 			/>
 		</div>
@@ -95,7 +92,6 @@ export const NotificationTextInputWithPrefix = ({
 	placeholder,
 	value,
 	update,
-	hardLimit,
 	softLimit,
 	allowLineBreak,
 	isDisabled,
@@ -164,9 +160,8 @@ export const NotificationTextInputWithPrefix = ({
 				/>
 			</div>
 			<CharacterCount
-				count={value && prefix ? prefix.length + value.length : 0}
+				count={value && prefix ? prefix.length + value.length : value.length}
 				softLimit={softLimit}
-				hardLimit={hardLimit}
 				fieldDescription={label}
 			/>
 		</div>

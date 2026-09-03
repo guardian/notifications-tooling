@@ -4,22 +4,21 @@ import { useContext } from 'react';
 import { getChannelDescription } from '../../../util/display-text-helpers';
 import type { SendNotificationRequest } from '../api/schemas';
 import { NotificationFormContext } from '../NotificationContext';
+import { useSendNotification } from '../use-send-notification';
 import { LoadingSpinner } from './LoadingSpinner';
 
 export const SendNotificationModal = () => {
-	const { channel, notification, updateNotification, sendNotification } =
-		useContext(NotificationFormContext);
+	const { channel, notification, updateNotification } = useContext(
+		NotificationFormContext,
+	);
+	const sendNotification = useSendNotification();
 	const { confirmSendModalOpen, isWaitingForSend, pendingRequest } =
 		notification;
 	const channelDescription = getChannelDescription(channel);
 
 	const handleSending =
-		(sendNotificationRequest: SendNotificationRequest) => () => {
-			updateNotification({ type: 'waiting-for-send' });
-			void sendNotification(sendNotificationRequest).then((result) => {
-				updateNotification({ type: 'receive-send-result', result });
-			});
-		};
+		(sendNotificationRequest: SendNotificationRequest) => () =>
+			sendNotification(sendNotificationRequest);
 
 	return (
 		<Modal

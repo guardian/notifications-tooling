@@ -1,27 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-	type ActionDispatch,
-	createContext,
-	type ReactNode,
-	useContext,
-	useReducer,
-} from 'react';
-import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
+import { type ActionDispatch, type ReactNode, useReducer } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { fetchCapiDataFromApi } from './api/fetch-capi-content';
 import { requestEmailHtml } from './api/fetch-email-preview';
 import { sendNotification } from './api/send-notification';
 import { requestTestEmailSend } from './api/send-test-email';
 import {
-	APP_ALERT_LIMIT_FALLBACKS,
-	NEWSLETTER_LIMIT_FALLBACKS,
-	useChannelConstraints,
-} from './api/useChannelConstraints';
-import {
+	appAlertFormSchema,
 	type AppAlertFormValues,
-	createAppAlertFormSchema,
-	createNewsletterFormSchema,
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
+	newsletterFormSchema,
 	type NewsletterFormValues,
 } from './notification-forms';
 import {
@@ -40,75 +29,6 @@ type NotificationDraft = readonly [
 	NotificationState,
 	ActionDispatch<[NotificationAction]>,
 ];
-
-const NotificationDraftsContext = createContext<
-	| {
-			newsletter: NotificationDraft;
-			appAlert: NotificationDraft;
-			newsletterForm: UseFormReturn<NewsletterFormValues>;
-			appAlertForm: UseFormReturn<AppAlertFormValues>;
-	  }
-	| undefined
->(undefined);
-
-export const NotificationDraftsProvider = ({
-	children,
-}: {
-	children: ReactNode;
-}) => {
-	const { data: constraints } = useChannelConstraints();
-	const newsletter = useReducer<NotificationState, [NotificationAction]>(
-		notificationReducer,
-		defaultState,
-	);
-	const appAlert = useReducer<NotificationState, [NotificationAction]>(
-		notificationReducer,
-		defaultAppAlertState,
-	);
-	const newsletterLimits = constraints?.channels.newsletter;
-	const appAlertLimits = constraints?.channels['app-push'];
-	const newsletterForm = useForm<NewsletterFormValues>({
-		defaultValues: defaultNewsletterFormValues,
-		resolver: zodResolver(
-			createNewsletterFormSchema({
-				subject:
-					newsletterLimits?.compose.subject.validationCap ??
-					NEWSLETTER_LIMIT_FALLBACKS.title.validationCap,
-				preview:
-					newsletterLimits?.content.body.validationCap ??
-					NEWSLETTER_LIMIT_FALLBACKS.body.validationCap,
-			}),
-		),
-	});
-	const appAlertForm = useForm<AppAlertFormValues>({
-		defaultValues: defaultAppAlertFormValues,
-		resolver: zodResolver(
-			createAppAlertFormSchema({
-				headline:
-					appAlertLimits?.content.body.validationCap ??
-					APP_ALERT_LIMIT_FALLBACKS.headline.validationCap,
-			}),
-		),
-	});
-
-	return (
-		<NotificationDraftsContext.Provider
-			value={{ newsletter, appAlert, newsletterForm, appAlertForm }}
-		>
-			{children}
-		</NotificationDraftsContext.Provider>
-	);
-};
-
-const useNotificationDrafts = () => {
-	const drafts = useContext(NotificationDraftsContext);
-	if (!drafts) {
-		throw new Error(
-			'Notification form providers must be inside NotificationDraftsProvider',
-		);
-	}
-	return drafts;
-};
 
 const NotificationFormProvider = ({
 	children,
@@ -139,7 +59,14 @@ export const NewsletterNotificationFormProvider = ({
 }: {
 	children: ReactNode;
 }) => {
-	const { newsletter, newsletterForm } = useNotificationDrafts();
+	const newsletter = useReducer<NotificationState, [NotificationAction]>(
+		notificationReducer,
+		defaultState,
+	);
+	const newsletterForm = useForm<NewsletterFormValues>({
+		defaultValues: defaultNewsletterFormValues,
+		resolver: zodResolver(newsletterFormSchema),
+	});
 	return (
 		<FormProvider {...newsletterForm}>
 			<NotificationFormProvider draft={newsletter} channel="email">
@@ -154,7 +81,14 @@ export const AppAlertNotificationFormProvider = ({
 }: {
 	children: ReactNode;
 }) => {
-	const { appAlert, appAlertForm } = useNotificationDrafts();
+	const appAlert = useReducer<NotificationState, [NotificationAction]>(
+		notificationReducer,
+		defaultAppAlertState,
+	);
+	const appAlertForm = useForm<AppAlertFormValues>({
+		defaultValues: defaultAppAlertFormValues,
+		resolver: zodResolver(appAlertFormSchema),
+	});
 	return (
 		<FormProvider {...appAlertForm}>
 			<NotificationFormProvider draft={appAlert} channel="push">

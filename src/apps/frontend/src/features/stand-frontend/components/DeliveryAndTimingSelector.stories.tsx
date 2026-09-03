@@ -85,5 +85,29 @@ export const PreviewAppAlert: SendInfoPreviewPillType = {
 		await expect(
 			canvas.getByRole('img', { name: 'Immediate send icon' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.queryByText('Show article thumbnail image'),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const PreviewAppAlertWithThumbnail: SendInfoPreviewPillType = {
+	render: () => (
+		<SendInfoPreviewPill
+			channel="push"
+			deliveryTiming="immediate"
+			includeThumbnail
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText('Show article thumbnail image'),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('img', {
+				name: 'Show article thumbnail image icon',
+			}),
+		).toBeInTheDocument();
 	},
 };

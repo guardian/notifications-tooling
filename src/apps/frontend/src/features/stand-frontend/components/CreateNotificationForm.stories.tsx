@@ -119,7 +119,7 @@ export const ValidationErrors: Story = {
 	},
 };
 
-export const HardLimitBlocksSend: Story = {
+export const PastRecommendedStillSends: Story = {
 	args: {
 		notificationState: populatedEmailState,
 	},
@@ -128,19 +128,26 @@ export const HardLimitBlocksSend: Story = {
 		const subject = canvas.getByLabelText('Subject');
 		await userEvent.clear(subject);
 		await userEvent.type(subject, 'a'.repeat(140));
+
+		await expect(canvas.getByText('Warning')).toBeVisible();
+		await expect(canvas.getByText('Recommended')).toBeVisible();
+		await expect(
+			canvas.getByText('46 characters or fewer preferred'),
+		).toBeVisible();
+		await expect(
+			canvas.getByText('85 characters or fewer preferred'),
+		).toBeVisible();
+
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Send newsletter email' }),
 		);
 
-		await expect(
-			canvas.getByText(
-				'Subject must be 150 characters or fewer including the kicker',
-			),
-		).toBeVisible();
 		const screen = within(canvasElement.ownerDocument.body);
 		await expect(
-			screen.queryByText('Are you sure you want to send the newsletter email?'),
-		).not.toBeInTheDocument();
+			await screen.findByText(
+				'Are you sure you want to send the newsletter email?',
+			),
+		).toBeVisible();
 	},
 };
 
@@ -170,6 +177,17 @@ export const FetchArticleError: Story = {
 			isFetchingContent: false,
 			fetchArticleError: 'Failed to fetch article',
 		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send newsletter email' }),
+		);
+
+		await expect(canvas.getByText('Failed to fetch article')).toBeVisible();
+		await expect(
+			canvas.queryByText('Paste a URL to fetch an article'),
+		).toBeNull();
 	},
 };
 
@@ -226,10 +244,7 @@ const buildErrorStory = (error: ApiError): Story => ({
 		notificationState: {
 			...populatedEmailState,
 			isWaitingForSend: false,
-			sendingResult: {
-				success: false,
-				failure: error,
-			},
+			sendFailure: error,
 		},
 	},
 	render: (args) => {
