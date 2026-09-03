@@ -11,10 +11,10 @@ import {
 } from './use-audience-editions';
 
 const TEST_NEWSLETTER_SEGMENTS = [
-	{ id: 'MARS', label: 'The red planet' },
-	{ id: 'JUPITER', label: 'The biggest planet' },
-	{ id: 'SATURN', label: 'The one with rings' },
-];
+	{ id: 'UK', label: 'United Kingdom' },
+	{ id: 'US', label: 'United States' },
+	{ id: 'AU', label: 'Australia' },
+] as const;
 
 const TEST_PUSH_TOPIC = {
 	id: 'joke-for-today',
