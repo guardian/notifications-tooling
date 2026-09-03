@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useChannelAudiences } from '../api/useChannelAudiences';
 import { useNotificationHistory } from '../api/useNotificationHistory';
 import { parseHistorySearchParams } from '../history-search-params';
-import { mapNotificationToHistoryAlert } from '../notification-history-mapper';
+import { mapNotificationToHistoryNotification } from '../notification-history-mapper';
 import { HistoryTab } from './HistoryTab';
 
 export const HistoryPage = () => {
@@ -12,18 +12,18 @@ export const HistoryPage = () => {
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();
 
-	const alerts =
+	const notifications =
 		notificationHistory.data?.notifications.flatMap((notification) => {
-			const alert = mapNotificationToHistoryAlert(
+			const historyNotification = mapNotificationToHistoryNotification(
 				notification,
 				channelAudiences.data,
 			);
-			return alert ? [alert] : [];
+			return historyNotification ? [historyNotification] : [];
 		}) ?? [];
 
 	return (
 		<HistoryTab
-			alerts={alerts}
+			notifications={notifications}
 			isLoading={notificationHistory.isPending}
 			error={
 				notificationHistory.isError ? (
