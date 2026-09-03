@@ -59,6 +59,7 @@ export const Default: Story = {
 		alerts,
 		totalItems: alerts.length,
 		currentPage: 1,
+		limit: 10,
 		handlePageChange: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
@@ -86,6 +87,7 @@ export const Empty: Story = {
 		alerts: [],
 		totalItems: 0,
 		currentPage: 1,
+		limit: 10,
 		handlePageChange: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
@@ -96,12 +98,55 @@ export const Empty: Story = {
 	},
 };
 
+export const Loading: Story = {
+	args: {
+		alerts: [],
+		totalItems: 0,
+		currentPage: 1,
+		limit: 10,
+		isLoading: true,
+		handlePageChange: () => undefined,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByText('Loading history...')).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('grid', { name: 'Sent alerts' }),
+		).not.toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('navigation', { name: 'Pagination' }),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const Error: Story = {
+	args: {
+		alerts: [],
+		totalItems: 0,
+		currentPage: 1,
+		limit: 10,
+		error: 'Unable to load notification history. Try again.',
+		handlePageChange: () => undefined,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText('Unable to load notification history. Try again.'),
+		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('grid', { name: 'Sent alerts' }),
+		).not.toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('navigation', { name: 'Pagination' }),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const WithPagination: Story = {
 	args: {
 		alerts: paginatedAlerts.slice(0, 10),
 		totalItems: paginatedAlerts.length,
 		limit: 10,
-		offset: 0,
 		currentPage: 1,
 		handlePageChange: () => undefined,
 	},
