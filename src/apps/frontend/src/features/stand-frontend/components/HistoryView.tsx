@@ -24,6 +24,7 @@ import { layoutMainTheme } from '../themes';
 import type { Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
 import { phoneIphoneIcon } from './FlagIcons';
+import { HistoryPagination } from './HistoryPagination';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
@@ -40,18 +41,37 @@ export interface HistoryNotification {
 	status: HistoryStatus;
 }
 
-interface HistoryTabProps {
+interface HistoryViewProps {
 	notifications?: HistoryNotification[];
+	totalItems?: number;
+	limit: number;
+	currentPage: number;
 	isLoading?: boolean;
 	error?: ReactNode;
+	handlePageChange: (page: number) => void;
 }
 
 const styles = {
 	container: css({
 		display: 'flex',
 		flexDirection: 'column',
-		gap: semanticSpacing.stackLg,
+		gap: semanticSpacing.stackMd,
 		padding: semanticSpacing.stackLg,
+	}),
+	header: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackMd,
+		[from.md]: {
+			flexDirection: 'row',
+			alignItems: 'center',
+		},
+	}),
+	titleBlock: css({
+		display: 'flex',
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
 	}),
 	notification: css({
 		display: 'flex',
@@ -211,17 +231,33 @@ const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
 		Failed: 'red',
 	};
 
-export const HistoryTab = ({
+export const HistoryView = ({
 	notifications = [],
+	totalItems = 0,
 	isLoading = false,
+	limit,
 	error,
-}: HistoryTabProps) => {
+	currentPage,
+	handlePageChange,
+}: HistoryViewProps) => {
 	return (
 		<Layout.Main theme={layoutMainTheme}>
 			<section aria-labelledby="history-heading" css={styles.container}>
-				<Typography id="history-heading" element="h1" variant="headingLg">
-					History
-				</Typography>
+				<div css={styles.header}>
+					<div css={styles.titleBlock}>
+						<Typography id="history-heading" element="h1" variant="headingLg">
+							History
+						</Typography>
+					</div>
+					{!isLoading && !error && totalItems > limit && (
+						<HistoryPagination
+							currentPage={currentPage}
+							totalItems={totalItems}
+							onPageChange={handlePageChange}
+							limit={limit}
+						/>
+					)}
+				</div>
 				{isLoading && (
 					<Typography variant="bodyMd">Loading history...</Typography>
 				)}
@@ -320,7 +356,7 @@ export const HistoryTab = ({
 												Sent to:{' '}
 											</span>
 											<span css={[styles.metadataValue, styles.regions]}>
-												{notification.sentTo.map((edition) => (
+												{notification.sentTo.map((edition: Edition) => (
 													<span
 														key={edition}
 														aria-label={editionNames[edition]}
