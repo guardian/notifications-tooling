@@ -14,10 +14,6 @@ import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Navigate, useNavigate } from 'react-router-dom';
-import {
-	capitalise,
-	getChannelDescription,
-} from '../ui/display-text-helpers';
 import { composeNewsletterSubject } from '../compose/newsletter-subject';
 import type {
 	AppAlertFormValues,
@@ -29,12 +25,13 @@ import {
 } from '../compose/notification-forms';
 import { alertTypeNameMap } from '../option-values';
 import { notificationRoutes } from '../routes';
-import { layoutMainTheme } from '../themes';
-import type { ChannelOption } from '../types';
-import type { DeliveryOption } from '../types';
 import { EDITION_OPTIONS } from '../segment/EditionOptions';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
 import { useNewsletterSegmentOptions } from '../segment/use-audience-editions';
+import { layoutMainTheme } from '../themes';
+import type { ChannelOption } from '../types';
+import type { DeliveryOption } from '../types';
+import { capitalise, getChannelDescription } from '../ui/display-text-helpers';
 import { scheduleIcon } from '../ui/FlagIcons';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 

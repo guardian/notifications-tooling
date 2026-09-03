@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import type {
-	ChannelAudienceResponse,
-	NotificationSummary,
-} from '../schemas';
+import type { ChannelAudienceResponse, NotificationSummary } from '../schemas';
 import { notificationListResponseSchema } from '../schemas';
 import { mapNotificationToHistoryNotification } from './notification-history-mapper';
 
