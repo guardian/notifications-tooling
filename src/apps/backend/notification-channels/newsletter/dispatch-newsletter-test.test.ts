@@ -75,6 +75,7 @@ describe('dispatchNewsletterTest', () => {
 			{
 				testId,
 				variant: 'UK',
+				emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
 				dispatchId: 'test-dispatch-123',
 				status: 'success',
 				providerStatusCode: 201,
@@ -82,6 +83,7 @@ describe('dispatchNewsletterTest', () => {
 			{
 				testId,
 				variant: 'US',
+				emailRenderingId: newsletterSegments.US.emailRenderingNewsletterId,
 				dispatchId: 'test-dispatch-123',
 				status: 'success',
 				providerStatusCode: 201,

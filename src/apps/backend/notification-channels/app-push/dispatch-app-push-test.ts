@@ -3,6 +3,7 @@ import { NotificationChannel } from '@config';
 import {
 	AppNotificationApiError,
 	type AppNotificationFailureReason,
+	type AppNotificationImportance,
 } from '@services';
 import { determineArticleId } from '@utils';
 import { z } from 'zod';
@@ -25,11 +26,17 @@ const appNotificationEnvironmentSchema = z.object({
 /**
  * The outcome of one test push to the internal test topic (one per topic type).
  * `id` is the mobile-n10n POST id, kept for tracking once a store exists.
+ * `topics` and `importance` are the actual values sent to mobile-n10n (not the
+ * internal topic-type mapping key), so persisted rows and logs record what was
+ * really dispatched.
  */
 export type AppPushTestDispatchOutcome = {
 	testId: string;
 	id: string;
 	topicType: string;
+	editions: string[];
+	topics: Array<{ type: string; name: string }>;
+	importance: AppNotificationImportance;
 	status: 'success' | 'failure';
 	failureReason?: AppNotificationFailureReason | 'unknown';
 	/** The mobile-n10n HTTP status once the push reached the provider. */
@@ -102,6 +109,9 @@ export const dispatchAppPushTest = async (
 				testId,
 				id,
 				topicType: push.topicType,
+				editions: push.editions,
+				topics: push.topics,
+				importance: push.importance,
 				status: 'success',
 				providerStatusCode: result.value.status,
 			};
@@ -110,6 +120,9 @@ export const dispatchAppPushTest = async (
 			testId,
 			id,
 			topicType: push.topicType,
+			editions: push.editions,
+			topics: push.topics,
+			importance: push.importance,
 			status: 'failure',
 			failureReason:
 				result.reason instanceof AppNotificationApiError
