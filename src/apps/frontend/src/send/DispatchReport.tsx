@@ -22,7 +22,10 @@ import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
 import type { DeliveryOption } from '../types';
 import { scheduleIcon } from '../ui/FlagIcons';
-import { capitalise, getChannelDescription } from '../utils/display-text-helpers';
+import {
+	capitalise,
+	getChannelDescription,
+} from '../utils/display-text-helpers';
 import { composeNewsletterSubject } from '../utils/newsletter-subject';
 import type {
 	AppAlertFormValues,
