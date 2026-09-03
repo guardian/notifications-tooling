@@ -28,6 +28,7 @@ interface NotificationFormWrapperProps {
 	onResetNotification: () => void;
 	onArticleImported: (article: ResolvedArticle) => void;
 	showArticleThumbnail?: boolean;
+	articleThumbnailUrl?: string;
 }
 
 export const NotificationFormWrapper = ({
@@ -40,6 +41,7 @@ export const NotificationFormWrapper = ({
 	onResetNotification,
 	onArticleImported,
 	showArticleThumbnail,
+	articleThumbnailUrl,
 	children,
 }: PropsWithChildren<NotificationFormWrapperProps>) => {
 	const { notification } = useContext(NotificationFormContext);
@@ -92,6 +94,7 @@ export const NotificationFormWrapper = ({
 							setLockArticleInputText={setLockArticleInputText}
 							onArticleImported={onArticleImported}
 							showThumbnail={showArticleThumbnail}
+							articleThumbnailUrl={articleThumbnailUrl}
 						/>
 						<ChannelDisplay channel={channel} />
 					</NotificationFormSection>

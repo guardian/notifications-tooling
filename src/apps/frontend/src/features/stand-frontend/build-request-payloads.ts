@@ -70,8 +70,14 @@ export const buildAppAlertRequest = ({
 	content,
 	idempotencyKey,
 }: BuildRequestArgs<AppAlertFormValues>): SendNotificationRequest => {
-	const { alertType, editions, headline, includeThumbnail } = values;
-	const thumbnailUrl = content.fields?.thumbnail;
+	const {
+		alertType,
+		editions,
+		headline,
+		includeThumbnail,
+		articleThumbnailUrl,
+	} = values;
+	const thumbnailUrl = articleThumbnailUrl ?? content.fields?.thumbnail;
 
 	return {
 		idempotencyKey,
@@ -87,7 +93,7 @@ export const buildAppAlertRequest = ({
 								media: {
 									type: 'image' as const,
 									imageUrl: thumbnailUrl,
-									thumbnailUrl,
+									thumbnailUrl: thumbnailUrl,
 								},
 							}
 						: {}),

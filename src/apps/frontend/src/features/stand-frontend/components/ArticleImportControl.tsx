@@ -41,6 +41,7 @@ export interface ArticleImportControlProps {
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
 	onArticleImported: (article: ResolvedArticle) => void;
 	showThumbnail?: boolean;
+	articleThumbnailUrl?: string;
 }
 export const ArticleImportControl = ({
 	articleInputText,
@@ -49,6 +50,7 @@ export const ArticleImportControl = ({
 	setLockArticleInputText,
 	onArticleImported,
 	showThumbnail,
+	articleThumbnailUrl,
 }: ArticleImportControlProps) => {
 	const { notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
@@ -208,7 +210,11 @@ export const ArticleImportControl = ({
 			</div>
 
 			{showImportedArticle && content && (
-				<ArticlePreviewCard content={content} showThumbnail={showThumbnail} />
+				<ArticlePreviewCard
+					content={content}
+					showThumbnail={showThumbnail}
+					articleThumbnailUrl={articleThumbnailUrl}
+				/>
 			)}
 		</div>
 	);

@@ -169,6 +169,41 @@ export const WithThumbnail: Story = {
 	},
 };
 
+export const WithReplacementThumbnail: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const replacementInput = canvas.getByLabelText('replacement image URL');
+		const updateButton = canvas.getByRole('button', { name: 'Update' });
+		const thumbnail = canvas.getByAltText(
+			'Thumbnail for A rhyme to recall rising temperatures',
+		);
+
+		await expect(thumbnail).toHaveAttribute(
+			'src',
+			articleFixture.fields?.thumbnail,
+		);
+		await expect(updateButton).toBeDisabled();
+
+		await userEvent.clear(replacementInput);
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await expect(thumbnail).toHaveAttribute(
+			'src',
+			articleFixture.fields?.thumbnail,
+		);
+
+		await userEvent.click(updateButton);
+
+		await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		await expect(updateButton).toBeDisabled();
+	},
+};
+
 export const WithThumbnailTurnedOff: Story = {
 	args: {
 		notificationState: populatedPushState,
@@ -199,7 +234,11 @@ export const WithoutThumbnail: Story = {
 				fields: { ...articleFixture.fields, thumbnail: '' },
 			},
 		},
-		formValues: { ...completePushParams, includeThumbnail: false },
+		formValues: {
+			...completePushParams,
+			includeThumbnail: false,
+			articleThumbnailUrl: '',
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
