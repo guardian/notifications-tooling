@@ -157,6 +157,7 @@ describe('mapNotificationToHistoryNotification', () => {
 		);
 
 		expect(notification).toMatchObject({
+			title: 'Full time',
 			channel: 'push',
 			alertType: 'Sport news',
 			thumbnailUrl: 'https://media.guim.co.uk/thumb.jpg',

@@ -9,6 +9,7 @@ import type { Edition } from './types';
 
 const contentItemSchema = z.object({
 	title: z.string(),
+	body: z.string(),
 	link: z.string(),
 	type: z.enum(['newsletter', 'app-push']),
 	media: z
@@ -108,7 +109,7 @@ export const mapNotificationToHistoryNotification = (
 
 	return {
 		id: notification.id,
-		title: content.title,
+		title: channel === 'push' ? content.body : content.title,
 		href: content.link,
 		thumbnailUrl: content.media?.thumbnailUrl ?? content.media?.imageUrl,
 		channel,

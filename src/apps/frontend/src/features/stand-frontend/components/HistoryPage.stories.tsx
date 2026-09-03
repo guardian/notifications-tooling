@@ -200,9 +200,14 @@ export const Loaded: Story = {
 		).toBeInTheDocument();
 		await expect(
 			canvas.getByRole('link', {
-				name: 'Breaking News',
+				name: 'Prime minister announces cabinet reshuffle',
 			}),
 		).toHaveAttribute('href', 'https://www.theguardian.com/politics');
+		await expect(
+			canvas.getByRole('link', {
+				name: 'Extreme weather disrupts travel across Europe',
+			}),
+		).toBeInTheDocument();
 		await expect(canvas.getAllByText('No image')).toHaveLength(2);
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(2);
 		await expect(canvas.getByText('Partially sent')).toBeInTheDocument();
