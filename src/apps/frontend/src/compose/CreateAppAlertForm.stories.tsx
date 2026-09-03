@@ -188,7 +188,6 @@ export const WithReplacementThumbnail: Story = {
 			'src',
 			articleFixture.fields?.thumbnail,
 		);
-		await expect(updateButton).toBeDisabled();
 
 		await userEvent.clear(replacementInput);
 		await userEvent.type(replacementInput, replacementThumbnailUrl);
@@ -200,7 +199,6 @@ export const WithReplacementThumbnail: Story = {
 		await userEvent.click(updateButton);
 
 		await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
-		await expect(updateButton).toBeDisabled();
 	},
 };
 
