@@ -55,7 +55,7 @@ const styles = {
 	container: css({
 		display: 'flex',
 		flexDirection: 'column',
-		gap: semanticSpacing.stackLg,
+		gap: semanticSpacing.stackMd,
 		padding: semanticSpacing.stackLg,
 	}),
 	header: css({
