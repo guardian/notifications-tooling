@@ -1,3 +1,4 @@
+import { DisplayAppAlertTopicEditionId, NewsletterSegmentId } from '@models/api-contract/audience';
 import {
 	auFlag,
 	euFlag,
@@ -6,7 +7,7 @@ import {
 	usFlag,
 } from './FlagIcons';
 
-export const FlagAtom = ({ segmentCode }: { segmentCode: string }) => {
+export const FlagAtom = ({ segmentCode }: { segmentCode: NewsletterSegmentId | DisplayAppAlertTopicEditionId }) => {
 	switch (segmentCode) {
 		case 'UK':
 			return ukFlag;

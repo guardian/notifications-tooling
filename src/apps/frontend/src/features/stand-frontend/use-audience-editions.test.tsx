@@ -99,7 +99,7 @@ describe('useTopicEditionOptions', () => {
 
 		cleanUp();
 	});
-	it('when asked for push data with a matching topic id not in the data, returns the editions for that topic', () => {
+	it('when asked for push data with a matching topic id in the data, returns the editions for that topic', () => {
 		const { output, cleanUp } = renderTestComponent({
 			topicId: TEST_PUSH_TOPIC.id,
 		});
