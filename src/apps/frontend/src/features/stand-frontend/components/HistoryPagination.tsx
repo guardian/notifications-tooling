@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { baseColors, semanticColors, semanticSpacing } from '@guardian/stand';
+import { baseColors, semanticColors } from '@guardian/stand';
 import {
 	type PaginationTheme,
 	Pagination as StandPagination,
