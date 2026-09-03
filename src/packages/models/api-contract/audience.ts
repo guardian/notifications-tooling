@@ -122,7 +122,7 @@ export type ChannelAudienceResponse = z.infer<
 
 // FIX ME - if we change the audience API data to use the
 // DisplayAppAlertTopicEditionId format for edition keys,
-// these functiosn won't be needed
+// these functions won't be needed
 const topicIdToDisplayIdMap: Record<
 	AppAlertTopicEditionId,
 	DisplayAppAlertTopicEditionId
