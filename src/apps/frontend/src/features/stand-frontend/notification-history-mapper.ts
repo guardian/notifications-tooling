@@ -25,6 +25,7 @@ const notificationPayloadSchema = z.object({
 		newsletter: z
 			.object({
 				audience: z.object({ items: z.array(z.string()) }),
+				variants: z.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT'])),
 				compose: z.object({
 					items: z.array(z.string()),
 					subject: z.string(),
@@ -93,11 +94,11 @@ export const mapNotificationToHistoryAlert = (
 	}
 
 	const appPushAudience = appPush?.audience.items ?? [];
-	const destinationIds =
-		newsletter?.audience.items ?? appPushAudience.map(({ name }) => name);
-	const sentTo = destinationIds
-		.map(toEdition)
-		.filter((edition): edition is Edition => edition !== undefined);
+	const sentTo = newsletter
+		? newsletter.variants
+		: appPushAudience
+				.map(({ name }) => toEdition(name))
+				.filter((edition): edition is Edition => edition !== undefined);
 	const topicTypeId = appPushAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(

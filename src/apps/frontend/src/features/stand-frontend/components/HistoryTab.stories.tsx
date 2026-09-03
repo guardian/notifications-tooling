@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import { page } from 'vitest/browser';
 import { articleFixture } from '../../../mocks/capi-fixtures';
 import { type HistoryAlert, HistoryTab } from './HistoryTab';
 
 const alerts: HistoryAlert[] = [
 	{
 		id: '2df4fb5d-6a52-46e8-a88e-81e4f990d642',
-		title: 'Prime minister announces cabinet reshuffle',
+		title:
+			'Prime minister announces cabinet reshuffle after a long day of meetings with senior ministers',
 		href: 'https://www.theguardian.com/politics',
 		thumbnailUrl: articleFixture.fields?.thumbnail,
 		channel: 'push',
@@ -43,22 +45,91 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
 	args: { alerts },
 	play: async ({ canvasElement }) => {
+		await page.viewport(1280, 900);
 		const canvas = within(canvasElement);
 		await expect(
 			canvas.getByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
 		await expect(
 			canvas.getByRole('link', {
-				name: 'Prime minister announces cabinet reshuffle',
+				name: /Prime minister announces cabinet reshuffle/,
 			}),
 		).toBeInTheDocument();
-		await expect(canvas.getByText('Sent')).toBeInTheDocument();
+		const sentBadge = canvas.getByText('Sent');
+		await expect(sentBadge).toBeInTheDocument();
 		await expect(canvas.getByText('Partially sent')).toBeInTheDocument();
-		await expect(canvas.getByText('No image')).toBeInTheDocument();
+		const noImageLabel = canvas.getByText('No image');
+		await expect(noImageLabel).toBeInTheDocument();
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(1);
 		await expect(
 			canvas.getByRole('img', { name: 'International' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getAllByRole('img', { name: 'Australia' }),
+		).toHaveLength(2);
+	},
+};
+
+export const Mobile: Story = {
+	args: { alerts },
+	play: async ({ canvasElement }) => {
+		await page.viewport(393, 852);
+		const canvas = within(canvasElement);
+		const columnHeaders = canvas.getAllByRole('columnheader', { hidden: true });
+		const alertType = canvas.getAllByText(/Breaking news/)[0]!;
+		const title = canvas.getByRole('link', {
+			name: /Prime minister announces cabinet reshuffle/,
+		});
+
+		await expect(columnHeaders[0]).toBeVisible();
+		await expect(columnHeaders[0]).toHaveTextContent('Sent alerts');
+		await expect(columnHeaders[1]).not.toBeVisible();
+		await expect(alertType).not.toBeVisible();
+		await expect(title).toBeVisible();
+		await expect(canvas.getByText('Sent')).toBeVisible();
+		await expect(
+			canvas.getAllByRole('img', { name: 'Australia' })[0],
+		).toBeVisible();
+	},
+};
+
+export const MidSize: Story = {
+	args: { alerts },
+	play: async ({ canvasElement }) => {
+		await page.viewport(829, 900);
+		const canvas = within(canvasElement);
+		const columnHeaders = canvas.getAllByRole('columnheader', { hidden: true });
+		const alertType = canvas.getAllByText(/Breaking news/)[0]!;
+
+		await expect(columnHeaders[0]).toBeVisible();
+		await expect(columnHeaders[0]).toHaveTextContent('Sent alerts');
+		await expect(columnHeaders[1]).not.toBeVisible();
+		await expect(alertType).toBeVisible();
+		await expect(canvas.getByText('alex@example.com')).toBeVisible();
+		await expect(canvas.getByText('Sent')).toBeVisible();
+	},
+};
+
+export const Tablet: Story = {
+	args: { alerts },
+	play: async ({ canvasElement }) => {
+		await page.viewport(900, 900);
+		const canvas = within(canvasElement);
+
+		await expect(
+			canvas.getByRole('grid', { name: 'Sent alerts' }),
+		).toBeVisible();
+		await expect(canvas.getAllByText(/Breaking news/)[0]).toBeVisible();
+	},
+};
+
+export const FailedStatus: Story = {
+	args: { alerts: [{ ...alerts[0]!, status: 'Failed' }] },
+	play: async ({ canvasElement }) => {
+		await page.viewport(393, 852);
+		const failedBadge = within(canvasElement).getByText('Failed');
+
+		await expect(failedBadge).toBeVisible();
 	},
 };
 

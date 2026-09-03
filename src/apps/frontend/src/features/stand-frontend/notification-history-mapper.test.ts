@@ -50,7 +50,7 @@ describe('notificationListResponseSchema', () => {
 });
 
 describe('mapNotificationToHistoryAlert', () => {
-	it('maps a newsletter summary and its segment destinations', () => {
+	it('maps a newsletter summary and its variant destinations', () => {
 		const alert = mapNotificationToHistoryAlert({
 			...baseNotification,
 			content: {
@@ -65,7 +65,11 @@ describe('mapNotificationToHistoryAlert', () => {
 			},
 			channels: {
 				newsletter: {
-					audience: { type: 'segment', items: ['US'] },
+					audience: {
+						type: 'email',
+						items: ['joshua.anderson@guardian.co.uk'],
+					},
+					variants: ['AU'],
 					compose: {
 						items: ['lead-story'],
 						subject:
@@ -81,7 +85,7 @@ describe('mapNotificationToHistoryAlert', () => {
 			channel: 'email',
 			alertType: 'Breaking News',
 			sentBy: 'joshua.anderson@guardian.co.uk',
-			sentTo: ['US'],
+			sentTo: ['AU'],
 			sentAt: '2026-08-26T14:52:16.143Z',
 			status: 'Sent',
 		});
@@ -104,6 +108,7 @@ describe('mapNotificationToHistoryAlert', () => {
 			channels: {
 				newsletter: {
 					audience: { type: 'segment', items: ['UK'] },
+					variants: ['UK'],
 					compose: {
 						items: ['lead-story'],
 						subject: 'Morning briefing',
