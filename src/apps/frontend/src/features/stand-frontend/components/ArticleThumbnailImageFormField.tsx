@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { IconButton } from '@guardian/stand/IconButton';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { AppAlertFormValues } from '../notification-forms';
 import { customIconButtonTheme } from '../themes';
@@ -19,16 +19,7 @@ export const ArticleThumbnailImageFormField = () => {
 			defaultValue: '',
 		}) ?? '';
 	const hasThumbnail = Boolean(articleThumbnailUrl);
-	const [replacementImageUrl, setReplacementImageUrl] =
-		useState(articleThumbnailUrl);
-	const replacementImageUrlToApply = replacementImageUrl.trim();
-	const canUpdateThumbnail =
-		Boolean(replacementImageUrlToApply) &&
-		replacementImageUrlToApply !== articleThumbnailUrl;
-
-	useEffect(() => {
-		setReplacementImageUrl(articleThumbnailUrl);
-	}, [articleThumbnailUrl]);
+	const [replacementImageUrl, setReplacementImageUrl] = useState('');
 
 	return (
 		<div
@@ -100,16 +91,14 @@ export const ArticleThumbnailImageFormField = () => {
 									/>
 									<Button
 										type="button"
-										isDisabled={!canUpdateThumbnail}
 										icon="refresh"
 										size="md"
 										variant="secondary"
 										onClick={() => {
-											setValue(
-												'articleThumbnailUrl',
-												replacementImageUrlToApply,
-												{ shouldDirty: true, shouldValidate: true },
-											);
+											setValue('articleThumbnailUrl', replacementImageUrl, {
+												shouldDirty: true,
+												shouldValidate: true,
+											});
 										}}
 									>
 										Update
