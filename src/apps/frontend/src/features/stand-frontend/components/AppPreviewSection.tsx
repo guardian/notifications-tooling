@@ -54,7 +54,11 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 			title="Preview"
 			description="The preview for the app alert will be shown below."
 		>
-			<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
+			<SendInfoPreviewPill
+				channel="push"
+				deliveryTiming="appImmediate"
+				includeThumbnail={includeThumbnail}
+			/>
 			<Editions topicTypes={topicTypes} selected={selectedTopics} />
 			<AlertBanner
 				level="information"

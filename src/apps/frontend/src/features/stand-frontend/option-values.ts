@@ -1,6 +1,7 @@
 import type { Icon } from '@guardian/stand/Icon';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import type { Kicker } from './api/schemas';
+import { phoneIphoneIcon } from './components/FlagIcons';
 import type { AlertType, ChannelOption, DeliveryOption } from './types';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
@@ -9,6 +10,7 @@ type OptionDisplayInfo = {
 	name: string;
 	description: string;
 	symbol?: IconSymbol;
+	customIcon?: ReactNode;
 };
 
 export const channelOptionNameMap: Record<ChannelOption, OptionDisplayInfo> = {
@@ -20,7 +22,7 @@ export const channelOptionNameMap: Record<ChannelOption, OptionDisplayInfo> = {
 	push: {
 		name: 'App alert',
 		description: 'Push notification to Guardian app users',
-		symbol: 'mobile_3',
+		customIcon: phoneIphoneIcon,
 	},
 };
 

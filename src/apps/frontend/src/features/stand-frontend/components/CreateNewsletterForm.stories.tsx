@@ -178,6 +178,17 @@ export const FetchArticleError: Story = {
 			fetchArticleError: 'Failed to fetch article',
 		},
 	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send newsletter email' }),
+		);
+
+		await expect(canvas.getByText('Failed to fetch article')).toBeVisible();
+		await expect(
+			canvas.queryByText('Paste a URL to fetch an article'),
+		).toBeNull();
+	},
 };
 
 export const PopulatedEmail: Story = {

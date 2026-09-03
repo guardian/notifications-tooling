@@ -8,10 +8,13 @@ import type {
 	ChannelAudienceResponse,
 	NotificationSummary,
 } from './api/schemas';
-import type { HistoryAlert } from './components/HistoryTab';
+import type { HistoryNotification } from './components/HistoryTab';
+import { editionIds } from './edition-values';
+import type { Edition } from './types';
 
 const contentItemSchema = z.object({
 	title: z.string(),
+	body: z.string(),
 	link: z.string(),
 	type: z.enum(['newsletter', 'app-push']),
 	media: z
@@ -28,6 +31,7 @@ const notificationPayloadSchema = z.object({
 		newsletter: z
 			.object({
 				audience: z.object({ items: z.array(z.string()) }),
+				variants: z.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT'])),
 				compose: z.object({
 					items: z.array(z.string()),
 					subject: z.string(),
@@ -58,7 +62,7 @@ const toEdition = (id: string): DisplayAppAlertTopicEditionId | undefined => {
 
 const statusDisplay: Record<
 	NotificationSummary['status'],
-	HistoryAlert['status']
+	HistoryNotification['status']
 > = {
 	accepted: 'Accepted',
 	delivered: 'Sent',
@@ -71,10 +75,10 @@ const getNewsletterAlertType = (subject: string): string => {
 	return kicker ?? 'Newsletter';
 };
 
-export const mapNotificationToHistoryAlert = (
+export const mapNotificationToHistoryNotification = (
 	notification: NotificationSummary,
 	audiences?: ChannelAudienceResponse,
-): HistoryAlert | undefined => {
+): HistoryNotification | undefined => {
 	const payload = notificationPayloadSchema.safeParse({
 		content: notification.content,
 		channels: notification.channels,
@@ -95,11 +99,11 @@ export const mapNotificationToHistoryAlert = (
 	}
 
 	const appPushAudience = appPush?.audience.items ?? [];
-	const destinationIds =
-		newsletter?.audience.items ?? appPushAudience.map(({ name }) => name);
-	const sentTo = destinationIds
-		.map(toEdition)
-		.filter(
+	const sentTo = newsletter
+		? newsletter.variants
+		: appPushAudience
+				.map(({ name }) => toEdition(name))
+				.filter(
 			(edition): edition is DisplayAppAlertTopicEditionId =>
 				edition !== undefined,
 		);
@@ -112,7 +116,7 @@ export const mapNotificationToHistoryAlert = (
 
 	return {
 		id: notification.id,
-		title: content.title,
+		title: channel === 'push' ? content.body : content.title,
 		href: content.link,
 		thumbnailUrl: content.media?.thumbnailUrl ?? content.media?.imageUrl,
 		channel,

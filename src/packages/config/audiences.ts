@@ -46,8 +46,8 @@ const newsletterSegmentsByStage: Record<
 		},
 		AU: {
 			label: 'AU',
-			brazeCampaignId: '',
-			emailRenderingNewsletterId: '',
+			brazeCampaignId: '149aa55d-570a-40a5-82d4-8f44a713ad58',
+			emailRenderingNewsletterId: 'breaking-news-australia',
 		},
 	},
 } as const;
