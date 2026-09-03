@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { IconButton } from '@guardian/stand/IconButton';
+import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
@@ -20,7 +21,10 @@ export const ArticleThumbnailImageFormField = () => {
 		}) ?? '';
 	const hasThumbnail = Boolean(articleThumbnailUrl);
 	const [replacementImageUrl, setReplacementImageUrl] = useState('');
-
+	const thumbnailReplaced =
+		hasThumbnail &&
+		articleThumbnailUrl === replacementImageUrl &&
+		replacementImageUrl !== '';
 	return (
 		<div
 			css={{
@@ -46,6 +50,7 @@ export const ArticleThumbnailImageFormField = () => {
 									display: 'flex',
 									flexDirection: 'column',
 									paddingLeft: '12px',
+									gap: semanticSpacing.stackXs,
 								}}
 							>
 								<div
@@ -104,6 +109,9 @@ export const ArticleThumbnailImageFormField = () => {
 										Update
 									</Button>
 								</div>
+								{thumbnailReplaced && (
+									<InlineMessage level="success">Image updated</InlineMessage>
+								)}
 							</div>
 						)}
 					</>
