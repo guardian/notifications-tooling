@@ -9,6 +9,7 @@ import type { Edition } from './types';
 
 const contentItemSchema = z.object({
 	title: z.string(),
+	body: z.string(),
 	link: z.string(),
 	type: z.enum(['newsletter', 'app-push']),
 	media: z
@@ -97,18 +98,18 @@ export const mapNotificationToHistoryNotification = (
 	const sentTo = newsletter
 		? newsletter.variants
 		: appPushAudience
-				.map(({ name }) => toEdition(name))
-				.filter((edition): edition is Edition => edition !== undefined);
+			.map(({ name }) => toEdition(name))
+			.filter((edition): edition is Edition => edition !== undefined);
 	const topicTypeId = appPushAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(
-				({ id }) => id === topicTypeId,
-			)?.label ?? topicTypeId)
+			({ id }) => id === topicTypeId,
+		)?.label ?? topicTypeId)
 		: getNewsletterAlertType(newsletter?.compose.subject ?? '');
 
 	return {
 		id: notification.id,
-		title: content.title,
+		title: channel === 'push' ? content.body : content.title,
 		href: content.link,
 		thumbnailUrl: content.media?.thumbnailUrl ?? content.media?.imageUrl,
 		channel,
