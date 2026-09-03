@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useChannelAudiences } from '../api/useChannelAudiences';
-import { FALLBACK_TOPIC_TYPES } from '../audience-fallbacks';
-import type { AppAlertFormValues } from '../notification-forms';
-import { AppPreviewSection } from './AppPreviewSection';
+import { AppPreviewSection } from '../preview/AppPreviewSection';
+import { AppPreviewToggle } from '../preview/PreviewToggle';
+import { FALLBACK_TOPIC_TYPES } from '../segment/audience-fallbacks';
+import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
-import { AppPreviewToggle } from './PreviewToggle';
+import type { AppAlertFormValues } from './notification-forms';
 
 export const CreateAppAlertTab = () => {
 	const { reset } = useFormContext<AppAlertFormValues>();

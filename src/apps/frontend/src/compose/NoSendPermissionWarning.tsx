@@ -3,7 +3,7 @@ import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Link } from '@guardian/stand/Link';
 import { UserPermissions } from '@models';
 import { useContext } from 'react';
-import { ConfigContext } from '../ConfigContext';
+import { ConfigContext } from '../config/ConfigContext';
 
 export const NoSendPermissionWarning = () => {
 	const { permissions = [] } = useContext(ConfigContext) ?? {};

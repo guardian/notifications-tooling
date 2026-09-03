@@ -3,9 +3,9 @@ import {
 	channelAudienceResponseSchema,
 } from '@models';
 import { useQuery } from '@tanstack/react-query';
-import { fetchJsonAndParse } from '../../../api/client';
-import { ApiError } from '../../../api/errors';
-import { redirectToLogin } from '../../../api/redirectToLogin';
+import { fetchJsonAndParse } from '../api-client/client';
+import { ApiError } from '../api-client/errors';
+import { redirectToLogin } from '../api-client/redirectToLogin';
 
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
 

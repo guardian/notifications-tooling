@@ -8,8 +8,8 @@ import { z } from 'zod';
 import type {
 	ChannelAudienceResponse,
 	NotificationSummary,
-} from './api/schemas';
-import type { HistoryNotification } from './components/HistoryView';
+} from '../schemas';
+import type { HistoryNotification } from './HistoryView';
 
 const contentItemSchema = z.object({
 	title: z.string(),
@@ -114,16 +114,16 @@ export const mapNotificationToHistoryNotification = (
 			? newsletter.audience.items
 			: (newsletter.variants ?? [])
 		: appPushAudience
-				.map(({ name }) => toEdition(name))
-				.filter(
-					(edition): edition is DisplayAppAlertTopicEditionId =>
-						edition !== undefined,
-				);
+			.map(({ name }) => toEdition(name))
+			.filter(
+				(edition): edition is DisplayAppAlertTopicEditionId =>
+					edition !== undefined,
+			);
 	const topicTypeId = appPushAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(
-				({ id }) => id === topicTypeId,
-			)?.label ?? topicTypeId)
+			({ id }) => id === topicTypeId,
+		)?.label ?? topicTypeId)
 		: getNewsletterAlertType(newsletter?.compose.subject ?? '');
 
 	return {

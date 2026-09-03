@@ -1,11 +1,11 @@
 import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { useContext } from 'react';
-import { getChannelDescription } from '../../../util/display-text-helpers';
-import type { SendNotificationRequest } from '../api/schemas';
-import { NotificationFormContext } from '../NotificationContext';
-import { useSendNotification } from '../use-send-notification';
-import { LoadingSpinner } from './LoadingSpinner';
+import { NotificationFormContext } from '../compose/NotificationContext';
+import type { SendNotificationRequest } from '../schemas';
+import { getChannelDescription } from '../ui/display-text-helpers';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { useSendNotification } from './use-send-notification';
 
 export const SendNotificationModal = () => {
 	const { channel, notification, updateNotification } = useContext(

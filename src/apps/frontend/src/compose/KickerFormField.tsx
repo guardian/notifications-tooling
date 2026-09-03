@@ -1,8 +1,8 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { Controller, useFormContext } from 'react-hook-form';
-import { kickerSchema } from '../api/schemas';
-import type { NewsletterFormValues } from '../notification-forms';
 import { kickerNameMap } from '../option-values';
+import { kickerSchema } from '../schemas';
+import type { NewsletterFormValues } from './notification-forms';
 
 const toOptionKey = (value: string) => `kicker//${value}`;
 

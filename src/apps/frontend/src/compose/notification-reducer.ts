@@ -1,4 +1,4 @@
-import type { NotificationAction, NotificationState } from './types';
+import type { NotificationAction, NotificationState } from '../types';
 
 export const defaultState: NotificationState = {
 	isFetchingContent: false,

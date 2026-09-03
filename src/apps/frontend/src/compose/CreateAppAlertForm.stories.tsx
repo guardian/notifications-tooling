@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { articleFixture } from '../../../mocks/capi-fixtures';
+import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
-} from '../../../stories/story-helpers';
-import type { AppAlertFormValues } from '../notification-forms';
-import { defaultAppAlertState } from '../notification-reducer';
+} from '../testing/story-helpers';
 import type { NotificationState } from '../types';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
+import type { AppAlertFormValues } from './notification-forms';
+import { defaultAppAlertState } from './notification-reducer';
 
 type StoryArgs = {
 	notificationState: NotificationState;

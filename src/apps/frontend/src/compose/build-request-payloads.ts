@@ -1,11 +1,11 @@
 import { type ResolvedArticle, toApiEditionId } from '@models';
-import type { SendNotificationRequest } from './api/schemas';
+import type { SendNotificationRequest } from '../schemas';
 import { composeNewsletterSubject } from './newsletter-subject';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
 } from './notification-forms';
-import { alertTypeNameMap } from './option-values';
+import { alertTypeNameMap } from '../option-values';
 
 type BuildRequestArgs<Values> = {
 	values: Values;
@@ -34,12 +34,12 @@ export const buildNewsletterRequest = ({
 					link: content.webUrl,
 					...(thumbnailUrl
 						? {
-								media: {
-									type: 'image' as const,
-									imageUrl: thumbnailUrl,
-									thumbnailUrl,
-								},
-							}
+							media: {
+								type: 'image' as const,
+								imageUrl: thumbnailUrl,
+								thumbnailUrl,
+							},
+						}
 						: {}),
 				},
 			},
@@ -83,12 +83,12 @@ export const buildAppAlertRequest = ({
 					link: content.webUrl,
 					...(includeThumbnail && thumbnailUrl
 						? {
-								media: {
-									type: 'image' as const,
-									imageUrl: thumbnailUrl,
-									thumbnailUrl,
-								},
-							}
+							media: {
+								type: 'image' as const,
+								imageUrl: thumbnailUrl,
+								thumbnailUrl,
+							},
+						}
 						: {}),
 				},
 			},

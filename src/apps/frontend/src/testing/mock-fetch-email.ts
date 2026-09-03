@@ -1,4 +1,4 @@
-import type { RequestEmailHtml } from '../features/stand-frontend/types';
+import type { RequestEmailHtml } from '../types';
 
 const buildHtml = (audience: string[]) => `
 <!DOCTYPE html>

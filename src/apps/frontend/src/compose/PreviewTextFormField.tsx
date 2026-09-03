@@ -1,8 +1,8 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import type { ChannelConstraintsResponse } from '../api/schemas';
-import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
-import type { NewsletterFormValues } from '../notification-forms';
+import type { ChannelConstraintsResponse } from '../schemas';
+import type { NewsletterFormValues } from './notification-forms';
 import { NotificationTextInput } from './NotificationTextInput';
+import { NEWSLETTER_LIMIT_FALLBACKS } from './useChannelConstraints';
 
 interface PreviewTextFormFieldProps {
 	constraints?: ChannelConstraintsResponse;

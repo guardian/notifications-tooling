@@ -5,14 +5,14 @@ import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useContext } from 'react';
-import type { ApiError } from '../../../api/errors';
-import { getChannelDescription } from '../../../util/display-text-helpers';
-import type { SendNotificationRequest } from '../api/schemas';
-import { NotificationFormContext } from '../NotificationContext';
+import type { ApiError } from '../api-client/errors';
+import { NotificationFormContext } from '../compose/NotificationContext';
+import type { SendNotificationRequest } from '../schemas';
 import type { ChannelOption } from '../types';
 import type { NotificationState } from '../types';
-import { useSendNotification } from '../use-send-notification';
-import { LoadingSpinner } from './LoadingSpinner';
+import { getChannelDescription } from '../ui/display-text-helpers';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { useSendNotification } from './use-send-notification';
 
 const deriveUserFacingMessage = (
 	apiError: ApiError,

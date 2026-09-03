@@ -1,13 +1,13 @@
 import { css } from '@emotion/react';
 import { baseColors, semanticColors } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
+import { GuardianLogo } from '../layout/GuardianLogo';
 import {
 	type AlertPreviewProps,
 	DEFAULT_ALERT_TYPE,
 	DEFAULT_HEADLINE,
 	DeviceAlertPreview,
 } from './DeviceAlertPreview';
-import { GuardianLogo } from './GuardianLogo';
 
 export const AndroidAlertPreview = ({
 	alertType = DEFAULT_ALERT_TYPE,

@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import type { ChannelAudienceResponse } from '@models';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import '../../../happydom-setup';
+import '../../happydom-setup';
 import { FALLBACK_NEWSLETTER_SEGMENTS } from './audience-fallbacks';
-import { EDITION_OPTIONS } from './components/EditionOptions';
+import { EDITION_OPTIONS } from './EditionOptions';
 import {
 	useNewsletterSegmentOptions,
 	useTopicEditionOptions,
@@ -18,20 +18,20 @@ const TEST_NEWSLETTER_SEGMENTS: ChannelAudienceResponse['channels']['newsletter'
 	];
 
 const TEST_PUSH_TOPIC: ChannelAudienceResponse['channels']['app-push']['topicTypes'][number] =
-	{
-		id: 'joke-for-today',
-		label: 'a daily regional joke',
-		editions: [
-			{
-				id: 'uk',
-				label: 'Jokes for the United Kingdom',
-			},
-			{
-				id: 'europe',
-				label: 'European jokes',
-			},
-		],
-	};
+{
+	id: 'joke-for-today',
+	label: 'a daily regional joke',
+	editions: [
+		{
+			id: 'uk',
+			label: 'Jokes for the United Kingdom',
+		},
+		{
+			id: 'europe',
+			label: 'European jokes',
+		},
+	],
+};
 
 const testData: ChannelAudienceResponse = {
 	channels: {
@@ -79,7 +79,7 @@ describe('useTopicEditionOptions', () => {
 		});
 		const output: unknown = JSON.parse(
 			container.querySelector('[data-testid="editions"]')?.textContent ??
-				'null',
+			'null',
 		);
 
 		const cleanUp = () => {
@@ -153,7 +153,7 @@ describe('useNewsletterSegmentOptions', () => {
 		});
 		const output: unknown = JSON.parse(
 			container.querySelector('[data-testid="editions"]')?.textContent ??
-				'null',
+			'null',
 		);
 
 		const cleanUp = () => {

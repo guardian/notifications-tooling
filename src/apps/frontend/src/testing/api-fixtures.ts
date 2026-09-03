@@ -1,5 +1,5 @@
-import { ApiError } from '../api/errors';
-import type { SendNotificationResponse } from '../features/stand-frontend/api/schemas';
+import { ApiError } from '../api-client/errors';
+import type { SendNotificationResponse } from '../schemas';
 
 export const badRequestError = new ApiError({
 	status: 400,

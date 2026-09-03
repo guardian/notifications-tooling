@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import type { ApiError } from '../../../api/errors';
+import type { ApiError } from '../api-client/errors';
 import {
 	badRequestError,
 	fetchFailError,
@@ -8,14 +8,14 @@ import {
 	jsonParseFailure,
 	noPermissionError,
 	unauthenticatedError,
-} from '../../../mocks/api-fixtures';
-import { mockSendRejectedNotification } from '../../../mocks/mock-send-notification';
+} from '../testing/api-fixtures';
+import { mockSendRejectedNotification } from '../testing/mock-send-notification';
 import {
 	completeEmailParams,
 	populatedEmailState,
 	WithNotificationContext,
-} from '../../../stories/story-helpers';
-import { defaultState } from '../notification-reducer';
+} from '../testing/story-helpers';
+import { defaultState } from './notification-reducer';
 import type { NotificationState } from '../types';
 import { CreateNewsletterForm } from './CreateNewsletterForm';
 

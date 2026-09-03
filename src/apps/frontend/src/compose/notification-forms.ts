@@ -1,6 +1,6 @@
 import { displayAppAlertTopicEditionId, newsletterSegmentId } from '@models';
 import { z } from 'zod';
-import { kickerSchema } from './api/schemas';
+import { kickerSchema } from '../schemas';
 
 /**
  * No length blocks composition: the character counter is guidance and the

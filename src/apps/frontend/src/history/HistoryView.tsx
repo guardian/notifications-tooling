@@ -20,10 +20,10 @@ import { Typography } from '@guardian/stand/Typography';
 import { from, until } from '@guardian/stand/utils';
 import type { DisplayAppAlertTopicEditionId } from '@models';
 import type { ReactNode } from 'react';
-import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';
-import { FlagAtom } from './FlagAtom';
-import { phoneIphoneIcon } from './FlagIcons';
+import { FlagAtom } from '../ui/FlagAtom';
+import { phoneIphoneIcon } from '../ui/FlagIcons';
+import { formatHistorySendTime } from './history-send-time';
 import { HistoryPagination } from './HistoryPagination';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
@@ -224,12 +224,12 @@ const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
 };
 
 const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
-	{
-		Accepted: 'grey',
-		Sent: 'green',
-		'Partially sent': 'yellow',
-		Failed: 'red',
-	};
+{
+	Accepted: 'grey',
+	Sent: 'green',
+	'Partially sent': 'yellow',
+	Failed: 'red',
+};
 
 export const HistoryView = ({
 	notifications = [],

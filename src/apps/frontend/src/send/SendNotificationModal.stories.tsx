@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { articleFixture } from '../../../mocks/capi-fixtures';
+import {
+	buildAppAlertRequest,
+	buildNewsletterRequest,
+} from '../compose/build-request-payloads';
+import { defaultAppAlertState } from '../compose/notification-reducer';
+import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeEmailParams,
 	completePushParams,
 	populatedEmailState,
 	WithNotificationContext,
-} from '../../../stories/story-helpers';
-import {
-	buildAppAlertRequest,
-	buildNewsletterRequest,
-} from '../build-request-payloads';
-import { defaultAppAlertState } from '../notification-reducer';
+} from '../testing/story-helpers';
 import type { ChannelOption, NotificationState } from '../types';
 import { SendNotificationModal } from './SendNotificationModal';
 

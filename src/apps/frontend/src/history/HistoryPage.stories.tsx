@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
 import { expect, within } from 'storybook/test';
-import { getApiBaseUrl } from '../../../api/config';
-import { articleFixture } from '../../../mocks/capi-fixtures';
-import { channelAudiencesHandler } from '../../../mocks/handlers/channels';
-import type { NotificationListResponse } from '../api/schemas';
+import { getApiBaseUrl } from '../api-client/config';
+import type { NotificationListResponse } from '../schemas';
+import { articleFixture } from '../testing/capi-fixtures';
+import { channelAudiencesHandler } from '../testing/handlers/channels';
 import { HistoryPage } from './HistoryPage';
 
 const historyResponse: NotificationListResponse = {

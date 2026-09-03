@@ -1,10 +1,10 @@
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-import { getChannelDescription } from '../../../util/display-text-helpers';
 import { deliveryOptionNameMap } from '../option-values';
 import type { ChannelOption } from '../types';
 import { type DeliveryOption } from '../types';
-import { SelectableTile } from './SelectableTile';
+import { getChannelDescription } from '../ui/display-text-helpers';
+import { SelectableTile } from '../ui/SelectableTile';
 
 interface DeliveryAndTimingSelectorProps {
 	selectedDeliveryTiming?: DeliveryOption;

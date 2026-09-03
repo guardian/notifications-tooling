@@ -8,25 +8,25 @@ import {
 	defaultNewsletterFormValues,
 	newsletterFormSchema,
 	type NewsletterFormValues,
-} from '../features/stand-frontend/notification-forms';
+} from '../compose/notification-forms';
 import {
 	defaultAppAlertState,
 	defaultState,
 	notificationReducer,
-} from '../features/stand-frontend/notification-reducer';
-import type { NotificationFormContextProps } from '../features/stand-frontend/NotificationContext';
-import { NotificationFormContext } from '../features/stand-frontend/NotificationContext';
+} from '../compose/notification-reducer';
+import type { NotificationFormContextProps } from '../compose/NotificationContext';
+import { NotificationFormContext } from '../compose/NotificationContext';
 import type {
 	ChannelOption,
 	NotificationAction,
 	NotificationState,
-} from '../features/stand-frontend/types';
-import { articleFixture } from '../mocks/capi-fixtures';
-import { mockCapiFetch } from '../mocks/mock-capi-fetch';
-import { mockRequestEmailHtml } from '../mocks/mock-fetch-email';
-import { mockRequestTestEmailSend } from '../mocks/mock-request-test-email-send';
-import { mockSendNotification } from '../mocks/mock-send-notification';
-import { parseHtml } from '../util/html-helpers';
+} from '../types';
+import { parseHtml } from '../ui/html-helpers';
+import { articleFixture } from './capi-fixtures';
+import { mockCapiFetch } from './mock-capi-fetch';
+import { mockRequestEmailHtml } from './mock-fetch-email';
+import { mockRequestTestEmailSend } from './mock-request-test-email-send';
+import { mockSendNotification } from './mock-send-notification';
 
 export const WithNotificationContext = (
 	reactNode: ReactNode,

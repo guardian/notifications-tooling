@@ -4,11 +4,11 @@ import {
 	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
-} from '../../../stories/story-helpers';
-import type { AppAlertFormValues } from '../notification-forms';
-import { defaultAppAlertState } from '../notification-reducer';
+} from '../testing/story-helpers';
 import type { NotificationState } from '../types';
 import { CreateAppAlertTab } from './CreateAppAlertTab';
+import type { AppAlertFormValues } from './notification-forms';
+import { defaultAppAlertState } from './notification-reducer';
 
 type StoryArgs = {
 	notificationState: NotificationState;

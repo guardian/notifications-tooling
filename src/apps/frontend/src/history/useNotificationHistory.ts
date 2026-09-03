@@ -1,11 +1,11 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { fetchJsonAndParse } from '../../../api/client';
-import { ApiError } from '../../../api/errors';
-import { redirectToLogin } from '../../../api/redirectToLogin';
+import { fetchJsonAndParse } from '../api-client/client';
+import { ApiError } from '../api-client/errors';
+import { redirectToLogin } from '../api-client/redirectToLogin';
 import {
 	type NotificationListResponse,
 	notificationListResponseSchema,
-} from './schemas';
+} from '../schemas';
 
 export interface NotificationHistoryQuery {
 	limit: number;

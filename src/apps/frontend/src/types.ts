@@ -5,9 +5,9 @@ import type {
 	NewsletterSegmentId,
 	ResolvedArticle,
 } from '@models';
-import type { Result } from '../../api/client';
-import type { ApiError } from '../../api/errors';
-import type { SendNotificationRequest } from './api/schemas';
+import type { Result } from './api-client/client';
+import type { ApiError } from './api-client/errors';
+import type { SendNotificationRequest } from './schemas';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';

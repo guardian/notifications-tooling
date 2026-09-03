@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import type { NewsletterFormValues } from '../notification-forms';
+import { EmailPreviewSection } from '../preview/EmailPreviewSection';
+import { EmailPreviewToggle } from '../preview/PreviewToggle';
 import { CreateNewsletterForm } from './CreateNewsletterForm';
-import { EmailPreviewSection } from './EmailPreviewSection';
+import type { NewsletterFormValues } from './notification-forms';
 import { NotificationTabLayout } from './NotificationTabLayout';
-import { EmailPreviewToggle } from './PreviewToggle';
 
 export const CreateNewsletterEmailTab = () => {
 	const { reset } = useFormContext<NewsletterFormValues>();

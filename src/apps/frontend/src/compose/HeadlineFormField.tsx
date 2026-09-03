@@ -1,8 +1,8 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import type { ChannelConstraintsResponse } from '../api/schemas';
-import { APP_ALERT_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
-import type { AppAlertFormValues } from '../notification-forms';
+import type { ChannelConstraintsResponse } from '../schemas';
+import type { AppAlertFormValues } from './notification-forms';
 import { NotificationTextInput } from './NotificationTextInput';
+import { APP_ALERT_LIMIT_FALLBACKS } from './useChannelConstraints';
 
 interface HeadlineFormFieldProps {
 	constraints?: ChannelConstraintsResponse;

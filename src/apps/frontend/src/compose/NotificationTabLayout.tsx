@@ -9,14 +9,14 @@ import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
 import type { ReactNode } from 'react';
 import { useContext, useState } from 'react';
-import { NotificationFormContext } from '../NotificationContext';
-import { layoutMainTheme } from '../themes';
-import type { ChannelOption } from '../types';
-import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 import {
 	DEFAULT_SIDE_NAV_HREF_BY_CHANNEL,
 	SideNavigationPanel,
-} from './SideNavigationPanel';
+} from '../layout/SideNavigationPanel';
+import { layoutMainTheme } from '../themes';
+import type { ChannelOption } from '../types';
+import { NoSendPermissionWarning } from './NoSendPermissionWarning';
+import { NotificationFormContext } from './NotificationContext';
 
 interface NotificationTabLayoutProps {
 	channel: ChannelOption;

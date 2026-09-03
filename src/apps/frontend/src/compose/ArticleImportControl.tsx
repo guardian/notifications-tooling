@@ -7,11 +7,11 @@ import { Typography } from '@guardian/stand/Typography';
 import type { ResolvedArticle } from '@models';
 import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
-import type { ApiError } from '../../../api/errors';
-import { parseArticleUrlInputToContentId } from '../form-validation';
-import { NotificationFormContext } from '../NotificationContext';
+import type { ApiError } from '../api-client/errors';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
-import { LoadingSpinner } from './LoadingSpinner';
+import { parseArticleUrlInputToContentId } from './form-validation';
+import { NotificationFormContext } from './NotificationContext';
 
 // TO DO - more helpful error UI
 // can we capture when article was taken down?

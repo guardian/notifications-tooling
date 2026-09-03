@@ -1,9 +1,9 @@
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { useSearchParams } from 'react-router-dom';
-import { useChannelAudiences } from '../api/useChannelAudiences';
-import { useNotificationHistory } from '../api/useNotificationHistory';
-import { parseHistorySearchParams } from '../history-search-params';
-import { mapNotificationToHistoryNotification } from '../notification-history-mapper';
+import { useChannelAudiences } from '../segment/useChannelAudiences';
+import { parseHistorySearchParams } from './history-search-params';
+import { mapNotificationToHistoryNotification } from './notification-history-mapper';
+import { useNotificationHistory } from './useNotificationHistory';
 import { HistoryView } from './HistoryView';
 
 export const HistoryPage = () => {

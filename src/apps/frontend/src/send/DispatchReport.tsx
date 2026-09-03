@@ -17,25 +17,25 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import {
 	capitalise,
 	getChannelDescription,
-} from '../../../util/display-text-helpers';
-import { composeNewsletterSubject } from '../newsletter-subject';
+} from '../ui/display-text-helpers';
+import { composeNewsletterSubject } from '../compose/newsletter-subject';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
-} from '../notification-forms';
+} from '../compose/notification-forms';
 import {
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
-} from '../notification-forms';
+} from '../compose/notification-forms';
 import { alertTypeNameMap } from '../option-values';
 import { notificationRoutes } from '../routes';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
 import type { DeliveryOption } from '../types';
-import { useNewsletterSegmentOptions } from '../use-audience-editions';
-import { EDITION_OPTIONS } from './EditionOptions';
-import { scheduleIcon } from './FlagIcons';
-import { FlagPreviewPill } from './FlagPreviewPill';
+import { EDITION_OPTIONS } from '../segment/EditionOptions';
+import { FlagPreviewPill } from '../segment/FlagPreviewPill';
+import { useNewsletterSegmentOptions } from '../segment/use-audience-editions';
+import { scheduleIcon } from '../ui/FlagIcons';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const styles = {

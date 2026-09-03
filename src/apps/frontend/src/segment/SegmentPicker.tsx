@@ -15,7 +15,7 @@ import type {
 	NewsletterSegmentId,
 } from '@models';
 import { audienceSegmentStyles, previewPillStyles } from '../themes';
-import { FlagAtom } from './FlagAtom';
+import { FlagAtom } from '../ui/FlagAtom';
 
 export interface SegmentOption<
 	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,

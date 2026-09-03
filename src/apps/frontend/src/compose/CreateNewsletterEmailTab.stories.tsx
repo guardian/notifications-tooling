@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { WithNotificationContext } from '../../../stories/story-helpers';
-import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
-import type { NewsletterFormValues } from '../notification-forms';
-import { defaultState } from '../notification-reducer';
+import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
+import { WithNotificationContext } from '../testing/story-helpers';
 import type { NotificationState } from '../types';
 import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
+import type { NewsletterFormValues } from './notification-forms';
+import { defaultState } from './notification-reducer';
 
 type StoryArgs = {
 	notificationState: NotificationState;

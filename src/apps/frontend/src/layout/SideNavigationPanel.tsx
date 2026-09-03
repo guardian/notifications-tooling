@@ -10,9 +10,9 @@ import type { SidebarStepperNavigationTheme } from '@guardian/stand/SidebarStepp
 import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../constants';
 import { layer, topBarHeight } from '../themes';
 import type { ChannelOption } from '../types';
+import { ACTIVE_SECTION_VIEWPORT_POSITION } from './constants';
 
 const getStep = (id: string, label: string): StepNavStep => ({
 	id,

@@ -1,19 +1,19 @@
 import type { ResolveArticleRequest, ResolveArticleResponse } from '@models';
 import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
-import type { Result } from '../../api/client';
-import { ApiError } from '../../api/errors';
+import type { Result } from '../api-client/client';
+import { ApiError } from '../api-client/errors';
 import type {
 	SendNotificationRequest,
 	SendNotificationResponse,
-} from './api/schemas';
-import type { TestEmailRequestFunction } from './api/send-test-email';
+} from '../schemas';
+import type { TestEmailRequestFunction } from '../send/send-test-email';
 import type {
 	ChannelOption,
 	NotificationAction,
 	NotificationState,
 	RequestEmailHtml,
-} from './types';
+} from '../types';
 
 export interface NotificationFormContextProps {
 	channel: ChannelOption;

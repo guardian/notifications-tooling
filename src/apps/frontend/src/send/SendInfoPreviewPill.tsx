@@ -3,7 +3,7 @@ import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { activePillTheme } from '../themes';
 import type { ChannelOption, DeliveryOption } from '../types';
-import { phoneIphoneIcon } from './FlagIcons';
+import { phoneIphoneIcon } from '../ui/FlagIcons';
 
 interface SendInfoPreviewPillProps {
 	channel?: ChannelOption;

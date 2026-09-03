@@ -1,5 +1,5 @@
-import type { ApiError } from '../api/errors';
-import type { TestEmailRequestFunction } from '../features/stand-frontend/api/send-test-email';
+import type { ApiError } from '../api-client/errors';
+import type { TestEmailRequestFunction } from '../send/send-test-email';
 
 export const mockRequestTestEmailSend: TestEmailRequestFunction = () => {
 	return new Promise((resolve) => {

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'bun:test';
 import type {
 	ChannelAudienceResponse,
 	NotificationSummary,
-} from './api/schemas';
-import { notificationListResponseSchema } from './api/schemas';
+} from '../schemas';
+import { notificationListResponseSchema } from '../schemas';
 import { mapNotificationToHistoryNotification } from './notification-history-mapper';
 
 const baseNotification: NotificationSummary = {

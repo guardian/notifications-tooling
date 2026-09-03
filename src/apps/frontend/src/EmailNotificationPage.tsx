@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import { Outlet } from 'react-router-dom';
-import { UserPermissions } from '../../../../../packages/models';
-import { MainLayout } from './components/MainLayout';
-import { NoPermissionsTab } from './components/NoPermissionsTab';
-import { ConfigContext } from './ConfigContext';
+import { UserPermissions } from '../../../packages/models';
+import { ConfigContext } from './config/ConfigContext';
+import { MainLayout } from './layout/MainLayout';
+import { NoPermissionsTab } from './layout/NoPermissionsTab';
 
 export const EmailNotificationPage = () => {
 	const config = useContext(ConfigContext);

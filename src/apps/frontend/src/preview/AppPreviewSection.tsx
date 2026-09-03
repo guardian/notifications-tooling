@@ -8,14 +8,14 @@ import { useWatch } from 'react-hook-form';
 import {
 	type AppAlertFormValues,
 	defaultAppAlertFormValues,
-} from '../notification-forms';
-import { NotificationFormContext } from '../NotificationContext';
+} from '../compose/notification-forms';
+import { NotificationFormContext } from '../compose/NotificationContext';
+import { Editions } from '../segment/Editions';
+import { SendInfoPreviewPill } from '../send/SendInfoPreviewPill';
 import { alertBannerCss, customAlertBannerTheme } from '../themes';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
-import { Editions } from './Editions';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 import { PreviewSection } from './PreviewSection';
-import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 interface AppPreviewSectionProps {
 	topicTypes: AppAlertTopicOption[];

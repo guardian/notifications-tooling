@@ -1,5 +1,5 @@
 import { emailPreviewResponseSchema } from '@models';
-import { safeFetchJsonAndParse } from '../../../api/client';
+import { safeFetchJsonAndParse } from '../api-client/client';
 import type { RequestEmailHtml } from '../types';
 
 export const requestEmailHtml: RequestEmailHtml = async (request) => {

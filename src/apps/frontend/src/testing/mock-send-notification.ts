@@ -1,6 +1,6 @@
-import type { Result } from '../api/client';
-import type { ApiError } from '../api/errors';
-import type { SendNotificationResponse } from '../features/stand-frontend/api/schemas';
+import type { Result } from '../api-client/client';
+import type { ApiError } from '../api-client/errors';
+import type { SendNotificationResponse } from '../schemas';
 import { acceptedEmailSendResponse } from './api-fixtures';
 
 export const mockSendNotification = () => {

@@ -1,10 +1,10 @@
-import type { Result } from '../../../api/client';
-import { safeFetchJsonAndParse } from '../../../api/client';
+import type { Result } from '../api-client/client';
+import { safeFetchJsonAndParse } from '../api-client/client';
 import type {
 	SendNotificationRequest,
 	SendNotificationResponse,
-} from './schemas';
-import { sendNotificationResponseSchema } from './schemas';
+} from '../schemas';
+import { sendNotificationResponseSchema } from '../schemas';
 
 export const sendNotification = async (
 	sendNotificationRequest: SendNotificationRequest,

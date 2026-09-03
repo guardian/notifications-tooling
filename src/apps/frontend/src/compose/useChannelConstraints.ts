@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchJsonAndParse } from '../../../api/client';
-import { ApiError } from '../../../api/errors';
-import { redirectToLogin } from '../../../api/redirectToLogin';
+import { fetchJsonAndParse } from '../api-client/client';
+import { ApiError } from '../api-client/errors';
+import { redirectToLogin } from '../api-client/redirectToLogin';
 import {
 	type ChannelConstraintsResponse,
 	channelConstraintsResponseSchema,
-} from './schemas';
+} from '../schemas';
 
 /**
  * The limits the UI falls back to when `GET /v1/channels/constraints` cannot be

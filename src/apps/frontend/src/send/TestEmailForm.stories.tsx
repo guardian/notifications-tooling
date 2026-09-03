@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { ApiError } from '../../../api/errors';
+import { ApiError } from '../api-client/errors';
 import {
 	mockFailingRequestTestEmailSend,
 	mockRequestTestEmailSend,
-} from '../../../mocks/mock-request-test-email-send';
+} from '../testing/mock-request-test-email-send';
 import {
 	completeEmailParams,
 	populatedEmailState,
 	WithNotificationContext,
-} from '../../../stories/story-helpers';
+} from '../testing/story-helpers';
 import type { NotificationState } from '../types';
 import { TestEmailForm } from './TestEmailForm';
 

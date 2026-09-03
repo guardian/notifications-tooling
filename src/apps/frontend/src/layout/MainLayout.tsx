@@ -11,7 +11,7 @@ import {
 import type { AppConfig } from '@models';
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ConfigContext } from '../ConfigContext';
+import { ConfigContext } from '../config/ConfigContext';
 import { getTopBarNavigationItems } from '../routes';
 import { faviconTheme, layer, topBarTheme } from '../themes';
 

@@ -3,8 +3,8 @@ import { HtmlPreview } from '@guardian/stand/HtmlPreviewLoader';
 import { Typography } from '@guardian/stand/Typography';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import type { NewsletterFormValues } from '../notification-forms';
-import { NotificationFormContext } from '../NotificationContext';
+import type { NewsletterFormValues } from '../compose/notification-forms';
+import { NotificationFormContext } from '../compose/NotificationContext';
 
 // TO DO - this function will work with the current format of the notification emails
 // but we should modidify the template used in email-rendering to include attributes

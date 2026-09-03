@@ -1,9 +1,9 @@
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import type { ChannelConstraintsResponse } from '../api/schemas';
-import { NEWSLETTER_LIMIT_FALLBACKS } from '../api/useChannelConstraints';
-import type { NewsletterFormValues } from '../notification-forms';
 import { kickerNameMap } from '../option-values';
+import type { ChannelConstraintsResponse } from '../schemas';
+import type { NewsletterFormValues } from './notification-forms';
 import { NotificationTextInputWithPrefix } from './NotificationTextInput';
+import { NEWSLETTER_LIMIT_FALLBACKS } from './useChannelConstraints';
 
 interface SubjectFormFieldProps {
 	constraints?: ChannelConstraintsResponse;

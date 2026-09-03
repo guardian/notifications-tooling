@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { ApiError } from '../../api/errors';
-import { articleFixture } from '../../mocks/capi-fixtures';
+import { ApiError } from '../api-client/errors';
+import { articleFixture } from '../testing/capi-fixtures';
 import { defaultState, notificationReducer } from './notification-reducer';
 
 describe('notificationReducer article lifecycle', () => {

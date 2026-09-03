@@ -2,8 +2,8 @@ import type {
 	DisplayAppAlertTopicEditionId,
 	NewsletterSegmentId,
 } from '@models';
-import { FlagAtom } from './FlagAtom';
-import { PreviewPillList } from './PreviewPillList';
+import { FlagAtom } from '../ui/FlagAtom';
+import { PreviewPillList } from '../ui/PreviewPillList';
 
 interface FlagPreviewPillOption<
 	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,

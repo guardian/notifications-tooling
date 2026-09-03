@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { articleFixture } from '../../mocks/capi-fixtures';
-import { sendNotificationRequestSchema } from './api/schemas';
+import { sendNotificationRequestSchema } from '../schemas';
+import { articleFixture } from '../testing/capi-fixtures';
 import {
 	buildAppAlertRequest,
 	buildNewsletterRequest,

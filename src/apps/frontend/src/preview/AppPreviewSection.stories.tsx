@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ComponentProps } from 'react';
 import { expect, within } from 'storybook/test';
-import { articleFixture } from '../../../mocks/capi-fixtures';
+import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
-} from '../../../stories/story-helpers';
-import { FALLBACK_TOPIC_TYPES } from '../audience-fallbacks';
+} from '../testing/story-helpers';
+import { FALLBACK_TOPIC_TYPES } from '../segment/audience-fallbacks';
 import type { NotificationState } from '../types';
 import { AppPreviewSection } from './AppPreviewSection';
 

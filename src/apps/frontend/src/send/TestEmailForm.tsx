@@ -7,17 +7,17 @@ import { Typography } from '@guardian/stand/Typography';
 import type { NewsletterSegmentId, ResolvedArticle } from '@models';
 import { useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import type { ApiError } from '../../../api/errors';
+import type { ApiError } from '../api-client/errors';
 import type {
 	TestEmailResponse,
 	TestEmailSendRequest,
-} from '../api/send-test-email';
-import { ConfigContext } from '../ConfigContext';
-import { validateGuardianEmail } from '../form-validation';
-import { composeNewsletterSubject } from '../newsletter-subject';
-import type { NewsletterFormValues } from '../notification-forms';
-import { NotificationFormContext } from '../NotificationContext';
-import { LoadingSpinner } from './LoadingSpinner';
+} from './send-test-email';
+import { NotificationFormContext } from '../compose/NotificationContext';
+import { validateGuardianEmail } from '../compose/form-validation';
+import { composeNewsletterSubject } from '../compose/newsletter-subject';
+import type { NewsletterFormValues } from '../compose/notification-forms';
+import { ConfigContext } from '../config/ConfigContext';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 type TestSendParams = {
 	emailInput: string;

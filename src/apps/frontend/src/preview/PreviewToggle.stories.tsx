@@ -5,9 +5,9 @@ import {
 	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
-} from '../../../stories/story-helpers';
-import { FALLBACK_TOPIC_TYPES } from '../audience-fallbacks';
-import { defaultState } from '../notification-reducer';
+} from '../testing/story-helpers';
+import { defaultState } from '../compose/notification-reducer';
+import { FALLBACK_TOPIC_TYPES } from '../segment/audience-fallbacks';
 import type { NotificationState } from '../types';
 import { AppPreviewToggle, EmailPreviewToggle } from './PreviewToggle';
 

@@ -3,8 +3,8 @@ import {
 	type ResolveArticleResponse,
 	resolveArticleResponseSchema,
 } from '@models';
-import type { Result } from '../../../api/client';
-import { safeFetchJsonAndParse } from '../../../api/client';
+import type { Result } from '../api-client/client';
+import { safeFetchJsonAndParse } from '../api-client/client';
 
 export const fetchCapiDataFromApi = (
 	request: ResolveArticleRequest,

@@ -3,7 +3,7 @@ import { Layout } from '@guardian/stand/Layout';
 import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
-import { ConfigContext } from '../ConfigContext';
+import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes } from '../routes';
 
 export const NotFoundTab = () => {

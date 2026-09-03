@@ -1,7 +1,7 @@
 import type { Icon } from '@guardian/stand/Icon';
 import type { ComponentProps, ReactNode } from 'react';
-import type { Kicker } from './api/schemas';
-import { phoneIphoneIcon } from './components/FlagIcons';
+import type { Kicker } from './schemas';
+import { phoneIphoneIcon } from './ui/FlagIcons';
 import type { AlertType, ChannelOption, DeliveryOption } from './types';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
@@ -41,15 +41,15 @@ export const alertTypeNameMap: Record<AlertType | 'undefined', string> = {
 };
 
 export const deliveryOptionNameMap: Record<DeliveryOption, OptionDisplayInfo> =
-	{
-		immediate: {
-			name: 'Immediate',
-			description: 'Sends right now via Braze',
-			symbol: 'bolt',
-		},
-		appImmediate: {
-			name: 'Immediate',
-			description: 'Sends right now',
-			symbol: 'bolt',
-		},
-	};
+{
+	immediate: {
+		name: 'Immediate',
+		description: 'Sends right now via Braze',
+		symbol: 'bolt',
+	},
+	appImmediate: {
+		name: 'Immediate',
+		description: 'Sends right now',
+		symbol: 'bolt',
+	},
+};

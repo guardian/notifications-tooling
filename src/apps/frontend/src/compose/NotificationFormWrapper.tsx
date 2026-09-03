@@ -7,16 +7,16 @@ import {
 	useContext,
 	useState,
 } from 'react';
-import { NotificationFormContext } from '../NotificationContext';
+import { SendButton } from '../send/SendButton';
+import { SendFailedModal } from '../send/SendFailedModal';
+import { SendNotificationModal } from '../send/SendNotificationModal';
 import type { ChannelOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelDisplay } from './ChannelDisplay';
 import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryOptionFormField } from './DeliveryOptionFormField';
+import { NotificationFormContext } from './NotificationContext';
 import { NotificationFormSection } from './NotificationFormSection';
-import { SendButton } from './SendButton';
-import { SendFailedModal } from './SendFailedModal';
-import { SendNotificationModal } from './SendNotificationModal';
 
 interface NotificationFormWrapperProps {
 	activeSectionHref: string;

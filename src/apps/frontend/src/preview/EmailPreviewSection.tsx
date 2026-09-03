@@ -6,14 +6,14 @@ import { useWatch } from 'react-hook-form';
 import {
 	defaultNewsletterFormValues,
 	type NewsletterFormValues,
-} from '../notification-forms';
+} from '../compose/notification-forms';
 import { alertBannerCss, customAlertBannerTheme } from '../themes';
-import { useNewsletterSegmentOptions } from '../use-audience-editions';
-import { FlagPreviewPill } from './FlagPreviewPill';
+import { useNewsletterSegmentOptions } from '../segment/use-audience-editions';
+import { FlagPreviewPill } from '../segment/FlagPreviewPill';
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
-import { SendInfoPreviewPill } from './SendInfoPreviewPill';
-import { TestEmailForm } from './TestEmailForm';
+import { SendInfoPreviewPill } from '../send/SendInfoPreviewPill';
+import { TestEmailForm } from '../send/TestEmailForm';
 
 export const EmailPreviewSection = () => {
 	const segments = useNewsletterSegmentOptions();

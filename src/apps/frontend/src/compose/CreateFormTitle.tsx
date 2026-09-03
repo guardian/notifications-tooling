@@ -1,7 +1,7 @@
 import { semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { useFormContext } from 'react-hook-form';
-import { TextLinkButton } from './TextLinkButton';
+import { TextLinkButton } from '../ui/TextLinkButton';
 
 export interface CreateFormTitleProps {
 	title: string;

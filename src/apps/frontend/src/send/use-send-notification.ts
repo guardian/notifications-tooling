@@ -2,10 +2,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import type { SendNotificationRequest } from './api/schemas';
-import { notificationHistoryQueryKey } from './api/useNotificationHistory';
-import { NotificationFormContext } from './NotificationContext';
-import { notificationRoutes } from './routes';
+import { NotificationFormContext } from '../compose/NotificationContext';
+import { notificationHistoryQueryKey } from '../history/useNotificationHistory';
+import { notificationRoutes } from '../routes';
+import type { SendNotificationRequest } from '../schemas';
 
 export const useSendNotification = () => {
 	const { channel, sendNotification, updateNotification } = useContext(

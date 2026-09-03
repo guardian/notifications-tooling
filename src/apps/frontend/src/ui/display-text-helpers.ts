@@ -1,4 +1,4 @@
-import type { ChannelOption } from '../features/stand-frontend/types';
+import type { ChannelOption } from '../types';
 
 const channelDescriptions = {
 	email: 'newsletter email',

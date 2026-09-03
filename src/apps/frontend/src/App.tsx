@@ -3,22 +3,22 @@ import './index.css';
 import { useState } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import type { AppConfig } from '../../../packages/models';
-import { CreateAppAlertTab } from './features/stand-frontend/components/CreateAppAlertTab';
-import { CreateNewsletterEmailTab } from './features/stand-frontend/components/CreateNewsletterEmailTab';
-import {
-	AppAlertDispatchReportTab,
-	NewsletterDispatchReportTab,
-} from './features/stand-frontend/components/DispatchReport';
-import { HistoryPage } from './features/stand-frontend/components/HistoryPage';
-import { NotFoundTab } from './features/stand-frontend/components/NotFoundTab';
-import { ConfigContext } from './features/stand-frontend/ConfigContext';
-import { EmailNotificationPage } from './features/stand-frontend/EmailNotificationPage';
-import { getAppConfig } from './features/stand-frontend/get-config';
+import { CreateAppAlertTab } from './compose/CreateAppAlertTab';
+import { CreateNewsletterEmailTab } from './compose/CreateNewsletterEmailTab';
 import {
 	AppAlertNotificationFormProvider,
 	NewsletterNotificationFormProvider,
-} from './features/stand-frontend/NotificationFormProvider';
-import { getAppRoutes } from './features/stand-frontend/routes';
+} from './compose/NotificationFormProvider';
+import { ConfigContext } from './config/ConfigContext';
+import { getAppConfig } from './config/get-config';
+import { EmailNotificationPage } from './EmailNotificationPage';
+import { HistoryPage } from './history/HistoryPage';
+import { NotFoundTab } from './layout/NotFoundTab';
+import { getAppRoutes } from './routes';
+import {
+	AppAlertDispatchReportTab,
+	NewsletterDispatchReportTab,
+} from './send/DispatchReport';
 
 export function App() {
 	const [config] = useState<AppConfig | undefined>(getAppConfig());

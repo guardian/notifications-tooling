@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import type { AppAlertFormValues } from '../notification-forms';
+import type { AppAlertFormValues } from '../compose/notification-forms';
 import { EDITION_OPTIONS } from './EditionOptions';
 import { SegmentPicker } from './SegmentPicker';
 

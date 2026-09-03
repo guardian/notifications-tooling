@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import type { completeEmailParams } from '../../../stories/story-helpers';
+import type { completeEmailParams } from '../testing/story-helpers';
 import {
 	populatedEmailState,
 	WithNotificationContext,
-} from '../../../stories/story-helpers';
+} from '../testing/story-helpers';
 import type { NotificationState } from '../types';
 import { EmailPreviewSection } from './EmailPreviewSection';
 

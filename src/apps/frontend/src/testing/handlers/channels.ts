@@ -1,9 +1,9 @@
 import { http, HttpResponse } from 'msw';
-import { getApiBaseUrl } from '../../api/config';
+import { getApiBaseUrl } from '../../api-client/config';
 import type {
 	ChannelAudienceResponse,
 	ChannelConstraintsResponse,
-} from '../../features/stand-frontend/api/schemas';
+} from '../../schemas';
 
 /**
  * Mirrors what `@config` currently serves. Typed as the response so a contract

@@ -3,10 +3,10 @@ import {
 	type NewsletterSegmentId,
 	toDisplayEditionId,
 } from '@models';
-import { useChannelAudiences } from './api/useChannelAudiences';
+import { useChannelAudiences } from './useChannelAudiences';
 import { FALLBACK_NEWSLETTER_SEGMENTS } from './audience-fallbacks';
-import { EDITION_OPTIONS } from './components/EditionOptions';
-import type { SegmentOption } from './components/SegmentPicker';
+import { EDITION_OPTIONS } from './EditionOptions';
+import type { SegmentOption } from './SegmentPicker';
 
 export const useNewsletterSegmentOptions = (): Array<
 	SegmentOption<NewsletterSegmentId>
