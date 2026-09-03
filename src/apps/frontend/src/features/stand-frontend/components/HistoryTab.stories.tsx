@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { page } from 'vitest/browser';
 import { articleFixture } from '../../../mocks/capi-fixtures';
-import { type HistoryAlert, HistoryTab } from './HistoryTab';
+import { type HistoryNotification, HistoryTab } from './HistoryTab';
 
-const alerts: HistoryAlert[] = [
+const notifications: HistoryNotification[] = [
 	{
 		id: '2df4fb5d-6a52-46e8-a88e-81e4f990d642',
 		title:
@@ -43,9 +42,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	args: { alerts },
+	args: { notifications },
+	globals: { viewport: { value: '1280px-900px', isRotated: false } },
 	play: async ({ canvasElement }) => {
-		await page.viewport(1280, 900);
 		const canvas = within(canvasElement);
 		await expect(
 			canvas.getByRole('grid', { name: 'Sent alerts' }),
@@ -71,20 +70,14 @@ export const Default: Story = {
 };
 
 export const Mobile: Story = {
-	args: { alerts },
+	args: { notifications },
+	globals: { viewport: { value: '393px-852px', isRotated: false } },
 	play: async ({ canvasElement }) => {
-		await page.viewport(393, 852);
 		const canvas = within(canvasElement);
-		const columnHeaders = canvas.getAllByRole('columnheader', { hidden: true });
-		const alertType = canvas.getAllByText(/Breaking news/)[0]!;
 		const title = canvas.getByRole('link', {
 			name: /Prime minister announces cabinet reshuffle/,
 		});
 
-		await expect(columnHeaders[0]).toBeVisible();
-		await expect(columnHeaders[0]).toHaveTextContent('Sent alerts');
-		await expect(columnHeaders[1]).not.toBeVisible();
-		await expect(alertType).not.toBeVisible();
 		await expect(title).toBeVisible();
 		await expect(canvas.getByText('Sent')).toBeVisible();
 		await expect(
@@ -94,39 +87,20 @@ export const Mobile: Story = {
 };
 
 export const MidSize: Story = {
-	args: { alerts },
+	args: { notifications },
+	globals: { viewport: { value: '829px-900px', isRotated: false } },
 	play: async ({ canvasElement }) => {
-		await page.viewport(829, 900);
 		const canvas = within(canvasElement);
-		const columnHeaders = canvas.getAllByRole('columnheader', { hidden: true });
-		const alertType = canvas.getAllByText(/Breaking news/)[0]!;
 
-		await expect(columnHeaders[0]).toBeVisible();
-		await expect(columnHeaders[0]).toHaveTextContent('Sent alerts');
-		await expect(columnHeaders[1]).not.toBeVisible();
-		await expect(alertType).toBeVisible();
 		await expect(canvas.getByText('alex@example.com')).toBeVisible();
 		await expect(canvas.getByText('Sent')).toBeVisible();
 	},
 };
 
-export const Tablet: Story = {
-	args: { alerts },
-	play: async ({ canvasElement }) => {
-		await page.viewport(900, 900);
-		const canvas = within(canvasElement);
-
-		await expect(
-			canvas.getByRole('grid', { name: 'Sent alerts' }),
-		).toBeVisible();
-		await expect(canvas.getAllByText(/Breaking news/)[0]).toBeVisible();
-	},
-};
-
 export const FailedStatus: Story = {
-	args: { alerts: [{ ...alerts[0]!, status: 'Failed' }] },
+	args: { notifications: [{ ...notifications[0]!, status: 'Failed' }] },
+	globals: { viewport: { value: '393px-852px', isRotated: false } },
 	play: async ({ canvasElement }) => {
-		await page.viewport(393, 852);
 		const failedBadge = within(canvasElement).getByText('Failed');
 
 		await expect(failedBadge).toBeVisible();

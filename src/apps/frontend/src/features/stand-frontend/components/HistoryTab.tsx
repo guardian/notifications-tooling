@@ -26,7 +26,7 @@ import { FlagAtom } from './FlagAtom';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
-export interface HistoryAlert {
+export interface HistoryNotification {
 	id: string;
 	title: string;
 	href: string;
@@ -40,7 +40,7 @@ export interface HistoryAlert {
 }
 
 interface HistoryTabProps {
-	alerts?: HistoryAlert[];
+	notifications?: HistoryNotification[];
 	isLoading?: boolean;
 	error?: ReactNode;
 }
@@ -52,7 +52,7 @@ const styles = {
 		gap: semanticSpacing.stackLg,
 		padding: semanticSpacing.stackLg,
 	}),
-	alert: css({
+	notification: css({
 		display: 'flex',
 		alignItems: 'center',
 		gap: semanticSpacing.stackSm,
@@ -77,7 +77,7 @@ const styles = {
 		color: semanticColors.text.weak,
 		backgroundColor: semanticColors.fill.neutralWeak,
 	}),
-	alertDetails: css({
+	notificationDetails: css({
 		display: 'flex',
 		minWidth: 0,
 		flexDirection: 'column',
@@ -95,7 +95,7 @@ const styles = {
 		gap: semanticSpacing.stackXs,
 		color: semanticColors.text.weak,
 	}),
-	alertType: css({
+	notificationType: css({
 		display: 'none',
 		'@media (min-width: 600px)': {
 			display: 'inline',
@@ -137,7 +137,7 @@ const styles = {
 			paddingBlock: 0,
 		},
 	}),
-	alertCell: css({
+	notificationCell: css({
 		'@media (min-width: 600px) and (max-width: 1055.9px)': {
 			alignSelf: 'start',
 		},
@@ -191,7 +191,7 @@ const styles = {
 	}),
 };
 
-const getChannelName = (channel: HistoryAlert['channel']) =>
+const getChannelName = (channel: HistoryNotification['channel']) =>
 	channel === 'push' ? 'App alert' : 'Newsletter email';
 
 const editionNames: Record<Edition, string> = {
@@ -211,7 +211,7 @@ const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
 	};
 
 export const HistoryTab = ({
-	alerts = [],
+	notifications = [],
 	isLoading = false,
 	error,
 }: HistoryTabProps) => {
@@ -232,7 +232,7 @@ export const HistoryTab = ({
 						columns={{
 							sm: 'minmax(0, 1fr)',
 							md: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
-							lg: 'minmax(280px, 2.4fr) minmax(180px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1fr) max-content',
+							lg: 'minmax(280px, 2.4fr) minmax(180px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1fr) 132px',
 						}}
 						headerVisibleFrom="sm"
 					>
@@ -244,24 +244,24 @@ export const HistoryTab = ({
 							<TableColumnHeader>Status</TableColumnHeader>
 						</TableHeader>
 						<TableBody>
-							{alerts.map((alert) => {
-								const sendTime = formatHistorySendTime(alert.sentAt);
+							{notifications.map((notification) => {
+								const sendTime = formatHistorySendTime(notification.sentAt);
 
 								return (
 									<TableRow
-										key={alert.id}
-										id={alert.id}
+										key={notification.id}
+										id={notification.id}
 										cssOverrides={styles.tableRow}
 									>
 										<TableCell
 											gridColumn={{ sm: '1', md: '1', lg: '1' }}
 											gridRow={{ md: '1 / span 4', lg: 'auto' }}
-											cssOverrides={styles.alertCell}
+											cssOverrides={styles.notificationCell}
 										>
-											<div css={styles.alert}>
-												{alert.thumbnailUrl ? (
+											<div css={styles.notification}>
+												{notification.thumbnailUrl ? (
 													<img
-														src={alert.thumbnailUrl}
+														src={notification.thumbnailUrl}
 														alt=""
 														css={styles.thumbnail}
 													/>
@@ -271,9 +271,12 @@ export const HistoryTab = ({
 														<Typography variant="bodyXs">No image</Typography>
 													</div>
 												)}
-												<div css={styles.alertDetails}>
-													<Link href={alert.href} cssOverrides={styles.title}>
-														{alert.title}
+												<div css={styles.notificationDetails}>
+													<Link
+														href={notification.href}
+														cssOverrides={styles.title}
+													>
+														{notification.title}
 													</Link>
 													<Typography
 														variant="bodyXs"
@@ -282,13 +285,15 @@ export const HistoryTab = ({
 														<Icon
 															size="sm"
 															symbol={
-																alert.channel === 'push' ? 'mobile_3' : 'mail'
+																notification.channel === 'push'
+																	? 'mobile_3'
+																	: 'mail'
 															}
 														/>
-														{getChannelName(alert.channel)}
-														<span css={styles.alertType}>
+														{getChannelName(notification.channel)}
+														<span css={styles.notificationType}>
 															{' '}
-															| {alert.alertType}
+															| {notification.alertType}
 														</span>
 													</Typography>
 												</div>
@@ -302,7 +307,9 @@ export const HistoryTab = ({
 											<span css={styles.compactLabel} aria-hidden="true">
 												Sent by:{' '}
 											</span>
-											<span css={styles.metadataValue}>{alert.sentBy}</span>
+											<span css={styles.metadataValue}>
+												{notification.sentBy}
+											</span>
 										</TableCell>
 										<TableCell
 											gridColumn={{ md: '2', lg: '3' }}
@@ -313,7 +320,7 @@ export const HistoryTab = ({
 												Sent to:{' '}
 											</span>
 											<span css={[styles.metadataValue, styles.regions]}>
-												{alert.sentTo.map((edition) => (
+												{notification.sentTo.map((edition) => (
 													<span
 														key={edition}
 														aria-label={editionNames[edition]}
@@ -350,12 +357,12 @@ export const HistoryTab = ({
 											</span>
 											<span css={styles.metadataValue}>
 												<Badge
-													color={statusColors[alert.status]}
+													color={statusColors[notification.status]}
 													size="xs"
 													weight="strong"
 													cssOverrides={styles.statusBadge}
 												>
-													{alert.status}
+													{notification.status}
 												</Badge>
 											</span>
 										</TableCell>
@@ -365,7 +372,7 @@ export const HistoryTab = ({
 						</TableBody>
 					</Table>
 				)}
-				{!isLoading && !error && alerts.length === 0 && (
+				{!isLoading && !error && notifications.length === 0 && (
 					<Typography variant="bodyMd" cssOverrides={styles.empty}>
 						No alerts have been sent yet.
 					</Typography>

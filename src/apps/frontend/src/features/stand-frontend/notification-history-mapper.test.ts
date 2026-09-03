@@ -4,7 +4,7 @@ import type {
 	NotificationSummary,
 } from './api/schemas';
 import { notificationListResponseSchema } from './api/schemas';
-import { mapNotificationToHistoryAlert } from './notification-history-mapper';
+import { mapNotificationToHistoryNotification } from './notification-history-mapper';
 
 const baseNotification: NotificationSummary = {
 	id: '939f106b-4be9-414a-ba14-f1e8c615696f',
@@ -49,9 +49,9 @@ describe('notificationListResponseSchema', () => {
 	});
 });
 
-describe('mapNotificationToHistoryAlert', () => {
+describe('mapNotificationToHistoryNotification', () => {
 	it('maps a newsletter summary and its variant destinations', () => {
-		const alert = mapNotificationToHistoryAlert({
+		const notification = mapNotificationToHistoryNotification({
 			...baseNotification,
 			content: {
 				items: {
@@ -79,7 +79,7 @@ describe('mapNotificationToHistoryAlert', () => {
 			},
 		});
 
-		expect(alert).toMatchObject({
+		expect(notification).toMatchObject({
 			title: '‘National scandal’: extreme heat linked to 40,000',
 			href: 'https://www.theguardian.com/environment/2026/aug/26/deaths-england-hottest-days-extreme-weather',
 			channel: 'email',
@@ -89,11 +89,11 @@ describe('mapNotificationToHistoryAlert', () => {
 			sentAt: '2026-08-26T14:52:16.143Z',
 			status: 'Sent',
 		});
-		expect(alert?.thumbnailUrl).toBeUndefined();
+		expect(notification?.thumbnailUrl).toBeUndefined();
 	});
 
 	it('uses a generic newsletter label when the subject has no known kicker', () => {
-		const alert = mapNotificationToHistoryAlert({
+		const notification = mapNotificationToHistoryNotification({
 			...baseNotification,
 			content: {
 				items: {
@@ -117,11 +117,11 @@ describe('mapNotificationToHistoryAlert', () => {
 			},
 		});
 
-		expect(alert?.alertType).toBe('Newsletter');
+		expect(notification?.alertType).toBe('Newsletter');
 	});
 
 	it('maps app-push compose, topic label, media, and edition ids', () => {
-		const alert = mapNotificationToHistoryAlert(
+		const notification = mapNotificationToHistoryNotification(
 			{
 				...baseNotification,
 				status: 'partially_delivered',
@@ -156,7 +156,7 @@ describe('mapNotificationToHistoryAlert', () => {
 			audiences,
 		);
 
-		expect(alert).toMatchObject({
+		expect(notification).toMatchObject({
 			channel: 'push',
 			alertType: 'Sport news',
 			thumbnailUrl: 'https://media.guim.co.uk/thumb.jpg',
@@ -166,6 +166,8 @@ describe('mapNotificationToHistoryAlert', () => {
 	});
 
 	it('omits a summary whose stored payload cannot drive the table', () => {
-		expect(mapNotificationToHistoryAlert(baseNotification)).toBeUndefined();
+		expect(
+			mapNotificationToHistoryNotification(baseNotification),
+		).toBeUndefined();
 	});
 });

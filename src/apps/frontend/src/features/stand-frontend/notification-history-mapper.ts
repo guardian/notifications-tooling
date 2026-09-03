@@ -3,7 +3,7 @@ import type {
 	ChannelAudienceResponse,
 	NotificationSummary,
 } from './api/schemas';
-import type { HistoryAlert } from './components/HistoryTab';
+import type { HistoryNotification } from './components/HistoryTab';
 import { editionIds } from './edition-values';
 import type { Edition } from './types';
 
@@ -57,7 +57,7 @@ const toEdition = (id: string): Edition | undefined => {
 
 const statusDisplay: Record<
 	NotificationSummary['status'],
-	HistoryAlert['status']
+	HistoryNotification['status']
 > = {
 	accepted: 'Accepted',
 	delivered: 'Sent',
@@ -70,10 +70,10 @@ const getNewsletterAlertType = (subject: string): string => {
 	return kicker ?? 'Newsletter';
 };
 
-export const mapNotificationToHistoryAlert = (
+export const mapNotificationToHistoryNotification = (
 	notification: NotificationSummary,
 	audiences?: ChannelAudienceResponse,
-): HistoryAlert | undefined => {
+): HistoryNotification | undefined => {
 	const payload = notificationPayloadSchema.safeParse({
 		content: notification.content,
 		channels: notification.channels,
