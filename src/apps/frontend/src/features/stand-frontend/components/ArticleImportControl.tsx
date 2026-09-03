@@ -101,8 +101,9 @@ export const ArticleImportControl = ({
 
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
-	const showFieldErrors =
+	const articleError =
 		failure ??
+		fetchArticleError ??
 		(!content && submitCount > 0
 			? 'Paste a URL to fetch an article'
 			: undefined);
@@ -147,7 +148,7 @@ export const ArticleImportControl = ({
 					<TextInput
 						name="articleUrl"
 						aria-label="article URL"
-						isInvalid={!!showFieldErrors}
+						isInvalid={!!articleError}
 						size="sm"
 						value={articleInputText}
 						placeholder="https://www.theguardian.com/..."
@@ -198,12 +199,8 @@ export const ArticleImportControl = ({
 					<InlineMessage level="success">Article imported</InlineMessage>
 				)}
 
-				{fetchArticleError && (
-					<InlineMessage level="error">{fetchArticleError}</InlineMessage>
-				)}
-
-				{showFieldErrors && (
-					<InlineMessage level="error">{showFieldErrors}</InlineMessage>
+				{articleError && (
+					<InlineMessage level="error">{articleError}</InlineMessage>
 				)}
 			</div>
 

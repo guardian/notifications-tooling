@@ -55,6 +55,9 @@ export const Default: Story = {
 		await expect(canvas.getByText('Send info')).toBeVisible();
 		await expect(canvas.getByText('App alert')).toBeVisible();
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
+		await expect(
+			canvas.getByText('Show article thumbnail image'),
+		).toBeVisible();
 		await expect(canvas.getByText('Editions')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
@@ -100,6 +103,9 @@ export const WithoutThumbnail: Story = {
 		).not.toBeInTheDocument();
 		await expect(
 			canvas.queryByAltText('Android article thumbnail'),
+		).not.toBeInTheDocument();
+		await expect(
+			canvas.queryByText('Show article thumbnail image'),
 		).not.toBeInTheDocument();
 	},
 };

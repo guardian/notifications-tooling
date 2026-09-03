@@ -68,6 +68,9 @@ export const EmailSuccess: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
 		).toBeVisible();
+		await expect(
+			canvas.getByText(`Exclusive: ${completeEmailParams.subject}`),
+		).toBeVisible();
 		await expect(canvas.getByText('Newsletter email')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('Australia')).toBeVisible();
@@ -91,10 +94,16 @@ export const AppAlertSuccess: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'App alert sent' }),
 		).toBeVisible();
+		await expect(
+			canvas.getByText(`Breaking News: ${completePushParams.headline}`),
+		).toBeVisible();
 		await expect(canvas.getByText('App alert')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
+		await expect(
+			canvas.getByText('Show article thumbnail image'),
+		).toBeVisible();
 
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Create new app alert' }),

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../../../mocks/capi-fixtures';
-import { type HistoryAlert, HistoryView } from './HistoryView';
+import { type HistoryNotification, HistoryView } from './HistoryView';
 
-const alerts: HistoryAlert[] = [
+const notifications: HistoryNotification[] = [
 	{
 		id: '2df4fb5d-6a52-46e8-a88e-81e4f990d642',
 		title: 'Prime minister announces cabinet reshuffle',
@@ -29,16 +29,16 @@ const alerts: HistoryAlert[] = [
 	},
 ];
 
-const paginatedAlerts: HistoryAlert[] = Array.from(
+const paginatedNotifications: HistoryNotification[] = Array.from(
 	{ length: 80 },
 	(_, index) => {
-		const alert = alerts[index % alerts.length]!;
+		const notification = notifications[index % notifications.length]!;
 
 		return {
-			...alert,
-			id: `${alert.id}-${index + 1}`,
-			href: `${alert.href}?story=${index + 1}`,
-			title: `${alert.title} (${index + 1})`,
+			...notification,
+			id: `${notification.id}-${index + 1}`,
+			href: `${notification.href}?story=${index + 1}`,
+			title: `${notification.title} (${index + 1})`,
 		};
 	},
 );
@@ -56,8 +56,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
 	args: {
-		alerts,
-		totalItems: alerts.length,
+		notifications,
+		totalItems: notifications.length,
 		currentPage: 1,
 		limit: 10,
 		handlePageChange: () => undefined,
@@ -84,7 +84,7 @@ export const Default: Story = {
 
 export const Empty: Story = {
 	args: {
-		alerts: [],
+		notifications: [],
 		totalItems: 0,
 		currentPage: 1,
 		limit: 10,
@@ -100,7 +100,7 @@ export const Empty: Story = {
 
 export const Loading: Story = {
 	args: {
-		alerts: [],
+		notifications: [],
 		totalItems: 0,
 		currentPage: 1,
 		limit: 10,
@@ -121,7 +121,7 @@ export const Loading: Story = {
 
 export const Error: Story = {
 	args: {
-		alerts: [],
+		notifications: [],
 		totalItems: 0,
 		currentPage: 1,
 		limit: 10,
@@ -144,8 +144,8 @@ export const Error: Story = {
 
 export const WithPagination: Story = {
 	args: {
-		alerts: paginatedAlerts.slice(0, 10),
-		totalItems: paginatedAlerts.length,
+		notifications: paginatedNotifications.slice(0, 10),
+		totalItems: paginatedNotifications.length,
 		limit: 10,
 		currentPage: 1,
 		handlePageChange: () => undefined,
