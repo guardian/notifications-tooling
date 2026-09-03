@@ -14,13 +14,13 @@
 	"devDependencies": {
 		"@codegenie/serverless-express": "5.0.0",
 		"@types/aws-lambda": "8.10.162",
-		"@types/bun": "1.3.14",
+		"@types/bun": "1.4.0",
 		"@types/express": "5.0.6",
 		"@types/swagger-ui-express": "4.1.8"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "3.1111.0",
-		"@aws-sdk/credential-providers": "3.1111.0",
+		"@aws-sdk/client-s3": "3.1119.0",
+		"@aws-sdk/credential-providers": "3.1119.0",
 		"@config": "workspace:*",
 		"@database": "workspace:*",
 		"@guardian/pan-domain-node": "1.2.5",
@@ -31,7 +31,7 @@
 		"@utils": "workspace:*",
 		"express": "5.2.1",
 		"express-zod-safe": "3.2.1",
-		"swagger-ui-dist": "5.32.13",
+		"swagger-ui-dist": "5.32.14",
 		"swagger-ui-express": "5.0.1",
 		"zod": "4.4.3"
 	}
