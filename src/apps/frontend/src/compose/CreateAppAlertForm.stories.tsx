@@ -188,7 +188,7 @@ export const WithReplacementThumbnail: Story = {
 		);
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'add replacement image URL' }),
+			canvas.getByRole('button', { name: 'add replacement image URL button' }),
 		);
 		const replacementInput = canvas.getByRole('textbox', {
 			name: 'replacement image URL',

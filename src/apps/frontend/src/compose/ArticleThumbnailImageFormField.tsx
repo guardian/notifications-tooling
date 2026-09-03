@@ -1,13 +1,13 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
-import { IconButton } from '@guardian/stand/IconButton';
+import { Icon } from '@guardian/stand/Icon';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { customIconButtonTheme } from '../themes';
+import { replaceThumbnailButtonTheme } from '../themes';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
 
@@ -61,28 +61,34 @@ export const ArticleThumbnailImageFormField = () => {
 									gap: semanticSpacing.stackXs,
 								}}
 							>
-								<div
-									css={{
-										display: 'flex',
-										flexDirection: 'row',
-										alignItems: 'center',
-										gap: semanticSpacing.stackXs,
-									}}
+								<Button
+									onClick={() => setOpenReplaceSection(!openReplaceSection)}
+									variant="tertiary"
+									theme={replaceThumbnailButtonTheme}
+									cssOverrides={css({
+										width: 'fit-content',
+										padding: 0,
+									})}
+									aria-label={`add replacement image URL button`}
 								>
-									<Typography variant="labelFormSm">Replace image</Typography>
-									<IconButton
-										variant="tertiary"
-										size="md"
-										symbol={
-											openReplaceSection
-												? 'keyboard_arrow_up'
-												: 'keyboard_arrow_down'
-										}
-										ariaLabel="add replacement image URL"
-										theme={customIconButtonTheme}
-										onClick={() => setOpenReplaceSection(!openReplaceSection)}
-									/>
-								</div>
+									<div
+										css={{
+											display: 'flex',
+											flexDirection: 'row',
+											gap: semanticSpacing.stackXs,
+										}}
+									>
+										<Typography variant="labelFormSm">Replace image</Typography>
+										<Icon
+											size="md"
+											symbol={
+												openReplaceSection
+													? 'keyboard_arrow_up'
+													: 'keyboard_arrow_down'
+											}
+										/>
+									</div>
+								</Button>
 								{openReplaceSection && (
 									<>
 										<Typography
