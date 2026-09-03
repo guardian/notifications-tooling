@@ -66,10 +66,9 @@ describe('mapNotificationToHistoryNotification', () => {
 			channels: {
 				newsletter: {
 					audience: {
-						type: 'email',
-						items: ['joshua.anderson@guardian.co.uk'],
+						type: 'segment',
+						items: ['AU'],
 					},
-					variants: ['AU'],
 					compose: {
 						items: ['lead-story'],
 						subject:
@@ -90,6 +89,37 @@ describe('mapNotificationToHistoryNotification', () => {
 			status: 'Sent',
 		});
 		expect(notification?.thumbnailUrl).toBeUndefined();
+	});
+
+	it('maps a test-newsletter summary using variants when the audience is email', () => {
+		const notification = mapNotificationToHistoryNotification({
+			...baseNotification,
+			content: {
+				items: {
+					'lead-story': {
+						type: 'newsletter',
+						title: 'Morning briefing',
+						body: 'Summary',
+						link: 'https://www.theguardian.com/world',
+					},
+				},
+			},
+			channels: {
+				newsletter: {
+					audience: {
+						type: 'email',
+						items: ['joshua.anderson@guardian.co.uk'],
+					},
+					variants: ['UK'],
+					compose: {
+						items: ['lead-story'],
+						subject: 'Morning briefing',
+					},
+				},
+			},
+		});
+
+		expect(notification?.sentTo).toEqual(['UK']);
 	});
 
 	it('uses a generic newsletter label when the subject has no known kicker', () => {
