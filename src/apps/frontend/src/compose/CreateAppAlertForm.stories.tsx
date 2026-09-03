@@ -178,8 +178,6 @@ export const WithReplacementThumbnail: Story = {
 		const canvas = within(canvasElement);
 		const replacementThumbnailUrl =
 			'https://media.guim.co.uk/replacement-thumbnail.jpg';
-		const replacementInput = canvas.getByLabelText('replacement image URL');
-		const updateButton = canvas.getByRole('button', { name: 'Update' });
 		const thumbnail = canvas.getByAltText(
 			'Thumbnail for A rhyme to recall rising temperatures',
 		);
@@ -188,6 +186,14 @@ export const WithReplacementThumbnail: Story = {
 			'src',
 			articleFixture.fields?.thumbnail,
 		);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'add replacement image URL' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		const updateButton = canvas.getByRole('button', { name: 'Update' });
 
 		await userEvent.clear(replacementInput);
 		await userEvent.type(replacementInput, replacementThumbnailUrl);
@@ -199,6 +205,7 @@ export const WithReplacementThumbnail: Story = {
 		await userEvent.click(updateButton);
 
 		await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		await expect(canvas.getByText('Image updated')).toBeVisible();
 	},
 };
 
@@ -220,6 +227,15 @@ export const WithThumbnailTurnedOff: Story = {
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
 		).not.toBeInTheDocument();
+
+		await userEvent.click(thumbnailToggle);
+
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(
+			canvas.getByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+		).toBeVisible();
 	},
 };
 
