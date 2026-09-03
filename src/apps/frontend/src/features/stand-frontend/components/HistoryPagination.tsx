@@ -11,7 +11,6 @@ const styles = {
 		width: '100%',
 		minWidth: 0,
 		display: 'flex',
-		paddingTop: semanticSpacing.stackXs,
 		[from.md]: {
 			paddingTop: 0,
 			marginLeft: 'auto',
