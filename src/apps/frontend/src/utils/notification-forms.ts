@@ -31,6 +31,7 @@ export const appAlertFormSchema = z.object({
 		.array(displayAppAlertTopicEditionId)
 		.min(1, 'Please select an edition'),
 	includeThumbnail: z.boolean(),
+	articleThumbnailUrl: z.union([z.literal(''), z.string().url()]).optional(),
 	deliveryOption: z.literal('appImmediate'),
 });
 
@@ -50,5 +51,6 @@ export const defaultAppAlertFormValues: AppAlertFormValues = {
 	headline: '',
 	editions: [],
 	includeThumbnail: true,
+	articleThumbnailUrl: '',
 	deliveryOption: 'appImmediate',
 };

@@ -4,24 +4,31 @@ import { Button } from '@guardian/stand/Button';
 import { IconButton } from '@guardian/stand/IconButton';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { customIconButtonTheme } from '../themes';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
-import { NotificationFormContext } from './NotificationContext';
 
 export const ArticleThumbnailImageFormField = () => {
-	const { notification } = useContext(NotificationFormContext);
-	const { control } = useFormContext<AppAlertFormValues>();
-	const thumbnailImage = notification.content?.fields?.thumbnail;
-	const hasThumbnail = Boolean(thumbnailImage);
+	const { control, setValue } = useFormContext<AppAlertFormValues>();
+	const articleThumbnailUrl =
+		useWatch<AppAlertFormValues, 'articleThumbnailUrl'>({
+			control,
+			name: 'articleThumbnailUrl',
+			defaultValue: '',
+		}) ?? '';
+	const hasThumbnail = Boolean(articleThumbnailUrl);
 	const [replacementImageUrl, setReplacementImageUrl] =
-		useState(thumbnailImage);
-	const replacementImageUrlToApply = replacementImageUrl?.trim();
+		useState(articleThumbnailUrl);
+	const replacementImageUrlToApply = replacementImageUrl.trim();
 	const canUpdateThumbnail =
 		Boolean(replacementImageUrlToApply) &&
-		replacementImageUrlToApply !== thumbnailImage;
+		replacementImageUrlToApply !== articleThumbnailUrl;
+
+	useEffect(() => {
+		setReplacementImageUrl(articleThumbnailUrl);
+	}, [articleThumbnailUrl]);
 
 	return (
 		<div
@@ -96,7 +103,13 @@ export const ArticleThumbnailImageFormField = () => {
 										icon="refresh"
 										size="md"
 										variant="secondary"
-										onClick={field.onChange}
+										onClick={() => {
+											setValue(
+												'articleThumbnailUrl',
+												replacementImageUrlToApply,
+												{ shouldDirty: true, shouldValidate: true },
+											);
+										}}
 									>
 										Update
 									</Button>

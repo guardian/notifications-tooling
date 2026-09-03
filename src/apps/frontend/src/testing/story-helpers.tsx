@@ -117,6 +117,7 @@ export const completePushParams: AppAlertFormValues = {
 	deliveryOption: 'appImmediate',
 	editions: ['UK', 'INT'],
 	includeThumbnail: true,
+	articleThumbnailUrl: articleFixture.fields?.thumbnail ?? '',
 };
 
 export const populatedPushState: NotificationState = {

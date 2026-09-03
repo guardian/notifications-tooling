@@ -26,6 +26,13 @@ export const CreateAppAlertForm = ({
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
+	const articleThumbnailUrl = useWatch<
+		AppAlertFormValues,
+		'articleThumbnailUrl'
+	>({
+		name: 'articleThumbnailUrl',
+		defaultValue: defaultAppAlertFormValues.articleThumbnailUrl,
+	});
 	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
 		name: 'includeThumbnail',
 		defaultValue: defaultAppAlertFormValues.includeThumbnail,
@@ -68,8 +75,10 @@ export const CreateAppAlertForm = ({
 			onArticleImported={(article) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);
 				setValue('includeThumbnail', Boolean(article.fields?.thumbnail));
+				setValue('articleThumbnailUrl', article.fields?.thumbnail ?? '');
 			}}
 			showArticleThumbnail={includeThumbnail}
+			articleThumbnailUrl={articleThumbnailUrl}
 		>
 			<NotificationFormSection
 				id="alert-section"
