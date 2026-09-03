@@ -10,26 +10,28 @@ import {
 	useTopicEditionOptions,
 } from './use-audience-editions';
 
-const TEST_NEWSLETTER_SEGMENTS = [
-	{ id: 'UK', label: 'United Kingdom' },
-	{ id: 'US', label: 'United States' },
-	{ id: 'AU', label: 'Australia' },
-] as const;
+const TEST_NEWSLETTER_SEGMENTS: ChannelAudienceResponse['channels']['newsletter']['segments'] =
+	[
+		{ id: 'UK', label: 'United Kingdom' },
+		{ id: 'US', label: 'United States' },
+		{ id: 'AU', label: 'Australia' },
+	];
 
-const TEST_PUSH_TOPIC = {
-	id: 'joke-for-today',
-	label: 'a daily regional joke',
-	editions: [
-		{
-			id: 'uk',
-			label: 'Jokes for the United Kingdom',
-		},
-		{
-			id: 'europe',
-			label: 'European jokes',
-		},
-	],
-};
+const TEST_PUSH_TOPIC: ChannelAudienceResponse['channels']['app-push']['topicTypes'][number] =
+	{
+		id: 'joke-for-today',
+		label: 'a daily regional joke',
+		editions: [
+			{
+				id: 'uk',
+				label: 'Jokes for the United Kingdom',
+			},
+			{
+				id: 'europe',
+				label: 'European jokes',
+			},
+		],
+	};
 
 const testData: ChannelAudienceResponse = {
 	channels: {
@@ -40,7 +42,7 @@ const testData: ChannelAudienceResponse = {
 			topicTypes: [TEST_PUSH_TOPIC],
 		},
 	},
-} as ChannelAudienceResponse;
+};
 
 const testResponse: { data?: ChannelAudienceResponse } = { data: testData };
 
