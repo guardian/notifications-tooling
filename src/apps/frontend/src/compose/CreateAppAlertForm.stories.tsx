@@ -42,7 +42,7 @@ const meta: Meta<StoryArgs> = {
 			{},
 			'push',
 			formValues ??
-			(notificationState.content ? completePushParams : undefined),
+				(notificationState.content ? completePushParams : undefined),
 		);
 	},
 };
