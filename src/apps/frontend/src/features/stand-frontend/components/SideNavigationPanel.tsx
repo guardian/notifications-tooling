@@ -23,7 +23,7 @@ const getStep = (id: string, label: string): StepNavStep => ({
 
 const EMAIL_STEPS: StepNavStep[] = [
 	getStep('#article-section', 'Article and channel'),
-	getStep('#content-section', 'Content'),
+	getStep('#content-section', 'Kicker, subject and preview'),
 	getStep('#audience-section', 'Audience'),
 	getStep('#delivery-timing-section', 'Delivery and timing'),
 	getStep('#send-button-section', 'Send'),
@@ -32,7 +32,7 @@ const EMAIL_STEPS: StepNavStep[] = [
 const PUSH_STEPS: StepNavStep[] = [
 	getStep('#article-section', 'Article and channel'),
 	getStep('#alert-section', 'Alert type and editions'),
-	getStep('#content-section', 'Content'),
+	getStep('#content-section', 'Headline'),
 	getStep('#delivery-timing-section', 'Delivery and timing'),
 	getStep('#send-button-section', 'Send'),
 ];
