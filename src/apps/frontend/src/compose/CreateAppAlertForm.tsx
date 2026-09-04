@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
+import { getArticleThumbnail } from '../utils/article-thumbnail';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
@@ -60,7 +61,7 @@ export const CreateAppAlertForm = ({
 			}
 			onArticleImported={(article) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);
-				setValue('includeThumbnail', Boolean(article.fields?.thumbnail));
+				setValue('includeThumbnail', Boolean(getArticleThumbnail(article).src));
 			}}
 		>
 			<NotificationFormSection

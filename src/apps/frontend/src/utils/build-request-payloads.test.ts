@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { sendNotificationRequestSchema } from '../schemas';
-import { articleFixture } from '../testing/capi-fixtures';
+import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
 import {
 	buildAppAlertRequest,
 	buildNewsletterRequest,
@@ -78,6 +78,36 @@ describe('notification request builders', () => {
 				type: 'image',
 				imageUrl: articleFixture.fields?.thumbnail,
 				thumbnailUrl: articleFixture.fields?.thumbnail,
+			},
+		});
+	});
+
+	it('uses a liveblog main-block image when the thumbnail field is absent', () => {
+		const request = buildAppAlertRequest({
+			values: {
+				alertType: 'breaking-news',
+				headline: 'Latest developments',
+				editions: ['UK'],
+				includeThumbnail: true,
+				deliveryOption: 'appImmediate',
+			},
+			content: {
+				...liveblogFixture,
+				fields: {
+					headline: liveblogFixture.fields?.headline ?? 'Latest developments',
+					lastModified: liveblogFixture.fields?.lastModified ?? '',
+				},
+			},
+			idempotencyKey: 'liveblog-app-alert-operation-id',
+		});
+
+		expect(request.content.items['lead-story']).toMatchObject({
+			media: {
+				type: 'image',
+				imageUrl:
+					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+				thumbnailUrl:
+					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
 			},
 		});
 	});

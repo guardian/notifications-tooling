@@ -56,16 +56,18 @@ const capiBlockSchema = z.looseObject({
 		.array(
 			z.looseObject({
 				type: z.string(),
-				assets: z.array(
-					z.looseObject({
-						file: z.string(),
-						typeData: z
-							.looseObject({
-								width: z.number().optional(),
-							})
-							.optional(),
-					}),
-				),
+				assets: z
+					.array(
+						z.looseObject({
+							file: z.string().optional(),
+							typeData: z
+								.looseObject({
+									width: z.number().optional(),
+								})
+								.optional(),
+						}),
+					)
+					.optional(),
 				imageTypeData: z
 					.looseObject({
 						alt: z.string().optional(),

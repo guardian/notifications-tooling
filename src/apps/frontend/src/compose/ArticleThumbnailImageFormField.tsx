@@ -2,6 +2,7 @@ import { semanticSpacing } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { getArticleThumbnail } from '../utils/article-thumbnail';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
 import { NotificationFormContext } from './NotificationContext';
@@ -9,7 +10,7 @@ import { NotificationFormContext } from './NotificationContext';
 export const ArticleThumbnailImageFormField = () => {
 	const { notification } = useContext(NotificationFormContext);
 	const { control } = useFormContext<AppAlertFormValues>();
-	const thumbnailImage = notification.content?.fields?.thumbnail;
+	const thumbnailImage = getArticleThumbnail(notification.content).src;
 	const hasThumbnail = Boolean(thumbnailImage);
 
 	return (

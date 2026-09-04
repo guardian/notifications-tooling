@@ -49,10 +49,37 @@ describe('fetchArticle', () => {
 		expect(timeout).toHaveBeenCalledWith(10_000);
 		expect(fetcher).toHaveBeenCalledWith(
 			new URL(
-				'https://content.guardianapis.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures?api-key=test-key&show-fields=all&show-blocks=all',
+				'https://content.guardianapis.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures?api-key=test-key&show-fields=all&show-blocks=main',
 			),
 			{ signal: timeoutSignal },
 		);
+	});
+
+	it('accepts block elements without image assets', async () => {
+		const content = {
+			...capiPayload.response.content,
+			blocks: {
+				main: {
+					id: 'main-block',
+					elements: [
+						{ type: 'text', textTypeData: { html: '<p>Update</p>' } },
+						{ type: 'image', imageTypeData: { alt: 'Update image' } },
+					],
+				},
+			},
+		};
+		spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ response: { status: 'ok', content } }),
+		);
+
+		const article = await fetchArticle({
+			endpoint: 'https://content.guardianapis.com',
+			apiKey: 'test-key',
+			articleId: content.id,
+			timeoutMs: 10_000,
+		});
+
+		expect(article).toEqual(content);
 	});
 
 	it('encodes the article id path segments in the CAPI request', async () => {
@@ -81,7 +108,7 @@ describe('fetchArticle', () => {
 		expect(article).toEqual(content);
 		expect(fetcher).toHaveBeenCalledWith(
 			new URL(
-				'https://content.guardianapis.com/world/2026/jul/08/summit?api-key=test-key&show-fields=all&show-blocks=all',
+				'https://content.guardianapis.com/world/2026/jul/08/summit?api-key=test-key&show-fields=all&show-blocks=main',
 			),
 			{ signal: timeoutSignal },
 		);
