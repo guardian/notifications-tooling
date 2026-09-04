@@ -224,12 +224,12 @@ const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
 };
 
 const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
-{
-	Accepted: 'grey',
-	Sent: 'green',
-	'Partially sent': 'yellow',
-	Failed: 'red',
-};
+	{
+		Accepted: 'grey',
+		Sent: 'green',
+		'Partially sent': 'yellow',
+		Failed: 'red',
+	};
 
 export const HistoryView = ({
 	notifications = [],

@@ -111,16 +111,16 @@ export const mapNotificationToHistoryNotification = (
 			? newsletter.audience.items
 			: (newsletter.variants ?? [])
 		: appPushAudience
-			.map(({ name }) => toEdition(name))
-			.filter(
-				(edition): edition is DisplayAppAlertTopicEditionId =>
-					edition !== undefined,
-			);
+				.map(({ name }) => toEdition(name))
+				.filter(
+					(edition): edition is DisplayAppAlertTopicEditionId =>
+						edition !== undefined,
+				);
 	const topicTypeId = appPushAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(
-			({ id }) => id === topicTypeId,
-		)?.label ?? topicTypeId)
+				({ id }) => id === topicTypeId,
+			)?.label ?? topicTypeId)
 		: getNewsletterAlertType(newsletter?.compose.subject ?? '');
 
 	return {

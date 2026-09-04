@@ -1,7 +1,7 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import type { NewsletterFormValues } from '../utils/notification-forms';
-import { useNewsletterSegmentOptions } from './use-audience-editions';
 import { SegmentPicker } from './SegmentPicker';
+import { useNewsletterSegmentOptions } from './use-audience-editions';
 
 export const AudienceSegmentsFormField = () => {
 	const { control } = useFormContext<NewsletterFormValues>();

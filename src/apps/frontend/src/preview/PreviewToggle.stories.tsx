@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import { FALLBACK_TOPIC_TYPES } from '../segment/audience-fallbacks';
 import {
 	completeEmailParams,
 	completePushParams,
 	populatedPushState,
 	WithNotificationContext,
 } from '../testing/story-helpers';
-import { FALLBACK_TOPIC_TYPES } from '../segment/audience-fallbacks';
 import type { NotificationState } from '../types';
 import { defaultState } from '../utils/notification-reducer';
 import { AppPreviewToggle, EmailPreviewToggle } from './PreviewToggle';

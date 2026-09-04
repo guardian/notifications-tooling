@@ -18,20 +18,20 @@ const TEST_NEWSLETTER_SEGMENTS: ChannelAudienceResponse['channels']['newsletter'
 	];
 
 const TEST_PUSH_TOPIC: ChannelAudienceResponse['channels']['app-push']['topicTypes'][number] =
-{
-	id: 'joke-for-today',
-	label: 'a daily regional joke',
-	editions: [
-		{
-			id: 'uk',
-			label: 'Jokes for the United Kingdom',
-		},
-		{
-			id: 'europe',
-			label: 'European jokes',
-		},
-	],
-};
+	{
+		id: 'joke-for-today',
+		label: 'a daily regional joke',
+		editions: [
+			{
+				id: 'uk',
+				label: 'Jokes for the United Kingdom',
+			},
+			{
+				id: 'europe',
+				label: 'European jokes',
+			},
+		],
+	};
 
 const testData: ChannelAudienceResponse = {
 	channels: {
@@ -48,7 +48,7 @@ const testResponse: { data?: ChannelAudienceResponse } = { data: testData };
 
 const useChannelAudiences = mock(() => testResponse);
 
-void mock.module('./api/useChannelAudiences', () => ({
+void mock.module('./useChannelAudiences', () => ({
 	useChannelAudiences,
 }));
 
@@ -79,7 +79,7 @@ describe('useTopicEditionOptions', () => {
 		});
 		const output: unknown = JSON.parse(
 			container.querySelector('[data-testid="editions"]')?.textContent ??
-			'null',
+				'null',
 		);
 
 		const cleanUp = () => {
@@ -153,7 +153,7 @@ describe('useNewsletterSegmentOptions', () => {
 		});
 		const output: unknown = JSON.parse(
 			container.querySelector('[data-testid="editions"]')?.textContent ??
-			'null',
+				'null',
 		);
 
 		const cleanUp = () => {

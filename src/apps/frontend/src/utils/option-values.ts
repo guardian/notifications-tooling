@@ -41,15 +41,15 @@ export const alertTypeNameMap: Record<AlertType | 'undefined', string> = {
 };
 
 export const deliveryOptionNameMap: Record<DeliveryOption, OptionDisplayInfo> =
-{
-	immediate: {
-		name: 'Immediate',
-		description: 'Sends right now via Braze',
-		symbol: 'bolt',
-	},
-	appImmediate: {
-		name: 'Immediate',
-		description: 'Sends right now',
-		symbol: 'bolt',
-	},
-};
+	{
+		immediate: {
+			name: 'Immediate',
+			description: 'Sends right now via Braze',
+			symbol: 'bolt',
+		},
+		appImmediate: {
+			name: 'Immediate',
+			description: 'Sends right now',
+			symbol: 'bolt',
+		},
+	};

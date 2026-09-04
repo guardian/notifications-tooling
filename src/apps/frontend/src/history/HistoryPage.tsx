@@ -3,8 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { parseHistorySearchParams } from '../utils/history-search-params';
-import { mapNotificationToHistoryNotification } from './notification-history-mapper';
 import { HistoryView } from './HistoryView';
+import { mapNotificationToHistoryNotification } from './notification-history-mapper';
 
 export const HistoryPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
