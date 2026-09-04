@@ -3,9 +3,9 @@ import type { ChannelAudienceResponse } from '@models';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../../../happydom-setup';
+import { FALLBACK_NEWSLETTER_SEGMENTS } from './audience-fallbacks';
 import { EDITION_OPTIONS } from './components/EditionOptions';
 import {
-	FALLBACK_SEGMENT_OPTIONS,
 	useNewsletterSegmentOptions,
 	useTopicEditionOptions,
 } from './use-audience-editions';
@@ -179,7 +179,12 @@ describe('useNewsletterSegmentOptions', () => {
 		testResponse.data = undefined;
 		const { output, cleanUp } = renderTestComponent();
 
-		expect(output).toEqual(FALLBACK_SEGMENT_OPTIONS);
+		expect(output).toEqual(
+			FALLBACK_NEWSLETTER_SEGMENTS.map(({ id, label }) => ({
+				code: id,
+				label,
+			})),
+		);
 		cleanUp();
 	});
 });
