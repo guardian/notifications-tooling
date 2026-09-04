@@ -5,14 +5,18 @@ import { Icon } from '@guardian/stand/Icon';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { AppAlertFormValues } from '../notification-forms';
+import { NotificationFormContext } from '../NotificationContext';
 import { replaceThumbnailButtonTheme } from '../themes';
 import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
 
 export const ArticleThumbnailImageFormField = () => {
 	const { control, setValue } = useFormContext<AppAlertFormValues>();
+	const { notification } = useContext(NotificationFormContext);
+	const originalArticleThumbnailUrl =
+		notification.content?.fields?.thumbnail ?? '';
 	const articleThumbnailUrl =
 		useWatch<AppAlertFormValues, 'articleThumbnailUrl'>({
 			control,
@@ -43,14 +47,7 @@ export const ArticleThumbnailImageFormField = () => {
 						<AppAlertThumbnailSwitch
 							isDisabled={!hasThumbnail}
 							isSelected={hasThumbnail && field.value}
-							onChange={(isSelected) => {
-								field.onChange(isSelected);
-
-								if (!isSelected) {
-									setReplacementImageUrl('');
-									setOpenReplaceSection(false);
-								}
-							}}
+							onChange={field.onChange}
 						/>
 						{hasThumbnail && field.value && (
 							<div
@@ -123,10 +120,21 @@ export const ArticleThumbnailImageFormField = () => {
 												size="md"
 												variant="secondary"
 												onClick={() => {
-													setValue('articleThumbnailUrl', replacementImageUrl, {
+													const nextThumbnailUrl =
+														replacementImageUrl || originalArticleThumbnailUrl;
+
+													setValue('articleThumbnailUrl', nextThumbnailUrl, {
 														shouldDirty: true,
 														shouldValidate: true,
 													});
+													setValue(
+														'includeThumbnail',
+														Boolean(nextThumbnailUrl),
+														{
+															shouldDirty: true,
+															shouldValidate: true,
+														},
+													);
 												}}
 											>
 												Update

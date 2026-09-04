@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -98,5 +99,59 @@ export const ConfirmationStep: Story = {
 		await expect(
 			screen.queryByText('Are you sure you want to send the app alert?'),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+		const articleThumbnail = canvas.getByAltText(
+			'Thumbnail for A rhyme to recall rising temperatures',
+		);
+		const iPhoneThumbnail = canvas.getByAltText('Article thumbnail');
+		const androidThumbnail = canvas.getByAltText('Android article thumbnail');
+
+		await userEvent.click(
+			canvas.getByRole('button', {
+				name: 'add replacement image URL button',
+			}),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		const updateButton = canvas.getByRole('button', { name: 'Update' });
+
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await userEvent.click(updateButton);
+
+		for (const thumbnail of [
+			articleThumbnail,
+			iPhoneThumbnail,
+			androidThumbnail,
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		}
+
+		await userEvent.clear(replacementInput);
+		await userEvent.click(updateButton);
+
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		for (const thumbnail of [
+			articleThumbnail,
+			iPhoneThumbnail,
+			androidThumbnail,
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
+		}
 	},
 };
