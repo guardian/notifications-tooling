@@ -1,0 +1,190 @@
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import type { ChannelAudienceResponse } from '@models';
+import { act, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import '../../happydom-setup';
+import { FALLBACK_NEWSLETTER_SEGMENTS } from './audience-fallbacks';
+import { EDITION_OPTIONS } from './EditionOptions';
+import {
+	useNewsletterSegmentOptions,
+	useTopicEditionOptions,
+} from './use-audience-editions';
+
+const TEST_NEWSLETTER_SEGMENTS: ChannelAudienceResponse['channels']['newsletter']['segments'] =
+	[
+		{ id: 'UK', label: 'United Kingdom' },
+		{ id: 'US', label: 'United States' },
+		{ id: 'AU', label: 'Australia' },
+	];
+
+const TEST_PUSH_TOPIC: ChannelAudienceResponse['channels']['app-push']['topicTypes'][number] =
+	{
+		id: 'joke-for-today',
+		label: 'a daily regional joke',
+		editions: [
+			{
+				id: 'uk',
+				label: 'Jokes for the United Kingdom',
+			},
+			{
+				id: 'europe',
+				label: 'European jokes',
+			},
+		],
+	};
+
+const testData: ChannelAudienceResponse = {
+	channels: {
+		newsletter: {
+			segments: TEST_NEWSLETTER_SEGMENTS,
+		},
+		'app-push': {
+			topicTypes: [TEST_PUSH_TOPIC],
+		},
+	},
+};
+
+const testResponse: { data?: ChannelAudienceResponse } = { data: testData };
+
+const useChannelAudiences = mock(() => testResponse);
+
+void mock.module('./useChannelAudiences', () => ({
+	useChannelAudiences,
+}));
+
+type TopicEditionsTestComponentProps = { topicId: string };
+const TopicEditionsTestComponent = ({
+	topicId,
+}: TopicEditionsTestComponentProps) => {
+	const editions = useTopicEditionOptions(topicId);
+	return createElement(
+		'output',
+		{ 'data-testid': 'editions' },
+		JSON.stringify(editions),
+	);
+};
+
+describe('useTopicEditionOptions', () => {
+	beforeEach(() => {
+		testResponse.data = testData;
+	});
+
+	const renderTestComponent = (props: TopicEditionsTestComponentProps) => {
+		const container = document.createElement('div');
+		document.body.append(container);
+		const root = createRoot(container);
+
+		act(() => {
+			root.render(createElement(TopicEditionsTestComponent, props));
+		});
+		const output: unknown = JSON.parse(
+			container.querySelector('[data-testid="editions"]')?.textContent ??
+				'null',
+		);
+
+		const cleanUp = () => {
+			act(() => {
+				root.unmount();
+				container.remove();
+			});
+		};
+
+		return { output, cleanUp };
+	};
+
+	it('when asked for push data with a topic id not in the data, returns the fallback', () => {
+		const { output, cleanUp } = renderTestComponent({
+			topicId: 'not a topic',
+		});
+
+		expect(output).toEqual(EDITION_OPTIONS);
+
+		cleanUp();
+	});
+	it('when asked for push data with a matching topic id in the data, returns the editions for that topic', () => {
+		const { output, cleanUp } = renderTestComponent({
+			topicId: TEST_PUSH_TOPIC.id,
+		});
+		expect(output).toEqual([
+			{
+				code: 'UK',
+				label: 'Jokes for the United Kingdom',
+			},
+			{
+				code: 'EU',
+				label: 'European jokes',
+			},
+		]);
+
+		cleanUp();
+	});
+	it('when asked for push data with a topic but the data is undefined, returns the fallback', () => {
+		testResponse.data = undefined;
+		const { output, cleanUp } = renderTestComponent({
+			topicId: TEST_PUSH_TOPIC.id,
+		});
+		expect(output).toEqual(EDITION_OPTIONS);
+
+		cleanUp();
+	});
+});
+
+const NewsletterSegmentOptionsTestComponent = () => {
+	const editions = useNewsletterSegmentOptions();
+	return createElement(
+		'output',
+		{ 'data-testid': 'editions' },
+		JSON.stringify(editions),
+	);
+};
+
+describe('useNewsletterSegmentOptions', () => {
+	beforeEach(() => {
+		testResponse.data = testData;
+	});
+
+	const renderTestComponent = () => {
+		const container = document.createElement('div');
+		document.body.append(container);
+		const root = createRoot(container);
+
+		act(() => {
+			root.render(createElement(NewsletterSegmentOptionsTestComponent));
+		});
+		const output: unknown = JSON.parse(
+			container.querySelector('[data-testid="editions"]')?.textContent ??
+				'null',
+		);
+
+		const cleanUp = () => {
+			act(() => {
+				root.unmount();
+				container.remove();
+			});
+		};
+
+		return { output, cleanUp };
+	};
+
+	it('returns the newsletter segment options, based on the audience data', () => {
+		const { output, cleanUp } = renderTestComponent();
+
+		expect(output).toEqual(
+			TEST_NEWSLETTER_SEGMENTS.map(({ id, label }) => ({ code: id, label })),
+		);
+		cleanUp();
+	});
+
+	it('returns the fallback segment options if no audience data was available', () => {
+		testResponse.data = undefined;
+		const { output, cleanUp } = renderTestComponent();
+
+		expect(output).toEqual(
+			FALLBACK_NEWSLETTER_SEGMENTS.map(({ id, label }) => ({
+				code: id,
+				label,
+			})),
+		);
+		cleanUp();
+	});
+});

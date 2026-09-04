@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mswLoader } from 'msw-storybook-addon/csf3';
 import { BrowserRouter } from 'react-router-dom';
 import '../src/index.css';
-import { channelHandlers } from '../src/mocks/handlers/channels';
+import { channelHandlers } from '../src/testing/handlers/channels';
 
 const preview: Preview = {
 	parameters: {

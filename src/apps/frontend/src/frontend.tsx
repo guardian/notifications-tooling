@@ -16,7 +16,7 @@ import { StrictMode } from 'react';
 import { RouterProvider as ReactAriaRouterProvider } from 'react-aria-components';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
-import { queryClient } from './api/queryClient';
+import { queryClient } from './api-client/queryClient';
 import { App } from './App';
 
 const RoutedApp = () => {
