@@ -160,7 +160,7 @@ export const NotificationTextInputWithPrefix = ({
 				/>
 			</div>
 			<CharacterCount
-				count={value && prefix ? prefix.length + value.length : 0}
+				count={value && prefix ? prefix.length + value.length : value.length}
 				softLimit={softLimit}
 				fieldDescription={label}
 			/>
