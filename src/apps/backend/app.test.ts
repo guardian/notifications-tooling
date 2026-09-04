@@ -12,7 +12,11 @@ import {
 installPandaAuthMock();
 
 const serveIndexMock = mock((_request: Request, response: Response) =>
-	response.status(200).type('html').send('<div id="root"></div>'),
+	response
+		.status(200)
+		.type('html')
+		.set('Cache-Control', 'no-store, max-age=0')
+		.send('<div id="root"></div>'),
 );
 void mock.module('./middleware/serve-index', () => ({
 	serveIndex: serveIndexMock,
@@ -109,6 +113,7 @@ describe('unmatched routes over HTTP', () => {
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get('content-type')).toContain('text/html');
+		expect(response.headers.get('cache-control')).toBe('no-store, max-age=0');
 		expect(await response.text()).toContain('<div id="root"></div>');
 	});
 
@@ -153,6 +158,15 @@ describe('unmatched routes over HTTP', () => {
 		const body = (await response.json()) as ErrorEnvelope;
 
 		expect(response.status).toBe(404);
+		expect(body.error).toBe('not_found');
+	});
+
+	it('does not serve the SPA document for missing frontend assets', async () => {
+		const response = await fetch(`${server.baseUrl}/index-stale.js`);
+		const body = (await response.json()) as ErrorEnvelope;
+
+		expect(response.status).toBe(404);
+		expect(response.headers.get('content-type')).toContain('application/json');
 		expect(body.error).toBe('not_found');
 	});
 });

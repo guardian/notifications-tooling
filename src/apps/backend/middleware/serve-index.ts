@@ -51,5 +51,9 @@ export const serveIndex: RequestHandler = async (
 		JSON.stringify(config),
 	);
 
-	res.status(200).type('html').set('Cache-Control', 'no-cache').send(html);
+	res
+		.status(200)
+		.type('html')
+		.set('Cache-Control', 'no-store, max-age=0')
+		.send(html);
 };
