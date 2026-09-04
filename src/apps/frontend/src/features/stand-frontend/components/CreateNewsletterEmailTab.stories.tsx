@@ -115,7 +115,9 @@ export const SectionNavigation: Story = {
 		});
 
 		await step('clicking Content updates the hash and highlight', async () => {
-			let contentButton = canvas.queryByRole('button', { name: 'Content' });
+			let contentButton = canvas.queryByRole('button', {
+				name: 'Kicker, subject and preview',
+			});
 			if (!contentButton) {
 				await userEvent.click(
 					canvas.getByRole('button', {
@@ -123,7 +125,7 @@ export const SectionNavigation: Story = {
 					}),
 				);
 				contentButton = within(document.body).getByRole('button', {
-					name: 'Content',
+					name: 'Kicker, subject and preview',
 				});
 			}
 			await userEvent.click(contentButton);

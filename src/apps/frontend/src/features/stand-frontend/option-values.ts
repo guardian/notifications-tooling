@@ -35,7 +35,7 @@ export const kickerNameMap: Record<Kicker, string> = {
 export const alertTypeNameMap: Record<AlertType | 'undefined', string> = {
 	'breaking-news': 'Breaking News',
 	sport: 'Sport',
-	'editors-picks': 'Editors’ Picks',
+	'editors-picks': 'Editors’ picks',
 	'one-not-to-miss': 'One Not to Miss',
 	undefined: 'None',
 };
