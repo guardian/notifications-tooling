@@ -1,12 +1,7 @@
 import type { NotificationChannel } from '@config';
 import { getSSMParameter } from '@config/ssm';
-import {
-	registerBrazeTestEmailRecipients,
-	renderEmail,
-	sendAppNotification,
-	sendBrazeCampaign,
-	sendBrazeTestEmail,
-} from '@services';
+import { renderEmail, sendAppNotification } from '@services';
+import { loadBrazeClient } from '../braze-client';
 import type {
 	NotificationSendRequest,
 	NotificationTestSendRequest,
@@ -18,20 +13,16 @@ export const PROVIDER_REQUEST_TIMEOUT_MS = 10_000;
 
 export type DispatchNotificationDependencies = {
 	getSSMParameter: typeof getSSMParameter;
+	loadBrazeClient: typeof loadBrazeClient;
 	renderEmail: typeof renderEmail;
 	sendAppNotification: typeof sendAppNotification;
-	sendBrazeCampaign: typeof sendBrazeCampaign;
-	registerBrazeTestEmailRecipients: typeof registerBrazeTestEmailRecipients;
-	sendBrazeTestEmail: typeof sendBrazeTestEmail;
 };
 
 export const defaultDependencies: DispatchNotificationDependencies = {
 	getSSMParameter,
+	loadBrazeClient,
 	renderEmail,
 	sendAppNotification,
-	sendBrazeCampaign,
-	registerBrazeTestEmailRecipients,
-	sendBrazeTestEmail,
 };
 
 /**

@@ -16,8 +16,6 @@ import {
 } from '../shared';
 
 export const newsletterEnvironmentSchema = z.object({
-	BRAZE_API_KEY: z.string().trim().min(1),
-	BRAZE_REST_ENDPOINT: z.url(),
 	EMAIL_RENDERING_ENDPOINT: z.url(),
 });
 
@@ -95,16 +93,12 @@ export const dispatchNewsletter = async (
 
 	const { item, plan, segments } = resolvedDispatch;
 
-	const [brazeApiKey, brazeRestEndpoint, emailRenderingEndpoint] =
-		await Promise.all([
-			dependencies.getSSMParameter('BRAZE_API_KEY'),
-			dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
-			dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
-		]);
+	const [brazeClient, emailRenderingEndpoint] = await Promise.all([
+		dependencies.loadBrazeClient(),
+		dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
+	]);
 
 	const environment = newsletterEnvironmentSchema.parse({
-		BRAZE_API_KEY: brazeApiKey,
-		BRAZE_REST_ENDPOINT: brazeRestEndpoint,
 		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
 	});
 
@@ -122,9 +116,7 @@ export const dispatchNewsletter = async (
 
 			// Braze returns one dispatch_id per send; kept for tracking.
 			const { dispatch_id: dispatchId, status } =
-				await dependencies.sendBrazeCampaign({
-					apiKey: environment.BRAZE_API_KEY,
-					restEndpoint: environment.BRAZE_REST_ENDPOINT,
+				await brazeClient.sendCampaign({
 					campaignId: brazeCampaignId,
 					html,
 					subject: plan.compose.subject,

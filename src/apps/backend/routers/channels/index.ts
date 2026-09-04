@@ -7,11 +7,10 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import { getSSMParameter } from '@config/ssm';
 import { UserPermissions } from '@models';
 import type { BrazeCampaignDetails } from '@services';
-import { getBrazeCampaignDetails } from '@services';
 import { type Request, type Response, Router } from 'express';
+import { loadBrazeClient } from '../../braze-client';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
 
@@ -145,10 +144,7 @@ export const channelsRouter = Router()
 		'/config/email',
 		authMiddleware,
 		async (_req: Request, res: Response) => {
-			const [apiKey, restEndpoint] = await Promise.all([
-				getSSMParameter('BRAZE_API_KEY'),
-				getSSMParameter('BRAZE_REST_ENDPOINT'),
-			]);
+			const brazeClient = await loadBrazeClient();
 
 			const editions = ['UK', 'US', 'AU'] as Array<
 				keyof typeof newsletterSegments
@@ -156,10 +152,8 @@ export const channelsRouter = Router()
 
 			const [ukDetails, usDetails, auDetails] = await Promise.all(
 				editions.map((key) =>
-					getBrazeCampaignDetails({
+					brazeClient.getCampaignDetails({
 						campaignId: newsletterSegments[key].brazeCampaignId,
-						restEndpoint,
-						apiKey,
 						timeoutMs: 2000,
 					}),
 				),

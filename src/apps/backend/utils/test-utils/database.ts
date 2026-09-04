@@ -1,6 +1,15 @@
 import { mock } from 'bun:test';
 import type { PersistedNotification } from '../../persistence/persist-notification';
 
+class DuplicateIdempotencyKeyError extends Error {
+	constructor(public readonly idempotencyKey: string) {
+		super(
+			`A notification with idempotencyKey '${idempotencyKey}' already exists.`,
+		);
+		this.name = 'DuplicateIdempotencyKeyError';
+	}
+}
+
 export const dbExecuteMock = mock<(query: string) => Promise<void>>(() =>
 	Promise.resolve(),
 );
@@ -9,8 +18,30 @@ const mockedDb = {
 	execute: dbExecuteMock,
 };
 
+const createNotificationsRepository = () => ({
+	create: mock(() =>
+		Promise.resolve(buildPersistedNotification().notification),
+	),
+	updateStatus: mock((id: string, status: string) =>
+		Promise.resolve({
+			...buildPersistedNotification().notification,
+			id,
+			status,
+		} as PersistedNotification['notification']),
+	),
+	findById: mock(() => Promise.resolve(null)),
+	findByIdWithDispatches: mock(() => Promise.resolve(null)),
+});
+
+const createNotificationDispatchesRepository = () => ({
+	upsert: mock((dispatch: unknown) => Promise.resolve(dispatch)),
+});
+
 export const installDatabaseMock = (): void => {
 	void mock.module('@database', () => ({
+		createNotificationDispatchesRepository,
+		createNotificationsRepository,
+		DuplicateIdempotencyKeyError,
 		getDb: () => Promise.resolve(mockedDb),
 	}));
 };

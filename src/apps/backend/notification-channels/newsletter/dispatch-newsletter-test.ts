@@ -1,7 +1,7 @@
 import { newsletterSegments, NotificationChannel } from '@config';
-import type {
-	BrazeFailureReason,
-	EmailRenderingFailureReason,
+import {
+	type BrazeFailureReason,
+	type EmailRenderingFailureReason,
 } from '@services';
 import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
@@ -68,15 +68,13 @@ export const dispatchNewsletterTest = async (
 		NotificationChannel.Newsletter,
 	);
 	const [
-		brazeApiKey,
-		brazeRestEndpoint,
+		brazeClient,
 		emailRenderingEndpoint,
 		brazeAppId,
 		brazeTestEmailFrom,
 		brazeTestEmailReplyTo,
 	] = await Promise.all([
-		dependencies.getSSMParameter('BRAZE_API_KEY'),
-		dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
+		dependencies.loadBrazeClient(),
 		dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
 		dependencies.getSSMParameter('BRAZE_APP_ID'),
 		dependencies.getSSMParameter('BRAZE_TEST_EMAIL_FROM'),
@@ -84,8 +82,6 @@ export const dispatchNewsletterTest = async (
 	]);
 
 	const environment = newsletterEnvironmentSchema.parse({
-		BRAZE_API_KEY: brazeApiKey,
-		BRAZE_REST_ENDPOINT: brazeRestEndpoint,
 		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
 	});
 	const configuration = testEmailEnvironmentSchema.parse({
@@ -113,9 +109,7 @@ export const dispatchNewsletterTest = async (
 		});
 	}
 
-	await dependencies.registerBrazeTestEmailRecipients({
-		apiKey: environment.BRAZE_API_KEY,
-		restEndpoint: environment.BRAZE_REST_ENDPOINT,
+	await brazeClient.registerTestEmailRecipients({
 		recipientEmails,
 		timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 	});
@@ -123,9 +117,7 @@ export const dispatchNewsletterTest = async (
 	// allSettled so one variant's send failure does not abort the others.
 	const settled = await Promise.allSettled(
 		renderedVariants.map(({ html }) =>
-			dependencies.sendBrazeTestEmail({
-				apiKey: environment.BRAZE_API_KEY,
-				restEndpoint: environment.BRAZE_REST_ENDPOINT,
+			brazeClient.sendTestEmail({
 				appId: configuration.BRAZE_APP_ID,
 				from: configuration.BRAZE_TEST_EMAIL_FROM,
 				replyTo: configuration.BRAZE_TEST_EMAIL_REPLY_TO,
