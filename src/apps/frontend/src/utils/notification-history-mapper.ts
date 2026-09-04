@@ -5,8 +5,8 @@ import {
 	toDisplayEditionId,
 } from '@models';
 import { z } from 'zod';
+import type { HistoryNotification } from '../history/HistoryView';
 import type { ChannelAudienceResponse, NotificationSummary } from '../schemas';
-import type { HistoryNotification } from './HistoryView';
 
 const contentItemSchema = z.object({
 	title: z.string(),
