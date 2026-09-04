@@ -1,4 +1,4 @@
-import { frontendAppAlertTopicEditionId, newsletterSegmentId } from '@models';
+import { displayAppAlertTopicEditionId, newsletterSegmentId } from '@models';
 import { z } from 'zod';
 import { kickerSchema } from './api/schemas';
 
@@ -28,7 +28,7 @@ export const appAlertFormSchema = z.object({
 	]),
 	headline: z.string().trim().min(1, 'Headline is required'),
 	editions: z
-		.array(frontendAppAlertTopicEditionId)
+		.array(displayAppAlertTopicEditionId)
 		.min(1, 'Please select an edition'),
 	includeThumbnail: z.boolean(),
 	deliveryOption: z.literal('appImmediate'),

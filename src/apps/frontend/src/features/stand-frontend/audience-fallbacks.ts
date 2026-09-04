@@ -1,6 +1,6 @@
 import type {
 	AppAlertTopicOption,
-	NewsletterEditionOption,
+	NewsletterSegmentOption,
 	TopicTypeEditionOption,
 } from '@models';
 
@@ -20,7 +20,7 @@ export const FALLBACK_TOPIC_TYPES: AppAlertTopicOption[] = [
 	},
 ];
 
-export const FALLBACK_NEWSLETTER_SEGMENTS: NewsletterEditionOption[] = [
+export const FALLBACK_NEWSLETTER_SEGMENTS: NewsletterSegmentOption[] = [
 	{ id: 'UK', label: 'United Kingdom' },
 	{ id: 'US', label: 'United States' },
 	{ id: 'AU', label: 'Australia' },

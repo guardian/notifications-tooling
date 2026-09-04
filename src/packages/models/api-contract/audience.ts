@@ -31,12 +31,12 @@ export interface NewsletterSegment {
 	brazeCampaignId: string;
 	emailRenderingNewsletterId: string;
 }
-const newsletterEditionOptionSchema = z.object({
+const newsletterSegmentOptionSchema = z.object({
 	id: newsletterSegmentId,
 	label: z.string(),
 });
-export type NewsletterEditionOption = z.infer<
-	typeof newsletterEditionOptionSchema
+export type NewsletterSegmentOption = z.infer<
+	typeof newsletterSegmentOptionSchema
 >;
 
 // App-push editions use two id formats today:
@@ -44,7 +44,7 @@ export type NewsletterEditionOption = z.infer<
 // - frontend display ids: 'UK' | 'US' | 'AU' | 'EU' | 'INT'
 // The frontend works with display ids, while the audience API exposes backend ids,
 // so mapping helpers are still needed in both directions.
-export const frontendAppAlertTopicEditionId = z.enum([
+export const displayAppAlertTopicEditionId = z.enum([
 	'UK',
 	'US',
 	'AU',
@@ -52,7 +52,7 @@ export const frontendAppAlertTopicEditionId = z.enum([
 	'INT',
 ]);
 export type DisplayAppAlertTopicEditionId = z.infer<
-	typeof frontendAppAlertTopicEditionId
+	typeof displayAppAlertTopicEditionId
 >;
 export const appAlertTopicEditionId = z.enum([
 	'uk',
@@ -61,14 +61,17 @@ export const appAlertTopicEditionId = z.enum([
 	'europe',
 	'international',
 ]);
+
 export type AppAlertTopicEditionId = z.infer<typeof appAlertTopicEditionId>;
 const topicTypeEditionOptionSchema = z.object({
 	id: appAlertTopicEditionId,
 	label: z.string(),
 });
+
 export type TopicTypeEditionOption = z.infer<
 	typeof topicTypeEditionOptionSchema
 >;
+
 const appAlertTopicOptionSchema = z.object({
 	id: z.string(),
 	label: z.string(),
@@ -81,6 +84,7 @@ const appAlertTopicOptionSchema = z.object({
 		topicTypeEditionOptionSchema.array(),
 	),
 });
+
 export type AppAlertTopicOption = z.infer<typeof appAlertTopicOptionSchema>;
 
 /**
@@ -95,10 +99,10 @@ export const channelAudienceResponseSchema = z.object({
 				.object({
 					segments: z.preprocess(
 						filterInvalidMembers(
-							newsletterEditionOptionSchema,
+							newsletterSegmentOptionSchema,
 							'invalid newsletter edition option filtered out',
 						),
-						z.array(newsletterEditionOptionSchema),
+						z.array(newsletterSegmentOptionSchema),
 					),
 				})
 				.loose(),
@@ -110,13 +114,11 @@ export const channelAudienceResponseSchema = z.object({
 		})
 		.loose(),
 });
+
 export type ChannelAudienceResponse = z.infer<
 	typeof channelAudienceResponseSchema
 >;
 
-// FIX ME - if we change the audience API data to use the
-// DisplayAppAlertTopicEditionId format for edition keys,
-// these functions won't be needed
 const topicIdToDisplayIdMap: Record<
 	AppAlertTopicEditionId,
 	DisplayAppAlertTopicEditionId

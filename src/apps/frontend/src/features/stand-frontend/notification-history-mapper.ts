@@ -1,5 +1,6 @@
 import {
 	appAlertTopicEditionId,
+	displayAppAlertTopicEditionId,
 	type DisplayAppAlertTopicEditionId,
 	toDisplayEditionId,
 } from '@models';
@@ -31,14 +32,14 @@ const notificationPayloadSchema = z.object({
 				audience: z.discriminatedUnion('type', [
 					z.object({
 						type: z.literal('segment'),
-						items: z.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT'])),
+						items: z.array(displayAppAlertTopicEditionId),
 					}),
 					z.object({
 						type: z.literal('email'),
 						items: z.array(z.string()),
 					}),
 				]),
-				variants: z.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT'])).optional(),
+				variants: z.array(displayAppAlertTopicEditionId).optional(),
 				compose: z.object({
 					items: z.array(z.string()),
 					subject: z.string(),
@@ -58,8 +59,10 @@ const notificationPayloadSchema = z.object({
 
 const toEdition = (id: string): DisplayAppAlertTopicEditionId | undefined => {
 	const upperCaseId = id.toUpperCase();
-	if (['UK', 'US', 'AU', 'EU', 'INT'].includes(upperCaseId)) {
-		return upperCaseId as DisplayAppAlertTopicEditionId;
+	const parsedDisplayEditionId =
+		displayAppAlertTopicEditionId.safeParse(upperCaseId);
+	if (parsedDisplayEditionId.success) {
+		return parsedDisplayEditionId.data;
 	}
 	const parsedEditionId = appAlertTopicEditionId.safeParse(id);
 	return parsedEditionId.success
