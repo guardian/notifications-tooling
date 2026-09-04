@@ -10,6 +10,19 @@ interface ArticlePreviewCardProps {
 	showThumbnail?: boolean;
 }
 
+const getMainBlockImage = (
+	mainBlock: NonNullable<ResolvedArticle['blocks']>['main'],
+) => {
+	const image = mainBlock?.elements?.find(({ type }) => type === 'image');
+	const thumbnail = image?.assets.find(
+		({ typeData }) => typeData?.width === 500,
+	);
+	return {
+		alt: image?.imageTypeData?.alt,
+		src: thumbnail?.file ?? image?.assets[0]?.file,
+	};
+};
+
 export const ArticlePreviewCard = ({
 	content,
 	showThumbnail = true,
@@ -22,14 +35,21 @@ export const ArticlePreviewCard = ({
 		fields,
 		webPublicationDate,
 		webUrl,
+		blocks,
+		type,
 	} = content;
+	const liveblogMainBlock = type === 'liveblog' ? blocks?.main : undefined;
+	const isLiveblog = !!liveblogMainBlock?.id;
 	const headline = fields?.headline ?? webTitle;
-	const thumbnail = fields?.thumbnail;
+	const mainBlockImage = getMainBlockImage(liveblogMainBlock);
+	const thumbnail = mainBlockImage.src ?? fields?.thumbnail;
 	const pillarColor = getPillarColor(pillarId);
-	const publishedAt = useRelativeTime(webPublicationDate);
+	const publishedAt = useRelativeTime(
+		isLiveblog ? fields?.lastModified : webPublicationDate,
+	);
 
 	return (
-		<div css={articlePreviewCardTheme.card}>
+		<div css={articlePreviewCardTheme.card(isLiveblog)}>
 			<div css={articlePreviewCardTheme.details}>
 				{(sectionName ?? pillarName) && (
 					<Typography
@@ -48,7 +68,36 @@ export const ArticlePreviewCard = ({
 					</Typography>
 				)}
 
-				{publishedAt && (
+				{isLiveblog && (
+					<div css={articlePreviewCardTheme.liveStatus}>
+						<Typography
+							variant="bodyBoldXs"
+							element="span"
+							cssOverrides={articlePreviewCardTheme.liveIndicator}
+						>
+							<span css={articlePreviewCardTheme.liveIndicatorDot} />
+							Live
+						</Typography>
+						{publishedAt && (
+							<Typography
+								variant="bodyXs"
+								element="span"
+								cssOverrides={articlePreviewCardTheme.updated}
+							>
+								Updated{' '}
+								<time
+									dateTime={publishedAt.iso8601}
+									title={publishedAt.formattedAbsoluteTime}
+									css={articlePreviewCardTheme.publishedRelative}
+								>
+									{publishedAt.label}
+								</time>
+							</Typography>
+						)}
+					</div>
+				)}
+
+				{publishedAt && !isLiveblog && (
 					<Typography
 						variant="bodyXs"
 						element="p"
@@ -73,6 +122,16 @@ export const ArticlePreviewCard = ({
 					{headline}
 				</Typography>
 
+				{liveblogMainBlock?.id && (
+					<Typography
+						variant="bodyBoldXs"
+						element="p"
+						cssOverrides={articlePreviewCardTheme.liveblogBlockId}
+					>
+						Liveblog block ID: {liveblogMainBlock.id}
+					</Typography>
+				)}
+
 				<Link
 					cssOverrides={articlePreviewCardTheme.url}
 					href={webUrl}
@@ -86,8 +145,8 @@ export const ArticlePreviewCard = ({
 			{thumbnail && showThumbnail && (
 				<img
 					src={thumbnail}
-					alt={`Thumbnail for ${headline}`}
-					css={articlePreviewCardTheme.thumbnail}
+					alt={mainBlockImage.alt ?? `Thumbnail for ${headline}`}
+					css={articlePreviewCardTheme.thumbnail(isLiveblog)}
 				/>
 			)}
 		</div>
