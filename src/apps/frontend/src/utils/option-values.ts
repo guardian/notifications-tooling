@@ -1,7 +1,7 @@
 import type { Icon } from '@guardian/stand/Icon';
 import type { ComponentProps, ReactNode } from 'react';
 import type { Kicker } from '../schemas';
-import type { AlertType, ChannelOption, DeliveryOption } from '../types';
+import type { ChannelOption, DeliveryOption } from '../types';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
@@ -30,14 +30,6 @@ export const kickerNameMap: Record<Kicker, string> = {
 	'breaking-news': 'Breaking News',
 	exclusive: 'Exclusive',
 	none: 'None',
-};
-
-export const alertTypeNameMap: Record<AlertType | 'undefined', string> = {
-	'breaking-news': 'Breaking News',
-	sport: 'Sport',
-	'editors-picks': 'Editors’ picks',
-	'one-not-to-miss': 'One Not to Miss',
-	undefined: 'None',
 };
 
 export const deliveryOptionNameMap: Record<DeliveryOption, OptionDisplayInfo> =

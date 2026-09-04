@@ -67,6 +67,14 @@ export const channelAudiences: ChannelAudienceResponse = {
 						{ id: 'us', label: 'US' },
 					],
 				},
+				{
+					id: 'sport',
+					label: 'Sport news',
+					editions: [
+						{ id: 'uk', label: 'UK' },
+						{ id: 'us', label: 'US' },
+					],
+				},
 			],
 		},
 	},

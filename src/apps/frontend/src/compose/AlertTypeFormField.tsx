@@ -1,16 +1,13 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { Controller, useFormContext } from 'react-hook-form';
-import {
-	appAlertFormSchema,
-	type AppAlertFormValues,
-} from '../utils/notification-forms';
-import { alertTypeNameMap } from '../utils/option-values';
+import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
+import type { AppAlertFormValues } from '../utils/notification-forms';
 
 const toOptionKey = (value: string) => `alertType//${value}`;
-const alertTypeSchema = appAlertFormSchema.shape.alertType;
 
 export const AlertTypeFormField = () => {
 	const { control } = useFormContext<AppAlertFormValues>();
+	const topicTypes = useAppPushTopicTypes();
 
 	return (
 		<Controller
@@ -24,17 +21,16 @@ export const AlertTypeFormField = () => {
 					onChange={(key) => {
 						const selectedAlertType =
 							typeof key === 'string' ? key.split('//').at(1) : undefined;
-						const result = alertTypeSchema.safeParse(selectedAlertType);
-						if (result.success) {
-							field.onChange(result.data);
+						if (topicTypes.some(({ id }) => id === selectedAlertType)) {
+							field.onChange(selectedAlertType);
 						}
 					}}
 					selectionMode="single"
 					value={toOptionKey(field.value)}
 				>
-					{alertTypeSchema.options.map((alertType) => (
-						<Option key={alertType} id={toOptionKey(alertType)}>
-							{alertTypeNameMap[alertType]}
+					{topicTypes.map(({ id, label }) => (
+						<Option key={id} id={toOptionKey(id)}>
+							{label}
 						</Option>
 					))}
 				</Select>

@@ -80,6 +80,7 @@ export const AppAlert: Story = {
 			confirmSendModalOpen: true,
 			pendingRequest: buildAppAlertRequest({
 				values: completePushParams,
+				alertTypeLabel: 'Breaking news',
 				content: articleFixture,
 				idempotencyKey: 'storybook-app-alert',
 			}),
