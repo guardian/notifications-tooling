@@ -4,13 +4,27 @@ import { useChannelAudiences } from '../api/useChannelAudiences';
 import { useNotificationHistory } from '../api/useNotificationHistory';
 import { parseHistorySearchParams } from '../history-search-params';
 import { mapNotificationToHistoryNotification } from '../notification-history-mapper';
-import { HistoryTab } from './HistoryTab';
+import { HistoryView } from './HistoryView';
 
 export const HistoryPage = () => {
-	const [searchParams] = useSearchParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const historyQuery = parseHistorySearchParams(searchParams);
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();
+
+	const limit = historyQuery.limit;
+	const offset = historyQuery.offset;
+	const currentPage = Math.max(1, Math.floor(offset / limit) + 1);
+
+	const handlePageChange = (page: number) => {
+		setSearchParams((currentSearchParams) => {
+			const nextSearchParams = new URLSearchParams(currentSearchParams);
+			nextSearchParams.set('offset', String((page - 1) * limit));
+			nextSearchParams.set('limit', String(limit));
+
+			return nextSearchParams;
+		});
+	};
 
 	const notifications =
 		notificationHistory.data?.notifications.flatMap((notification) => {
@@ -22,8 +36,9 @@ export const HistoryPage = () => {
 		}) ?? [];
 
 	return (
-		<HistoryTab
+		<HistoryView
 			notifications={notifications}
+			totalItems={notificationHistory.data?.total ?? 0}
 			isLoading={notificationHistory.isPending}
 			error={
 				notificationHistory.isError ? (
@@ -32,6 +47,9 @@ export const HistoryPage = () => {
 					</InlineMessage>
 				) : undefined
 			}
+			limit={limit}
+			handlePageChange={handlePageChange}
+			currentPage={currentPage}
 		/>
 	);
 };
