@@ -204,7 +204,10 @@ export const WithReplacementThumbnail: Story = {
 
 		await userEvent.click(updateButton);
 
-		await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		await expect(thumbnail).toHaveAttribute(
+			'src',
+			articleFixture.fields?.thumbnail,
+		);
 		await expect(canvas.getByText('Image updated')).toBeVisible();
 	},
 };

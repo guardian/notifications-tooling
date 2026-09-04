@@ -134,11 +134,8 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		await userEvent.type(replacementInput, replacementThumbnailUrl);
 		await userEvent.click(updateButton);
 
-		for (const thumbnail of [
-			articleThumbnail,
-			iPhoneThumbnail,
-			androidThumbnail,
-		]) {
+		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
+		for (const thumbnail of [iPhoneThumbnail, androidThumbnail]) {
 			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
 		}
 
