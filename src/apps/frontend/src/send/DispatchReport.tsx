@@ -18,6 +18,7 @@ import { notificationRoutes } from '../routes';
 import { EDITION_OPTIONS } from '../segment/EditionOptions';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
 import { useNewsletterSegmentOptions } from '../segment/use-audience-editions';
+import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
 import type { DeliveryOption } from '../types';
@@ -35,7 +36,6 @@ import {
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
 } from '../utils/notification-forms';
-import { alertTypeNameMap } from '../utils/option-values';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const styles = {
@@ -190,6 +190,7 @@ export const NewsletterDispatchDetails = () => {
 };
 
 export const AppAlertDispatchDetails = () => {
+	const topicTypes = useAppPushTopicTypes();
 	const alertType = useWatch<AppAlertFormValues, 'alertType'>({
 		name: 'alertType',
 		defaultValue: defaultAppAlertFormValues.alertType,
@@ -215,7 +216,8 @@ export const AppAlertDispatchDetails = () => {
 		<section>
 			<ParameterLabel label="Headline">
 				<Typography variant="bodySm">
-					{alertTypeNameMap[alertType]}: {headline}
+					{topicTypes.find(({ id }) => id === alertType)?.label ?? alertType}:{' '}
+					{headline}
 				</Typography>
 			</ParameterLabel>
 			<ParameterLabel label="Channel">

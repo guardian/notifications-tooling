@@ -12,8 +12,6 @@ import type { SendNotificationRequest } from './schemas';
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
 export type KickerId = 'breaking-news' | 'exclusive';
-export type AlertType =
-	'breaking-news' | 'sport' | 'editors-picks' | 'one-not-to-miss';
 export type DeliveryOption = 'immediate' | 'appImmediate';
 
 export type EmailNotification = {
@@ -28,7 +26,7 @@ export type EmailNotification = {
 
 export type PushNotification = {
 	type: 'push';
-	alertType?: AlertType;
+	alertType?: string;
 	headline?: string;
 	pushDeliveryOption?: DeliveryOption;
 	editions?: DisplayAppAlertTopicEditionId[];

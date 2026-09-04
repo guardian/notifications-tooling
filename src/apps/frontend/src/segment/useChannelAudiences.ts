@@ -1,4 +1,5 @@
 import {
+	type AppAlertTopicOption,
 	type ChannelAudienceResponse,
 	channelAudienceResponseSchema,
 } from '@models';
@@ -6,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
 import { redirectToLogin } from '../api-client/redirectToLogin';
+import { FALLBACK_TOPIC_TYPES } from './audience-fallbacks';
 
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
 
@@ -46,3 +48,14 @@ export const useChannelAudiences = () =>
 		// session, so refetching them on every mount is pure noise.
 		staleTime: Infinity,
 	});
+
+/**
+ * The curated app-push topic types from the backend.
+ *
+ * While the query is in flight or if it failed we fall back to
+ * {@link FALLBACK_TOPIC_TYPES}.
+ */
+export const useAppPushTopicTypes = (): AppAlertTopicOption[] => {
+	const { data: audiences } = useChannelAudiences();
+	return audiences?.channels['app-push'].topicTypes ?? FALLBACK_TOPIC_TYPES;
+};
