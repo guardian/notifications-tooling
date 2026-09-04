@@ -30,7 +30,19 @@ export const appAlertFormSchema = z.object({
 		.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT']))
 		.min(1, 'Please select an edition'),
 	includeThumbnail: z.boolean(),
-	articleThumbnailUrl: z.union([z.literal(''), z.string().url()]).optional(),
+	articleThumbnailUrl: z
+		.union([
+			z.literal(''),
+			z
+				.string()
+				.url()
+				.refine(
+					(url) =>
+						/^(https?:\/\/)(media\.guim\.co\.uk|i\.guim\.co\.uk)\//.test(url),
+					{ message: 'Please enter a valid Guardian image URL' },
+				),
+		])
+		.optional(),
 	deliveryOption: z.literal('appImmediate'),
 });
 

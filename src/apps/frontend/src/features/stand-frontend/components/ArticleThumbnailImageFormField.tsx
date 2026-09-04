@@ -67,7 +67,6 @@ export const ArticleThumbnailImageFormField = () => {
 										width: 'fit-content',
 										padding: 0,
 									})}
-									aria-label="add replacement image URL button"
 									aria-expanded={openReplaceSection}
 								>
 									<div
