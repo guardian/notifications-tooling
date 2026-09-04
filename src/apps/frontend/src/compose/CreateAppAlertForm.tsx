@@ -1,12 +1,9 @@
 import { type FormEvent, useContext } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
-import {
-	type AppAlertFormValues,
-	defaultAppAlertFormValues,
-} from '../utils/notification-forms';
+import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
 import { HeadlineFormField } from './HeadlineFormField';
