@@ -139,14 +139,42 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
 		}
 
-		await userEvent.clear(replacementInput);
-		await userEvent.click(updateButton);
+		await userEvent.click(thumbnailToggle);
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await userEvent.click(thumbnailToggle);
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+
+		const restoredIPhoneThumbnail = canvas.getByAltText('Article thumbnail');
+		const restoredAndroidThumbnail = canvas.getByAltText(
+			'Android article thumbnail',
+		);
+		for (const thumbnail of [
+			restoredIPhoneThumbnail,
+			restoredAndroidThumbnail,
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		}
+
+		await userEvent.click(
+			canvas.getByRole('button', {
+				name: 'add replacement image URL button',
+			}),
+		);
+		const retainedReplacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await expect(retainedReplacementInput).toHaveValue(replacementThumbnailUrl);
+
+		await userEvent.clear(retainedReplacementInput);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
 
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
 		for (const thumbnail of [
-			articleThumbnail,
-			iPhoneThumbnail,
-			androidThumbnail,
+			canvas.getByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
 		]) {
 			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
 		}
