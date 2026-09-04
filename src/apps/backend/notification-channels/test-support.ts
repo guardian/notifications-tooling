@@ -64,22 +64,32 @@ export const createDependencies = () => {
 			status: 201,
 		}),
 	);
+	const getCampaignDetails = mock(() =>
+		Promise.resolve({ data: undefined, status: 200 }),
+	);
+	const brazeClient = {
+		sendCampaign: sendBrazeCampaign,
+		registerTestEmailRecipients: registerBrazeTestEmailRecipients,
+		sendTestEmail: sendBrazeTestEmail,
+		getCampaignDetails,
+	};
+	const loadBrazeClient = mock(() => Promise.resolve(brazeClient));
 	const dependencies: DispatchNotificationDependencies = {
 		getSSMParameter,
+		loadBrazeClient,
 		renderEmail,
 		sendAppNotification,
-		sendBrazeCampaign,
-		registerBrazeTestEmailRecipients,
-		sendBrazeTestEmail,
 	};
 
 	return {
 		dependencies,
 		getSSMParameter,
+		loadBrazeClient,
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
 		registerBrazeTestEmailRecipients,
 		sendBrazeTestEmail,
+		getCampaignDetails,
 	};
 };

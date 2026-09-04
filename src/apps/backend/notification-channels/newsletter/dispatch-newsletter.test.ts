@@ -16,7 +16,7 @@ import {
 
 describe('dispatchNotification (newsletter channel)', () => {
 	it('renders each newsletter segment and sends it through Braze', async () => {
-		const { dependencies, renderEmail, sendBrazeCampaign } =
+		const { dependencies, loadBrazeClient, renderEmail, sendBrazeCampaign } =
 			createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -53,17 +53,14 @@ describe('dispatchNotification (newsletter channel)', () => {
 			previewText: newsletterItem.body,
 			timeoutMs: 10_000,
 		});
+		expect(loadBrazeClient).toHaveBeenCalledTimes(1);
 		expect(sendBrazeCampaign).toHaveBeenNthCalledWith(1, {
-			apiKey: 'test-api-key',
-			restEndpoint: 'https://rest.example.braze.eu',
 			campaignId: newsletterSegments.UK.brazeCampaignId,
 			html: '<html>Rendered newsletter</html>',
 			subject: 'Daily briefing',
 			timeoutMs: 10_000,
 		});
 		expect(sendBrazeCampaign).toHaveBeenNthCalledWith(2, {
-			apiKey: 'test-api-key',
-			restEndpoint: 'https://rest.example.braze.eu',
 			campaignId: newsletterSegments.US.brazeCampaignId,
 			html: '<html>Rendered newsletter</html>',
 			subject: 'Daily briefing',

@@ -3,8 +3,6 @@ import { z } from 'zod';
 export const MAX_BRAZE_TRIGGER_PROPERTIES_BYTES = 50_000;
 
 type SendBrazeCampaignRequest = {
-	apiKey: string;
-	restEndpoint: string;
 	campaignId: string;
 	html: string;
 	subject: string;
@@ -12,8 +10,6 @@ type SendBrazeCampaignRequest = {
 };
 
 type SendBrazeTestEmailRequest = {
-	apiKey: string;
-	restEndpoint: string;
 	appId: string;
 	from: string;
 	replyTo: string;
@@ -23,9 +19,14 @@ type SendBrazeTestEmailRequest = {
 	recipientEmails: string[];
 };
 
+type GetBrazeCampaignDetailsRequest = {
+	campaignId: string;
+	timeoutMs: number;
+};
+
 type RegisterBrazeTestEmailRecipientsRequest = Pick<
 	SendBrazeTestEmailRequest,
-	'apiKey' | 'restEndpoint' | 'timeoutMs' | 'recipientEmails'
+	'timeoutMs' | 'recipientEmails'
 >;
 
 export type BrazeCampaignTriggerResponse = {
@@ -38,8 +39,16 @@ export type BrazeCampaignTriggerResult = BrazeCampaignTriggerResponse & {
 	status: number;
 };
 
+type BrazeClientConfig = {
+	apiKey: string;
+	restEndpoint: string;
+};
+
 export type BrazeOperation =
-	'campaign trigger' | 'test user tracking' | 'test email send';
+	| 'campaign trigger'
+	| 'test user tracking'
+	| 'test email send'
+	| 'get campaign details';
 
 export type BrazeFailureReason =
 	| 'http_error'
@@ -86,6 +95,23 @@ const brazeUserTrackResponseSchema = z.object({
 	message: z.string(),
 	errors: z.array(z.unknown()).optional(),
 });
+
+// see https://www.braze.com/docs/api/endpoints/export/campaigns/get_campaign_details#request-parameters
+// this is not the full set of properties returned, just the ones likely to be relevant
+const brazeCampaignDetailsSchema = z.object({
+	name: z.string(),
+	created_at: z.string().optional(),
+	updated_at: z.string().optional(),
+	description: z.string().optional(),
+	archived: z.boolean(),
+	enabled: z.boolean(),
+	draft: z.boolean(),
+	schedule_type: z.string(),
+	channels: z.string().array().optional(),
+	first_sent: z.string().optional(),
+	last_sent: z.string().optional(),
+});
+export type BrazeCampaignDetails = z.infer<typeof brazeCampaignDetailsSchema>;
 
 const testEmailUserAliasLabel = 'dispatch-tool-test-email';
 
@@ -145,14 +171,10 @@ type BrazeCampaignTriggerRequest = {
 	};
 };
 
-export const sendBrazeCampaign = async ({
-	apiKey,
-	restEndpoint,
-	campaignId,
-	html,
-	subject,
-	timeoutMs,
-}: SendBrazeCampaignRequest): Promise<BrazeCampaignTriggerResult> => {
+export const sendBrazeCampaign = async (
+	{ apiKey, restEndpoint }: BrazeClientConfig,
+	{ campaignId, html, subject, timeoutMs }: SendBrazeCampaignRequest,
+): Promise<BrazeCampaignTriggerResult> => {
 	const triggerProperties = { body: html, subject };
 	const triggerPropertiesSize = Buffer.byteLength(
 		JSON.stringify(triggerProperties),
@@ -196,12 +218,10 @@ export const sendBrazeCampaign = async ({
 	return { ...result, status: response.status };
 };
 
-export const registerBrazeTestEmailRecipients = async ({
-	apiKey,
-	restEndpoint,
-	timeoutMs,
-	recipientEmails,
-}: RegisterBrazeTestEmailRecipientsRequest): Promise<void> => {
+export const registerBrazeTestEmailRecipients = async (
+	{ apiKey, restEndpoint }: BrazeClientConfig,
+	{ timeoutMs, recipientEmails }: RegisterBrazeTestEmailRecipientsRequest,
+): Promise<void> => {
 	const userTrackResponse = await requestBraze(
 		new URL('/users/track', restEndpoint).toString(),
 		{
@@ -232,17 +252,18 @@ export const registerBrazeTestEmailRecipients = async ({
 	}
 };
 
-export const sendBrazeTestEmail = async ({
-	apiKey,
-	restEndpoint,
-	appId,
-	from,
-	replyTo,
-	html,
-	subject,
-	timeoutMs,
-	recipientEmails,
-}: SendBrazeTestEmailRequest): Promise<BrazeCampaignTriggerResult> => {
+export const sendBrazeTestEmail = async (
+	{ apiKey, restEndpoint }: BrazeClientConfig,
+	{
+		appId,
+		from,
+		replyTo,
+		html,
+		subject,
+		timeoutMs,
+		recipientEmails,
+	}: SendBrazeTestEmailRequest,
+): Promise<BrazeCampaignTriggerResult> => {
 	const messageResponse = await requestBraze(
 		new URL('/messages/send', restEndpoint).toString(),
 		{
@@ -276,3 +297,61 @@ export const sendBrazeTestEmail = async ({
 	);
 	return { ...result, status: messageResponse.status };
 };
+
+export const getBrazeCampaignDetails = async (
+	{ apiKey, restEndpoint }: BrazeClientConfig,
+	{ campaignId, timeoutMs }: GetBrazeCampaignDetailsRequest,
+): Promise<{
+	data?: BrazeCampaignDetails;
+	errorMessage?: string;
+	status?: number;
+}> => {
+	try {
+		const detailsResponse = await requestBraze(
+			new URL(
+				`/campaigns/details?campaign_id=${campaignId}`,
+				restEndpoint,
+			).toString(),
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${apiKey}`,
+					'Content-Type': 'application/json',
+				},
+				signal: AbortSignal.timeout(timeoutMs),
+			},
+			'get campaign details',
+		);
+
+		const result = await parseBrazeResponse(
+			detailsResponse,
+			brazeCampaignDetailsSchema,
+			'get campaign details',
+		);
+
+		return { data: result, status: detailsResponse.status };
+	} catch (err) {
+		if (!(err instanceof BrazeApiError)) {
+			throw err;
+		}
+
+		return { data: undefined, status: err.status, errorMessage: err.message };
+	}
+};
+
+export const createBrazeClient = ({
+	apiKey,
+	restEndpoint,
+}: BrazeClientConfig) => ({
+	sendCampaign: (request: SendBrazeCampaignRequest) =>
+		sendBrazeCampaign({ apiKey, restEndpoint }, request),
+	registerTestEmailRecipients: (
+		request: RegisterBrazeTestEmailRecipientsRequest,
+	) => registerBrazeTestEmailRecipients({ apiKey, restEndpoint }, request),
+	sendTestEmail: (request: SendBrazeTestEmailRequest) =>
+		sendBrazeTestEmail({ apiKey, restEndpoint }, request),
+	getCampaignDetails: (request: GetBrazeCampaignDetailsRequest) =>
+		getBrazeCampaignDetails({ apiKey, restEndpoint }, request),
+});
+
+export type BrazeClient = ReturnType<typeof createBrazeClient>;

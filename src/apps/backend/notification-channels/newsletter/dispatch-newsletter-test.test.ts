@@ -8,6 +8,7 @@ describe('dispatchNewsletterTest', () => {
 	it('renders and sends test newsletters directly to normalized recipients', async () => {
 		const {
 			dependencies,
+			loadBrazeClient,
 			renderEmail,
 			sendBrazeCampaign,
 			registerBrazeTestEmailRecipients,
@@ -52,16 +53,13 @@ describe('dispatchNewsletterTest', () => {
 			previewText: newsletterItem.body,
 			timeoutMs: 10_000,
 		});
+		expect(loadBrazeClient).toHaveBeenCalledTimes(1);
 		expect(registerBrazeTestEmailRecipients).toHaveBeenCalledWith({
-			apiKey: 'test-api-key',
-			restEndpoint: 'https://rest.example.braze.eu',
 			recipientEmails: ['test.user@guardian.co.uk'],
 			timeoutMs: 10_000,
 		});
 		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(2);
 		expect(sendBrazeTestEmail).toHaveBeenCalledWith({
-			apiKey: 'test-api-key',
-			restEndpoint: 'https://rest.example.braze.eu',
 			appId: 'test-app-id',
 			from: 'dev testing <dev-testing@email.theguardian.com>',
 			replyTo: 'NO_REPLY_TO',
