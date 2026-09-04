@@ -1,8 +1,8 @@
+import type { NewsletterSegmentId } from '@models';
 import type z from 'zod';
 import type { Result } from '../../../api/client';
 import { safeFetchJsonAndParse } from '../../../api/client';
 import { notificationResourceSchema } from './schemas';
-import { NewsletterSegmentId } from '@models';
 
 // TO DO - the types and schemas partially replicate the ones defined in the backend
 // because the backend schema rely on the actual config values for the segment ID etc for validation

@@ -3,8 +3,8 @@ import {
 	type NewsletterSegmentId,
 	toDisplayEditionId,
 } from '@models';
-import { FALLBACK_NEWSLETTER_SEGMENTS } from './audience-fallbacks';
 import { useChannelAudiences } from './api/useChannelAudiences';
+import { FALLBACK_NEWSLETTER_SEGMENTS } from './audience-fallbacks';
 import { EDITION_OPTIONS } from './components/EditionOptions';
 import type { SegmentOption } from './components/SegmentPicker';
 
