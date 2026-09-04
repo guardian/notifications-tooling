@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import { articleFixture } from '../../../mocks/capi-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -97,6 +98,99 @@ export const ConfirmationStep: Story = {
 		await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 		await expect(
 			screen.queryByText('Are you sure you want to send the app alert?'),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+		const articleThumbnail = canvas.getByAltText(
+			'Thumbnail for A rhyme to recall rising temperatures',
+		);
+		const iPhoneThumbnail = canvas.getByAltText('Article thumbnail');
+		const androidThumbnail = canvas.getByAltText('Android article thumbnail');
+
+		await userEvent.click(
+			canvas.getByRole('button', {
+				name: 'Replace image',
+			}),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		const updateButton = canvas.getByRole('button', { name: 'Update' });
+
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await userEvent.click(updateButton);
+
+		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
+		for (const thumbnail of [iPhoneThumbnail, androidThumbnail]) {
+			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		}
+
+		await userEvent.click(thumbnailToggle);
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
+		await expect(
+			canvas.queryByAltText('Article thumbnail'),
+		).not.toBeInTheDocument();
+		await expect(
+			canvas.queryByAltText('Android article thumbnail'),
+		).not.toBeInTheDocument();
+		await userEvent.click(thumbnailToggle);
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		).toHaveAttribute('aria-expanded', 'true');
+
+		const restoredIPhoneThumbnail = canvas.getByAltText('Article thumbnail');
+		const restoredAndroidThumbnail = canvas.getByAltText(
+			'Android article thumbnail',
+		);
+		for (const thumbnail of [
+			restoredIPhoneThumbnail,
+			restoredAndroidThumbnail,
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		}
+
+		const retainedReplacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await expect(retainedReplacementInput).toHaveValue(replacementThumbnailUrl);
+
+		await userEvent.clear(retainedReplacementInput);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		for (const thumbnail of [
+			canvas.getByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
+		}
+
+		await userEvent.click(thumbnailToggle);
+		await userEvent.click(thumbnailToggle);
+		await expect(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		).toHaveAttribute('aria-expanded', 'false');
+		await expect(
+			canvas.queryByRole('textbox', { name: 'replacement image URL' }),
 		).not.toBeInTheDocument();
 	},
 };

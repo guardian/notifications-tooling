@@ -39,6 +39,12 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		name: 'includeThumbnail',
 		defaultValue: defaultAppAlertFormValues.includeThumbnail,
 	});
+	const articleThumbnailUrl =
+		useWatch<AppAlertFormValues, 'articleThumbnailUrl'>({
+			name: 'articleThumbnailUrl',
+			defaultValue: defaultAppAlertFormValues.articleThumbnailUrl,
+		}) ?? '';
+
 	const alertTypeLabel =
 		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
 	const selectedTopics = editions.map((edition) => ({
@@ -46,7 +52,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		name: toApiEditionId(edition),
 	}));
 	const thumbnailUrl = includeThumbnail
-		? notification.content?.fields?.thumbnail
+		? articleThumbnailUrl || notification.content?.fields?.thumbnail
 		: undefined;
 
 	return (

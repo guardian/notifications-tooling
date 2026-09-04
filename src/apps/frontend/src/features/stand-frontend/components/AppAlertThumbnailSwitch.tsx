@@ -14,29 +14,31 @@ export const AppAlertThumbnailSwitch = ({
 	isSelected,
 	isDisabled = false,
 	onChange,
-}: AppAlertThumbnailSwitchProps) => (
-	<div
-		css={css({
-			display: 'flex',
-			flexDirection: 'row',
-			gap: '8px',
-			alignItems: 'center',
-		})}
-	>
-		<ToggleButton
-			aria-label="Show article thumbnail image"
-			isDisabled={isDisabled}
-			isSelected={isSelected}
-			onChange={onChange}
-			css={ToggleSwitchTheme.baseStyle(isSelected)}
+}: AppAlertThumbnailSwitchProps) => {
+	return (
+		<div
+			css={css({
+				display: 'flex',
+				flexDirection: 'row',
+				gap: '8px',
+				alignItems: 'center',
+			})}
 		>
-			<Icon
-				symbol={isSelected ? 'check_circle' : 'circle'}
-				cssOverrides={ToggleSwitchTheme.thumb(isSelected)}
-			/>
-		</ToggleButton>
-		<Typography variant="labelFormInlineSm">
-			Show article thumbnail image
-		</Typography>
-	</div>
-);
+			<ToggleButton
+				aria-label="Show article thumbnail image"
+				isDisabled={isDisabled}
+				isSelected={isSelected}
+				onChange={onChange}
+				css={ToggleSwitchTheme.baseStyle(isSelected)}
+			>
+				<Icon
+					symbol={isSelected ? 'check_circle' : 'circle'}
+					cssOverrides={ToggleSwitchTheme.thumb(isSelected)}
+				/>
+			</ToggleButton>
+			<Typography variant="labelFormInlineSm">
+				Show article thumbnail image
+			</Typography>
+		</div>
+	);
+};
