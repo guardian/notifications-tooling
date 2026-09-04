@@ -222,14 +222,11 @@ export const articlePreviewCardTheme = {
 	}),
 	thumbnail: (isLiveblog: boolean) =>
 		css({
-			width: isLiveblog ? '250px' : '120px',
+			width: '124px',
 			aspectRatio: isLiveblog ? '5 / 4' : undefined,
 			borderRadius: semanticRadius.cornerXs,
 			objectFit: 'cover',
 			flexShrink: 0,
-			'@media (max-width: 600px)': isLiveblog
-				? { width: '100%', maxHeight: '320px' }
-				: undefined,
 		}),
 };
 
