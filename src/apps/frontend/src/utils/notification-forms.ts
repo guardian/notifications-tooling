@@ -20,12 +20,10 @@ export const newsletterFormSchema = z.object({
 
 export const appAlertFormSchema = z.object({
 	dispatchId: z.string().optional(),
-	alertType: z.enum([
-		'breaking-news',
-		'sport',
-		'editors-picks',
-		'one-not-to-miss',
-	]),
+	// The selectable alert types are the topic types the backend exposes via
+	// `GET /v1/channels/audiences`, so this cannot be a fixed enum. The select
+	// constrains the value to that list, and the broker rejects unknown ids.
+	alertType: z.string().min(1, 'Please select an alert type'),
 	headline: z.string().trim().min(1, 'Headline is required'),
 	editions: z
 		.array(displayAppAlertTopicEditionId)
