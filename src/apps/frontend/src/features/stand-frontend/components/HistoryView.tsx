@@ -356,7 +356,7 @@ export const HistoryView = ({
 												Sent to:{' '}
 											</span>
 											<span css={[styles.metadataValue, styles.regions]}>
-												{notification.sentTo.map((edition: Edition) => (
+												{notification.sentTo.map((edition) => (
 													<span
 														key={edition}
 														aria-label={editionNames[edition]}

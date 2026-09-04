@@ -9,8 +9,6 @@ import type {
 	NotificationSummary,
 } from './api/schemas';
 import type { HistoryNotification } from './components/HistoryView';
-import { editionIds } from './edition-values';
-import type { Edition } from './types';
 
 const contentItemSchema = z.object({
 	title: z.string(),

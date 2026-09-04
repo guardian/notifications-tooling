@@ -24,10 +24,6 @@ function filterInvalidMembers<T>(
 	};
 }
 
-// FIX ME: Do we need a separate enum for newsletter segments, or can this be the same
-// as app alert topics?
-// We happen not to be using 'EU' and 'INT' for newsletters, but that's just the current
-// config rather than a hard rule.
 export const newsletterSegmentId = z.enum(['UK', 'US', 'AU']);
 export type NewsletterSegmentId = z.infer<typeof newsletterSegmentId>;
 export interface NewsletterSegment {
@@ -43,13 +39,11 @@ export type NewsletterEditionOption = z.infer<
 	typeof newsletterEditionOptionSchema
 >;
 
-// FIX ME: we use the FrontendAppAlertTopicEditionId to reference the
-// editions in the frontend, but the data from the backend keys the topic editions
-// on the AppAlertTopicEditionId, so we need to convert the string in a number of
-// places.
-// The keys used in the audience data could be changed to align to FrontendAppAlertTopicEditionId
-// which would simplify a lot of the modeling and frontend code
-// see: src/packages/config/audiences.ts
+// App-push editions use two id formats today:
+// - API/backend ids: 'uk' | 'us' | 'au' | 'europe' | 'international'
+// - frontend display ids: 'UK' | 'US' | 'AU' | 'EU' | 'INT'
+// The frontend works with display ids, while the audience API exposes backend ids,
+// so mapping helpers are still needed in both directions.
 export const frontendAppAlertTopicEditionId = z.enum([
 	'UK',
 	'US',
