@@ -7,13 +7,16 @@ import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
 
 interface AppAlertReplaceImageSectionProps {
+	replacementImageUrl: string;
+	onReplacementImageUrlChange: (replacementImageUrl: string) => void;
 	onUpdate: (replacementImageUrl: string) => void;
 }
 
 export const AppAlertReplaceImageSection = ({
+	replacementImageUrl,
+	onReplacementImageUrlChange,
 	onUpdate,
 }: AppAlertReplaceImageSectionProps) => {
-	const [replacementImageUrl, setReplacementImageUrl] = useState('');
 	const [imageUpdated, setImageUpdated] = useState(false);
 
 	return (
@@ -40,7 +43,7 @@ export const AppAlertReplaceImageSection = ({
 					value={replacementImageUrl}
 					placeholder="Enter replacement image URL..."
 					onChange={(url) => {
-						setReplacementImageUrl(url);
+						onReplacementImageUrlChange(url);
 						setImageUpdated(false);
 					}}
 					id="replacement-image-URL"

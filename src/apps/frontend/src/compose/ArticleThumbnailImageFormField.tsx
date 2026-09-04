@@ -23,6 +23,7 @@ export const ArticleThumbnailImageFormField = () => {
 			defaultValue: '',
 		}) ?? '';
 	const hasThumbnail = Boolean(articleThumbnailUrl);
+	const [replacementImageUrl, setReplacementImageUrl] = useState('');
 	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	return (
 		<div
@@ -89,6 +90,8 @@ export const ArticleThumbnailImageFormField = () => {
 								</Button>
 								{openReplaceSection && (
 									<AppAlertReplaceImageSection
+										replacementImageUrl={replacementImageUrl}
+										onReplacementImageUrlChange={setReplacementImageUrl}
 										onUpdate={(replacementImageUrl) => {
 											const nextThumbnailUrl =
 												replacementImageUrl.trim() ||
