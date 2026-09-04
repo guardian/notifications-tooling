@@ -1,9 +1,6 @@
-import type { TopicTypeEditionOption } from '@models';
 import {
-	type AppAlertTopicOption,
 	type ChannelAudienceResponse,
 	channelAudienceResponseSchema,
-	type NewsletterEditionOption,
 } from '@models';
 import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../../../api/client';
@@ -11,28 +8,6 @@ import { ApiError } from '../../../api/errors';
 import { redirectToLogin } from '../../../api/redirectToLogin';
 
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
-
-export const FALLBACK_APP_ALERT_EDITIONS: TopicTypeEditionOption[] = [
-	{ id: 'uk', label: 'UK' },
-	{ id: 'us', label: 'US' },
-	{ id: 'au', label: 'AU' },
-	{ id: 'international', label: 'International' },
-	{ id: 'europe', label: 'Europe' },
-];
-
-export const FALLBACK_TOPIC_TYPES: AppAlertTopicOption[] = [
-	{
-		id: 'breaking-news',
-		label: 'Breaking news',
-		editions: FALLBACK_APP_ALERT_EDITIONS,
-	},
-];
-
-export const FALLBACK_NEWSLETTER_EDITIONS: NewsletterEditionOption[] = [
-	{ id: 'UK', label: 'United Kingdom' },
-	{ id: 'US', label: 'United States' },
-	{ id: 'AU', label: 'Australia' },
-];
 
 /**
  * Reads the per-channel constraints the backend derives from the same config it

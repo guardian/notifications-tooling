@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import {
-	FALLBACK_TOPIC_TYPES,
-	useChannelAudiences,
-} from '../api/useChannelAudiences';
+import { FALLBACK_TOPIC_TYPES } from '../audience-fallbacks';
+import { useChannelAudiences } from '../api/useChannelAudiences';
 import type { AppAlertFormValues } from '../notification-forms';
 import { AppPreviewSection } from './AppPreviewSection';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
