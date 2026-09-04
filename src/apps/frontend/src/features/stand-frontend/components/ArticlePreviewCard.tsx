@@ -8,13 +8,11 @@ import { useRelativeTime } from '../use-relative-time';
 interface ArticlePreviewCardProps {
 	content: ResolvedArticle;
 	showThumbnail?: boolean;
-	articleThumbnailUrl?: string;
 }
 
 export const ArticlePreviewCard = ({
 	content,
 	showThumbnail = true,
-	articleThumbnailUrl,
 }: ArticlePreviewCardProps) => {
 	const {
 		sectionName,
@@ -26,7 +24,7 @@ export const ArticlePreviewCard = ({
 		webUrl,
 	} = content;
 	const headline = fields?.headline ?? webTitle;
-	const thumbnail = articleThumbnailUrl ?? fields?.thumbnail;
+	const thumbnail = fields?.thumbnail;
 	const pillarColor = getPillarColor(pillarId);
 	const publishedAt = useRelativeTime(webPublicationDate);
 
