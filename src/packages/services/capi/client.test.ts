@@ -64,6 +64,10 @@ describe('fetchArticle', () => {
 					elements: [
 						{ type: 'text', textTypeData: { html: '<p>Update</p>' } },
 						{ type: 'image', imageTypeData: { alt: 'Update image' } },
+						{
+							type: 'image',
+							assets: [{ typeData: { width: 500 } }],
+						},
 					],
 				},
 			},
