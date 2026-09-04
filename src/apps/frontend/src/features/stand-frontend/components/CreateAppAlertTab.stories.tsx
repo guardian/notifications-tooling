@@ -141,6 +141,13 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 
 		await userEvent.click(thumbnailToggle);
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
+		await expect(
+			canvas.queryByAltText('Article thumbnail'),
+		).not.toBeInTheDocument();
+		await expect(
+			canvas.queryByAltText('Android article thumbnail'),
+		).not.toBeInTheDocument();
 		await userEvent.click(thumbnailToggle);
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
 

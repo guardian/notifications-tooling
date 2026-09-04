@@ -226,10 +226,10 @@ export const WithThumbnailTurnedOff: Story = {
 		await expect(thumbnailToggle).toBeEnabled();
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
 		await expect(
-			canvas.queryByAltText(
+			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
-		).not.toBeInTheDocument();
+		).toBeVisible();
 
 		await userEvent.click(thumbnailToggle);
 
