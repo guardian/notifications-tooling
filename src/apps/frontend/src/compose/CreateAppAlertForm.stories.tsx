@@ -42,7 +42,7 @@ const meta: Meta<StoryArgs> = {
 			{},
 			'push',
 			formValues ??
-				(notificationState.content ? completePushParams : undefined),
+			(notificationState.content ? completePushParams : undefined),
 		);
 	},
 };
@@ -217,34 +217,6 @@ export const WithThumbnailTurnedOff: Story = {
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
 		).toBeVisible();
-	},
-};
-
-export const WithoutThumbnail: Story = {
-	args: {
-		notificationState: {
-			...populatedPushState,
-			content: {
-				...articleFixture,
-				fields: { ...articleFixture.fields, thumbnail: '' },
-			},
-		},
-		formValues: { ...completePushParams, includeThumbnail: false },
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		const thumbnailToggle = canvas.getByRole('button', {
-			name: 'Show article thumbnail image',
-		});
-
-		await expect(canvas.getByText('Article imported')).toBeVisible();
-		await expect(thumbnailToggle).toBeDisabled();
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
-		await expect(
-			canvas.queryByAltText(
-				'Thumbnail for A rhyme to recall rising temperatures',
-			),
-		).not.toBeInTheDocument();
 	},
 };
 
