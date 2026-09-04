@@ -58,6 +58,7 @@ app.use('/v1/preview', previewRouter);
 app.use('/docs/api', docsRouter);
 
 const serverRoutePrefixes = ['/health', '/v1', '/docs/api'];
+const frontendAssetPathPattern = /\.(?:css|js|map)$/i;
 
 /**
  * Browser-history routes are resolved by React Router, but a direct request
@@ -69,7 +70,7 @@ const spaFallback: express.RequestHandler = (req, res, next) => {
 		(prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`),
 	);
 
-	if (isServerRoute) {
+	if (isServerRoute || frontendAssetPathPattern.test(req.path)) {
 		return next('route');
 	}
 
