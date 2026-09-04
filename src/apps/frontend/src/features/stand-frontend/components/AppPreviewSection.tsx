@@ -2,10 +2,9 @@ import { css } from '@emotion/react';
 import { semanticColors } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Typography } from '@guardian/stand/Typography';
+import { type AppAlertTopicOption, toApiEditionId } from '@models';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
-import type { TopicTypeOption } from '../api/schemas';
-import { editionIds } from '../edition-values';
 import {
 	type AppAlertFormValues,
 	defaultAppAlertFormValues,
@@ -19,7 +18,7 @@ import { PreviewSection } from './PreviewSection';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 interface AppPreviewSectionProps {
-	topicTypes: TopicTypeOption[];
+	topicTypes: AppAlertTopicOption[];
 }
 
 export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
@@ -44,7 +43,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		topicTypes.find(({ id }) => id === alertType)?.label ?? alertType;
 	const selectedTopics = editions.map((edition) => ({
 		type: alertType,
-		name: editionIds[edition],
+		name: toApiEditionId(edition),
 	}));
 	const thumbnailUrl = includeThumbnail
 		? notification.content?.fields?.thumbnail

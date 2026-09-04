@@ -1,20 +1,29 @@
-import type { AudienceSegment, Edition } from '../types';
+import type {
+	DisplayAppAlertTopicEditionId,
+	NewsletterSegmentId,
+} from '@models';
 import { FlagAtom } from './FlagAtom';
 import { PreviewPillList } from './PreviewPillList';
 
-interface FlagPreviewPillOption<Code extends AudienceSegment | Edition> {
+interface FlagPreviewPillOption<
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
+> {
 	code: Code;
 	label: string;
 }
 
-interface FlagPreviewPillProps<Code extends AudienceSegment | Edition> {
+interface FlagPreviewPillProps<
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
+> {
 	title: string;
 	options: Array<FlagPreviewPillOption<Code>>;
 	selected: Code[];
 	isConfirmation?: boolean;
 }
 
-export const FlagPreviewPill = <Code extends AudienceSegment | Edition>({
+export const FlagPreviewPill = <
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
+>({
 	title,
 	options,
 	selected,

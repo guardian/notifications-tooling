@@ -2,9 +2,9 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import type { AppAlertTopicOption } from '@models';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import type { TopicTypeOption } from '../api/schemas';
 import { AppPreviewSection } from './AppPreviewSection';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
@@ -56,7 +56,7 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 export const AppPreviewToggle = ({
 	topicTypes,
 }: {
-	topicTypes: TopicTypeOption[];
+	topicTypes: AppAlertTopicOption[];
 }) => (
 	<PreviewToggle>
 		<AppPreviewSection topicTypes={topicTypes} />

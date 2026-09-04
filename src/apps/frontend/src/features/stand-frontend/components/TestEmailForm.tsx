@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import type { ResolvedArticle } from '@models';
+import type { NewsletterSegmentId, ResolvedArticle } from '@models';
 import { useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { ApiError } from '../../../api/errors';
@@ -17,12 +17,11 @@ import { validateGuardianEmail } from '../form-validation';
 import { composeNewsletterSubject } from '../newsletter-subject';
 import type { NewsletterFormValues } from '../notification-forms';
 import { NotificationFormContext } from '../NotificationContext';
-import type { AudienceSegment } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 
 type TestSendParams = {
 	emailInput: string;
-	audienceSegments: AudienceSegment[];
+	audienceSegments: NewsletterSegmentId[];
 	emailSubjectLine: string;
 	subject: string;
 	preview: string;

@@ -1,4 +1,7 @@
-import type { AudienceSegment, Edition } from '../types';
+import type {
+	DisplayAppAlertTopicEditionId,
+	NewsletterSegmentId,
+} from '@models/api-contract/audience';
 import {
 	auFlag,
 	euFlag,
@@ -10,7 +13,7 @@ import {
 export const FlagAtom = ({
 	segmentCode,
 }: {
-	segmentCode: AudienceSegment | Edition;
+	segmentCode: NewsletterSegmentId | DisplayAppAlertTopicEditionId;
 }) => {
 	switch (segmentCode) {
 		case 'UK':

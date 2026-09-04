@@ -8,6 +8,7 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
+import type { NewsletterSegmentId } from '@models';
 import { UserPermissions } from '@models';
 import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
@@ -163,7 +164,8 @@ describe('GET /v1/channels/audiences', () => {
 		const body = (await response.json()) as typeof channelAudiences;
 
 		expect(
-			body.channels[NotificationChannel.AppPushNotification].topicTypes,
+			body.channels[NotificationChannel.AppPushNotification]
+				.topicTypes as unknown,
 		).toEqual(
 			Object.entries(appPushTopicTypes).map(([id, { label, editions }]) => ({
 				id,
@@ -182,7 +184,7 @@ describe('GET /v1/channels/audiences', () => {
 
 		expect(body.channels[NotificationChannel.Newsletter].segments).toEqual(
 			Object.entries(newsletterSegments).map(([id, { label }]) => ({
-				id,
+				id: id as NewsletterSegmentId,
 				label,
 			})),
 		);

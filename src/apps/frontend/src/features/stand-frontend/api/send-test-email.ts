@@ -1,3 +1,4 @@
+import type { NewsletterSegmentId } from '@models';
 import type z from 'zod';
 import type { Result } from '../../../api/client';
 import { safeFetchJsonAndParse } from '../../../api/client';
@@ -15,7 +16,7 @@ export type TestEmailSendRequest = {
 				type: 'email';
 				items: string[];
 			};
-			variants: Array<'UK' | 'US' | 'AU'>;
+			variants: NewsletterSegmentId[];
 			compose: {
 				items: string[];
 				subject: string;

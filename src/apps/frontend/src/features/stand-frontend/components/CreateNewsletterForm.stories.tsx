@@ -17,7 +17,7 @@ import {
 } from '../../../stories/story-helpers';
 import { defaultState } from '../notification-reducer';
 import type { NotificationState } from '../types';
-import { CreateNotificationForm } from './CreateNotificationForm';
+import { CreateNewsletterForm } from './CreateNewsletterForm';
 
 type StoryArgs = {
 	notificationState: NotificationState;
@@ -26,8 +26,8 @@ type StoryArgs = {
 type Story = StoryObj<StoryArgs>;
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/CreateNotificationForm',
-	component: CreateNotificationForm,
+	title: 'Stand Frontend/CreateNewsletterForm',
+	component: CreateNewsletterForm,
 	parameters: {
 		layout: 'fullscreen',
 		docs: {
@@ -44,7 +44,7 @@ const meta: Meta<StoryArgs> = {
 	render: (args) => {
 		const { activeSectionHref, notificationState } = args;
 		return WithNotificationContext(
-			<CreateNotificationForm activeSectionHref={activeSectionHref} />,
+			<CreateNewsletterForm activeSectionHref={activeSectionHref} />,
 			notificationState,
 			{},
 			'email',
@@ -250,7 +250,7 @@ const buildErrorStory = (error: ApiError): Story => ({
 	render: (args) => {
 		const { activeSectionHref, notificationState } = args;
 		return WithNotificationContext(
-			<CreateNotificationForm activeSectionHref={activeSectionHref} />,
+			<CreateNewsletterForm activeSectionHref={activeSectionHref} />,
 			notificationState,
 			{
 				sendNotification: mockSendRejectedNotification(error),

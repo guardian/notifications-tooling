@@ -1,11 +1,15 @@
+import {
+	appAlertTopicEditionId,
+	displayAppAlertTopicEditionId,
+	type DisplayAppAlertTopicEditionId,
+	toDisplayEditionId,
+} from '@models';
 import { z } from 'zod';
 import type {
 	ChannelAudienceResponse,
 	NotificationSummary,
 } from './api/schemas';
 import type { HistoryNotification } from './components/HistoryView';
-import { editionIds } from './edition-values';
-import type { Edition } from './types';
 
 const contentItemSchema = z.object({
 	title: z.string(),
@@ -28,14 +32,14 @@ const notificationPayloadSchema = z.object({
 				audience: z.discriminatedUnion('type', [
 					z.object({
 						type: z.literal('segment'),
-						items: z.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT'])),
+						items: z.array(displayAppAlertTopicEditionId),
 					}),
 					z.object({
 						type: z.literal('email'),
 						items: z.array(z.string()),
 					}),
 				]),
-				variants: z.array(z.enum(['UK', 'US', 'AU', 'EU', 'INT'])).optional(),
+				variants: z.array(displayAppAlertTopicEditionId).optional(),
 				compose: z.object({
 					items: z.array(z.string()),
 					subject: z.string(),
@@ -53,16 +57,17 @@ const notificationPayloadSchema = z.object({
 	}),
 });
 
-const editionsById = Object.fromEntries(
-	Object.entries(editionIds).map(([edition, id]) => [id, edition]),
-) as Record<string, Edition>;
-
-const toEdition = (id: string): Edition | undefined => {
+const toEdition = (id: string): DisplayAppAlertTopicEditionId | undefined => {
 	const upperCaseId = id.toUpperCase();
-	if (['UK', 'US', 'AU', 'EU', 'INT'].includes(upperCaseId)) {
-		return upperCaseId as Edition;
+	const parsedDisplayEditionId =
+		displayAppAlertTopicEditionId.safeParse(upperCaseId);
+	if (parsedDisplayEditionId.success) {
+		return parsedDisplayEditionId.data;
 	}
-	return editionsById[id];
+	const parsedEditionId = appAlertTopicEditionId.safeParse(id);
+	return parsedEditionId.success
+		? toDisplayEditionId(parsedEditionId.data)
+		: undefined;
 };
 
 const statusDisplay: Record<
@@ -110,7 +115,10 @@ export const mapNotificationToHistoryNotification = (
 			: (newsletter.variants ?? [])
 		: appPushAudience
 				.map(({ name }) => toEdition(name))
-				.filter((edition): edition is Edition => edition !== undefined);
+				.filter(
+					(edition): edition is DisplayAppAlertTopicEditionId =>
+						edition !== undefined,
+				);
 	const topicTypeId = appPushAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(

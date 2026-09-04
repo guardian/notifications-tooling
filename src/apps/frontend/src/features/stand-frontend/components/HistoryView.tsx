@@ -18,10 +18,10 @@ import {
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
 import { from, until } from '@guardian/stand/utils';
+import type { DisplayAppAlertTopicEditionId } from '@models';
 import type { ReactNode } from 'react';
 import { formatHistorySendTime } from '../history-send-time';
 import { layoutMainTheme } from '../themes';
-import type { Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
 import { phoneIphoneIcon } from './FlagIcons';
 import { HistoryPagination } from './HistoryPagination';
@@ -36,7 +36,7 @@ export interface HistoryNotification {
 	channel: 'email' | 'push';
 	alertType: string;
 	sentBy: string;
-	sentTo: Edition[];
+	sentTo: DisplayAppAlertTopicEditionId[];
 	sentAt: string;
 	status: HistoryStatus;
 }
@@ -215,7 +215,7 @@ const styles = {
 const getChannelName = (channel: HistoryNotification['channel']) =>
 	channel === 'push' ? 'App alert' : 'Newsletter email';
 
-const editionNames: Record<Edition, string> = {
+const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
 	UK: 'United Kingdom',
 	US: 'United States',
 	AU: 'Australia',
@@ -356,7 +356,7 @@ export const HistoryView = ({
 												Sent to:{' '}
 											</span>
 											<span css={[styles.metadataValue, styles.regions]}>
-												{notification.sentTo.map((edition: Edition) => (
+												{notification.sentTo.map((edition) => (
 													<span
 														key={edition}
 														aria-label={editionNames[edition]}

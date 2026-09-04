@@ -1,6 +1,8 @@
 import type {
+	DisplayAppAlertTopicEditionId,
 	EmailPreviewRequest,
 	EmailPreviewResponse,
+	NewsletterSegmentId,
 	ResolvedArticle,
 } from '@models';
 import type { Result } from '../../api/client';
@@ -13,8 +15,6 @@ export type KickerId = 'breaking-news' | 'exclusive';
 export type AlertType =
 	'breaking-news' | 'sport' | 'editors-picks' | 'one-not-to-miss';
 export type DeliveryOption = 'immediate' | 'appImmediate';
-export type AudienceSegment = 'UK' | 'US' | 'AU';
-export type Edition = 'UK' | 'US' | 'AU' | 'EU' | 'INT';
 
 export type EmailNotification = {
 	type: 'email';
@@ -22,7 +22,7 @@ export type EmailNotification = {
 	subject?: string;
 	preview?: string;
 	emailHtml?: string;
-	audienceSegments?: AudienceSegment[];
+	audienceSegments?: NewsletterSegmentId[];
 	emailDeliveryOption?: DeliveryOption;
 };
 
@@ -31,7 +31,7 @@ export type PushNotification = {
 	alertType?: AlertType;
 	headline?: string;
 	pushDeliveryOption?: DeliveryOption;
-	editions?: Edition[];
+	editions?: DisplayAppAlertTopicEditionId[];
 };
 export type NotificationState = {
 	isFetchingContent: boolean;

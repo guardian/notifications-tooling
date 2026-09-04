@@ -5,21 +5,28 @@ import {
 	semanticSizing,
 	semanticSpacing,
 } from '@guardian/stand';
-import { Checkbox } from '@guardian/stand/Checkbox';
 import type { CheckboxTheme } from '@guardian/stand/Checkbox';
+import { Checkbox } from '@guardian/stand/Checkbox';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
+import type {
+	DisplayAppAlertTopicEditionId,
+	NewsletterSegmentId,
+} from '@models';
 import { audienceSegmentStyles, previewPillStyles } from '../themes';
-import type { AudienceSegment, Edition } from '../types';
 import { FlagAtom } from './FlagAtom';
 
-export interface SegmentOption<Code extends AudienceSegment | Edition> {
+export interface SegmentOption<
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
+> {
 	code: Code;
 	label: string;
 }
 
-interface SegmentPickerProps<Code extends AudienceSegment | Edition> {
+interface SegmentPickerProps<
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
+> {
 	title?: string;
 	description?: string;
 	options: Array<SegmentOption<Code>>;
@@ -45,7 +52,9 @@ const customTheme: CheckboxTheme = {
 	},
 };
 
-export const SegmentPicker = <Code extends AudienceSegment | Edition>({
+export const SegmentPicker = <
+	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
+>({
 	title,
 	description,
 	options,

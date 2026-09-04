@@ -12,13 +12,13 @@ import { NotificationFormWrapper } from './NotificationFormWrapper';
 import { PreviewTextFormField } from './PreviewTextFormField';
 import { SubjectFormField } from './SubjectFormField';
 
-interface CreateNotificationFormProps {
+interface CreateNewsletterFormProps {
 	activeSectionHref: string;
 }
 
-export const CreateNotificationForm = ({
+export const CreateNewsletterForm = ({
 	activeSectionHref,
-}: CreateNotificationFormProps) => {
+}: CreateNewsletterFormProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);

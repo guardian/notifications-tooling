@@ -19,20 +19,20 @@ import {
 	getChannelDescription,
 } from '../../../util/display-text-helpers';
 import { composeNewsletterSubject } from '../newsletter-subject';
-import {
-	defaultAppAlertFormValues,
-	defaultNewsletterFormValues,
-} from '../notification-forms';
 import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
+} from '../notification-forms';
+import {
+	defaultAppAlertFormValues,
+	defaultNewsletterFormValues,
 } from '../notification-forms';
 import { alertTypeNameMap } from '../option-values';
 import { notificationRoutes } from '../routes';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
 import type { DeliveryOption } from '../types';
-import { SEGMENT_OPTIONS } from './AudienceSegmentOptions';
+import { useNewsletterSegmentOptions } from '../use-audience-editions';
 import { EDITION_OPTIONS } from './EditionOptions';
 import { scheduleIcon } from './FlagIcons';
 import { FlagPreviewPill } from './FlagPreviewPill';
@@ -164,6 +164,7 @@ export const NewsletterDispatchDetails = () => {
 		name: 'deliveryOption',
 		defaultValue: defaultNewsletterFormValues.deliveryOption,
 	});
+	const options = useNewsletterSegmentOptions();
 
 	return (
 		<section>
@@ -178,7 +179,7 @@ export const NewsletterDispatchDetails = () => {
 			<ParameterLabel label="Audience segments">
 				<FlagPreviewPill
 					title="Audience segments"
-					options={SEGMENT_OPTIONS}
+					options={options}
 					selected={audienceSegments}
 					isConfirmation={true}
 				/>
