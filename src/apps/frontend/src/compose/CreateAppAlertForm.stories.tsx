@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { articleFixture } from '../testing/capi-fixtures';
+import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -243,6 +243,40 @@ export const RejectsNonGuardianReplacementThumbnail: Story = {
 			canvas.getByText('Please enter a valid Guardian image URL'),
 		).toBeVisible();
 		await expect(canvas.queryByText('Image updated')).not.toBeInTheDocument();
+	},
+};
+
+export const WithLiveblogMainBlockThumbnail: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			fetchedArticleId: liveblogFixture.id,
+			content: {
+				...liveblogFixture,
+				fields: {
+					headline: liveblogFixture.fields?.headline ?? 'Latest developments',
+					lastModified: liveblogFixture.fields?.lastModified ?? '',
+				},
+			},
+		},
+		formValues: {
+			...completePushParams,
+			headline: liveblogFixture.fields?.headline ?? 'Latest developments',
+			articleThumbnailUrl: '',
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+
+		await expect(thumbnailToggle).toBeEnabled();
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(canvas.getByAltText('Latest liveblog update')).toHaveAttribute(
+			'src',
+			'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+		);
 	},
 };
 

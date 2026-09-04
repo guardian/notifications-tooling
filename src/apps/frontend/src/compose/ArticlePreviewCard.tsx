@@ -3,25 +3,13 @@ import { Typography } from '@guardian/stand/Typography';
 import type { ResolvedArticle } from '@models';
 import { useRelativeTime } from '../hooks/use-relative-time';
 import { articlePreviewCardTheme } from '../themes';
+import { getArticleThumbnail } from '../utils/article-thumbnail';
 import { getPillarColor } from '../utils/pillar-colors';
 
 interface ArticlePreviewCardProps {
 	content: ResolvedArticle;
 	showThumbnail?: boolean;
 }
-
-const getMainBlockImage = (
-	mainBlock: NonNullable<ResolvedArticle['blocks']>['main'],
-) => {
-	const image = mainBlock?.elements?.find(({ type }) => type === 'image');
-	const thumbnail = image?.assets.find(
-		({ typeData }) => typeData?.width === 500,
-	);
-	return {
-		alt: image?.imageTypeData?.alt,
-		src: thumbnail?.file ?? image?.assets[0]?.file,
-	};
-};
 
 export const ArticlePreviewCard = ({
 	content,
@@ -41,8 +29,7 @@ export const ArticlePreviewCard = ({
 	const liveblogMainBlock = type === 'liveblog' ? blocks?.main : undefined;
 	const isLiveblog = !!liveblogMainBlock?.id;
 	const headline = fields?.headline ?? webTitle;
-	const mainBlockImage = getMainBlockImage(liveblogMainBlock);
-	const thumbnail = mainBlockImage.src ?? fields?.thumbnail;
+	const thumbnail = getArticleThumbnail(content);
 	const pillarColor = getPillarColor(pillarId);
 	const publishedAt = useRelativeTime(
 		isLiveblog ? fields?.lastModified : webPublicationDate,
@@ -75,7 +62,10 @@ export const ArticlePreviewCard = ({
 							element="span"
 							cssOverrides={articlePreviewCardTheme.liveIndicator}
 						>
-							<span css={articlePreviewCardTheme.liveIndicatorDot} />
+							<span
+								css={articlePreviewCardTheme.liveIndicatorDot}
+								aria-hidden="true"
+							/>
 							Live
 						</Typography>
 						{publishedAt && (
@@ -142,10 +132,10 @@ export const ArticlePreviewCard = ({
 				</Link>
 			</div>
 
-			{thumbnail && showThumbnail && (
+			{thumbnail.src && showThumbnail && (
 				<img
-					src={thumbnail}
-					alt={mainBlockImage.alt ?? `Thumbnail for ${headline}`}
+					src={thumbnail.src}
+					alt={thumbnail.alt ?? `Thumbnail for ${headline}`}
 					css={articlePreviewCardTheme.thumbnail(isLiveblog)}
 				/>
 			)}

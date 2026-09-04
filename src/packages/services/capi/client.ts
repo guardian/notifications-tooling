@@ -23,7 +23,7 @@ export const fetchArticle = async ({
 	const url = new URL(`/${encodedId}`, endpoint);
 	url.searchParams.set('api-key', apiKey);
 	url.searchParams.set('show-fields', 'all');
-	url.searchParams.set('show-blocks', 'all');
+	url.searchParams.set('show-blocks', 'main');
 
 	let response: Response;
 	try {

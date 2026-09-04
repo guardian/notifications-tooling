@@ -4,6 +4,7 @@ import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
 import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
+import { getArticleThumbnail } from '../utils/article-thumbnail';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
@@ -65,8 +66,9 @@ export const CreateAppAlertForm = ({
 			}
 			onArticleImported={(article) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);
-				setValue('includeThumbnail', Boolean(article.fields?.thumbnail));
-				setValue('articleThumbnailUrl', article.fields?.thumbnail ?? '');
+				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
+				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
+				setValue('articleThumbnailUrl', articleThumbnailUrl);
 			}}
 		>
 			<NotificationFormSection
