@@ -26,10 +26,6 @@ export const CreateAppAlertForm = ({
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
-		name: 'includeThumbnail',
-		defaultValue: defaultAppAlertFormValues.includeThumbnail,
-	});
 
 	const { data: constraints } = useChannelConstraints();
 	const prepareSend = (values: AppAlertFormValues) => {
@@ -69,7 +65,6 @@ export const CreateAppAlertForm = ({
 				setValue('headline', article.fields?.headline ?? article.webTitle);
 				setValue('includeThumbnail', Boolean(article.fields?.thumbnail));
 			}}
-			showArticleThumbnail={includeThumbnail}
 		>
 			<NotificationFormSection
 				id="alert-section"
