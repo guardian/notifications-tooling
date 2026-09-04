@@ -145,21 +145,53 @@ export const activePillTheme = {
 };
 
 export const articlePreviewCardTheme = {
-	card: css({
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'flex-start',
-		justifyContent: 'space-between',
-		gap: semanticSpacing.stackMd,
-		padding: semanticSpacing.stackSm,
-		borderRadius: semanticRadius.cornerSm,
-		backgroundColor: baseColors.neutral[850],
-		maxWidth: '500px',
-	}),
+	card: (isLiveblog: boolean) =>
+		css({
+			display: 'flex',
+			flexDirection: 'row',
+			alignItems: 'flex-start',
+			justifyContent: 'space-between',
+			gap: semanticSpacing.stackMd,
+			padding: semanticSpacing.stackSm,
+			borderRadius: semanticRadius.cornerSm,
+			backgroundColor: baseColors.neutral[850],
+			maxWidth: isLiveblog ? '900px' : '500px',
+			'@media (max-width: 600px)': isLiveblog
+				? { flexDirection: 'column', alignItems: 'stretch' }
+				: undefined,
+		}),
 	details: css({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: semanticSpacing.stackXxs,
+		minWidth: 0,
+		flex: 1,
+	}),
+	liveStatus: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+	}),
+	liveIndicator: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
+		padding: `${baseSpacing['2Px']} ${baseSpacing['6Px']}`,
+		color: semanticColors.text.strongerInverse,
+		backgroundColor: semanticColors.text.error,
+		textTransform: 'uppercase',
+	}),
+	liveIndicatorDot: css({
+		width: '8px',
+		height: '8px',
+		borderRadius: '50%',
+		backgroundColor: semanticColors.text.strongerInverse,
+	}),
+	liveblogBlockId: css({
+		fontSize: '12px',
+		fontWeight: 700,
+		color: semanticColors.text.success,
+		margin: 0,
 	}),
 	sectionLabel: (color: string) =>
 		css({
@@ -175,6 +207,10 @@ export const articlePreviewCardTheme = {
 		color: semanticColors.text.weak,
 		margin: 0,
 	}),
+	updated: css({
+		fontSize: '12px',
+		color: semanticColors.text.strong,
+	}),
 	publishedRelative: css({
 		fontWeight: 700,
 		color: semanticColors.text.strong,
@@ -184,12 +220,14 @@ export const articlePreviewCardTheme = {
 		color: semanticColors.text.link,
 		overflowWrap: 'anywhere',
 	}),
-	thumbnail: css({
-		width: '120px',
-		borderRadius: semanticRadius.cornerXs,
-		objectFit: 'cover',
-		flexShrink: 0,
-	}),
+	thumbnail: (isLiveblog: boolean) =>
+		css({
+			width: '124px',
+			aspectRatio: isLiveblog ? '5 / 4' : undefined,
+			borderRadius: semanticRadius.cornerXs,
+			objectFit: 'cover',
+			flexShrink: 0,
+		}),
 };
 
 export const audienceSegmentStyles = {

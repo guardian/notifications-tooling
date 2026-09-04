@@ -9,6 +9,7 @@ import { NotificationFormContext } from '../compose/NotificationContext';
 import { Editions } from '../segment/Editions';
 import { SendInfoPreviewPill } from '../send/SendInfoPreviewPill';
 import { alertBannerCss, customAlertBannerTheme } from '../themes';
+import { getArticleThumbnail } from '../utils/article-thumbnail';
 import {
 	type AppAlertFormValues,
 	defaultAppAlertFormValues,
@@ -46,7 +47,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		name: toApiEditionId(edition),
 	}));
 	const thumbnailUrl = includeThumbnail
-		? notification.content?.fields?.thumbnail
+		? getArticleThumbnail(notification.content).src
 		: undefined;
 
 	return (

@@ -50,6 +50,34 @@ export class CapiError extends Error {
  *
  * see https://open-platform.theguardian.com/documentation/item for the model
  */
+const capiBlockSchema = z.looseObject({
+	id: z.string().optional(),
+	elements: z
+		.array(
+			z.looseObject({
+				type: z.string(),
+				assets: z
+					.array(
+						z.looseObject({
+							file: z.string().optional(),
+							typeData: z
+								.looseObject({
+									width: z.number().optional(),
+								})
+								.optional(),
+						}),
+					)
+					.optional(),
+				imageTypeData: z
+					.looseObject({
+						alt: z.string().optional(),
+					})
+					.optional(),
+			}),
+		)
+		.optional(),
+});
+
 const capiContentSchema = z.looseObject({
 	id: z.string(),
 	type: z.string(),
@@ -60,6 +88,11 @@ const capiContentSchema = z.looseObject({
 	webUrl: z.string(),
 	webPublicationDate: z.string().optional(),
 	fields: z.record(z.string(), z.string()).optional(),
+	blocks: z
+		.looseObject({
+			main: capiBlockSchema.optional(),
+		})
+		.optional(),
 });
 
 /** The full CAPI content item for the resolved article. */

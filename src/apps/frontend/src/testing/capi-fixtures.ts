@@ -26,3 +26,35 @@ export const articleFixture: ResolvedArticle = {
 	tags: [],
 	references: [],
 };
+
+export const liveblogFixture: ResolvedArticle = {
+	...articleFixture,
+	id: 'world/live/2026/sep/04/latest-developments',
+	type: 'liveblog',
+	webTitle: 'Latest developments',
+	webUrl:
+		'https://www.theguardian.com/world/live/2026/sep/04/latest-developments',
+	fields: {
+		headline: 'Latest developments',
+		lastModified: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+		thumbnail:
+			'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+	},
+	blocks: {
+		main: {
+			id: 'liveblog-main-block-id',
+			elements: [
+				{
+					type: 'image',
+					assets: [
+						{
+							file: 'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+							typeData: { width: 500 },
+						},
+					],
+					imageTypeData: { alt: 'Latest liveblog update' },
+				},
+			],
+		},
+	},
+};

@@ -24,10 +24,13 @@ export const IPhoneAlertPreview = ({
 					'0 8px 24px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
 				boxSizing: 'border-box',
 				display: 'grid',
-				gridTemplateColumns: `34px minmax(0, 1fr) ${thumbnailUrl ? '32px' : 'auto'}`,
+				gridTemplateColumns: thumbnailUrl
+					? '34px minmax(0, 1fr) 32px'
+					: '34px minmax(0, 1fr)',
 				gap: 9,
 				maxWidth: 353,
 				padding: 12,
+				position: 'relative',
 				width: '68.5%',
 			})}
 			aria-label="iPhone notification preview"
@@ -80,6 +83,11 @@ export const IPhoneAlertPreview = ({
 					display: 'flex',
 					flexDirection: 'column',
 					gap: 5,
+					...(!thumbnailUrl && {
+						position: 'absolute',
+						right: 12,
+						top: 12,
+					}),
 				})}
 			>
 				<Typography

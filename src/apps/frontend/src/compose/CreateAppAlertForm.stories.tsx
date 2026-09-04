@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { articleFixture } from '../testing/capi-fixtures';
+import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -169,6 +169,36 @@ export const WithThumbnail: Story = {
 	},
 };
 
+export const WithLiveblogMainBlockThumbnail: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			fetchedArticleId: liveblogFixture.id,
+			content: {
+				...liveblogFixture,
+				fields: {
+					headline: liveblogFixture.fields?.headline ?? 'Latest developments',
+					lastModified: liveblogFixture.fields?.lastModified ?? '',
+				},
+			},
+		},
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+
+		await expect(thumbnailToggle).toBeEnabled();
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(canvas.getByAltText('Latest liveblog update')).toHaveAttribute(
+			'src',
+			'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+		);
+	},
+};
+
 export const WithThumbnailTurnedOff: Story = {
 	args: {
 		notificationState: populatedPushState,
@@ -183,38 +213,10 @@ export const WithThumbnailTurnedOff: Story = {
 		await expect(thumbnailToggle).toBeEnabled();
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
 		await expect(
-			canvas.queryByAltText(
+			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
-		).not.toBeInTheDocument();
-	},
-};
-
-export const WithoutThumbnail: Story = {
-	args: {
-		notificationState: {
-			...populatedPushState,
-			content: {
-				...articleFixture,
-				fields: { ...articleFixture.fields, thumbnail: '' },
-			},
-		},
-		formValues: { ...completePushParams, includeThumbnail: false },
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		const thumbnailToggle = canvas.getByRole('button', {
-			name: 'Show article thumbnail image',
-		});
-
-		await expect(canvas.getByText('Article imported')).toBeVisible();
-		await expect(thumbnailToggle).toBeDisabled();
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
-		await expect(
-			canvas.queryByAltText(
-				'Thumbnail for A rhyme to recall rising temperatures',
-			),
-		).not.toBeInTheDocument();
+		).toBeVisible();
 	},
 };
 
