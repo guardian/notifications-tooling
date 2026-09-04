@@ -49,7 +49,7 @@ describe('fetchArticle', () => {
 		expect(timeout).toHaveBeenCalledWith(10_000);
 		expect(fetcher).toHaveBeenCalledWith(
 			new URL(
-				'https://content.guardianapis.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures?api-key=test-key&show-fields=all',
+				'https://content.guardianapis.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures?api-key=test-key&show-fields=all&show-blocks=all',
 			),
 			{ signal: timeoutSignal },
 		);
@@ -81,7 +81,7 @@ describe('fetchArticle', () => {
 		expect(article).toEqual(content);
 		expect(fetcher).toHaveBeenCalledWith(
 			new URL(
-				'https://content.guardianapis.com/world/2026/jul/08/summit?api-key=test-key&show-fields=all',
+				'https://content.guardianapis.com/world/2026/jul/08/summit?api-key=test-key&show-fields=all&show-blocks=all',
 			),
 			{ signal: timeoutSignal },
 		);

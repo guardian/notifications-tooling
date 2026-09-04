@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { articleFixture } from '../testing/capi-fixtures';
+import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 
 const meta = {
@@ -40,6 +40,28 @@ export const WithThumbnail: PreviewCardStory = {
 			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
+		).toBeInTheDocument();
+	},
+};
+
+export const Liveblog: PreviewCardStory = {
+	args: {
+		content: liveblogFixture,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByText('Live')).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Liveblog block ID: liveblog-main-block-id'),
+		).toBeInTheDocument();
+		await expect(canvas.getByText('Latest developments')).toBeInTheDocument();
+		await expect(
+			canvas.getByText(
+				(_, element) => element?.textContent === 'Updated 2m ago',
+			),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByAltText('Latest liveblog update'),
 		).toBeInTheDocument();
 	},
 };
