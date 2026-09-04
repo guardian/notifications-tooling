@@ -44,7 +44,7 @@ export const ArticleThumbnailImageFormField = () => {
 							isSelected={hasThumbnail && field.value}
 							onChange={(isSelected) => {
 								field.onChange(isSelected);
-								if (!isSelected) {
+								if (!isSelected && !replacementImageUrl.trim()) {
 									setOpenReplaceSection(false);
 								}
 							}}

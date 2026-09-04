@@ -123,7 +123,7 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 
 		await userEvent.click(
 			canvas.getByRole('button', {
-				name: 'add replacement image URL button',
+				name: 'Replace image',
 			}),
 		);
 		const replacementInput = canvas.getByRole('textbox', {
@@ -150,6 +150,9 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		).not.toBeInTheDocument();
 		await userEvent.click(thumbnailToggle);
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		).toHaveAttribute('aria-expanded', 'true');
 
 		const restoredIPhoneThumbnail = canvas.getByAltText('Article thumbnail');
 		const restoredAndroidThumbnail = canvas.getByAltText(
@@ -162,11 +165,6 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
 		}
 
-		await userEvent.click(
-			canvas.getByRole('button', {
-				name: 'add replacement image URL button',
-			}),
-		);
 		const retainedReplacementInput = canvas.getByRole('textbox', {
 			name: 'replacement image URL',
 		});
@@ -185,5 +183,14 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		]) {
 			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
 		}
+
+		await userEvent.click(thumbnailToggle);
+		await userEvent.click(thumbnailToggle);
+		await expect(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		).toHaveAttribute('aria-expanded', 'false');
+		await expect(
+			canvas.queryByRole('textbox', { name: 'replacement image URL' }),
+		).not.toBeInTheDocument();
 	},
 };

@@ -55,15 +55,13 @@ export const AppAlertReplaceImageSection = ({
 					variant="secondary"
 					onClick={() => {
 						const trimmed = replacementImageUrl.trim();
-						if (!trimmed) {
-							setImageUpdated(false);
-							return;
-						}
-						try {
-							new URL(trimmed);
-						} catch {
-							setImageUpdated(false);
-							return;
+						if (trimmed) {
+							try {
+								new URL(trimmed);
+							} catch {
+								setImageUpdated(false);
+								return;
+							}
 						}
 						onUpdate(trimmed);
 						setImageUpdated(true);
