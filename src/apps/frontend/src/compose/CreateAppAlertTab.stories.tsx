@@ -91,7 +91,7 @@ export const ConfirmationStep: Story = {
 			screen.getByText('Are you sure you want to send the app alert?'),
 		).toBeVisible();
 		await expect(
-			screen.getByText('Sent app alerts cannot be undone'),
+			screen.getByText('Sent app alerts cannot be undone.'),
 		).toBeVisible();
 
 		await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));

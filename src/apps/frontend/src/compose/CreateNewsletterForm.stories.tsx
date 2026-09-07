@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 import type { ApiError } from '../api-client/errors';
 import {
@@ -27,6 +28,24 @@ type StoryArgs = {
 };
 type Story = StoryObj<StoryArgs>;
 
+const ControlledCreateNewsletterForm = ({
+	activeSectionHref,
+	initialShowPreview,
+}: {
+	activeSectionHref: string;
+	initialShowPreview: boolean;
+}) => {
+	const [showPreview, setShowPreview] = useState(initialShowPreview);
+
+	return (
+		<CreateNewsletterForm
+			activeSectionHref={activeSectionHref}
+			showPreview={showPreview}
+			onTogglePreview={setShowPreview}
+		/>
+	);
+};
+
 const meta: Meta<StoryArgs> = {
 	title: 'Stand Frontend/CreateNewsletterForm',
 	component: CreateNewsletterForm,
@@ -46,17 +65,11 @@ const meta: Meta<StoryArgs> = {
 		onTogglePreview: () => {},
 	},
 	render: (args) => {
-		const {
-			activeSectionHref,
-			notificationState,
-			showPreview,
-			onTogglePreview,
-		} = args;
+		const { activeSectionHref, notificationState, showPreview } = args;
 		return WithNotificationContext(
-			<CreateNewsletterForm
+			<ControlledCreateNewsletterForm
 				activeSectionHref={activeSectionHref}
-				showPreview={showPreview}
-				onTogglePreview={onTogglePreview}
+				initialShowPreview={showPreview}
 			/>,
 			notificationState,
 			{},
@@ -284,17 +297,11 @@ const buildErrorStory = (error: ApiError): Story => ({
 		},
 	},
 	render: (args) => {
-		const {
-			activeSectionHref,
-			notificationState,
-			showPreview,
-			onTogglePreview,
-		} = args;
+		const { activeSectionHref, notificationState, showPreview } = args;
 		return WithNotificationContext(
-			<CreateNewsletterForm
+			<ControlledCreateNewsletterForm
 				activeSectionHref={activeSectionHref}
-				showPreview={showPreview}
-				onTogglePreview={onTogglePreview}
+				initialShowPreview={showPreview}
 			/>,
 			notificationState,
 			{
