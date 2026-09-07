@@ -41,7 +41,7 @@ export const SendNotificationModal = () => {
 					Are you sure you want to send the {channelDescription}?
 				</Dialog.Header>
 				<Dialog.Content>
-					Sent {channelDescription}s cannot be undone
+					Sent {channelDescription}s cannot be undone.
 				</Dialog.Content>
 				<Dialog.Buttons theme={{ flexDirection: 'row' }}>
 					<Button

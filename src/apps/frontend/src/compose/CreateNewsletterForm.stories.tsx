@@ -22,6 +22,8 @@ import { CreateNewsletterForm } from './CreateNewsletterForm';
 type StoryArgs = {
 	notificationState: NotificationState;
 	activeSectionHref: string;
+	showPreview: boolean;
+	onTogglePreview: (showPreview: boolean) => void;
 };
 type Story = StoryObj<StoryArgs>;
 
@@ -40,11 +42,22 @@ const meta: Meta<StoryArgs> = {
 	args: {
 		notificationState: defaultState,
 		activeSectionHref: '#article-section',
+		showPreview: true,
+		onTogglePreview: () => {},
 	},
 	render: (args) => {
-		const { activeSectionHref, notificationState } = args;
+		const {
+			activeSectionHref,
+			notificationState,
+			showPreview,
+			onTogglePreview,
+		} = args;
 		return WithNotificationContext(
-			<CreateNewsletterForm activeSectionHref={activeSectionHref} />,
+			<CreateNewsletterForm
+				activeSectionHref={activeSectionHref}
+				showPreview={showPreview}
+				onTogglePreview={onTogglePreview}
+			/>,
 			notificationState,
 			{},
 			'email',
@@ -64,6 +77,7 @@ export const Default: Story = {
 		await expect(canvas.getByText('Article')).toBeInTheDocument();
 		await expect(canvas.getByText('Kicker')).toBeInTheDocument();
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
+		await expect(canvas.getByText('Show preview text')).toBeInTheDocument();
 		await expect(canvas.getByText('Preview text')).toBeInTheDocument();
 		await expect(
 			canvas.getByText('The newsletter email is sent immediately'),
@@ -109,7 +123,6 @@ export const ValidationErrors: Story = {
 		);
 
 		await expect(canvas.getByText('Subject is required')).toBeVisible();
-		await expect(canvas.getByText('Preview text is required')).toBeVisible();
 		await expect(
 			canvas.getByText('Please select an audience segment'),
 		).toBeVisible();
@@ -197,6 +210,29 @@ export const PopulatedEmail: Story = {
 	},
 };
 
+export const PreviewToggleHidesField: Story = {
+	args: {
+		notificationState: populatedEmailState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const toggle = canvas.getByRole('button', { name: 'Show preview text' });
+		const previewInput = canvas.getByLabelText('Preview text');
+
+		await expect(previewInput).toBeVisible();
+		await userEvent.clear(previewInput);
+		await userEvent.type(previewInput, 'Saved preview text');
+		await userEvent.click(toggle);
+		await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(canvas.queryByLabelText('Preview text')).toBeNull();
+		await userEvent.click(toggle);
+		await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(canvas.getByLabelText('Preview text')).toHaveValue(
+			'Saved preview text',
+		);
+	},
+};
+
 export const SubmitWithNativeForm: Story = {
 	args: {
 		notificationState: populatedEmailState,
@@ -248,9 +284,18 @@ const buildErrorStory = (error: ApiError): Story => ({
 		},
 	},
 	render: (args) => {
-		const { activeSectionHref, notificationState } = args;
+		const {
+			activeSectionHref,
+			notificationState,
+			showPreview,
+			onTogglePreview,
+		} = args;
 		return WithNotificationContext(
-			<CreateNewsletterForm activeSectionHref={activeSectionHref} />,
+			<CreateNewsletterForm
+				activeSectionHref={activeSectionHref}
+				showPreview={showPreview}
+				onTogglePreview={onTogglePreview}
+			/>,
 			notificationState,
 			{
 				sendNotification: mockSendRejectedNotification(error),

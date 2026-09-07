@@ -11,7 +11,7 @@ export const newsletterFormSchema = z.object({
 	dispatchId: z.string().optional(),
 	kicker: kickerSchema,
 	subject: z.string().trim().min(1, 'Subject is required'),
-	preview: z.string().trim().min(1, 'Preview text is required'),
+	preview: z.string().trim(),
 	audienceSegments: z
 		.array(newsletterSegmentId)
 		.min(1, 'Please select an audience segment'),

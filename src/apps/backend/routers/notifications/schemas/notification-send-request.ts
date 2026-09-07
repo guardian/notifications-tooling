@@ -79,14 +79,10 @@ const newsletterContentItem = z.strictObject({
 			description: `Headline shown in the email. Editorial recommends ${newsletterLimits.title.recommended} characters or fewer; longer titles are accepted.`,
 			example: 'Your morning briefing',
 		}),
-	body: z
-		.string()
-		.min(1)
-		.meta({
-			description: `Email body copy. Editorial recommends ${newsletterLimits.body.recommended} characters or fewer; longer copy is accepted.`,
-			example:
-				'The three stories shaping the day, plus what to keep an eye on.',
-		}),
+	body: z.string().meta({
+		description: `Email body copy. Editorial recommends ${newsletterLimits.body.recommended} characters or fewer; longer copy is accepted.`,
+		example: 'The three stories shaping the day, plus what to keep an eye on.',
+	}),
 	link: guardianArticleLink,
 	media: mediaSchema.optional(),
 });

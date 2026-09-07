@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { EmailPreviewSection } from '../preview/EmailPreviewSection';
 import { EmailPreviewToggle } from '../preview/PreviewToggle';
@@ -8,6 +8,7 @@ import { NotificationTabLayout } from './NotificationTabLayout';
 
 export const CreateNewsletterEmailTab = () => {
 	const { reset } = useFormContext<NewsletterFormValues>();
+	const [showPreview, setShowPreview] = useState(true);
 
 	useEffect(() => reset(), [reset]);
 
@@ -16,9 +17,13 @@ export const CreateNewsletterEmailTab = () => {
 			channel="email"
 			previewToggle={<EmailPreviewToggle />}
 			renderForm={(activeSectionHref) => (
-				<CreateNewsletterForm activeSectionHref={activeSectionHref} />
+				<CreateNewsletterForm
+					activeSectionHref={activeSectionHref}
+					showPreview={showPreview}
+					onTogglePreview={setShowPreview}
+				/>
 			)}
-			previewSection={<EmailPreviewSection />}
+			previewSection={<EmailPreviewSection showPreview={showPreview} />}
 		/>
 	);
 };

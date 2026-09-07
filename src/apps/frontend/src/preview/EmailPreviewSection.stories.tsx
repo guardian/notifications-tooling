@@ -11,6 +11,7 @@ import { EmailPreviewSection } from './EmailPreviewSection';
 type StoryArgs = {
 	notificationState: NotificationState;
 	formValues?: Partial<typeof completeEmailParams>;
+	showPreview: boolean;
 };
 
 const meta: Meta<StoryArgs> = {
@@ -18,10 +19,11 @@ const meta: Meta<StoryArgs> = {
 	component: EmailPreviewSection,
 	args: {
 		notificationState: populatedEmailState,
+		showPreview: true,
 	},
-	render: ({ notificationState, formValues }) =>
+	render: ({ notificationState, formValues, showPreview }) =>
 		WithNotificationContext(
-			<EmailPreviewSection />,
+			<EmailPreviewSection showPreview={showPreview} />,
 			notificationState,
 			{},
 			'email',
