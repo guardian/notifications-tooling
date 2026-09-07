@@ -9,13 +9,15 @@ import { useState } from 'react';
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
 	onReplacementImageUrlChange: (replacementImageUrl: string) => void;
-	onUpdate: (replacementImageUrl: string) => void;
+	onUpdate: (replacementImageUrl: string) => Promise<boolean>;
+	errorMessage?: string;
 }
 
 export const AppAlertReplaceImageSection = ({
 	replacementImageUrl,
 	onReplacementImageUrlChange,
 	onUpdate,
+	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
 	const [imageUpdated, setImageUpdated] = useState(false);
 
@@ -55,21 +57,15 @@ export const AppAlertReplaceImageSection = ({
 					variant="secondary"
 					onClick={() => {
 						const trimmed = replacementImageUrl.trim();
-						if (trimmed) {
-							try {
-								new URL(trimmed);
-							} catch {
-								setImageUpdated(false);
-								return;
-							}
-						}
-						onUpdate(trimmed);
-						setImageUpdated(true);
+						void onUpdate(trimmed).then(setImageUpdated);
 					}}
 				>
 					Update
 				</Button>
 			</div>
+			{errorMessage && (
+				<InlineMessage level="error">{errorMessage}</InlineMessage>
+			)}
 			{imageUpdated && (
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}

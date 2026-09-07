@@ -209,6 +209,38 @@ export const WithReplacementThumbnail: Story = {
 			articleFixture.fields?.thumbnail,
 		);
 		await expect(canvas.getByText('Image updated')).toBeVisible();
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		);
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			await screen.findByText('Are you sure you want to send the app alert?'),
+		).toBeVisible();
+	},
+};
+
+export const RejectsNonGuardianReplacementThumbnail: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		await userEvent.type(
+			canvas.getByRole('textbox', { name: 'replacement image URL' }),
+			'https://example.com/replacement-thumbnail.jpg',
+		);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(
+			canvas.getByText('Please enter a valid Guardian image URL'),
+		).toBeVisible();
+		await expect(canvas.queryByText('Image updated')).not.toBeInTheDocument();
 	},
 };
 
