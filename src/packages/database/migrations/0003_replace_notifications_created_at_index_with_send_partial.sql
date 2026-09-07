@@ -1,0 +1,2 @@
+DROP INDEX "notifications_created_at_idx";--> statement-breakpoint
+CREATE INDEX "notifications_send_created_at_idx" ON "notifications" USING btree ("created_at" DESC NULLS LAST) WHERE "notifications"."kind" = 'send';

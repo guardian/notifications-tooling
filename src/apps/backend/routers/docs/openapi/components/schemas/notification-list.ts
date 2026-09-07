@@ -1,7 +1,8 @@
 /**
- * The paginated `GET /v1/notifications` response: a page of notifications
- * created at or after the requested `since` cut-off plus the total count within
- * that range. Referenced via `#/components/schemas/NotificationList`.
+ * The paginated `GET /v1/notifications` response: a page of production send
+ * notifications created at or after the requested `since` cut-off plus the total
+ * count within that range. Test notifications are excluded. Referenced via
+ * `#/components/schemas/NotificationList`.
  */
 export const notificationListSchema = {
 	type: 'object',
@@ -10,7 +11,7 @@ export const notificationListSchema = {
 		total: {
 			type: 'integer',
 			description:
-				'The number of notifications created at or after the `since` cut-off, ignoring pagination.',
+				'The number of production send notifications created at or after the `since` cut-off, ignoring pagination.',
 		},
 		limit: {
 			type: 'integer',
@@ -23,7 +24,7 @@ export const notificationListSchema = {
 		notifications: {
 			type: 'array',
 			description:
-				'The page of notifications, newest first. Dispatch outcomes are not included.',
+				'The page of production send notifications, newest first. Dispatch outcomes are not included.',
 			items: { $ref: '#/components/schemas/NotificationSummary' },
 		},
 	},

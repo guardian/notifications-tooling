@@ -157,4 +157,21 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		expect(secondPage.total).toBe(3);
 		expect(secondPage.notifications.map((row) => row.id)).toEqual([third.id]);
 	});
+
+	it('excludes test notifications from the page and the total', async () => {
+		const send = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			createdAt: daysAgo(1),
+		});
+
+		const page = await notifications.listRecent({ since: daysAgo(14) });
+
+		expect(page.total).toBe(1);
+		expect(page.notifications.map((row) => row.id)).toEqual([send.id]);
+	});
 });
