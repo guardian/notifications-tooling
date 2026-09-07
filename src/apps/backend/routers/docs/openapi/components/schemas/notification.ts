@@ -20,6 +20,7 @@ export const notificationSchema = {
 		'createdAt',
 		'updatedAt',
 		'dispatches',
+		'failedTargets',
 	],
 	properties: {
 		id: {
@@ -81,6 +82,50 @@ export const notificationSchema = {
 			type: 'string',
 			format: 'date-time',
 			description: 'When the notification was last updated.',
+		},
+		failedTargets: {
+			type: 'object',
+			description:
+				'The targets that failed to dispatch, denormalised from the dispatch outcomes so this can be read without the per-target dispatches. Keys are stored (not labels) so a consumer maps them back via the audiences maps.',
+			required: ['topics', 'segments'],
+			properties: {
+				topics: {
+					type: 'array',
+					description:
+						'The app-push topic type / edition key pairs that failed to push.',
+					items: {
+						type: 'object',
+						required: ['topicType', 'edition'],
+						properties: {
+							topicType: {
+								type: 'string',
+								description:
+									'The topic type key, mappable to a label via the audiences map.',
+							},
+							edition: {
+								type: 'string',
+								description:
+									'The edition key, mappable to a label via the topic type in the audiences map.',
+							},
+						},
+					},
+				},
+				segments: {
+					type: 'array',
+					description: 'The newsletter segment keys that failed to send.',
+					items: {
+						type: 'object',
+						required: ['segmentId'],
+						properties: {
+							segmentId: {
+								type: 'string',
+								description:
+									'The segment id key, mappable to a label via the audiences map.',
+							},
+						},
+					},
+				},
+			},
 		},
 		dispatches: {
 			type: 'array',

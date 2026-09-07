@@ -1,4 +1,5 @@
 export { getDb } from './client';
+export type { FailedTargets } from './schema/notifications';
 export {
 	createNotificationDispatchesRepository,
 	type NewNotificationDispatch,

@@ -185,6 +185,7 @@ describe('POST /v1/notifications (real Postgres)', () => {
 						notificationId,
 						id: 'mobile-n10n-1',
 						topicType: 'breaking-news',
+						editions: ['uk'],
 						status: 'success' as const,
 					},
 				],
@@ -239,6 +240,7 @@ describe('POST /v1/notifications (real Postgres)', () => {
 						notificationId,
 						id: 'mobile-n10n-1',
 						topicType: 'breaking-news',
+						editions: ['uk'],
 						status: 'success' as const,
 					},
 				],
@@ -284,6 +286,12 @@ describe('POST /v1/notifications (real Postgres)', () => {
 				status: 'failure',
 				providerStatusCode: 500,
 				detail: { campaignId: 'braze-campaign-1' },
+			});
+
+			// The failed segment is denormalised onto the row for the list endpoint.
+			expect(stored?.failedTargets).toEqual({
+				topics: [],
+				segments: [{ segmentId: 'morning-briefing-uk' }],
 			});
 		} finally {
 			await dispatchServer.close();

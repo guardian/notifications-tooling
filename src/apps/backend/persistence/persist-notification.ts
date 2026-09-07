@@ -1,6 +1,7 @@
 import {
 	createNotificationDispatchesRepository,
 	createNotificationsRepository,
+	type FailedTargets,
 	getDb,
 	type NewNotificationDispatch,
 	type Notification,
@@ -38,6 +39,33 @@ export const rollUpStatus = (
 	return anyFailure ? 'failed' : 'delivered';
 };
 
+/**
+ * Collects the targets that failed to dispatch, grouped by channel, so they can
+ * be denormalised onto the notification row. Only keys are recorded so an API
+ * consumer maps them back to labels via the audiences maps: `topicType`/`edition`
+ * for app-push, `segmentId` for newsletter.
+ */
+export const collectFailedTargets = (
+	dispatches: readonly NewNotificationDispatch[],
+): FailedTargets => {
+	const failed = dispatches.filter((d) => d.status === 'failure');
+	return {
+		topics: failed
+			.filter((d) => d.channel === 'app-push')
+			.flatMap((d) => {
+				const editions =
+					(d.detail as { editions?: string[] } | null)?.editions ?? [];
+				return editions.map((edition) => ({
+					topicType: d.target,
+					edition,
+				}));
+			}),
+		segments: failed
+			.filter((d) => d.channel === 'newsletter')
+			.map((d) => ({ segmentId: d.target })),
+	};
+};
+
 /** Maps a production dispatch's per-channel outcomes to dispatch rows. */
 export const mapSendOutcomesToDispatches = (
 	notificationId: string,
@@ -51,6 +79,7 @@ export const mapSendOutcomesToDispatches = (
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
+		detail: { editions: outcome.editions },
 	})),
 	...newsletter.map((outcome): NewNotificationDispatch => ({
 		notificationId,
@@ -77,6 +106,7 @@ export const mapTestOutcomesToDispatches = (
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
+		detail: { editions: outcome.editions },
 	})),
 	...newsletter.map((outcome): NewNotificationDispatch => ({
 		notificationId,
@@ -119,6 +149,7 @@ export const toNotificationSummary = (notification: Notification) => ({
 	scheduledFor: notification.scheduledFor?.toISOString() ?? null,
 	content: notification.content,
 	channels: notification.channels,
+	failedTargets: notification.failedTargets,
 	createdAt: notification.createdAt.toISOString(),
 	updatedAt: notification.updatedAt.toISOString(),
 });
@@ -191,10 +222,11 @@ const recordDispatches = async (
 	);
 
 	const status = rollUpStatus(dispatches);
-	const updated =
-		status === notification.status
-			? notification
-			: await notificationsRepository.updateStatus(notification.id, status);
+	const failedTargets = collectFailedTargets(dispatches);
+	const updated = await notificationsRepository.updateDeliveryOutcome(
+		notification.id,
+		{ status, failedTargets },
+	);
 
 	return { notification: updated, dispatches: persistedDispatches };
 };

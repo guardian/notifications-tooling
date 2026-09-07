@@ -206,6 +206,12 @@ export const notificationResourceSchema = z.strictObject({
 	scheduledFor: z.string().nullable(),
 	content: z.record(z.string(), z.unknown()),
 	channels: z.record(z.string(), z.unknown()),
+	failedTargets: z
+		.object({
+			topics: z.array(z.object({ topicType: z.string(), edition: z.string() })),
+			segments: z.array(z.object({ segmentId: z.string() })),
+		})
+		.optional(),
 	createdAt: z.string(),
 	updatedAt: z.string(),
 	dispatches: notificationDispatchSchema.array(),

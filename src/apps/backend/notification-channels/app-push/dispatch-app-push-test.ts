@@ -30,6 +30,8 @@ export type AppPushTestDispatchOutcome = {
 	testId: string;
 	id: string;
 	topicType: string;
+	/** The public edition ids this push addressed, kept so failures map to labels. */
+	editions: string[];
 	status: 'success' | 'failure';
 	failureReason?: AppNotificationFailureReason | 'unknown';
 	/** The mobile-n10n HTTP status once the push reached the provider. */
@@ -102,6 +104,7 @@ export const dispatchAppPushTest = async (
 				testId,
 				id,
 				topicType: push.topicType,
+				editions: push.editions,
 				status: 'success',
 				providerStatusCode: result.value.status,
 			};
@@ -110,6 +113,7 @@ export const dispatchAppPushTest = async (
 			testId,
 			id,
 			topicType: push.topicType,
+			editions: push.editions,
 			status: 'failure',
 			failureReason:
 				result.reason instanceof AppNotificationApiError

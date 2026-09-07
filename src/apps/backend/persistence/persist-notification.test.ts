@@ -3,6 +3,7 @@ import type { NotificationDispatch } from '@database';
 import type { DispatchOutcomes } from '../notification-channels/dispatch-notification';
 import type { TestDispatchOutcomes } from '../notification-channels/dispatch-notification-test';
 import {
+	collectFailedTargets,
 	httpStatusForNotification,
 	mapSendOutcomesToDispatches,
 	mapTestOutcomesToDispatches,
@@ -64,6 +65,55 @@ describe('rollUpStatus', () => {
 	});
 });
 
+describe('collectFailedTargets', () => {
+	it('is empty when nothing failed', () => {
+		expect(
+			collectFailedTargets([
+				{ notificationId, channel: 'app-push', target: 'a', status: 'success' },
+			]),
+		).toEqual({ topics: [], segments: [] });
+	});
+
+	it('groups failed targets by channel and ignores successes', () => {
+		expect(
+			collectFailedTargets([
+				{
+					notificationId,
+					channel: 'app-push',
+					target: 'breaking-news',
+					status: 'failure',
+					detail: { editions: ['uk', 'us'] },
+				},
+				{
+					notificationId,
+					channel: 'app-push',
+					target: 'sport',
+					status: 'success',
+					detail: { editions: ['uk'] },
+				},
+				{
+					notificationId,
+					channel: 'newsletter',
+					target: 'UK',
+					status: 'failure',
+				},
+				{
+					notificationId,
+					channel: 'newsletter',
+					target: 'US',
+					status: 'success',
+				},
+			]),
+		).toEqual({
+			topics: [
+				{ topicType: 'breaking-news', edition: 'uk' },
+				{ topicType: 'breaking-news', edition: 'us' },
+			],
+			segments: [{ segmentId: 'UK' }],
+		});
+	});
+});
+
 describe('mapSendOutcomesToDispatches', () => {
 	it('maps app-push and newsletter outcomes to dispatch rows', () => {
 		const outcomes: DispatchOutcomes = {
@@ -72,6 +122,7 @@ describe('mapSendOutcomesToDispatches', () => {
 					notificationId,
 					id: 'push-1',
 					topicType: 'breaking-news',
+					editions: ['uk'],
 					status: 'failure',
 					failureReason: 'http_error',
 					providerStatusCode: 500,
@@ -97,6 +148,7 @@ describe('mapSendOutcomesToDispatches', () => {
 				status: 'failure',
 				failureReason: 'http_error',
 				providerStatusCode: 500,
+				detail: { editions: ['uk'] },
 			},
 			{
 				notificationId,
@@ -120,6 +172,7 @@ describe('mapTestOutcomesToDispatches', () => {
 					testId: notificationId,
 					id: 'push-1',
 					topicType: 'test',
+					editions: ['test'],
 					status: 'success',
 					providerStatusCode: 201,
 				},
@@ -144,6 +197,7 @@ describe('mapTestOutcomesToDispatches', () => {
 				status: 'success',
 				failureReason: null,
 				providerStatusCode: 201,
+				detail: { editions: ['test'] },
 			},
 			{
 				notificationId,
@@ -204,6 +258,7 @@ describe('toNotificationResponse', () => {
 					scheduledFor: null,
 					content: {},
 					channels: {},
+					failedTargets: { topics: [], segments: [] },
 					createdAt: new Date('2026-08-25T00:00:00.000Z'),
 					updatedAt: new Date('2026-08-25T00:00:00.000Z'),
 				},
@@ -234,6 +289,7 @@ describe('toNotificationResponse', () => {
 			scheduledFor: null,
 			content: {},
 			channels: {},
+			failedTargets: { topics: [], segments: [] },
 			createdAt: '2026-08-25T00:00:00.000Z',
 			updatedAt: '2026-08-25T00:00:00.000Z',
 			dispatches: [
@@ -266,6 +322,7 @@ describe('toNotificationResponse', () => {
 				scheduledFor: new Date('2026-09-01T09:00:00.000Z'),
 				content: {},
 				channels: {},
+				failedTargets: { topics: [], segments: [] },
 				createdAt: new Date('2026-08-25T00:00:00.000Z'),
 				updatedAt: new Date('2026-08-25T00:00:00.000Z'),
 			},

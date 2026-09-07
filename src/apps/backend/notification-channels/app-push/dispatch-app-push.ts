@@ -34,6 +34,8 @@ export type AppPushDispatchOutcome = {
 	notificationId: string;
 	id: string;
 	topicType: string;
+	/** The public edition ids this push addressed, kept so failures map to labels. */
+	editions: string[];
 	status: 'success' | 'failure';
 	failureReason?: AppNotificationFailureReason | 'unknown';
 	/** The mobile-n10n HTTP status when a failed push reached the provider. */
@@ -43,6 +45,8 @@ export type AppPushDispatchOutcome = {
 /** One resolved push: a topic type, its importance, and its mobile-n10n topics. */
 export type ResolvedAppPush = {
 	topicType: string;
+	/** The public edition ids grouped into this push. */
+	editions: string[];
 	importance: AppNotificationImportance;
 	titleOverride?: string;
 	topics: Array<{ type: string; name: string }>;
@@ -75,11 +79,13 @@ export const groupAppPushTopicsByType = (
 			: type;
 		const push = pushesByKey.get(key) ?? {
 			topicType: type,
+			editions: [],
 			importance: resolved.importance,
 			titleOverride: resolved.titleOverride,
 			topics: [],
 		};
 		push.topics.push(resolved.topic);
+		push.editions.push(name);
 		pushesByKey.set(key, push);
 	}
 	return [...pushesByKey.values()];
@@ -158,6 +164,7 @@ export const dispatchAppPush = async (
 				notificationId,
 				id,
 				topicType: push.topicType,
+				editions: push.editions,
 				status: 'success',
 				providerStatusCode: result.value.status,
 			};
@@ -166,6 +173,7 @@ export const dispatchAppPush = async (
 			notificationId,
 			id,
 			topicType: push.topicType,
+			editions: push.editions,
 			status: 'failure',
 			failureReason:
 				result.reason instanceof AppNotificationApiError

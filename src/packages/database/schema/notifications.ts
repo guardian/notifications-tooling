@@ -33,6 +33,18 @@ export const notificationStatusEnum = pgEnum('notification_status', [
 type ContentItemsJson = Record<string, unknown>;
 type ChannelsJson = Record<string, unknown>;
 
+/**
+ * The targets that failed to dispatch, denormalised from the dispatch outcomes
+ * so the list endpoint can surface them without joining `notification_dispatches`.
+ * Keys are stored (not labels) so a consumer maps them back via the audiences
+ * maps: `topicType`/`edition` against the app-push topic types, `segmentId`
+ * against the newsletter segments.
+ */
+export type FailedTargets = {
+	topics: Array<{ topicType: string; edition: string }>;
+	segments: Array<{ segmentId: string }>;
+};
+
 export const notifications = pgTable(
 	'notifications',
 	{
@@ -51,6 +63,12 @@ export const notifications = pgTable(
 		}),
 		content: jsonb('content').$type<ContentItemsJson>().notNull(),
 		channels: jsonb('channels').$type<ChannelsJson>().notNull(),
+		// Denormalised from the dispatch outcomes; lets the list endpoint report
+		// failed targets without joining notification_dispatches.
+		failedTargets: jsonb('failed_targets')
+			.$type<FailedTargets>()
+			.notNull()
+			.default({ topics: [], segments: [] }),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
 			mode: 'date',

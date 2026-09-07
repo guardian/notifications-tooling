@@ -199,6 +199,7 @@ describe('POST /v1/notifications', () => {
 							notificationId: 'ignored',
 							id: 'push-1',
 							topicType: 'breaking-news',
+							editions: ['uk'],
 							status: 'success' as const,
 						},
 					],
@@ -430,6 +431,7 @@ describe('POST /v1/notifications', () => {
 							notificationId: 'ignored',
 							id: 'push-1',
 							topicType: 'breaking-news',
+							editions: ['uk'],
 							status: 'success' as const,
 						},
 					],
@@ -608,6 +610,7 @@ const storedNotification = (): NotificationWithDispatches => ({
 	scheduledFor: null,
 	content: { items: { lead: { type: 'app-push', title: 'Ukraine summit' } } },
 	channels: { 'app-push': { compose: { use: 'lead' } } },
+	failedTargets: { topics: [], segments: [] },
 	createdAt: new Date('2026-07-08T09:00:00.000Z'),
 	updatedAt: new Date('2026-07-08T09:00:05.000Z'),
 	dispatches: [
@@ -757,13 +760,17 @@ const storedListPage = (): NotificationListPage => ({
 			id: notificationId,
 			idempotencyKey: 'push-2026-07-08',
 			kind: 'send',
-			status: 'delivered',
+			status: 'partially_delivered',
 			sender: 'notifications-tooling-spa/v1',
 			createdByEmail: 'editor@theguardian.com',
 			dryRun: false,
 			scheduledFor: null,
 			content: { items: { lead: { type: 'app-push' } } },
 			channels: { 'app-push': { compose: { use: 'lead' } } },
+			failedTargets: {
+				topics: [{ topicType: 'sport', edition: 'uk' }],
+				segments: [],
+			},
 			createdAt: new Date('2026-07-08T09:00:00.000Z'),
 			updatedAt: new Date('2026-07-08T09:00:05.000Z'),
 		},
@@ -841,7 +848,11 @@ describe('GET /v1/notifications', () => {
 				expect(body.notifications).toHaveLength(1);
 				expect(body.notifications[0]).toMatchObject({
 					id: notificationId,
-					status: 'delivered',
+					status: 'partially_delivered',
+					failedTargets: {
+						topics: [{ topicType: 'sport', edition: 'uk' }],
+						segments: [],
+					},
 					createdAt: '2026-07-08T09:00:00.000Z',
 				});
 				// The list endpoint does not join dispatches.

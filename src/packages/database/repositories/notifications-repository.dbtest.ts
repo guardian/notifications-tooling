@@ -63,6 +63,31 @@ describe('notifications repository (real Postgres)', () => {
 		expect(found?.status).toBe('delivered');
 	});
 
+	it('defaults failedTargets to empty arrays and records them with the status', async () => {
+		const created = await notifications.create(buildNotification());
+		expect(created.failedTargets).toEqual({ topics: [], segments: [] });
+
+		const updated = await notifications.updateDeliveryOutcome(created.id, {
+			status: 'partially_delivered',
+			failedTargets: {
+				topics: [{ topicType: 'sport', edition: 'uk' }],
+				segments: [{ segmentId: 'UK' }],
+			},
+		});
+
+		expect(updated.status).toBe('partially_delivered');
+		expect(updated.failedTargets).toEqual({
+			topics: [{ topicType: 'sport', edition: 'uk' }],
+			segments: [{ segmentId: 'UK' }],
+		});
+
+		const found = await notifications.findById(created.id);
+		expect(found?.failedTargets).toEqual({
+			topics: [{ topicType: 'sport', edition: 'uk' }],
+			segments: [{ segmentId: 'UK' }],
+		});
+	});
+
 	it('loads a notification together with its dispatches, oldest first', async () => {
 		const notification = await notifications.create(buildNotification());
 

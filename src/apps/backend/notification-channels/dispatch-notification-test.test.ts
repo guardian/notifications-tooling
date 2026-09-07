@@ -55,6 +55,7 @@ describe('dispatchNotificationTest', () => {
 				testId,
 				id: anyString,
 				topicType: 'test',
+				editions: ['test'],
 				status: 'success',
 				providerStatusCode: 201,
 			},
