@@ -46,11 +46,12 @@ export const mapSendOutcomesToDispatches = (
 	...appPush.map((outcome): NewNotificationDispatch => ({
 		notificationId,
 		channel: 'app-push',
-		target: outcome.topicType,
+		target: `${outcome.topicType}/${outcome.editions.join(',')}`,
 		providerRef: outcome.id,
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
+		detail: { topics: outcome.topics, importance: outcome.importance },
 	})),
 	...newsletter.map((outcome): NewNotificationDispatch => ({
 		notificationId,
@@ -60,7 +61,10 @@ export const mapSendOutcomesToDispatches = (
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
-		detail: { campaignId: outcome.campaignId },
+		detail: {
+			campaignId: outcome.campaignId,
+			emailRenderingId: outcome.emailRenderingId,
+		},
 	})),
 ];
 
@@ -72,11 +76,12 @@ export const mapTestOutcomesToDispatches = (
 	...appPush.map((outcome): NewNotificationDispatch => ({
 		notificationId,
 		channel: 'app-push',
-		target: outcome.topicType,
+		target: `${outcome.topicType}/${outcome.editions.join(',')}`,
 		providerRef: outcome.id,
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
+		detail: { topics: outcome.topics, importance: outcome.importance },
 	})),
 	...newsletter.map((outcome): NewNotificationDispatch => ({
 		notificationId,
@@ -86,6 +91,7 @@ export const mapTestOutcomesToDispatches = (
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
+		detail: { emailRenderingId: outcome.emailRenderingId },
 	})),
 ];
 

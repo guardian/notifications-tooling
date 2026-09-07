@@ -27,8 +27,8 @@ export const notificationDispatchSchema = {
 		target: {
 			type: 'string',
 			description:
-				'The unit this call addressed: an app-push topic type or a newsletter segment id.',
-			example: 'breaking-news',
+				'The unit this call addressed: for app-push, the topic type and the editions it went to, joined as `topicType/edition,edition`; for newsletter, the segment id.',
+			example: 'breaking-news/uk,us',
 		},
 		providerRef: {
 			type: ['string', 'null'],
@@ -53,8 +53,12 @@ export const notificationDispatchSchema = {
 		detail: {
 			type: ['object', 'null'],
 			description:
-				'Channel-specific extras (e.g. Braze campaignId, importance, editions).',
+				'Channel-specific extras: for app-push, the `topics` sent to mobile-n10n and the `importance`; for newsletter, the Braze `campaignId` and the `emailRenderingId`.',
 			additionalProperties: true,
+			example: {
+				topics: [{ type: 'breaking', name: 'uk' }],
+				importance: 'Major',
+			},
 		},
 		createdAt: {
 			type: 'string',
