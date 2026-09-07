@@ -73,7 +73,7 @@ export const AppAlertReplaceImageSection = ({
 					Update
 				</Button>
 			</div>
-			{imageUpdated && (
+			{imageUpdated && replacementImageUrl && (
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}
 		</>
