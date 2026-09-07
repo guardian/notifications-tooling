@@ -4,6 +4,7 @@ import {
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
 	newsletterFormSchema,
+	validateNewsletterPreview,
 } from './notification-forms';
 
 describe('notification form length rules', () => {
@@ -46,5 +47,36 @@ describe('notification form length rules', () => {
 				editions: ['UK'],
 			}).success,
 		).toBe(false);
+	});
+
+	it('requires preview text only when preview is shown', () => {
+		expect(validateNewsletterPreview('   ', true)).toBe(
+			'Preview text is required',
+		);
+
+		expect(validateNewsletterPreview('   ', false)).toBeUndefined();
+		expect(validateNewsletterPreview('Preview', true)).toBeUndefined();
+	});
+
+	it('validates preview text on submit when show preview is enabled', () => {
+		expect(
+			newsletterFormSchema.safeParse({
+				...defaultNewsletterFormValues,
+				subject: 'Subject',
+				preview: '   ',
+				showPreview: true,
+				audienceSegments: ['UK'],
+			}).success,
+		).toBe(false);
+
+		expect(
+			newsletterFormSchema.safeParse({
+				...defaultNewsletterFormValues,
+				subject: 'Subject',
+				preview: '   ',
+				showPreview: false,
+				audienceSegments: ['UK'],
+			}).success,
+		).toBe(true);
 	});
 });

@@ -101,6 +101,7 @@ export const completeEmailParams: NewsletterFormValues = {
 	kicker: 'exclusive',
 	subject: articleFixture.fields?.headline ?? '',
 	preview: parseHtml(articleFixture.fields?.standfirst).textContent,
+	showPreview: true,
 	deliveryOption: 'immediate',
 	audienceSegments: ['AU', 'UK'],
 };

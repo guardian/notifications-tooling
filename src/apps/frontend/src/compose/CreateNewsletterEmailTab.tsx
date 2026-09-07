@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { EmailPreviewSection } from '../preview/EmailPreviewSection';
 import { EmailPreviewToggle } from '../preview/PreviewToggle';
@@ -7,8 +7,8 @@ import { CreateNewsletterForm } from './CreateNewsletterForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
 
 export const CreateNewsletterEmailTab = () => {
-	const { reset } = useFormContext<NewsletterFormValues>();
-	const [showPreview, setShowPreview] = useState(true);
+	const { reset, setValue, watch } = useFormContext<NewsletterFormValues>();
+	const showPreview = watch('showPreview');
 
 	useEffect(() => reset(), [reset]);
 
@@ -20,7 +20,11 @@ export const CreateNewsletterEmailTab = () => {
 				<CreateNewsletterForm
 					activeSectionHref={activeSectionHref}
 					showPreview={showPreview}
-					onTogglePreview={setShowPreview}
+					onTogglePreview={(isSelected) => {
+						setValue('showPreview', isSelected, {
+							shouldValidate: true,
+						});
+					}}
 				/>
 			)}
 			previewSection={<EmailPreviewSection showPreview={showPreview} />}

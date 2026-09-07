@@ -5,7 +5,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { Controller, useFormContext } from 'react-hook-form';
 import { NEWSLETTER_LIMIT_FALLBACKS } from '../hooks/useChannelConstraints';
 import type { ChannelConstraintsResponse } from '../schemas';
-import type { NewsletterFormValues } from '../utils/notification-forms';
+import { type NewsletterFormValues } from '../utils/notification-forms';
 import { CharacterCount } from './CharacterCount';
 import { PreviewTextToggle } from './PreviewTextToggle';
 
@@ -29,7 +29,7 @@ export const PreviewTextFormField = ({
 	showPreview,
 	onTogglePreview,
 }: PreviewTextFormFieldProps) => {
-	const { control } = useFormContext<NewsletterFormValues>();
+	const { clearErrors, control } = useFormContext<NewsletterFormValues>();
 	const previewLimits =
 		constraints?.channels.newsletter.content.body ??
 		NEWSLETTER_LIMIT_FALLBACKS.body;
@@ -46,7 +46,12 @@ export const PreviewTextFormField = ({
 					</Typography>
 					<PreviewTextToggle
 						isSelected={showPreview}
-						onChange={onTogglePreview}
+						onChange={(isSelected) => {
+							onTogglePreview(isSelected);
+							if (!isSelected) {
+								clearErrors('preview');
+							}
+						}}
 					/>
 					{showPreview && (
 						<div>
