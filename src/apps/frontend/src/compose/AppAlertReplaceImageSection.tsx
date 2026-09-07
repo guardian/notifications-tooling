@@ -45,7 +45,6 @@ export const AppAlertReplaceImageSection = ({
 				<TextInput
 					name="replacementImageUrl"
 					aria-label="replacement image URL"
-					error={displayedErrorMessage}
 					isInvalid={!!displayedErrorMessage}
 					size="md"
 					value={replacementImageUrl}
@@ -73,6 +72,11 @@ export const AppAlertReplaceImageSection = ({
 					Update
 				</Button>
 			</div>
+
+			{displayedErrorMessage && (
+				<InlineMessage level="error">{displayedErrorMessage}</InlineMessage>
+			)}
+
 			{imageUpdated && replacementImageUrl && (
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}
