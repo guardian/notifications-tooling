@@ -376,6 +376,12 @@ describe('GET /v1/notifications (real Postgres)', () => {
 			...buildNotification(),
 			createdAt: daysAgo(13),
 		});
+		// A test notification within the window: excluded from the list and total.
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			createdAt: daysAgo(2),
+		});
 		// Created before the cut-off: excluded from the list and the total.
 		await notifications.create({
 			...buildNotification(),
@@ -450,6 +456,25 @@ describe('GET /v1/notifications (real Postgres)', () => {
 
 		expect(body.total).toBe(1);
 		expect(body.notifications).toEqual([]);
+	});
+
+	it('excludes test notifications from the list and the total', async () => {
+		const send = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			createdAt: daysAgo(1),
+		});
+
+		const body = (await (
+			await fetch(`${baseUrl}/v1/notifications?since=${sinceParam}`)
+		).json()) as ListResponse;
+
+		expect(body.total).toBe(1);
+		expect(body.notifications.map((row) => row.id)).toEqual([send.id]);
 	});
 
 	it('rejects an invalid limit with a 400', async () => {
