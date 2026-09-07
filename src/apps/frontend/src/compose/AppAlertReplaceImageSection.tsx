@@ -5,11 +5,12 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
+import { validateGuardianImageUrl } from '../utils/form-validation';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
 	onReplacementImageUrlChange: (replacementImageUrl: string) => void;
-	onUpdate: (replacementImageUrl: string) => Promise<boolean>;
+	onUpdate: (replacementImageUrl: string) => void;
 	errorMessage?: string;
 }
 
@@ -20,6 +21,9 @@ export const AppAlertReplaceImageSection = ({
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
 	const [imageUpdated, setImageUpdated] = useState(false);
+	const trimmedReplacementImageUrl = replacementImageUrl.trim();
+	const validationError = validateGuardianImageUrl(trimmedReplacementImageUrl);
+	const displayedErrorMessage = validationError ?? errorMessage;
 
 	return (
 		<>
@@ -41,6 +45,8 @@ export const AppAlertReplaceImageSection = ({
 				<TextInput
 					name="replacementImageUrl"
 					aria-label="replacement image URL"
+					error={displayedErrorMessage}
+					isInvalid={!!displayedErrorMessage}
 					size="md"
 					value={replacementImageUrl}
 					placeholder="Enter replacement image URL..."
@@ -56,16 +62,17 @@ export const AppAlertReplaceImageSection = ({
 					size="md"
 					variant="secondary"
 					onClick={() => {
-						const trimmed = replacementImageUrl.trim();
-						void onUpdate(trimmed).then(setImageUpdated);
+						if (validationError) {
+							setImageUpdated(false);
+							return;
+						}
+						onUpdate(trimmedReplacementImageUrl);
+						setImageUpdated(true);
 					}}
 				>
 					Update
 				</Button>
 			</div>
-			{errorMessage && (
-				<InlineMessage level="error">{errorMessage}</InlineMessage>
-			)}
 			{imageUpdated && (
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}

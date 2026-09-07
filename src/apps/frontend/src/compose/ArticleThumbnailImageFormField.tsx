@@ -13,10 +13,10 @@ import { NotificationFormContext } from './NotificationContext';
 
 export const ArticleThumbnailImageFormField = () => {
 	const {
+		clearErrors,
 		control,
 		formState: { errors },
 		setValue,
-		trigger,
 	} = useFormContext<AppAlertFormValues>();
 	const { notification } = useContext(NotificationFormContext);
 	const originalArticleThumbnailUrl =
@@ -95,9 +95,12 @@ export const ArticleThumbnailImageFormField = () => {
 								{openReplaceSection && (
 									<AppAlertReplaceImageSection
 										replacementImageUrl={replacementImageUrl}
-										onReplacementImageUrlChange={setReplacementImageUrl}
+										onReplacementImageUrlChange={(replacementImageUrl) => {
+											setReplacementImageUrl(replacementImageUrl);
+											clearErrors('articleThumbnailUrl');
+										}}
 										errorMessage={errors.articleThumbnailUrl?.message}
-										onUpdate={async (replacementImageUrl) => {
+										onUpdate={(replacementImageUrl) => {
 											const nextThumbnailUrl =
 												replacementImageUrl.trim() ||
 												originalArticleThumbnailUrl;
@@ -110,8 +113,6 @@ export const ArticleThumbnailImageFormField = () => {
 												shouldDirty: true,
 												shouldValidate: true,
 											});
-
-											return trigger('articleThumbnailUrl');
 										}}
 									/>
 								)}
