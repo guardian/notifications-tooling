@@ -306,6 +306,82 @@ describe('POST /v1/notifications (real Postgres)', () => {
 		}
 	});
 
+	it('registers each failed app-push edition on the notification when a topic type fails', async () => {
+		const dispatch = mock((_request: unknown, notificationId: string) =>
+			Promise.resolve({
+				appPush: [
+					{
+						notificationId,
+						id: 'mobile-n10n-1',
+						topicType: 'breaking-news',
+						editions: ['uk', 'us'],
+						topics: [{ type: 'breaking', name: 'uk' }],
+						importance: 'Major' as const,
+						status: 'failure' as const,
+						failureReason: 'unknown' as const,
+						providerStatusCode: 500,
+					},
+					{
+						notificationId,
+						id: 'mobile-n10n-2',
+						topicType: 'sport',
+						editions: ['uk'],
+						topics: [{ type: 'breaking', name: 'uk' }],
+						importance: 'Minor' as const,
+						status: 'success' as const,
+					},
+				],
+				newsletter: [],
+			}),
+		);
+		const dispatchServer = await startDispatchServer(dispatch);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notifications`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(validPushRequest()),
+				},
+			);
+
+			expect(response.status).toBe(502);
+			const body = (await response.json()) as { id: string; status: string };
+			expect(body.status).toBe('partially_delivered');
+
+			const stored = await notifications.findByIdWithDispatches(body.id);
+			expect(stored?.status).toBe('partially_delivered');
+			expect(stored?.dispatches).toHaveLength(2);
+
+			const failed = stored?.dispatches.find(
+				(dispatchRow) => dispatchRow.status === 'failure',
+			);
+			expect(failed).toMatchObject({
+				channel: 'app-push',
+				target: 'breaking-news/uk,us',
+				providerRef: 'mobile-n10n-1',
+				providerStatusCode: 500,
+				detail: {
+					topics: [{ type: 'breaking', name: 'uk' }],
+					importance: 'Major',
+				},
+			});
+
+			// Each failed edition is denormalised onto the row as a topicType/edition
+			// pair, parsed back off the dispatch target for the list endpoint.
+			expect(stored?.failedTargets).toEqual({
+				topics: [
+					{ topicType: 'breaking-news', edition: 'uk' },
+					{ topicType: 'breaking-news', edition: 'us' },
+				],
+				segments: [],
+			});
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
 	it('persists a dry run as accepted with no dispatches', async () => {
 		const dispatch = mock(() =>
 			Promise.resolve({ appPush: [], newsletter: [] }),

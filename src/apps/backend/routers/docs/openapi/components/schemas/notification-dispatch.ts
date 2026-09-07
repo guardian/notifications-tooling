@@ -56,7 +56,7 @@ export const notificationDispatchSchema = {
 				'Channel-specific extras: for app-push, the `topics` sent to mobile-n10n and the `importance`; for newsletter, the Braze `campaignId` and the `emailRenderingId`.',
 			additionalProperties: true,
 			example: {
-				topics: [{ type: 'breaking', name: 'uk' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 				importance: 'Major',
 			},
 		},

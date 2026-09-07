@@ -1,10 +1,10 @@
 ALTER TABLE "notifications" ADD COLUMN "failed_targets" jsonb DEFAULT '{"topics":[],"segments":[]}'::jsonb NOT NULL;--> statement-breakpoint
 -- Backfill existing rows from their recorded failed dispatch outcomes. Rows with
 -- no failed dispatches keep the empty default set by the ADD COLUMN above.
--- App-push topics are expanded to { topicType, edition } key pairs from the
--- dispatch's recorded editions; newsletter segments to { segmentId } keys.
--- Dispatches predating edition recording (no detail->'editions') contribute no
--- topics, since the editions they addressed were never stored.
+-- App-push targets are stored as '<topicType>/<edition>,<edition>', so the topic
+-- type and its editions are parsed back off the target string and expanded into
+-- { topicType, edition } key pairs; newsletter segments to { segmentId } keys.
+-- Targets with no editions (a bare topic type) contribute no topics.
 UPDATE "notifications" AS n
 SET "failed_targets" = agg.failed
 FROM (
@@ -14,8 +14,15 @@ FROM (
 			'topics',
 			COALESCE(
 				jsonb_agg(
-					DISTINCT jsonb_build_object('topicType', d."target", 'edition', edition.value)
-				) FILTER (WHERE d."channel" = 'app-push' AND edition.value IS NOT NULL),
+					DISTINCT jsonb_build_object(
+						'topicType', split_part(d."target", '/', 1),
+						'edition', edition.value
+					)
+				) FILTER (
+					WHERE d."channel" = 'app-push'
+						AND edition.value IS NOT NULL
+						AND edition.value <> ''
+				),
 				'[]'::jsonb
 			),
 			'segments',
@@ -26,7 +33,9 @@ FROM (
 			)
 		) AS failed
 	FROM "notification_dispatches" AS d
-	LEFT JOIN LATERAL jsonb_array_elements_text(d."detail" -> 'editions') AS edition(value)
+	LEFT JOIN LATERAL unnest(
+		string_to_array(split_part(d."target", '/', 2), ',')
+	) AS edition(value)
 		ON d."channel" = 'app-push'
 	WHERE d."status" = 'failure'
 	GROUP BY d."notification_id"
