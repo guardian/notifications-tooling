@@ -1,6 +1,6 @@
 {
-  "id": "c9bd80dc-fda1-44cd-b2ac-65f7d167f090",
-  "prevId": "e42679a0-eeec-455e-9274-00c3c20cd1e7",
+  "id": "45f238b3-9978-45ee-a09d-a6dce6f71ca1",
+  "prevId": "c9bd80dc-fda1-44cd-b2ac-65f7d167f090",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -198,6 +198,13 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
+        },
+        "failed_targets": {
+          "name": "failed_targets",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"topics\":[],\"segments\":[]}'::jsonb"
         },
         "created_at": {
           "name": "created_at",

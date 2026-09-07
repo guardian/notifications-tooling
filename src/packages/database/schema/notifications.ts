@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
 	boolean,
 	index,
@@ -86,7 +87,11 @@ export const notifications = pgTable(
 		uniqueIndex('notifications_idempotency_key_unique').on(
 			table.idempotencyKey,
 		),
-		// Serves the list endpoint's `since` cut-off filter + newest-first order.
-		index('notifications_created_at_idx').on(table.createdAt.desc()),
+		// Serves the list endpoint, which returns production sends only, newest
+		// first. Partial on `kind = 'send'` so test notifications never enter the
+		// scan and the index stays confined to the rows the query can return.
+		index('notifications_send_created_at_idx')
+			.on(table.createdAt.desc())
+			.where(sql`${table.kind} = 'send'`),
 	],
 );

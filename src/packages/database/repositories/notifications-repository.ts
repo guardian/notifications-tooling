@@ -1,4 +1,4 @@
-import { count, desc, eq, gte } from 'drizzle-orm';
+import { and, count, desc, eq, gte } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -116,16 +116,20 @@ export const createNotificationsRepository = (db: Database) => ({
 	},
 
 	/**
-	 * The notifications created at or after `since`, newest first. `total`
-	 * counts every row within that cut-off, ignoring the limit/offset page.
-	 * Dispatch outcomes are intentionally not joined here.
+	 * The production sends (`kind = 'send'`) created at or after `since`, newest
+	 * first. Test notifications are excluded. `total` counts every matching row
+	 * within that cut-off, ignoring the limit/offset page. Dispatch outcomes are
+	 * intentionally not joined here.
 	 */
 	async listRecent({
 		since,
 		limit,
 		offset,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
-		const withinWindow = gte(notifications.createdAt, since);
+		const withinWindow = and(
+			gte(notifications.createdAt, since),
+			eq(notifications.kind, 'send'),
+		);
 
 		const [totals] = await db
 			.select({ total: count() })
