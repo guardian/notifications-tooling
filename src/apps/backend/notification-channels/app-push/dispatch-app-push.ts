@@ -29,6 +29,9 @@ const appNotificationEnvironmentSchema = z.object({
 /**
  * The outcome of one mobile-n10n push (one per targeted topic type). Returned so
  * the caller can persist each POST's id and status once a store exists.
+ * `topics` and `importance` are the actual values sent to mobile-n10n (not the
+ * internal topic-type mapping key), so persisted rows and logs record what was
+ * really dispatched.
  */
 export type AppPushDispatchOutcome = {
 	notificationId: string;
@@ -36,6 +39,8 @@ export type AppPushDispatchOutcome = {
 	topicType: string;
 	/** The public edition ids this push addressed, kept so failures map to labels. */
 	editions: string[];
+	topics: Array<{ type: string; name: string }>;
+	importance: AppNotificationImportance;
 	status: 'success' | 'failure';
 	failureReason?: AppNotificationFailureReason | 'unknown';
 	/** The mobile-n10n HTTP status when a failed push reached the provider. */
@@ -84,8 +89,8 @@ export const groupAppPushTopicsByType = (
 			titleOverride: resolved.titleOverride,
 			topics: [],
 		};
-		push.topics.push(resolved.topic);
 		push.editions.push(name);
+		push.topics.push(resolved.topic);
 		pushesByKey.set(key, push);
 	}
 	return [...pushesByKey.values()];
@@ -165,6 +170,8 @@ export const dispatchAppPush = async (
 				id,
 				topicType: push.topicType,
 				editions: push.editions,
+				topics: push.topics,
+				importance: push.importance,
 				status: 'success',
 				providerStatusCode: result.value.status,
 			};
@@ -174,6 +181,8 @@ export const dispatchAppPush = async (
 			id,
 			topicType: push.topicType,
 			editions: push.editions,
+			topics: push.topics,
+			importance: push.importance,
 			status: 'failure',
 			failureReason:
 				result.reason instanceof AppNotificationApiError

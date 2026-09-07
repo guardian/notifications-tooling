@@ -186,6 +186,8 @@ describe('POST /v1/notifications (real Postgres)', () => {
 						id: 'mobile-n10n-1',
 						topicType: 'breaking-news',
 						editions: ['uk'],
+						topics: [{ type: 'breaking', name: 'uk' }],
+						importance: 'Major' as const,
 						status: 'success' as const,
 					},
 				],
@@ -223,7 +225,7 @@ describe('POST /v1/notifications (real Postgres)', () => {
 			expect(stored?.dispatches).toHaveLength(1);
 			expect(stored?.dispatches[0]).toMatchObject({
 				channel: 'app-push',
-				target: 'breaking-news',
+				target: 'breaking-news/uk',
 				providerRef: 'mobile-n10n-1',
 				status: 'success',
 			});
@@ -241,6 +243,8 @@ describe('POST /v1/notifications (real Postgres)', () => {
 						id: 'mobile-n10n-1',
 						topicType: 'breaking-news',
 						editions: ['uk'],
+						topics: [{ type: 'breaking', name: 'uk' }],
+						importance: 'Major' as const,
 						status: 'success' as const,
 					},
 				],
@@ -249,6 +253,7 @@ describe('POST /v1/notifications (real Postgres)', () => {
 						notificationId,
 						segmentId: 'morning-briefing-uk',
 						campaignId: 'braze-campaign-1',
+						emailRenderingId: 'braze-newsletter-1',
 						dispatchId: 'braze-dispatch-1',
 						status: 'failure' as const,
 						failureReason: 'unknown' as const,
@@ -285,7 +290,10 @@ describe('POST /v1/notifications (real Postgres)', () => {
 				providerRef: 'braze-dispatch-1',
 				status: 'failure',
 				providerStatusCode: 500,
-				detail: { campaignId: 'braze-campaign-1' },
+				detail: {
+					campaignId: 'braze-campaign-1',
+					emailRenderingId: 'braze-newsletter-1',
+				},
 			});
 
 			// The failed segment is denormalised onto the row for the list endpoint.

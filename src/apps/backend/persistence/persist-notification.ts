@@ -43,7 +43,9 @@ export const rollUpStatus = (
  * Collects the targets that failed to dispatch, grouped by channel, so they can
  * be denormalised onto the notification row. Only keys are recorded so an API
  * consumer maps them back to labels via the audiences maps: `topicType`/`edition`
- * for app-push, `segmentId` for newsletter.
+ * for app-push, `segmentId` for newsletter. App-push targets are stored as
+ * `topicType/edition,edition`, so the topic type and editions are read back off
+ * the target string.
  */
 export const collectFailedTargets = (
 	dispatches: readonly NewNotificationDispatch[],
@@ -53,10 +55,10 @@ export const collectFailedTargets = (
 		topics: failed
 			.filter((d) => d.channel === 'app-push')
 			.flatMap((d) => {
-				const editions =
-					(d.detail as { editions?: string[] } | null)?.editions ?? [];
+				const [topicType, editionsCsv = ''] = d.target.split('/');
+				const editions = editionsCsv ? editionsCsv.split(',') : [];
 				return editions.map((edition) => ({
-					topicType: d.target,
+					topicType: topicType ?? d.target,
 					edition,
 				}));
 			}),
@@ -74,12 +76,12 @@ export const mapSendOutcomesToDispatches = (
 	...appPush.map((outcome): NewNotificationDispatch => ({
 		notificationId,
 		channel: 'app-push',
-		target: outcome.topicType,
+		target: `${outcome.topicType}/${outcome.editions.join(',')}`,
 		providerRef: outcome.id,
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
-		detail: { editions: outcome.editions },
+		detail: { topics: outcome.topics, importance: outcome.importance },
 	})),
 	...newsletter.map((outcome): NewNotificationDispatch => ({
 		notificationId,
@@ -89,7 +91,10 @@ export const mapSendOutcomesToDispatches = (
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
-		detail: { campaignId: outcome.campaignId },
+		detail: {
+			campaignId: outcome.campaignId,
+			emailRenderingId: outcome.emailRenderingId,
+		},
 	})),
 ];
 
@@ -101,12 +106,12 @@ export const mapTestOutcomesToDispatches = (
 	...appPush.map((outcome): NewNotificationDispatch => ({
 		notificationId,
 		channel: 'app-push',
-		target: outcome.topicType,
+		target: `${outcome.topicType}/${outcome.editions.join(',')}`,
 		providerRef: outcome.id,
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
-		detail: { editions: outcome.editions },
+		detail: { topics: outcome.topics, importance: outcome.importance },
 	})),
 	...newsletter.map((outcome): NewNotificationDispatch => ({
 		notificationId,
@@ -116,6 +121,7 @@ export const mapTestOutcomesToDispatches = (
 		status: outcome.status,
 		failureReason: outcome.failureReason ?? null,
 		providerStatusCode: outcome.providerStatusCode ?? null,
+		detail: { emailRenderingId: outcome.emailRenderingId },
 	})),
 ];
 

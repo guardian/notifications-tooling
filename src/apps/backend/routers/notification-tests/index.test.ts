@@ -263,6 +263,7 @@ describe('POST /v1/notification-tests', () => {
 					{
 						testId: 'ignored',
 						variant: 'UK',
+						emailRenderingId: 'newsletter-uk',
 						dispatchId: 'dispatch-1',
 						status: 'success' as const,
 					},

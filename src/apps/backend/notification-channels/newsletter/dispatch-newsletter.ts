@@ -22,11 +22,15 @@ export const newsletterEnvironmentSchema = z.object({
 /**
  * The outcome of one newsletter send (one per targeted segment). `dispatchId` is
  * Braze's `dispatch_id` from the campaign-trigger response, kept for tracking.
+ * `campaignId` and `emailRenderingId` are the actual downstream ids sent to
+ * Braze and email-rendering (not the internal segment mapping key), so persisted
+ * rows and logs record what was really dispatched.
  */
 export type NewsletterDispatchOutcome = {
 	notificationId: string;
 	segmentId: string;
 	campaignId: string;
+	emailRenderingId: string;
 	dispatchId?: string;
 	status: 'success' | 'failure';
 	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
@@ -128,12 +132,14 @@ export const dispatchNewsletter = async (
 	);
 
 	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
-		const { segmentId, brazeCampaignId } = segments[index]!;
+		const { segmentId, brazeCampaignId, emailRenderingNewsletterId } =
+			segments[index]!;
 		if (result.status === 'fulfilled') {
 			return {
 				notificationId,
 				segmentId,
 				campaignId: brazeCampaignId,
+				emailRenderingId: emailRenderingNewsletterId,
 				dispatchId: result.value.dispatchId,
 				status: 'success',
 				providerStatusCode: result.value.status,
@@ -143,6 +149,7 @@ export const dispatchNewsletter = async (
 			notificationId,
 			segmentId,
 			campaignId: brazeCampaignId,
+			emailRenderingId: emailRenderingNewsletterId,
 			status: 'failure',
 			failureReason: newsletterFailureReason(result.reason),
 			providerStatusCode: newsletterStatusCode(result.reason),

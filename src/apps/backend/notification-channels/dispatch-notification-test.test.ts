@@ -45,6 +45,7 @@ describe('dispatchNotificationTest', () => {
 			{
 				testId,
 				variant: 'UK',
+				emailRenderingId: 'breaking-news-uk',
 				dispatchId: 'test-dispatch-123',
 				status: 'success',
 				providerStatusCode: 201,
@@ -56,6 +57,8 @@ describe('dispatchNotificationTest', () => {
 				id: anyString,
 				topicType: 'test',
 				editions: ['test'],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+				importance: 'Minor',
 				status: 'success',
 				providerStatusCode: 201,
 			},
