@@ -39,7 +39,16 @@ export const buildDispatch = (
 ): NewNotificationDispatch => ({
 	notificationId,
 	channel: 'app-push',
-	target: 'breaking-news',
+	requested: {
+		channel: 'app-push',
+		topicType: 'breaking-news',
+		editions: ['uk'],
+	},
+	resolved: {
+		channel: 'app-push',
+		topics: [{ type: 'breaking', name: 'uk' }],
+		importance: 'Major',
+	},
 	status: 'success',
 	...overrides,
 });

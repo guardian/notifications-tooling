@@ -179,12 +179,30 @@ export type ChannelAudienceResponse = z.infer<
 export const notificationDispatchSchema = z.strictObject({
 	id: z.string(),
 	channel: z.enum(['newsletter', 'app-push']),
-	target: z.string(),
+	requested: z.discriminatedUnion('channel', [
+		z.object({
+			channel: z.literal('app-push'),
+			topicType: z.string(),
+			editions: z.array(z.string()),
+		}),
+		z.object({ channel: z.literal('newsletter'), segment: z.string() }),
+	]),
+	resolved: z.discriminatedUnion('channel', [
+		z.object({
+			channel: z.literal('app-push'),
+			topics: z.array(z.object({ type: z.string(), name: z.string() })),
+			importance: z.enum(['Major', 'Minor']),
+		}),
+		z.object({
+			channel: z.literal('newsletter'),
+			brazeCampaignId: z.string().optional(),
+			emailRenderingId: z.string(),
+		}),
+	]),
 	status: z.enum(['success', 'failure']),
 	providerRef: z.string().nullable(),
 	failureReason: z.string().nullable(),
 	providerStatusCode: z.number().int().nullable(),
-	detail: z.record(z.string(), z.unknown()).nullable(),
 	createdAt: z.string(),
 	updatedAt: z.string(),
 });
@@ -206,6 +224,12 @@ export const notificationResourceSchema = z.strictObject({
 	scheduledFor: z.string().nullable(),
 	content: z.record(z.string(), z.unknown()),
 	channels: z.record(z.string(), z.unknown()),
+	failedTargets: z
+		.object({
+			topics: z.array(z.object({ topicType: z.string(), edition: z.string() })),
+			segments: z.array(z.object({ segmentId: z.string() })),
+		})
+		.optional(),
 	createdAt: z.string(),
 	updatedAt: z.string(),
 	dispatches: notificationDispatchSchema.array(),

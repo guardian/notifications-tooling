@@ -73,14 +73,17 @@ describe('GET /v1/notifications/:id (real Postgres)', () => {
 		const notification = await notifications.create(buildNotification());
 		await dispatches.upsert(
 			buildDispatch(notification.id, {
-				target: 'breaking-news',
 				providerRef: 'mobile-n10n-1',
 			}),
 		);
 		await dispatches.upsert(
 			buildDispatch(notification.id, {
 				channel: 'newsletter',
-				target: 'morning-briefing-uk',
+				requested: { channel: 'newsletter', segment: 'morning-briefing-uk' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: 'morning-briefing-uk',
+				},
 			}),
 		);
 
@@ -99,7 +102,7 @@ describe('GET /v1/notifications/:id (real Postgres)', () => {
 			createdAt: string;
 			dispatches: Array<{
 				channel: string;
-				target: string;
+				requested: Record<string, unknown>;
 				providerRef: string | null;
 				status: string;
 			}>;
@@ -112,13 +115,17 @@ describe('GET /v1/notifications/:id (real Postgres)', () => {
 		expect(body.channels).toEqual(notification.channels);
 		expect(typeof body.createdAt).toBe('string');
 
-		expect(body.dispatches.map((dispatch) => dispatch.target)).toEqual([
-			'breaking-news',
-			'morning-briefing-uk',
+		expect(body.dispatches.map((dispatch) => dispatch.requested)).toEqual([
+			{ channel: 'app-push', topicType: 'breaking-news', editions: ['uk'] },
+			{ channel: 'newsletter', segment: 'morning-briefing-uk' },
 		]);
 		expect(body.dispatches[0]).toMatchObject({
 			channel: 'app-push',
-			target: 'breaking-news',
+			requested: {
+				channel: 'app-push',
+				topicType: 'breaking-news',
+				editions: ['uk'],
+			},
 			providerRef: 'mobile-n10n-1',
 			status: 'success',
 		});
@@ -178,17 +185,24 @@ const startDispatchServer = (
 
 describe('POST /v1/notifications (real Postgres)', () => {
 	it('persists the notification and its dispatch outcomes when every target delivers', async () => {
-		const dispatch = mock((_request: unknown, notificationId: string) =>
+		const dispatch = mock(() =>
 			Promise.resolve({
 				appPush: [
 					{
-						notificationId,
-						id: 'mobile-n10n-1',
-						topicType: 'breaking-news',
-						editions: ['uk'],
-						topics: [{ type: 'breaking', name: 'uk' }],
-						importance: 'Major' as const,
+						requested: {
+							channel: 'app-push' as const,
+							topicType: 'breaking-news',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push' as const,
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major' as const,
+						},
 						status: 'success' as const,
+						providerRef: 'mobile-n10n-1',
+						failureReason: null,
+						providerStatusCode: null,
 					},
 				],
 				newsletter: [],
@@ -225,7 +239,11 @@ describe('POST /v1/notifications (real Postgres)', () => {
 			expect(stored?.dispatches).toHaveLength(1);
 			expect(stored?.dispatches[0]).toMatchObject({
 				channel: 'app-push',
-				target: 'breaking-news/uk',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
 				providerRef: 'mobile-n10n-1',
 				status: 'success',
 			});
@@ -235,27 +253,39 @@ describe('POST /v1/notifications (real Postgres)', () => {
 	});
 
 	it('rolls a mix of outcomes up to partially_delivered and stores each dispatch', async () => {
-		const dispatch = mock((_request: unknown, notificationId: string) =>
+		const dispatch = mock(() =>
 			Promise.resolve({
 				appPush: [
 					{
-						notificationId,
-						id: 'mobile-n10n-1',
-						topicType: 'breaking-news',
-						editions: ['uk'],
-						topics: [{ type: 'breaking', name: 'uk' }],
-						importance: 'Major' as const,
+						requested: {
+							channel: 'app-push' as const,
+							topicType: 'breaking-news',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push' as const,
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major' as const,
+						},
 						status: 'success' as const,
+						providerRef: 'mobile-n10n-1',
+						failureReason: null,
+						providerStatusCode: null,
 					},
 				],
 				newsletter: [
 					{
-						notificationId,
-						segmentId: 'morning-briefing-uk',
-						campaignId: 'braze-campaign-1',
-						emailRenderingId: 'braze-newsletter-1',
-						dispatchId: 'braze-dispatch-1',
+						requested: {
+							channel: 'newsletter' as const,
+							segment: 'morning-briefing-uk',
+						},
+						resolved: {
+							channel: 'newsletter' as const,
+							brazeCampaignId: 'braze-campaign-1',
+							emailRenderingId: 'braze-newsletter-1',
+						},
 						status: 'failure' as const,
+						providerRef: null,
 						failureReason: 'unknown' as const,
 						providerStatusCode: 500,
 					},
@@ -286,14 +316,113 @@ describe('POST /v1/notifications (real Postgres)', () => {
 				(dispatchRow) => dispatchRow.channel === 'newsletter',
 			);
 			expect(newsletter).toMatchObject({
-				target: 'morning-briefing-uk',
-				providerRef: 'braze-dispatch-1',
+				requested: { channel: 'newsletter', segment: 'morning-briefing-uk' },
 				status: 'failure',
 				providerStatusCode: 500,
-				detail: {
-					campaignId: 'braze-campaign-1',
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId: 'braze-campaign-1',
 					emailRenderingId: 'braze-newsletter-1',
 				},
+			});
+
+			// The failed segment is denormalised onto the row for the list endpoint.
+			expect(stored?.failedTargets).toEqual({
+				topics: [],
+				segments: [{ segmentId: 'morning-briefing-uk' }],
+			});
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
+	it('registers each failed app-push edition on the notification when a topic type fails', async () => {
+		const dispatch = mock(() =>
+			Promise.resolve({
+				appPush: [
+					{
+						requested: {
+							channel: 'app-push' as const,
+							topicType: 'breaking-news',
+							editions: ['uk', 'us'],
+						},
+						resolved: {
+							channel: 'app-push' as const,
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major' as const,
+						},
+						status: 'failure' as const,
+						providerRef: 'mobile-n10n-1',
+						failureReason: 'unknown' as const,
+						providerStatusCode: 500,
+					},
+					{
+						requested: {
+							channel: 'app-push' as const,
+							topicType: 'sport',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push' as const,
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Minor' as const,
+						},
+						status: 'success' as const,
+						providerRef: 'mobile-n10n-2',
+						failureReason: null,
+						providerStatusCode: null,
+					},
+				],
+				newsletter: [],
+			}),
+		);
+		const dispatchServer = await startDispatchServer(dispatch);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notifications`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(validPushRequest()),
+				},
+			);
+
+			expect(response.status).toBe(502);
+			const body = (await response.json()) as { id: string; status: string };
+			expect(body.status).toBe('partially_delivered');
+
+			const stored = await notifications.findByIdWithDispatches(body.id);
+			expect(stored?.status).toBe('partially_delivered');
+			expect(stored?.dispatches).toHaveLength(2);
+
+			const failed = stored?.dispatches.find(
+				(dispatchRow) => dispatchRow.status === 'failure',
+			);
+			expect(failed).toMatchObject({
+				channel: 'app-push',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk', 'us'],
+				},
+				providerRef: 'mobile-n10n-1',
+				providerStatusCode: 500,
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'uk' }],
+					importance: 'Major',
+				},
+			});
+
+			// Each failed edition is denormalised onto the row as a topicType/edition
+			// pair, derived from the structured `requested` for the list endpoint.
+			expect(stored?.failedTargets).toEqual({
+				topics: [
+					{ topicType: 'breaking-news', edition: 'uk' },
+					{ topicType: 'breaking-news', edition: 'us' },
+				],
+				segments: [],
 			});
 		} finally {
 			await dispatchServer.close();

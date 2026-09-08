@@ -1,6 +1,7 @@
 import { and, count, desc, eq, gte } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
+import type { FailedTargets } from '../schema/notifications';
 import type { NotificationDispatch } from './notification-dispatches-repository';
 
 export type Notification = typeof notifications.$inferSelect;
@@ -77,6 +78,27 @@ export const createNotificationsRepository = (db: Database) => ({
 		const [row] = await db
 			.update(notifications)
 			.set({ status, updatedAt: new Date() })
+			.where(eq(notifications.id, id))
+			.returning();
+
+		return row!;
+	},
+
+	/**
+	 * Records the rolled-up status and the failed targets together once the
+	 * dispatch outcomes settle, so the list endpoint can report failures without
+	 * joining the dispatches.
+	 */
+	async updateDeliveryOutcome(
+		id: string,
+		{
+			status,
+			failedTargets,
+		}: { status: Notification['status']; failedTargets: FailedTargets },
+	): Promise<Notification> {
+		const [row] = await db
+			.update(notifications)
+			.set({ status, failedTargets, updatedAt: new Date() })
 			.where(eq(notifications.id, id))
 			.returning();
 

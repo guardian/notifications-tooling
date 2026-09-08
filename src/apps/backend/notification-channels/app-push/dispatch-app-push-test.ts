@@ -1,13 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { NotificationChannel } from '@config';
-import {
-	AppNotificationApiError,
-	type AppNotificationFailureReason,
-	type AppNotificationImportance,
-} from '@services';
+import { AppNotificationApiError } from '@services';
 import { determineArticleId } from '@utils';
 import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
+import type { AppPushDispatchOutcome } from '../dispatch-outcome';
 import {
 	type ChannelDispatchResult,
 	defaultDependencies,
@@ -24,26 +21,6 @@ const appNotificationEnvironmentSchema = z.object({
 });
 
 /**
- * The outcome of one test push to the internal test topic (one per topic type).
- * `id` is the mobile-n10n POST id, kept for tracking once a store exists.
- * `topics` and `importance` are the actual values sent to mobile-n10n (not the
- * internal topic-type mapping key), so persisted rows and logs record what was
- * really dispatched.
- */
-export type AppPushTestDispatchOutcome = {
-	testId: string;
-	id: string;
-	topicType: string;
-	editions: string[];
-	topics: Array<{ type: string; name: string }>;
-	importance: AppNotificationImportance;
-	status: 'success' | 'failure';
-	failureReason?: AppNotificationFailureReason | 'unknown';
-	/** The mobile-n10n HTTP status once the push reached the provider. */
-	providerStatusCode?: number;
-};
-
-/**
  * Sends a test app-push to the internal test topic via mobile-n10n. The schema
  * guarantees only the internal test topic can reach here, so production devices
  * are never targeted. Dry-run gating lives in the orchestrator
@@ -51,9 +28,9 @@ export type AppPushTestDispatchOutcome = {
  */
 export const dispatchAppPushTest = async (
 	request: NotificationTestSendRequest,
-	testId: string,
+	_testId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
-): Promise<ChannelDispatchResult<AppPushTestDispatchOutcome>> => {
+): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
 	const plan = request.channels[NotificationChannel.AppPushNotification];
 	if (!plan) {
 		return { outcomes: [] };
@@ -102,36 +79,41 @@ export const dispatchAppPushTest = async (
 		),
 	);
 
-	const outcomes = settled.map((result, index): AppPushTestDispatchOutcome => {
-		const { id, push } = dispatched[index]!;
+	const outcomes = settled.map((result, index): AppPushDispatchOutcome => {
+		const { push } = dispatched[index]!;
+		const requested = {
+			channel: 'app-push' as const,
+			topicType: push.topicType,
+			editions: push.editions,
+		};
+		const resolved = {
+			channel: 'app-push' as const,
+			topics: push.topics,
+			importance: push.importance,
+		};
 		if (result.status === 'fulfilled') {
 			return {
-				testId,
-				id,
-				topicType: push.topicType,
-				editions: push.editions,
-				topics: push.topics,
-				importance: push.importance,
+				requested,
+				resolved,
 				status: 'success',
+				providerRef: dispatched[index]!.id,
+				failureReason: null,
 				providerStatusCode: result.value.status,
 			};
 		}
 		return {
-			testId,
-			id,
-			topicType: push.topicType,
-			editions: push.editions,
-			topics: push.topics,
-			importance: push.importance,
+			requested,
+			resolved,
 			status: 'failure',
+			providerRef: dispatched[index]!.id,
 			failureReason:
 				result.reason instanceof AppNotificationApiError
 					? result.reason.reason
 					: 'unknown',
 			providerStatusCode:
 				result.reason instanceof AppNotificationApiError
-					? result.reason.status
-					: undefined,
+					? (result.reason.status ?? null)
+					: null,
 		};
 	});
 

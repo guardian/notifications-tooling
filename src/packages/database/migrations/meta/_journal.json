@@ -29,6 +29,20 @@
       "when": 1788771193470,
       "tag": "0003_replace_notifications_created_at_index_with_send_partial",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788789643341,
+      "tag": "0004_add_notifications_failed_targets",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788800000000,
+      "tag": "0005_structured_dispatch_targets",
+      "breakpoints": true
     }
   ]
 }

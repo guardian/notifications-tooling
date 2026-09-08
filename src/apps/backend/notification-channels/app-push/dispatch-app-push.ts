@@ -7,12 +7,12 @@ import {
 } from '@config';
 import {
 	AppNotificationApiError,
-	type AppNotificationFailureReason,
 	type AppNotificationImportance,
 } from '@services';
 import { determineArticleId } from '@utils';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
+import type { AppPushDispatchOutcome } from '../dispatch-outcome';
 import {
 	type ChannelDispatchResult,
 	type DispatchNotificationDependencies,
@@ -26,29 +26,10 @@ const appNotificationEnvironmentSchema = z.object({
 	MOBILE_N10N_API_KEY: z.string().trim().min(1),
 });
 
-/**
- * The outcome of one mobile-n10n push (one per targeted topic type). Returned so
- * the caller can persist each POST's id and status once a store exists.
- * `topics` and `importance` are the actual values sent to mobile-n10n (not the
- * internal topic-type mapping key), so persisted rows and logs record what was
- * really dispatched.
- */
-export type AppPushDispatchOutcome = {
-	notificationId: string;
-	id: string;
-	topicType: string;
-	editions: string[];
-	topics: Array<{ type: string; name: string }>;
-	importance: AppNotificationImportance;
-	status: 'success' | 'failure';
-	failureReason?: AppNotificationFailureReason | 'unknown';
-	/** The mobile-n10n HTTP status when a failed push reached the provider. */
-	providerStatusCode?: number;
-};
-
 /** One resolved push: a topic type, its importance, and its mobile-n10n topics. */
 export type ResolvedAppPush = {
 	topicType: string;
+	/** The public edition ids grouped into this push. */
 	editions: string[];
 	importance: AppNotificationImportance;
 	titleOverride?: string;
@@ -115,7 +96,7 @@ export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 
 export const dispatchAppPush = async (
 	resolvedDispatch: ReturnType<typeof resolveAppPushDispatch>,
-	notificationId: string,
+	_notificationId: string,
 	dependencies: DispatchNotificationDependencies,
 ): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
 	if (!resolvedDispatch) {
@@ -161,35 +142,40 @@ export const dispatchAppPush = async (
 	);
 
 	const outcomes = settled.map((result, index): AppPushDispatchOutcome => {
-		const { id, push } = dispatched[index]!;
+		const { push } = dispatched[index]!;
+		const requested = {
+			channel: 'app-push' as const,
+			topicType: push.topicType,
+			editions: push.editions,
+		};
+		const resolved = {
+			channel: 'app-push' as const,
+			topics: push.topics,
+			importance: push.importance,
+		};
 		if (result.status === 'fulfilled') {
 			return {
-				notificationId,
-				id,
-				topicType: push.topicType,
-				editions: push.editions,
-				topics: push.topics,
-				importance: push.importance,
+				requested,
+				resolved,
 				status: 'success',
+				providerRef: dispatched[index]!.id,
+				failureReason: null,
 				providerStatusCode: result.value.status,
 			};
 		}
 		return {
-			notificationId,
-			id,
-			topicType: push.topicType,
-			editions: push.editions,
-			topics: push.topics,
-			importance: push.importance,
+			requested,
+			resolved,
 			status: 'failure',
+			providerRef: dispatched[index]!.id,
 			failureReason:
 				result.reason instanceof AppNotificationApiError
 					? result.reason.reason
 					: 'unknown',
 			providerStatusCode:
 				result.reason instanceof AppNotificationApiError
-					? result.reason.status
-					: undefined,
+					? (result.reason.status ?? null)
+					: null,
 		};
 	});
 
