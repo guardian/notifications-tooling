@@ -18,6 +18,21 @@ export const FALLBACK_TOPIC_TYPES: AppAlertTopicOption[] = [
 		label: 'Breaking news',
 		editions: FALLBACK_APP_ALERT_EDITIONS,
 	},
+	{
+		id: 'sport',
+		label: 'Sports news',
+		editions: FALLBACK_APP_ALERT_EDITIONS,
+	},
+	{
+		id: 'editors-picks',
+		label: "Editors' picks",
+		editions: FALLBACK_APP_ALERT_EDITIONS,
+	},
+	{
+		id: 'one-not-to-miss',
+		label: 'One not to miss',
+		editions: FALLBACK_APP_ALERT_EDITIONS,
+	},
 ];
 
 export const FALLBACK_NEWSLETTER_SEGMENTS: NewsletterSegmentOption[] = [

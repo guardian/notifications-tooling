@@ -292,7 +292,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		expect(sendAppNotification).not.toHaveBeenCalled();
 	});
 
-	it('sends the US sport edition as its own push with the overridden title', async () => {
+	it('sends sport editions with their regional titles', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -317,11 +317,11 @@ describe('dispatchNotification (app-push channel)', () => {
 			dependencies,
 		);
 
-		// The override splits US out of the generic sport group into its own push.
+		// The regional titles split UK and US into separate pushes.
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				title: pushItem.title,
+				title: 'Sport news',
 				importance: 'Minor',
 				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
@@ -357,7 +357,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		]);
 	});
 
-	it('splits the overridden US sport edition out when mixed with other topic types and sport editions', async () => {
+	it('splits sport editions by regional title when mixed with other topic types', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -384,7 +384,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			dependencies,
 		);
 
-		// breaking-news (1) + grouped uk/au sport (1) + overridden us sport (1).
+		// breaking-news (1) + grouped uk/au sport (1) + US sport (1).
 		expect(sendAppNotification).toHaveBeenCalledTimes(3);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -395,7 +395,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				title: pushItem.title,
+				title: 'Sport news',
 				importance: 'Minor',
 				topics: [
 					{ type: 'breaking', name: 'internal-dispatch-test' },
