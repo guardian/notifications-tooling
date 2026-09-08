@@ -14,10 +14,14 @@ import { SubjectFormField } from './SubjectFormField';
 
 interface CreateNewsletterFormProps {
 	activeSectionHref: string;
+	showPreview: boolean;
+	onTogglePreview: (showPreview: boolean) => void;
 }
 
 export const CreateNewsletterForm = ({
 	activeSectionHref,
+	showPreview,
+	onTogglePreview,
 }: CreateNewsletterFormProps) => {
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
@@ -30,10 +34,11 @@ export const CreateNewsletterForm = ({
 		if (!notification.content) {
 			return;
 		}
+		const valuesToSend = showPreview ? values : { ...values, preview: '' };
 		updateNotification({
 			type: 'prepare-send',
 			request: buildNewsletterRequest({
-				values,
+				values: valuesToSend,
 				content: notification.content,
 				idempotencyKey: crypto.randomUUID(),
 			}),
@@ -56,10 +61,13 @@ export const CreateNewsletterForm = ({
 			channel="email"
 			sendButtonLabel="Send newsletter email"
 			onSubmit={submitForm}
-			onResetNotification={() =>
-				updateNotification({ type: 'reset-newsletter-email' })
-			}
+			onResetNotification={() => {
+				onTogglePreview(true);
+				updateNotification({ type: 'reset-newsletter-email' });
+			}}
 			onArticleImported={(article) => {
+				onTogglePreview(true);
+
 				const { headline, standfirst } = article.fields ?? {};
 				if (headline) {
 					setValue('subject', headline);
@@ -76,7 +84,11 @@ export const CreateNewsletterForm = ({
 			>
 				<KickerFormField />
 				<SubjectFormField constraints={constraints} />
-				<PreviewTextFormField constraints={constraints} />
+				<PreviewTextFormField
+					constraints={constraints}
+					showPreview={showPreview}
+					onTogglePreview={onTogglePreview}
+				/>
 			</NotificationFormSection>
 			<NotificationFormSection
 				id="audience-section"

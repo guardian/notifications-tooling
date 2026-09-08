@@ -15,7 +15,13 @@ import {
 import { HTMLPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
 
-export const EmailPreviewSection = () => {
+interface EmailPreviewSectionProps {
+	showPreview?: boolean;
+}
+
+export const EmailPreviewSection = ({
+	showPreview = true,
+}: EmailPreviewSectionProps) => {
 	const segments = useNewsletterSegmentOptions();
 	const selectedSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
 		name: 'audienceSegments',
@@ -55,7 +61,7 @@ export const EmailPreviewSection = () => {
 					Email appearance may vary across different email clients and devices
 				</Typography>
 			</AlertBanner>
-			<HTMLPreview />
+			<HTMLPreview showPreview={showPreview} />
 			<TestEmailForm />
 		</PreviewSection>
 	);

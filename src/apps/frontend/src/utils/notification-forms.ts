@@ -7,16 +7,29 @@ import { kickerSchema } from '../schemas';
  * broker caps nothing an editor can type. These schemas therefore check
  * presence and shape only.
  */
-export const newsletterFormSchema = z.object({
-	dispatchId: z.string().optional(),
-	kicker: kickerSchema,
-	subject: z.string().trim().min(1, 'Subject is required'),
-	preview: z.string().trim().min(1, 'Preview text is required'),
-	audienceSegments: z
-		.array(newsletterSegmentId)
-		.min(1, 'Please select an audience segment'),
-	deliveryOption: z.literal('immediate'),
-});
+export const newsletterFormSchema = z
+	.object({
+		dispatchId: z.string().optional(),
+		kicker: kickerSchema,
+		subject: z.string().trim().min(1, 'Subject is required'),
+		preview: z.string().trim(),
+		showPreview: z.boolean(),
+		audienceSegments: z
+			.array(newsletterSegmentId)
+			.min(1, 'Please select an audience segment'),
+		deliveryOption: z.literal('immediate'),
+	})
+	.superRefine(({ preview, showPreview }, context) => {
+		const previewError = validateNewsletterPreview(preview, showPreview);
+
+		if (previewError) {
+			context.addIssue({
+				code: 'custom',
+				message: previewError,
+				path: ['preview'],
+			});
+		}
+	});
 
 export const appAlertFormSchema = z.object({
 	dispatchId: z.string().optional(),
@@ -35,10 +48,22 @@ export const appAlertFormSchema = z.object({
 export type NewsletterFormValues = z.infer<typeof newsletterFormSchema>;
 export type AppAlertFormValues = z.infer<typeof appAlertFormSchema>;
 
+export const validateNewsletterPreview = (
+	preview: NewsletterFormValues['preview'],
+	showPreview: boolean,
+) => {
+	if (showPreview && preview.trim().length === 0) {
+		return 'Preview text is required';
+	}
+
+	return undefined;
+};
+
 export const defaultNewsletterFormValues: NewsletterFormValues = {
 	kicker: 'breaking-news',
 	subject: '',
 	preview: '',
+	showPreview: true,
 	audienceSegments: [],
 	deliveryOption: 'immediate',
 };

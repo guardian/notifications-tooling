@@ -7,7 +7,8 @@ import { CreateNewsletterForm } from './CreateNewsletterForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
 
 export const CreateNewsletterEmailTab = () => {
-	const { reset } = useFormContext<NewsletterFormValues>();
+	const { reset, setValue, watch } = useFormContext<NewsletterFormValues>();
+	const showPreview = watch('showPreview');
 
 	useEffect(() => reset(), [reset]);
 
@@ -16,9 +17,17 @@ export const CreateNewsletterEmailTab = () => {
 			channel="email"
 			previewToggle={<EmailPreviewToggle />}
 			renderForm={(activeSectionHref) => (
-				<CreateNewsletterForm activeSectionHref={activeSectionHref} />
+				<CreateNewsletterForm
+					activeSectionHref={activeSectionHref}
+					showPreview={showPreview}
+					onTogglePreview={(isSelected) => {
+						setValue('showPreview', isSelected, {
+							shouldValidate: true,
+						});
+					}}
+				/>
 			)}
-			previewSection={<EmailPreviewSection />}
+			previewSection={<EmailPreviewSection showPreview={showPreview} />}
 		/>
 	);
 };
