@@ -1,10 +1,7 @@
 import { newsletterSegments, NotificationChannel } from '@config';
-import {
-	type BrazeFailureReason,
-	type EmailRenderingFailureReason,
-} from '@services';
 import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
+import type { NewsletterDispatchOutcome } from '../dispatch-outcome';
 import {
 	type ChannelDispatchResult,
 	defaultDependencies,
@@ -36,28 +33,15 @@ const testEmailEnvironmentSchema = z.object({
 });
 
 /**
- * The outcome of one test-email send (one per rendering variant). `dispatchId`
- * is Braze's `dispatch_id` from the test send, kept for tracking.
- * `emailRenderingId` is the actual email-rendering newsletter id used to render
- * the variant (not the internal segment mapping key), so persisted rows and logs
- * record what was really dispatched.
+ * Sends one Braze test email per rendering variant to the registered test
+ * recipients. `resolved.emailRenderingId` is the actual email-rendering id used
+ * to render the variant, so persisted rows record what was really dispatched.
  */
-export type NewsletterTestDispatchOutcome = {
-	testId: string;
-	variant: string;
-	emailRenderingId: string;
-	dispatchId?: string;
-	status: 'success' | 'failure';
-	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
-	/** The Braze or email-rendering HTTP status once the send reached the provider. */
-	providerStatusCode?: number;
-};
-
 export const dispatchNewsletterTest = async (
 	request: NotificationTestSendRequest,
-	testId: string,
+	_testId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
-): Promise<ChannelDispatchResult<NewsletterTestDispatchOutcome>> => {
+): Promise<ChannelDispatchResult<NewsletterDispatchOutcome>> => {
 	const plan = request.channels[NotificationChannel.Newsletter];
 	if (!plan) {
 		return { outcomes: [] };
@@ -140,29 +124,29 @@ export const dispatchNewsletterTest = async (
 		),
 	);
 
-	const outcomes = settled.map(
-		(result, index): NewsletterTestDispatchOutcome => {
-			const { segmentId, emailRenderingId } = renderedVariants[index]!;
-			if (result.status === 'fulfilled') {
-				return {
-					testId,
-					variant: segmentId,
-					emailRenderingId,
-					dispatchId: result.value.dispatch_id,
-					status: 'success',
-					providerStatusCode: result.value.status,
-				};
-			}
+	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
+		const { segmentId, emailRenderingId } = renderedVariants[index]!;
+		const requested = { channel: 'newsletter' as const, segment: segmentId };
+		const resolved = { channel: 'newsletter' as const, emailRenderingId };
+		if (result.status === 'fulfilled') {
 			return {
-				testId,
-				variant: segmentId,
-				emailRenderingId,
-				status: 'failure',
-				failureReason: newsletterFailureReason(result.reason),
-				providerStatusCode: newsletterStatusCode(result.reason),
+				requested,
+				resolved,
+				status: 'success',
+				providerRef: result.value.dispatch_id ?? null,
+				failureReason: null,
+				providerStatusCode: result.value.status,
 			};
-		},
-	);
+		}
+		return {
+			requested,
+			resolved,
+			status: 'failure',
+			providerRef: null,
+			failureReason: newsletterFailureReason(result.reason),
+			providerStatusCode: newsletterStatusCode(result.reason) ?? null,
+		};
+	});
 
 	return { outcomes, error: firstSettledError(settled) };
 };

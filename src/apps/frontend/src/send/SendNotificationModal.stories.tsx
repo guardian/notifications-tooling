@@ -63,7 +63,7 @@ export const NewsletterEmail: Story = {
 			canvas.getByText('Are you sure you want to send the newsletter email?'),
 		).toBeVisible();
 		await expect(
-			canvas.getByText('Sent newsletter emails cannot be undone'),
+			canvas.getByText('Sent newsletter emails cannot be undone.'),
 		).toBeVisible();
 		await expect(canvas.getByRole('button', { name: 'Cancel' })).toBeVisible();
 		await expect(
@@ -92,7 +92,7 @@ export const AppAlert: Story = {
 			canvas.getByText('Are you sure you want to send the app alert?'),
 		).toBeVisible();
 		await expect(
-			canvas.getByText('Sent app alerts cannot be undone'),
+			canvas.getByText('Sent app alerts cannot be undone.'),
 		).toBeVisible();
 		await expect(canvas.getByRole('button', { name: 'Cancel' })).toBeVisible();
 		await expect(

@@ -67,12 +67,16 @@ export const acceptedEmailSendResponse: SendNotificationResponse = {
 		{
 			id: 'dispatch-1234-abcd',
 			channel: 'newsletter',
-			target: 'UK',
+			requested: { channel: 'newsletter', segment: 'UK' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'braze-campaign-1',
+				emailRenderingId: 'briefing-uk',
+			},
 			status: 'success',
 			providerRef: 'braze-dispatch-1',
 			failureReason: null,
 			providerStatusCode: null,
-			detail: null,
 			createdAt: '2026-08-25T00:00:00.000Z',
 			updatedAt: '2026-08-25T00:00:00.000Z',
 		},

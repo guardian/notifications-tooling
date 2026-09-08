@@ -83,12 +83,14 @@ export const UpdatesFormFields: Story = {
 		const headline = canvas.getByLabelText('Headline');
 
 		await userEvent.click(alertType);
-		await userEvent.click(await screen.findByRole('option', { name: 'Sport' }));
+		await userEvent.click(
+			await screen.findByRole('option', { name: 'Sports news' }),
+		);
 		await userEvent.click(unitedKingdom);
 		await userEvent.type(headline, 'A developing story');
 
 		await expect(
-			canvas.getByRole('button', { name: 'Sport Alert type' }),
+			canvas.getByRole('button', { name: 'Sports news Alert type' }),
 		).toBeVisible();
 		await expect(unitedKingdom).toBeChecked();
 		await expect(headline).toHaveValue('A developing story');
@@ -229,6 +231,81 @@ export const WithThumbnail: Story = {
 	},
 };
 
+export const WithReplacementThumbnail: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const thumbnail = canvas.getByAltText(
+			'Thumbnail for A rhyme to recall rising temperatures',
+		);
+
+		await expect(thumbnail).toHaveAttribute(
+			'src',
+			articleFixture.fields?.thumbnail,
+		);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		const updateButton = canvas.getByRole('button', { name: 'Update' });
+
+		await userEvent.clear(replacementInput);
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await expect(thumbnail).toHaveAttribute(
+			'src',
+			articleFixture.fields?.thumbnail,
+		);
+
+		await userEvent.click(updateButton);
+
+		await expect(thumbnail).toHaveAttribute(
+			'src',
+			articleFixture.fields?.thumbnail,
+		);
+		await expect(canvas.getByText('Image updated')).toBeVisible();
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		);
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			await screen.findByText('Are you sure you want to send the app alert?'),
+		).toBeVisible();
+	},
+};
+
+export const RejectsNonGuardianReplacementThumbnail: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		await userEvent.type(
+			canvas.getByRole('textbox', { name: 'replacement image URL' }),
+			'https://example.com/replacement-thumbnail.jpg',
+		);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(
+			canvas.getByText('Please enter a valid Guardian image URL'),
+		).toBeVisible();
+		await expect(canvas.queryByText('Image updated')).not.toBeInTheDocument();
+	},
+};
+
 export const WithThumbnailTurnedOff: Story = {
 	args: {
 		notificationState: populatedPushState,
@@ -243,10 +320,19 @@ export const WithThumbnailTurnedOff: Story = {
 		await expect(thumbnailToggle).toBeEnabled();
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
 		await expect(
-			canvas.queryByAltText(
+			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
-		).not.toBeInTheDocument();
+		).toBeVisible();
+
+		await userEvent.click(thumbnailToggle);
+
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(
+			canvas.getByAltText(
+				'Thumbnail for A rhyme to recall rising temperatures',
+			),
+		).toBeVisible();
 	},
 };
 
@@ -259,7 +345,11 @@ export const WithoutThumbnail: Story = {
 				fields: { ...articleFixture.fields, thumbnail: '' },
 			},
 		},
-		formValues: { ...completePushParams, includeThumbnail: false },
+		formValues: {
+			...completePushParams,
+			includeThumbnail: false,
+			articleThumbnailUrl: '',
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

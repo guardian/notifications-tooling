@@ -87,3 +87,27 @@ export const validateGuardianEmail = (emailInput: string) => {
 	}
 	return undefined;
 };
+
+const guardianImageUrlHosts = ['media.guim.co.uk', 'i.guim.co.uk'];
+export const guardianImageUrlValidationMessage =
+	'Please enter a valid Guardian image URL';
+
+export const validateGuardianImageUrl = (imageUrl: string) => {
+	if (imageUrl.length === 0) {
+		return undefined;
+	}
+
+	try {
+		const url = new URL(imageUrl);
+		const hasValidProtocol =
+			url.protocol === 'https:' || url.protocol === 'http:';
+		const hasValidHost = guardianImageUrlHosts.includes(url.host);
+		const hasImagePath = url.pathname !== '/';
+
+		return hasValidProtocol && hasValidHost && hasImagePath
+			? undefined
+			: guardianImageUrlValidationMessage;
+	} catch {
+		return guardianImageUrlValidationMessage;
+	}
+};

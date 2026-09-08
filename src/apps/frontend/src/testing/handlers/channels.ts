@@ -69,7 +69,7 @@ export const channelAudiences: ChannelAudienceResponse = {
 				},
 				{
 					id: 'sport',
-					label: 'Sport',
+					label: 'Sports news',
 					editions: [
 						{ id: 'uk', label: 'UK' },
 						{ id: 'us', label: 'US' },

@@ -15,6 +15,7 @@ describe('notification request builders', () => {
 				preview: 'What readers need to know.',
 				audienceSegments: ['UK', 'AU'],
 				deliveryOption: 'immediate',
+				showPreview: true,
 			},
 			content: articleFixture,
 			idempotencyKey: 'newsletter-operation-id',
@@ -50,6 +51,7 @@ describe('notification request builders', () => {
 				headline: 'A developing story',
 				editions: ['UK', 'EU', 'INT'],
 				includeThumbnail: true,
+				articleThumbnailUrl: articleFixture.fields?.thumbnail ?? '',
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',
@@ -83,6 +85,31 @@ describe('notification request builders', () => {
 		});
 	});
 
+	it('uses a replacement thumbnail URL in app-push media', () => {
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const request = buildAppAlertRequest({
+			values: {
+				alertType: 'breaking-news',
+				headline: 'A developing story',
+				editions: ['UK'],
+				includeThumbnail: true,
+				articleThumbnailUrl: replacementThumbnailUrl,
+				deliveryOption: 'appImmediate',
+			},
+			alertTypeLabel: 'Breaking news',
+			content: articleFixture,
+			idempotencyKey: 'app-alert-with-replacement-thumbnail',
+		});
+
+		expect(request.content.items['lead-story']).toMatchObject({
+			media: {
+				imageUrl: replacementThumbnailUrl,
+				thumbnailUrl: replacementThumbnailUrl,
+			},
+		});
+	});
+
 	it('removes app-push media when the thumbnail is disabled', () => {
 		const request = buildAppAlertRequest({
 			values: {
@@ -90,6 +117,7 @@ describe('notification request builders', () => {
 				headline: 'A developing story',
 				editions: ['UK'],
 				includeThumbnail: false,
+				articleThumbnailUrl: articleFixture.fields?.thumbnail ?? '',
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',
@@ -108,6 +136,7 @@ describe('notification request builders', () => {
 				preview: 'What readers need to know.',
 				audienceSegments: ['UK'],
 				deliveryOption: 'immediate',
+				showPreview: true,
 			},
 			content: articleFixture,
 			idempotencyKey: 'newsletter-operation-id',
@@ -118,6 +147,7 @@ describe('notification request builders', () => {
 				headline: 'A developing story',
 				editions: ['UK'],
 				includeThumbnail: false,
+				articleThumbnailUrl: articleFixture.fields?.thumbnail ?? '',
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',

@@ -4,29 +4,33 @@ import { Typography } from '@guardian/stand/Typography';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 import { ToggleSwitchTheme } from '../themes';
 
-interface AppAlertThumbnailSwitchProps {
+interface PreviewTextToggleProps {
 	isSelected: boolean;
-	isDisabled?: boolean;
 	onChange: (isSelected: boolean) => void;
 }
 
-export const AppAlertThumbnailSwitch = ({
+const styles = {
+	container: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: '4px',
+	}),
+	row: css({
+		display: 'flex',
+		flexDirection: 'row',
+		gap: '8px',
+		alignItems: 'center',
+	}),
+};
+
+export const PreviewTextToggle = ({
 	isSelected,
-	isDisabled = false,
 	onChange,
-}: AppAlertThumbnailSwitchProps) => {
-	return (
-		<div
-			css={css({
-				display: 'flex',
-				flexDirection: 'row',
-				gap: '8px',
-				alignItems: 'center',
-			})}
-		>
+}: PreviewTextToggleProps) => (
+	<div css={styles.container}>
+		<div css={styles.row}>
 			<ToggleButton
-				aria-label="Show article thumbnail image"
-				isDisabled={isDisabled}
+				aria-label="Show preview text"
 				isSelected={isSelected}
 				onChange={onChange}
 				css={ToggleSwitchTheme.baseStyle(isSelected)}
@@ -36,9 +40,7 @@ export const AppAlertThumbnailSwitch = ({
 					cssOverrides={ToggleSwitchTheme.thumb(isSelected)}
 				/>
 			</ToggleButton>
-			<Typography variant="labelFormInlineSm">
-				Show article thumbnail image
-			</Typography>
+			<Typography variant="labelFormInlineSm">Show preview text</Typography>
 		</div>
-	);
-};
+	</div>
+);

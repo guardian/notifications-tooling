@@ -108,7 +108,7 @@ const DeliveryParameter = ({
 		month: '2-digit',
 		year: '2-digit',
 	});
-	const temporaryDeliveryTime = `${tempTime} (ET), ${tempDate}`;
+	const temporaryDeliveryTime = `${tempTime}, ${tempDate}`;
 
 	return (
 		<ParameterLabel label="Delivery and time">

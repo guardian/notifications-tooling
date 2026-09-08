@@ -4,6 +4,7 @@ import {
 	defaultAppAlertFormValues,
 	defaultNewsletterFormValues,
 	newsletterFormSchema,
+	validateNewsletterPreview,
 } from './notification-forms';
 
 describe('notification form length rules', () => {
@@ -29,6 +30,64 @@ describe('notification form length rules', () => {
 		expect(result.success).toBe(true);
 	});
 
+	it('accepts an empty or valid app-alert thumbnail URL', () => {
+		const values = {
+			...defaultAppAlertFormValues,
+			headline: 'A developing story',
+			editions: ['UK'] as const,
+		};
+
+		expect(appAlertFormSchema.safeParse(values).success).toBe(true);
+		expect(
+			appAlertFormSchema.safeParse({
+				...values,
+				articleThumbnailUrl:
+					'https://media.guim.co.uk/replacement-thumbnail.jpg',
+			}).success,
+		).toBe(true);
+		expect(
+			appAlertFormSchema.safeParse({
+				...values,
+				articleThumbnailUrl: 'https://i.guim.co.uk/img/media/image-id.jpg',
+			}).success,
+		).toBe(true);
+	});
+
+	it('rejects an invalid app-alert thumbnail URL', () => {
+		expect(
+			appAlertFormSchema.safeParse({
+				...defaultAppAlertFormValues,
+				headline: 'A developing story',
+				editions: ['UK'],
+				articleThumbnailUrl: 'not a URL',
+			}).success,
+		).toBe(false);
+		expect(
+			appAlertFormSchema.safeParse({
+				...defaultAppAlertFormValues,
+				headline: 'A developing story',
+				editions: ['UK'],
+				articleThumbnailUrl: 'https://www.theguardian.com/news/image.jpg',
+			}).success,
+		).toBe(false);
+		expect(
+			appAlertFormSchema.safeParse({
+				...defaultAppAlertFormValues,
+				headline: 'A developing story',
+				editions: ['UK'],
+				articleThumbnailUrl: 'ftp://media.guim.co.uk/replacement-thumbnail.jpg',
+			}).success,
+		).toBe(false);
+		expect(
+			appAlertFormSchema.safeParse({
+				...defaultAppAlertFormValues,
+				headline: 'A developing story',
+				editions: ['UK'],
+				articleThumbnailUrl: 'https://media.guim.co.uk',
+			}).success,
+		).toBe(false);
+	});
+
 	it('still requires each text field to be present', () => {
 		expect(
 			newsletterFormSchema.safeParse({
@@ -46,5 +105,36 @@ describe('notification form length rules', () => {
 				editions: ['UK'],
 			}).success,
 		).toBe(false);
+	});
+
+	it('requires preview text only when preview is shown', () => {
+		expect(validateNewsletterPreview('   ', true)).toBe(
+			'Preview text is required',
+		);
+
+		expect(validateNewsletterPreview('   ', false)).toBeUndefined();
+		expect(validateNewsletterPreview('Preview', true)).toBeUndefined();
+	});
+
+	it('validates preview text on submit when show preview is enabled', () => {
+		expect(
+			newsletterFormSchema.safeParse({
+				...defaultNewsletterFormValues,
+				subject: 'Subject',
+				preview: '   ',
+				showPreview: true,
+				audienceSegments: ['UK'],
+			}).success,
+		).toBe(false);
+
+		expect(
+			newsletterFormSchema.safeParse({
+				...defaultNewsletterFormValues,
+				subject: 'Subject',
+				preview: '   ',
+				showPreview: false,
+				audienceSegments: ['UK'],
+			}).success,
+		).toBe(true);
 	});
 });

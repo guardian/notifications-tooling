@@ -29,6 +29,13 @@ const createNotificationsRepository = () => ({
 			status,
 		} as PersistedNotification['notification']),
 	),
+	updateDeliveryOutcome: mock((id: string, { status }: { status: string }) =>
+		Promise.resolve({
+			...buildPersistedNotification().notification,
+			id,
+			status,
+		} as PersistedNotification['notification']),
+	),
 	findById: mock(() => Promise.resolve(null)),
 	findByIdWithDispatches: mock(() => Promise.resolve(null)),
 });
@@ -67,6 +74,7 @@ export const buildPersistedNotification = (
 		scheduledFor: null,
 		content: {},
 		channels: {},
+		failedTargets: { topics: [], segments: [] },
 		createdAt: new Date(0),
 		updatedAt: new Date(0),
 		...overrides.notification,

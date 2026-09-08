@@ -46,13 +46,19 @@ describe('dispatchAppPushTest', () => {
 		);
 		expect(outcomes).toEqual([
 			{
-				testId,
-				id: anyString,
-				topicType: 'test',
-				editions: ['test'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);
@@ -70,13 +76,19 @@ describe('dispatchAppPushTest', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 		expect(outcomes).toEqual([
 			{
-				testId,
-				id: anyString,
-				topicType: 'test',
-				editions: ['test'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);
@@ -95,13 +107,18 @@ describe('dispatchAppPushTest', () => {
 
 		expect(outcomes).toEqual([
 			{
-				testId,
-				id: anyString,
-				topicType: 'test',
-				editions: ['test'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'failure',
+				providerRef: anyString,
 				failureReason: 'http_error',
 				providerStatusCode: 400,
 			},

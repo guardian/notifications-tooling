@@ -63,24 +63,51 @@ describe('notifications repository (real Postgres)', () => {
 		expect(found?.status).toBe('delivered');
 	});
 
+	it('defaults failedTargets to empty arrays and records them with the status', async () => {
+		const created = await notifications.create(buildNotification());
+		expect(created.failedTargets).toEqual({ topics: [], segments: [] });
+
+		const updated = await notifications.updateDeliveryOutcome(created.id, {
+			status: 'partially_delivered',
+			failedTargets: {
+				topics: [{ topicType: 'sport', edition: 'uk' }],
+				segments: [{ segmentId: 'UK' }],
+			},
+		});
+
+		expect(updated.status).toBe('partially_delivered');
+		expect(updated.failedTargets).toEqual({
+			topics: [{ topicType: 'sport', edition: 'uk' }],
+			segments: [{ segmentId: 'UK' }],
+		});
+
+		const found = await notifications.findById(created.id);
+		expect(found?.failedTargets).toEqual({
+			topics: [{ topicType: 'sport', edition: 'uk' }],
+			segments: [{ segmentId: 'UK' }],
+		});
+	});
+
 	it('loads a notification together with its dispatches, oldest first', async () => {
 		const notification = await notifications.create(buildNotification());
 
-		await dispatches.upsert(
-			buildDispatch(notification.id, { target: 'breaking-news' }),
-		);
+		await dispatches.upsert(buildDispatch(notification.id));
 		await dispatches.upsert(
 			buildDispatch(notification.id, {
 				channel: 'newsletter',
-				target: 'morning-briefing-uk',
+				requested: { channel: 'newsletter', segment: 'morning-briefing-uk' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: 'morning-briefing-uk',
+				},
 			}),
 		);
 
 		const found = await notifications.findByIdWithDispatches(notification.id);
 
-		expect(found?.dispatches.map((dispatch) => dispatch.target)).toEqual([
-			'breaking-news',
-			'morning-briefing-uk',
+		expect(found?.dispatches.map((dispatch) => dispatch.requested)).toEqual([
+			{ channel: 'app-push', topicType: 'breaking-news', editions: ['uk'] },
+			{ channel: 'newsletter', segment: 'morning-briefing-uk' },
 		]);
 	});
 

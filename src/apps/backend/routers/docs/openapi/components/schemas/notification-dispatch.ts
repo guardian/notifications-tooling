@@ -1,19 +1,21 @@
 /**
  * One persisted downstream provider call for a notification — a single
  * mobile-n10n push per app-push topic type, or a single Braze campaign per
- * newsletter segment. Referenced via `#/components/schemas/NotificationDispatch`.
+ * newsletter segment. `requested` records what the API consumer asked for and
+ * `resolved` what it mapped to downstream, side by side. Referenced via
+ * `#/components/schemas/NotificationDispatch`.
  */
 export const notificationDispatchSchema = {
 	type: 'object',
 	required: [
 		'id',
 		'channel',
-		'target',
+		'requested',
+		'resolved',
 		'providerRef',
 		'status',
 		'failureReason',
 		'providerStatusCode',
-		'detail',
 		'createdAt',
 		'updatedAt',
 	],
@@ -24,11 +26,68 @@ export const notificationDispatchSchema = {
 			description: 'The dispatch record id.',
 		},
 		channel: { $ref: '#/components/schemas/NotificationChannel' },
-		target: {
-			type: 'string',
+		requested: {
+			type: 'object',
 			description:
-				'The unit this call addressed: for app-push, the topic type and the editions it went to, joined as `topicType/edition,edition`; for newsletter, the segment id.',
-			example: 'breaking-news/uk,us',
+				'The audience unit the API consumer asked for. For app-push, the topic type and its editions; for newsletter, the segment.',
+			oneOf: [
+				{
+					type: 'object',
+					required: ['channel', 'topicType', 'editions'],
+					properties: {
+						channel: { type: 'string', enum: ['app-push'] },
+						topicType: { type: 'string', example: 'breaking-news' },
+						editions: {
+							type: 'array',
+							items: { type: 'string' },
+							example: ['uk', 'us'],
+						},
+					},
+				},
+				{
+					type: 'object',
+					required: ['channel', 'segment'],
+					properties: {
+						channel: { type: 'string', enum: ['newsletter'] },
+						segment: { type: 'string', example: 'morning-briefing-uk' },
+					},
+				},
+			],
+		},
+		resolved: {
+			type: 'object',
+			description:
+				'The final values sent to the provider. For app-push, the mobile-n10n topics and importance; for newsletter, the Braze campaign and email-rendering ids.',
+			oneOf: [
+				{
+					type: 'object',
+					required: ['channel', 'topics', 'importance'],
+					properties: {
+						channel: { type: 'string', enum: ['app-push'] },
+						topics: {
+							type: 'array',
+							items: {
+								type: 'object',
+								properties: {
+									type: { type: 'string' },
+									name: { type: 'string' },
+								},
+							},
+							example: [{ type: 'breaking', name: 'uk' }],
+						},
+						importance: { type: 'string', enum: ['Major', 'Minor'] },
+					},
+				},
+				{
+					type: 'object',
+					required: ['channel', 'emailRenderingId'],
+					properties: {
+						channel: { type: 'string', enum: ['newsletter'] },
+						brazeCampaignId: { type: 'string', example: 'braze-campaign-1' },
+						emailRenderingId: { type: 'string', example: 'briefing-uk' },
+					},
+				},
+			],
 		},
 		providerRef: {
 			type: ['string', 'null'],
@@ -49,16 +108,6 @@ export const notificationDispatchSchema = {
 			description:
 				"The provider's HTTP status when a failed call reached it (null for a success, timeout, or network error).",
 			example: 502,
-		},
-		detail: {
-			type: ['object', 'null'],
-			description:
-				'Channel-specific extras: for app-push, the `topics` sent to mobile-n10n and the `importance`; for newsletter, the Braze `campaignId` and the `emailRenderingId`.',
-			additionalProperties: true,
-			example: {
-				topics: [{ type: 'breaking', name: 'uk' }],
-				importance: 'Major',
-			},
 		},
 		createdAt: {
 			type: 'string',
