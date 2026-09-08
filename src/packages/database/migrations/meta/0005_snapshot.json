@@ -40,12 +40,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "target_key": {
-          "name": "target_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "provider_ref": {
           "name": "provider_ref",
           "type": "text",
@@ -87,8 +81,8 @@
         }
       },
       "indexes": {
-        "notification_dispatches_notification_channel_target_unique": {
-          "name": "notification_dispatches_notification_channel_target_unique",
+        "notification_dispatches_notification_requested_unique": {
+          "name": "notification_dispatches_notification_requested_unique",
           "columns": [
             {
               "expression": "notification_id",
@@ -97,13 +91,7 @@
               "nulls": "last"
             },
             {
-              "expression": "channel",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "target_key",
+              "expression": "requested",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

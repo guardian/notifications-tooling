@@ -100,15 +100,14 @@ describe('notifications repository (real Postgres)', () => {
 					channel: 'newsletter',
 					emailRenderingId: 'morning-briefing-uk',
 				},
-				targetKey: 'morning-briefing-uk',
 			}),
 		);
 
 		const found = await notifications.findByIdWithDispatches(notification.id);
 
-		expect(found?.dispatches.map((dispatch) => dispatch.targetKey)).toEqual([
-			'breaking-news/uk',
-			'morning-briefing-uk',
+		expect(found?.dispatches.map((dispatch) => dispatch.requested)).toEqual([
+			{ channel: 'app-push', topicType: 'breaking-news', editions: ['uk'] },
+			{ channel: 'newsletter', segment: 'morning-briefing-uk' },
 		]);
 	});
 

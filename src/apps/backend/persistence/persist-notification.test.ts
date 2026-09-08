@@ -28,7 +28,6 @@ const appPushRow = (
 		topics: [{ type: 'breaking', name: 'uk' }],
 		importance: 'Major',
 	},
-	targetKey: 'breaking-news/uk',
 	status,
 });
 
@@ -39,7 +38,6 @@ const newsletterRow = (
 	channel: 'newsletter',
 	requested: { channel: 'newsletter', segment: 'UK' },
 	resolved: { channel: 'newsletter', emailRenderingId: 'newsletter-1' },
-	targetKey: 'UK',
 	status,
 });
 
@@ -98,7 +96,6 @@ describe('collectFailedTargets', () => {
 						topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 						importance: 'Major',
 					},
-					targetKey: 'breaking-news/uk,us',
 					status: 'failure',
 				},
 				{
@@ -114,7 +111,6 @@ describe('collectFailedTargets', () => {
 						topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 						importance: 'Minor',
 					},
-					targetKey: 'sport/uk',
 					status: 'success',
 				},
 				{
@@ -122,7 +118,6 @@ describe('collectFailedTargets', () => {
 					channel: 'newsletter',
 					requested: { channel: 'newsletter', segment: 'UK' },
 					resolved: { channel: 'newsletter', emailRenderingId: 'newsletter-1' },
-					targetKey: 'UK',
 					status: 'failure',
 				},
 				{
@@ -130,7 +125,6 @@ describe('collectFailedTargets', () => {
 					channel: 'newsletter',
 					requested: { channel: 'newsletter', segment: 'US' },
 					resolved: { channel: 'newsletter', emailRenderingId: 'newsletter-2' },
-					targetKey: 'US',
 					status: 'success',
 				},
 			]),
@@ -195,7 +189,6 @@ describe('mapOutcomesToDispatches (send outcomes)', () => {
 					topics: [{ type: 'breaking', name: 'uk' }],
 					importance: 'Major',
 				},
-				targetKey: 'breaking-news/uk',
 				providerRef: 'push-1',
 				status: 'failure',
 				failureReason: 'http_error',
@@ -210,7 +203,6 @@ describe('mapOutcomesToDispatches (send outcomes)', () => {
 					brazeCampaignId: 'campaign-1',
 					emailRenderingId: 'newsletter-1',
 				},
-				targetKey: 'UK',
 				providerRef: 'dispatch-1',
 				status: 'success',
 				failureReason: null,
@@ -270,7 +262,6 @@ describe('mapOutcomesToDispatches (test outcomes)', () => {
 					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 					importance: 'Minor',
 				},
-				targetKey: 'test/test',
 				providerRef: 'push-1',
 				status: 'success',
 				failureReason: null,
@@ -284,7 +275,6 @@ describe('mapOutcomesToDispatches (test outcomes)', () => {
 					channel: 'newsletter',
 					emailRenderingId: 'newsletter-1',
 				},
-				targetKey: 'UK',
 				providerRef: 'dispatch-1',
 				status: 'success',
 				failureReason: null,
@@ -306,7 +296,6 @@ describe('toPublicDispatch', () => {
 				brazeCampaignId: 'campaign-1',
 				emailRenderingId: 'newsletter-1',
 			},
-			targetKey: 'UK',
 			providerRef: 'dispatch-1',
 			status: 'success',
 			failureReason: null,
@@ -368,7 +357,6 @@ describe('toNotificationResponse', () => {
 							topics: [{ type: 'breaking', name: 'uk' }],
 							importance: 'Major',
 						},
-						targetKey: 'breaking-news/uk',
 						providerRef: 'push-1',
 						status: 'success',
 						failureReason: null,

@@ -84,7 +84,6 @@ describe('GET /v1/notifications/:id (real Postgres)', () => {
 					channel: 'newsletter',
 					emailRenderingId: 'morning-briefing-uk',
 				},
-				targetKey: 'morning-briefing-uk',
 			}),
 		);
 
@@ -240,7 +239,6 @@ describe('POST /v1/notifications (real Postgres)', () => {
 			expect(stored?.dispatches).toHaveLength(1);
 			expect(stored?.dispatches[0]).toMatchObject({
 				channel: 'app-push',
-				targetKey: 'breaking-news/uk',
 				requested: {
 					channel: 'app-push',
 					topicType: 'breaking-news',
@@ -318,7 +316,6 @@ describe('POST /v1/notifications (real Postgres)', () => {
 				(dispatchRow) => dispatchRow.channel === 'newsletter',
 			);
 			expect(newsletter).toMatchObject({
-				targetKey: 'morning-briefing-uk',
 				requested: { channel: 'newsletter', segment: 'morning-briefing-uk' },
 				status: 'failure',
 				providerStatusCode: 500,
@@ -404,7 +401,6 @@ describe('POST /v1/notifications (real Postgres)', () => {
 			);
 			expect(failed).toMatchObject({
 				channel: 'app-push',
-				targetKey: 'breaking-news/uk,us',
 				requested: {
 					channel: 'app-push',
 					topicType: 'breaking-news',

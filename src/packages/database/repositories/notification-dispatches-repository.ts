@@ -17,8 +17,8 @@ export const createNotificationDispatchesRepository = (db: Database) => ({
 	},
 
 	/**
-	 * Records a dispatch outcome, upserting on the (notification, channel,
-	 * target key) unique key so a retry overwrites that target's prior outcome.
+	 * Records a dispatch outcome, upserting on the (notification, requested)
+	 * unique key so a retry overwrites that target's prior outcome.
 	 */
 	async upsert(values: NewNotificationDispatch): Promise<NotificationDispatch> {
 		const [row] = await db
@@ -27,11 +27,9 @@ export const createNotificationDispatchesRepository = (db: Database) => ({
 			.onConflictDoUpdate({
 				target: [
 					notificationDispatches.notificationId,
-					notificationDispatches.channel,
-					notificationDispatches.targetKey,
+					notificationDispatches.requested,
 				],
 				set: {
-					requested: values.requested,
 					resolved: values.resolved,
 					providerRef: values.providerRef ?? null,
 					status: values.status,

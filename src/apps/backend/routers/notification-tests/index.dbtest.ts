@@ -146,7 +146,6 @@ describe('POST /v1/notification-tests (real Postgres)', () => {
 			expect(stored?.dispatches).toHaveLength(1);
 			expect(stored?.dispatches[0]).toMatchObject({
 				channel: 'newsletter',
-				targetKey: 'UK',
 				requested: { channel: 'newsletter', segment: 'UK' },
 				providerRef: 'braze-dispatch-1',
 				status: 'success',

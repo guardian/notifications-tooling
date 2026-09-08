@@ -1,12 +1,10 @@
 ALTER TABLE "notification_dispatches" ADD COLUMN "requested" jsonb;--> statement-breakpoint
 ALTER TABLE "notification_dispatches" ADD COLUMN "resolved" jsonb;--> statement-breakpoint
-ALTER TABLE "notification_dispatches" ADD COLUMN "target_key" text;--> statement-breakpoint
 -- Back-fill the structured columns from the previous `target`/`detail` encoding.
 -- App-push targets were '<topicType>/<edition>,<edition>' with detail
 -- `{ topics, importance }`; newsletter targets were the segment with detail
--- `{ campaignId?, emailRenderingId }`. The old target string becomes target_key.
+-- `{ campaignId?, emailRenderingId }`.
 UPDATE "notification_dispatches" SET
-	"target_key" = "target",
 	"requested" = CASE "channel"
 		WHEN 'app-push' THEN jsonb_build_object(
 			'channel', 'app-push',
@@ -32,8 +30,7 @@ UPDATE "notification_dispatches" SET
 	END;--> statement-breakpoint
 ALTER TABLE "notification_dispatches" ALTER COLUMN "requested" SET NOT NULL;--> statement-breakpoint
 ALTER TABLE "notification_dispatches" ALTER COLUMN "resolved" SET NOT NULL;--> statement-breakpoint
-ALTER TABLE "notification_dispatches" ALTER COLUMN "target_key" SET NOT NULL;--> statement-breakpoint
 DROP INDEX "notification_dispatches_notification_channel_target_unique";--> statement-breakpoint
 ALTER TABLE "notification_dispatches" DROP COLUMN "target";--> statement-breakpoint
 ALTER TABLE "notification_dispatches" DROP COLUMN "detail";--> statement-breakpoint
-CREATE UNIQUE INDEX "notification_dispatches_notification_channel_target_unique" ON "notification_dispatches" USING btree ("notification_id","channel","target_key");
+CREATE UNIQUE INDEX "notification_dispatches_notification_requested_unique" ON "notification_dispatches" USING btree ("notification_id","requested");

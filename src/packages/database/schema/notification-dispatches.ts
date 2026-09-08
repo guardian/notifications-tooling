@@ -64,9 +64,6 @@ export const notificationDispatches = pgTable(
 		// The final values sent downstream: app-push `{ topics, importance }` or
 		// newsletter `{ brazeCampaignId?, emailRenderingId }`.
 		resolved: jsonb('resolved').$type<DispatchResolved>().notNull(),
-		// Deterministic dedup key for `requested`, used only by the unique index so
-		// a retry overwrites the same target; reads use `requested`/`resolved`.
-		targetKey: text('target_key').notNull(),
 		// mobile-n10n POST id or Braze dispatchId.
 		providerRef: text('provider_ref'),
 		status: dispatchStatusEnum('status').notNull(),
@@ -89,9 +86,11 @@ export const notificationDispatches = pgTable(
 			.defaultNow(),
 	},
 	(table) => [
-		// One row per (notification, channel, target key); a retry upserts it.
-		uniqueIndex(
-			'notification_dispatches_notification_channel_target_unique',
-		).on(table.notificationId, table.channel, table.targetKey),
+		// One row per requested target within a notification; `requested` fully
+		// identifies the target, so a retry upserts the same row.
+		uniqueIndex('notification_dispatches_notification_requested_unique').on(
+			table.notificationId,
+			table.requested,
+		),
 	],
 );

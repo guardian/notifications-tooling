@@ -287,7 +287,6 @@ describe('POST /v1/notification-tests', () => {
 						channel: 'newsletter',
 						emailRenderingId: 'newsletter-uk',
 					},
-					targetKey: 'UK',
 					providerRef: 'dispatch-1',
 					status: 'success',
 					failureReason: null,

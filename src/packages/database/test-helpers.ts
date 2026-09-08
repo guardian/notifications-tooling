@@ -49,7 +49,6 @@ export const buildDispatch = (
 		topics: [{ type: 'breaking', name: 'uk' }],
 		importance: 'Major',
 	},
-	targetKey: 'breaking-news/uk',
 	status: 'success',
 	...overrides,
 });

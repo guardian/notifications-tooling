@@ -45,13 +45,3 @@ export type NewsletterDispatchOutcome = DispatchResult &
  */
 export type DispatchOutcome =
 	AppPushDispatchOutcome | NewsletterDispatchOutcome;
-
-/**
- * The deterministic dedup key for one requested target, used only for the
- * dispatch upsert's unique constraint so a retry overwrites the same target.
- * Reads use the structured `requested`/`resolved`, never this string.
- */
-export const dispatchTargetKey = (requested: DispatchRequested): string =>
-	requested.channel === 'app-push'
-		? `${requested.topicType}/${requested.editions.join(',')}`
-		: requested.segment;
