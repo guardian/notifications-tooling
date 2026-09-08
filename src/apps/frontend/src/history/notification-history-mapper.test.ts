@@ -25,7 +25,7 @@ const audiences: ChannelAudienceResponse = {
 			topicTypes: [
 				{
 					id: 'sport',
-					label: 'Sport',
+					label: 'Sports news',
 					editions: [],
 				},
 			],
@@ -186,7 +186,7 @@ describe('mapNotificationToHistoryNotification', () => {
 		expect(notification).toMatchObject({
 			title: 'Full time',
 			channel: 'push',
-			alertType: 'Sport',
+			alertType: 'Sports news',
 			thumbnailUrl: 'https://media.guim.co.uk/thumb.jpg',
 			sentTo: ['INT', 'EU'],
 			status: 'Partially sent',

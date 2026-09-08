@@ -4,6 +4,7 @@ import {
 	appPushTestEditionIdsByTopicType,
 	appPushTestTopicTypeIds,
 	appPushTopicTypeIds,
+	getAppPushTopicTypes,
 	getNewsletterSegments,
 	resolveAppPushTopic,
 } from './audiences';
@@ -18,6 +19,22 @@ describe('getNewsletterSegments', () => {
 });
 
 describe('resolveAppPushTopic', () => {
+	it('exposes the notification bucket labels', () => {
+		expect(
+			Object.fromEntries(
+				Object.entries(getAppPushTopicTypes('CODE')).map(([id, { label }]) => [
+					id,
+					label,
+				]),
+			),
+		).toEqual({
+			'breaking-news': 'Breaking news',
+			sport: 'Sports news',
+			'editors-picks': "Editors' picks",
+			'one-not-to-miss': 'One not to miss',
+		});
+	});
+
 	it('resolves the internal test topic to its mobile-n10n coordinates', () => {
 		expect(resolveAppPushTopic('test', 'test')).toEqual({
 			topic: { type: 'breaking', name: 'internal-dispatch-test' },
@@ -33,20 +50,15 @@ describe('resolveAppPushTopic', () => {
 		});
 	});
 
-	it('surfaces the title override for the US sport edition', () => {
-		expect(resolveAppPushTopic('sport', 'us')).toEqual({
-			topic: { type: 'breaking', name: 'internal-dispatch-test' },
-			importance: AppPushImportance.Minor,
-			titleOverride: 'Sports news',
-		});
-	});
-
-	it('leaves other sport editions without a title override', () => {
-		expect(resolveAppPushTopic('sport', 'uk')).toEqual({
-			topic: { type: 'breaking', name: 'internal-dispatch-test' },
-			importance: AppPushImportance.Minor,
-			titleOverride: undefined,
-		});
+	it('resolves the regional sport titles for every edition', () => {
+		for (const edition of ['uk', 'au', 'international', 'europe']) {
+			expect(resolveAppPushTopic('sport', edition)?.titleOverride).toBe(
+				'Sport news',
+			);
+		}
+		expect(resolveAppPushTopic('sport', 'us')?.titleOverride).toBe(
+			'Sports news',
+		);
 	});
 
 	it('returns undefined for an edition the topic type does not define', () => {

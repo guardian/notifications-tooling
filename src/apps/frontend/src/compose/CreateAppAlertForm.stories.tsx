@@ -79,12 +79,14 @@ export const UpdatesFormFields: Story = {
 		const headline = canvas.getByLabelText('Headline');
 
 		await userEvent.click(alertType);
-		await userEvent.click(await screen.findByRole('option', { name: 'Sport' }));
+		await userEvent.click(
+			await screen.findByRole('option', { name: 'Sports news' }),
+		);
 		await userEvent.click(unitedKingdom);
 		await userEvent.type(headline, 'A developing story');
 
 		await expect(
-			canvas.getByRole('button', { name: 'Sport Alert type' }),
+			canvas.getByRole('button', { name: 'Sports news Alert type' }),
 		).toBeVisible();
 		await expect(unitedKingdom).toBeChecked();
 		await expect(headline).toHaveValue('A developing story');
