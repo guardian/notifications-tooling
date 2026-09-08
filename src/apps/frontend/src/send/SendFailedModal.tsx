@@ -9,10 +9,64 @@ import type { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from '../compose/NotificationContext';
 import { useSendNotification } from '../hooks/use-send-notification';
 import type { SendNotificationRequest } from '../schemas';
+import type { NotificationResource } from '../schemas';
 import type { ChannelOption } from '../types';
 import type { NotificationState } from '../types';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { getChannelDescription } from '../utils/display-text-helpers';
+
+const formatDispatchTarget = (target: string): string => {
+	const editions = target.split('/').at(-1) ?? target;
+	return editions
+		.split(',')
+		.map((edition) =>
+			edition.length <= 3
+				? edition.toUpperCase()
+				: edition.replaceAll('-', ' '),
+		)
+		.join(', ');
+};
+
+const deriveDispatchFailureMessage = (
+	notification: NotificationResource,
+	channelDescription: string,
+): ReactNode => {
+	const successfulTargets = notification.dispatches
+		.filter(({ status }) => status === 'success')
+		.map(({ target }) => formatDispatchTarget(target));
+	const failedTargets = notification.dispatches
+		.filter(({ status }) => status === 'failure')
+		.map(({ target }) => formatDispatchTarget(target));
+	const upstreamService =
+		notification.dispatches[0]?.channel === 'app-push'
+			? 'mobile notification service'
+			: 'newsletter delivery service';
+
+	return (
+		<>
+			<Typography element="p">
+				{notification.dispatches.length === 0
+					? `The delivery could not be started. No ${channelDescription} was sent.`
+					: notification.status === 'partially_delivered'
+						? `The ${upstreamService} failed for some destinations.`
+						: `The ${upstreamService} failed. No ${channelDescription} was sent.`}
+			</Typography>
+			{successfulTargets.length > 0 && (
+				<Typography element="p">
+					Sent to: {successfulTargets.join(', ')}
+				</Typography>
+			)}
+			{failedTargets.length > 0 && (
+				<Typography element="p" variant="bodyBoldSm">
+					Not sent to: {failedTargets.join(', ')}
+				</Typography>
+			)}
+			<Typography element="p" variant="bodySm">
+				Reference: {notification.id}
+			</Typography>
+		</>
+	);
+};
 
 const deriveUserFacingMessage = (
 	apiError: ApiError,
@@ -92,14 +146,35 @@ const getFailure = (
 	}
 
 	const channelDescription = getChannelDescription(channel);
+	if (sendFailure.failure === 'dispatch-fail') {
+		return {
+			title:
+				sendFailure.notification.status === 'partially_delivered'
+					? `The ${channelDescription} was only partially sent`
+					: `The ${channelDescription} wasn't sent`,
+			message: deriveDispatchFailureMessage(
+				sendFailure.notification,
+				channelDescription,
+			),
+			canRetry: false,
+		};
+	}
 
-	const { loginUrl, details } = sendFailure;
+	const { loginUrl, requestId } = sendFailure;
 	return {
 		title: deriveErrorTitle(sendFailure, channelDescription),
-		message: deriveUserFacingMessage(sendFailure, channelDescription),
+		message: (
+			<>
+				{deriveUserFacingMessage(sendFailure, channelDescription)}
+				{requestId && (
+					<Typography element="p" variant="bodySm">
+						Reference: {requestId}
+					</Typography>
+				)}
+			</>
+		),
 		canRetry: checkIfCanRetry(sendFailure),
 		loginUrl,
-		details,
 	};
 };
 

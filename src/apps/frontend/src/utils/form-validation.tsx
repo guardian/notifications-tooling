@@ -9,12 +9,31 @@ const trimTrailingSlash = (rawPath: string): string =>
 const trimLeadingSlash = (rawPath: string): string =>
 	rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
 
-// TO DO - config options to allow use of https://m.code.dev-theguardian.com ?
-const hostWhitelist = ['www.theguardian.com'];
+const guardianUrlDomains = ['theguardian.com', 'gu.com'];
+
+export type ArticleUrlInputFailure =
+	'not-guardian-url' | 'incomplete-article-url' | 'invalid-url';
+
+export const getArticleUrlInputFailureMessage = (
+	failure: ArticleUrlInputFailure,
+): string => {
+	switch (failure) {
+		case 'not-guardian-url':
+			return 'Paste a Guardian article URL beginning with https://.';
+		case 'incomplete-article-url':
+			return 'This Guardian link looks incomplete. Paste the full article URL.';
+		case 'invalid-url':
+			return 'Paste a complete Guardian article URL, for example https://www.theguardian.com/world/2026/sep/08/article.';
+	}
+};
 
 export const parseArticleUrlInputToContentId = (
 	articleInputText: string,
-): { articleId?: string; failure?: string; webUrl?: string } => {
+): {
+	articleId?: string;
+	failure?: ArticleUrlInputFailure;
+	webUrl?: string;
+} => {
 	if (articleInputText.length === 0) {
 		return {};
 	}
@@ -22,15 +41,19 @@ export const parseArticleUrlInputToContentId = (
 	try {
 		const url = new URL(articleInputText);
 
-		if (!hostWhitelist.includes(url.host)) {
+		const isGuardianDomain = guardianUrlDomains.some(
+			(domain) =>
+				url.hostname === domain || url.hostname.endsWith(`.${domain}`),
+		);
+		if (url.protocol !== 'https:' || !isGuardianDomain) {
 			return {
-				failure: 'Not a Guardian URL',
+				failure: 'not-guardian-url',
 			};
 		}
 		const pathname = trimTrailingSlash(url.pathname);
 		if (!articleUrlPathPattern.test(pathname)) {
 			return {
-				failure: 'Not a Guardian article URL',
+				failure: 'incomplete-article-url',
 			};
 		}
 
@@ -40,7 +63,7 @@ export const parseArticleUrlInputToContentId = (
 			webUrl: `${url.origin}${pathname}`,
 		};
 	} catch {
-		// if not a URL, check if the inut is a valid article id
+		// If it is not a URL, check whether it is a valid article id.
 		const maybeInputtedArticleId = trimLeadingSlash(articleInputText);
 		if (articleUrlPathPattern.test(`/${maybeInputtedArticleId}`)) {
 			return {
@@ -48,7 +71,7 @@ export const parseArticleUrlInputToContentId = (
 				webUrl: `${DEFAULT_ORIGIN}/${maybeInputtedArticleId}`,
 			};
 		}
-		return { failure: 'Not a valid url' };
+		return { failure: 'invalid-url' };
 	}
 };
 

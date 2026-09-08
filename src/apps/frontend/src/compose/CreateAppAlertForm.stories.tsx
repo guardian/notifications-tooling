@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import {
+	failedAppPushSendResponse,
+	partiallyDeliveredAppPushSendResponse,
+} from '../testing/api-fixtures';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completePushParams,
@@ -106,6 +110,62 @@ export const ValidationErrors: Story = {
 		await expect(
 			canvas.getByText('Paste a URL to fetch an article'),
 		).toBeVisible();
+	},
+};
+
+export const MobileNotificationServiceFailure: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			sendFailure: {
+				failure: 'dispatch-fail',
+				notification: failedAppPushSendResponse,
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const screen = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			await screen.findByText("The app alert wasn't sent"),
+		).toBeVisible();
+		await expect(
+			screen.getByText(
+				'The mobile notification service failed. No app alert was sent.',
+			),
+		).toBeVisible();
+		await expect(screen.getByText('Not sent to: UK')).toBeVisible();
+		await expect(screen.getByText('Reference: push-failed-1234')).toBeVisible();
+		await expect(
+			screen.queryByRole('button', { name: 'Try Again' }),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const PartialMobileNotificationServiceFailure: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			sendFailure: {
+				failure: 'dispatch-fail',
+				notification: partiallyDeliveredAppPushSendResponse,
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const screen = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			await screen.findByText('The app alert was only partially sent'),
+		).toBeVisible();
+		await expect(screen.getByText('Sent to: UK')).toBeVisible();
+		await expect(screen.getByText('Not sent to: US')).toBeVisible();
+		await expect(
+			screen.getByText('Reference: push-partial-1234'),
+		).toBeVisible();
+		await expect(
+			screen.queryByRole('button', { name: 'Try Again' }),
+		).not.toBeInTheDocument();
 	},
 };
 
@@ -266,5 +326,35 @@ export const FetchArticleError: Story = {
 			isFetchingContent: false,
 			fetchArticleError: 'Failed to fetch article',
 		},
+	},
+};
+
+export const NonGuardianArticleUrl: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			'https://www.example.com/world/2026/sep/08/article',
+		);
+
+		await expect(
+			canvas.getByText('Paste a Guardian article URL beginning with https://.'),
+		).toBeVisible();
+	},
+};
+
+export const IncompleteGuardianArticleUrl: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			'https://www.theguardian.com/world',
+		);
+
+		await expect(
+			canvas.getByText(
+				'This Guardian link looks incomplete. Paste the full article URL.',
+			),
+		).toBeVisible();
 	},
 };

@@ -6,8 +6,8 @@ import type {
 	ResolvedArticle,
 } from '@models';
 import type { Result } from './api-client/client';
-import type { ApiError } from './api-client/errors';
 import type { SendNotificationRequest } from './schemas';
+import type { SendNotificationFailure } from './utils/send-notification';
 
 export type TabName = 'create' | 'history';
 export type ChannelOption = 'email' | 'push';
@@ -38,7 +38,7 @@ export type NotificationState = {
 	content?: ResolvedArticle;
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
-	sendFailure?: ApiError;
+	sendFailure?: SendNotificationFailure;
 	pendingRequest?: SendNotificationRequest;
 };
 
@@ -71,7 +71,7 @@ export type NotificationAction =
 	  }
 	| {
 			type: 'receive-send-failure';
-			failure: ApiError;
+			failure: SendNotificationFailure;
 	  }
 	| {
 			type: 'complete-send';

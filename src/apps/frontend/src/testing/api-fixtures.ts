@@ -78,3 +78,43 @@ export const acceptedEmailSendResponse: SendNotificationResponse = {
 		},
 	],
 };
+
+export const failedAppPushSendResponse: SendNotificationResponse = {
+	...acceptedEmailSendResponse,
+	id: 'push-failed-1234',
+	idempotencyKey: 'push-failed-idempotency-key',
+	status: 'failed',
+	dispatches: [
+		{
+			...acceptedEmailSendResponse.dispatches[0]!,
+			id: 'push-dispatch-uk',
+			channel: 'app-push',
+			target: 'breaking-news/uk',
+			status: 'failure',
+			providerRef: null,
+			failureReason: 'http_error',
+			providerStatusCode: 500,
+		},
+	],
+};
+
+export const partiallyDeliveredAppPushSendResponse: SendNotificationResponse = {
+	...failedAppPushSendResponse,
+	id: 'push-partial-1234',
+	status: 'partially_delivered',
+	dispatches: [
+		{
+			...failedAppPushSendResponse.dispatches[0]!,
+			id: 'push-dispatch-uk',
+			target: 'breaking-news/uk',
+			status: 'success',
+			failureReason: null,
+			providerStatusCode: 201,
+		},
+		{
+			...failedAppPushSendResponse.dispatches[0]!,
+			id: 'push-dispatch-us',
+			target: 'breaking-news/us',
+		},
+	],
+};

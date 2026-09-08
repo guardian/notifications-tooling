@@ -21,6 +21,8 @@ const readErrorEnvelope = async (response: Response) => {
 interface FetchJsonAndParseInit extends RequestInit {
 	/** Overrides the default 10s timeout. Ignored if `signal` is also passed. */
 	timeoutMs?: number;
+	/** Non-2xx statuses whose bodies should be parsed with the supplied schema. */
+	acceptedResponseStatuses?: readonly number[];
 }
 
 export type Result<DataType> =
@@ -53,7 +55,12 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 	path: string,
 	init: FetchJsonAndParseInit = {},
 ): Promise<Result<z.infer<Schema>>> {
-	const { timeoutMs = DEFAULT_TIMEOUT_MS, signal, ...requestInit } = init;
+	const {
+		timeoutMs = DEFAULT_TIMEOUT_MS,
+		acceptedResponseStatuses = [],
+		signal,
+		...requestInit
+	} = init;
 	const url = `${getApiBaseUrl()}${path}`;
 
 	let response: Response;
@@ -81,7 +88,7 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 		);
 	}
 
-	if (!response.ok) {
+	if (!response.ok && !acceptedResponseStatuses.includes(response.status)) {
 		const envelope = await readErrorEnvelope(response);
 
 		if (response.status === 401) {
