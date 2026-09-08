@@ -96,6 +96,7 @@ describe('notification request builders', () => {
 				articleThumbnailUrl: replacementThumbnailUrl,
 				deliveryOption: 'appImmediate',
 			},
+			alertTypeLabel: 'Breaking news',
 			content: articleFixture,
 			idempotencyKey: 'app-alert-with-replacement-thumbnail',
 		});
