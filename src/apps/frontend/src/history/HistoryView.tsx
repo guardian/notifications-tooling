@@ -24,8 +24,8 @@ import { useRelativeTime } from '../hooks/use-relative-time';
 import { layoutMainTheme } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
+import { SendTimeTooltip } from '../ui/SendTimeTooltip';
 import { HistoryPagination } from './HistoryPagination';
-import { SendTimeTooltip } from './SendTimeTooltip';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
