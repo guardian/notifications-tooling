@@ -134,7 +134,7 @@ const codeAppPushTopicTypes = {
 		},
 	},
 	sport: {
-		label: 'Sport news',
+		label: 'Sport',
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
@@ -273,7 +273,7 @@ const prodAppPushTopicTypes = {
 	// 	},
 	// },
 	// sport: {
-	// 	label: 'Sport news',
+	// 	label: 'Sport',
 	// 	importance: AppPushImportance.Minor,
 	// 	editions: {
 	// 		uk: {

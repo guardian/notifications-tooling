@@ -7,7 +7,7 @@ export const emailChannelConfigExample = {
 			emailRenderingNewsletterId: 'breaking-news-uk',
 			campaignLive: true,
 			data: {
-				name: 'Test Breaking News UK',
+				name: 'Test Breaking news UK',
 				created_at: '2026-07-13T08:55:04+00:00',
 				updated_at: '2026-08-07T15:56:50+00:00',
 				description: '',
@@ -27,7 +27,7 @@ export const emailChannelConfigExample = {
 			emailRenderingNewsletterId: 'breakingnewsus',
 			campaignLive: true,
 			data: {
-				name: 'Test Breaking News US',
+				name: 'Test Breaking news US',
 				created_at: '2026-07-24T11:13:53+00:00',
 				updated_at: '2026-08-07T15:57:58+00:00',
 				description: '',
@@ -47,7 +47,7 @@ export const emailChannelConfigExample = {
 			emailRenderingNewsletterId: 'breaking-news-au',
 			campaignLive: true,
 			data: {
-				name: 'Test Breaking News AU',
+				name: 'Test Breaking news AU',
 				created_at: '2026-07-24T11:15:30+00:00',
 				updated_at: '2026-08-07T15:53:24+00:00',
 				description: '',

@@ -25,7 +25,7 @@ const audiences: ChannelAudienceResponse = {
 			topicTypes: [
 				{
 					id: 'sport',
-					label: 'Sport news',
+					label: 'Sport',
 					editions: [],
 				},
 			],
@@ -69,7 +69,7 @@ describe('mapNotificationToHistoryNotification', () => {
 					compose: {
 						items: ['lead-story'],
 						subject:
-							'Breaking News: ‘National scandal’: extreme heat linked to 40,000',
+							'Breaking news: ‘National scandal’: extreme heat linked to 40,000',
 					},
 				},
 			},
@@ -79,7 +79,7 @@ describe('mapNotificationToHistoryNotification', () => {
 			title: '‘National scandal’: extreme heat linked to 40,000',
 			href: 'https://www.theguardian.com/environment/2026/aug/26/deaths-england-hottest-days-extreme-weather',
 			channel: 'email',
-			alertType: 'Breaking News',
+			alertType: 'Breaking news',
 			sentBy: 'joshua.anderson@guardian.co.uk',
 			sentTo: ['AU'],
 			sentAt: '2026-08-26T14:52:16.143Z',
@@ -186,7 +186,7 @@ describe('mapNotificationToHistoryNotification', () => {
 		expect(notification).toMatchObject({
 			title: 'Full time',
 			channel: 'push',
-			alertType: 'Sport news',
+			alertType: 'Sport',
 			thumbnailUrl: 'https://media.guim.co.uk/thumb.jpg',
 			sentTo: ['INT', 'EU'],
 			status: 'Partially sent',

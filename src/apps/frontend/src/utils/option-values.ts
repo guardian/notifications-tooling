@@ -27,7 +27,7 @@ export const channelOptionNameMap: Record<ChannelOption, OptionDisplayInfo> = {
 };
 
 export const kickerNameMap: Record<Kicker, string> = {
-	'breaking-news': 'Breaking News',
+	'breaking-news': 'Breaking news',
 	exclusive: 'Exclusive',
 	none: 'None',
 };
