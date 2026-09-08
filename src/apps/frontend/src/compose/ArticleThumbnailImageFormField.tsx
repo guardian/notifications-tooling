@@ -21,7 +21,8 @@ export const ArticleThumbnailImageFormField = () => {
 	} = useFormContext<AppAlertFormValues>();
 	const { notification } = useContext(NotificationFormContext);
 	const originalArticleThumbnailUrl =
-		getArticleThumbnail(notification.content).src ?? '';
+		getArticleThumbnail(notification.content, notification.requestedBlock)
+			.src ?? '';
 	const articleThumbnailUrl =
 		useWatch<AppAlertFormValues, 'articleThumbnailUrl'>({
 			control,

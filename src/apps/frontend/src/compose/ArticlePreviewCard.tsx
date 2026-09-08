@@ -3,7 +3,7 @@ import { Typography } from '@guardian/stand/Typography';
 import type { CapiBlock, ResolvedArticle } from '@models';
 import { useRelativeTime } from '../hooks/use-relative-time';
 import { articlePreviewCardTheme } from '../themes';
-import { getArticleThumbnail } from '../utils/article-thumbnail';
+import { getArticlePresentation } from '../utils/article-presentation';
 import { getPillarColor } from '../utils/pillar-colors';
 
 interface ArticlePreviewCardProps {
@@ -19,27 +19,17 @@ export const ArticlePreviewCard = ({
 	requestedBlock,
 	showThumbnail = true,
 }: ArticlePreviewCardProps) => {
+	const { sectionName, pillarId, pillarName } = content;
 	const {
-		sectionName,
-		pillarId,
-		pillarName,
-		webTitle,
-		fields,
-		webPublicationDate,
-		webUrl,
-		blocks,
-		type,
-	} = content;
-	const liveblogBlock =
-		type === 'liveblog' ? (requestedBlock ?? blocks?.main) : undefined;
-	const isLiveblog = !!liveblogBlock?.id;
-	const headline = fields?.headline ?? webTitle;
-	const thumbnail = getArticleThumbnail(content, requestedBlock);
-	const linkUrl = requestedUrl ?? webUrl;
+		headline,
+		isLiveblog,
+		linkUrl,
+		liveblogBlock,
+		publishedDate,
+		thumbnail,
+	} = getArticlePresentation({ content, requestedUrl, requestedBlock });
 	const pillarColor = getPillarColor(pillarId);
-	const publishedAt = useRelativeTime(
-		isLiveblog ? fields?.lastModified : webPublicationDate,
-	);
+	const publishedAt = useRelativeTime(publishedDate);
 
 	return (
 		<div css={articlePreviewCardTheme.card(isLiveblog)}>
