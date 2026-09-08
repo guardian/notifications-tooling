@@ -2,6 +2,7 @@ import { type FormEvent, useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
+import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
@@ -25,6 +26,7 @@ export const CreateAppAlertForm = ({
 	);
 
 	const { data: constraints } = useChannelConstraints();
+	const topicTypes = useAppPushTopicTypes();
 	const prepareSend = (values: AppAlertFormValues) => {
 		if (!notification.content) {
 			return;
@@ -33,6 +35,9 @@ export const CreateAppAlertForm = ({
 			type: 'prepare-send',
 			request: buildAppAlertRequest({
 				values,
+				alertTypeLabel:
+					topicTypes.find(({ id }) => id === values.alertType)?.label ??
+					values.alertType,
 				content: notification.content,
 				idempotencyKey: crypto.randomUUID(),
 			}),

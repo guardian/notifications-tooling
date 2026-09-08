@@ -53,6 +53,7 @@ describe('notification request builders', () => {
 				articleThumbnailUrl: articleFixture.fields?.thumbnail ?? '',
 				deliveryOption: 'appImmediate',
 			},
+			alertTypeLabel: 'Breaking news',
 			content: articleFixture,
 			idempotencyKey: 'app-alert-operation-id',
 		});
@@ -73,7 +74,7 @@ describe('notification request builders', () => {
 		});
 		expect(request.content.items['lead-story']).toMatchObject({
 			type: 'app-push',
-			title: 'Breaking News',
+			title: 'Breaking news',
 			body: 'A developing story',
 			media: {
 				type: 'image',
@@ -117,6 +118,7 @@ describe('notification request builders', () => {
 				articleThumbnailUrl: articleFixture.fields?.thumbnail ?? '',
 				deliveryOption: 'appImmediate',
 			},
+			alertTypeLabel: 'Breaking news',
 			content: articleFixture,
 			idempotencyKey: 'app-alert-without-thumbnail',
 		});
@@ -145,6 +147,7 @@ describe('notification request builders', () => {
 				articleThumbnailUrl: articleFixture.fields?.thumbnail ?? '',
 				deliveryOption: 'appImmediate',
 			},
+			alertTypeLabel: 'Breaking news',
 			content: articleFixture,
 			idempotencyKey: 'app-alert-operation-id',
 		});

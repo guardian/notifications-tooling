@@ -71,7 +71,7 @@ export const UpdatesFormFields: Story = {
 		const canvas = within(canvasElement);
 		const screen = within(canvasElement.ownerDocument.body);
 		const alertType = canvas.getByRole('button', {
-			name: 'Breaking News Alert type',
+			name: 'Breaking news Alert type',
 		});
 		const unitedKingdom = canvas.getByRole('checkbox', {
 			name: 'Select United Kingdom',
@@ -79,7 +79,7 @@ export const UpdatesFormFields: Story = {
 		const headline = canvas.getByLabelText('Headline');
 
 		await userEvent.click(alertType);
-		await userEvent.click(screen.getByRole('option', { name: 'Sport' }));
+		await userEvent.click(await screen.findByRole('option', { name: 'Sport' }));
 		await userEvent.click(unitedKingdom);
 		await userEvent.type(headline, 'A developing story');
 

@@ -95,7 +95,7 @@ export const AppAlertSuccess: Story = {
 			canvas.getByRole('heading', { name: 'App alert sent' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByText(`Breaking News: ${completePushParams.headline}`),
+			canvas.getByText(`Breaking news: ${completePushParams.headline}`),
 		).toBeVisible();
 		await expect(canvas.getByText('App alert')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();

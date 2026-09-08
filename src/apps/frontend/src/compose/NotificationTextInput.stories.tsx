@@ -49,13 +49,13 @@ const renderWithPrefix: PrefixedStory['render'] = (args) => (
 export const WithPrefixBreakingNews: PrefixedStory = {
 	args: {
 		value: 'This is Guardian breaking news',
-		prefix: 'Breaking News: ',
+		prefix: 'Breaking news: ',
 	},
 	render: renderWithPrefix,
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 
-		await expect(canvas.getByText('Breaking News:')).toBeVisible();
+		await expect(canvas.getByText('Breaking news:')).toBeVisible();
 		await expect(canvas.getByLabelText('Subject')).toHaveValue(
 			'This is Guardian breaking news',
 		);
@@ -88,13 +88,13 @@ export const WithPrefixAndEmptyValue: PrefixedStory = {
 	args: {
 		placeholder: 'Enter a subject line here...',
 		value: '',
-		prefix: 'Breaking News: ',
+		prefix: 'Breaking news: ',
 	},
 	render: renderWithPrefix,
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 
-		await expect(canvas.queryByText('Breaking News:')).not.toBeInTheDocument();
+		await expect(canvas.queryByText('Breaking news:')).not.toBeInTheDocument();
 		await expect(canvas.getByLabelText('Subject')).toHaveValue('');
 		await expect(
 			canvas.getByLabelText('Subject character count'),
@@ -105,7 +105,7 @@ export const WithPrefixAndEmptyValue: PrefixedStory = {
 export const WithPrefixAndLengthySubject: PrefixedStory = {
 	args: {
 		value: 'All work and no play makes Jack a dull boy. '.repeat(3),
-		prefix: 'Breaking News: ',
+		prefix: 'Breaking news: ',
 	},
 	render: renderWithPrefix,
 };

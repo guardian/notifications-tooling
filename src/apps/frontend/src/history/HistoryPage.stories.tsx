@@ -25,7 +25,7 @@ const historyResponse: NotificationListResponse = {
 				items: {
 					'lead-story': {
 						type: 'app-push',
-						title: 'Breaking News',
+						title: 'Breaking news',
 						body: 'Prime minister announces cabinet reshuffle',
 						link: 'https://www.theguardian.com/politics',
 						media: {
