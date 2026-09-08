@@ -9,6 +9,10 @@ import {
 } from '@database';
 import type { DispatchOutcomes } from '../notification-channels/dispatch-notification';
 import type { TestDispatchOutcomes } from '../notification-channels/dispatch-notification-test';
+import {
+	type DispatchOutcome,
+	dispatchTargetKey,
+} from '../notification-channels/dispatch-outcome';
 import type {
 	NotificationSendRequest,
 	NotificationTestSendRequest,
@@ -43,98 +47,67 @@ export const rollUpStatus = (
  * Collects the targets that failed to dispatch, grouped by channel, so they can
  * be denormalised onto the notification row. Only keys are recorded so an API
  * consumer maps them back to labels via the audiences maps: `topicType`/`edition`
- * for app-push, `segmentId` for newsletter. App-push targets are stored as
- * `topicType/edition,edition`, so the topic type and editions are read back off
- * the target string.
+ * for app-push, `segmentId` for newsletter. Read straight off each dispatch's
+ * structured `requested`, so no encoding is parsed back out.
  */
 export const collectFailedTargets = (
 	dispatches: readonly NewNotificationDispatch[],
 ): FailedTargets => {
 	const failed = dispatches.filter((d) => d.status === 'failure');
 	return {
-		topics: failed
-			.filter((d) => d.channel === 'app-push')
-			.flatMap((d) => {
-				const [topicType, editionsCsv = ''] = d.target.split('/');
-				const editions = editionsCsv ? editionsCsv.split(',') : [];
-				return editions.map((edition) => ({
-					topicType: topicType ?? d.target,
-					edition,
-				}));
-			}),
-		segments: failed
-			.filter((d) => d.channel === 'newsletter')
-			.map((d) => ({ segmentId: d.target })),
+		topics: failed.flatMap((d) => {
+			const requested = d.requested;
+			return requested.channel === 'app-push'
+				? requested.editions.map((edition) => ({
+						topicType: requested.topicType,
+						edition,
+					}))
+				: [];
+		}),
+		segments: failed.flatMap((d) => {
+			const requested = d.requested;
+			return requested.channel === 'newsletter'
+				? [{ segmentId: requested.segment }]
+				: [];
+		}),
 	};
 };
 
-/** Maps a production dispatch's per-channel outcomes to dispatch rows. */
-export const mapSendOutcomesToDispatches = (
+/** Maps one dispatch outcome to its persisted row. */
+const toDispatchRow = (
 	notificationId: string,
-	{ appPush, newsletter }: DispatchOutcomes,
-): NewNotificationDispatch[] => [
-	...appPush.map((outcome): NewNotificationDispatch => ({
-		notificationId,
-		channel: 'app-push',
-		target: `${outcome.topicType}/${outcome.editions.join(',')}`,
-		providerRef: outcome.id,
-		status: outcome.status,
-		failureReason: outcome.failureReason ?? null,
-		providerStatusCode: outcome.providerStatusCode ?? null,
-		detail: { topics: outcome.topics, importance: outcome.importance },
-	})),
-	...newsletter.map((outcome): NewNotificationDispatch => ({
-		notificationId,
-		channel: 'newsletter',
-		target: outcome.segmentId,
-		providerRef: outcome.dispatchId ?? null,
-		status: outcome.status,
-		failureReason: outcome.failureReason ?? null,
-		providerStatusCode: outcome.providerStatusCode ?? null,
-		detail: {
-			campaignId: outcome.campaignId,
-			emailRenderingId: outcome.emailRenderingId,
-		},
-	})),
-];
+	outcome: DispatchOutcome,
+): NewNotificationDispatch => ({
+	notificationId,
+	channel: outcome.requested.channel,
+	requested: outcome.requested,
+	resolved: outcome.resolved,
+	targetKey: dispatchTargetKey(outcome.requested),
+	providerRef: outcome.providerRef,
+	status: outcome.status,
+	failureReason: outcome.failureReason,
+	providerStatusCode: outcome.providerStatusCode,
+});
 
-/** Maps a test dispatch's per-channel outcomes to dispatch rows. */
-export const mapTestOutcomesToDispatches = (
+/** Maps a dispatch's per-channel outcomes to dispatch rows. */
+export const mapOutcomesToDispatches = (
 	notificationId: string,
-	{ appPush, newsletter }: TestDispatchOutcomes,
+	{ appPush, newsletter }: DispatchOutcomes | TestDispatchOutcomes,
 ): NewNotificationDispatch[] => [
-	...appPush.map((outcome): NewNotificationDispatch => ({
-		notificationId,
-		channel: 'app-push',
-		target: `${outcome.topicType}/${outcome.editions.join(',')}`,
-		providerRef: outcome.id,
-		status: outcome.status,
-		failureReason: outcome.failureReason ?? null,
-		providerStatusCode: outcome.providerStatusCode ?? null,
-		detail: { topics: outcome.topics, importance: outcome.importance },
-	})),
-	...newsletter.map((outcome): NewNotificationDispatch => ({
-		notificationId,
-		channel: 'newsletter',
-		target: outcome.variant,
-		providerRef: outcome.dispatchId ?? null,
-		status: outcome.status,
-		failureReason: outcome.failureReason ?? null,
-		providerStatusCode: outcome.providerStatusCode ?? null,
-		detail: { emailRenderingId: outcome.emailRenderingId },
-	})),
+	...appPush.map((outcome) => toDispatchRow(notificationId, outcome)),
+	...newsletter.map((outcome) => toDispatchRow(notificationId, outcome)),
 ];
 
 /** The client-facing shape of one persisted dispatch outcome. */
 export const toPublicDispatch = (dispatch: NotificationDispatch) => ({
 	id: dispatch.id,
 	channel: dispatch.channel,
-	target: dispatch.target,
+	requested: dispatch.requested,
+	resolved: dispatch.resolved,
 	status: dispatch.status,
 	providerRef: dispatch.providerRef,
 	failureReason: dispatch.failureReason,
 	providerStatusCode: dispatch.providerStatusCode,
-	detail: dispatch.detail,
 	createdAt: dispatch.createdAt.toISOString(),
 	updatedAt: dispatch.updatedAt.toISOString(),
 });
@@ -287,7 +260,7 @@ export const sendNotificationStore: SendNotificationStore = {
 	recordOutcomes: (notification, outcomes) =>
 		recordDispatches(
 			notification,
-			mapSendOutcomesToDispatches(notification.id, outcomes),
+			mapOutcomesToDispatches(notification.id, outcomes),
 		),
 	markFailed: markNotificationFailed,
 };
@@ -307,7 +280,7 @@ export const testNotificationStore: TestNotificationStore = {
 	recordOutcomes: (notification, outcomes) =>
 		recordDispatches(
 			notification,
-			mapTestOutcomesToDispatches(notification.id, outcomes),
+			mapOutcomesToDispatches(notification.id, outcomes),
 		),
 	markFailed: markNotificationFailed,
 };

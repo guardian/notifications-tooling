@@ -1,12 +1,7 @@
 import type { NotificationTestSendRequest } from '../routers/notifications/schemas/notification-send-request';
-import {
-	type AppPushTestDispatchOutcome,
-	dispatchAppPushTest,
-} from './app-push/dispatch-app-push-test';
-import {
-	dispatchNewsletterTest,
-	type NewsletterTestDispatchOutcome,
-} from './newsletter/dispatch-newsletter-test';
+import { dispatchAppPushTest } from './app-push/dispatch-app-push-test';
+import type { DispatchOutcome } from './dispatch-outcome';
+import { dispatchNewsletterTest } from './newsletter/dispatch-newsletter-test';
 import {
 	defaultDependencies,
 	type DispatchNotificationDependencies,
@@ -18,8 +13,8 @@ import {
  * lets the router persist every outcome and then surface the documented 502/504.
  */
 export type TestDispatchOutcomes = {
-	newsletter: NewsletterTestDispatchOutcome[];
-	appPush: AppPushTestDispatchOutcome[];
+	newsletter: DispatchOutcome[];
+	appPush: DispatchOutcome[];
 	error?: unknown;
 };
 

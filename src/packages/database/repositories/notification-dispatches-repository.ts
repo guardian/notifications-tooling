@@ -18,7 +18,7 @@ export const createNotificationDispatchesRepository = (db: Database) => ({
 
 	/**
 	 * Records a dispatch outcome, upserting on the (notification, channel,
-	 * target) unique key so a retry overwrites that target's prior outcome.
+	 * target key) unique key so a retry overwrites that target's prior outcome.
 	 */
 	async upsert(values: NewNotificationDispatch): Promise<NotificationDispatch> {
 		const [row] = await db
@@ -28,14 +28,15 @@ export const createNotificationDispatchesRepository = (db: Database) => ({
 				target: [
 					notificationDispatches.notificationId,
 					notificationDispatches.channel,
-					notificationDispatches.target,
+					notificationDispatches.targetKey,
 				],
 				set: {
+					requested: values.requested,
+					resolved: values.resolved,
 					providerRef: values.providerRef ?? null,
 					status: values.status,
 					failureReason: values.failureReason ?? null,
 					providerStatusCode: values.providerStatusCode ?? null,
-					detail: values.detail ?? null,
 					updatedAt: new Date(),
 				},
 			})

@@ -68,21 +68,27 @@ describe('dispatchNotification (newsletter channel)', () => {
 		});
 		expect(outcomes.newsletter).toEqual([
 			{
-				notificationId,
-				segmentId: 'UK',
-				campaignId: newsletterSegments.UK.brazeCampaignId,
-				emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
-				dispatchId: 'dispatch-123',
+				requested: { channel: 'newsletter', segment: 'UK' },
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId: newsletterSegments.UK.brazeCampaignId,
+					emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
+				},
 				status: 'success',
+				providerRef: 'dispatch-123',
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				segmentId: 'US',
-				campaignId: newsletterSegments.US.brazeCampaignId,
-				emailRenderingId: newsletterSegments.US.emailRenderingNewsletterId,
-				dispatchId: 'dispatch-123',
+				requested: { channel: 'newsletter', segment: 'US' },
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId: newsletterSegments.US.brazeCampaignId,
+					emailRenderingId: newsletterSegments.US.emailRenderingNewsletterId,
+				},
 				status: 'success',
+				providerRef: 'dispatch-123',
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);
@@ -123,20 +129,26 @@ describe('dispatchNotification (newsletter channel)', () => {
 		expect(sendBrazeCampaign).toHaveBeenCalledTimes(2);
 		expect(outcomes).toEqual([
 			{
-				notificationId,
-				segmentId: 'UK',
-				campaignId: newsletterSegments.UK.brazeCampaignId,
-				emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
-				dispatchId: 'dispatch-123',
+				requested: { channel: 'newsletter', segment: 'UK' },
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId: newsletterSegments.UK.brazeCampaignId,
+					emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
+				},
 				status: 'success',
+				providerRef: 'dispatch-123',
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				segmentId: 'US',
-				campaignId: newsletterSegments.US.brazeCampaignId,
-				emailRenderingId: newsletterSegments.US.emailRenderingNewsletterId,
+				requested: { channel: 'newsletter', segment: 'US' },
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId: newsletterSegments.US.brazeCampaignId,
+					emailRenderingId: newsletterSegments.US.emailRenderingNewsletterId,
+				},
 				status: 'failure',
+				providerRef: null,
 				failureReason: 'http_error',
 				providerStatusCode: 502,
 			},

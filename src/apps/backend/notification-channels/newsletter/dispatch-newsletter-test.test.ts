@@ -71,19 +71,25 @@ describe('dispatchNewsletterTest', () => {
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
 		expect(outcomes).toEqual([
 			{
-				testId,
-				variant: 'UK',
-				emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
-				dispatchId: 'test-dispatch-123',
+				requested: { channel: 'newsletter', segment: 'UK' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
+				},
 				status: 'success',
+				providerRef: 'test-dispatch-123',
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 			{
-				testId,
-				variant: 'US',
-				emailRenderingId: newsletterSegments.US.emailRenderingNewsletterId,
-				dispatchId: 'test-dispatch-123',
+				requested: { channel: 'newsletter', segment: 'US' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: newsletterSegments.US.emailRenderingNewsletterId,
+				},
 				status: 'success',
+				providerRef: 'test-dispatch-123',
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);

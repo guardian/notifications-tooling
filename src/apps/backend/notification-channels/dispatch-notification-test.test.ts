@@ -43,23 +43,32 @@ describe('dispatchNotificationTest', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 		expect(outcomes.newsletter).toEqual([
 			{
-				testId,
-				variant: 'UK',
-				emailRenderingId: 'breaking-news-uk',
-				dispatchId: 'test-dispatch-123',
+				requested: { channel: 'newsletter', segment: 'UK' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: 'breaking-news-uk',
+				},
 				status: 'success',
+				providerRef: 'test-dispatch-123',
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);
 		expect(outcomes.appPush).toEqual([
 			{
-				testId,
-				id: anyString,
-				topicType: 'test',
-				editions: ['test'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);

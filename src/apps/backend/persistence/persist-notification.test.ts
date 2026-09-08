@@ -1,18 +1,47 @@
 import { describe, expect, it } from 'bun:test';
-import type { NotificationDispatch } from '@database';
+import type { NewNotificationDispatch, NotificationDispatch } from '@database';
 import type { DispatchOutcomes } from '../notification-channels/dispatch-notification';
 import type { TestDispatchOutcomes } from '../notification-channels/dispatch-notification-test';
 import {
 	collectFailedTargets,
 	httpStatusForNotification,
-	mapSendOutcomesToDispatches,
-	mapTestOutcomesToDispatches,
+	mapOutcomesToDispatches,
 	rollUpStatus,
 	toNotificationResponse,
 	toPublicDispatch,
 } from './persist-notification';
 
 const notificationId = '11111111-1111-1111-1111-111111111111';
+
+const appPushRow = (
+	status: 'success' | 'failure',
+): NewNotificationDispatch => ({
+	notificationId,
+	channel: 'app-push',
+	requested: {
+		channel: 'app-push',
+		topicType: 'breaking-news',
+		editions: ['uk'],
+	},
+	resolved: {
+		channel: 'app-push',
+		topics: [{ type: 'breaking', name: 'uk' }],
+		importance: 'Major',
+	},
+	targetKey: 'breaking-news/uk',
+	status,
+});
+
+const newsletterRow = (
+	status: 'success' | 'failure',
+): NewNotificationDispatch => ({
+	notificationId,
+	channel: 'newsletter',
+	requested: { channel: 'newsletter', segment: 'UK' },
+	resolved: { channel: 'newsletter', emailRenderingId: 'newsletter-1' },
+	targetKey: 'UK',
+	status,
+});
 
 describe('httpStatusForNotification', () => {
 	it('maps each rolled-up status to its HTTP code', () => {
@@ -30,48 +59,27 @@ describe('rollUpStatus', () => {
 
 	it('is delivered when every dispatch succeeded', () => {
 		expect(
-			rollUpStatus([
-				{ notificationId, channel: 'app-push', target: 'a', status: 'success' },
-				{
-					notificationId,
-					channel: 'newsletter',
-					target: 'b',
-					status: 'success',
-				},
-			]),
+			rollUpStatus([appPushRow('success'), newsletterRow('success')]),
 		).toBe('delivered');
 	});
 
 	it('is failed when every dispatch failed', () => {
-		expect(
-			rollUpStatus([
-				{ notificationId, channel: 'app-push', target: 'a', status: 'failure' },
-			]),
-		).toBe('failed');
+		expect(rollUpStatus([appPushRow('failure')])).toBe('failed');
 	});
 
 	it('is partially_delivered on a mix of outcomes', () => {
 		expect(
-			rollUpStatus([
-				{ notificationId, channel: 'app-push', target: 'a', status: 'success' },
-				{
-					notificationId,
-					channel: 'newsletter',
-					target: 'b',
-					status: 'failure',
-				},
-			]),
+			rollUpStatus([appPushRow('success'), newsletterRow('failure')]),
 		).toBe('partially_delivered');
 	});
 });
 
 describe('collectFailedTargets', () => {
 	it('is empty when nothing failed', () => {
-		expect(
-			collectFailedTargets([
-				{ notificationId, channel: 'app-push', target: 'a', status: 'success' },
-			]),
-		).toEqual({ topics: [], segments: [] });
+		expect(collectFailedTargets([appPushRow('success')])).toEqual({
+			topics: [],
+			segments: [],
+		});
 	});
 
 	it('groups failed targets by channel and ignores successes', () => {
@@ -80,33 +88,49 @@ describe('collectFailedTargets', () => {
 				{
 					notificationId,
 					channel: 'app-push',
-					target: 'breaking-news/uk,us',
-					status: 'failure',
-					detail: {
+					requested: {
+						channel: 'app-push',
+						topicType: 'breaking-news',
+						editions: ['uk', 'us'],
+					},
+					resolved: {
+						channel: 'app-push',
 						topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 						importance: 'Major',
 					},
+					targetKey: 'breaking-news/uk,us',
+					status: 'failure',
 				},
 				{
 					notificationId,
 					channel: 'app-push',
-					target: 'sport/uk',
-					status: 'success',
-					detail: {
+					requested: {
+						channel: 'app-push',
+						topicType: 'sport',
+						editions: ['uk'],
+					},
+					resolved: {
+						channel: 'app-push',
 						topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 						importance: 'Minor',
 					},
+					targetKey: 'sport/uk',
+					status: 'success',
 				},
 				{
 					notificationId,
 					channel: 'newsletter',
-					target: 'UK',
+					requested: { channel: 'newsletter', segment: 'UK' },
+					resolved: { channel: 'newsletter', emailRenderingId: 'newsletter-1' },
+					targetKey: 'UK',
 					status: 'failure',
 				},
 				{
 					notificationId,
 					channel: 'newsletter',
-					target: 'US',
+					requested: { channel: 'newsletter', segment: 'US' },
+					resolved: { channel: 'newsletter', emailRenderingId: 'newsletter-2' },
+					targetKey: 'US',
 					status: 'success',
 				},
 			]),
@@ -120,115 +144,151 @@ describe('collectFailedTargets', () => {
 	});
 });
 
-describe('mapSendOutcomesToDispatches', () => {
+describe('mapOutcomesToDispatches (send outcomes)', () => {
 	it('maps app-push and newsletter outcomes to dispatch rows', () => {
 		const outcomes: DispatchOutcomes = {
 			appPush: [
 				{
-					notificationId,
-					id: 'push-1',
-					topicType: 'breaking-news',
-					editions: ['uk'],
-					topics: [{ type: 'breaking', name: 'uk' }],
-					importance: 'Major',
+					requested: {
+						channel: 'app-push',
+						topicType: 'breaking-news',
+						editions: ['uk'],
+					},
+					resolved: {
+						channel: 'app-push',
+						topics: [{ type: 'breaking', name: 'uk' }],
+						importance: 'Major',
+					},
 					status: 'failure',
+					providerRef: 'push-1',
 					failureReason: 'http_error',
 					providerStatusCode: 500,
 				},
 			],
 			newsletter: [
 				{
-					notificationId,
-					segmentId: 'UK',
-					campaignId: 'campaign-1',
-					emailRenderingId: 'newsletter-1',
-					dispatchId: 'dispatch-1',
+					requested: { channel: 'newsletter', segment: 'UK' },
+					resolved: {
+						channel: 'newsletter',
+						brazeCampaignId: 'campaign-1',
+						emailRenderingId: 'newsletter-1',
+					},
 					status: 'success',
+					providerRef: 'dispatch-1',
+					failureReason: null,
+					providerStatusCode: null,
 				},
 			],
 		};
 
-		expect(mapSendOutcomesToDispatches(notificationId, outcomes)).toEqual([
+		expect(mapOutcomesToDispatches(notificationId, outcomes)).toEqual([
 			{
 				notificationId,
 				channel: 'app-push',
-				target: 'breaking-news/uk',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'uk' }],
+					importance: 'Major',
+				},
+				targetKey: 'breaking-news/uk',
 				providerRef: 'push-1',
 				status: 'failure',
 				failureReason: 'http_error',
 				providerStatusCode: 500,
-				detail: {
-					topics: [{ type: 'breaking', name: 'uk' }],
-					importance: 'Major',
-				},
 			},
 			{
 				notificationId,
 				channel: 'newsletter',
-				target: 'UK',
+				requested: { channel: 'newsletter', segment: 'UK' },
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId: 'campaign-1',
+					emailRenderingId: 'newsletter-1',
+				},
+				targetKey: 'UK',
 				providerRef: 'dispatch-1',
 				status: 'success',
 				failureReason: null,
 				providerStatusCode: null,
-				detail: {
-					campaignId: 'campaign-1',
-					emailRenderingId: 'newsletter-1',
-				},
 			},
 		]);
 	});
 });
 
-describe('mapTestOutcomesToDispatches', () => {
-	it('maps test outcomes to dispatch rows keyed by topic type and variant', () => {
+describe('mapOutcomesToDispatches (test outcomes)', () => {
+	it('maps test outcomes to dispatch rows keyed by topic type and segment', () => {
 		const outcomes: TestDispatchOutcomes = {
 			appPush: [
 				{
-					testId: notificationId,
-					id: 'push-1',
-					topicType: 'test',
-					editions: ['test'],
-					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-					importance: 'Minor',
+					requested: {
+						channel: 'app-push',
+						topicType: 'test',
+						editions: ['test'],
+					},
+					resolved: {
+						channel: 'app-push',
+						topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+						importance: 'Minor',
+					},
 					status: 'success',
+					providerRef: 'push-1',
+					failureReason: null,
 					providerStatusCode: 201,
 				},
 			],
 			newsletter: [
 				{
-					testId: notificationId,
-					variant: 'UK',
-					emailRenderingId: 'newsletter-1',
-					dispatchId: 'dispatch-1',
+					requested: { channel: 'newsletter', segment: 'UK' },
+					resolved: {
+						channel: 'newsletter',
+						emailRenderingId: 'newsletter-1',
+					},
 					status: 'success',
+					providerRef: 'dispatch-1',
+					failureReason: null,
 					providerStatusCode: 201,
 				},
 			],
 		};
 
-		expect(mapTestOutcomesToDispatches(notificationId, outcomes)).toEqual([
+		expect(mapOutcomesToDispatches(notificationId, outcomes)).toEqual([
 			{
 				notificationId,
 				channel: 'app-push',
-				target: 'test/test',
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
+				targetKey: 'test/test',
 				providerRef: 'push-1',
 				status: 'success',
 				failureReason: null,
 				providerStatusCode: 201,
-				detail: {
-					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-					importance: 'Minor',
-				},
 			},
 			{
 				notificationId,
 				channel: 'newsletter',
-				target: 'UK',
+				requested: { channel: 'newsletter', segment: 'UK' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: 'newsletter-1',
+				},
+				targetKey: 'UK',
 				providerRef: 'dispatch-1',
 				status: 'success',
 				failureReason: null,
 				providerStatusCode: 201,
-				detail: { emailRenderingId: 'newsletter-1' },
 			},
 		]);
 	});
@@ -240,12 +300,17 @@ describe('toPublicDispatch', () => {
 			id: '22222222-2222-2222-2222-222222222222',
 			notificationId,
 			channel: 'newsletter',
-			target: 'UK',
+			requested: { channel: 'newsletter', segment: 'UK' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'campaign-1',
+				emailRenderingId: 'newsletter-1',
+			},
+			targetKey: 'UK',
 			providerRef: 'dispatch-1',
 			status: 'success',
 			failureReason: null,
 			providerStatusCode: null,
-			detail: { campaignId: 'campaign-1' },
 			createdAt: new Date(0),
 			updatedAt: new Date(0),
 		};
@@ -253,12 +318,16 @@ describe('toPublicDispatch', () => {
 		expect(toPublicDispatch(row)).toEqual({
 			id: '22222222-2222-2222-2222-222222222222',
 			channel: 'newsletter',
-			target: 'UK',
+			requested: { channel: 'newsletter', segment: 'UK' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'campaign-1',
+				emailRenderingId: 'newsletter-1',
+			},
 			status: 'success',
 			providerRef: 'dispatch-1',
 			failureReason: null,
 			providerStatusCode: null,
-			detail: { campaignId: 'campaign-1' },
 			createdAt: '1970-01-01T00:00:00.000Z',
 			updatedAt: '1970-01-01T00:00:00.000Z',
 		});
@@ -289,12 +358,21 @@ describe('toNotificationResponse', () => {
 						id: '22222222-2222-2222-2222-222222222222',
 						notificationId,
 						channel: 'app-push',
-						target: 'breaking-news',
+						requested: {
+							channel: 'app-push',
+							topicType: 'breaking-news',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push',
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major',
+						},
+						targetKey: 'breaking-news/uk',
 						providerRef: 'push-1',
 						status: 'success',
 						failureReason: null,
 						providerStatusCode: null,
-						detail: null,
 						createdAt: new Date(0),
 						updatedAt: new Date(0),
 					},
@@ -318,12 +396,20 @@ describe('toNotificationResponse', () => {
 				{
 					id: '22222222-2222-2222-2222-222222222222',
 					channel: 'app-push',
-					target: 'breaking-news',
+					requested: {
+						channel: 'app-push',
+						topicType: 'breaking-news',
+						editions: ['uk'],
+					},
+					resolved: {
+						channel: 'app-push',
+						topics: [{ type: 'breaking', name: 'uk' }],
+						importance: 'Major',
+					},
 					status: 'success',
 					providerRef: 'push-1',
 					failureReason: null,
 					providerStatusCode: null,
-					detail: null,
 					createdAt: '1970-01-01T00:00:00.000Z',
 					updatedAt: '1970-01-01T00:00:00.000Z',
 				},

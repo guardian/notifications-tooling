@@ -7,6 +7,7 @@ import {
 } from '@services';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
+import type { NewsletterDispatchOutcome } from '../dispatch-outcome';
 import {
 	type ChannelDispatchResult,
 	type DispatchNotificationDependencies,
@@ -20,24 +21,10 @@ export const newsletterEnvironmentSchema = z.object({
 });
 
 /**
- * The outcome of one newsletter send (one per targeted segment). `dispatchId` is
- * Braze's `dispatch_id` from the campaign-trigger response, kept for tracking.
  * `campaignId` and `emailRenderingId` are the actual downstream ids sent to
  * Braze and email-rendering (not the internal segment mapping key), so persisted
  * rows and logs record what was really dispatched.
  */
-export type NewsletterDispatchOutcome = {
-	notificationId: string;
-	segmentId: string;
-	campaignId: string;
-	emailRenderingId: string;
-	dispatchId?: string;
-	status: 'success' | 'failure';
-	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
-	/** The Braze or email-rendering HTTP status when a failed send reached the provider. */
-	providerStatusCode?: number;
-};
-
 export const newsletterFailureReason = (
 	error: unknown,
 ): BrazeFailureReason | EmailRenderingFailureReason | 'unknown' =>
@@ -88,7 +75,7 @@ export const resolveNewsletterDispatch = (request: NotificationSendRequest) => {
 
 export const dispatchNewsletter = async (
 	resolvedDispatch: ReturnType<typeof resolveNewsletterDispatch>,
-	notificationId: string,
+	_notificationId: string,
 	dependencies: DispatchNotificationDependencies,
 ): Promise<ChannelDispatchResult<NewsletterDispatchOutcome>> => {
 	if (!resolvedDispatch) {
@@ -134,25 +121,29 @@ export const dispatchNewsletter = async (
 	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
 		const { segmentId, brazeCampaignId, emailRenderingNewsletterId } =
 			segments[index]!;
+		const requested = { channel: 'newsletter' as const, segment: segmentId };
+		const resolved = {
+			channel: 'newsletter' as const,
+			brazeCampaignId,
+			emailRenderingId: emailRenderingNewsletterId,
+		};
 		if (result.status === 'fulfilled') {
 			return {
-				notificationId,
-				segmentId,
-				campaignId: brazeCampaignId,
-				emailRenderingId: emailRenderingNewsletterId,
-				dispatchId: result.value.dispatchId,
+				requested,
+				resolved,
 				status: 'success',
+				providerRef: result.value.dispatchId ?? null,
+				failureReason: null,
 				providerStatusCode: result.value.status,
 			};
 		}
 		return {
-			notificationId,
-			segmentId,
-			campaignId: brazeCampaignId,
-			emailRenderingId: emailRenderingNewsletterId,
+			requested,
+			resolved,
 			status: 'failure',
+			providerRef: null,
 			failureReason: newsletterFailureReason(result.reason),
-			providerStatusCode: newsletterStatusCode(result.reason),
+			providerStatusCode: newsletterStatusCode(result.reason) ?? null,
 		};
 	});
 

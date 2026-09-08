@@ -91,20 +91,23 @@ describe('notifications repository (real Postgres)', () => {
 	it('loads a notification together with its dispatches, oldest first', async () => {
 		const notification = await notifications.create(buildNotification());
 
-		await dispatches.upsert(
-			buildDispatch(notification.id, { target: 'breaking-news' }),
-		);
+		await dispatches.upsert(buildDispatch(notification.id));
 		await dispatches.upsert(
 			buildDispatch(notification.id, {
 				channel: 'newsletter',
-				target: 'morning-briefing-uk',
+				requested: { channel: 'newsletter', segment: 'morning-briefing-uk' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: 'morning-briefing-uk',
+				},
+				targetKey: 'morning-briefing-uk',
 			}),
 		);
 
 		const found = await notifications.findByIdWithDispatches(notification.id);
 
-		expect(found?.dispatches.map((dispatch) => dispatch.target)).toEqual([
-			'breaking-news',
+		expect(found?.dispatches.map((dispatch) => dispatch.targetKey)).toEqual([
+			'breaking-news/uk',
 			'morning-briefing-uk',
 		]);
 	});

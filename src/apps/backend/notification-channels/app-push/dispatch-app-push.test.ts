@@ -57,16 +57,22 @@ describe('dispatchNotification (app-push channel)', () => {
 		});
 		expect(outcomes.appPush).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
-				editions: ['uk', 'us'],
-				topics: [
-					{ type: 'breaking', name: 'internal-dispatch-test' },
-					{ type: 'breaking', name: 'internal-dispatch-test' },
-				],
-				importance: 'Major',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk', 'us'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [
+						{ type: 'breaking', name: 'internal-dispatch-test' },
+						{ type: 'breaking', name: 'internal-dispatch-test' },
+					],
+					importance: 'Major',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);
@@ -113,23 +119,35 @@ describe('dispatchNotification (app-push channel)', () => {
 		);
 		expect(outcomes.appPush).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
-				editions: ['uk'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Major',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Major',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
-				editions: ['uk'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);
@@ -172,23 +190,34 @@ describe('dispatchNotification (app-push channel)', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
 		expect(outcomes).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
-				editions: ['uk'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Major',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Major',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
-				editions: ['uk'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'failure',
+				providerRef: anyString,
 				failureReason: 'http_error',
 				providerStatusCode: 400,
 			},
@@ -335,23 +364,35 @@ describe('dispatchNotification (app-push channel)', () => {
 		);
 		expect(outcomes.appPush).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
-				editions: ['uk'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
-				editions: ['us'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['us'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);
@@ -412,36 +453,54 @@ describe('dispatchNotification (app-push channel)', () => {
 		);
 		expect(outcomes.appPush).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
-				editions: ['uk'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Major',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Major',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
-				editions: ['uk', 'au'],
-				topics: [
-					{ type: 'breaking', name: 'internal-dispatch-test' },
-					{ type: 'breaking', name: 'internal-dispatch-test' },
-				],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['uk', 'au'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [
+						{ type: 'breaking', name: 'internal-dispatch-test' },
+						{ type: 'breaking', name: 'internal-dispatch-test' },
+					],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
-				editions: ['us'],
-				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
-				importance: 'Minor',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['us'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
 				providerStatusCode: 201,
 			},
 		]);

@@ -36,6 +36,13 @@
       "when": 1788789643341,
       "tag": "0004_add_notifications_failed_targets",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788800000000,
+      "tag": "0005_structured_dispatch_targets",
+      "breakpoints": true
     }
   ]
 }

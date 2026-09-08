@@ -98,16 +98,20 @@ const startDispatchServer = (
 
 describe('POST /v1/notification-tests (real Postgres)', () => {
 	it('persists the test notification and its dispatch when delivery succeeds', async () => {
-		const dispatch = mock((_request: unknown, testId: string) =>
+		const dispatch = mock(() =>
 			Promise.resolve({
 				appPush: [],
 				newsletter: [
 					{
-						testId,
-						variant: 'UK',
-						emailRenderingId: 'braze-newsletter-1',
-						dispatchId: 'braze-dispatch-1',
+						requested: { channel: 'newsletter' as const, segment: 'UK' },
+						resolved: {
+							channel: 'newsletter' as const,
+							emailRenderingId: 'braze-newsletter-1',
+						},
 						status: 'success' as const,
+						providerRef: 'braze-dispatch-1',
+						failureReason: null,
+						providerStatusCode: null,
 					},
 				],
 			}),
@@ -142,7 +146,8 @@ describe('POST /v1/notification-tests (real Postgres)', () => {
 			expect(stored?.dispatches).toHaveLength(1);
 			expect(stored?.dispatches[0]).toMatchObject({
 				channel: 'newsletter',
-				target: 'UK',
+				targetKey: 'UK',
+				requested: { channel: 'newsletter', segment: 'UK' },
 				providerRef: 'braze-dispatch-1',
 				status: 'success',
 			});
