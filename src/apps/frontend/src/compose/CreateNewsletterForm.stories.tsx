@@ -89,7 +89,7 @@ export const SelectNoKicker: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const screen = within(canvasElement.ownerDocument.body);
-		const kicker = canvas.getByRole('button', { name: 'Breaking News Kicker' });
+		const kicker = canvas.getByRole('button', { name: 'Breaking news Kicker' });
 
 		await userEvent.click(kicker);
 		await userEvent.click(screen.getByRole('option', { name: 'None' }));

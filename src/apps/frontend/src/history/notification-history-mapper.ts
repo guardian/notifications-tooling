@@ -78,7 +78,7 @@ const statusDisplay: Record<
 };
 
 const getNewsletterAlertType = (subject: string): string => {
-	const kicker = subject.match(/^(Breaking News|Exclusive):/i)?.[1];
+	const kicker = subject.match(/^(Breaking news|Exclusive):/i)?.[1];
 	return kicker ?? 'Newsletter';
 };
 
