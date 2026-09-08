@@ -5,7 +5,6 @@ import type {
 	AppAlertFormValues,
 	NewsletterFormValues,
 } from './notification-forms';
-import { alertTypeNameMap } from './option-values';
 
 type BuildRequestArgs<Values> = {
 	values: Values;
@@ -66,9 +65,12 @@ export const buildNewsletterRequest = ({
 
 export const buildAppAlertRequest = ({
 	values,
+	alertTypeLabel,
 	content,
 	idempotencyKey,
-}: BuildRequestArgs<AppAlertFormValues>): SendNotificationRequest => {
+}: BuildRequestArgs<AppAlertFormValues> & {
+	alertTypeLabel: string;
+}): SendNotificationRequest => {
 	const { alertType, editions, headline, includeThumbnail } = values;
 	const thumbnailUrl = content.fields?.thumbnail;
 
@@ -78,7 +80,7 @@ export const buildAppAlertRequest = ({
 			items: {
 				'lead-story': {
 					type: 'app-push',
-					title: alertTypeNameMap[alertType],
+					title: alertTypeLabel,
 					body: headline,
 					link: content.webUrl,
 					...(includeThumbnail && thumbnailUrl
