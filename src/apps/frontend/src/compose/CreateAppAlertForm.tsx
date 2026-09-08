@@ -1,13 +1,10 @@
 import { type FormEvent, useContext } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
 import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
-import {
-	type AppAlertFormValues,
-	defaultAppAlertFormValues,
-} from '../utils/notification-forms';
+import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
 import { HeadlineFormField } from './HeadlineFormField';
@@ -27,10 +24,6 @@ export const CreateAppAlertForm = ({
 	const { notification, updateNotification } = useContext(
 		NotificationFormContext,
 	);
-	const includeThumbnail = useWatch<AppAlertFormValues, 'includeThumbnail'>({
-		name: 'includeThumbnail',
-		defaultValue: defaultAppAlertFormValues.includeThumbnail,
-	});
 
 	const { data: constraints } = useChannelConstraints();
 	const topicTypes = useAppPushTopicTypes();
@@ -73,8 +66,8 @@ export const CreateAppAlertForm = ({
 			onArticleImported={(article) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);
 				setValue('includeThumbnail', Boolean(article.fields?.thumbnail));
+				setValue('articleThumbnailUrl', article.fields?.thumbnail ?? '');
 			}}
-			showArticleThumbnail={includeThumbnail}
 		>
 			<NotificationFormSection
 				id="alert-section"

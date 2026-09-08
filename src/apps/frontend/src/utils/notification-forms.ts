@@ -1,6 +1,10 @@
 import { displayAppAlertTopicEditionId, newsletterSegmentId } from '@models';
 import { z } from 'zod';
 import { kickerSchema } from '../schemas';
+import {
+	guardianImageUrlValidationMessage,
+	validateGuardianImageUrl,
+} from './form-validation';
 
 /**
  * No length blocks composition: the character counter is guidance and the
@@ -42,6 +46,12 @@ export const appAlertFormSchema = z.object({
 		.array(displayAppAlertTopicEditionId)
 		.min(1, 'Please select an edition'),
 	includeThumbnail: z.boolean(),
+	articleThumbnailUrl: z
+		.string()
+		.refine((url) => !validateGuardianImageUrl(url), {
+			message: guardianImageUrlValidationMessage,
+		})
+		.optional(),
 	deliveryOption: z.literal('appImmediate'),
 });
 
@@ -73,5 +83,6 @@ export const defaultAppAlertFormValues: AppAlertFormValues = {
 	headline: '',
 	editions: [],
 	includeThumbnail: true,
+	articleThumbnailUrl: '',
 	deliveryOption: 'appImmediate',
 };

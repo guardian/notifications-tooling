@@ -30,6 +30,64 @@ describe('notification form length rules', () => {
 		expect(result.success).toBe(true);
 	});
 
+	it('accepts an empty or valid app-alert thumbnail URL', () => {
+		const values = {
+			...defaultAppAlertFormValues,
+			headline: 'A developing story',
+			editions: ['UK'] as const,
+		};
+
+		expect(appAlertFormSchema.safeParse(values).success).toBe(true);
+		expect(
+			appAlertFormSchema.safeParse({
+				...values,
+				articleThumbnailUrl:
+					'https://media.guim.co.uk/replacement-thumbnail.jpg',
+			}).success,
+		).toBe(true);
+		expect(
+			appAlertFormSchema.safeParse({
+				...values,
+				articleThumbnailUrl: 'https://i.guim.co.uk/img/media/image-id.jpg',
+			}).success,
+		).toBe(true);
+	});
+
+	it('rejects an invalid app-alert thumbnail URL', () => {
+		expect(
+			appAlertFormSchema.safeParse({
+				...defaultAppAlertFormValues,
+				headline: 'A developing story',
+				editions: ['UK'],
+				articleThumbnailUrl: 'not a URL',
+			}).success,
+		).toBe(false);
+		expect(
+			appAlertFormSchema.safeParse({
+				...defaultAppAlertFormValues,
+				headline: 'A developing story',
+				editions: ['UK'],
+				articleThumbnailUrl: 'https://www.theguardian.com/news/image.jpg',
+			}).success,
+		).toBe(false);
+		expect(
+			appAlertFormSchema.safeParse({
+				...defaultAppAlertFormValues,
+				headline: 'A developing story',
+				editions: ['UK'],
+				articleThumbnailUrl: 'ftp://media.guim.co.uk/replacement-thumbnail.jpg',
+			}).success,
+		).toBe(false);
+		expect(
+			appAlertFormSchema.safeParse({
+				...defaultAppAlertFormValues,
+				headline: 'A developing story',
+				editions: ['UK'],
+				articleThumbnailUrl: 'https://media.guim.co.uk',
+			}).success,
+		).toBe(false);
+	});
+
 	it('still requires each text field to be present', () => {
 		expect(
 			newsletterFormSchema.safeParse({

@@ -8,6 +8,7 @@ import {
 	semanticSpacing,
 } from '@guardian/stand';
 import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
+import type { ButtonTheme } from '@guardian/stand/Button';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
@@ -287,6 +288,23 @@ export const customAlertBannerTheme: NonNullable<AlertBannerProps['theme']> = {
 		content: {
 			icon: {
 				color: semanticColors.text.blue,
+			},
+		},
+	},
+};
+export const replaceThumbnailButtonTheme: ButtonTheme = {
+	tertiary: {
+		shared: {
+			border: 'none',
+			backgroundColor: semanticColors.bg.base,
+			color: semanticColors.text.weak,
+			hover: {
+				border: 'none',
+				backgroundColor: semanticColors.bg.base,
+			},
+			active: {
+				border: 'none',
+				backgroundColor: semanticColors.bg.base,
 			},
 		},
 	},
