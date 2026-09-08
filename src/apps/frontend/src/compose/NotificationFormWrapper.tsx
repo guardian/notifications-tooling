@@ -1,6 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
-import type { ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from '@models';
 import {
 	type FormEventHandler,
 	type PropsWithChildren,
@@ -26,7 +26,10 @@ interface NotificationFormWrapperProps {
 	sendButtonLabel: string;
 	onSubmit: FormEventHandler<HTMLFormElement>;
 	onResetNotification: () => void;
-	onArticleImported: (article: ResolvedArticle) => void;
+	onArticleImported: (
+		article: ResolvedArticle,
+		requestedBlock?: CapiBlock,
+	) => void;
 }
 
 export const NotificationFormWrapper = ({

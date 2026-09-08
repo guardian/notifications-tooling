@@ -40,6 +40,8 @@ export const CreateAppAlertForm = ({
 					topicTypes.find(({ id }) => id === values.alertType)?.label ??
 					values.alertType,
 				content: notification.content,
+				requestedUrl: notification.requestedUrl,
+				requestedBlock: notification.requestedBlock,
 				idempotencyKey: crypto.randomUUID(),
 			}),
 		});
@@ -64,9 +66,10 @@ export const CreateAppAlertForm = ({
 			onResetNotification={() =>
 				updateNotification({ type: 'reset-app-alert' })
 			}
-			onArticleImported={(article) => {
+			onArticleImported={(article, requestedBlock) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);
-				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
+				const articleThumbnailUrl =
+					getArticleThumbnail(article, requestedBlock).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
 				setValue('articleThumbnailUrl', articleThumbnailUrl);
 			}}

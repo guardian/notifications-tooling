@@ -1,6 +1,6 @@
 import { Link } from '@guardian/stand/Link';
 import { Typography } from '@guardian/stand/Typography';
-import type { ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from '@models';
 import { useRelativeTime } from '../hooks/use-relative-time';
 import { articlePreviewCardTheme } from '../themes';
 import { getArticleThumbnail } from '../utils/article-thumbnail';
@@ -8,11 +8,15 @@ import { getPillarColor } from '../utils/pillar-colors';
 
 interface ArticlePreviewCardProps {
 	content: ResolvedArticle;
+	requestedUrl?: string;
+	requestedBlock?: CapiBlock;
 	showThumbnail?: boolean;
 }
 
 export const ArticlePreviewCard = ({
 	content,
+	requestedUrl,
+	requestedBlock,
 	showThumbnail = true,
 }: ArticlePreviewCardProps) => {
 	const {
@@ -26,10 +30,12 @@ export const ArticlePreviewCard = ({
 		blocks,
 		type,
 	} = content;
-	const liveblogMainBlock = type === 'liveblog' ? blocks?.main : undefined;
-	const isLiveblog = !!liveblogMainBlock?.id;
+	const liveblogBlock =
+		type === 'liveblog' ? (requestedBlock ?? blocks?.main) : undefined;
+	const isLiveblog = !!liveblogBlock?.id;
 	const headline = fields?.headline ?? webTitle;
-	const thumbnail = getArticleThumbnail(content);
+	const thumbnail = getArticleThumbnail(content, requestedBlock);
+	const linkUrl = requestedUrl ?? webUrl;
 	const pillarColor = getPillarColor(pillarId);
 	const publishedAt = useRelativeTime(
 		isLiveblog ? fields?.lastModified : webPublicationDate,
@@ -112,23 +118,23 @@ export const ArticlePreviewCard = ({
 					{headline}
 				</Typography>
 
-				{liveblogMainBlock?.id && (
+				{liveblogBlock?.id && (
 					<Typography
 						variant="bodyBoldXs"
 						element="p"
 						cssOverrides={articlePreviewCardTheme.liveblogBlockId}
 					>
-						Liveblog block ID: {liveblogMainBlock.id}
+						Liveblog block ID: {liveblogBlock.id}
 					</Typography>
 				)}
 
 				<Link
 					cssOverrides={articlePreviewCardTheme.url}
-					href={webUrl}
+					href={linkUrl}
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					{webUrl}
+					{linkUrl}
 				</Link>
 			</div>
 

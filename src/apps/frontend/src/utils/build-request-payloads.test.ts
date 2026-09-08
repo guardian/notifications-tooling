@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'bun:test';
 import { sendNotificationRequestSchema } from '../schemas';
-import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
+import {
+	articleFixture,
+	liveblogFixture,
+	requestedLiveblogBlock,
+} from '../testing/capi-fixtures';
 import {
 	buildAppAlertRequest,
 	buildNewsletterRequest,
@@ -137,6 +141,34 @@ describe('notification request builders', () => {
 					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
 				thumbnailUrl:
 					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+			},
+		});
+	});
+
+	it('uses the requested liveblog block image and exact deep link', () => {
+		const requestedUrl = `${liveblogFixture.webUrl}?filterKeyEvents=false#${requestedLiveblogBlock.id}`;
+		const request = buildAppAlertRequest({
+			values: {
+				alertType: 'breaking-news',
+				headline: 'Requested liveblog update',
+				editions: ['UK'],
+				includeThumbnail: true,
+				articleThumbnailUrl: '',
+				deliveryOption: 'appImmediate',
+			},
+			alertTypeLabel: 'Breaking news',
+			content: liveblogFixture,
+			requestedUrl,
+			requestedBlock: requestedLiveblogBlock,
+			idempotencyKey: 'requested-liveblog-block-operation-id',
+		});
+
+		expect(request.content.items['lead-story']).toMatchObject({
+			link: requestedUrl,
+			media: {
+				imageUrl: 'https://media.guim.co.uk/requested-liveblog-block/500.jpg',
+				thumbnailUrl:
+					'https://media.guim.co.uk/requested-liveblog-block/500.jpg',
 			},
 		});
 	});

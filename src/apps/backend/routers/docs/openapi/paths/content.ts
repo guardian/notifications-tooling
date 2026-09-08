@@ -3,7 +3,7 @@ export const resolveArticlePath = {
 	post: {
 		summary: 'Resolve a Guardian article link or id',
 		description:
-			'Determines the CAPI content id from the input — a bare article id or any Guardian article URL (public front-end or internal gutools preview/viewer link) — and resolves it against the Content API. Returns the full CAPI content item, under `article`.',
+			'Determines the CAPI content id from the input — a bare article id or any Guardian article URL (public front-end or internal gutools preview/viewer link) — and resolves it against the Content API. A liveblog `#block-...` fragment is validated and returned with the exact requested URL.',
 		security: [{ pandaCookie: [] }],
 		requestBody: {
 			required: true,
@@ -19,13 +19,7 @@ export const resolveArticlePath = {
 					'The article was found. Returns the full CAPI content item under `article`.',
 				content: {
 					'application/json': {
-						schema: {
-							type: 'object',
-							required: ['article'],
-							properties: {
-								article: { $ref: '#/components/schemas/ResolvedArticle' },
-							},
-						},
+						schema: { $ref: '#/components/schemas/ResolveArticleResponse' },
 					},
 				},
 			},
@@ -44,7 +38,7 @@ export const resolveArticlePath = {
 			},
 			'422': {
 				description:
-					'The body failed semantic validation, or the article reference is not a Guardian article URL or id (`invalid_article_reference`).',
+					'The body failed semantic validation, the article reference is invalid, or a requested liveblog block was not found (`invalid_article_reference`).',
 				content: {
 					'application/json': {
 						schema: {

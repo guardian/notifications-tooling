@@ -1,5 +1,21 @@
 import type { ResolvedArticle } from '@models';
 
+export const requestedLiveblogBlock = {
+	id: 'block-6a9af4938f0834a1091dfae4',
+	elements: [
+		{
+			type: 'image',
+			assets: [
+				{
+					file: 'https://media.guim.co.uk/requested-liveblog-block/500.jpg',
+					typeData: { width: 500 },
+				},
+			],
+			imageTypeData: { alt: 'Requested liveblog update' },
+		},
+	],
+};
+
 export const articleFixture: ResolvedArticle = {
 	id: 'environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures',
 	type: 'article',
@@ -56,5 +72,6 @@ export const liveblogFixture: ResolvedArticle = {
 				},
 			],
 		},
+		body: [requestedLiveblogBlock],
 	},
 };

@@ -1,4 +1,4 @@
-import type { ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from '@models';
 
 interface ArticleThumbnail {
 	alt?: string;
@@ -7,10 +7,13 @@ interface ArticleThumbnail {
 
 export const getArticleThumbnail = (
 	content?: ResolvedArticle,
+	requestedBlock?: CapiBlock,
 ): ArticleThumbnail => {
 	const mainBlock =
 		content?.type === 'liveblog' ? content.blocks?.main : undefined;
-	const image = mainBlock?.elements?.find(({ type }) => type === 'image');
+	const image = (requestedBlock ?? mainBlock)?.elements?.find(
+		({ type }) => type === 'image',
+	);
 	const preferredAsset = image?.assets?.find(
 		({ file, typeData }) => file && typeData?.width === 500,
 	);
