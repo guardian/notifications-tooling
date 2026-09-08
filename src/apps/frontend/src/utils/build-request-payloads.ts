@@ -34,12 +34,12 @@ export const buildNewsletterRequest = ({
 					link: content.webUrl,
 					...(thumbnailUrl
 						? {
-							media: {
-								type: 'image' as const,
-								imageUrl: thumbnailUrl,
-								thumbnailUrl,
-							},
-						}
+								media: {
+									type: 'image' as const,
+									imageUrl: thumbnailUrl,
+									thumbnailUrl,
+								},
+							}
 						: {}),
 				},
 			},
@@ -79,7 +79,10 @@ export const buildAppAlertRequest = ({
 		includeThumbnail,
 		articleThumbnailUrl,
 	} = values;
-	const thumbnailUrl = articleThumbnailUrl || getArticleThumbnail(content).src;
+	let thumbnailUrl = articleThumbnailUrl;
+	if (thumbnailUrl === undefined || thumbnailUrl === '') {
+		thumbnailUrl = getArticleThumbnail(content).src;
+	}
 
 	return {
 		idempotencyKey,
@@ -92,12 +95,12 @@ export const buildAppAlertRequest = ({
 					link: content.webUrl,
 					...(includeThumbnail && thumbnailUrl
 						? {
-							media: {
-								type: 'image' as const,
-								imageUrl: thumbnailUrl,
-								thumbnailUrl,
-							},
-						}
+								media: {
+									type: 'image' as const,
+									imageUrl: thumbnailUrl,
+									thumbnailUrl,
+								},
+							}
 						: {}),
 				},
 			},
