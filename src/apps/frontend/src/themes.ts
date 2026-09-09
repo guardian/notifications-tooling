@@ -316,3 +316,21 @@ export const replaceThumbnailButtonTheme: ButtonTheme = {
 		},
 	},
 };
+
+export const dispatchLandingTheme = {
+	dispatchMainContainer: css({
+		flow: 'vertical',
+		paddingTop: '48px',
+		paddingLeft: '24px',
+		width: '983px',
+		height: '823px',
+		gap: semanticSpacing.stackLg,
+	}),
+	dispatchTableSection: css({
+		width: '983px',
+		marginTop: '16px',
+		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		paddingTop: '12px',
+		gap: semanticSpacing.stackMd,
+	}),
+};

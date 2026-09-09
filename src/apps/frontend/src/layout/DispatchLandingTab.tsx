@@ -1,4 +1,3 @@
-import { css } from '@emotion/react';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
@@ -8,6 +7,7 @@ import { HistoryView } from '../history/HistoryView';
 import { mapNotificationToHistoryNotification } from '../history/notification-history-mapper';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
+import { dispatchLandingTheme } from '../themes';
 import { parseHistorySearchParams } from '../utils/history-search-params';
 
 export const DispatchLandingTab = () => {
@@ -47,11 +47,12 @@ export const DispatchLandingTab = () => {
 
 	return (
 		<Layout.Main>
-			<div>
-				<Typography variant="heading2Xl" element="h1">
+			<div css={dispatchLandingTheme.dispatchMainContainer}>
+				<Typography variant="titleXl" element={'h1'}>
 					Welcome to Dispatch
 				</Typography>
-				<section css={css({ width: '983px', marginTop: '16px' })}>
+				<div css={dispatchLandingTheme.dispatchTableSection}>
+					<Typography variant="headingXl">Last 24-hour activity</Typography>
 					<HistoryView
 						notifications={notifications}
 						totalItems={notificationHistory.data?.total ?? 0}
@@ -68,7 +69,7 @@ export const DispatchLandingTab = () => {
 						currentPage={currentPage}
 						dispatchLandingPage={true}
 					/>
-				</section>
+				</div>
 			</div>
 		</Layout.Main>
 	);
