@@ -76,6 +76,12 @@ export const notificationDispatchSchema = {
 							example: [{ type: 'breaking', name: 'uk' }],
 						},
 						importance: { type: 'string', enum: ['Major', 'Minor'] },
+						blockId: {
+							type: 'string',
+							description:
+								'The liveblog block the push deep-links into, present only when the article link named one.',
+							example: '5dd7ca0f8f080fd59fb15354',
+						},
 					},
 				},
 				{

@@ -155,6 +155,7 @@ export const dispatchAppPush = async (
 			channel: 'app-push' as const,
 			topics: push.topics,
 			importance: push.importance,
+			...(blockId ? { blockId } : {}),
 		};
 		if (result.status === 'fulfilled') {
 			return {
