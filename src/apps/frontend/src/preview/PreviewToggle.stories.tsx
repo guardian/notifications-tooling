@@ -13,6 +13,7 @@ import { AppPreviewToggle, EmailPreviewToggle } from './PreviewToggle';
 
 type StoryArgs = {
 	notificationState: NotificationState;
+	showPreview: boolean;
 };
 
 type Story = StoryObj<StoryArgs>;
@@ -22,9 +23,13 @@ const meta: Meta<StoryArgs> = {
 	component: EmailPreviewToggle,
 	args: {
 		notificationState: defaultState,
+		showPreview: true,
 	},
-	render: ({ notificationState }) =>
-		WithNotificationContext(<EmailPreviewToggle />, notificationState),
+	render: ({ notificationState, showPreview }) =>
+		WithNotificationContext(
+			<EmailPreviewToggle showPreview={showPreview} />,
+			notificationState,
+		),
 };
 
 export default meta;
@@ -44,9 +49,9 @@ export const Expanded: Story = {
 			...defaultState,
 		},
 	},
-	render: ({ notificationState }) =>
+	render: ({ notificationState, showPreview }) =>
 		WithNotificationContext(
-			<EmailPreviewToggle />,
+			<EmailPreviewToggle showPreview={showPreview} />,
 			notificationState,
 			{},
 			'email',
