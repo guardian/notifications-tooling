@@ -1,37 +1,11 @@
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
-import type { DisplayAppAlertTopicEditionId } from '@models';
-import type { ReactNode } from 'react';
+import { HistoryPagination } from '../history/HistoryPagination';
+import { HistoryTable } from '../history/HistoryTable';
+import type { HistoryViewProps } from '../history/HistoryView';
 import { historyViewStyles, layoutMainTheme } from '../themes';
-import { HistoryPagination } from './HistoryPagination';
-import { HistoryTable } from './HistoryTable';
 
-export type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
-
-export interface HistoryNotification {
-	id: string;
-	title: string;
-	href: string;
-	thumbnailUrl?: string;
-	channel: 'email' | 'push';
-	alertType: string;
-	sentBy: string;
-	sentTo: DisplayAppAlertTopicEditionId[];
-	sentAt: string;
-	status: HistoryStatus;
-}
-
-export interface HistoryViewProps {
-	notifications?: HistoryNotification[];
-	totalItems?: number;
-	limit: number;
-	currentPage: number;
-	isLoading?: boolean;
-	error?: ReactNode;
-	handlePageChange: (page: number) => void;
-}
-
-export const HistoryView = ({
+export const DispatchLandingHistoryView = ({
 	notifications = [],
 	totalItems = 0,
 	isLoading = false,
@@ -47,11 +21,7 @@ export const HistoryView = ({
 				css={historyViewStyles.container}
 			>
 				<div css={historyViewStyles.header}>
-					<div css={historyViewStyles.titleBlock}>
-						<Typography id="history-heading" element="h1" variant="headingLg">
-							History
-						</Typography>
-					</div>
+					<Typography variant="headingXl">Last 24-hour activity</Typography>
 					{!isLoading && !error && totalItems > limit && (
 						<HistoryPagination
 							currentPage={currentPage}
@@ -62,7 +32,7 @@ export const HistoryView = ({
 					)}
 				</div>
 				{isLoading && (
-					<Typography variant="bodyMd">Loading history...</Typography>
+					<Typography variant="bodyMd">Loading 24 hour history...</Typography>
 				)}
 				{error}
 				{!isLoading && !error && <HistoryTable notifications={notifications} />}
