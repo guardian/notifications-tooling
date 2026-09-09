@@ -315,14 +315,18 @@ export const replaceThumbnailButtonTheme: ButtonTheme = {
 export const dispatchLandingTheme = {
 	dispatchMainContainer: css({
 		flow: 'vertical',
-		paddingTop: '48px',
-		paddingLeft: '24px',
-		width: '983px',
-		height: '823px',
+		paddingTop: semanticSpacing.stackLg,
+		paddingInline: semanticSpacing.stackMd,
+		width: '100%',
+		maxWidth: '983px',
 		gap: semanticSpacing.stackLg,
+		[from.md]: {
+			paddingInline: semanticSpacing.stackLg,
+		},
 	}),
 	dispatchTableSection: css({
-		width: '983px',
+		width: '100%',
+		maxWidth: '983px',
 		marginTop: '16px',
 		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		paddingTop: '12px',
@@ -423,7 +427,10 @@ export const historyViewStyles = {
 	}),
 	tableHeader: css({
 		'& > tr > *': {
-			padding: '16px',
+			padding: '12px',
+			[from.md]: {
+				padding: '16px',
+			},
 		},
 		'& > tr > :not(:first-of-type)': {
 			display: 'none',
@@ -473,6 +480,7 @@ export const historyViewStyles = {
 	}),
 	metadataValue: css({
 		minWidth: 0,
+		overflowWrap: 'anywhere',
 	}),
 	statusBadge: css({
 		boxSizing: 'border-box',
