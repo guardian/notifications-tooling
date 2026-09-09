@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte } from 'drizzle-orm';
+import { and, count, desc, eq, gte, lte } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -17,6 +17,13 @@ export type ListRecentNotificationsOptions = {
 	since: Date;
 	limit?: number;
 	offset?: number;
+};
+
+export type ListNotificationsInWindowOptions = {
+	from: Date;
+	to: Date;
+	/** Caps the notifications loaded so an unbounded range can't exhaust memory. */
+	limit: number;
 };
 
 export type NotificationListPage = {
@@ -151,6 +158,31 @@ export const createNotificationsRepository = (db: Database) => ({
 		}
 
 		return { notifications: await pageQuery, total: totals?.total ?? 0 };
+	},
+
+	/** Production sends in a time window with their provider outcomes attached. */
+	async listRecentWithDispatches({
+		from,
+		to,
+		limit,
+	}: ListNotificationsInWindowOptions): Promise<NotificationWithDispatches[]> {
+		return db.query.notifications.findMany({
+			where: and(
+				gte(notifications.createdAt, from),
+				lte(notifications.createdAt, to),
+				eq(notifications.kind, 'send'),
+				eq(notifications.dryRun, false),
+			),
+			orderBy: (notification, { desc: orderDescending }) => [
+				orderDescending(notification.createdAt),
+			],
+			limit,
+			with: {
+				dispatches: {
+					orderBy: (dispatch, { asc }) => [asc(dispatch.createdAt)],
+				},
+			},
+		});
 	},
 
 	/** The notification plus its dispatch outcomes, oldest first, or null. */

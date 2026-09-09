@@ -6,6 +6,12 @@ import {
 import { channelConstraintsSchema } from './channel-constraints';
 import { emailPreviewErrorSchema } from './email-preview-error';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
+import { grafanaMetricsSchema } from './grafana-metrics';
+import {
+	grafanaQueryErrorSchema,
+	grafanaQueryRequestSchema,
+	grafanaQueryResponseSchema,
+} from './grafana-query';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { liveblogBlockSchema } from './liveblog-block';
@@ -30,6 +36,10 @@ import { userResponseSchema, userSchema } from './user';
 /** Reusable schema objects referenced via `#/components/schemas/*`. */
 export const schemas = {
 	HealthStatus: healthStatusSchema,
+	GrafanaMetrics: grafanaMetricsSchema,
+	GrafanaQueryRequest: grafanaQueryRequestSchema,
+	GrafanaQueryResponse: grafanaQueryResponseSchema,
+	GrafanaQueryError: grafanaQueryErrorSchema,
 	NotificationChannel: notificationChannelSchema,
 	Notification: notificationSchema,
 	NotificationSummary: notificationSummarySchema,
