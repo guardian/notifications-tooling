@@ -94,17 +94,20 @@ export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 	};
 };
 
-export const dispatchAppPush = async (
-	resolvedDispatch: ReturnType<typeof resolveAppPushDispatch>,
-	_notificationId: string,
+/** The content, sender and grouped pushes a single app-push dispatch sends. */
+export type ResolvedAppPushDispatch = NonNullable<
+	ReturnType<typeof resolveAppPushDispatch>
+>;
+
+/**
+ * Sends one mobile-n10n push per resolved topic-type group and maps each to a
+ * dispatch outcome. Shared by the production and internal-test push flows, which
+ * differ only in how they resolve the content, sender and pushes.
+ */
+export const sendResolvedAppPushes = async (
+	{ item, sender, pushes }: ResolvedAppPushDispatch,
 	dependencies: DispatchNotificationDependencies,
 ): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
-	if (!resolvedDispatch) {
-		return { outcomes: [] };
-	}
-
-	const { item, sender, pushes } = resolvedDispatch;
-
 	const [endpoint, apiKey] = await Promise.all([
 		dependencies.getSSMParameter('MOBILE_N10N_ENDPOINT'),
 		dependencies.getSSMParameter('MOBILE_N10N_API_KEY'),
@@ -184,4 +187,16 @@ export const dispatchAppPush = async (
 	});
 
 	return { outcomes, error: firstSettledError(settled) };
+};
+
+export const dispatchAppPush = async (
+	resolvedDispatch: ReturnType<typeof resolveAppPushDispatch>,
+	_notificationId: string,
+	dependencies: DispatchNotificationDependencies,
+): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
+	if (!resolvedDispatch) {
+		return { outcomes: [] };
+	}
+
+	return sendResolvedAppPushes(resolvedDispatch, dependencies);
 };
