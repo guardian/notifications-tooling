@@ -28,7 +28,7 @@ app.disable('x-powered-by');
 app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(grafanaCorsMiddleware);
+app.use(['/metrics', '/query'], grafanaCorsMiddleware);
 
 app.use('/health', healthRouter);
 app.use('/', grafanaRouter);
