@@ -100,7 +100,7 @@ describe('Grafana datasource endpoints', () => {
 
 		expect(response.status).toBe(204);
 		expect(response.headers.get('access-control-allow-methods')).toBe(
-			'POST, OPTIONS',
+			'POST,OPTIONS',
 		);
 	});
 
