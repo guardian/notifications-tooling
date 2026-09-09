@@ -80,7 +80,7 @@ export const Default: Story = {
 			canvas.getByRole('img', { name: 'International' }),
 		).toBeInTheDocument();
 		const recentSendTime = canvas.getAllByRole('time')[0];
-		await expect(recentSendTime).toHaveTextContent(/^\d+m ago$/);
+		await expect(recentSendTime).toHaveTextContent(/^\d+ mins? ago$/);
 		await expect(recentSendTime).toHaveAttribute(
 			'datetime',
 			notifications[0]?.sentAt,

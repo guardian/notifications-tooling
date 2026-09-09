@@ -23,6 +23,12 @@ export type SendAppNotificationRequest = {
 	 * external URL.
 	 */
 	contentApiId?: string;
+	/**
+	 * Liveblog block id derived from `link`. When set (alongside `contentApiId`),
+	 * mobile-n10n appends `?page=with:block-<id>` so the apps open the liveblog at
+	 * that block instead of the top.
+	 */
+	blockId?: string;
 	importance: AppNotificationImportance;
 	topics: ReadonlyArray<{ type: string; name: string }>;
 	media?: {
@@ -87,6 +93,7 @@ export const sendAppNotification = async ({
 	body,
 	link,
 	contentApiId,
+	blockId,
 	importance,
 	topics,
 	media,
@@ -113,12 +120,14 @@ export const sendAppNotification = async ({
 		sender,
 		// A Guardian link (contentApiId + `item-trimmed` GITContent prefix) so the
 		// apps open the article in place; an external URL when no id is derivable.
-		// `link.title` mirrors the message (the headline), as Fronts does.
+		// `link.title` mirrors the message (the headline), as Fronts does. A liveblog
+		// `blockId` deep-links to a single block; mobile-n10n builds the block URL.
 		link: contentApiId
 			? {
 					contentApiId,
 					title: body,
 					git: { mobileAggregatorPrefix: 'item-trimmed' },
+					...(blockId ? { blockId } : {}),
 				}
 			: { url: link },
 		importance,

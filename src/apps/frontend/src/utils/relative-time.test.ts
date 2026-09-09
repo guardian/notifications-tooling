@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import {
 	formatRelativeTime,
 	getRefreshIntervalMs,
+	isRelativeTime,
 	parsePublicationDate,
 } from './relative-time';
 
@@ -34,19 +35,55 @@ describe('formatRelativeTime', () => {
 		expect(formatRelativeTime(hoursAgo(23), TEST_DATE)).toBe('23h ago');
 	});
 
-	it('counts whole days', () => {
-		expect(formatRelativeTime(daysAgo(1), TEST_DATE)).toBe('1d ago');
-		expect(formatRelativeTime(daysAgo(6), TEST_DATE)).toBe('6d ago');
+	it('supports long relative labels', () => {
+		expect(
+			formatRelativeTime(
+				new Date(TEST_DATE.getTime() - 999),
+				TEST_DATE,
+				'long',
+			),
+		).toBe('just now');
+		expect(
+			formatRelativeTime(
+				new Date(TEST_DATE.getTime() - 1_000),
+				TEST_DATE,
+				'long',
+			),
+		).toBe('1 sec ago');
+		expect(formatRelativeTime(hoursAgo(1), TEST_DATE, 'long')).toBe(
+			'1 hour ago',
+		);
+		expect(
+			formatRelativeTime(
+				new Date(TEST_DATE.getTime() - 42_000),
+				TEST_DATE,
+				'long',
+			),
+		).toBe('42 secs ago');
 	});
 
-	it('falls back to an absolute date after a week', () => {
-		expect(formatRelativeTime(daysAgo(7), TEST_DATE)).toBe('12 Jul 2026');
-		expect(formatRelativeTime(daysAgo(400), TEST_DATE)).toBe('14 Jun 2025');
+	it('falls back to a full absolute time at exactly 24 hours', () => {
+		expect(formatRelativeTime(daysAgo(1), TEST_DATE)).toBe(
+			'18 Jul 2026, 13:00',
+		);
+		expect(formatRelativeTime(daysAgo(400), TEST_DATE)).toBe(
+			'14 Jun 2025, 13:00',
+		);
 	});
 
 	it('falls back to an absolute date for future publication dates', () => {
 		const tomorrow = new Date(TEST_DATE.getTime() + 24 * 60 * 60 * 1000);
-		expect(formatRelativeTime(tomorrow, TEST_DATE)).toBe('20 Jul 2026');
+		expect(formatRelativeTime(tomorrow, TEST_DATE)).toBe('20 Jul 2026, 13:00');
+	});
+});
+
+describe('isRelativeTime', () => {
+	it('is true only for timestamps within the past 24 hours', () => {
+		expect(isRelativeTime(hoursAgo(23), TEST_DATE)).toBe(true);
+		expect(isRelativeTime(daysAgo(1), TEST_DATE)).toBe(false);
+		expect(
+			isRelativeTime(new Date(TEST_DATE.getTime() + 1_000), TEST_DATE),
+		).toBe(false);
 	});
 });
 
@@ -72,13 +109,22 @@ describe('getRefreshIntervalMs', () => {
 		expect(getRefreshIntervalMs(minutesAgo(2), TEST_DATE)).toBe(30_000);
 	});
 
-	it('ticks every 5 minutes once counting hours or days', () => {
+	it('ticks every 5 minutes once counting hours', () => {
 		expect(getRefreshIntervalMs(hoursAgo(3), TEST_DATE)).toBe(300_000);
-		expect(getRefreshIntervalMs(daysAgo(3), TEST_DATE)).toBe(300_000);
+	});
+
+	it('ticks every second while long labels count seconds', () => {
+		expect(getRefreshIntervalMs(minutesAgo(0), TEST_DATE, 'long')).toBe(1_000);
+	});
+
+	it('ticks at the exact 24-hour boundary', () => {
+		expect(getRefreshIntervalMs(minutesAgo(24 * 60 - 1), TEST_DATE)).toBe(
+			60_000,
+		);
 	});
 
 	it('stops ticking once the label is an absolute date', () => {
-		expect(getRefreshIntervalMs(daysAgo(8), TEST_DATE)).toBeUndefined();
+		expect(getRefreshIntervalMs(daysAgo(1), TEST_DATE)).toBeUndefined();
 		expect(
 			getRefreshIntervalMs(new Date(TEST_DATE.getTime() + 60_000), TEST_DATE),
 		).toBeUndefined();

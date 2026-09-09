@@ -21,7 +21,7 @@ export interface HistoryNotification {
 	status: HistoryStatus;
 }
 
-export interface HistoryViewProps {
+interface HistoryViewProps {
 	notifications?: HistoryNotification[];
 	totalItems?: number;
 	limit: number;

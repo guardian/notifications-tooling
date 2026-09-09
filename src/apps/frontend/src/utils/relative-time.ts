@@ -3,21 +3,17 @@ const MINUTE_MS = 60 * SECOND_MS;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
-/** Beyond this age a relative label stops being useful, so show a date instead. */
-const ABSOLUTE_THRESHOLD_MS = 7 * DAY_MS;
-
 const absoluteDateFormatter = new Intl.DateTimeFormat('en-GB', {
-	day: 'numeric',
-	month: 'short',
-	year: 'numeric',
+	dateStyle: 'medium',
 	timeZone: 'Europe/London',
 });
 
-const absoluteDateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
-	dateStyle: 'medium',
+const absoluteTimeFormatter = new Intl.DateTimeFormat('en-GB', {
 	timeStyle: 'short',
 	timeZone: 'Europe/London',
 });
+
+export type RelativeTimeStyle = 'short' | 'long';
 
 /**
  * Parses a CAPI `iso8601` publication date, returning `undefined` when the
@@ -32,37 +28,51 @@ export const parsePublicationDate = (iso8601?: string): Date | undefined => {
 };
 
 /**
- * Formats a publication date as a short, relative label, e.g. `2m ago`.
- * Dates older than a week (or in the future) fall back to an
- * absolute date, e.g. `12 Jul 2026`.
+ * Whether a date is within the past 24 hours and should use a relative label.
+ */
+export const isRelativeTime = (date: Date, now: Date = new Date()): boolean => {
+	const elapsedMs = now.getTime() - date.getTime();
+	return elapsedMs >= 0 && elapsedMs < DAY_MS;
+};
+
+const longRelativeLabel = (amount: number, unit: string) =>
+	`${amount} ${unit}${amount === 1 ? '' : 's'} ago`;
+
+/**
+ * Formats a date relative to now. Dates at least 24 hours old, and future
+ * dates, use a full absolute date and time.
  */
 export const formatRelativeTime = (
 	date: Date,
 	now: Date = new Date(),
+	style: RelativeTimeStyle = 'short',
 ): string => {
 	const elapsedMs = now.getTime() - date.getTime();
 
-	if (elapsedMs < 0) {
-		return absoluteDateFormatter.format(date);
+	if (!isRelativeTime(date, now)) {
+		return formatAbsoluteTime(date);
 	}
-	if (elapsedMs < MINUTE_MS) {
+	if (elapsedMs < SECOND_MS) {
 		return 'just now';
 	}
+	if (elapsedMs < MINUTE_MS) {
+		return style === 'long'
+			? longRelativeLabel(Math.floor(elapsedMs / SECOND_MS), 'sec')
+			: 'just now';
+	}
 	if (elapsedMs < HOUR_MS) {
-		return `${Math.floor(elapsedMs / MINUTE_MS)}m ago`;
+		const minutes = Math.floor(elapsedMs / MINUTE_MS);
+		return style === 'long'
+			? longRelativeLabel(minutes, 'min')
+			: `${minutes}m ago`;
 	}
-	if (elapsedMs < DAY_MS) {
-		return `${Math.floor(elapsedMs / HOUR_MS)}h ago`;
-	}
-	if (elapsedMs < ABSOLUTE_THRESHOLD_MS) {
-		return `${Math.floor(elapsedMs / DAY_MS)}d ago`;
-	}
-	return absoluteDateFormatter.format(date);
+	const hours = Math.floor(elapsedMs / HOUR_MS);
+	return style === 'long' ? longRelativeLabel(hours, 'hour') : `${hours}h ago`;
 };
 
 /** Full date and time, used as the tooltip/screen-reader detail for a relative label. */
 export const formatAbsoluteTime = (date: Date): string =>
-	absoluteDateTimeFormatter.format(date);
+	`${absoluteDateFormatter.format(date)}, ${absoluteTimeFormatter.format(date)}`;
 
 /**
  * How often a relative label needs re-rendering to stay accurate: every 30s
@@ -72,11 +82,17 @@ export const formatAbsoluteTime = (date: Date): string =>
 export const getRefreshIntervalMs = (
 	date: Date,
 	now: Date = new Date(),
+	style: RelativeTimeStyle = 'short',
 ): number | undefined => {
 	const elapsedMs = now.getTime() - date.getTime();
 
-	if (elapsedMs < 0 || elapsedMs >= ABSOLUTE_THRESHOLD_MS) {
+	if (!isRelativeTime(date, now)) {
 		return undefined;
 	}
-	return elapsedMs < HOUR_MS ? 30 * SECOND_MS : 5 * MINUTE_MS;
+	if (style === 'long' && elapsedMs < MINUTE_MS) {
+		return SECOND_MS;
+	}
+	const regularIntervalMs =
+		elapsedMs < HOUR_MS ? 30 * SECOND_MS : 5 * MINUTE_MS;
+	return Math.min(regularIntervalMs, DAY_MS - elapsedMs);
 };

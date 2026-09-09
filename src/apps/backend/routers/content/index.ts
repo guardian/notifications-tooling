@@ -88,7 +88,7 @@ export const createContentRouter = (
 									buildErrorEnvelope(
 										req,
 										'invalid_article_reference',
-										'The liveblog block could not be found.',
+										'The imported liveblog block ID is invalid.',
 									),
 								);
 						}

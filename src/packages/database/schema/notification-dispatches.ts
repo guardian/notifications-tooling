@@ -38,6 +38,8 @@ export type DispatchResolved =
 			channel: 'app-push';
 			topics: Array<{ type: string; name: string }>;
 			importance: 'Major' | 'Minor';
+			/** Liveblog block deep-linked into, when the article link named one. */
+			blockId?: string;
 	  }
 	| {
 			channel: 'newsletter';
