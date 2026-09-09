@@ -13,10 +13,17 @@ export const grafanaQueryRequestSchema = {
 		},
 		targets: {
 			type: 'array',
+			minItems: 1,
+			maxItems: 1,
 			items: {
 				type: 'object',
+				required: ['target'],
 				properties: {
-					target: { type: 'string', example: 'notifications' },
+					target: {
+						type: 'string',
+						enum: ['notifications'],
+						example: 'notifications',
+					},
 					refId: { type: 'string', example: 'A' },
 				},
 			},
