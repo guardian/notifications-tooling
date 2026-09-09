@@ -3,8 +3,12 @@ const MINUTE_MS = 60 * SECOND_MS;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
-const absoluteDateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
+const absoluteDateFormatter = new Intl.DateTimeFormat('en-GB', {
 	dateStyle: 'medium',
+	timeZone: 'Europe/London',
+});
+
+const absoluteTimeFormatter = new Intl.DateTimeFormat('en-GB', {
 	timeStyle: 'short',
 	timeZone: 'Europe/London',
 });
@@ -65,7 +69,7 @@ export const formatRelativeTime = (
 
 /** Full date and time, used as the tooltip/screen-reader detail for a relative label. */
 export const formatAbsoluteTime = (date: Date): string =>
-	absoluteDateTimeFormatter.format(date);
+	`${absoluteDateFormatter.format(date)}, ${absoluteTimeFormatter.format(date)}`;
 
 /**
  * How often a relative label needs re-rendering to stay accurate: every 30s

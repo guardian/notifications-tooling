@@ -50,18 +50,16 @@ describe('formatRelativeTime', () => {
 
 	it('falls back to a full absolute time at exactly 24 hours', () => {
 		expect(formatRelativeTime(daysAgo(1), TEST_DATE)).toBe(
-			'18 Jul 2026 at 13:00',
+			'18 Jul 2026, 13:00',
 		);
 		expect(formatRelativeTime(daysAgo(400), TEST_DATE)).toBe(
-			'14 Jun 2025 at 13:00',
+			'14 Jun 2025, 13:00',
 		);
 	});
 
 	it('falls back to an absolute date for future publication dates', () => {
 		const tomorrow = new Date(TEST_DATE.getTime() + 24 * 60 * 60 * 1000);
-		expect(formatRelativeTime(tomorrow, TEST_DATE)).toBe(
-			'20 Jul 2026 at 13:00',
-		);
+		expect(formatRelativeTime(tomorrow, TEST_DATE)).toBe('20 Jul 2026, 13:00');
 	});
 });
 
