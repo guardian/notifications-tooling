@@ -82,6 +82,28 @@ const getNewsletterAlertType = (subject: string): string => {
 	return kicker ?? 'Newsletter';
 };
 
+export const getSenderDisplayName = (createdByEmail: string): string => {
+	if (!createdByEmail.includes('@')) {
+		return createdByEmail;
+	}
+
+	const [localPart] = createdByEmail.split('@');
+	if (!localPart) {
+		return createdByEmail;
+	}
+
+	const words = localPart.split(/[._-]+/).filter(Boolean);
+	if (words.length === 0) {
+		return createdByEmail;
+	}
+
+	return words
+		.map(
+			(word) => `${word[0]?.toUpperCase() ?? ''}${word.slice(1).toLowerCase()}`,
+		)
+		.join(' ');
+};
+
 export const mapNotificationToHistoryNotification = (
 	notification: NotificationSummary,
 	audiences?: ChannelAudienceResponse,

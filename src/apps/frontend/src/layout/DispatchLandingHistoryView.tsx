@@ -77,7 +77,9 @@ export const DispatchLandingHistoryView = ({
 				<Typography variant="bodyMd">Loading 24 hour history...</Typography>
 			)}
 			{error}
-			{!isLoading && !error && <HistoryTable notifications={notifications} />}
+			{!isLoading && !error && (
+				<HistoryTable notifications={notifications} dispatchLandingPage />
+			)}
 			{!isLoading && !error && notifications.length === 0 && (
 				<Typography variant="bodyMd" cssOverrides={historyViewStyles.empty}>
 					No alerts have been sent yet.

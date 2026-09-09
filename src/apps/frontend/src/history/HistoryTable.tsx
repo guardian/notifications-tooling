@@ -1,3 +1,4 @@
+import { baseColors } from '@guardian/stand';
 import { Badge } from '@guardian/stand/Badge';
 import { Icon } from '@guardian/stand/Icon';
 import { Link } from '@guardian/stand/Link';
@@ -16,10 +17,13 @@ import { historyViewStyles } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
 import { SendTimeTooltip } from '../ui/SendTimeTooltip';
+import { Tooltip } from '../ui/Tooltip';
+import { getSenderDisplayName } from '../utils/notification-history-mapper';
 import type { HistoryNotification, HistoryStatus } from './HistoryView';
 
 interface HistoryTableProps {
 	notifications?: HistoryNotification[];
+	dispatchLandingPage?: boolean;
 }
 
 const getChannelName = (channel: HistoryNotification['channel']) =>
@@ -65,7 +69,35 @@ const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
 	);
 };
 
-export const HistoryTable = ({ notifications = [] }: HistoryTableProps) => {
+const SentByUserDetails = ({
+	sentByUser,
+	dispatchLandingPage = false,
+}: {
+	sentByUser: string;
+	dispatchLandingPage: boolean;
+}) => {
+	return (
+		<span css={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+			{dispatchLandingPage ? getSenderDisplayName(sentByUser) : sentByUser}
+			{dispatchLandingPage && (
+				<Tooltip
+					label="Sender email"
+					theme={{
+						backgroundColor: baseColors.magenta[800],
+						triggerColor: baseColors.magenta[800],
+					}}
+				>
+					{sentByUser}
+				</Tooltip>
+			)}
+		</span>
+	);
+};
+
+export const HistoryTable = ({
+	notifications = [],
+	dispatchLandingPage = false,
+}: HistoryTableProps) => {
 	return (
 		<Table
 			aria-label="Sent alerts"
@@ -145,9 +177,10 @@ export const HistoryTable = ({ notifications = [] }: HistoryTableProps) => {
 								<span css={historyViewStyles.compactLabel} aria-hidden="true">
 									Sent by:{' '}
 								</span>
-								<span css={historyViewStyles.metadataValue}>
-									{notification.sentBy}
-								</span>
+								<SentByUserDetails
+									sentByUser={notification.sentBy}
+									dispatchLandingPage={dispatchLandingPage}
+								/>
 							</TableCell>
 							<TableCell
 								gridColumn={{ md: '2', lg: '3' }}
