@@ -1,4 +1,12 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test';
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	describe,
+	expect,
+	it,
+	mock,
+} from 'bun:test';
 import type {
 	SendNotificationRequest,
 	SendNotificationResponse,
@@ -6,9 +14,28 @@ import type {
 import { sendNotification } from './send-notification';
 
 const originalFetch = globalThis.fetch;
+const originalLocation = Object.getOwnPropertyDescriptor(
+	globalThis,
+	'location',
+);
+
+beforeAll(() => {
+	Object.defineProperty(globalThis, 'location', {
+		configurable: true,
+		value: { origin: 'http://localhost:3000' },
+	});
+});
 
 afterEach(() => {
 	globalThis.fetch = originalFetch;
+});
+
+afterAll(() => {
+	if (originalLocation) {
+		Object.defineProperty(globalThis, 'location', originalLocation);
+	} else {
+		Reflect.deleteProperty(globalThis, 'location');
+	}
 });
 
 const request = {} as SendNotificationRequest;
