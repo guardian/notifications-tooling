@@ -154,9 +154,6 @@ export const Default: Story = {
 			canvas.getByRole('heading', { name: 'Welcome to Dispatch' }),
 		).toBeInTheDocument();
 		await expect(
-			canvasElement.querySelector('a[href="/dispatch"]'),
-		).toBeInTheDocument();
-		await expect(
 			await canvas.findByText('No alerts have been sent yet.'),
 		).toBeInTheDocument();
 		await expect(

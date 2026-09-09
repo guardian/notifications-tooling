@@ -11,7 +11,7 @@ import { parseHistorySearchParams } from '../utils/history-search-params';
 import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
 
 export const DispatchLandingTab = () => {
-	const [searchParams, setSearchParams] = useSearchParams();
+	const [searchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
 	const [last24HoursSince] = useState(() =>
 		Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000),
@@ -22,20 +22,6 @@ export const DispatchLandingTab = () => {
 	};
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();
-
-	const limit = historyQuery.limit;
-	const offset = historyQuery.offset;
-	const currentPage = Math.max(1, Math.floor(offset / limit) + 1);
-
-	const handlePageChange = (page: number) => {
-		setSearchParams((currentSearchParams) => {
-			const nextSearchParams = new URLSearchParams(currentSearchParams);
-			nextSearchParams.set('offset', String((page - 1) * limit));
-			nextSearchParams.set('limit', String(limit));
-
-			return nextSearchParams;
-		});
-	};
 	const notifications =
 		notificationHistory.data?.notifications.flatMap((notification) => {
 			const historyNotification = mapNotificationToHistoryNotification(
@@ -54,7 +40,6 @@ export const DispatchLandingTab = () => {
 				<div css={dispatchLandingTheme.dispatchTableSection}>
 					<DispatchLandingHistoryView
 						notifications={notifications}
-						totalItems={notificationHistory.data?.total ?? 0}
 						isLoading={notificationHistory.isPending}
 						error={
 							notificationHistory.isError ? (
@@ -63,9 +48,6 @@ export const DispatchLandingTab = () => {
 								</InlineMessage>
 							) : undefined
 						}
-						limit={limit}
-						handlePageChange={handlePageChange}
-						currentPage={currentPage}
 					/>
 				</div>
 			</div>

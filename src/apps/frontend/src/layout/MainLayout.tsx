@@ -44,8 +44,6 @@ export const MainLayout = ({ children }: Props) => {
 						favicon={{
 							icon: <Favicon icon="notifications" theme={faviconTheme} />,
 						}}
-						hoverText="Back to Dispatch landing page"
-						collapsedHoverText="Dispatch landing page"
 					/>
 					<TopBarContainerLeft>
 						{getTopBarNavigationItems(config).map(

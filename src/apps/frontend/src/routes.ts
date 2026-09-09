@@ -13,7 +13,7 @@ export const notificationRoutes = {
 
 export const getAppRoutes = (config: AppConfig | undefined) => {
 	return {
-		dispatchLanding: '/dispatch',
+		dispatchLanding: '/',
 		createNewsletterEmail: notificationRoutes.email.create,
 		newsletterEmailReport: notificationRoutes.email.report,
 		createAppAlert: config?.DISABLE_APP_SEND_TAB

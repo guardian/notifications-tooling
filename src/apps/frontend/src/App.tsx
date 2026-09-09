@@ -1,7 +1,7 @@
 import './index.css';
 
 import { useState } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Outlet, Route, Routes } from 'react-router-dom';
 import type { AppConfig } from '../../../packages/models';
 import { CreateAppAlertTab } from './compose/CreateAppAlertTab';
 import { CreateNewsletterEmailTab } from './compose/CreateNewsletterEmailTab';
@@ -29,11 +29,7 @@ export function App() {
 		<ConfigContext.Provider value={config}>
 			<Routes>
 				<Route element={<EmailNotificationPage />}>
-					<Route
-						index
-						element={<Navigate to={appRoutes.dispatchLanding} replace />}
-					/>
-					<Route path="dispatch" element={<DispatchLandingTab />} />
+					<Route index element={<DispatchLandingTab />} />
 					<Route
 						path="newsletter-email"
 						element={

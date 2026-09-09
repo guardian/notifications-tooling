@@ -1,18 +1,20 @@
 import { Typography } from '@guardian/stand/Typography';
-import { HistoryPagination } from '../history/HistoryPagination';
+import type { ReactNode } from 'react';
 import { HistoryTable } from '../history/HistoryTable';
-import type { HistoryViewProps } from '../history/HistoryView';
+import type { HistoryNotification } from '../history/HistoryView';
 import { dispatchLandingTheme, historyViewStyles } from '../themes';
+
+interface DispatchLandingHistoryViewProps {
+	notifications?: HistoryNotification[];
+	isLoading?: boolean;
+	error?: ReactNode;
+}
 
 export const DispatchLandingHistoryView = ({
 	notifications = [],
-	totalItems = 0,
 	isLoading = false,
-	limit,
 	error,
-	currentPage,
-	handlePageChange,
-}: HistoryViewProps) => {
+}: DispatchLandingHistoryViewProps) => {
 	return (
 		<>
 			<div css={historyViewStyles.header}>
@@ -22,14 +24,6 @@ export const DispatchLandingHistoryView = ({
 				>
 					Last 24-hour activity
 				</Typography>
-				{!isLoading && !error && totalItems > limit && (
-					<HistoryPagination
-						currentPage={currentPage}
-						totalItems={totalItems}
-						onPageChange={handlePageChange}
-						limit={limit}
-					/>
-				)}
 			</div>
 			{isLoading && (
 				<Typography variant="bodyMd">Loading 24 hour history...</Typography>
