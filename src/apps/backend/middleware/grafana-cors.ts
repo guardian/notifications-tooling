@@ -1,13 +1,6 @@
-import { env } from '@config';
 import type { RequestHandler } from 'express';
 
-const grafanaOriginByStage = {
-	CODE: 'https://metrics.code.dev-gutools.co.uk',
-	PROD: 'https://metrics.gutools.co.uk',
-	DEV: '',
-} as const;
-
-const allowedGrafanaOrigin = grafanaOriginByStage[env.STAGE];
+const allowedGrafanaOrigin = 'https://metrics.gutools.co.uk';
 
 export const grafanaCorsMiddleware: RequestHandler = (
 	request,
