@@ -13,6 +13,7 @@ import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { contentRouter } from './routers/content';
 import { docsRouter } from './routers/docs';
+import { grafanaRouter } from './routers/grafana';
 import { healthRouter } from './routers/health';
 import { notificationTestsRouter } from './routers/notification-tests';
 import { notificationsRouter } from './routers/notifications';
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
+app.use('/', grafanaRouter);
 
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 
