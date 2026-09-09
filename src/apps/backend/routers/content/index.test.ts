@@ -150,9 +150,91 @@ describe('POST /v1/content/articles/resolve', () => {
 				);
 			});
 		});
+
+		it('validates and returns a requested liveblog block', async () => {
+			const requestedBlockId = 'block-6a9af6108f0834a1091dfafe';
+			const capiBlock = {
+				id: '6a9af6108f0834a1091dfafe',
+				elements: [],
+			};
+			const liveblog = {
+				...resolvedArticle,
+				type: 'liveblog',
+				blocks: { body: [capiBlock] },
+			};
+			const requestedUrl = `${validUrl}?page=with%3A${requestedBlockId}#${requestedBlockId}`;
+			const resolveArticle = mock(() => Promise.resolve(liveblog));
+
+			await withResolver(resolveArticle, async (url) => {
+				const response = await fetch(`${url}${ROUTE}`, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ article: requestedUrl }),
+				});
+
+				expect(response.status).toBe(200);
+				expect(await response.json()).toEqual({
+					article: liveblog,
+					requestedUrl,
+					requestedBlock: { ...capiBlock, id: requestedBlockId },
+				});
+			});
+		});
+
+		it('defaults an unfragmented liveblog URL to its main block', async () => {
+			const mainBlock = {
+				id: 'liveblog-main-block-id',
+				elements: [],
+			};
+			const liveblog = {
+				...resolvedArticle,
+				type: 'liveblog',
+				blocks: { main: mainBlock, body: [] },
+			};
+			const liveblogUrl =
+				'https://www.theguardian.com/politics/live/2026/sep/04/reform-uk-donations-nigel-farage-james-orr-dan-jukes-channel-4-investigation-conference-jordan-bardella-latest-news-updates';
+			const resolveArticle = mock(() => Promise.resolve(liveblog));
+
+			await withResolver(resolveArticle, async (url) => {
+				const response = await fetch(`${url}${ROUTE}`, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ article: liveblogUrl }),
+				});
+
+				expect(response.status).toBe(200);
+				expect(await response.json()).toEqual({
+					article: liveblog,
+					requestedBlock: mainBlock,
+				});
+			});
+		});
 	});
 
 	describe('invalid_article_reference', () => {
+		it('rejects a liveblog URL whose requested block does not exist', async () => {
+			const liveblog = {
+				...resolvedArticle,
+				type: 'liveblog',
+				blocks: { body: [] },
+			};
+			const resolveArticle = mock(() => Promise.resolve(liveblog));
+
+			await withResolver(resolveArticle, async (url) => {
+				const response = await fetch(`${url}${ROUTE}`, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ article: `${validUrl}#block-missing` }),
+				});
+
+				expect(response.status).toBe(422);
+				expect(await response.json()).toMatchObject({
+					error: 'invalid_article_reference',
+					message: 'The liveblog block could not be found.',
+				});
+			});
+		});
+
 		it('rejects a non-Guardian URL with 422 without calling CAPI', async () => {
 			const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 

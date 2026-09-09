@@ -1,4 +1,5 @@
 import type {
+	CapiBlock,
 	DisplayAppAlertTopicEditionId,
 	EmailPreviewRequest,
 	EmailPreviewResponse,
@@ -36,6 +37,8 @@ export type NotificationState = {
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
 	content?: ResolvedArticle;
+	requestedUrl?: string;
+	requestedBlock?: CapiBlock;
 	confirmSendModalOpen: boolean;
 	isWaitingForSend: boolean;
 	sendFailure?: ApiError;
@@ -53,6 +56,8 @@ export type NotificationAction =
 	| {
 			type: 'receive-article';
 			content: ResolvedArticle;
+			requestedUrl?: string;
+			requestedBlock?: CapiBlock;
 	  }
 	| {
 			type: 'report-article-error';

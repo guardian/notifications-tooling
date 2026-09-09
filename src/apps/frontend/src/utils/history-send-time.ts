@@ -1,55 +1,48 @@
-const SECOND_MS = 1000;
-const MINUTE_MS = 60 * SECOND_MS;
-const HOUR_MS = 60 * MINUTE_MS;
-const DAY_MS = 24 * HOUR_MS;
+export type LocalSendTimeRegion = 'UK' | 'US' | 'AU' | 'EU';
 
-const absoluteDateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
-	hour: '2-digit',
-	minute: '2-digit',
-	timeZoneName: 'short',
-	day: 'numeric',
-	month: 'long',
-	year: 'numeric',
-	timeZone: 'Europe/London',
-});
-
-export interface HistorySendTime {
-	label: string;
-	isRecent: boolean;
+export interface LocalSendTime {
+	region: LocalSendTimeRegion;
+	time: string;
 }
 
-export const formatHistorySendTime = (
-	iso8601: string,
-	now: Date = new Date(),
-): HistorySendTime => {
+const localSendTimeZones: ReadonlyArray<{
+	region: LocalSendTimeRegion;
+	locale: string;
+	timeZone: string;
+}> = [
+	{ region: 'UK', locale: 'en-GB', timeZone: 'Europe/London' },
+	{ region: 'US', locale: 'en-US', timeZone: 'America/New_York' },
+	{ region: 'AU', locale: 'en-AU', timeZone: 'Australia/Sydney' },
+	{ region: 'EU', locale: 'en-GB', timeZone: 'Europe/Paris' },
+];
+
+const localTimeFormatters = localSendTimeZones.map(
+	({ region, locale, timeZone }) => ({
+		region,
+		formatter: new Intl.DateTimeFormat(locale, {
+			hour: '2-digit',
+			minute: '2-digit',
+			hour12: false,
+			timeZoneName: 'short',
+			timeZone,
+		}),
+	}),
+);
+
+/**
+ * Converts a send time into the local time of each edition's region, so an
+ * editor can see when an alert landed for its audience. Returns an empty array
+ * for a missing or unparseable timestamp, so callers can hide the detail.
+ */
+export const formatLocalSendTimes = (iso8601: string): LocalSendTime[] => {
 	const sentAt = new Date(iso8601);
-	const elapsedMs = now.getTime() - sentAt.getTime();
 
-	if (Number.isNaN(sentAt.getTime()) || elapsedMs < 0 || elapsedMs >= DAY_MS) {
-		return {
-			label: Number.isNaN(sentAt.getTime())
-				? iso8601
-				: absoluteDateTimeFormatter.format(sentAt),
-			isRecent: false,
-		};
+	if (Number.isNaN(sentAt.getTime())) {
+		return [];
 	}
 
-	if (elapsedMs < MINUTE_MS) {
-		return {
-			label: `${Math.floor(elapsedMs / SECOND_MS)} secs ago`,
-			isRecent: true,
-		};
-	}
-
-	if (elapsedMs < HOUR_MS) {
-		return {
-			label: `${Math.floor(elapsedMs / MINUTE_MS)} mins ago`,
-			isRecent: true,
-		};
-	}
-
-	return {
-		label: `${Math.floor(elapsedMs / HOUR_MS)} hours ago`,
-		isRecent: true,
-	};
+	return localTimeFormatters.map(({ region, formatter }) => ({
+		region,
+		time: formatter.format(sentAt),
+	}));
 };

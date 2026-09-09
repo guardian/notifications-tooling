@@ -66,8 +66,44 @@ export const createContentRouter = (
 			}
 
 			try {
-				const article = await resolveArticle(articleId);
-				const responseBody: ResolveArticleResponse = { article };
+				const resolvedArticle = await resolveArticle(articleId);
+				let requestedUrl: string | undefined;
+				let requestedBlock: ResolveArticleResponse['requestedBlock'] =
+					resolvedArticle.type === 'liveblog'
+						? resolvedArticle.blocks?.main
+						: undefined;
+
+				try {
+					const url = new URL(article);
+					const requestedBlockId = url.hash.slice(1);
+					if (requestedBlockId.startsWith('block-')) {
+						const capiBlockId = requestedBlockId.slice('block-'.length);
+						const matchingBlock = resolvedArticle.blocks?.body?.find(
+							({ id }) => id === capiBlockId || id === requestedBlockId,
+						);
+						if (resolvedArticle.type !== 'liveblog' || !matchingBlock) {
+							return res
+								.status(422)
+								.json(
+									buildErrorEnvelope(
+										req,
+										'invalid_article_reference',
+										'The liveblog block could not be found.',
+									),
+								);
+						}
+						requestedBlock = { ...matchingBlock, id: requestedBlockId };
+						requestedUrl = article;
+					}
+				} catch {
+					// Bare content ids do not carry a requested block.
+				}
+
+				const responseBody: ResolveArticleResponse = {
+					article: resolvedArticle,
+					...(requestedUrl ? { requestedUrl } : {}),
+					...(requestedBlock ? { requestedBlock } : {}),
+				};
 				return res.status(200).json(responseBody);
 			} catch (error) {
 				if (error instanceof CapiError && error.reason === 'not_found') {

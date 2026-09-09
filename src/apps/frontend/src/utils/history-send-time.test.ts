@@ -1,45 +1,26 @@
 import { describe, expect, it } from 'bun:test';
-import { formatHistorySendTime } from './history-send-time';
+import { formatLocalSendTimes } from './history-send-time';
 
-const NOW = new Date('2026-08-27T12:00:00Z');
-const ago = (milliseconds: number) =>
-	new Date(NOW.getTime() - milliseconds).toISOString();
-
-describe('formatHistorySendTime', () => {
-	it('uses whole seconds for times less than a minute ago', () => {
-		expect(formatHistorySendTime(ago(42_900), NOW)).toEqual({
-			label: '42 secs ago',
-			isRecent: true,
-		});
+describe('formatLocalSendTimes', () => {
+	it('converts a summer send time into each region local time', () => {
+		expect(formatLocalSendTimes('2026-06-15T09:21:00Z')).toEqual([
+			{ region: 'UK', time: '10:21 BST' },
+			{ region: 'US', time: '05:21 EDT' },
+			{ region: 'AU', time: '19:21 AEST' },
+			{ region: 'EU', time: '11:21 CEST' },
+		]);
 	});
 
-	it('uses only whole minutes for times less than an hour ago', () => {
-		expect(formatHistorySendTime(ago(12 * 60_000 + 45_000), NOW)).toEqual({
-			label: '12 mins ago',
-			isRecent: true,
-		});
+	it('converts a winter send time into each region local time', () => {
+		expect(formatLocalSendTimes('2026-01-15T09:21:00Z')).toEqual([
+			{ region: 'UK', time: '09:21 GMT' },
+			{ region: 'US', time: '04:21 EST' },
+			{ region: 'AU', time: '20:21 AEDT' },
+			{ region: 'EU', time: '10:21 CET' },
+		]);
 	});
 
-	it('uses only whole hours for times less than 24 hours ago', () => {
-		expect(
-			formatHistorySendTime(ago(5 * 3_600_000 + 59 * 60_000), NOW),
-		).toEqual({
-			label: '5 hours ago',
-			isRecent: true,
-		});
-	});
-
-	it('uses an absolute, non-bold time at exactly 24 hours', () => {
-		const result = formatHistorySendTime(ago(24 * 3_600_000), NOW);
-
-		expect(result.isRecent).toBe(false);
-		expect(result.label).not.toContain('ago');
-	});
-
-	it('preserves an invalid timestamp without marking it as recent', () => {
-		expect(formatHistorySendTime('not-a-date', NOW)).toEqual({
-			label: 'not-a-date',
-			isRecent: false,
-		});
+	it('returns no times for an invalid timestamp', () => {
+		expect(formatLocalSendTimes('not-a-date')).toEqual([]);
 	});
 });
