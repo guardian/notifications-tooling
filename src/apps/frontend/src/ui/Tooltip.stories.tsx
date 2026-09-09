@@ -21,9 +21,7 @@ export const Default: Story = {
 		const trigger = canvas.getByRole('button', { name: 'More information' });
 
 		await expect(
-			canvas.queryByText(
-				'Notifications are sent to every subscribed user.',
-			),
+			canvas.queryByText('Notifications are sent to every subscribed user.'),
 		).not.toBeInTheDocument();
 
 		await userEvent.click(trigger);
