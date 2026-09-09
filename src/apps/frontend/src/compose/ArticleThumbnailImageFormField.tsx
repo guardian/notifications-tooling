@@ -6,6 +6,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { useContext, useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { replaceThumbnailButtonTheme } from '../themes';
+import { getArticleThumbnail } from '../utils/article-thumbnail';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertReplaceImageSection } from './AppAlertReplaceImageSection';
 import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
@@ -20,14 +21,17 @@ export const ArticleThumbnailImageFormField = () => {
 	} = useFormContext<AppAlertFormValues>();
 	const { notification } = useContext(NotificationFormContext);
 	const originalArticleThumbnailUrl =
-		notification.content?.fields?.thumbnail ?? '';
+		getArticleThumbnail(notification.content, notification.requestedBlock)
+			.src ?? '';
 	const articleThumbnailUrl =
 		useWatch<AppAlertFormValues, 'articleThumbnailUrl'>({
 			control,
 			name: 'articleThumbnailUrl',
 			defaultValue: '',
 		}) ?? '';
-	const hasThumbnail = Boolean(articleThumbnailUrl);
+	const hasThumbnail = Boolean(
+		articleThumbnailUrl || originalArticleThumbnailUrl,
+	);
 	const [replacementImageUrl, setReplacementImageUrl] = useState('');
 	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	return (

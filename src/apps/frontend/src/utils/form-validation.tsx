@@ -60,7 +60,7 @@ export const parseArticleUrlInputToContentId = (
 		// the id of the article is the path with the leading slash removed
 		return {
 			articleId: trimLeadingSlash(pathname),
-			webUrl: `${url.origin}${pathname}`,
+			webUrl: `${url.origin}${pathname}${url.search}${url.hash}`,
 		};
 	} catch {
 		// If it is not a URL, check whether it is a valid article id.

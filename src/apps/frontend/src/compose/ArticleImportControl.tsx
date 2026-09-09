@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import type { ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from '@models';
 import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';
@@ -42,8 +42,10 @@ export interface ArticleImportControlProps {
 	setArticleInputText: (setArticleInputText: string) => void;
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
-	onArticleImported: (article: ResolvedArticle) => void;
-	showThumbnail?: boolean;
+	onArticleImported: (
+		article: ResolvedArticle,
+		requestedBlock?: CapiBlock,
+	) => void;
 }
 export const ArticleImportControl = ({
 	articleInputText,
@@ -51,7 +53,6 @@ export const ArticleImportControl = ({
 	lockArticleInputText,
 	setLockArticleInputText,
 	onArticleImported,
-	showThumbnail,
 }: ArticleImportControlProps) => {
 	const { notification, updateNotification, capiFetch } = useContext(
 		NotificationFormContext,
@@ -91,12 +92,14 @@ export const ArticleImportControl = ({
 					errorMessage: getUserFacingError(result.failure),
 				});
 			}
-			const { article } = result.data;
-			onArticleImported(article);
+			const { article, requestedUrl, requestedBlock } = result.data;
+			onArticleImported(article, requestedBlock);
 			clearErrors('root');
 			updateNotification({
 				type: 'receive-article',
 				content: article,
+				requestedUrl,
+				requestedBlock,
 			});
 			setLockArticleInputText(true);
 		});
@@ -209,7 +212,11 @@ export const ArticleImportControl = ({
 			</div>
 
 			{showImportedArticle && content && (
-				<ArticlePreviewCard content={content} showThumbnail={showThumbnail} />
+				<ArticlePreviewCard
+					content={content}
+					requestedUrl={notification.requestedUrl}
+					requestedBlock={notification.requestedBlock}
+				/>
 			)}
 		</div>
 	);

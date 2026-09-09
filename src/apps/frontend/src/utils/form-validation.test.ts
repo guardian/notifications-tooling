@@ -45,7 +45,7 @@ describe('parseArticleUrlInputToContentId', () => {
 			failure: 'not-guardian-url',
 		});
 	});
-	it('ignores query params and hash', () => {
+	it('preserves query params and hash', () => {
 		expect(
 			parseArticleUrlInputToContentId(
 				'https://www.theguardian.com/film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change?foo=bar&baz=foo#baz',
@@ -53,7 +53,7 @@ describe('parseArticleUrlInputToContentId', () => {
 		).toEqual({
 			articleId: 'film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change',
 			webUrl:
-				'https://www.theguardian.com/film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change',
+				'https://www.theguardian.com/film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change?foo=bar&baz=foo#baz',
 		});
 	});
 	it('rejects paths with only one components', () => {
