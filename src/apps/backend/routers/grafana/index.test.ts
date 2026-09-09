@@ -78,6 +78,20 @@ describe('Grafana datasource endpoints', () => {
 		);
 	});
 
+	it('allows the public Grafana origin', async () => {
+		const response = await fetch(`${server.baseUrl}/metrics`, {
+			method: 'POST',
+			headers: { Origin: 'https://public.metrics.gutools.co.uk' },
+		});
+
+		expect(response.headers.get('access-control-allow-origin')).toBe(
+			'https://public.metrics.gutools.co.uk',
+		);
+		expect(response.headers.get('access-control-allow-credentials')).toBe(
+			'true',
+		);
+	});
+
 	it('handles the credentialed metrics preflight', async () => {
 		const response = await fetch(`${server.baseUrl}/metrics`, {
 			method: 'OPTIONS',
