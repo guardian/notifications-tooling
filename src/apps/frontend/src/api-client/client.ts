@@ -144,11 +144,22 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 			}),
 		);
 	}
+	const isNon2xxResponse = !response.ok;
 
 	let json: unknown;
 	try {
 		json = await response.json();
 	} catch (cause) {
+		if (isNon2xxResponse) {
+			return failWith(
+				new ApiError({
+					message: `Request to ${path} responded with ${response.status}`,
+					failure: 'non-2xx-response',
+					status: response.status,
+					cause,
+				}),
+			);
+		}
 		return failWith(
 			new ApiError({
 				message: `Response from ${path} was not valid JSON`,
@@ -161,6 +172,20 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 
 	const result = schema.safeParse(json);
 	if (!result.success) {
+		if (isNon2xxResponse) {
+			const envelope = apiErrorEnvelopeSchema.safeParse(json);
+			return failWith(
+				new ApiError({
+					message: envelope.success
+						? (envelope.data.message ??
+							`Request to ${path} responded with ${response.status}`)
+						: `Request to ${path} responded with ${response.status}`,
+					failure: 'non-2xx-response',
+					status: response.status,
+					requestId: envelope.success ? envelope.data.requestId : undefined,
+				}),
+			);
+		}
 		const prettyError = z.prettifyError(result.error);
 		// Loud early warning of backend contract drift.
 		console.error(`Schema parse failed for ${path}:`, prettyError);

@@ -8,37 +8,42 @@ import { useContext } from 'react';
 import type { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from '../compose/NotificationContext';
 import { useSendNotification } from '../hooks/use-send-notification';
-import type { SendNotificationRequest } from '../schemas';
-import type { NotificationResource } from '../schemas';
+import type {
+	NotificationDispatch,
+	NotificationResource,
+	SendNotificationRequest,
+} from '../schemas';
 import type { ChannelOption } from '../types';
 import type { NotificationState } from '../types';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { getChannelDescription } from '../utils/display-text-helpers';
 
-const formatDispatchTarget = (target: string): string => {
-	const editions = target.split('/').at(-1) ?? target;
-	return editions
-		.split(',')
-		.map((edition) =>
-			edition.length <= 3
-				? edition.toUpperCase()
-				: edition.replaceAll('-', ' '),
+const formatDispatchTarget = (
+	requested: NotificationDispatch['requested'],
+): string => {
+	const targets =
+		requested.channel === 'app-push' ? requested.editions : [requested.segment];
+
+	return targets
+		.map((target) =>
+			target.length <= 3 ? target.toUpperCase() : target.replaceAll('-', ' '),
 		)
 		.join(', ');
 };
 
 const deriveDispatchFailureMessage = (
 	notification: NotificationResource,
+	channel: ChannelOption,
 	channelDescription: string,
 ): ReactNode => {
 	const successfulTargets = notification.dispatches
 		.filter(({ status }) => status === 'success')
-		.map(({ target }) => formatDispatchTarget(target));
+		.map(({ requested }) => formatDispatchTarget(requested));
 	const failedTargets = notification.dispatches
 		.filter(({ status }) => status === 'failure')
-		.map(({ target }) => formatDispatchTarget(target));
+		.map(({ requested }) => formatDispatchTarget(requested));
 	const upstreamService =
-		notification.dispatches[0]?.channel === 'app-push'
+		channel === 'push'
 			? 'mobile notification service'
 			: 'newsletter delivery service';
 
@@ -46,7 +51,7 @@ const deriveDispatchFailureMessage = (
 		<>
 			<Typography element="p">
 				{notification.dispatches.length === 0
-					? `The delivery could not be started. No ${channelDescription} was sent.`
+					? `We couldn't confirm whether the ${channelDescription} was sent.`
 					: notification.status === 'partially_delivered'
 						? `The ${upstreamService} failed for some destinations.`
 						: `The ${upstreamService} failed. No ${channelDescription} was sent.`}
@@ -147,13 +152,18 @@ const getFailure = (
 
 	const channelDescription = getChannelDescription(channel);
 	if (sendFailure.failure === 'dispatch-fail') {
+		const hasNoDispatchOutcomes =
+			sendFailure.notification.dispatches.length === 0;
+
 		return {
-			title:
-				sendFailure.notification.status === 'partially_delivered'
+			title: hasNoDispatchOutcomes
+				? 'Something went wrong'
+				: sendFailure.notification.status === 'partially_delivered'
 					? `The ${channelDescription} was only partially sent`
 					: `The ${channelDescription} wasn't sent`,
 			message: deriveDispatchFailureMessage(
 				sendFailure.notification,
+				channel,
 				channelDescription,
 			),
 			canRetry: false,

@@ -3,6 +3,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import {
 	failedAppPushSendResponse,
 	partiallyDeliveredAppPushSendResponse,
+	unconfirmedAppPushSendResponse,
 } from '../testing/api-fixtures';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
@@ -138,6 +139,32 @@ export const MobileNotificationServiceFailure: Story = {
 		).toBeVisible();
 		await expect(screen.getByText('Not sent to: UK')).toBeVisible();
 		await expect(screen.getByText('Reference: push-failed-1234')).toBeVisible();
+		await expect(
+			screen.queryByRole('button', { name: 'Try Again' }),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const UnconfirmedMobileNotificationDelivery: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			sendFailure: {
+				failure: 'dispatch-fail',
+				notification: unconfirmedAppPushSendResponse,
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const screen = within(canvasElement.ownerDocument.body);
+
+		await expect(await screen.findByText('Something went wrong')).toBeVisible();
+		await expect(
+			screen.getByText("We couldn't confirm whether the app alert was sent."),
+		).toBeVisible();
+		await expect(
+			screen.getByText('Reference: push-unconfirmed-1234'),
+		).toBeVisible();
 		await expect(
 			screen.queryByRole('button', { name: 'Try Again' }),
 		).not.toBeInTheDocument();

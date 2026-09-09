@@ -93,13 +93,28 @@ export const failedAppPushSendResponse: SendNotificationResponse = {
 			...acceptedEmailSendResponse.dispatches[0]!,
 			id: 'push-dispatch-uk',
 			channel: 'app-push',
-			target: 'breaking-news/uk',
+			requested: {
+				channel: 'app-push',
+				topicType: 'breaking-news',
+				editions: ['uk'],
+			},
+			resolved: {
+				channel: 'app-push',
+				topics: [{ type: 'breaking', name: 'uk' }],
+				importance: 'Major',
+			},
 			status: 'failure',
 			providerRef: null,
 			failureReason: 'http_error',
 			providerStatusCode: 500,
 		},
 	],
+};
+
+export const unconfirmedAppPushSendResponse: SendNotificationResponse = {
+	...failedAppPushSendResponse,
+	id: 'push-unconfirmed-1234',
+	dispatches: [],
 };
 
 export const partiallyDeliveredAppPushSendResponse: SendNotificationResponse = {
@@ -110,7 +125,6 @@ export const partiallyDeliveredAppPushSendResponse: SendNotificationResponse = {
 		{
 			...failedAppPushSendResponse.dispatches[0]!,
 			id: 'push-dispatch-uk',
-			target: 'breaking-news/uk',
 			status: 'success',
 			failureReason: null,
 			providerStatusCode: 201,
@@ -118,7 +132,16 @@ export const partiallyDeliveredAppPushSendResponse: SendNotificationResponse = {
 		{
 			...failedAppPushSendResponse.dispatches[0]!,
 			id: 'push-dispatch-us',
-			target: 'breaking-news/us',
+			requested: {
+				channel: 'app-push',
+				topicType: 'breaking-news',
+				editions: ['us'],
+			},
+			resolved: {
+				channel: 'app-push',
+				topics: [{ type: 'breaking', name: 'us' }],
+				importance: 'Major',
+			},
 		},
 	],
 };
