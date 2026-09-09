@@ -63,12 +63,8 @@ export const AppPreviewToggle = ({
 	</PreviewToggle>
 );
 
-export const EmailPreviewToggle = ({
-	showPreview,
-}: {
-	showPreview: boolean;
-}) => (
+export const EmailPreviewToggle = () => (
 	<PreviewToggle>
-		<EmailPreviewSection showPreview={showPreview} />
+		<EmailPreviewSection />
 	</PreviewToggle>
 );

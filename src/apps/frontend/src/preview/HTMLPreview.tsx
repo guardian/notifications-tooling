@@ -12,12 +12,11 @@ import type { NewsletterFormValues } from '../utils/notification-forms';
 const modifyContent = (
 	emailHtml: string,
 	parameters: Partial<NewsletterFormValues>,
-	showPreview: boolean,
 ): string => {
 	const body = document.createElement('body');
 	body.innerHTML = emailHtml;
 
-	const { subject, preview } = parameters;
+	const { subject, preview, showPreview = true } = parameters;
 	const headlineElement = body.querySelector('h2');
 	const previewElement =
 		headlineElement?.parentElement?.querySelector<HTMLElement>('h2~div');
@@ -35,11 +34,7 @@ const modifyContent = (
 	return body.innerHTML;
 };
 
-interface HTMLPreviewProps {
-	showPreview?: boolean;
-}
-
-export const HTMLPreview = ({ showPreview = true }: HTMLPreviewProps) => {
+export const HTMLPreview = () => {
 	const {
 		notification: { content },
 		requestEmailHtml,
@@ -90,7 +85,7 @@ export const HTMLPreview = ({ showPreview = true }: HTMLPreviewProps) => {
 		<HtmlPreview
 			html={
 				emailHtml
-					? modifyContent(emailHtml, parameters, showPreview)
+					? modifyContent(emailHtml, parameters)
 					: `<div>no article html</div> `
 			}
 			errorMessage={errorMessage}
