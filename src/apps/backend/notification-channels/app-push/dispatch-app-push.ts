@@ -9,7 +9,7 @@ import {
 	AppNotificationApiError,
 	type AppNotificationImportance,
 } from '@services';
-import { determineArticleId } from '@utils';
+import { determineArticleId, determineBlockId } from '@utils';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { AppPushDispatchOutcome } from '../dispatch-outcome';
@@ -117,6 +117,8 @@ export const dispatchAppPush = async (
 
 	// Derive the CAPI content id so the apps deep-link; falls back to the raw URL.
 	const contentApiId = determineArticleId(item.link);
+	// A liveblog block link deep-links to that block; absent for plain articles.
+	const blockId = determineBlockId(item.link);
 
 	// A fresh id per topic-type push; returned so each POST can be persisted.
 	const dispatched = pushes.map((push) => ({ id: randomUUID(), push }));
@@ -134,6 +136,7 @@ export const dispatchAppPush = async (
 				body: item.body,
 				link: item.link,
 				contentApiId,
+				...(blockId ? { blockId } : {}),
 				importance: push.importance,
 				topics: push.topics,
 				media: item.media,

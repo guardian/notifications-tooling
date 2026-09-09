@@ -89,6 +89,24 @@ describe('sendAppNotification', () => {
 		});
 	});
 
+	it('includes the liveblog block id in the link when supplied', async () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ id: 'n10n-uuid' }, { status: 201 }),
+		);
+
+		await sendAppNotification({ ...request, blockId: 'block-abc123' });
+
+		const sentBody = JSON.parse(fetcher.mock.calls[0]?.[1]?.body as string) as {
+			link: Record<string, unknown>;
+		};
+		expect(sentBody.link).toEqual({
+			contentApiId: 'world/2026/jul/08/ukraine-summit',
+			title: 'World leaders gather in Geneva as talks open.',
+			git: { mobileAggregatorPrefix: 'item-trimmed' },
+			blockId: 'block-abc123',
+		});
+	});
+
 	it('prefers the thumbnail crop and always sends it as thumbnailUrl', async () => {
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
 			Response.json({ id: 'n10n-uuid' }, { status: 201 }),

@@ -78,6 +78,39 @@ describe('dispatchNotification (app-push channel)', () => {
 		]);
 	});
 
+	it('forwards the liveblog block id derived from a block link', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: {
+				items: {
+					lead: {
+						...pushItem,
+						link: 'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-5dd7ca0f8f080fd59fb15354',
+					},
+				},
+			},
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		await dispatchNotification(request, notificationId, dependencies);
+
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				contentApiId: 'politics/live/2026/jul/19/election-live',
+				blockId: '5dd7ca0f8f080fd59fb15354',
+			}),
+		);
+	});
+
 	it('sends one push per topic type when types are mixed', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {

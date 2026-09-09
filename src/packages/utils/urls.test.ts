@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { determineArticleId } from './urls';
+import { determineArticleId, determineBlockId } from './urls';
 
 describe('determineArticleId', () => {
 	it('accepts a bare CAPI article id', () => {
@@ -62,5 +62,55 @@ describe('determineArticleId', () => {
 	it('rejects an empty string', () => {
 		expect(determineArticleId('')).toBeUndefined();
 		expect(determineArticleId('   ')).toBeUndefined();
+	});
+});
+
+describe('determineBlockId', () => {
+	it('extracts the block id from a `page=with:block-` query', () => {
+		expect(
+			determineBlockId(
+				'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-5dd7ca0f8f080fd59fb15354',
+			),
+		).toBe('5dd7ca0f8f080fd59fb15354');
+	});
+
+	it('extracts the block id when a matching hash is also present', () => {
+		expect(
+			determineBlockId(
+				'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-abc123#block-abc123',
+			),
+		).toBe('abc123');
+	});
+
+	it('falls back to a `#block-` fragment when there is no page query', () => {
+		expect(
+			determineBlockId(
+				'https://www.theguardian.com/politics/live/2026/jul/19/election-live#block-abc123',
+			),
+		).toBe('abc123');
+	});
+
+	it('returns undefined for a link without a block reference', () => {
+		expect(
+			determineBlockId(
+				'https://www.theguardian.com/environment/2026/jul/19/a-headline?utm=x',
+			),
+		).toBeUndefined();
+	});
+
+	it('returns undefined for a non-block `page` query', () => {
+		expect(
+			determineBlockId(
+				'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block',
+			),
+		).toBeUndefined();
+	});
+
+	it('returns undefined for a bare article id or non-http(s) input', () => {
+		expect(
+			determineBlockId('environment/2026/jul/19/a-headline'),
+		).toBeUndefined();
+		expect(determineBlockId('mailto:someone@theguardian.com')).toBeUndefined();
+		expect(determineBlockId('')).toBeUndefined();
 	});
 });
