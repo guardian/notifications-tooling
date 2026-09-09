@@ -10,11 +10,11 @@ const localSendTimeZones: ReadonlyArray<{
 	locale: string;
 	timeZone: string;
 }> = [
-		{ region: 'UK', locale: 'en-GB', timeZone: 'Europe/London' },
-		{ region: 'US', locale: 'en-US', timeZone: 'America/New_York' },
-		{ region: 'AU', locale: 'en-AU', timeZone: 'Australia/Sydney' },
-		{ region: 'EU', locale: 'en-GB', timeZone: 'Europe/Paris' },
-	];
+	{ region: 'UK', locale: 'en-GB', timeZone: 'Europe/London' },
+	{ region: 'US', locale: 'en-US', timeZone: 'America/New_York' },
+	{ region: 'AU', locale: 'en-AU', timeZone: 'Australia/Sydney' },
+	{ region: 'EU', locale: 'en-GB', timeZone: 'Europe/Paris' },
+];
 
 const localTimeFormatters = localSendTimeZones.map(
 	({ region, locale, timeZone }) => ({

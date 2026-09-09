@@ -60,9 +60,7 @@ export const formatRelativeTime = (
 			: `${minutes}m ago`;
 	}
 	const hours = Math.floor(elapsedMs / HOUR_MS);
-	return style === 'long'
-		? longRelativeLabel(hours, 'hour')
-		: `${hours}h ago`;
+	return style === 'long' ? longRelativeLabel(hours, 'hour') : `${hours}h ago`;
 };
 
 /** Full date and time, used as the tooltip/screen-reader detail for a relative label. */

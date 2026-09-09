@@ -40,7 +40,11 @@ describe('formatRelativeTime', () => {
 			'1 hour ago',
 		);
 		expect(
-			formatRelativeTime(new Date(TEST_DATE.getTime() - 42_000), TEST_DATE, 'long'),
+			formatRelativeTime(
+				new Date(TEST_DATE.getTime() - 42_000),
+				TEST_DATE,
+				'long',
+			),
 		).toBe('42 secs ago');
 	});
 
