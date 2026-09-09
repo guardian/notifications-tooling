@@ -36,6 +36,20 @@ describe('formatRelativeTime', () => {
 	});
 
 	it('supports long relative labels', () => {
+		expect(
+			formatRelativeTime(
+				new Date(TEST_DATE.getTime() - 999),
+				TEST_DATE,
+				'long',
+			),
+		).toBe('just now');
+		expect(
+			formatRelativeTime(
+				new Date(TEST_DATE.getTime() - 1_000),
+				TEST_DATE,
+				'long',
+			),
+		).toBe('1 sec ago');
 		expect(formatRelativeTime(hoursAgo(1), TEST_DATE, 'long')).toBe(
 			'1 hour ago',
 		);

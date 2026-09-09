@@ -52,6 +52,9 @@ export const formatRelativeTime = (
 	if (!isRelativeTime(date, now)) {
 		return formatAbsoluteTime(date);
 	}
+	if (elapsedMs < SECOND_MS) {
+		return 'just now';
+	}
 	if (elapsedMs < MINUTE_MS) {
 		return style === 'long'
 			? longRelativeLabel(Math.floor(elapsedMs / SECOND_MS), 'sec')
