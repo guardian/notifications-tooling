@@ -25,6 +25,7 @@ type TestSendParams = {
 	emailSubjectLine: string;
 	subject: string;
 	preview: string;
+	showPreview: boolean;
 	webUrl: string;
 };
 
@@ -40,6 +41,7 @@ const getSendParams = (
 	const {
 		audienceSegments = [],
 		preview = '',
+		showPreview = true,
 		subject = '',
 		kicker,
 	} = parameters;
@@ -55,6 +57,7 @@ const getSendParams = (
 		emailSubjectLine,
 		subject,
 		preview,
+		showPreview,
 		webUrl: content.webUrl,
 	};
 };
@@ -65,6 +68,7 @@ const makePayload = ({
 	audienceSegments,
 	subject,
 	preview,
+	showPreview,
 	webUrl,
 }: TestSendParams): TestEmailSendRequest => ({
 	channels: {
@@ -89,7 +93,7 @@ const makePayload = ({
 			'lead-story': {
 				type: 'newsletter',
 				title: subject,
-				body: preview,
+				body: showPreview ? preview : '',
 				link: webUrl,
 			},
 		},
