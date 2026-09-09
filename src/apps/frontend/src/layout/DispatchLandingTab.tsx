@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { HistoryView } from '../history/HistoryView';
 import { mapNotificationToHistoryNotification } from '../history/notification-history-mapper';
@@ -11,7 +12,14 @@ import { parseHistorySearchParams } from '../utils/history-search-params';
 
 export const DispatchLandingTab = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const historyQuery = parseHistorySearchParams(searchParams);
+	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
+	const [last24HoursSince] = useState(() =>
+		Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000),
+	);
+	const historyQuery = {
+		...parsedHistoryQuery,
+		since: last24HoursSince,
+	};
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();
 
@@ -41,7 +49,7 @@ export const DispatchLandingTab = () => {
 		<Layout.Main>
 			<div>
 				<Typography variant="heading2Xl" element="h1">
-					Dispatch Landing Page
+					Welcome to Dispatch
 				</Typography>
 				<section css={css({ width: '983px', marginTop: '16px' })}>
 					<HistoryView
