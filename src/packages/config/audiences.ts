@@ -259,54 +259,54 @@ const codeAppPushTopicTypes = {
  * separate so PROD topic coordinates can diverge without affecting CODE.
  */
 const prodAppPushTopicTypes = {
-	// 'breaking-news': {
-	// 	label: 'Breaking news',
-	// 	importance: AppPushImportance.Major,
-	// 	editions: {
-	// 		uk: { label: 'UK', mobileN10nTopic: { type: 'breaking', name: 'uk' } },
-	// 		us: { label: 'US', mobileN10nTopic: { type: 'breaking', name: 'us' } },
-	// 		au: { label: 'AU', mobileN10nTopic: { type: 'breaking', name: 'au' } },
-	// 		international: {
-	// 			label: 'International',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'international' },
-	// 		},
-	// 		europe: {
-	// 			label: 'Europe',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'europe' },
-	// 		},
-	// 	},
-	// },
-	// sport: {
-	// 	label: 'Sports news',
-	// 	importance: AppPushImportance.Minor,
-	// 	editions: {
-	// 		uk: {
-	// 			label: 'UK',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
-	// 			titleOverride: 'Sport news',
-	// 		},
-	// 		us: {
-	// 			label: 'US',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
-	// 			titleOverride: 'Sports news',
-	// 		},
-	// 		au: {
-	// 			label: 'AU',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
-	// 			titleOverride: 'Sport news',
-	// 		},
-	// 		international: {
-	// 			label: 'International',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
-	// 			titleOverride: 'Sport news',
-	// 		},
-	// 		europe: {
-	// 			label: 'Europe',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
-	// 			titleOverride: 'Sport news',
-	// 		},
-	// 	},
-	// },
+	'breaking-news': {
+		label: 'Breaking news',
+		importance: AppPushImportance.Major,
+		editions: {
+			uk: { label: 'UK', mobileN10nTopic: { type: 'breaking', name: 'uk' } },
+			us: { label: 'US', mobileN10nTopic: { type: 'breaking', name: 'us' } },
+			au: { label: 'AU', mobileN10nTopic: { type: 'breaking', name: 'au' } },
+			international: {
+				label: 'International',
+				mobileN10nTopic: { type: 'breaking', name: 'international' },
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: { type: 'breaking', name: 'europe' },
+			},
+		},
+	},
+	sport: {
+		label: 'Sports news',
+		importance: AppPushImportance.Minor,
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
+				titleOverride: 'Sport news',
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
+				titleOverride: 'Sports news',
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
+				titleOverride: 'Sport news',
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
+				titleOverride: 'Sport news',
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
+				titleOverride: 'Sport news',
+			},
+		},
+	},
 	'editors-picks': {
 		label: "Editors' picks",
 		importance: AppPushImportance.Minor,
@@ -336,35 +336,35 @@ const prodAppPushTopicTypes = {
 			},
 		},
 	},
-	// 'one-not-to-miss': {
-	// 	label: 'One not to miss',
-	// 	importance: AppPushImportance.Minor,
-	// 	editions: {
-	// 		uk: {
-	// 			label: 'UK',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
-	// 		},
-	// 		us: {
-	// 			label: 'US',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
-	// 		},
-	// 		au: {
-	// 			label: 'AU',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
-	// 		},
-	// 		international: {
-	// 			label: 'International',
-	// 			mobileN10nTopic: {
-	// 				type: 'breaking',
-	// 				name: 'international-one-not-to-miss',
-	// 			},
-	// 		},
-	// 		europe: {
-	// 			label: 'Europe',
-	// 			mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
-	// 		},
-	// 	},
-	// },
+	'one-not-to-miss': {
+		label: 'One not to miss',
+		importance: AppPushImportance.Minor,
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'international-one-not-to-miss',
+				},
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
+			},
+		},
+	},
 } as const satisfies Record<string, AppPushTopicType>;
 
 /**
