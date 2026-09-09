@@ -49,6 +49,7 @@ interface HistoryViewProps {
 	isLoading?: boolean;
 	error?: ReactNode;
 	handlePageChange: (page: number) => void;
+	dispatchLandingPage?: boolean;
 }
 
 const styles = {
@@ -239,15 +240,18 @@ export const HistoryView = ({
 	error,
 	currentPage,
 	handlePageChange,
+	dispatchLandingPage,
 }: HistoryViewProps) => {
 	return (
 		<Layout.Main theme={layoutMainTheme}>
 			<section aria-labelledby="history-heading" css={styles.container}>
 				<div css={styles.header}>
 					<div css={styles.titleBlock}>
-						<Typography id="history-heading" element="h1" variant="headingLg">
-							History
-						</Typography>
+						{!dispatchLandingPage && (
+							<Typography id="history-heading" element="h1" variant="headingLg">
+								History
+							</Typography>
+						)}
 					</div>
 					{!isLoading && !error && totalItems > limit && (
 						<HistoryPagination
