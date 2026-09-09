@@ -27,7 +27,7 @@ export const CreateNewsletterEmailTab = () => {
 					}}
 				/>
 			)}
-			previewSection={<EmailPreviewSection showPreview={showPreview} />}
+			previewSection={<EmailPreviewSection />}
 		/>
 	);
 };

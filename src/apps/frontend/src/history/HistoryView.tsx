@@ -20,10 +20,11 @@ import { Typography } from '@guardian/stand/Typography';
 import { from, until } from '@guardian/stand/utils';
 import type { DisplayAppAlertTopicEditionId } from '@models';
 import type { ReactNode } from 'react';
+import { useRelativeTime } from '../hooks/use-relative-time';
 import { layoutMainTheme } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
-import { formatHistorySendTime } from '../utils/history-send-time';
+import { SendTimeTooltip } from '../ui/SendTimeTooltip';
 import { HistoryPagination } from './HistoryPagination';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
@@ -192,6 +193,11 @@ const styles = {
 	metadataValue: css({
 		minWidth: 0,
 	}),
+	sendTimeValue: css({
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
+	}),
 	statusBadge: css({
 		boxSizing: 'border-box',
 		height: '18px',
@@ -230,6 +236,28 @@ const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
 		'Partially sent': 'yellow',
 		Failed: 'red',
 	};
+
+const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
+	const sendTime = useRelativeTime(sentAt);
+
+	return (
+		<span css={[styles.metadataValue, styles.sendTimeValue]}>
+			<Typography variant="bodySm">
+				{sendTime ? (
+					<time
+						dateTime={sendTime.iso8601}
+						title={sendTime.formattedAbsoluteTime}
+					>
+						{sendTime.label}
+					</time>
+				) : (
+					sentAt
+				)}
+			</Typography>
+			<SendTimeTooltip sentAt={sentAt} />
+		</span>
+	);
+};
 
 export const HistoryView = ({
 	notifications = [],
@@ -282,8 +310,6 @@ export const HistoryView = ({
 						</TableHeader>
 						<TableBody>
 							{notifications.map((notification) => {
-								const sendTime = formatHistorySendTime(notification.sentAt);
-
 								return (
 									<TableRow
 										key={notification.id}
@@ -375,13 +401,7 @@ export const HistoryView = ({
 											<span css={styles.compactLabel} aria-hidden="true">
 												Send time:{' '}
 											</span>
-											<span css={styles.metadataValue}>
-												<Typography
-													variant={sendTime.isRecent ? 'bodyBoldSm' : 'bodySm'}
-												>
-													{sendTime.label}
-												</Typography>
-											</span>
+											<HistorySendTime sentAt={notification.sentAt} />
 										</TableCell>
 										<TableCell
 											gridColumn={{ md: '2', lg: '5' }}

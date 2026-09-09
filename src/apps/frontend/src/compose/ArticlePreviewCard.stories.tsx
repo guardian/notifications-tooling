@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
-import { articleFixture } from '../testing/capi-fixtures';
+import { expect, waitFor, within } from 'storybook/test';
+import {
+	articleFixture,
+	liveblogFixture,
+	requestedLiveblogBlock,
+} from '../testing/capi-fixtures';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 
 const meta = {
@@ -44,6 +48,63 @@ export const WithThumbnail: PreviewCardStory = {
 	},
 };
 
+export const Liveblog: PreviewCardStory = {
+	args: {
+		content: liveblogFixture,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const liveIndicator = canvas.getByText('Live');
+		await expect(liveIndicator).toBeInTheDocument();
+		await expect(
+			liveIndicator.querySelector('[aria-hidden="true"]'),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Liveblog block ID: liveblog-main-block-id'),
+		).toBeInTheDocument();
+		await expect(canvas.getByText('Latest developments')).toBeInTheDocument();
+		await expect(
+			canvas.getByText((_, element) =>
+				/^Updated \d+m ago$/.test(element?.textContent ?? ''),
+			),
+		).toBeInTheDocument();
+		await expect(canvas.getByRole('time')).toHaveAttribute(
+			'datetime',
+			liveblogFixture.fields?.lastModified,
+		);
+		const image = canvas.getByAltText<HTMLImageElement>(
+			'Latest liveblog update',
+		);
+		await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0));
+	},
+};
+
+export const RequestedLiveblogBlock: PreviewCardStory = {
+	args: {
+		content: liveblogFixture,
+		requestedUrl: `${liveblogFixture.webUrl}?filterKeyEvents=false#${requestedLiveblogBlock.id}`,
+		requestedBlock: requestedLiveblogBlock,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText(`Liveblog block ID: ${requestedLiveblogBlock.id}`),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('link', { name: new RegExp(requestedLiveblogBlock.id) }),
+		).toHaveAttribute(
+			'href',
+			expect.stringContaining(`#${requestedLiveblogBlock.id}`),
+		);
+		await expect(
+			canvas.getByAltText('Requested liveblog update'),
+		).toHaveAttribute(
+			'src',
+			'https://media.guim.co.uk/requested-liveblog-block/500.jpg',
+		);
+	},
+};
+
 export const JustPublished: PreviewCardStory = {
 	args: {
 		content: {
@@ -58,33 +119,6 @@ export const JustPublished: PreviewCardStory = {
 				(_, element) => element?.textContent === 'Published 2m ago',
 			),
 		).toBeInTheDocument();
-	},
-};
-
-export const PublishedLongAgo: PreviewCardStory = {
-	args: {
-		content: {
-			...articleFixture,
-			webPublicationDate: publicationDate(30 * 24 * 60 * 60 * 1000),
-		},
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByText((_, element) =>
-				/^Published \d{1,2} \w{3} \d{4}$/.test(element?.textContent ?? ''),
-			),
-		).toBeInTheDocument();
-	},
-};
-
-export const WithoutPublicationDate: PreviewCardStory = {
-	args: {
-		content: { ...articleFixture, webPublicationDate: undefined },
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(canvas.queryByText(/^Published/)).not.toBeInTheDocument();
 	},
 };
 
@@ -125,5 +159,32 @@ export const WithoutHeadlineField: PreviewCardStory = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText(articleFixture.webTitle)).toBeInTheDocument();
+	},
+};
+
+export const PublishedLongAgo: PreviewCardStory = {
+	args: {
+		content: {
+			...articleFixture,
+			webPublicationDate: publicationDate(30 * 24 * 60 * 60 * 1000),
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText((_, element) =>
+				/^Published \d{1,2} \w{3} \d{4}$/.test(element?.textContent ?? ''),
+			),
+		).toBeInTheDocument();
+	},
+};
+
+export const WithoutPublicationDate: PreviewCardStory = {
+	args: {
+		content: { ...articleFixture, webPublicationDate: undefined },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.queryByText(/^Published/)).not.toBeInTheDocument();
 	},
 };

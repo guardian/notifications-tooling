@@ -1,5 +1,6 @@
-import { type ResolvedArticle, toApiEditionId } from '@models';
+import { type CapiBlock, type ResolvedArticle, toApiEditionId } from '@models';
 import type { SendNotificationRequest } from '../schemas';
+import { getArticleThumbnail } from './article-thumbnail';
 import { composeNewsletterSubject } from './newsletter-subject';
 import type {
 	AppAlertFormValues,
@@ -10,6 +11,8 @@ type BuildRequestArgs<Values> = {
 	values: Values;
 	content: ResolvedArticle;
 	idempotencyKey: string;
+	requestedUrl?: string;
+	requestedBlock?: CapiBlock;
 };
 
 export const buildNewsletterRequest = ({
@@ -18,7 +21,7 @@ export const buildNewsletterRequest = ({
 	idempotencyKey,
 }: BuildRequestArgs<NewsletterFormValues>): SendNotificationRequest => {
 	const { subject: headline, preview, audienceSegments, kicker } = values;
-	const thumbnailUrl = content.fields?.thumbnail;
+	const thumbnailUrl = getArticleThumbnail(content).src;
 
 	const emailSubjectLine = composeNewsletterSubject(headline, kicker);
 
@@ -68,6 +71,8 @@ export const buildAppAlertRequest = ({
 	alertTypeLabel,
 	content,
 	idempotencyKey,
+	requestedUrl,
+	requestedBlock,
 }: BuildRequestArgs<AppAlertFormValues> & {
 	alertTypeLabel: string;
 }): SendNotificationRequest => {
@@ -78,7 +83,10 @@ export const buildAppAlertRequest = ({
 		includeThumbnail,
 		articleThumbnailUrl,
 	} = values;
-	const thumbnailUrl = articleThumbnailUrl ?? content.fields?.thumbnail;
+	let thumbnailUrl = articleThumbnailUrl;
+	if (thumbnailUrl === undefined || thumbnailUrl === '') {
+		thumbnailUrl = getArticleThumbnail(content, requestedBlock).src;
+	}
 
 	return {
 		idempotencyKey,
@@ -88,13 +96,13 @@ export const buildAppAlertRequest = ({
 					type: 'app-push',
 					title: alertTypeLabel,
 					body: headline,
-					link: content.webUrl,
+					link: requestedUrl ?? content.webUrl,
 					...(includeThumbnail && thumbnailUrl
 						? {
 								media: {
 									type: 'image' as const,
 									imageUrl: thumbnailUrl,
-									thumbnailUrl: thumbnailUrl,
+									thumbnailUrl,
 								},
 							}
 						: {}),
