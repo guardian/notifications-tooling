@@ -22,6 +22,8 @@ export type ListRecentNotificationsOptions = {
 export type ListNotificationsInWindowOptions = {
 	from: Date;
 	to: Date;
+	/** Caps the notifications loaded so an unbounded range can't exhaust memory. */
+	limit: number;
 };
 
 export type NotificationListPage = {
@@ -162,6 +164,7 @@ export const createNotificationsRepository = (db: Database) => ({
 	async listRecentWithDispatches({
 		from,
 		to,
+		limit,
 	}: ListNotificationsInWindowOptions): Promise<NotificationWithDispatches[]> {
 		return db.query.notifications.findMany({
 			where: and(
@@ -173,6 +176,7 @@ export const createNotificationsRepository = (db: Database) => ({
 			orderBy: (notification, { desc: orderDescending }) => [
 				orderDescending(notification.createdAt),
 			],
+			limit,
 			with: {
 				dispatches: {
 					orderBy: (dispatch, { asc }) => [asc(dispatch.createdAt)],

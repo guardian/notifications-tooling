@@ -33,11 +33,12 @@ type GrafanaQueryBody = {
 	targets?: Array<{ target?: unknown }>;
 };
 
-const hasNotificationsTarget = (
-	body: GrafanaQueryBody | null | undefined,
-) =>
-	body?.targets?.length === 1 &&
-	body.targets[0]?.target === 'notifications';
+// Bounds an all-time Grafana query so it can't exhaust the database or memory.
+const maxRangeMs = 90 * 24 * 60 * 60 * 1000;
+const maxNotifications = 5000;
+
+const hasNotificationsTarget = (body: GrafanaQueryBody | null | undefined) =>
+	body?.targets?.length === 1 && body.targets[0]?.target === 'notifications';
 
 const getDateRange = (body: GrafanaQueryBody) => {
 	const from = body.range?.from ? new Date(body.range.from) : null;
@@ -59,7 +60,7 @@ const toGrafanaRows = (notifications: NotificationWithDispatches[]) =>
 			: [null];
 
 		return dispatches.map((dispatch) => [
-			(dispatch?.createdAt ?? notification.createdAt).getTime(),
+			notification.createdAt.getTime(),
 			notification.id,
 			dispatch?.channel ?? null,
 			notification.createdByEmail,
@@ -89,9 +90,21 @@ export const grafanaQueryHandler = async (req: Request, res: Response) => {
 		return;
 	}
 
+	if (dateRange.to.getTime() - dateRange.from.getTime() > maxRangeMs) {
+		res.status(400).json({
+			error: 'range_too_large',
+			message: 'Grafana query range must not exceed 90 days.',
+		});
+		return;
+	}
+
 	const notifications = await createNotificationsRepository(
 		await getDb(),
-	).listRecentWithDispatches({ from: dateRange.from, to: dateRange.to });
+	).listRecentWithDispatches({
+		from: dateRange.from,
+		to: dateRange.to,
+		limit: maxNotifications,
+	});
 
 	res.json([
 		{

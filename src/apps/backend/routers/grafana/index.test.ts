@@ -122,6 +122,26 @@ describe('Grafana datasource endpoints', () => {
 		expect(body[0]?.rows).toEqual([]);
 	});
 
+	it('rejects a query range longer than 90 days', async () => {
+		const response = await fetch(`${server.baseUrl}/query`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				range: {
+					from: '2026-01-01T00:00:00.000Z',
+					to: '2026-09-09T00:00:00.000Z',
+				},
+				targets: [{ target: 'notifications', refId: 'A' }],
+			}),
+		});
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({
+			error: 'range_too_large',
+			message: 'Grafana query range must not exceed 90 days.',
+		});
+	});
+
 	it('rejects an unsupported metric', async () => {
 		const response = await fetch(`${server.baseUrl}/query`, {
 			method: 'POST',
@@ -214,7 +234,7 @@ describe('Grafana datasource endpoints', () => {
 		const body = (await response.json()) as GrafanaTableResponse;
 		expect(body[0]?.rows).toEqual([
 			[
-				1788436801000,
+				1788436800000,
 				'00000000-0000-0000-0000-000000000000',
 				'newsletter',
 				'editor@theguardian.com',
@@ -224,7 +244,7 @@ describe('Grafana datasource endpoints', () => {
 				null,
 			],
 			[
-				1788436802000,
+				1788436800000,
 				'00000000-0000-0000-0000-000000000000',
 				'app-push',
 				'editor@theguardian.com',
