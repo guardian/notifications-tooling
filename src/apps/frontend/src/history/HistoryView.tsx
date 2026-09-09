@@ -230,19 +230,19 @@ const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
 };
 
 const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
-	{
-		Accepted: 'grey',
-		Sent: 'green',
-		'Partially sent': 'yellow',
-		Failed: 'red',
-	};
+{
+	Accepted: 'grey',
+	Sent: 'green',
+	'Partially sent': 'yellow',
+	Failed: 'red',
+};
 
 const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
-	const sendTime = useRelativeTime(sentAt);
+	const sendTime = useRelativeTime(sentAt, 'long');
 
 	return (
 		<span css={[styles.metadataValue, styles.sendTimeValue]}>
-			<Typography variant="bodySm">
+			<Typography variant={sendTime?.isRelative ? 'bodyBoldSm' : 'bodySm'}>
 				{sendTime ? (
 					<time
 						dateTime={sendTime.iso8601}
