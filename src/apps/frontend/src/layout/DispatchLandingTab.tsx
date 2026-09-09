@@ -3,11 +3,11 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { mapNotificationToHistoryNotification } from '../history/notification-history-mapper';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { dispatchLandingTheme } from '../themes';
 import { parseHistorySearchParams } from '../utils/history-search-params';
+import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
 import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
 
 export const DispatchLandingTab = () => {

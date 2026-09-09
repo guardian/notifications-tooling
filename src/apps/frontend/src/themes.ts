@@ -465,10 +465,7 @@ export const historyViewStyles = {
 	}),
 	tableHeader: css({
 		'& > tr > *': {
-			padding: '12px',
-			[from.md]: {
-				padding: '16px',
-			},
+			padding: '16px',
 		},
 		'& > tr > :not(:first-of-type)': {
 			display: 'none',
@@ -518,7 +515,11 @@ export const historyViewStyles = {
 	}),
 	metadataValue: css({
 		minWidth: 0,
-		overflowWrap: 'anywhere',
+	}),
+	sendTimeValue: css({
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
 	}),
 	statusBadge: css({
 		boxSizing: 'border-box',
