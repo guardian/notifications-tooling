@@ -38,7 +38,7 @@ export const resolveArticlePath = {
 			},
 			'422': {
 				description:
-					'The body failed semantic validation, the article reference is invalid, or a requested liveblog block was not found (`invalid_article_reference`).',
+					'The body failed semantic validation, the article reference is invalid, or an imported liveblog block ID is invalid (`invalid_article_reference`).',
 				content: {
 					'application/json': {
 						schema: {

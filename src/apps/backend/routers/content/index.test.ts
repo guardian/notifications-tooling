@@ -230,7 +230,7 @@ describe('POST /v1/content/articles/resolve', () => {
 				expect(response.status).toBe(422);
 				expect(await response.json()).toMatchObject({
 					error: 'invalid_article_reference',
-					message: 'The liveblog block could not be found.',
+					message: 'The imported liveblog block ID is invalid.',
 				});
 			});
 		});
