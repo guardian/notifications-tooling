@@ -9,6 +9,7 @@ import { clientAssetsDir } from './client-assets';
 import { buildErrorEnvelope } from './error-envelope';
 import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { errorMiddleware } from './middleware/error-middleware';
+import { grafanaCorsMiddleware } from './middleware/grafana-cors';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { contentRouter } from './routers/content';
@@ -27,6 +28,7 @@ app.disable('x-powered-by');
 app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(grafanaCorsMiddleware);
 
 app.use('/health', healthRouter);
 app.use('/', grafanaRouter);
