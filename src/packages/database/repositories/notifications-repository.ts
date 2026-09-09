@@ -168,6 +168,7 @@ export const createNotificationsRepository = (db: Database) => ({
 				gte(notifications.createdAt, from),
 				lte(notifications.createdAt, to),
 				eq(notifications.kind, 'send'),
+				eq(notifications.dryRun, false),
 			),
 			orderBy: (notification, { desc: orderDescending }) => [
 				orderDescending(notification.createdAt),
