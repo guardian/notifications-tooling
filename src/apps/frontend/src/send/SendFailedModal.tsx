@@ -9,10 +9,16 @@ import type { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from '../compose/NotificationContext';
 import { useSendNotification } from '../hooks/use-send-notification';
 import type {
+	ChannelAudienceResponse,
 	NotificationDispatch,
 	NotificationResource,
 	SendNotificationRequest,
 } from '../schemas';
+import {
+	FALLBACK_NEWSLETTER_SEGMENTS,
+	FALLBACK_TOPIC_TYPES,
+} from '../segment/audience-fallbacks';
+import { useChannelAudiences } from '../segment/useChannelAudiences';
 import type { ChannelOption } from '../types';
 import type { NotificationState } from '../types';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -20,13 +26,30 @@ import { getChannelDescription } from '../utils/display-text-helpers';
 
 const formatDispatchTarget = (
 	requested: NotificationDispatch['requested'],
+	audiences?: ChannelAudienceResponse,
 ): string => {
-	const targets =
-		requested.channel === 'app-push' ? requested.editions : [requested.segment];
+	if (requested.channel === 'newsletter') {
+		const segments = audiences?.channels.newsletter.segments ?? [];
+		return (
+			segments.find(({ id }) => id === requested.segment)?.label ??
+			FALLBACK_NEWSLETTER_SEGMENTS.find(({ id }) => id === requested.segment)
+				?.label ??
+			requested.segment
+		);
+	}
 
-	return targets
-		.map((target) =>
-			target.length <= 3 ? target.toUpperCase() : target.replaceAll('-', ' '),
+	const topicTypes = audiences?.channels['app-push'].topicTypes ?? [];
+	const topic = topicTypes.find(({ id }) => id === requested.topicType);
+	const fallbackTopic = FALLBACK_TOPIC_TYPES.find(
+		({ id }) => id === requested.topicType,
+	);
+
+	return requested.editions
+		.map(
+			(edition) =>
+				topic?.editions.find(({ id }) => id === edition)?.label ??
+				fallbackTopic?.editions.find(({ id }) => id === edition)?.label ??
+				edition,
 		)
 		.join(', ');
 };
@@ -35,13 +58,14 @@ const deriveDispatchFailureMessage = (
 	notification: NotificationResource,
 	channel: ChannelOption,
 	channelDescription: string,
+	audiences?: ChannelAudienceResponse,
 ): ReactNode => {
 	const successfulTargets = notification.dispatches
 		.filter(({ status }) => status === 'success')
-		.map(({ requested }) => formatDispatchTarget(requested));
+		.map(({ requested }) => formatDispatchTarget(requested, audiences));
 	const failedTargets = notification.dispatches
 		.filter(({ status }) => status === 'failure')
-		.map(({ requested }) => formatDispatchTarget(requested));
+		.map(({ requested }) => formatDispatchTarget(requested, audiences));
 	const upstreamService =
 		channel === 'push'
 			? 'mobile notification service'
@@ -144,6 +168,7 @@ const checkIfCanRetry = (apiError: ApiError) => {
 const getFailure = (
 	notification: NotificationState,
 	channel: ChannelOption,
+	audiences?: ChannelAudienceResponse,
 ) => {
 	const { sendFailure } = notification;
 	if (!sendFailure) {
@@ -165,6 +190,7 @@ const getFailure = (
 				sendFailure.notification,
 				channel,
 				channelDescription,
+				audiences,
 			),
 			canRetry: false,
 		};
@@ -193,9 +219,10 @@ export const SendFailedModal = () => {
 		NotificationFormContext,
 	);
 	const sendNotification = useSendNotification();
+	const { data: audiences } = useChannelAudiences();
 
 	const { isWaitingForSend, pendingRequest } = notification;
-	const failure = getFailure(notification, channel);
+	const failure = getFailure(notification, channel, audiences);
 
 	const handleRetry =
 		(sendNotificationRequest: SendNotificationRequest) => () =>

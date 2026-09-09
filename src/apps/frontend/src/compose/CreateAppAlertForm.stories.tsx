@@ -137,7 +137,7 @@ export const MobileNotificationServiceFailure: Story = {
 				'The mobile notification service failed. No app alert was sent.',
 			),
 		).toBeVisible();
-		await expect(screen.getByText('Not sent to: UK')).toBeVisible();
+		await expect(screen.getByText('Not sent to: International')).toBeVisible();
 		await expect(screen.getByText('Reference: push-failed-1234')).toBeVisible();
 		await expect(
 			screen.queryByRole('button', { name: 'Try Again' }),

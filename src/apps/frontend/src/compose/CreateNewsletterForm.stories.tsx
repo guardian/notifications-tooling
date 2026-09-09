@@ -4,10 +4,12 @@ import { expect, userEvent, within } from 'storybook/test';
 import type { ApiError } from '../api-client/errors';
 import {
 	badRequestError,
+	failedNewsletterSendResponse,
 	fetchFailError,
 	internalError,
 	jsonParseFailure,
 	noPermissionError,
+	partiallyDeliveredNewsletterSendResponse,
 	unauthenticatedError,
 } from '../testing/api-fixtures';
 import { mockSendRejectedNotification } from '../testing/mock-send-notification';
@@ -141,6 +143,58 @@ export const ValidationErrors: Story = {
 		).toBeVisible();
 		await expect(
 			canvas.getByText('Paste a URL to fetch an article'),
+		).toBeVisible();
+	},
+};
+
+export const NewsletterDeliveryFailure: Story = {
+	args: {
+		notificationState: {
+			...populatedEmailState,
+			sendFailure: {
+				failure: 'dispatch-fail',
+				notification: failedNewsletterSendResponse,
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const screen = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			await screen.findByText("The newsletter email wasn't sent"),
+		).toBeVisible();
+		await expect(
+			screen.getByText(
+				'The newsletter delivery service failed. No newsletter email was sent.',
+			),
+		).toBeVisible();
+		await expect(screen.getByText('Not sent to: United Kingdom')).toBeVisible();
+		await expect(
+			screen.getByText('Reference: email-failed-1234'),
+		).toBeVisible();
+	},
+};
+
+export const PartialNewsletterDeliveryFailure: Story = {
+	args: {
+		notificationState: {
+			...populatedEmailState,
+			sendFailure: {
+				failure: 'dispatch-fail',
+				notification: partiallyDeliveredNewsletterSendResponse,
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const screen = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			await screen.findByText('The newsletter email was only partially sent'),
+		).toBeVisible();
+		await expect(screen.getByText('Sent to: United Kingdom')).toBeVisible();
+		await expect(screen.getByText('Not sent to: United States')).toBeVisible();
+		await expect(
+			screen.getByText('Reference: email-partial-1234'),
 		).toBeVisible();
 	},
 };
