@@ -395,6 +395,22 @@ export const historyViewStyles = {
 			alignItems: 'center',
 		},
 	}),
+	headerActions: css({
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: semanticSpacing.stackSm,
+		minWidth: 0,
+		[from.md]: {
+			marginLeft: 'auto',
+		},
+	}),
+	refreshControls: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		whiteSpace: 'nowrap',
+	}),
 	titleBlock: css({
 		display: 'flex',
 		flexDirection: 'row',
