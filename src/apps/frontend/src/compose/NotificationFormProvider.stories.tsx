@@ -4,7 +4,7 @@ import { type ComponentProps, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
-import { articleFixture } from '../testing/capi-fixtures';
+import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
 import {
 	channelAudiencesHandler,
 	channelConstraintsHandler,
@@ -23,6 +23,18 @@ import {
 const resolveArticleHandler = http.post(
 	`${getApiBaseUrl()}/v1/content/articles/resolve`,
 	() => HttpResponse.json({ article: articleFixture }),
+);
+
+const invalidLiveblogBlockHandler = http.post(
+	`${getApiBaseUrl()}/v1/content/articles/resolve`,
+	() =>
+		HttpResponse.json(
+			{
+				error: 'invalid_article_reference',
+				message: 'The imported liveblog block ID is invalid.',
+			},
+			{ status: 422 },
+		),
 );
 
 const NewsletterSubject = () => {
@@ -156,5 +168,30 @@ export const ArticleStateIsOwnedByChannel: Story = {
 		await expect(
 			canvas.getByLabelText('Newsletter subject'),
 		).toBeEmptyDOMElement();
+	},
+};
+
+export const InvalidLiveblogBlockId: Story = {
+	parameters: {
+		msw: {
+			handlers: [
+				invalidLiveblogBlockHandler,
+				channelConstraintsHandler,
+				channelAudiencesHandler,
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const invalidBlockUrl = `${liveblogFixture.webUrl}#block-invalid`;
+
+		await userEvent.type(canvas.getByLabelText('article URL'), invalidBlockUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+
+		await waitFor(() =>
+			expect(
+				canvas.getByText('The imported liveblog block ID is invalid.'),
+			).toBeVisible(),
+		);
 	},
 };
