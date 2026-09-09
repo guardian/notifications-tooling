@@ -335,6 +335,9 @@ export const dispatchLandingTheme = {
 		paddingTop: '12px',
 		gap: semanticSpacing.stackMd,
 	}),
+	dispatchHistoryHeader: css({
+		paddingBottom: '30px',
+	}),
 };
 
 export const historyViewStyles = {

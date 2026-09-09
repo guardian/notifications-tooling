@@ -46,8 +46,8 @@ export const DispatchLandingTab = () => {
 		}) ?? [];
 
 	return (
-		<Layout.Main>
-			<div css={dispatchLandingTheme.dispatchMainContainer}>
+		<Layout.Main css={dispatchLandingTheme.dispatchMainContainer}>
+			<div>
 				<Typography variant="titleXl" element={'h1'}>
 					Welcome to Dispatch
 				</Typography>
