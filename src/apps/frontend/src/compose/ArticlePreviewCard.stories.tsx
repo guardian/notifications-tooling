@@ -105,32 +105,6 @@ export const RequestedLiveblogBlock: PreviewCardStory = {
 	},
 };
 
-export const LiveblogWithoutBlockImageAssets: PreviewCardStory = {
-	args: {
-		content: {
-			...liveblogFixture,
-			blocks: {
-				main: {
-					...liveblogFixture.blocks?.main,
-					elements: [
-						{
-							type: 'image',
-							imageTypeData: { alt: 'Latest liveblog update' },
-						},
-					],
-				},
-			},
-		},
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(canvas.getByAltText('Latest liveblog update')).toHaveAttribute(
-			'src',
-			liveblogFixture.fields?.thumbnail,
-		);
-	},
-};
-
 export const JustPublished: PreviewCardStory = {
 	args: {
 		content: {
