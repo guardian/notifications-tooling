@@ -1,24 +1,16 @@
-import { randomUUID } from 'node:crypto';
 import { NotificationChannel } from '@config';
-import { AppNotificationApiError } from '@services';
-import { determineArticleId } from '@utils';
-import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { AppPushDispatchOutcome } from '../dispatch-outcome';
 import {
 	type ChannelDispatchResult,
 	defaultDependencies,
 	type DispatchNotificationDependencies,
-	firstSettledError,
-	PROVIDER_REQUEST_TIMEOUT_MS,
 	requireContentItem,
 } from '../shared';
-import { groupAppPushTopicsByType } from './dispatch-app-push';
-
-const appNotificationEnvironmentSchema = z.object({
-	MOBILE_N10N_ENDPOINT: z.url(),
-	MOBILE_N10N_API_KEY: z.string().trim().min(1),
-});
+import {
+	groupAppPushTopicsByType,
+	sendResolvedAppPushes,
+} from './dispatch-app-push';
 
 /**
  * Sends a test app-push to the internal test topic via mobile-n10n. The schema
@@ -41,81 +33,13 @@ export const dispatchAppPushTest = async (
 		plan.compose.use,
 		NotificationChannel.AppPushNotification,
 	);
-	const pushes = groupAppPushTopicsByType(plan.audience.items);
 
-	const [endpoint, apiKey] = await Promise.all([
-		dependencies.getSSMParameter('MOBILE_N10N_ENDPOINT'),
-		dependencies.getSSMParameter('MOBILE_N10N_API_KEY'),
-	]);
-
-	const environment = appNotificationEnvironmentSchema.parse({
-		MOBILE_N10N_ENDPOINT: endpoint,
-		MOBILE_N10N_API_KEY: apiKey,
-	});
-
-	// Derive the CAPI content id so the apps deep-link; falls back to the raw URL.
-	const contentApiId = determineArticleId(item.link);
-
-	// A fresh id per topic-type push; returned so each POST can be persisted.
-	const dispatched = pushes.map((push) => ({ id: randomUUID(), push }));
-
-	// allSettled so one failed push does not abort the others.
-	const settled = await Promise.allSettled(
-		dispatched.map(({ id, push }) =>
-			dependencies.sendAppNotification({
-				endpoint: environment.MOBILE_N10N_ENDPOINT,
-				apiKey: environment.MOBILE_N10N_API_KEY,
-				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-				id,
-				sender: request.sender,
-				title: item.title,
-				body: item.body,
-				link: item.link,
-				contentApiId,
-				importance: push.importance,
-				topics: push.topics,
-				media: item.media,
-			}),
-		),
+	return sendResolvedAppPushes(
+		{
+			item,
+			sender: request.sender,
+			pushes: groupAppPushTopicsByType(plan.audience.items),
+		},
+		dependencies,
 	);
-
-	const outcomes = settled.map((result, index): AppPushDispatchOutcome => {
-		const { push } = dispatched[index]!;
-		const requested = {
-			channel: 'app-push' as const,
-			topicType: push.topicType,
-			editions: push.editions,
-		};
-		const resolved = {
-			channel: 'app-push' as const,
-			topics: push.topics,
-			importance: push.importance,
-		};
-		if (result.status === 'fulfilled') {
-			return {
-				requested,
-				resolved,
-				status: 'success',
-				providerRef: dispatched[index]!.id,
-				failureReason: null,
-				providerStatusCode: result.value.status,
-			};
-		}
-		return {
-			requested,
-			resolved,
-			status: 'failure',
-			providerRef: dispatched[index]!.id,
-			failureReason:
-				result.reason instanceof AppNotificationApiError
-					? result.reason.reason
-					: 'unknown',
-			providerStatusCode:
-				result.reason instanceof AppNotificationApiError
-					? (result.reason.status ?? null)
-					: null,
-		};
-	});
-
-	return { outcomes, error: firstSettledError(settled) };
 };

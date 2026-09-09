@@ -78,6 +78,76 @@ describe('dispatchNotification (app-push channel)', () => {
 		]);
 	});
 
+	it('forwards the liveblog block id derived from a block link', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: {
+				items: {
+					lead: {
+						...pushItem,
+						link: 'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-5dd7ca0f8f080fd59fb15354',
+					},
+				},
+			},
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		await dispatchNotification(request, notificationId, dependencies);
+
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				contentApiId: 'politics/live/2026/jul/19/election-live',
+				blockId: '5dd7ca0f8f080fd59fb15354',
+			}),
+		);
+	});
+
+	it('records the block id in the resolved dispatch outcome', async () => {
+		const { dependencies } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: {
+				items: {
+					lead: {
+						...pushItem,
+						link: 'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-5dd7ca0f8f080fd59fb15354',
+					},
+				},
+			},
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			dependencies,
+		);
+
+		expect(outcomes.appPush[0]?.resolved).toEqual({
+			channel: 'app-push',
+			topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+			importance: 'Major',
+			blockId: '5dd7ca0f8f080fd59fb15354',
+		});
+	});
+
 	it('sends one push per topic type when types are mixed', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
