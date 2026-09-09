@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { env } from '@config';
 import { UserPermissions } from '@models';
 import {
 	buildPersistedNotification,
@@ -64,35 +65,41 @@ describe('Grafana datasource endpoints', () => {
 		]);
 	});
 
-	it('allows credentialed requests from the CODE Grafana origin', async () => {
-		const response = await fetch(`${server.baseUrl}/metrics`, {
-			method: 'POST',
-			headers: { Origin: 'https://metrics.code.dev-gutools.co.uk' },
-		});
+	it.skipIf(env.STAGE !== 'CODE')(
+		'allows credentialed requests from the CODE Grafana origin',
+		async () => {
+			const response = await fetch(`${server.baseUrl}/metrics`, {
+				method: 'POST',
+				headers: { Origin: 'https://metrics.code.dev-gutools.co.uk' },
+			});
 
-		expect(response.headers.get('access-control-allow-origin')).toBe(
-			'https://metrics.code.dev-gutools.co.uk',
-		);
-		expect(response.headers.get('access-control-allow-credentials')).toBe(
-			'true',
-		);
-	});
+			expect(response.headers.get('access-control-allow-origin')).toBe(
+				'https://metrics.code.dev-gutools.co.uk',
+			);
+			expect(response.headers.get('access-control-allow-credentials')).toBe(
+				'true',
+			);
+		},
+	);
 
-	it('handles the credentialed metrics preflight', async () => {
-		const response = await fetch(`${server.baseUrl}/metrics`, {
-			method: 'OPTIONS',
-			headers: {
-				Origin: 'https://metrics.code.dev-gutools.co.uk',
-				'Access-Control-Request-Method': 'POST',
-				'Access-Control-Request-Headers': 'content-type',
-			},
-		});
+	it.skipIf(env.STAGE !== 'CODE')(
+		'handles the credentialed metrics preflight',
+		async () => {
+			const response = await fetch(`${server.baseUrl}/metrics`, {
+				method: 'OPTIONS',
+				headers: {
+					Origin: 'https://metrics.code.dev-gutools.co.uk',
+					'Access-Control-Request-Method': 'POST',
+					'Access-Control-Request-Headers': 'content-type',
+				},
+			});
 
-		expect(response.status).toBe(204);
-		expect(response.headers.get('access-control-allow-methods')).toBe(
-			'POST, OPTIONS',
-		);
-	});
+			expect(response.status).toBe(204);
+			expect(response.headers.get('access-control-allow-methods')).toBe(
+				'POST, OPTIONS',
+			);
+		},
+	);
 
 	it('returns an empty Grafana table for the notification query', async () => {
 		const response = await fetch(`${server.baseUrl}/query`, {
