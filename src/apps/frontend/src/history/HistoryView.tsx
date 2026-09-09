@@ -24,6 +24,7 @@ import { useRelativeTime } from '../hooks/use-relative-time';
 import { layoutMainTheme } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
+import { SendTimeTooltip } from '../ui/SendTimeTooltip';
 import { HistoryPagination } from './HistoryPagination';
 
 type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
@@ -192,6 +193,11 @@ const styles = {
 	metadataValue: css({
 		minWidth: 0,
 	}),
+	sendTimeValue: css({
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
+	}),
 	statusBadge: css({
 		boxSizing: 'border-box',
 		height: '18px',
@@ -235,7 +241,7 @@ const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
 	const sendTime = useRelativeTime(sentAt);
 
 	return (
-		<span css={styles.metadataValue}>
+		<span css={[styles.metadataValue, styles.sendTimeValue]}>
 			<Typography variant="bodySm">
 				{sendTime ? (
 					<time
@@ -248,6 +254,7 @@ const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
 					sentAt
 				)}
 			</Typography>
+			<SendTimeTooltip sentAt={sentAt} />
 		</span>
 	);
 };
