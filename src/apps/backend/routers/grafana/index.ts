@@ -33,8 +33,11 @@ type GrafanaQueryBody = {
 	targets?: Array<{ target?: unknown }>;
 };
 
-const hasNotificationsTarget = (body: GrafanaQueryBody) =>
-	body.targets?.length === 1 && body.targets[0]?.target === 'notifications';
+const hasNotificationsTarget = (
+	body: GrafanaQueryBody | null | undefined,
+) =>
+	body?.targets?.length === 1 &&
+	body.targets[0]?.target === 'notifications';
 
 const getDateRange = (body: GrafanaQueryBody) => {
 	const from = body.range?.from ? new Date(body.range.from) : null;
