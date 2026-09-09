@@ -46,7 +46,8 @@ const getDateRange = (body: GrafanaQueryBody) => {
 	return from &&
 		to &&
 		!Number.isNaN(from.getTime()) &&
-		!Number.isNaN(to.getTime())
+		!Number.isNaN(to.getTime()) &&
+		from.getTime() <= to.getTime()
 		? { from, to }
 		: null;
 };
