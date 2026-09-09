@@ -377,9 +377,6 @@ export const dispatchLandingTheme = {
 		paddingTop: '12px',
 		gap: semanticSpacing.stackMd,
 	}),
-	dispatchHistoryHeader: css({
-		paddingBottom: '30px',
-	}),
 };
 
 export const historyViewStyles = {
@@ -392,7 +389,7 @@ export const historyViewStyles = {
 	header: css({
 		display: 'flex',
 		flexDirection: 'column',
-		gap: semanticSpacing.stackMd,
+		gap: semanticSpacing.stackLg,
 		[from.md]: {
 			flexDirection: 'row',
 			alignItems: 'center',
