@@ -13,6 +13,7 @@ import { ConfigContext } from './config/ConfigContext';
 import { getAppConfig } from './config/get-config';
 import { EmailNotificationPage } from './EmailNotificationPage';
 import { HistoryPage } from './history/HistoryPage';
+import { DispatchLandingTab } from './layout/DispatchLandingTab';
 import { NotFoundTab } from './layout/NotFoundTab';
 import { getAppRoutes } from './routes';
 import {
@@ -30,8 +31,9 @@ export function App() {
 				<Route element={<EmailNotificationPage />}>
 					<Route
 						index
-						element={<Navigate to={appRoutes.createNewsletterEmail} replace />}
+						element={<Navigate to={appRoutes.dispatchLanding} replace />}
 					/>
+					<Route path="dispatch" element={<DispatchLandingTab />} />
 					<Route
 						path="newsletter-email"
 						element={

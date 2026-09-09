@@ -12,7 +12,7 @@ import type { AppConfig } from '@models';
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
-import { getTopBarNavigationItems } from '../routes';
+import { getAppRoutes, getTopBarNavigationItems } from '../routes';
 import { faviconTheme, layer, topBarTheme } from '../themes';
 
 interface Props {
@@ -28,6 +28,7 @@ const getInitials = (user: AppConfig['user']): string => {
 
 export const MainLayout = ({ children }: Props) => {
 	const config = useContext(ConfigContext);
+	const routes = getAppRoutes(config);
 	const { user } = config ?? {};
 	const { pathname } = useLocation();
 
@@ -39,9 +40,12 @@ export const MainLayout = ({ children }: Props) => {
 				<TopBar theme={topBarTheme}>
 					<TopBarToolName
 						name="Dispatch"
+						href={routes.dispatchLanding}
 						favicon={{
 							icon: <Favicon icon="notifications" theme={faviconTheme} />,
 						}}
+						hoverText="Back to Dispatch landing page"
+						collapsedHoverText="Dispatch landing page"
 					/>
 					<TopBarContainerLeft>
 						{getTopBarNavigationItems(config).map(

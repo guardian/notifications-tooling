@@ -40,6 +40,13 @@ export const topBarTheme: TopBarTheme = {
 	},
 	toolName: {
 		color: semanticColors.text.strongerInverse,
+		hoverLink: {
+			color: semanticColors.text.strongerInverse,
+			backgroundColor: baseColors.magenta[200],
+			pressed: {
+				backgroundColor: baseColors.magenta[200],
+			},
+		},
 	},
 	navigation: {
 		shared: {
