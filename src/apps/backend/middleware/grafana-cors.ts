@@ -10,6 +10,4 @@ const allowedGrafanaOrigins = [
 export const grafanaCorsMiddleware: RequestHandler = cors({
 	origin: allowedGrafanaOrigins,
 	credentials: true,
-	methods: ['POST', 'OPTIONS'],
-	allowedHeaders: ['Content-Type'],
 });
