@@ -44,6 +44,8 @@ export const MainLayout = ({ children }: Props) => {
 						favicon={{
 							icon: <Favicon icon="notifications" theme={faviconTheme} />,
 						}}
+						hoverText=""
+						collapsedHoverText=""
 					/>
 					<TopBarContainerLeft>
 						{getTopBarNavigationItems(config).map(
