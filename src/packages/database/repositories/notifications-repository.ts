@@ -160,8 +160,8 @@ export const createNotificationsRepository = (db: Database) => ({
 		return { notifications: await pageQuery, total: totals?.total ?? 0 };
 	},
 
-	/** Production sends in a time window with their provider outcomes attached. */
-	async listRecentWithDispatches({
+	/** Production sends in a time window with their dispatch outcomes, newest first. */
+	async listSendsWithDispatchesInWindow({
 		from,
 		to,
 		limit,

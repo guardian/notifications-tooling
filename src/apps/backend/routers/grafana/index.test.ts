@@ -3,7 +3,7 @@ import { UserPermissions } from '@models';
 import {
 	buildPersistedNotification,
 	installDatabaseMock,
-	listRecentWithDispatchesMock,
+	listSendsWithDispatchesInWindowMock,
 } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
@@ -162,12 +162,17 @@ describe('Grafana datasource endpoints', () => {
 		});
 	});
 
-	it('returns newsletter and app-push dispatch details', async () => {
+	it('returns one row per notification with its failed audiences and errors', async () => {
 		const persistedNotification = buildPersistedNotification({
 			notification: {
 				status: 'partially_delivered',
 				createdAt: new Date('2026-09-03T12:00:00.000Z'),
 				createdByEmail: 'editor@theguardian.com',
+				channels: { 'app-push': {}, newsletter: {} },
+				failedTargets: {
+					topics: [{ topicType: 'breaking-news', edition: 'uk' }],
+					segments: [{ segmentId: 'UK' }],
+				},
 			},
 			dispatches: [
 				{
@@ -175,14 +180,11 @@ describe('Grafana datasource endpoints', () => {
 					notificationId: '00000000-0000-0000-0000-000000000000',
 					channel: 'newsletter',
 					requested: { channel: 'newsletter', segment: 'UK' },
-					resolved: {
-						channel: 'newsletter',
-						emailRenderingId: 'newsletter-1',
-					},
-					providerRef: 'campaign-1',
-					status: 'success',
-					failureReason: null,
-					providerStatusCode: null,
+					resolved: { channel: 'newsletter', emailRenderingId: 'newsletter-1' },
+					providerRef: null,
+					status: 'failure',
+					failureReason: 'braze_rejected',
+					providerStatusCode: 400,
 					createdAt: new Date('2026-09-03T12:00:01.000Z'),
 					updatedAt: new Date('2026-09-03T12:00:01.000Z'),
 				},
@@ -209,7 +211,7 @@ describe('Grafana datasource endpoints', () => {
 				},
 			],
 		});
-		listRecentWithDispatchesMock.mockImplementationOnce(() =>
+		listSendsWithDispatchesInWindowMock.mockImplementationOnce(() =>
 			Promise.resolve([
 				{
 					...persistedNotification.notification,
@@ -236,22 +238,11 @@ describe('Grafana datasource endpoints', () => {
 			[
 				1788436800000,
 				'00000000-0000-0000-0000-000000000000',
-				'newsletter',
+				'app-push, newsletter',
 				'editor@theguardian.com',
 				'partially_delivered',
-				'success',
-				null,
-				null,
-			],
-			[
-				1788436800000,
-				'00000000-0000-0000-0000-000000000000',
-				'app-push',
-				'editor@theguardian.com',
-				'partially_delivered',
-				'failure',
-				500,
-				'http_error',
+				'breaking-news [uk], UK',
+				'UK: braze_rejected (400); breaking-news [uk]: http_error (500)',
 			],
 		]);
 	});

@@ -1,6 +1,7 @@
 import {
 	createNotificationsRepository,
 	getDb,
+	type Notification,
 	type NotificationWithDispatches,
 } from '@database';
 import { UserPermissions } from '@models';
@@ -23,9 +24,8 @@ const grafanaTableColumns = [
 	{ text: 'Channel', type: 'string' },
 	{ text: 'Created By', type: 'string' },
 	{ text: 'Notification Status', type: 'string' },
-	{ text: 'Dispatch Status', type: 'string' },
-	{ text: 'Provider Status Code', type: 'number' },
-	{ text: 'Error', type: 'string' },
+	{ text: 'Failed Audiences', type: 'string' },
+	{ text: 'Errors', type: 'string' },
 ] as const;
 
 type GrafanaQueryBody = {
@@ -53,23 +53,53 @@ const getDateRange = (body: GrafanaQueryBody) => {
 		: null;
 };
 
-const toGrafanaRows = (notifications: NotificationWithDispatches[]) =>
-	notifications.flatMap((notification) => {
-		const dispatches = notification.dispatches.length
-			? notification.dispatches
-			: [null];
+const formatChannels = (channels: Notification['channels']) =>
+	Object.keys(channels).join(', ') || null;
 
-		return dispatches.map((dispatch) => [
-			notification.createdAt.getTime(),
-			notification.id,
-			dispatch?.channel ?? null,
-			notification.createdByEmail,
-			notification.status,
-			dispatch?.status ?? null,
-			dispatch?.providerStatusCode ?? null,
-			dispatch?.failureReason ?? null,
-		]);
-	});
+const formatAudience = (
+	requested: NotificationWithDispatches['dispatches'][number]['requested'],
+) =>
+	requested.channel === 'app-push'
+		? `${requested.topicType} [${requested.editions.join(', ')}]`
+		: requested.segment;
+
+const formatFailedAudiences = (
+	failedTargets: Notification['failedTargets'],
+) => {
+	const failures = [
+		...failedTargets.topics.map(
+			({ topicType, edition }) => `${topicType} [${edition}]`,
+		),
+		...failedTargets.segments.map(({ segmentId }) => segmentId),
+	];
+	return failures.length ? failures.join(', ') : null;
+};
+
+const formatErrors = (
+	dispatches: NotificationWithDispatches['dispatches'],
+) => {
+	const errors = dispatches
+		.filter((dispatch) => dispatch.status === 'failure')
+		.map((dispatch) => {
+			const audience = formatAudience(dispatch.requested);
+			const reason = dispatch.failureReason ?? 'unknown';
+			return dispatch.providerStatusCode !== null
+				? `${audience}: ${reason} (${dispatch.providerStatusCode})`
+				: `${audience}: ${reason}`;
+		});
+	return errors.length ? errors.join('; ') : null;
+};
+
+const toGrafanaRows = (notifications: NotificationWithDispatches[]) =>
+	notifications.map((notification) => [
+		notification.createdAt.getTime(),
+		notification.id,
+		formatChannels(notification.channels),
+		notification.createdByEmail,
+		notification.status,
+		formatFailedAudiences(notification.failedTargets),
+		formatErrors(notification.dispatches),
+	]);
 
 export const grafanaQueryHandler = async (req: Request, res: Response) => {
 	const body = req.body as GrafanaQueryBody;
@@ -100,7 +130,7 @@ export const grafanaQueryHandler = async (req: Request, res: Response) => {
 
 	const notifications = await createNotificationsRepository(
 		await getDb(),
-	).listRecentWithDispatches({
+	).listSendsWithDispatchesInWindow({
 		from: dateRange.from,
 		to: dateRange.to,
 		limit: maxNotifications,
