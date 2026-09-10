@@ -11,7 +11,6 @@ export interface NotificationHistoryQuery {
 	limit: number;
 	offset: number;
 	since?: number;
-	/** Stable identity for rolling windows whose exact cutoff changes on remount. */
 	cacheScope?: string;
 }
 
@@ -33,7 +32,7 @@ export const getNotificationHistoryQueryKey = ({
 			: { limit, offset, since },
 	] as const;
 
-export const notificationHistoryStaleTime = Infinity;
+export const ALWAYS_FRESH = Infinity;
 
 export const fetchNotificationHistory = ({
 	limit,
@@ -73,6 +72,5 @@ export const useNotificationHistory = (query: NotificationHistoryQuery) =>
 			}
 		},
 		placeholderData: keepPreviousData,
-		// Activity is refreshed explicitly by the user, or invalidated after a send.
-		staleTime: notificationHistoryStaleTime,
+		staleTime: ALWAYS_FRESH,
 	});

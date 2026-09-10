@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'bun:test';
 import { QueryClient } from '@tanstack/react-query';
 import {
+	ALWAYS_FRESH,
 	getNotificationHistoryQueryKey,
 	notificationHistoryQueryKey,
-	notificationHistoryStaleTime,
 } from './useNotificationHistory';
 
 describe('notification history query keys', () => {
@@ -72,12 +72,12 @@ describe('notification history query keys', () => {
 		await queryClient.fetchQuery({
 			queryKey: firstMountKey,
 			queryFn,
-			staleTime: notificationHistoryStaleTime,
+			staleTime: ALWAYS_FRESH,
 		});
 		await queryClient.fetchQuery({
 			queryKey: secondMountKey,
 			queryFn,
-			staleTime: notificationHistoryStaleTime,
+			staleTime: ALWAYS_FRESH,
 		});
 
 		expect(requestCount).toBe(1);
@@ -88,7 +88,7 @@ describe('notification history query keys', () => {
 		await queryClient.fetchQuery({
 			queryKey: secondMountKey,
 			queryFn,
-			staleTime: notificationHistoryStaleTime,
+			staleTime: ALWAYS_FRESH,
 		});
 
 		expect(requestCount).toBe(2);
