@@ -75,9 +75,7 @@ const formatFailedAudiences = (
 	return failures.length ? failures.join(', ') : null;
 };
 
-const formatErrors = (
-	dispatches: NotificationWithDispatches['dispatches'],
-) => {
+const formatErrors = (dispatches: NotificationWithDispatches['dispatches']) => {
 	const errors = dispatches
 		.filter((dispatch) => dispatch.status === 'failure')
 		.map((dispatch) => {
