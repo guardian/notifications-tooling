@@ -27,10 +27,12 @@ const checkImageUrlExists = async (
 		});
 
 		if (!response.ok) {
-			const statusText = response.statusText || `HTTP ${response.status}`;
+			const statusSummary = response.statusText
+				? `HTTP ${response.status} ${response.statusText}`
+				: `HTTP ${response.status}`;
 			return {
 				exists: false,
-				error: `Image URL returned ${statusText}`,
+				error: `Image URL returned ${statusSummary}`,
 			};
 		}
 
@@ -50,12 +52,19 @@ export const AppAlertReplaceImageSection = ({
 }: AppAlertReplaceImageSectionProps) => {
 	const [imageUpdated, setImageUpdated] = useState(false);
 	const [isCheckingImage, setIsCheckingImage] = useState(false);
-	const [imageCheckError, setImageCheckError] = useState<string | null>(null);
+	const [imageCheckError, setImageCheckError] = useState<{
+		url: string;
+		message: string;
+	} | null>(null);
 
 	const trimmedReplacementImageUrl = replacementImageUrl.trim();
 	const validationError = validateGuardianImageUrl(trimmedReplacementImageUrl);
+	const imageCheckErrorForCurrentUrl =
+		imageCheckError?.url === trimmedReplacementImageUrl
+			? imageCheckError.message
+			: null;
 	const displayedErrorMessage =
-		validationError ?? imageCheckError ?? errorMessage;
+		validationError ?? imageCheckErrorForCurrentUrl ?? errorMessage;
 
 	const handleUpdateClick = async () => {
 		if (validationError) {
@@ -81,7 +90,10 @@ export const AppAlertReplaceImageSection = ({
 
 		if (result.error) {
 			// Image fetch failed; keep existing thumbnail unchanged
-			setImageCheckError(result.error);
+			setImageCheckError({
+				url: trimmedReplacementImageUrl,
+				message: result.error,
+			});
 			setImageUpdated(false);
 			return;
 		}
