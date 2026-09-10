@@ -5,8 +5,9 @@ import type { ReactNode } from 'react';
 import { historyViewStyles, layoutMainTheme } from '../themes';
 import { LastUpdated } from '../ui/LastUpdated';
 import { RefreshButton } from '../ui/RefreshButton';
+import { HistoryEmptyState } from './HistoryEmptyState';
 import { HistoryPagination } from './HistoryPagination';
-import { HistoryTable } from './HistoryTable';
+import { HistoryTable, HistoryTableSkeleton } from './HistoryTable';
 
 export type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
@@ -80,15 +81,13 @@ export const HistoryView = ({
 						</div>
 					)}
 				</div>
-				{isLoading && (
-					<Typography variant="bodyMd">Loading history...</Typography>
-				)}
+				{isLoading && <HistoryTableSkeleton />}
 				{error}
-				{!isLoading && !error && <HistoryTable notifications={notifications} />}
+				{!isLoading && !error && notifications.length > 0 && (
+					<HistoryTable notifications={notifications} />
+				)}
 				{!isLoading && !error && notifications.length === 0 && (
-					<Typography variant="bodyMd" cssOverrides={historyViewStyles.empty}>
-						No alerts have been sent yet.
-					</Typography>
+					<HistoryEmptyState />
 				)}
 			</section>
 		</Layout.Main>

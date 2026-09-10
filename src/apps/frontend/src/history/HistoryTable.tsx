@@ -22,6 +22,12 @@ interface HistoryTableProps {
 	notifications?: HistoryNotification[];
 }
 
+const tableColumns = {
+	sm: 'minmax(0, 1fr)',
+	md: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+	lg: 'minmax(280px, 2.4fr) minmax(180px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1fr) 132px',
+} as const;
+
 const getChannelName = (channel: HistoryNotification['channel']) =>
 	channel === 'push' ? 'App alert' : 'Newsletter email';
 
@@ -70,11 +76,7 @@ export const HistoryTable = ({ notifications = [] }: HistoryTableProps) => {
 		<Table
 			aria-label="Sent alerts"
 			cssOverrides={historyViewStyles.table}
-			columns={{
-				sm: 'minmax(0, 1fr)',
-				md: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
-				lg: 'minmax(280px, 2.4fr) minmax(180px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1fr) 132px',
-			}}
+			columns={tableColumns}
 			headerVisibleFrom="sm"
 		>
 			<TableHeader cssOverrides={historyViewStyles.tableHeader}>
@@ -210,3 +212,58 @@ export const HistoryTable = ({ notifications = [] }: HistoryTableProps) => {
 		</Table>
 	);
 };
+
+export const HistoryTableSkeleton = () => (
+	<div role="status" aria-label="Loading alert history" aria-busy="true">
+		<Table
+			aria-label="Loading sent alerts"
+			cssOverrides={historyViewStyles.table}
+			columns={tableColumns}
+			headerVisibleFrom="sm"
+		>
+			<TableHeader cssOverrides={historyViewStyles.tableHeader}>
+				<TableColumnHeader isRowHeader>Sent alerts</TableColumnHeader>
+				<TableColumnHeader>Sent by</TableColumnHeader>
+				<TableColumnHeader>Sent to</TableColumnHeader>
+				<TableColumnHeader>Send time</TableColumnHeader>
+				<TableColumnHeader>Status</TableColumnHeader>
+			</TableHeader>
+			<TableBody>
+				{Array.from({ length: 5 }, (_, index) => (
+					<TableRow
+						key={index}
+						id={`history-skeleton-${index}`}
+						cssOverrides={historyViewStyles.tableRow}
+					>
+						<TableCell
+							gridColumn={{ sm: '1', md: '1', lg: '1' }}
+							gridRow={{ md: '1 / span 4', lg: 'auto' }}
+							cssOverrides={historyViewStyles.notificationCell}
+						>
+							<div css={historyViewStyles.notification} aria-hidden="true">
+								<span css={historyViewStyles.skeletonThumbnail} />
+								<div css={historyViewStyles.skeletonNotificationDetails}>
+									<span css={historyViewStyles.skeletonLine('85%')} />
+									<span css={historyViewStyles.skeletonLine('55%')} />
+								</div>
+							</div>
+						</TableCell>
+						{[1, 2, 3, 4].map((column) => (
+							<TableCell
+								key={column}
+								gridColumn={{ md: '2', lg: String(column + 1) }}
+								gridRow={{ md: String(column), lg: 'auto' }}
+								cssOverrides={historyViewStyles.metadataCell(column)}
+							>
+								<span
+									css={historyViewStyles.skeletonMetadata}
+									aria-hidden="true"
+								/>
+							</TableCell>
+						))}
+					</TableRow>
+				))}
+			</TableBody>
+		</Table>
+	</div>
+);
