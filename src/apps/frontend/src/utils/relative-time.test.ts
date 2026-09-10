@@ -62,6 +62,19 @@ describe('formatRelativeTime', () => {
 		).toBe('42 secs ago');
 	});
 
+	it('supports long labels without counting seconds', () => {
+		expect(
+			formatRelativeTime(
+				new Date(TEST_DATE.getTime() - 59_999),
+				TEST_DATE,
+				'long-minutes',
+			),
+		).toBe('just now');
+		expect(formatRelativeTime(minutesAgo(1), TEST_DATE, 'long-minutes')).toBe(
+			'1 min ago',
+		);
+	});
+
 	it('falls back to a full absolute time at exactly 24 hours', () => {
 		expect(formatRelativeTime(daysAgo(1), TEST_DATE)).toBe(
 			'18 Jul 2026, 13:00',
@@ -115,6 +128,16 @@ describe('getRefreshIntervalMs', () => {
 
 	it('ticks every second while long labels count seconds', () => {
 		expect(getRefreshIntervalMs(minutesAgo(0), TEST_DATE, 'long')).toBe(1_000);
+	});
+
+	it('ticks when a minute-only long label stops saying just now', () => {
+		expect(
+			getRefreshIntervalMs(
+				new Date(TEST_DATE.getTime() - 42_000),
+				TEST_DATE,
+				'long-minutes',
+			),
+		).toBe(18_000);
 	});
 
 	it('ticks at the exact 24-hour boundary', () => {

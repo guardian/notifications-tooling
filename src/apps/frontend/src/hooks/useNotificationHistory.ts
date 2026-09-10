@@ -11,6 +11,7 @@ export interface NotificationHistoryQuery {
 	limit: number;
 	offset: number;
 	since?: number;
+	cacheScope?: string;
 }
 
 export const notificationHistoryQueryKey = [
@@ -22,8 +23,16 @@ export const getNotificationHistoryQueryKey = ({
 	limit,
 	offset,
 	since,
+	cacheScope,
 }: NotificationHistoryQuery) =>
-	[...notificationHistoryQueryKey, { limit, offset, since }] as const;
+	[
+		...notificationHistoryQueryKey,
+		cacheScope !== undefined
+			? { limit, offset, cacheScope }
+			: { limit, offset, since },
+	] as const;
+
+export const ALWAYS_FRESH = Infinity;
 
 export const fetchNotificationHistory = ({
 	limit,
@@ -63,5 +72,5 @@ export const useNotificationHistory = (query: NotificationHistoryQuery) =>
 			}
 		},
 		placeholderData: keepPreviousData,
-		staleTime: 30_000,
+		staleTime: ALWAYS_FRESH,
 	});
