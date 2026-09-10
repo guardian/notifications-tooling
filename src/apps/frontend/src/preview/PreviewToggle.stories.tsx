@@ -18,7 +18,7 @@ type StoryArgs = {
 type Story = StoryObj<StoryArgs>;
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/PreviewToggle',
+	title: 'Dispatch/Preview/PreviewToggle',
 	component: EmailPreviewToggle,
 	args: {
 		notificationState: defaultState,

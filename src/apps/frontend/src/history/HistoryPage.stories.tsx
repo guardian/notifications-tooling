@@ -187,7 +187,7 @@ const failedHistoryHandler = http.get(
 );
 
 const meta = {
-	title: 'Stand Frontend/HistoryPage',
+	title: 'Dispatch/History/HistoryPage',
 	component: HistoryPage,
 	parameters: {
 		layout: 'fullscreen',

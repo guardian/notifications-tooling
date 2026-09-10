@@ -14,7 +14,7 @@ type StoryArgs = {
 };
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/EmailPreviewSection',
+	title: 'Dispatch/Preview/EmailPreviewSection',
 	component: EmailPreviewSection,
 	args: {
 		notificationState: populatedEmailState,

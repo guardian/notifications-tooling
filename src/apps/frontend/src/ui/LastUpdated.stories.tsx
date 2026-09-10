@@ -5,7 +5,7 @@ import { LastUpdated } from './LastUpdated';
 const updatedAt = new Date(Date.now() - 5 * 60_000).toISOString();
 
 const meta = {
-	title: 'Stand Frontend/LastUpdated',
+	title: 'Dispatch/UI/LastUpdated',
 	component: LastUpdated,
 	args: { updatedAt },
 } satisfies Meta<typeof LastUpdated>;
