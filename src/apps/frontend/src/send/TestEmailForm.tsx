@@ -11,6 +11,7 @@ import type { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from '../compose/NotificationContext';
 import { ConfigContext } from '../config/ConfigContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { senderId } from '../utils/build-request-payloads';
 import { validateGuardianEmail } from '../utils/form-validation';
 import { composeNewsletterSubject } from '../utils/newsletter-subject';
 import type { NewsletterFormValues } from '../utils/notification-forms';
@@ -98,7 +99,7 @@ const makePayload = ({
 			},
 		},
 	},
-	sender: 'notifications-tooling-spa/v1',
+	sender: senderId,
 });
 
 export const TestEmailForm = () => {
