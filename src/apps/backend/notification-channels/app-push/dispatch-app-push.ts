@@ -75,7 +75,10 @@ export const groupAppPushTopicsByType = (
 	return [...pushesByKey.values()];
 };
 
-export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
+export const resolveAppPushDispatch = (
+	request: NotificationSendRequest,
+	createdByEmail: string,
+) => {
 	const plan = request.channels[NotificationChannel.AppPushNotification];
 	if (!plan) {
 		return;
@@ -90,6 +93,7 @@ export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 	return {
 		item,
 		sender: request.sender,
+		createdByEmail,
 		pushes: groupAppPushTopicsByType(plan.audience.items),
 	};
 };
@@ -105,7 +109,7 @@ export type ResolvedAppPushDispatch = NonNullable<
  * differ only in how they resolve the content, sender and pushes.
  */
 export const sendResolvedAppPushes = async (
-	{ item, sender, pushes }: ResolvedAppPushDispatch,
+	{ item, sender, createdByEmail, pushes }: ResolvedAppPushDispatch,
 	dependencies: DispatchNotificationDependencies,
 ): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
 	const [endpoint, apiKey] = await Promise.all([
@@ -134,7 +138,9 @@ export const sendResolvedAppPushes = async (
 				apiKey: environment.MOBILE_N10N_API_KEY,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 				id,
-				sender,
+				// Ophan attributes on this single string, so carry both the
+				// originating system and the author it lost otherwise.
+				sender: `${sender} <${createdByEmail}>`,
 				title: push.titleOverride ?? item.title,
 				body: item.body,
 				link: item.link,

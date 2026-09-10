@@ -27,6 +27,7 @@ export type DispatchOutcomes = {
 export const dispatchNotification = async (
 	request: NotificationSendRequest,
 	notificationId: string,
+	createdByEmail: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
 ): Promise<DispatchOutcomes> => {
 	if (request.options.dryRun) {
@@ -38,7 +39,7 @@ export const dispatchNotification = async (
 	}
 
 	const newsletterDispatch = resolveNewsletterDispatch(request);
-	const appPushDispatch = resolveAppPushDispatch(request);
+	const appPushDispatch = resolveAppPushDispatch(request, createdByEmail);
 
 	// Both channels are attempted in full (each isolates its own targets via
 	// allSettled); outcomes are returned for future persistence. Nothing is

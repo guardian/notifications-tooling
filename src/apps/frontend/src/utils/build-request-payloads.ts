@@ -7,6 +7,9 @@ import type {
 	NewsletterFormValues,
 } from './notification-forms';
 
+/** Identifier for the originating system, shared across every channel. */
+export const senderId = 'dispatch-app';
+
 type BuildRequestArgs<Values> = {
 	values: Values;
 	content: ResolvedArticle;
@@ -58,7 +61,7 @@ export const buildNewsletterRequest = ({
 				},
 			},
 		},
-		sender: 'editorial-newsletters',
+		sender: senderId,
 		options: {
 			dryRun: false,
 			scheduledFor: null,
@@ -121,7 +124,7 @@ export const buildAppAlertRequest = ({
 				compose: { use: 'lead-story' },
 			},
 		},
-		sender: 'notifications-tooling-spa/v1',
+		sender: senderId,
 		options: {
 			dryRun: false,
 			scheduledFor: null,

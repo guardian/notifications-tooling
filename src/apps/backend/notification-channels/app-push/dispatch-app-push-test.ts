@@ -21,6 +21,7 @@ import {
 export const dispatchAppPushTest = async (
 	request: NotificationTestSendRequest,
 	_testId: string,
+	createdByEmail: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
 ): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
 	const plan = request.channels[NotificationChannel.AppPushNotification];
@@ -38,6 +39,7 @@ export const dispatchAppPushTest = async (
 		{
 			item,
 			sender: request.sender,
+			createdByEmail,
 			pushes: groupAppPushTopicsByType(plan.audience.items),
 		},
 		dependencies,

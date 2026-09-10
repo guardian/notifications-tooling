@@ -6,6 +6,7 @@ import { dispatchNotification } from '../dispatch-notification';
 import {
 	anyString,
 	baseRequest,
+	createdByEmail,
 	createDependencies,
 	notificationId,
 	pushItem,
@@ -35,6 +36,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
@@ -43,7 +45,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
 			id: anyString,
-			sender: baseRequest.sender,
+			sender: `${baseRequest.sender} <${createdByEmail}>`,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
@@ -101,7 +103,12 @@ describe('dispatchNotification (app-push channel)', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -137,6 +144,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -170,6 +178,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
@@ -251,7 +260,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		};
 
 		const { outcomes, error } = await dispatchAppPush(
-			resolveAppPushDispatch(request),
+			resolveAppPushDispatch(request, createdByEmail),
 			notificationId,
 			dependencies,
 		);
@@ -312,7 +321,12 @@ describe('dispatchNotification (app-push channel)', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
 				id: anyString,
@@ -343,13 +357,18 @@ describe('dispatchNotification (app-push channel)', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(sendAppNotification).toHaveBeenCalledWith({
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
 			id: anyString,
-			sender: baseRequest.sender,
+			sender: `${baseRequest.sender} <${createdByEmail}>`,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
@@ -378,7 +397,12 @@ describe('dispatchNotification (app-push channel)', () => {
 
 		let dispatchError: unknown;
 		try {
-			await dispatchNotification(request, notificationId, dependencies);
+			await dispatchNotification(
+				request,
+				notificationId,
+				createdByEmail,
+				dependencies,
+			);
 		} catch (error) {
 			dispatchError = error;
 		}
@@ -413,6 +437,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -492,6 +517,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 

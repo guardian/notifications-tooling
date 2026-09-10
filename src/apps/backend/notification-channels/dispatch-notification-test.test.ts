@@ -5,6 +5,7 @@ import type { NotificationTestSendRequest } from '../routers/notifications/schem
 import { dispatchNotificationTest } from './dispatch-notification-test';
 import {
 	anyString,
+	createdByEmail,
 	createDependencies,
 	newsletterItem,
 	pushItem,
@@ -36,6 +37,7 @@ describe('dispatchNotificationTest', () => {
 		const outcomes = await dispatchNotificationTest(
 			request,
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -92,6 +94,7 @@ describe('dispatchNotificationTest', () => {
 		const outcomes = await dispatchNotificationTest(
 			request,
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -129,6 +132,7 @@ describe('dispatchNotificationTest', () => {
 		const outcomes = await dispatchNotificationTest(
 			request,
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -167,6 +171,7 @@ describe('dispatchNotificationTest', () => {
 		const { error } = await dispatchNotificationTest(
 			request,
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
