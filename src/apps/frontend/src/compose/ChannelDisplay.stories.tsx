@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 import { ChannelDisplay } from './ChannelDisplay';
 
 const meta = {
-	title: 'Stand Frontend/Compose/ChannelDisplay',
+	title: 'Dispatch/Compose/ChannelDisplay',
 	component: ChannelDisplay,
 	parameters: {
 		docs: {

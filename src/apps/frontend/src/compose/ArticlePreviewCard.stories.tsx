@@ -8,7 +8,7 @@ import {
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 
 const meta = {
-	title: 'Stand Frontend/Compose/ArticlePreviewCard',
+	title: 'Dispatch/Compose/ArticlePreviewCard',
 	component: ArticlePreviewCard,
 	parameters: {
 		docs: {

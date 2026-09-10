@@ -44,7 +44,7 @@ const paginatedNotifications: HistoryNotification[] = Array.from(
 );
 
 const meta = {
-	title: 'Stand Frontend/History/HistoryView',
+	title: 'Dispatch/History/HistoryView',
 	component: HistoryView,
 	parameters: {
 		layout: 'fullscreen',

@@ -6,7 +6,7 @@ import {
 } from './NotificationTextInput';
 
 const meta = {
-	title: 'Stand Frontend/Compose/NotificationTextInput',
+	title: 'Dispatch/Compose/NotificationTextInput',
 	component: NotificationTextInput,
 	args: {
 		name: 'subject',

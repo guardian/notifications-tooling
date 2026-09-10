@@ -3,7 +3,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { RefreshButton } from './RefreshButton';
 
 const meta = {
-	title: 'Stand Frontend/UI/RefreshButton',
+	title: 'Dispatch/UI/RefreshButton',
 	component: RefreshButton,
 	args: {
 		onRefresh: fn(),

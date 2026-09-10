@@ -21,7 +21,7 @@ type StoryArgs = {
 };
 
 const meta = {
-	title: 'Stand Frontend/Send/SendNotificationModal',
+	title: 'Dispatch/Send/SendNotificationModal',
 	component: SendNotificationModal,
 	parameters: {
 		layout: 'fullscreen',

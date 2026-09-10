@@ -128,7 +128,7 @@ const ProviderHarness = () => {
 };
 
 const meta = {
-	title: 'Stand Frontend/Compose/NotificationFormProvider',
+	title: 'Dispatch/Compose/NotificationFormProvider',
 	component: ProviderHarness,
 	parameters: {
 		msw: {

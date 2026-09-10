@@ -4,7 +4,7 @@ import { articleFixture } from '../testing/capi-fixtures';
 import { AndroidAlertPreview } from './AndroidAlertPreview';
 
 const meta = {
-	title: 'Stand Frontend/Preview/AndroidAlertPreview',
+	title: 'Dispatch/Preview/AndroidAlertPreview',
 	component: AndroidAlertPreview,
 	parameters: {
 		layout: 'centered',

@@ -16,7 +16,7 @@ const topicTypes: AppAlertTopicOption[] = [
 ];
 
 const meta = {
-	title: 'Stand Frontend/Segment/Editions',
+	title: 'Dispatch/Segment/Editions',
 	component: Editions,
 	args: {
 		topicTypes,
