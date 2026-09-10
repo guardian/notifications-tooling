@@ -1,4 +1,4 @@
-import { semanticColors } from '@guardian/stand';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Dialog, Modal } from '@guardian/stand/Modal';
@@ -80,19 +80,35 @@ const deriveDispatchFailureMessage = (
 						? `The ${upstreamService} failed for some destinations.`
 						: `The ${upstreamService} failed. No ${channelDescription} was sent.`}
 			</Typography>
-			{successfulTargets.length > 0 && (
-				<Typography element="p">
-					Sent to: {successfulTargets.join(', ')}
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'column',
+					gap: semanticSpacing.stackXxs,
+					marginTop: semanticSpacing.stackSm,
+				}}
+			>
+				{successfulTargets.length > 0 && (
+					<Typography
+						element="p"
+						theme={{ color: semanticColors.text.success }}
+					>
+						Sent to: {successfulTargets.join(', ')}
+					</Typography>
+				)}
+				{failedTargets.length > 0 && (
+					<Typography element="p" theme={{ color: semanticColors.text.error }}>
+						Not sent to: {failedTargets.join(', ')}
+					</Typography>
+				)}
+				<Typography
+					element="p"
+					variant="bodySm"
+					css={{ marginTop: semanticSpacing.stackSm }}
+				>
+					Reference: {notification.id}
 				</Typography>
-			)}
-			{failedTargets.length > 0 && (
-				<Typography element="p" variant="bodyBoldSm">
-					Not sent to: {failedTargets.join(', ')}
-				</Typography>
-			)}
-			<Typography element="p" variant="bodySm">
-				Reference: {notification.id}
-			</Typography>
+			</div>
 		</>
 	);
 };
@@ -203,7 +219,11 @@ const getFailure = (
 			<>
 				{deriveUserFacingMessage(sendFailure, channelDescription)}
 				{requestId && (
-					<Typography element="p" variant="bodySm">
+					<Typography
+						element="p"
+						variant="bodySm"
+						css={{ marginTop: semanticSpacing.stackSm }}
+					>
 						Reference: {requestId}
 					</Typography>
 				)}
