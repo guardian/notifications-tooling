@@ -4,11 +4,31 @@ import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
+import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { dispatchLandingTheme } from '../themes';
 import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
+import { ClickableTile } from './ClickableTile';
 import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
+
+const dispatchClickableTiles = [
+	{
+		title: 'Create a newsletter email',
+		icon: 'mail',
+		href: notificationRoutes.email.create,
+	},
+	{
+		title: 'Create an app alert',
+		icon: 'notifications',
+		href: notificationRoutes.push.create,
+	},
+	{
+		title: 'History',
+		icon: 'history',
+		href: '/history',
+	},
+] as const;
 
 export const DispatchLandingTab = () => {
 	const [searchParams] = useSearchParams();
@@ -38,6 +58,27 @@ export const DispatchLandingTab = () => {
 				<Typography variant="titleXl" element={'h1'}>
 					Welcome to Dispatch
 				</Typography>
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'row',
+						gap: '12px',
+						width: '100%',
+						maxWidth: '983px',
+						marginTop: '16px',
+						marginBottom: '16px',
+						paddingTop: '12px',
+					}}
+				>
+					{dispatchClickableTiles.map((tile) => (
+						<ClickableTile
+							key={tile.title}
+							title={tile.title}
+							icon={tile.icon}
+							href={tile.href}
+						/>
+					))}
+				</div>
 				<div css={dispatchLandingTheme.dispatchTableSection}>
 					<DispatchLandingHistoryView
 						notifications={notifications}
