@@ -42,7 +42,7 @@ const DispatchReportStory = ({
 	);
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/DispatchReport',
+	title: 'Stand Frontend/Send/DispatchReport',
 	component: DispatchReportStory,
 	parameters: {
 		docs: {

@@ -47,7 +47,7 @@ const ControlledCreateNewsletterForm = ({
 };
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/CreateNewsletterForm',
+	title: 'Stand Frontend/Compose/CreateNewsletterForm',
 	component: CreateNewsletterForm,
 	parameters: {
 		layout: 'fullscreen',

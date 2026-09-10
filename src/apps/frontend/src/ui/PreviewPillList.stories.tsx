@@ -10,7 +10,7 @@ const options = [
 ];
 
 const meta = {
-	title: 'Stand Frontend/PreviewPillList',
+	title: 'Stand Frontend/UI/PreviewPillList',
 	component: PreviewPillList,
 	args: {
 		title: 'Editions',

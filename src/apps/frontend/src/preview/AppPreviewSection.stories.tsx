@@ -17,7 +17,7 @@ type StoryArgs = ComponentProps<typeof AppPreviewSection> & {
 };
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/AppPreviewSection',
+	title: 'Stand Frontend/Preview/AppPreviewSection',
 	component: AppPreviewSection,
 	render: ({ notificationState, includeThumbnail, ...args }) =>
 		WithNotificationContext(

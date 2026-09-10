@@ -19,7 +19,7 @@ type StoryArgs = {
 type Story = StoryObj<StoryArgs>;
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/CreateAppAlertForm',
+	title: 'Stand Frontend/Compose/CreateAppAlertForm',
 	component: CreateAppAlertForm,
 	parameters: {
 		layout: 'fullscreen',

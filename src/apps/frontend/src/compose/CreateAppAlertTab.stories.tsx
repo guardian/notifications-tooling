@@ -18,7 +18,7 @@ type StoryArgs = {
 };
 
 const meta = {
-	title: 'Stand Frontend/CreateAppAlertTab',
+	title: 'Stand Frontend/Compose/CreateAppAlertTab',
 	component: CreateAppAlertTab,
 	args: {
 		notificationState: defaultAppAlertState,

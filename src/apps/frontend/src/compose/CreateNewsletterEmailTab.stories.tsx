@@ -14,7 +14,7 @@ type StoryArgs = {
 };
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/CreateNewsletterEmailTab',
+	title: 'Stand Frontend/Compose/CreateNewsletterEmailTab',
 	component: CreateNewsletterEmailTab,
 	args: {
 		notificationState: defaultState,

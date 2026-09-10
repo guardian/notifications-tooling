@@ -4,7 +4,7 @@ import { articleFixture } from '../testing/capi-fixtures';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 
 const meta = {
-	title: 'Stand Frontend/IPhoneAlertPreview',
+	title: 'Stand Frontend/Preview/IPhoneAlertPreview',
 	component: IPhoneAlertPreview,
 	parameters: {
 		layout: 'centered',

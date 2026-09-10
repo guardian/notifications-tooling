@@ -7,7 +7,7 @@ import { mockAppConfig } from '../testing/app-config';
 import { MainLayout } from './MainLayout';
 
 const meta = {
-	title: 'Stand Frontend/MainLayout',
+	title: 'Stand Frontend/Layout/MainLayout',
 	component: MainLayout,
 	parameters: {
 		layout: 'fullscreen',

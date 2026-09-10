@@ -20,7 +20,7 @@ type StoryArgs = {
 type Story = StoryObj<StoryArgs>;
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/TestEmailForm',
+	title: 'Stand Frontend/Send/TestEmailForm',
 	component: TestEmailForm,
 	args: {
 		notificationState: populatedEmailState,

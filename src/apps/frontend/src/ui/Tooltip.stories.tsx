@@ -4,7 +4,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Tooltip } from './Tooltip';
 
 const meta = {
-	title: 'Stand Frontend/Tooltip',
+	title: 'Stand Frontend/UI/Tooltip',
 	component: Tooltip,
 	args: {
 		label: 'More information',

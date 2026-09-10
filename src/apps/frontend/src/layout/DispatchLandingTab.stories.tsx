@@ -126,7 +126,7 @@ const sinceAwareHistoryHandler = http.get(
 );
 
 const meta = {
-	title: 'Stand Frontend/DispatchLandingTab',
+	title: 'Stand Frontend/Layout/DispatchLandingTab',
 	component: DispatchLandingTab,
 	parameters: {
 		layout: 'fullscreen',

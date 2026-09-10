@@ -4,7 +4,7 @@ import { DeliveryAndTimingSelector } from './DeliveryAndTimingSelector';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
 const meta = {
-	title: 'Stand Frontend/DeliveryAndTimingSelector',
+	title: 'Stand Frontend/Send/DeliveryAndTimingSelector',
 	component: DeliveryAndTimingSelector,
 	parameters: {
 		docs: {
