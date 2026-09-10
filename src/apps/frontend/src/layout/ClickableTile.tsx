@@ -1,27 +1,39 @@
 import { css } from '@emotion/react';
-import { semanticSpacing } from '@guardian/stand';
+import {
+	semanticColors,
+	semanticRadius,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
+import { from } from '@guardian/stand/utils';
 import type { ComponentProps } from 'react';
+import { phoneIphoneIcon } from '../ui/FlagIcons';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 
 interface ClickableTileProps {
 	title: string;
-	icon: IconSymbol;
+	icon: string;
 	href: string;
 }
 
 const tileStyles = {
 	tileButtonStyle: css({
-		width: '300px',
+		width: '100%',
 		height: '74px',
 		display: 'flex',
 		flexDirection: 'column',
 		gap: '8px',
 		justifyContent: 'space-between',
 		alignItems: 'stretch',
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		borderRadius: semanticRadius.cornerSm,
+		[from.md]: {
+			width: '300px',
+		},
 	}),
 	topRow: css({
 		display: 'flex',
@@ -48,7 +60,18 @@ export const ClickableTile = ({ title, icon, href }: ClickableTileProps) => {
 				href={href}
 			>
 				<div css={tileStyles.topRow}>
-					<Icon symbol={icon} size="sm" cssOverrides={css({ width: '20px' })} />
+					{icon !== 'appAlert' && (
+						<Icon
+							symbol={icon as IconSymbol}
+							size="sm"
+							cssOverrides={css({ width: '20px' })}
+						/>
+					)}
+					{icon === 'appAlert' && (
+						<Icon size="sm" cssOverrides={css({ width: '20px' })}>
+							{phoneIphoneIcon}
+						</Icon>
+					)}
 					<Typography variant="headingMd">{title}</Typography>
 				</div>
 
