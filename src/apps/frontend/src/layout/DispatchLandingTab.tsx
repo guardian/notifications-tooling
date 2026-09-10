@@ -19,6 +19,7 @@ export const DispatchLandingTab = () => {
 	const historyQuery = {
 		...parsedHistoryQuery,
 		since: last24HoursSince,
+		cacheScope: 'last-24-hours',
 	};
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();

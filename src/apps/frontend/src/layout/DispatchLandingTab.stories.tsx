@@ -166,6 +166,21 @@ export const Default: Story = {
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
 		});
+		const activitySummary = canvas.getByRole('group', {
+			name: 'Activity summary',
+		});
+		await expect(
+			within(activitySummary).getByText('Newsletter email'),
+		).toBeInTheDocument();
+		await expect(
+			within(activitySummary).getByText('App alert'),
+		).toBeInTheDocument();
+		await expect(
+			within(activitySummary).getByText('Last updated:'),
+		).toBeInTheDocument();
+		await expect(within(activitySummary).getByRole('button')).toBe(
+			refreshButton,
+		);
 		await expect(
 			refreshButton.compareDocumentPosition(
 				canvas.getByRole('grid', { name: 'Sent alerts' }),

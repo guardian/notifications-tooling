@@ -7,7 +7,7 @@ interface LastUpdatedProps {
 }
 
 export const LastUpdated = ({ updatedAt }: LastUpdatedProps) => {
-	const relativeTime = useRelativeTime(updatedAt, 'long');
+	const relativeTime = useRelativeTime(updatedAt, 'long-minutes');
 
 	if (!relativeTime) {
 		return null;

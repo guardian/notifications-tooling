@@ -51,23 +51,15 @@ export const DispatchLandingHistoryView = ({
 
 	return (
 		<>
-			<div
-				css={{
-					display: 'flex',
-					flexDirection: 'column',
-					gap: '10px',
-					marginBottom: '16px',
-				}}
-			>
+			<div css={dispatchLandingTheme.activityHeading}>
 				<Typography variant="headingXl">Last 24-hour activity</Typography>
-				<div
-					css={{
-						display: 'flex',
-						flexDirection: 'row',
-						height: '32px',
-						gap: '8px',
-					}}
-				>
+			</div>
+			<div
+				role="group"
+				aria-label="Activity summary"
+				css={dispatchLandingTheme.activityControls}
+			>
+				<div css={dispatchLandingTheme.activityCounters}>
 					{selectedPills.map((pill) => (
 						<div key={pill.label} css={activePillTheme.isConfirmationStyle}>
 							{pill.icon === 'mail' ? (
@@ -84,9 +76,7 @@ export const DispatchLandingHistoryView = ({
 						</div>
 					))}
 				</div>
-			</div>
-			{!isLoading && !error && (
-				<div css={dispatchLandingTheme.activityControls}>
+				{!isLoading && !error && (
 					<div css={historyViewStyles.refreshControls}>
 						{lastUpdatedAt && <LastUpdated updatedAt={lastUpdatedAt} />}
 						<RefreshButton
@@ -94,8 +84,8 @@ export const DispatchLandingHistoryView = ({
 							isRefreshing={isRefreshing}
 						/>
 					</div>
-				</div>
-			)}
+				)}
+			</div>
 			{isLoading && (
 				<Typography variant="bodyMd">Loading 24 hour history...</Typography>
 			)}

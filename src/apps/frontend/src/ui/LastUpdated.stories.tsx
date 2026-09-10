@@ -24,3 +24,16 @@ export const Default: Story = {
 		await expect(time).toHaveAttribute('title');
 	},
 };
+
+export const JustNow: Story = {
+	args: {
+		updatedAt: new Date(Date.now() - 30_000).toISOString(),
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			within(canvas.getByText('Last updated:')).getByRole('time'),
+		).toHaveTextContent('just now');
+	},
+};

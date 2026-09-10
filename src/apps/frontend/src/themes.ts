@@ -377,10 +377,21 @@ export const dispatchLandingTheme = {
 		paddingTop: '12px',
 		gap: semanticSpacing.stackMd,
 	}),
+	activityHeading: css({
+		marginBottom: semanticSpacing.stackSm,
+	}),
 	activityControls: css({
 		display: 'flex',
-		justifyContent: 'flex-end',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: semanticSpacing.stackSm,
 		marginBottom: semanticSpacing.stackMd,
+	}),
+	activityCounters: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
 	}),
 };
 
