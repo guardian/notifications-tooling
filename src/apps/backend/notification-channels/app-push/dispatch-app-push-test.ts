@@ -38,7 +38,6 @@ export const dispatchAppPushTest = async (
 	return sendResolvedAppPushes(
 		{
 			item,
-			sender: request.sender,
 			createdByEmail,
 			pushes: groupAppPushTopicsByType(plan.audience.items),
 		},
