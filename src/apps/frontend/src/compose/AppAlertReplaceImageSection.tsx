@@ -14,6 +14,36 @@ interface AppAlertReplaceImageSectionProps {
 	errorMessage?: string;
 }
 
+const checkImageUrlExists = async (
+	imageUrl: string,
+): Promise<{ exists: boolean; error?: string }> => {
+	if (!imageUrl.trim()) {
+		return { exists: false, error: 'Image URL is empty' };
+	}
+
+	try {
+		const response = await fetch(imageUrl, {
+			method: 'HEAD',
+		});
+
+		if (!response.ok) {
+			const statusSummary = response.statusText
+				? `HTTP ${response.status} ${response.statusText}`
+				: `HTTP ${response.status}`;
+			return {
+				exists: false,
+				error: `Image URL returned ${statusSummary}`,
+			};
+		}
+
+		return { exists: true };
+	} catch (err) {
+		const errorMessage =
+			err instanceof Error ? err.message : 'Network error or CORS issue';
+		return { exists: false, error: `Unable to verify image: ${errorMessage}` };
+	}
+};
+
 export const AppAlertReplaceImageSection = ({
 	replacementImageUrl,
 	onReplacementImageUrlChange,
@@ -21,9 +51,57 @@ export const AppAlertReplaceImageSection = ({
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
 	const [imageUpdated, setImageUpdated] = useState(false);
+	const [isCheckingImage, setIsCheckingImage] = useState(false);
+	const [imageCheckError, setImageCheckError] = useState<{
+		url: string;
+		message: string;
+	} | null>(null);
+
 	const trimmedReplacementImageUrl = replacementImageUrl.trim();
 	const validationError = validateGuardianImageUrl(trimmedReplacementImageUrl);
-	const displayedErrorMessage = validationError ?? errorMessage;
+	const imageCheckErrorForCurrentUrl =
+		imageCheckError?.url === trimmedReplacementImageUrl
+			? imageCheckError.message
+			: null;
+	const displayedErrorMessage =
+		validationError ?? imageCheckErrorForCurrentUrl ?? errorMessage;
+
+	const handleUpdateClick = async () => {
+		if (validationError) {
+			setImageUpdated(false);
+			return;
+		}
+
+		// If empty URL, fall back to original image
+		if (!trimmedReplacementImageUrl) {
+			onReplacementImageUrlChange('');
+			setImageCheckError(null);
+			onUpdate('');
+			setImageUpdated(true);
+			return;
+		}
+
+		// Clear previous error and check image
+		setImageCheckError(null);
+		setIsCheckingImage(true);
+
+		const result = await checkImageUrlExists(trimmedReplacementImageUrl);
+		setIsCheckingImage(false);
+
+		if (result.error) {
+			// Image fetch failed; keep existing thumbnail unchanged
+			setImageCheckError({
+				url: trimmedReplacementImageUrl,
+				message: result.error,
+			});
+			setImageUpdated(false);
+			return;
+		}
+
+		// Image is valid, proceed with update
+		onUpdate(trimmedReplacementImageUrl);
+		setImageUpdated(true);
+	};
 
 	return (
 		<>
@@ -60,16 +138,10 @@ export const AppAlertReplaceImageSection = ({
 					icon="refresh"
 					size="md"
 					variant="secondary"
-					onClick={() => {
-						if (validationError) {
-							setImageUpdated(false);
-							return;
-						}
-						onUpdate(trimmedReplacementImageUrl);
-						setImageUpdated(true);
-					}}
+					isDisabled={!!validationError || isCheckingImage}
+					onClick={() => void handleUpdateClick()}
 				>
-					Update
+					{isCheckingImage ? 'Checking...' : 'Update'}
 				</Button>
 			</div>
 

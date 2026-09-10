@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completePushParams,
@@ -108,89 +108,172 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		formValues: completePushParams,
 	},
 	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
-		const replacementThumbnailUrl =
-			'https://media.guim.co.uk/replacement-thumbnail.jpg';
-		const thumbnailToggle = canvas.getByRole('button', {
-			name: 'Show article thumbnail image',
-		});
-		const articleThumbnail = canvas.getByAltText(
-			'Thumbnail for A rhyme to recall rising temperatures',
-		);
-		const iPhoneThumbnail = canvas.getByAltText('Article thumbnail');
-		const androidThumbnail = canvas.getByAltText('Android article thumbnail');
+		const fetchSpy = globalThis.fetch;
+		globalThis.fetch = (async (input, init) => {
+			const url = input instanceof Request ? input.url : String(input);
+			if (
+				init?.method === 'HEAD' &&
+				url.includes('replacement-thumbnail.jpg')
+			) {
+				return new Response(null, { status: 200, statusText: 'OK' });
+			}
+			return fetchSpy(input, init);
+		}) as typeof fetch;
 
-		await userEvent.click(
-			canvas.getByRole('button', {
-				name: 'Replace image',
-			}),
-		);
-		const replacementInput = canvas.getByRole('textbox', {
-			name: 'replacement image URL',
-		});
-		const updateButton = canvas.getByRole('button', { name: 'Update' });
-
-		await userEvent.type(replacementInput, replacementThumbnailUrl);
-		await userEvent.click(updateButton);
-
-		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
-		for (const thumbnail of [iPhoneThumbnail, androidThumbnail]) {
-			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
-		}
-
-		await userEvent.click(thumbnailToggle);
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
-		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
-		await expect(
-			canvas.queryByAltText('Article thumbnail'),
-		).not.toBeInTheDocument();
-		await expect(
-			canvas.queryByAltText('Android article thumbnail'),
-		).not.toBeInTheDocument();
-		await userEvent.click(thumbnailToggle);
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
-		await expect(
-			canvas.getByRole('button', { name: 'Replace image' }),
-		).toHaveAttribute('aria-expanded', 'true');
-
-		const restoredIPhoneThumbnail = canvas.getByAltText('Article thumbnail');
-		const restoredAndroidThumbnail = canvas.getByAltText(
-			'Android article thumbnail',
-		);
-		for (const thumbnail of [
-			restoredIPhoneThumbnail,
-			restoredAndroidThumbnail,
-		]) {
-			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
-		}
-
-		const retainedReplacementInput = canvas.getByRole('textbox', {
-			name: 'replacement image URL',
-		});
-		await expect(retainedReplacementInput).toHaveValue(replacementThumbnailUrl);
-
-		await userEvent.clear(retainedReplacementInput);
-		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
-
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
-		for (const thumbnail of [
-			canvas.getByAltText(
+		try {
+			const canvas = within(canvasElement);
+			const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
+			const replacementThumbnailUrl =
+				'https://media.guim.co.uk/replacement-thumbnail.jpg';
+			const thumbnailToggle = canvas.getByRole('button', {
+				name: 'Show article thumbnail image',
+			});
+			const articleThumbnail = canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
-			),
-			canvas.getByAltText('Article thumbnail'),
-			canvas.getByAltText('Android article thumbnail'),
-		]) {
-			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
-		}
+			);
+			const iPhoneThumbnail = canvas.getByAltText('Article thumbnail');
+			const androidThumbnail = canvas.getByAltText('Android article thumbnail');
 
-		await userEvent.click(thumbnailToggle);
-		await userEvent.click(thumbnailToggle);
-		await expect(
-			canvas.getByRole('button', { name: 'Replace image' }),
-		).toHaveAttribute('aria-expanded', 'false');
-		await expect(
-			canvas.queryByRole('textbox', { name: 'replacement image URL' }),
-		).not.toBeInTheDocument();
+			await userEvent.click(
+				canvas.getByRole('button', {
+					name: 'Replace image',
+				}),
+			);
+			const replacementInput = canvas.getByRole('textbox', {
+				name: 'replacement image URL',
+			});
+			const updateButton = canvas.getByRole('button', { name: 'Update' });
+
+			await userEvent.type(replacementInput, replacementThumbnailUrl);
+			await userEvent.click(updateButton);
+
+			await waitFor(async () => {
+				const updateButton = canvas.getByRole('button', { name: 'Update' });
+				await expect(updateButton).toHaveTextContent('Update');
+			});
+
+			await expect(articleThumbnail).toHaveAttribute(
+				'src',
+				originalThumbnailUrl,
+			);
+			for (const thumbnail of [iPhoneThumbnail, androidThumbnail]) {
+				await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+			}
+
+			await userEvent.click(thumbnailToggle);
+			await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+			await expect(articleThumbnail).toHaveAttribute(
+				'src',
+				originalThumbnailUrl,
+			);
+			await expect(
+				canvas.queryByAltText('Article thumbnail'),
+			).not.toBeInTheDocument();
+			await expect(
+				canvas.queryByAltText('Android article thumbnail'),
+			).not.toBeInTheDocument();
+			await userEvent.click(thumbnailToggle);
+			await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+			await expect(
+				canvas.getByRole('button', { name: 'Replace image' }),
+			).toHaveAttribute('aria-expanded', 'true');
+
+			const restoredIPhoneThumbnail = canvas.getByAltText('Article thumbnail');
+			const restoredAndroidThumbnail = canvas.getByAltText(
+				'Android article thumbnail',
+			);
+			for (const thumbnail of [
+				restoredIPhoneThumbnail,
+				restoredAndroidThumbnail,
+			]) {
+				await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+			}
+
+			const retainedReplacementInput = canvas.getByRole('textbox', {
+				name: 'replacement image URL',
+			});
+			await expect(retainedReplacementInput).toHaveValue(
+				replacementThumbnailUrl,
+			);
+
+			await userEvent.clear(retainedReplacementInput);
+			await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+			await waitFor(async () => {
+				const updateButton = canvas.getByRole('button', { name: 'Update' });
+				await expect(updateButton).toHaveTextContent('Update');
+			});
+
+			await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+			for (const thumbnail of [
+				canvas.getByAltText(
+					'Thumbnail for A rhyme to recall rising temperatures',
+				),
+				canvas.getByAltText('Article thumbnail'),
+				canvas.getByAltText('Android article thumbnail'),
+			]) {
+				await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
+			}
+
+			await userEvent.click(thumbnailToggle);
+			await userEvent.click(thumbnailToggle);
+			await expect(
+				canvas.getByRole('button', { name: 'Replace image' }),
+			).toHaveAttribute('aria-expanded', 'false');
+			await expect(
+				canvas.queryByRole('textbox', { name: 'replacement image URL' }),
+			).not.toBeInTheDocument();
+		} finally {
+			globalThis.fetch = fetchSpy;
+		}
+	},
+};
+
+export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
+	args: {
+		notificationState: populatedPushState,
+		formValues: completePushParams,
+	},
+	play: async ({ canvasElement }) => {
+		const fetchSpy = globalThis.fetch;
+		globalThis.fetch = (async (input, init) => {
+			const url = input instanceof Request ? input.url : String(input);
+			if (init?.method === 'HEAD' && url.includes('broken-thumbnail.jpg')) {
+				return new Response(null, { status: 403, statusText: 'Forbidden' });
+			}
+			return fetchSpy(input, init);
+		}) as typeof fetch;
+
+		try {
+			const canvas = within(canvasElement);
+			const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
+			const brokenReplacementThumbnailUrl =
+				'https://media.guim.co.uk/broken-thumbnail.jpg';
+
+			await userEvent.click(
+				canvas.getByRole('button', {
+					name: 'Replace image',
+				}),
+			);
+			const replacementInput = canvas.getByRole('textbox', {
+				name: 'replacement image URL',
+			});
+			await userEvent.type(replacementInput, brokenReplacementThumbnailUrl);
+			await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+			await waitFor(async () => {
+				await expect(
+					canvas.getByText('Image URL returned HTTP 403 Forbidden'),
+				).toBeInTheDocument();
+			});
+
+			for (const thumbnail of [
+				canvas.getByAltText('Article thumbnail'),
+				canvas.getByAltText('Android article thumbnail'),
+			]) {
+				await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
+			}
+		} finally {
+			globalThis.fetch = fetchSpy;
+		}
 	},
 };
