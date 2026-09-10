@@ -377,6 +377,22 @@ export const dispatchLandingTheme = {
 		paddingTop: '12px',
 		gap: semanticSpacing.stackMd,
 	}),
+	activityHeading: css({
+		marginBottom: semanticSpacing.stackSm,
+	}),
+	activityControls: css({
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: semanticSpacing.stackSm,
+		marginBottom: semanticSpacing.stackMd,
+	}),
+	activityCounters: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+	}),
 };
 
 export const historyViewStyles = {
@@ -394,6 +410,22 @@ export const historyViewStyles = {
 			flexDirection: 'row',
 			alignItems: 'center',
 		},
+	}),
+	headerActions: css({
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: semanticSpacing.stackSm,
+		minWidth: 0,
+		[from.md]: {
+			marginLeft: 'auto',
+		},
+	}),
+	refreshControls: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		whiteSpace: 'nowrap',
 	}),
 	titleBlock: css({
 		display: 'flex',
