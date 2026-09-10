@@ -41,6 +41,13 @@ export const DispatchLandingTab = () => {
 					<DispatchLandingHistoryView
 						notifications={notifications}
 						isLoading={notificationHistory.isPending}
+						isRefreshing={notificationHistory.isFetching}
+						lastUpdatedAt={
+							notificationHistory.dataUpdatedAt
+								? new Date(notificationHistory.dataUpdatedAt).toISOString()
+								: undefined
+						}
+						handleRefresh={() => void notificationHistory.refetch()}
 						error={
 							notificationHistory.isError ? (
 								<InlineMessage level="error">

@@ -377,6 +377,11 @@ export const dispatchLandingTheme = {
 		paddingTop: '12px',
 		gap: semanticSpacing.stackMd,
 	}),
+	activityControls: css({
+		display: 'flex',
+		justifyContent: 'flex-end',
+		marginBottom: semanticSpacing.stackMd,
+	}),
 };
 
 export const historyViewStyles = {
