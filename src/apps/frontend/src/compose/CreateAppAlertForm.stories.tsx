@@ -130,14 +130,16 @@ export const MobileNotificationServiceFailure: Story = {
 		const screen = within(canvasElement.ownerDocument.body);
 
 		await expect(
-			await screen.findByText("The app alert wasn't sent"),
+			await screen.findByText('The app alert had delivery issues'),
 		).toBeVisible();
 		await expect(
 			screen.getByText(
-				'The mobile notification service failed. No app alert was sent.',
+				'The mobile notification service reported a failure for all destinations.',
 			),
 		).toBeVisible();
-		await expect(screen.getByText('Not sent to: International')).toBeVisible();
+		await expect(
+			screen.getByText('Delivery not confirmed for: International'),
+		).toBeVisible();
 		await expect(screen.getByText('Reference: push-failed-1234')).toBeVisible();
 		await expect(
 			screen.queryByRole('button', { name: 'Try Again' }),
@@ -185,10 +187,14 @@ export const PartialMobileNotificationServiceFailure: Story = {
 		const screen = within(canvasElement.ownerDocument.body);
 
 		await expect(
-			await screen.findByText('The app alert was only partially sent'),
+			await screen.findByText('The app alert had partial delivery issues'),
 		).toBeVisible();
-		await expect(screen.getByText('Sent to: UK')).toBeVisible();
-		await expect(screen.getByText('Not sent to: US')).toBeVisible();
+		await expect(
+			screen.getByText('Accepted for delivery to: UK'),
+		).toBeVisible();
+		await expect(
+			screen.getByText('Delivery not confirmed for: US'),
+		).toBeVisible();
 		await expect(
 			screen.getByText('Reference: push-partial-1234'),
 		).toBeVisible();

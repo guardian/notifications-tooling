@@ -77,8 +77,8 @@ const deriveDispatchFailureMessage = (
 				{notification.dispatches.length === 0
 					? `We couldn't confirm whether the ${channelDescription} was sent.`
 					: notification.status === 'partially_delivered'
-						? `The ${upstreamService} failed for some destinations.`
-						: `The ${upstreamService} failed. No ${channelDescription} was sent.`}
+						? `The ${upstreamService} reported a failure for some destinations.`
+						: `The ${upstreamService} reported a failure for all destinations.`}
 			</Typography>
 			<div
 				css={{
@@ -93,12 +93,12 @@ const deriveDispatchFailureMessage = (
 						element="p"
 						theme={{ color: semanticColors.text.success }}
 					>
-						Sent to: {successfulTargets.join(', ')}
+						Accepted for delivery to: {successfulTargets.join(', ')}
 					</Typography>
 				)}
 				{failedTargets.length > 0 && (
 					<Typography element="p" theme={{ color: semanticColors.text.error }}>
-						Not sent to: {failedTargets.join(', ')}
+						Delivery not confirmed for: {failedTargets.join(', ')}
 					</Typography>
 				)}
 				<Typography
@@ -134,16 +134,36 @@ const deriveUserFacingMessage = (
 					</Typography>
 				</>
 			);
-		case 'non-2xx-response': // TO DO - parse the details array to return more specific info
+		case 'non-2xx-response':
+			if (apiError.status === 409) {
+				return (
+					<Typography>
+						This send request has already been used. Check notification history
+						to confirm whether it was sent.
+					</Typography>
+				);
+			}
+			if (!checkIfCanRetry(apiError)) {
+				return (
+					<Typography>
+						The request to send the {channelDescription} was rejected.
+					</Typography>
+				);
+			}
+			return (
+				<Typography>
+					We could not confirm whether the {channelDescription} was sent. Try
+					again.
+				</Typography>
+			);
 		case 'fetch-fail':
 		case 'timeout':
 		default:
-			return checkIfCanRetry(apiError) ? (
+			return (
 				<Typography>
-					The {channelDescription} could not be sent at this time. Try again.
+					We could not confirm whether the {channelDescription} was sent. Try
+					again.
 				</Typography>
-			) : (
-				<Typography>The {channelDescription} could not be sent.</Typography>
 			);
 	}
 };
@@ -156,7 +176,11 @@ const deriveErrorTitle = (apiError: ApiError, channelDescription: string) => {
 		case 'schema-parse-fail':
 			return 'Communication Failure';
 		case 'non-2xx-response':
+			return (apiError.status ?? 0) >= 500
+				? `The ${channelDescription} delivery couldn't be confirmed`
+				: `The ${channelDescription} couldn't be sent`;
 		case 'timeout':
+			return `The ${channelDescription} delivery couldn't be confirmed`;
 		case 'unauthenticated':
 		case 'forbidden':
 			return `The ${channelDescription} couldn't be sent`;
@@ -200,8 +224,8 @@ const getFailure = (
 			title: hasNoDispatchOutcomes
 				? 'Something went wrong'
 				: sendFailure.notification.status === 'partially_delivered'
-					? `The ${channelDescription} was only partially sent`
-					: `The ${channelDescription} wasn't sent`,
+					? `The ${channelDescription} had partial delivery issues`
+					: `The ${channelDescription} had delivery issues`,
 			message: deriveDispatchFailureMessage(
 				sendFailure.notification,
 				channel,

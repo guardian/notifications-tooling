@@ -161,14 +161,16 @@ export const NewsletterDeliveryFailure: Story = {
 		const screen = within(canvasElement.ownerDocument.body);
 
 		await expect(
-			await screen.findByText("The newsletter email wasn't sent"),
+			await screen.findByText('The newsletter email had delivery issues'),
 		).toBeVisible();
 		await expect(
 			screen.getByText(
-				'The newsletter delivery service failed. No newsletter email was sent.',
+				'The newsletter delivery service reported a failure for all destinations.',
 			),
 		).toBeVisible();
-		await expect(screen.getByText('Not sent to: United Kingdom')).toBeVisible();
+		await expect(
+			screen.getByText('Delivery not confirmed for: United Kingdom'),
+		).toBeVisible();
 		await expect(
 			screen.getByText('Reference: email-failed-1234'),
 		).toBeVisible();
@@ -189,10 +191,16 @@ export const PartialNewsletterDeliveryFailure: Story = {
 		const screen = within(canvasElement.ownerDocument.body);
 
 		await expect(
-			await screen.findByText('The newsletter email was only partially sent'),
+			await screen.findByText(
+				'The newsletter email had partial delivery issues',
+			),
 		).toBeVisible();
-		await expect(screen.getByText('Sent to: United Kingdom')).toBeVisible();
-		await expect(screen.getByText('Not sent to: United States')).toBeVisible();
+		await expect(
+			screen.getByText('Accepted for delivery to: United Kingdom'),
+		).toBeVisible();
+		await expect(
+			screen.getByText('Delivery not confirmed for: United States'),
+		).toBeVisible();
 		await expect(
 			screen.getByText('Reference: email-partial-1234'),
 		).toBeVisible();
