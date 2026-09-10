@@ -80,9 +80,9 @@ export const AppAlertReplaceImageSection = ({
 		setIsCheckingImage(false);
 
 		if (result.error) {
-			// Image fetch failed, fall back to original
+			// Image fetch failed; keep existing thumbnail unchanged
 			setImageCheckError(result.error);
-			onUpdate('');
+			setImageUpdated(false);
 			return;
 		}
 

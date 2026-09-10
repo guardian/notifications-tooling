@@ -262,7 +262,7 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 			await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
 			await waitFor(async () => {
 				await expect(
-					canvas.getByText('Image URL returned Forbidden'),
+					canvas.getByText('Image URL returned HTTP 403 Forbidden'),
 				).toBeInTheDocument();
 			});
 
