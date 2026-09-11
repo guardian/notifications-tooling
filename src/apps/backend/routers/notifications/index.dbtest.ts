@@ -252,7 +252,7 @@ describe('POST /v1/notifications (real Postgres)', () => {
 		}
 	});
 
-	it('rolls a mix of outcomes up to partially_delivered and stores each dispatch', async () => {
+	it('rolls a mix of outcomes up to failed and stores each dispatch', async () => {
 		const dispatch = mock(() =>
 			Promise.resolve({
 				appPush: [
@@ -306,10 +306,10 @@ describe('POST /v1/notifications (real Postgres)', () => {
 
 			expect(response.status).toBe(502);
 			const body = (await response.json()) as { id: string; status: string };
-			expect(body.status).toBe('partially_delivered');
+			expect(body.status).toBe('failed');
 
 			const stored = await notifications.findByIdWithDispatches(body.id);
-			expect(stored?.status).toBe('partially_delivered');
+			expect(stored?.status).toBe('failed');
 			expect(stored?.dispatches).toHaveLength(2);
 
 			const newsletter = stored?.dispatches.find(
@@ -390,10 +390,10 @@ describe('POST /v1/notifications (real Postgres)', () => {
 
 			expect(response.status).toBe(502);
 			const body = (await response.json()) as { id: string; status: string };
-			expect(body.status).toBe('partially_delivered');
+			expect(body.status).toBe('failed');
 
 			const stored = await notifications.findByIdWithDispatches(body.id);
-			expect(stored?.status).toBe('partially_delivered');
+			expect(stored?.status).toBe('failed');
 			expect(stored?.dispatches).toHaveLength(2);
 
 			const failed = stored?.dispatches.find(

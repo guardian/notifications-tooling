@@ -73,7 +73,7 @@ const statusDisplay: Record<
 > = {
 	accepted: 'Accepted',
 	delivered: 'Sent',
-	partially_delivered: 'Partially sent',
+	partially_delivered: 'Failed',
 	failed: 'Failed',
 };
 

@@ -2,7 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
-import type { NotificationListResponse } from '../schemas';
+import type {
+	NotificationListResponse,
+	NotificationResource,
+} from '../schemas';
 import { articleFixture } from '../testing/capi-fixtures';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
 import { HistoryPage } from './HistoryPage';
@@ -173,6 +176,49 @@ const historyHandler = http.get(
 	},
 );
 
+const partialFailureDetail: NotificationResource = {
+	...historyResponse.notifications[1]!,
+	dispatches: [
+		{
+			id: 'a1495707-6400-4765-b019-c2409233a73c',
+			channel: 'newsletter',
+			requested: { channel: 'newsletter', segment: 'AU' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'campaign-au',
+				emailRenderingId: 'render-au',
+			},
+			status: 'success',
+			providerRef: 'dispatch-au',
+			failureReason: null,
+			providerStatusCode: 201,
+			createdAt: '2026-08-27T08:30:01.000Z',
+			updatedAt: '2026-08-27T08:30:02.000Z',
+		},
+		{
+			id: '17bc36c1-f8cb-47c8-a2f0-d12813b96796',
+			channel: 'newsletter',
+			requested: { channel: 'newsletter', segment: 'US' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'campaign-us',
+				emailRenderingId: 'render-us',
+			},
+			status: 'failure',
+			providerRef: null,
+			failureReason: 'http_error',
+			providerStatusCode: 500,
+			createdAt: '2026-08-27T08:30:01.000Z',
+			updatedAt: '2026-08-27T08:30:03.000Z',
+		},
+	],
+};
+
+const failureDetailHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications/${partialFailureDetail.id}`,
+	() => HttpResponse.json(partialFailureDetail),
+);
+
 const loadingHistoryHandler = http.get(
 	`${getApiBaseUrl()}/v1/notifications`,
 	async () => {
@@ -191,7 +237,9 @@ const meta = {
 	component: HistoryPage,
 	parameters: {
 		layout: 'fullscreen',
-		msw: { handlers: [historyHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [historyHandler, failureDetailHandler, channelAudiencesHandler],
+		},
 	},
 } satisfies Meta<typeof HistoryPage>;
 
@@ -221,19 +269,47 @@ export const Loaded: Story = {
 				name: 'Prime minister announces cabinet reshuffle',
 			}),
 		).toHaveAttribute('href', 'https://www.theguardian.com/politics');
-		await expect(
-			canvas.getByRole('link', {
-				name: 'Extreme weather disrupts travel across Europe',
-			}),
-		).toBeInTheDocument();
+		const failedNotification = canvas.getByRole('button', {
+			name: 'Extreme weather disrupts travel across Europe',
+		});
+		await expect(failedNotification).toBeInTheDocument();
 		await expect(canvas.getAllByText('No image')).toHaveLength(2);
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(2);
-		await expect(canvas.getByText('Partially sent')).toBeInTheDocument();
-		await expect(canvas.getByText('Failed')).toBeInTheDocument();
+		await expect(canvas.getAllByText('Failed')).toHaveLength(2);
 		await expect(canvas.getByText('Accepted')).toBeInTheDocument();
 		await expect(
 			canvas.getAllByRole('img', { name: 'Australia' }),
 		).toHaveLength(2);
+
+		await userEvent.click(failedNotification);
+		const page = within(document.body);
+		const dialog = await page.findByRole('dialog', {
+			name: 'Failure details for Extreme weather disrupts travel across Europe',
+		});
+		await expect(
+			within(dialog).getAllByRole('heading', {
+				name: 'Extreme weather disrupts travel across Europe failed to send',
+			})[0],
+		).toBeVisible();
+		await expect(
+			within(dialog).getByText('Failed channel: Newsletter email'),
+		).toBeVisible();
+		await expect(
+			within(dialog).getByText(
+				'Some recipients received the notification; delivery failed for others.',
+			),
+		).toBeVisible();
+		await expect(
+			within(dialog).getByText('Affected destination: US'),
+		).toBeVisible();
+		await expect(
+			within(dialog).getByText('The delivery service rejected the request.'),
+		).toBeVisible();
+		await expect(
+			within(dialog).getByRole('button', {
+				name: 'Create another newsletter email',
+			}),
+		).toBeVisible();
 	},
 };
 
