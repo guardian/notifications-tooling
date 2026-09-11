@@ -16,9 +16,8 @@ export const CreateNewsletterEmailTab = () => {
 		<NotificationTabLayout
 			channel="email"
 			previewToggle={<EmailPreviewToggle />}
-			renderForm={(activeSectionHref) => (
+			form={
 				<CreateNewsletterForm
-					activeSectionHref={activeSectionHref}
 					showPreview={showPreview}
 					onTogglePreview={(isSelected) => {
 						setValue('showPreview', isSelected, {
@@ -26,7 +25,7 @@ export const CreateNewsletterEmailTab = () => {
 						});
 					}}
 				/>
-			)}
+			}
 			previewSection={<EmailPreviewSection />}
 		/>
 	);
