@@ -171,8 +171,6 @@ describe('unmatched routes over HTTP', () => {
 	});
 
 	it('does not redirect missing web manifests to login', async () => {
-		verifyCookieMock.mockResolvedValueOnce({ success: false });
-
 		const response = await fetch(`${server.baseUrl}/site-stale.webmanifest`, {
 			redirect: 'manual',
 		});
