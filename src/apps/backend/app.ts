@@ -1,3 +1,5 @@
+import type { ServerResponse } from 'node:http';
+import { basename } from 'node:path';
 import serverlessExpress from '@codegenie/serverless-express';
 import { httpLogger } from '@http-logger';
 import express, {
@@ -30,6 +32,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/health', healthRouter);
 
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+const fingerprintedAssetPattern = /-[a-z0-9]{8}\.[^.]+(?:\.map)?$/i;
+
+export const setStaticAssetCacheHeaders = (
+	response: ServerResponse,
+	filePath: string,
+) => {
+	if (!fingerprintedAssetPattern.test(basename(filePath))) {
+		response.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+	}
+};
 
 // Serve index.html with the current user injected as config. Handled before
 // express.static (which has index serving disabled below) so the un-injected
@@ -37,7 +49,7 @@ const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 if (process.env.NODE_ENV === 'test') {
 	app.get(['/', '/index.html'], serveIndex);
 } else {
-	app.use(authRedirectMiddleware).get(['/', '/index.html'], serveIndex);
+	app.get(['/', '/index.html'], authRedirectMiddleware, serveIndex);
 }
 
 app.use(
@@ -45,6 +57,7 @@ app.use(
 		index: false,
 		maxAge: oneYearInMs,
 		immutable: true,
+		setHeaders: setStaticAssetCacheHeaders,
 	}),
 );
 
@@ -58,7 +71,8 @@ app.use('/v1/preview', previewRouter);
 app.use('/docs/api', docsRouter);
 
 const serverRoutePrefixes = ['/health', '/v1', '/docs/api'];
-const frontendAssetPathPattern = /\.(?:css|js|map)$/i;
+const frontendAssetPathPattern =
+	/\.(?:avif|css|gif|ico|jpe?g|js|map|png|svg|webmanifest|webp|woff2?)$/i;
 
 /**
  * Browser-history routes are resolved by React Router, but a direct request

@@ -1115,7 +1115,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "dispatchlambdadispatchapiDeployment664A949C5ae9a054bfffd87f632c7af919047ad1": {
+    "dispatchlambdadispatchapiDeployment664A949C61e431388b8d3eb0f1a5e70953f5e120": {
       "DependsOn": [
         "dispatchlambdadispatchapiproxyANYE34E6F78",
         "dispatchlambdadispatchapiproxy929EBBAA",
@@ -1138,7 +1138,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "dispatchlambdadispatchapiDeployment664A949C5ae9a054bfffd87f632c7af919047ad1",
+          "Ref": "dispatchlambdadispatchapiDeployment664A949C61e431388b8d3eb0f1a5e70953f5e120",
         },
         "MethodSettings": [
           {
@@ -1181,6 +1181,9 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     },
     "dispatchlambdadispatchapiEEAA8616": {
       "Properties": {
+        "BinaryMediaTypes": [
+          "image/*",
+        ],
         "Description": "API for creating, previewing, and dispatching multi-channel notifications. It provides a frontend for users to configure and send notifications, and a backend responsible for forwarding requests to relevant downstream services e.g. app and email notification APIs.",
         "Name": "notifications-TEST-dispatch-api",
         "Tags": [
