@@ -27,14 +27,14 @@
 		"zod": "4.5.4"
 	},
 	"devDependencies": {
-		"@happy-dom/global-registrator": "20.13.2",
+		"@happy-dom/global-registrator": "20.14.0",
 		"@storybook/addon-docs": "10.6.0",
 		"@storybook/addon-vitest": "10.6.0",
 		"@storybook/builder-vite": "10.6.0",
 		"@storybook/react-vite": "10.6.0",
 		"@types/bun": "1.4.0",
 		"@types/react": "19.2.18",
-		"@types/react-dom": "19.2.5",
+		"@types/react-dom": "19.2.7",
 		"@vitest/browser-playwright": "4.1.11",
 		"@vitest/coverage-v8": "4.1.11",
 		"eslint-plugin-storybook": "10.6.0",
