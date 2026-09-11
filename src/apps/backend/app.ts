@@ -1,3 +1,5 @@
+import type { ServerResponse } from 'node:http';
+import { basename } from 'node:path';
 import serverlessExpress from '@codegenie/serverless-express';
 import { httpLogger } from '@http-logger';
 import express, {
@@ -30,6 +32,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/health', healthRouter);
 
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+const fingerprintedAssetPattern = /-[a-z0-9]{8}\.[^.]+(?:\.map)?$/i;
+
+export const setStaticAssetCacheHeaders = (
+	response: ServerResponse,
+	filePath: string,
+) => {
+	if (!fingerprintedAssetPattern.test(basename(filePath))) {
+		response.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+	}
+};
 
 // Serve index.html with the current user injected as config. Handled before
 // express.static (which has index serving disabled below) so the un-injected
@@ -45,6 +57,7 @@ app.use(
 		index: false,
 		maxAge: oneYearInMs,
 		immutable: true,
+		setHeaders: setStaticAssetCacheHeaders,
 	}),
 );
 
