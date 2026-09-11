@@ -9,4 +9,5 @@ export interface UserResponse {
 
 export type AppConfig = UserResponse & {
 	DISABLE_APP_SEND_TAB?: boolean;
+	stage?: 'DEV' | 'CODE' | 'PROD';
 };
