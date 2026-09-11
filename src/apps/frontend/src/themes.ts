@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import {
 	baseColors,
 	baseSpacing,
@@ -395,6 +395,20 @@ export const dispatchLandingTheme = {
 	}),
 };
 
+const skeletonPulse = keyframes({
+	'0%, 100%': { opacity: 0.45 },
+	'50%': { opacity: 1 },
+});
+
+const skeletonBase = {
+	display: 'block',
+	backgroundColor: semanticColors.fill.neutralWeak,
+	animation: `${skeletonPulse} 1.5s ease-in-out infinite`,
+	'@media (prefers-reduced-motion: reduce)': {
+		animation: 'none',
+	},
+} as const;
+
 export const historyViewStyles = {
 	container: css({
 		display: 'flex',
@@ -571,8 +585,51 @@ export const historyViewStyles = {
 		},
 	}),
 	empty: css({
-		margin: 0,
-		padding: `${semanticSpacing.stackLg} 0`,
+		display: 'flex',
+		minHeight: '280px',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: semanticSpacing.stackXs,
+		padding: semanticSpacing.stackLg,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		textAlign: 'center',
+	}),
+	emptyIcon: css({
+		display: 'grid',
+		width: '48px',
+		height: '48px',
+		placeItems: 'center',
+		marginBottom: semanticSpacing.stackXs,
+		borderRadius: '50%',
 		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+	}),
+	emptyCopy: css({
+		maxWidth: '420px',
+		color: semanticColors.text.weak,
+	}),
+	skeletonThumbnail: css({
+		...skeletonBase,
+		width: '60px',
+		height: '60px',
+		flexShrink: 0,
+	}),
+	skeletonNotificationDetails: css({
+		display: 'flex',
+		width: 'min(100%, 320px)',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXs,
+	}),
+	skeletonLine: (width: string) =>
+		css({
+			...skeletonBase,
+			width,
+			height: '14px',
+		}),
+	skeletonMetadata: css({
+		...skeletonBase,
+		width: '70%',
+		height: '14px',
 	}),
 };

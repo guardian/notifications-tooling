@@ -116,8 +116,14 @@ export const Empty: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
-			canvas.getByText('No alerts have been sent yet.'),
+			canvas.getByRole('heading', { name: 'No alerts yet' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Alerts will appear here after they have been sent.'),
+		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('grid', { name: 'Sent alerts' }),
+		).not.toBeInTheDocument();
 	},
 };
 
@@ -133,10 +139,12 @@ export const Loading: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Loading history...')).toBeInTheDocument();
 		await expect(
-			canvas.queryByRole('grid', { name: 'Sent alerts' }),
-		).not.toBeInTheDocument();
+			canvas.getByRole('status', { name: 'Loading alert history' }),
+		).toHaveAttribute('aria-busy', 'true');
+		await expect(
+			canvas.getByRole('grid', { name: 'Loading sent alerts' }),
+		).toBeInTheDocument();
 		await expect(
 			canvas.queryByRole('navigation', { name: 'Pagination' }),
 		).not.toBeInTheDocument();

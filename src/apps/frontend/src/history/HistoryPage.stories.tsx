@@ -243,10 +243,12 @@ export const Loading: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Loading history...')).toBeVisible();
 		await expect(
-			canvas.queryByRole('grid', { name: 'Sent alerts' }),
-		).not.toBeInTheDocument();
+			canvas.getByRole('status', { name: 'Loading alert history' }),
+		).toHaveAttribute('aria-busy', 'true');
+		await expect(
+			canvas.getByRole('grid', { name: 'Loading sent alerts' }),
+		).toBeVisible();
 	},
 };
 
