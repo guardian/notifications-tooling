@@ -9,7 +9,7 @@ import { HistoryEmptyState } from './HistoryEmptyState';
 import { HistoryPagination } from './HistoryPagination';
 import { HistoryTable, HistoryTableSkeleton } from './HistoryTable';
 
-export type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
+export type HistoryStatus = 'Accepted' | 'Sent' | 'Failed';
 
 export interface HistoryNotification {
 	id: string;
@@ -35,6 +35,7 @@ interface HistoryViewProps {
 	lastUpdatedAt?: string;
 	handlePageChange: (page: number) => void;
 	handleRefresh: () => void;
+	onSelectFailure?: (notification: HistoryNotification) => void;
 }
 
 export const HistoryView = ({
@@ -48,6 +49,7 @@ export const HistoryView = ({
 	currentPage,
 	handlePageChange,
 	handleRefresh,
+	onSelectFailure,
 }: HistoryViewProps) => {
 	return (
 		<Layout.Main theme={layoutMainTheme}>
@@ -84,7 +86,10 @@ export const HistoryView = ({
 				{isLoading && <HistoryTableSkeleton />}
 				{error}
 				{!isLoading && !error && notifications.length > 0 && (
-					<HistoryTable notifications={notifications} />
+					<HistoryTable
+						notifications={notifications}
+						onSelectFailure={onSelectFailure}
+					/>
 				)}
 				{!isLoading && !error && notifications.length === 0 && (
 					<HistoryEmptyState />

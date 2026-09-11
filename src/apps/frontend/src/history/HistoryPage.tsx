@@ -1,13 +1,21 @@
 import { InlineMessage } from '@guardian/stand/InlineMessage';
-import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNotificationDetail } from '../hooks/useNotificationDetail';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
+import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
+import { HistoryFailureDetail } from './HistoryFailureDetail';
 import { HistoryView } from './HistoryView';
+import type { HistoryNotification } from './HistoryView';
 
 export const HistoryPage = () => {
+	const navigate = useNavigate();
 	const [searchParams, setSearchParams] = useSearchParams();
+	const [selectedFailure, setSelectedFailure] = useState<HistoryNotification>();
+	const notificationDetail = useNotificationDetail(selectedFailure?.id);
 	const historyQuery = parseHistorySearchParams(searchParams);
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();
@@ -36,27 +44,42 @@ export const HistoryPage = () => {
 		}) ?? [];
 
 	return (
-		<HistoryView
-			notifications={notifications}
-			totalItems={notificationHistory.data?.total ?? 0}
-			isLoading={notificationHistory.isPending}
-			error={
-				notificationHistory.isError ? (
-					<InlineMessage level="error">
-						Unable to load notification history. Try again.
-					</InlineMessage>
-				) : undefined
-			}
-			limit={limit}
-			handlePageChange={handlePageChange}
-			handleRefresh={() => void notificationHistory.refetch()}
-			isRefreshing={notificationHistory.isFetching}
-			lastUpdatedAt={
-				notificationHistory.dataUpdatedAt
-					? new Date(notificationHistory.dataUpdatedAt).toISOString()
-					: undefined
-			}
-			currentPage={currentPage}
-		/>
+		<>
+			<HistoryView
+				notifications={notifications}
+				totalItems={notificationHistory.data?.total ?? 0}
+				isLoading={notificationHistory.isPending}
+				error={
+					notificationHistory.isError ? (
+						<InlineMessage level="error">
+							Unable to load notification history. Try again.
+						</InlineMessage>
+					) : undefined
+				}
+				limit={limit}
+				handlePageChange={handlePageChange}
+				handleRefresh={() => void notificationHistory.refetch()}
+				isRefreshing={notificationHistory.isFetching}
+				lastUpdatedAt={
+					notificationHistory.dataUpdatedAt
+						? new Date(notificationHistory.dataUpdatedAt).toISOString()
+						: undefined
+				}
+				currentPage={currentPage}
+				onSelectFailure={setSelectedFailure}
+			/>
+			{selectedFailure && (
+				<HistoryFailureDetail
+					selected={selectedFailure}
+					notification={notificationDetail.data}
+					isLoading={notificationDetail.isPending}
+					isError={notificationDetail.isError}
+					onClose={() => setSelectedFailure(undefined)}
+					onResolve={() =>
+						void navigate(notificationRoutes[selectedFailure.channel].create)
+					}
+				/>
+			)}
+		</>
 	);
 };

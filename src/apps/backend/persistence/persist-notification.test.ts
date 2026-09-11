@@ -65,10 +65,10 @@ describe('rollUpStatus', () => {
 		expect(rollUpStatus([appPushRow('failure')])).toBe('failed');
 	});
 
-	it('is partially_delivered on a mix of outcomes', () => {
+	it('is failed when any dispatch failed', () => {
 		expect(
 			rollUpStatus([appPushRow('success'), newsletterRow('failure')]),
-		).toBe('partially_delivered');
+		).toBe('failed');
 	});
 });
 

@@ -39,7 +39,8 @@ export const notificationSchema = {
 		},
 		status: {
 			type: 'string',
-			description: 'The delivery status rolled up from the dispatch outcomes.',
+			description:
+				'The delivery status rolled up from the dispatch outcomes. Any failed outcome makes a new notification failed; dispatches show whether other recipients were reached. partially_delivered is retained for existing records.',
 			enum: ['accepted', 'delivered', 'partially_delivered', 'failed'],
 		},
 		sender: {

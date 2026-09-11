@@ -25,7 +25,7 @@ const notifications: HistoryNotification[] = [
 		sentBy: 'jamie@example.com',
 		sentTo: ['US', 'UK', 'AU', 'INT', 'EU'],
 		sentAt: '2026-08-11T15:34:00Z',
-		status: 'Partially sent',
+		status: 'Failed',
 	},
 ];
 
@@ -75,7 +75,7 @@ export const Default: Story = {
 			}),
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Sent')).toBeInTheDocument();
-		await expect(canvas.getByText('Partially sent')).toBeInTheDocument();
+		await expect(canvas.getByText('Failed')).toBeInTheDocument();
 		await expect(canvas.getByText('No image')).toBeInTheDocument();
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(1);
 		const lastUpdated = canvas.getByText('Last updated:');

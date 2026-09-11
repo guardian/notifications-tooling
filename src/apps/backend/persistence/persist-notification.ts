@@ -31,12 +31,8 @@ export const rollUpStatus = (
 		return 'accepted';
 	}
 
-	const anySuccess = dispatches.some((d) => d.status === 'success');
 	const anyFailure = dispatches.some((d) => d.status === 'failure');
 
-	if (anySuccess && anyFailure) {
-		return 'partially_delivered';
-	}
 	return anyFailure ? 'failed' : 'delivered';
 };
 

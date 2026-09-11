@@ -20,6 +20,7 @@ import type { HistoryNotification, HistoryStatus } from './HistoryView';
 
 interface HistoryTableProps {
 	notifications?: HistoryNotification[];
+	onSelectFailure?: (notification: HistoryNotification) => void;
 }
 
 const tableColumns = {
@@ -43,7 +44,6 @@ const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
 	{
 		Accepted: 'grey',
 		Sent: 'green',
-		'Partially sent': 'yellow',
 		Failed: 'red',
 	};
 
@@ -71,7 +71,10 @@ const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
 	);
 };
 
-export const HistoryTable = ({ notifications = [] }: HistoryTableProps) => {
+export const HistoryTable = ({
+	notifications = [],
+	onSelectFailure,
+}: HistoryTableProps) => {
 	return (
 		<Table
 			aria-label="Sent alerts"
@@ -113,12 +116,22 @@ export const HistoryTable = ({ notifications = [] }: HistoryTableProps) => {
 										</div>
 									)}
 									<div css={historyViewStyles.notificationDetails}>
-										<Link
-											href={notification.href}
-											cssOverrides={historyViewStyles.title}
-										>
-											{notification.title}
-										</Link>
+										{notification.status === 'Failed' && onSelectFailure ? (
+											<button
+												type="button"
+												onClick={() => onSelectFailure(notification)}
+												css={historyViewStyles.failureTitle}
+											>
+												{notification.title}
+											</button>
+										) : (
+											<Link
+												href={notification.href}
+												cssOverrides={historyViewStyles.title}
+											>
+												{notification.title}
+											</Link>
+										)}
 										<Typography
 											variant="bodyXs"
 											cssOverrides={historyViewStyles.channel}
