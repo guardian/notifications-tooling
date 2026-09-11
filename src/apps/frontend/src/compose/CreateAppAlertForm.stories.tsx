@@ -18,7 +18,6 @@ import { CreateAppAlertForm } from './CreateAppAlertForm';
 
 type StoryArgs = {
 	notificationState: NotificationState;
-	activeSectionHref: string;
 	formValues?: Partial<AppAlertFormValues>;
 };
 type Story = StoryObj<StoryArgs>;
@@ -37,12 +36,11 @@ const meta: Meta<StoryArgs> = {
 	},
 	args: {
 		notificationState: defaultAppAlertState,
-		activeSectionHref: '#article-section',
 	},
 	render: (args) => {
-		const { activeSectionHref, formValues, notificationState } = args;
+		const { formValues, notificationState } = args;
 		return WithNotificationContext(
-			<CreateAppAlertForm activeSectionHref={activeSectionHref} />,
+			<CreateAppAlertForm />,
 			notificationState,
 			{},
 			'push',
