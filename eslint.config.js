@@ -8,13 +8,13 @@ const react = guardian.configs.react.map((config) => ({
 export default [
 	{
 		ignores: [
+			'**/coverage/**',
 			'**/dist/**',
 			'cdk/cdk.out/**',
 			'**/storybook-static/**',
 			'docker/**',
 			'!docker/docker-compose.local.yml',
 			'**/*.d.ts',
-			'**/storybook-static/**',
 		],
 	},
 	{
