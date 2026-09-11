@@ -189,7 +189,7 @@ describe('mapNotificationToHistoryNotification', () => {
 			alertType: 'Sports news',
 			thumbnailUrl: 'https://media.guim.co.uk/thumb.jpg',
 			sentTo: ['INT', 'EU'],
-			status: 'Partially sent',
+			status: 'Failed',
 		});
 	});
 

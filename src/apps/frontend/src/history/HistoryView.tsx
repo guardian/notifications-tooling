@@ -36,6 +36,7 @@ interface HistoryViewProps {
 	lastUpdatedAt?: string;
 	onPageChange: (page: number) => void;
 	onRefresh: () => void;
+	onSelectFailure?: (notification: HistoryNotification) => void;
 }
 
 export const HistoryView = ({
@@ -49,6 +50,7 @@ export const HistoryView = ({
 	currentPage,
 	onPageChange,
 	onRefresh,
+	onSelectFailure,
 }: HistoryViewProps) => {
 	return (
 		<Layout.Main theme={layoutMainTheme}>
@@ -85,7 +87,10 @@ export const HistoryView = ({
 				{isLoading && <HistoryTableSkeleton />}
 				{error}
 				{!isLoading && !error && notifications.length > 0 && (
-					<HistoryTable notifications={notifications} />
+					<HistoryTable
+						notifications={notifications}
+						onSelectFailure={onSelectFailure}
+					/>
 				)}
 				{!isLoading && !error && notifications.length === 0 && (
 					<HistoryEmptyState />

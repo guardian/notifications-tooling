@@ -24,6 +24,7 @@ import type { HistoryNotification, HistoryStatus } from './HistoryView';
 interface HistoryTableProps {
 	notifications?: HistoryNotification[];
 	showUserName?: boolean;
+	onSelectFailure?: (notification: HistoryNotification) => void;
 }
 
 const tableColumns = {
@@ -103,6 +104,7 @@ const SentByUserDetails = ({
 export const HistoryTable = ({
 	notifications = [],
 	showUserName = false,
+	onSelectFailure,
 }: HistoryTableProps) => {
 	return (
 		<Table
@@ -145,12 +147,24 @@ export const HistoryTable = ({
 										</div>
 									)}
 									<div css={historyViewStyles.notificationDetails}>
-										<ExternalLink
-											href={notification.href}
-											cssOverrides={historyViewStyles.title}
-										>
-											{notification.title}
-										</ExternalLink>
+										{(notification.status === 'Failed' ||
+											notification.status === 'Partially sent') &&
+										onSelectFailure ? (
+											<button
+												type="button"
+												onClick={() => onSelectFailure(notification)}
+												css={historyViewStyles.failureTitle}
+											>
+												{notification.title}
+											</button>
+										) : (
+											<ExternalLink
+												href={notification.href}
+												cssOverrides={historyViewStyles.title}
+											>
+												{notification.title}
+											</ExternalLink>
+										)}
 										<Typography
 											variant="bodyXs"
 											cssOverrides={historyViewStyles.channel}
