@@ -4,6 +4,7 @@ import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { FormProvider, useForm } from 'react-hook-form';
 import { MemoryRouter, useLocation } from 'react-router-dom';
+import '../../happydom-setup';
 import type { Result } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
 import {
@@ -110,12 +111,14 @@ describe('useSendNotification', () => {
 			data: acceptedEmailSendResponse,
 		});
 
-		act(() => harness.send());
+		const sendPromise = harness.send();
 		expect(harness.updateNotification).toHaveBeenCalledWith({
 			type: 'waiting-for-send',
 		});
 
-		await act(async () => {});
+		await act(async () => {
+			await sendPromise;
+		});
 
 		expect(harness.sendNotification).toHaveBeenCalledWith(request);
 		expect(harness.getDispatchId()).toBe(acceptedEmailSendResponse.id);
@@ -139,8 +142,9 @@ describe('useSendNotification', () => {
 		});
 		const harness = renderHook({ success: false, failure });
 
-		act(() => harness.send());
-		await act(async () => {});
+		await act(async () => {
+			await harness.send();
+		});
 
 		expect(harness.updateNotification).toHaveBeenLastCalledWith({
 			type: 'receive-send-failure',

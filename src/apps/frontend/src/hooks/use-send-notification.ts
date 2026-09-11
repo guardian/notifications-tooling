@@ -17,7 +17,7 @@ export const useSendNotification = () => {
 
 	return (request: SendNotificationRequest) => {
 		updateNotification({ type: 'waiting-for-send' });
-		void sendNotification(request).then((result) => {
+		return sendNotification(request).then((result) => {
 			if (!result.success) {
 				updateNotification({
 					type: 'receive-send-failure',
