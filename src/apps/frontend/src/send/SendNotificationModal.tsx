@@ -17,8 +17,9 @@ export const SendNotificationModal = () => {
 	const channelDescription = getChannelDescription(channel);
 
 	const handleSending =
-		(sendNotificationRequest: SendNotificationRequest) => () =>
-			sendNotification(sendNotificationRequest);
+		(sendNotificationRequest: SendNotificationRequest) => () => {
+			void sendNotification(sendNotificationRequest);
+		};
 
 	return (
 		<Modal
