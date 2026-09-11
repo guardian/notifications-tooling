@@ -17,9 +17,7 @@ export const CreateAppAlertTab = () => {
 		<NotificationTabLayout
 			channel="push"
 			previewToggle={<AppPreviewToggle topicTypes={topicTypes} />}
-			renderForm={(activeSectionHref) => (
-				<CreateAppAlertForm activeSectionHref={activeSectionHref} />
-			)}
+			form={<CreateAppAlertForm />}
 			previewSection={<AppPreviewSection topicTypes={topicTypes} />}
 		/>
 	);

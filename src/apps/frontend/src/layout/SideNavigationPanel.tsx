@@ -9,7 +9,8 @@ import { SidebarStepperNavigation } from '@guardian/stand/SidebarStepperNavigati
 import type { SidebarStepperNavigationTheme } from '@guardian/stand/SidebarStepperNavigation';
 import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useActiveSectionHref } from '../hooks/useActiveSectionHref';
 import { layer, topBarHeight } from '../themes';
 import type { ChannelOption } from '../types';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from './constants';
@@ -41,14 +42,6 @@ const PANEL_ITEMS_BY_CHANNEL: Record<ChannelOption, StepNavStep[]> = {
 	email: EMAIL_STEPS,
 	push: PUSH_STEPS,
 };
-
-export const DEFAULT_SIDE_NAV_HREF_BY_CHANNEL: Record<ChannelOption, string> = {
-	email: EMAIL_STEPS[0]!.id,
-	push: PUSH_STEPS[0]!.id,
-};
-
-export const DEFAULT_SIDE_NAV_HREF = DEFAULT_SIDE_NAV_HREF_BY_CHANNEL.email;
-export const APP_DEFAULT_SIDE_NAV_HREF = DEFAULT_SIDE_NAV_HREF_BY_CHANNEL.push;
 
 const theme: SidebarStepperNavigationTheme = {
 	navigation: {
@@ -82,33 +75,22 @@ const sidebarNavigationCssOverrides = css({
 });
 
 interface SideNavigationPanelProps {
-	selectedHref: string;
-	onSelectedHrefChange: (href: string) => void;
 	channel?: ChannelOption;
 }
 
 export const SideNavigationPanel = ({
-	selectedHref,
-	onSelectedHrefChange,
 	channel = 'email',
 }: SideNavigationPanelProps) => {
 	const PANEL_ITEMS = PANEL_ITEMS_BY_CHANNEL[channel];
-	const DEFAULT_HREF = DEFAULT_SIDE_NAV_HREF_BY_CHANNEL[channel];
 
-	const { hash } = useLocation();
+	const activeSectionHref = useActiveSectionHref();
 	const navigate = useNavigate();
-	const selectedHrefRef = useRef(DEFAULT_HREF);
-	const locationHashRef = useRef(hash);
+	const locationHashRef = useRef(activeSectionHref);
 	const isClickLockedRef = useRef(false);
 
 	useEffect(() => {
-		locationHashRef.current = hash;
-	}, [hash]);
-
-	const selectHref = (href: string) => {
-		selectedHrefRef.current = href;
-		onSelectedHrefChange(href);
-	};
+		locationHashRef.current = activeSectionHref;
+	}, [activeSectionHref]);
 
 	useEffect(() => {
 		const sections = PANEL_ITEMS.flatMap((item) => {
@@ -118,10 +100,6 @@ export const SideNavigationPanel = ({
 		let animationFrameId: number | undefined;
 
 		const selectItem = (item: (typeof PANEL_ITEMS)[number]) => {
-			if (selectedHrefRef.current !== item.id) {
-				selectedHrefRef.current = item.id;
-				onSelectedHrefChange(item.id);
-			}
 			if (locationHashRef.current !== item.id) {
 				locationHashRef.current = item.id;
 				void navigate({ hash: item.id }, { replace: true });
@@ -162,7 +140,12 @@ export const SideNavigationPanel = ({
 			});
 		};
 
-		updateActiveSection();
+		const hasValidLocationHash = PANEL_ITEMS.some(
+			({ id }) => id === window.location.hash,
+		);
+		if (!hasValidLocationHash) {
+			updateActiveSection();
+		}
 		window.addEventListener('scroll', scheduleUpdate, { passive: true });
 		window.addEventListener('resize', scheduleUpdate);
 
@@ -173,10 +156,9 @@ export const SideNavigationPanel = ({
 				window.cancelAnimationFrame(animationFrameId);
 			}
 		};
-	}, [navigate, onSelectedHrefChange, PANEL_ITEMS]);
+	}, [navigate, PANEL_ITEMS]);
 
 	const handleTileClick = (href: string) => {
-		selectHref(href);
 		if (locationHashRef.current !== href) {
 			locationHashRef.current = href;
 			void navigate({ hash: href });
@@ -207,7 +189,7 @@ export const SideNavigationPanel = ({
 		>
 			<SidebarStepperNavigation
 				stepNavTitle={'Dispatch'}
-				currentStepId={selectedHref}
+				currentStepId={activeSectionHref}
 				stepNavConfig={{
 					isNonLinear: true,
 					steps: PANEL_ITEMS,
