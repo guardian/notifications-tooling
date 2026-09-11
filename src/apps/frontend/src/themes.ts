@@ -486,6 +486,9 @@ export const historyViewStyles = {
 		display: 'inline-flex',
 		alignItems: 'center',
 		gap: semanticSpacing.stackXs,
+		'@media (max-width: 680px)': {
+			flexWrap: 'wrap',
+		},
 		'& svg': {
 			display: 'block',
 			width: '24px',
