@@ -21,6 +21,8 @@ const readErrorEnvelope = async (response: Response) => {
 interface FetchJsonAndParseInit extends RequestInit {
 	/** Overrides the default 10s timeout. Ignored if `signal` is also passed. */
 	timeoutMs?: number;
+	/** Non-2xx statuses whose bodies should be parsed with the supplied schema. */
+	acceptedResponseStatuses?: readonly number[];
 }
 
 export type Result<DataType> =
@@ -53,7 +55,12 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 	path: string,
 	init: FetchJsonAndParseInit = {},
 ): Promise<Result<z.infer<Schema>>> {
-	const { timeoutMs = DEFAULT_TIMEOUT_MS, signal, ...requestInit } = init;
+	const {
+		timeoutMs = DEFAULT_TIMEOUT_MS,
+		acceptedResponseStatuses = [],
+		signal,
+		...requestInit
+	} = init;
 	const url = `${getApiBaseUrl()}${path}`;
 
 	let response: Response;
@@ -81,7 +88,7 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 		);
 	}
 
-	if (!response.ok) {
+	if (!response.ok && !acceptedResponseStatuses.includes(response.status)) {
 		const envelope = await readErrorEnvelope(response);
 
 		if (response.status === 401) {
@@ -137,11 +144,22 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 			}),
 		);
 	}
+	const isNon2xxResponse = !response.ok;
 
 	let json: unknown;
 	try {
 		json = await response.json();
 	} catch (cause) {
+		if (isNon2xxResponse) {
+			return failWith(
+				new ApiError({
+					message: `Request to ${path} responded with ${response.status}`,
+					failure: 'non-2xx-response',
+					status: response.status,
+					cause,
+				}),
+			);
+		}
 		return failWith(
 			new ApiError({
 				message: `Response from ${path} was not valid JSON`,
@@ -154,6 +172,20 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 
 	const result = schema.safeParse(json);
 	if (!result.success) {
+		if (isNon2xxResponse) {
+			const envelope = apiErrorEnvelopeSchema.safeParse(json);
+			return failWith(
+				new ApiError({
+					message: envelope.success
+						? (envelope.data.message ??
+							`Request to ${path} responded with ${response.status}`)
+						: `Request to ${path} responded with ${response.status}`,
+					failure: 'non-2xx-response',
+					status: response.status,
+					requestId: envelope.success ? envelope.data.requestId : undefined,
+				}),
+			);
+		}
 		const prettyError = z.prettifyError(result.error);
 		// Loud early warning of backend contract drift.
 		console.error(`Schema parse failed for ${path}:`, prettyError);

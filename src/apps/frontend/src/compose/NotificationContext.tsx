@@ -3,16 +3,14 @@ import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
 import type { Result } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
-import type {
-	SendNotificationRequest,
-	SendNotificationResponse,
-} from '../schemas';
+import type { SendNotificationRequest } from '../schemas';
 import type {
 	ChannelOption,
 	NotificationAction,
 	NotificationState,
 	RequestEmailHtml,
 } from '../types';
+import type { SendNotificationResult } from '../utils/send-notification';
 import type { TestEmailRequestFunction } from '../utils/send-test-email';
 
 export interface NotificationFormContextProps {
@@ -26,7 +24,7 @@ export interface NotificationFormContextProps {
 	sendNotification: {
 		(
 			sendNotificationRequest: SendNotificationRequest,
-		): Promise<Result<SendNotificationResponse>>;
+		): Promise<SendNotificationResult>;
 	};
 	requestEmailHtml: RequestEmailHtml;
 	requestTestEmailSend: TestEmailRequestFunction;

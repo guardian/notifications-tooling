@@ -19,7 +19,30 @@ describe('parseArticleUrlInputToContentId', () => {
 				'https://www.example.com/film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change',
 			),
 		).toEqual({
-			failure: 'Not a Guardian URL',
+			failure: 'not-guardian-url',
+		});
+	});
+	it('accepts Guardian subdomains and short links', () => {
+		expect(
+			parseArticleUrlInputToContentId(
+				'https://amp.theguardian.com/world/2026/sep/08/article',
+			),
+		).toEqual({
+			articleId: 'world/2026/sep/08/article',
+			webUrl: 'https://amp.theguardian.com/world/2026/sep/08/article',
+		});
+		expect(parseArticleUrlInputToContentId('https://gu.com/p/abc12')).toEqual({
+			articleId: 'p/abc12',
+			webUrl: 'https://gu.com/p/abc12',
+		});
+	});
+	it('rejects non-https Guardian urls', () => {
+		expect(
+			parseArticleUrlInputToContentId(
+				'http://www.theguardian.com/world/2026/sep/08/article',
+			),
+		).toEqual({
+			failure: 'not-guardian-url',
 		});
 	});
 	it('preserves query params and hash', () => {
@@ -37,7 +60,7 @@ describe('parseArticleUrlInputToContentId', () => {
 		expect(
 			parseArticleUrlInputToContentId('https://www.theguardian.com/uk'),
 		).toEqual({
-			failure: 'Not a Guardian article URL',
+			failure: 'incomplete-article-url',
 		});
 	});
 	it('rejects paths with characters other than letters, numbers and dashes between in the segments', () => {
@@ -46,7 +69,7 @@ describe('parseArticleUrlInputToContentId', () => {
 				'https://www.theguardian.com/film/****/jul/23/ryan-gosling-hand-la-la-land-poster-change',
 			),
 		).toEqual({
-			failure: 'Not a Guardian article URL',
+			failure: 'incomplete-article-url',
 		});
 	});
 	it('will accept an article id and use the default domain', () => {

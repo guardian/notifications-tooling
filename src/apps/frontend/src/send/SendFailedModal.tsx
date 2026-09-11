@@ -1,4 +1,4 @@
-import { semanticColors } from '@guardian/stand';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Dialog, Modal } from '@guardian/stand/Modal';
@@ -8,11 +8,110 @@ import { useContext } from 'react';
 import type { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from '../compose/NotificationContext';
 import { useSendNotification } from '../hooks/use-send-notification';
-import type { SendNotificationRequest } from '../schemas';
+import type {
+	ChannelAudienceResponse,
+	NotificationDispatch,
+	NotificationResource,
+	SendNotificationRequest,
+} from '../schemas';
+import {
+	FALLBACK_NEWSLETTER_SEGMENTS,
+	FALLBACK_TOPIC_TYPES,
+} from '../segment/audience-fallbacks';
+import { useChannelAudiences } from '../segment/useChannelAudiences';
 import type { ChannelOption } from '../types';
 import type { NotificationState } from '../types';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { getChannelDescription } from '../utils/display-text-helpers';
+
+const formatDispatchTarget = (
+	requested: NotificationDispatch['requested'],
+	audiences?: ChannelAudienceResponse,
+): string => {
+	if (requested.channel === 'newsletter') {
+		const segments = audiences?.channels.newsletter.segments ?? [];
+		return (
+			segments.find(({ id }) => id === requested.segment)?.label ??
+			FALLBACK_NEWSLETTER_SEGMENTS.find(({ id }) => id === requested.segment)
+				?.label ??
+			requested.segment
+		);
+	}
+
+	const topicTypes = audiences?.channels['app-push'].topicTypes ?? [];
+	const topic = topicTypes.find(({ id }) => id === requested.topicType);
+	const fallbackTopic = FALLBACK_TOPIC_TYPES.find(
+		({ id }) => id === requested.topicType,
+	);
+
+	return requested.editions
+		.map(
+			(edition) =>
+				topic?.editions.find(({ id }) => id === edition)?.label ??
+				fallbackTopic?.editions.find(({ id }) => id === edition)?.label ??
+				edition,
+		)
+		.join(', ');
+};
+
+const deriveDispatchFailureMessage = (
+	notification: NotificationResource,
+	channel: ChannelOption,
+	channelDescription: string,
+	audiences?: ChannelAudienceResponse,
+): ReactNode => {
+	const successfulTargets = notification.dispatches
+		.filter(({ status }) => status === 'success')
+		.map(({ requested }) => formatDispatchTarget(requested, audiences));
+	const failedTargets = notification.dispatches
+		.filter(({ status }) => status === 'failure')
+		.map(({ requested }) => formatDispatchTarget(requested, audiences));
+	const upstreamService =
+		channel === 'push'
+			? 'mobile notification service'
+			: 'newsletter delivery service';
+
+	return (
+		<>
+			<Typography element="p">
+				{notification.dispatches.length === 0
+					? `We couldn't confirm whether the ${channelDescription} was sent.`
+					: notification.status === 'partially_delivered'
+						? `The ${upstreamService} reported a failure for some destinations.`
+						: `The ${upstreamService} reported a failure for all destinations.`}
+			</Typography>
+			<div
+				css={{
+					display: 'flex',
+					flexDirection: 'column',
+					gap: semanticSpacing.stackXxs,
+					marginTop: semanticSpacing.stackSm,
+				}}
+			>
+				{successfulTargets.length > 0 && (
+					<Typography
+						element="p"
+						theme={{ color: semanticColors.text.success }}
+					>
+						Accepted for delivery to: {successfulTargets.join(', ')}
+					</Typography>
+				)}
+				{failedTargets.length > 0 && (
+					<Typography element="p" theme={{ color: semanticColors.text.error }}>
+						Delivery not confirmed for: {failedTargets.join(', ')}
+					</Typography>
+				)}
+				<Typography
+					element="p"
+					variant="bodySm"
+					css={{ marginTop: semanticSpacing.stackSm }}
+				>
+					Reference: {notification.id}
+				</Typography>
+			</div>
+		</>
+	);
+};
 
 const deriveUserFacingMessage = (
 	apiError: ApiError,
@@ -35,16 +134,36 @@ const deriveUserFacingMessage = (
 					</Typography>
 				</>
 			);
-		case 'non-2xx-response': // TO DO - parse the details array to return more specific info
+		case 'non-2xx-response':
+			if (apiError.status === 409) {
+				return (
+					<Typography>
+						This send request has already been used. Check notification history
+						to confirm whether it was sent.
+					</Typography>
+				);
+			}
+			if (!checkIfCanRetry(apiError)) {
+				return (
+					<Typography>
+						The request to send the {channelDescription} was rejected.
+					</Typography>
+				);
+			}
+			return (
+				<Typography>
+					We could not confirm whether the {channelDescription} was sent. Try
+					again.
+				</Typography>
+			);
 		case 'fetch-fail':
 		case 'timeout':
 		default:
-			return checkIfCanRetry(apiError) ? (
+			return (
 				<Typography>
-					The {channelDescription} could not be sent at this time. Try again.
+					We could not confirm whether the {channelDescription} was sent. Try
+					again.
 				</Typography>
-			) : (
-				<Typography>The {channelDescription} could not be sent.</Typography>
 			);
 	}
 };
@@ -57,7 +176,11 @@ const deriveErrorTitle = (apiError: ApiError, channelDescription: string) => {
 		case 'schema-parse-fail':
 			return 'Communication Failure';
 		case 'non-2xx-response':
+			return (apiError.status ?? 0) >= 500
+				? `The ${channelDescription} delivery couldn't be confirmed`
+				: `The ${channelDescription} couldn't be sent`;
 		case 'timeout':
+			return `The ${channelDescription} delivery couldn't be confirmed`;
 		case 'unauthenticated':
 		case 'forbidden':
 			return `The ${channelDescription} couldn't be sent`;
@@ -85,6 +208,7 @@ const checkIfCanRetry = (apiError: ApiError) => {
 const getFailure = (
 	notification: NotificationState,
 	channel: ChannelOption,
+	audiences?: ChannelAudienceResponse,
 ) => {
 	const { sendFailure } = notification;
 	if (!sendFailure) {
@@ -92,14 +216,45 @@ const getFailure = (
 	}
 
 	const channelDescription = getChannelDescription(channel);
+	if (sendFailure.failure === 'dispatch-fail') {
+		const hasNoDispatchOutcomes =
+			sendFailure.notification.dispatches.length === 0;
 
-	const { loginUrl, details } = sendFailure;
+		return {
+			title: hasNoDispatchOutcomes
+				? 'Something went wrong'
+				: sendFailure.notification.status === 'partially_delivered'
+					? `The ${channelDescription} had partial delivery issues`
+					: `The ${channelDescription} had delivery issues`,
+			message: deriveDispatchFailureMessage(
+				sendFailure.notification,
+				channel,
+				channelDescription,
+				audiences,
+			),
+			canRetry: false,
+		};
+	}
+
+	const { loginUrl, requestId } = sendFailure;
 	return {
 		title: deriveErrorTitle(sendFailure, channelDescription),
-		message: deriveUserFacingMessage(sendFailure, channelDescription),
+		message: (
+			<>
+				{deriveUserFacingMessage(sendFailure, channelDescription)}
+				{requestId && (
+					<Typography
+						element="p"
+						variant="bodySm"
+						css={{ marginTop: semanticSpacing.stackSm }}
+					>
+						Reference: {requestId}
+					</Typography>
+				)}
+			</>
+		),
 		canRetry: checkIfCanRetry(sendFailure),
 		loginUrl,
-		details,
 	};
 };
 
@@ -108,9 +263,10 @@ export const SendFailedModal = () => {
 		NotificationFormContext,
 	);
 	const sendNotification = useSendNotification();
+	const { data: audiences } = useChannelAudiences();
 
 	const { isWaitingForSend, pendingRequest } = notification;
-	const failure = getFailure(notification, channel);
+	const failure = getFailure(notification, channel, audiences);
 
 	const handleRetry =
 		(sendNotificationRequest: SendNotificationRequest) => () =>

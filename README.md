@@ -24,6 +24,12 @@ Email delivery currently integrates with [Braze](https://www.braze.com/docs/deve
 
 ### Prerequisites
 
+- Node.js 24. Use the version in `.nvmrc` with a version manager such as
+  [fnm](https://github.com/Schniz/fnm) or [nvm](https://github.com/nvm-sh/nvm):
+  ```sh
+  fnm use
+  # or: nvm use
+  ```
 - This project relies on [Bun](https://bun.com/). On Mac OS install its latest version using Homebrew:
   ```sh
   brew install bun
