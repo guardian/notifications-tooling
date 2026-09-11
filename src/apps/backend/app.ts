@@ -37,7 +37,7 @@ const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 if (process.env.NODE_ENV === 'test') {
 	app.get(['/', '/index.html'], serveIndex);
 } else {
-	app.use(authRedirectMiddleware).get(['/', '/index.html'], serveIndex);
+	app.get(['/', '/index.html'], authRedirectMiddleware, serveIndex);
 }
 
 app.use(
@@ -58,7 +58,8 @@ app.use('/v1/preview', previewRouter);
 app.use('/docs/api', docsRouter);
 
 const serverRoutePrefixes = ['/health', '/v1', '/docs/api'];
-const frontendAssetPathPattern = /\.(?:css|js|map)$/i;
+const frontendAssetPathPattern =
+	/\.(?:avif|css|gif|ico|jpe?g|js|map|png|svg|webmanifest|webp|woff2?)$/i;
 
 /**
  * Browser-history routes are resolved by React Router, but a direct request

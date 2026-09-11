@@ -169,4 +169,17 @@ describe('unmatched routes over HTTP', () => {
 		expect(response.headers.get('content-type')).toContain('application/json');
 		expect(body.error).toBe('not_found');
 	});
+
+	it('does not redirect missing web manifests to login', async () => {
+		verifyCookieMock.mockResolvedValueOnce({ success: false });
+
+		const response = await fetch(`${server.baseUrl}/site-stale.webmanifest`, {
+			redirect: 'manual',
+		});
+		const body = (await response.json()) as ErrorEnvelope;
+
+		expect(response.status).toBe(404);
+		expect(response.headers.get('content-type')).toContain('application/json');
+		expect(body.error).toBe('not_found');
+	});
 });
