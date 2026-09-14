@@ -53,8 +53,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		name: toApiEditionId(edition),
 	}));
 	const thumbnailUrl = includeThumbnail
-		? articleThumbnailUrl ||
-			getArticleThumbnail(notification.content, notification.requestedBlock).src
+		? articleThumbnailUrl || getArticleThumbnail(notification.content).src
 		: undefined;
 
 	return (
