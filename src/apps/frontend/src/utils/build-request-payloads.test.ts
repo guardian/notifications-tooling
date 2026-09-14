@@ -170,7 +170,7 @@ describe('notification request builders', () => {
 		});
 	});
 
-	it('uses the requested liveblog block image and exact deep link', () => {
+	it('uses the main liveblog image and exact requested-block deep link', () => {
 		const requestedUrl = `${liveblogFixture.webUrl}?filterKeyEvents=false#${requestedLiveblogBlock.id}`;
 		const request = buildAppAlertRequest({
 			values: {
@@ -191,9 +191,10 @@ describe('notification request builders', () => {
 		expect(request.content.items['lead-story']).toMatchObject({
 			link: requestedUrl,
 			media: {
-				imageUrl: 'https://media.guim.co.uk/requested-liveblog-block/500.jpg',
+				imageUrl:
+					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
 				thumbnailUrl:
-					'https://media.guim.co.uk/requested-liveblog-block/500.jpg',
+					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
 			},
 		});
 	});

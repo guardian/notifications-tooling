@@ -13,13 +13,7 @@ import { NotificationFormContext } from './NotificationContext';
 import { NotificationFormSection } from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 
-interface CreateAppAlertFormProps {
-	activeSectionHref: string;
-}
-
-export const CreateAppAlertForm = ({
-	activeSectionHref,
-}: CreateAppAlertFormProps) => {
+export const CreateAppAlertForm = () => {
 	const { handleSubmit, setError, setValue } =
 		useFormContext<AppAlertFormValues>();
 	const { notification, updateNotification } = useContext(
@@ -57,7 +51,6 @@ export const CreateAppAlertForm = ({
 
 	return (
 		<NotificationFormWrapper
-			activeSectionHref={activeSectionHref}
 			title="Create app alert"
 			formLabel="Create app alert"
 			channel="push"
@@ -66,25 +59,18 @@ export const CreateAppAlertForm = ({
 			onResetNotification={() =>
 				updateNotification({ type: 'reset-app-alert' })
 			}
-			onArticleImported={(article, requestedBlock) => {
+			onArticleImported={(article) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);
-				const articleThumbnailUrl =
-					getArticleThumbnail(article, requestedBlock).src ?? '';
+				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
 				setValue('articleThumbnailUrl', articleThumbnailUrl);
 			}}
 		>
-			<NotificationFormSection
-				id="alert-section"
-				isActive={activeSectionHref === '#alert-section'}
-			>
+			<NotificationFormSection id="alert-section">
 				<AlertTypeFormField />
 				<EditionsFormField />
 			</NotificationFormSection>
-			<NotificationFormSection
-				id="content-section"
-				isActive={activeSectionHref === '#content-section'}
-			>
+			<NotificationFormSection id="content-section">
 				<HeadlineFormField constraints={constraints} />
 				<ArticleThumbnailImageFormField />
 			</NotificationFormSection>

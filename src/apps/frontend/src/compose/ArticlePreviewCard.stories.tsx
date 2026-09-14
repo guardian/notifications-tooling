@@ -96,11 +96,9 @@ export const RequestedLiveblogBlock: PreviewCardStory = {
 			'href',
 			expect.stringContaining(`#${requestedLiveblogBlock.id}`),
 		);
-		await expect(
-			canvas.getByAltText('Requested liveblog update'),
-		).toHaveAttribute(
+		await expect(canvas.getByAltText('Latest liveblog update')).toHaveAttribute(
 			'src',
-			'https://media.guim.co.uk/requested-liveblog-block/500.jpg',
+			'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
 		);
 	},
 };

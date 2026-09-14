@@ -5,7 +5,11 @@ import {
 	partiallyDeliveredAppPushSendResponse,
 	unconfirmedAppPushSendResponse,
 } from '../testing/api-fixtures';
-import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
+import {
+	articleFixture,
+	liveblogFixture,
+	requestedLiveblogBlock,
+} from '../testing/capi-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -18,7 +22,6 @@ import { CreateAppAlertForm } from './CreateAppAlertForm';
 
 type StoryArgs = {
 	notificationState: NotificationState;
-	activeSectionHref: string;
 	formValues?: Partial<AppAlertFormValues>;
 };
 type Story = StoryObj<StoryArgs>;
@@ -37,12 +40,11 @@ const meta: Meta<StoryArgs> = {
 	},
 	args: {
 		notificationState: defaultAppAlertState,
-		activeSectionHref: '#article-section',
 	},
 	render: (args) => {
-		const { activeSectionHref, formValues, notificationState } = args;
+		const { formValues, notificationState } = args;
 		return WithNotificationContext(
-			<CreateAppAlertForm activeSectionHref={activeSectionHref} />,
+			<CreateAppAlertForm />,
 			notificationState,
 			{},
 			'push',
@@ -339,7 +341,7 @@ export const RejectsNonGuardianReplacementThumbnail: Story = {
 	},
 };
 
-export const WithLiveblogMainBlockThumbnail: Story = {
+export const RequestedLiveblogBlockUsesMainPresentation: Story = {
 	args: {
 		notificationState: {
 			...populatedPushState,
@@ -351,6 +353,8 @@ export const WithLiveblogMainBlockThumbnail: Story = {
 					lastModified: liveblogFixture.fields?.lastModified ?? '',
 				},
 			},
+			requestedBlock: requestedLiveblogBlock,
+			requestedUrl: `${liveblogFixture.webUrl}#${requestedLiveblogBlock.id}`,
 		},
 		formValues: {
 			...completePushParams,
@@ -366,6 +370,9 @@ export const WithLiveblogMainBlockThumbnail: Story = {
 
 		await expect(thumbnailToggle).toBeEnabled();
 		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(canvas.getByLabelText('Headline')).toHaveValue(
+			'Latest developments',
+		);
 		await expect(canvas.getByAltText('Latest liveblog update')).toHaveAttribute(
 			'src',
 			'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',

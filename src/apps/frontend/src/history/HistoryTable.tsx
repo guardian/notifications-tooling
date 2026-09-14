@@ -1,3 +1,4 @@
+import { baseColors } from '@guardian/stand';
 import { Badge } from '@guardian/stand/Badge';
 import { Icon } from '@guardian/stand/Icon';
 import { Link } from '@guardian/stand/Link';
@@ -16,10 +17,13 @@ import { historyViewStyles } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
 import { SendTimeTooltip } from '../ui/SendTimeTooltip';
+import { Tooltip } from '../ui/Tooltip';
+import { getSenderDisplayName } from '../utils/notification-history-mapper';
 import type { HistoryNotification, HistoryStatus } from './HistoryView';
 
 interface HistoryTableProps {
 	notifications?: HistoryNotification[];
+	showUserName?: boolean;
 }
 
 const tableColumns = {
@@ -71,7 +75,35 @@ const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
 	);
 };
 
-export const HistoryTable = ({ notifications = [] }: HistoryTableProps) => {
+const SentByUserDetails = ({
+	sentByUser,
+	showUserName = false,
+}: {
+	sentByUser: string;
+	showUserName: boolean;
+}) => {
+	return (
+		<span css={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+			{showUserName ? getSenderDisplayName(sentByUser) : sentByUser}
+			{showUserName && (
+				<Tooltip
+					label="Sender email"
+					theme={{
+						backgroundColor: baseColors.magenta[800],
+						triggerColor: baseColors.magenta[800],
+					}}
+				>
+					{sentByUser}
+				</Tooltip>
+			)}
+		</span>
+	);
+};
+
+export const HistoryTable = ({
+	notifications = [],
+	showUserName = false,
+}: HistoryTableProps) => {
 	return (
 		<Table
 			aria-label="Sent alerts"
@@ -147,9 +179,10 @@ export const HistoryTable = ({ notifications = [] }: HistoryTableProps) => {
 								<span css={historyViewStyles.compactLabel} aria-hidden="true">
 									Sent by:{' '}
 								</span>
-								<span css={historyViewStyles.metadataValue}>
-									{notification.sentBy}
-								</span>
+								<SentByUserDetails
+									sentByUser={notification.sentBy}
+									showUserName={showUserName}
+								/>
 							</TableCell>
 							<TableCell
 								gridColumn={{ md: '2', lg: '3' }}

@@ -82,6 +82,18 @@ const getNewsletterAlertType = (subject: string): string => {
 	return kicker ?? 'Newsletter';
 };
 
+export const getSenderDisplayName = (createdByEmail: string): string => {
+	const [senderName] = createdByEmail.split('@');
+	const names = senderName?.split(/[._-]+/).filter(Boolean) ?? [];
+	if (names.length === 0) {
+		return createdByEmail;
+	}
+
+	return names
+		.map((name) => `${name[0]?.toUpperCase()}${name.slice(1).toLowerCase()}`)
+		.join(' ');
+};
+
 export const mapNotificationToHistoryNotification = (
 	notification: NotificationSummary,
 	audiences?: ChannelAudienceResponse,
