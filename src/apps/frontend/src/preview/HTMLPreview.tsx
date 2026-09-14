@@ -36,7 +36,7 @@ const modifyContent = (
 
 export const HTMLPreview = () => {
 	const {
-		notification: { content },
+		notification: { content, requestedUrl },
 		requestEmailHtml,
 	} = useContext(NotificationFormContext);
 	const parameters = useWatch<NewsletterFormValues>();
@@ -44,7 +44,7 @@ export const HTMLPreview = () => {
 	const [errorMessage, setErrorMessage] = useState<string>();
 	const [isLoading, setIsLoading] = useState(false);
 	const stringifiedAudience = (parameters.audienceSegments ?? []).join();
-	const { webUrl } = content ?? {};
+	const webUrl = requestedUrl ?? content?.webUrl;
 
 	const fetchHtml = useCallback(async () => {
 		if (!webUrl) {

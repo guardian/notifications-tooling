@@ -5,6 +5,7 @@ import {
 	EmailRenderingError,
 	type EmailRenderingFailureReason,
 } from '@services';
+import { determineBlockId } from '@utils';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { NewsletterDispatchOutcome } from '../dispatch-outcome';
@@ -92,6 +93,7 @@ export const dispatchNewsletter = async (
 	const environment = newsletterEnvironmentSchema.parse({
 		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
 	});
+	const blockId = determineBlockId(item.link);
 
 	// allSettled so one segment's render/send failure does not abort the others.
 	const settled = await Promise.allSettled(
@@ -99,6 +101,7 @@ export const dispatchNewsletter = async (
 			const html = await dependencies.renderEmail({
 				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 				articleUrl: item.link,
+				...(blockId ? { blockId } : {}),
 				newsletterId: emailRenderingNewsletterId,
 				headlineOverride: item.title,
 				previewText: item.body,
@@ -126,6 +129,7 @@ export const dispatchNewsletter = async (
 			channel: 'newsletter' as const,
 			brazeCampaignId,
 			emailRenderingId: emailRenderingNewsletterId,
+			...(blockId ? { blockId } : {}),
 		};
 		if (result.status === 'fulfilled') {
 			return {

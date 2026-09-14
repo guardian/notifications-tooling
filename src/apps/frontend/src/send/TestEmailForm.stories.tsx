@@ -11,10 +11,15 @@ import {
 	WithNotificationContext,
 } from '../testing/story-helpers';
 import type { NotificationState } from '../types';
+import type {
+	TestEmailRequestFunction,
+	TestEmailSendRequest,
+} from '../utils/send-test-email';
 import { TestEmailForm } from './TestEmailForm';
 
 type StoryArgs = {
 	notificationState: NotificationState;
+	requestTestEmailSend?: TestEmailRequestFunction;
 };
 
 type Story = StoryObj<StoryArgs>;
@@ -25,11 +30,11 @@ const meta: Meta<StoryArgs> = {
 	args: {
 		notificationState: populatedEmailState,
 	},
-	render: ({ notificationState }) =>
+	render: ({ notificationState, requestTestEmailSend }) =>
 		WithNotificationContext(
 			<TestEmailForm />,
 			notificationState,
-			{},
+			{ requestTestEmailSend },
 			'email',
 			completeEmailParams,
 		),
@@ -93,6 +98,39 @@ export const SentTestEmail: Story = {
 
 		await waitFor(() =>
 			expect(canvas.getByText('Test email sent')).toBeInTheDocument(),
+		);
+	},
+};
+
+const requestedLiveblogUrl =
+	'https://www.theguardian.com/world/live/2026/sep/04/latest-developments#block-6a9af4938f0834a1091dfae4';
+let lastBlockTestEmailRequest: TestEmailSendRequest | undefined;
+const requestBlockTestEmailSend: TestEmailRequestFunction = (request) => {
+	lastBlockTestEmailRequest = request;
+	return mockRequestTestEmailSend(request);
+};
+
+export const RequestedLiveblogBlock: Story = {
+	args: {
+		notificationState: {
+			...populatedEmailState,
+			requestedUrl: requestedLiveblogUrl,
+		},
+		requestTestEmailSend: requestBlockTestEmailSend,
+	},
+	play: async ({ canvasElement }) => {
+		lastBlockTestEmailRequest = undefined;
+		const canvas = within(canvasElement);
+		await userEvent.type(
+			canvas.getByPlaceholderText('name@theguardian.com'),
+			'joe.blogs@theguardian.com',
+		);
+		await userEvent.click(canvas.getByRole('button', { name: BUTTON_TEXT }));
+
+		await waitFor(() =>
+			expect(lastBlockTestEmailRequest?.content.items['lead-story']?.link).toBe(
+				requestedLiveblogUrl,
+			),
 		);
 	},
 };

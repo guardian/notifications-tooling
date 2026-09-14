@@ -96,6 +96,41 @@ describe('dispatchNotification (newsletter channel)', () => {
 		]);
 	});
 
+	it('forwards and records a liveblog block id', async () => {
+		const { dependencies, renderEmail } = createDependencies();
+		const blockId = '5dd7ca0f8f080fd59fb15354';
+		const articleUrl = `${newsletterItem.link}?page=with:block-${blockId}`;
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: {
+				items: { lead: { ...newsletterItem, link: articleUrl } },
+			},
+			channels: {
+				[NotificationChannel.Newsletter]: {
+					audience: { type: 'segment', items: ['UK'] },
+					compose: { items: ['lead'], subject: 'Daily briefing' },
+				},
+			},
+		};
+
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
+
+		expect(renderEmail).toHaveBeenCalledWith(
+			expect.objectContaining({ articleUrl, blockId }),
+		);
+		expect(outcomes.newsletter[0]?.resolved).toEqual({
+			channel: 'newsletter',
+			brazeCampaignId: newsletterSegments.UK.brazeCampaignId,
+			emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
+			blockId,
+		});
+	});
+
 	it('records the Braze HTTP status on a failed segment while still sending the others', async () => {
 		const { dependencies, sendBrazeCampaign } = createDependencies();
 		const brazeError = new BrazeApiError('campaign trigger', 'http_error', 502);

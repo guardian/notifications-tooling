@@ -7,7 +7,7 @@ import type {
 } from '@models';
 import { emailPreviewRequestSchema, UserPermissions } from '@models';
 import { EmailRenderingError, renderEmail } from '@services';
-import { determineArticleId } from '@utils';
+import { determineArticleId, determineBlockId } from '@utils';
 import { type Request, type Response, Router } from 'express';
 import validate from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';
@@ -27,10 +27,12 @@ const fetchEmailPreview: FetchEmailPreview = async (articleUrl, segment) => {
 	const emailRenderingEndpoint = await getSSMParameter(
 		'EMAIL_RENDERING_ENDPOINT',
 	);
+	const blockId = determineBlockId(articleUrl);
 
 	return await renderEmail({
 		endpoint: emailRenderingEndpoint,
 		articleUrl,
+		...(blockId ? { blockId } : {}),
 		newsletterId: segment.emailRenderingNewsletterId,
 		timeoutMs: EMAIL_RENDERING_REQUEST_TIMEOUT_MS,
 		// send a non-empty string so that the preview text element will be rendered

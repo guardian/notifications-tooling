@@ -20,6 +20,7 @@ describe('renderEmail', () => {
 				endpoint: 'https://email-rendering.example.com',
 				articleUrl:
 					'https://www.theguardian.com/world/2026/jul/22/example-story',
+				blockId: 'liveblog-block-id',
 				newsletterId: 'breaking-news-uk',
 				headlineOverride: 'Breaking news headline',
 				previewText: 'A summary of the breaking news.',
@@ -35,6 +36,7 @@ describe('renderEmail', () => {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
+					blockId: 'liveblog-block-id',
 					newsletterId: 'breaking-news-uk',
 					headlineOverride: 'Breaking news headline',
 					previewText: 'A summary of the breaking news.',

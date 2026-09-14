@@ -34,6 +34,7 @@ const getSendParams = (
 	emailInput: string,
 	parameters: Partial<NewsletterFormValues>,
 	content?: ResolvedArticle,
+	requestedUrl?: string,
 ): TestSendParams | undefined => {
 	if (!content) {
 		return undefined;
@@ -59,7 +60,7 @@ const getSendParams = (
 		subject,
 		preview,
 		showPreview,
-		webUrl: content.webUrl,
+		webUrl: requestedUrl ?? content.webUrl,
 	};
 };
 
@@ -119,6 +120,7 @@ export const TestEmailForm = () => {
 		emailInput,
 		parameters,
 		notification.content,
+		notification.requestedUrl,
 	);
 
 	// remove the confirmation if the user changes anything that would
@@ -131,6 +133,7 @@ export const TestEmailForm = () => {
 			emailInput,
 			parameters,
 			notification.content,
+			notification.requestedUrl,
 		);
 		if (!newSendParams) {
 			// eslint-disable-next-line react-hooks/set-state-in-effect -- is ok
@@ -149,6 +152,7 @@ export const TestEmailForm = () => {
 		paramsLastUsed,
 		emailInput,
 		notification.content,
+		notification.requestedUrl,
 		parameters,
 	]);
 

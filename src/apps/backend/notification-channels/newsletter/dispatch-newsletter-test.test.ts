@@ -95,6 +95,60 @@ describe('dispatchNewsletterTest', () => {
 		]);
 	});
 
+	it('forwards and records a liveblog block id', async () => {
+		const { dependencies, renderEmail, sendBrazeTestEmail } =
+			createDependencies();
+		const blockId = '5dd7ca0f8f080fd59fb15354';
+		const articleUrl = `${newsletterItem.link}#block-${blockId}`;
+		renderEmail.mockResolvedValue(`
+			<a href="https://www.theguardian.com/live/blog?page=with:block-${blockId}&amp;##braze_utm###block-${blockId}">Live update</a>
+			<a href="https://support.theguardian.com?##braze_utm##">Support us</a>
+		`);
+		const request: NotificationTestSendRequest = {
+			idempotencyKey: 'test-liveblog-block',
+			sender: 'dispatch-test',
+			options: { dryRun: false },
+			content: {
+				items: {
+					newsletter: { ...newsletterItem, link: articleUrl },
+				},
+			},
+			channels: {
+				[NotificationChannel.Newsletter]: {
+					audience: {
+						type: 'email',
+						items: ['test.user@guardian.co.uk'],
+					},
+					variants: ['UK'],
+					compose: { items: ['newsletter'], subject: 'Test briefing' },
+				},
+			},
+		};
+
+		const { outcomes } = await dispatchNewsletterTest(
+			request,
+			testId,
+			dependencies,
+		);
+
+		expect(renderEmail).toHaveBeenCalledWith(
+			expect.objectContaining({ articleUrl, blockId }),
+		);
+		expect(sendBrazeTestEmail).toHaveBeenCalledWith(
+			expect.objectContaining({
+				html: `
+			<a href="https://www.theguardian.com/live/blog?page=with:block-${blockId}#block-${blockId}">Live update</a>
+			<a href="https://support.theguardian.com">Support us</a>
+		`,
+			}),
+		);
+		expect(outcomes[0]?.resolved).toEqual({
+			channel: 'newsletter',
+			emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
+			blockId,
+		});
+	});
+
 	it('renders, registers and sends even when dryRun is set (gated by the orchestrator)', async () => {
 		const {
 			dependencies,

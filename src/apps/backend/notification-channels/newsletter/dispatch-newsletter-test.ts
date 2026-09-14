@@ -1,4 +1,5 @@
 import { newsletterSegments, NotificationChannel } from '@config';
+import { determineBlockId } from '@utils';
 import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { NewsletterDispatchOutcome } from '../dispatch-outcome';
@@ -31,6 +32,14 @@ const testEmailEnvironmentSchema = z.object({
 		z.union([z.email(), z.literal('NO_REPLY_TO')]).default('NO_REPLY_TO'),
 	),
 });
+
+const campaignLinkTrackingTokenWithSeparator =
+	/(?:\?|&(?:amp;)?)##braze_utm##/g;
+
+// Direct /messages/send calls do not expand campaign placeholders; removing the
+// separator as well keeps a following URL fragment valid.
+const formatHtmlForBrazeTestSend = (html: string): string =>
+	html.replace(campaignLinkTrackingTokenWithSeparator, '');
 
 /**
  * Sends one Braze test email per rendering variant to the registered test
@@ -80,6 +89,7 @@ export const dispatchNewsletterTest = async (
 	const recipientEmails = plan.audience.items.map((email) =>
 		email.toLowerCase(),
 	);
+	const blockId = determineBlockId(item.link);
 
 	// All variants must render before any Braze call; a render failure aborts.
 	const renderedVariants: Array<{
@@ -90,17 +100,19 @@ export const dispatchNewsletterTest = async (
 	for (const segmentId of plan.variants) {
 		const emailRenderingId =
 			newsletterSegments[segmentId].emailRenderingNewsletterId;
+		const html = await dependencies.renderEmail({
+			endpoint: environment.EMAIL_RENDERING_ENDPOINT,
+			articleUrl: item.link,
+			...(blockId ? { blockId } : {}),
+			newsletterId: emailRenderingId,
+			headlineOverride: item.title,
+			previewText: item.body,
+			timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+		});
 		renderedVariants.push({
 			segmentId,
 			emailRenderingId,
-			html: await dependencies.renderEmail({
-				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
-				articleUrl: item.link,
-				newsletterId: emailRenderingId,
-				headlineOverride: item.title,
-				previewText: item.body,
-				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-			}),
+			html: formatHtmlForBrazeTestSend(html),
 		});
 	}
 
@@ -127,7 +139,11 @@ export const dispatchNewsletterTest = async (
 	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
 		const { segmentId, emailRenderingId } = renderedVariants[index]!;
 		const requested = { channel: 'newsletter' as const, segment: segmentId };
-		const resolved = { channel: 'newsletter' as const, emailRenderingId };
+		const resolved = {
+			channel: 'newsletter' as const,
+			emailRenderingId,
+			...(blockId ? { blockId } : {}),
+		};
 		if (result.status === 'fulfilled') {
 			return {
 				requested,

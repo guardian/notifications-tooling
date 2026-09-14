@@ -66,6 +66,7 @@ const failedNotification: SendNotificationResponse = {
 				channel: 'app-push',
 				topics: [{ type: 'breaking', name: 'uk' }],
 				importance: 'Major',
+				blockId: '5dd7ca0f8f080fd59fb15354',
 			},
 			status: 'failure',
 			providerRef: null,

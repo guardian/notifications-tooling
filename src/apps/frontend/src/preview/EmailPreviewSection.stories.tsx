@@ -1,16 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, fn, waitFor, within } from 'storybook/test';
+import { mockRequestEmailHtml } from '../testing/mock-fetch-email';
 import type { completeEmailParams } from '../testing/story-helpers';
 import {
 	populatedEmailState,
 	WithNotificationContext,
 } from '../testing/story-helpers';
 import type { NotificationState } from '../types';
+import type { RequestEmailHtml } from '../types';
 import { EmailPreviewSection } from './EmailPreviewSection';
 
 type StoryArgs = {
 	notificationState: NotificationState;
 	formValues?: Partial<typeof completeEmailParams>;
+	requestEmailHtml?: RequestEmailHtml;
 };
 
 const meta: Meta<StoryArgs> = {
@@ -19,11 +22,11 @@ const meta: Meta<StoryArgs> = {
 	args: {
 		notificationState: populatedEmailState,
 	},
-	render: ({ notificationState, formValues }) =>
+	render: ({ notificationState, formValues, requestEmailHtml }) =>
 		WithNotificationContext(
 			<EmailPreviewSection />,
 			notificationState,
-			{},
+			{ requestEmailHtml },
 			'email',
 			formValues,
 		),
@@ -72,5 +75,28 @@ export const FullyPopulated: Story = {
 	args: {
 		notificationState: populatedEmailState,
 		formValues: { audienceSegments: ['UK', 'US', 'AU'] },
+	},
+};
+
+const requestedLiveblogUrl =
+	'https://www.theguardian.com/world/live/2026/sep/04/latest-developments#block-6a9af4938f0834a1091dfae4';
+const requestBlockEmailHtml = fn(mockRequestEmailHtml);
+
+export const RequestedLiveblogBlock: Story = {
+	args: {
+		notificationState: {
+			...populatedEmailState,
+			requestedUrl: requestedLiveblogUrl,
+		},
+		formValues: { audienceSegments: ['UK'] },
+		requestEmailHtml: requestBlockEmailHtml,
+	},
+	play: async () => {
+		await waitFor(() =>
+			expect(requestBlockEmailHtml).toHaveBeenCalledWith({
+				article: requestedLiveblogUrl,
+				audience: ['UK'],
+			}),
+		);
 	},
 };

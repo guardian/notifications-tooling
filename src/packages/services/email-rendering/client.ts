@@ -7,6 +7,7 @@ const renderedNotificationSchema = z.object({
 type RenderEmailRequest = {
 	endpoint: string;
 	articleUrl: string;
+	blockId?: string;
 	newsletterId: string;
 	headlineOverride?: string;
 	previewText?: string;
@@ -59,6 +60,7 @@ const articleIdFromUrl = (articleUrl: string): string => {
 export const renderEmail = async ({
 	endpoint,
 	articleUrl,
+	blockId,
 	newsletterId,
 	headlineOverride,
 	previewText,
@@ -75,7 +77,12 @@ export const renderEmail = async ({
 		response = await fetch(renderUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ newsletterId, headlineOverride, previewText }),
+			body: JSON.stringify({
+				blockId,
+				newsletterId,
+				headlineOverride,
+				previewText,
+			}),
 			signal: AbortSignal.timeout(timeoutMs),
 		});
 	} catch (error) {
