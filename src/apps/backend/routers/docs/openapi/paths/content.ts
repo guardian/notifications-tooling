@@ -88,3 +88,34 @@ export const resolveArticlePath = {
 		},
 	},
 } as const;
+
+/** The `/v1/content/articles/latest` path item. */
+export const latestArticlesPath = {
+	get: {
+		summary: 'List the latest published Guardian articles',
+		description:
+			'Returns the ten most recently published Content API items, ordered by web publication date.',
+		security: [{ pandaCookie: [] }],
+		responses: {
+			'200': {
+				description: 'The latest published articles and CAPI pagination data.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/LatestArticles' },
+					},
+				},
+			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
+			'502': {
+				description:
+					'The Content API could not be reached or returned an invalid response (`capi_unavailable`).',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/ArticleResolutionError' },
+					},
+				},
+			},
+		},
+	},
+} as const;

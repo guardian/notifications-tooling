@@ -10,6 +10,7 @@ import { emailPreviewResponseJsonSchema } from './email-preview-response';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
+import { latestArticlesSchema } from './latest-articles';
 import { liveblogBlockSchema } from './liveblog-block';
 import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
@@ -57,6 +58,7 @@ export const schemas = {
 	UserResponse: userResponseSchema,
 	Unauthenticated: unauthenticatedSchema,
 	InsufficientPermissions: insufficientPermissionsSchema,
+	LatestArticles: latestArticlesSchema,
 	EmailPreviewErrorSchema: emailPreviewErrorSchema,
 	EmailPreviewRequest: emailPreviewRequestJsonSchema,
 	EmailPreviewResponse: emailPreviewResponseJsonSchema,

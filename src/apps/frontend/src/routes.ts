@@ -22,6 +22,7 @@ export const getAppRoutes = (config: AppConfig | undefined) => {
 		appAlertReport: config?.DISABLE_APP_SEND_TAB
 			? undefined
 			: notificationRoutes.push.report,
+		latestArticles: '/latest',
 		history: '/history',
 	};
 };
@@ -44,6 +45,11 @@ export const getTopBarNavigationItems = (
 					path: routes.createAppAlert,
 					activePaths: [routes.createAppAlert, routes.appAlertReport!],
 				},
+		{
+			text: 'Latest articles',
+			path: routes.latestArticles,
+			activePaths: [routes.latestArticles],
+		},
 		{ text: 'History', path: routes.history, activePaths: [routes.history] },
 	].flat();
 };

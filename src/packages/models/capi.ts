@@ -108,20 +108,21 @@ export const capiResponseSchema = z.object({
 });
 export type CapiResponse = z.infer<typeof capiResponseSchema>;
 
+export const capiSearchResultSchema = z.object({
+	status: z.string(),
+	total: z.number().int().nonnegative(),
+	startIndex: z.number().int().nonnegative(),
+	pageSize: z.number().int().nonnegative(),
+	currentPage: z.number().int().positive(),
+	pages: z.number().int().nonnegative(),
+	orderBy: z.string(),
+	results: z.array(capiContentSchema),
+});
 export const capiSearchResponseSchema = z.object({
-	response: z.object({
-		status: z.string(),
-		total: z.number().int().nonnegative(),
-		startIndex: z.number().int().nonnegative(),
-		pageSize: z.number().int().nonnegative(),
-		currentPage: z.number().int().positive(),
-		pages: z.number().int().nonnegative(),
-		orderBy: z.string(),
-		results: z.array(capiContentSchema),
-	}),
+	response: capiSearchResultSchema,
 });
 export type CapiSearchResponse = z.infer<typeof capiSearchResponseSchema>;
-export type CapiSearchResult = CapiSearchResponse['response'];
+export type CapiSearchResult = z.infer<typeof capiSearchResultSchema>;
 
 export const resolveArticleResponseSchema = z.object({
 	article: capiContentSchema,

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import type { CapiSearchResult } from '@models';
 import { UserPermissions } from '@models';
 import { CapiError } from '@models';
 import express from 'express';
@@ -30,6 +31,7 @@ const { startTestServer } = await import('../../utils/test-utils/server');
  */
 
 const ROUTE = '/v1/content/articles/resolve';
+const LATEST_ROUTE = '/v1/content/articles/latest';
 
 let server: TestServer;
 let baseUrl: string;
@@ -50,16 +52,28 @@ const resolvedArticle = {
 const validUrl =
 	'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures';
 
+const latestArticles: CapiSearchResult = {
+	status: 'ok',
+	total: 1,
+	startIndex: 1,
+	pageSize: 10,
+	currentPage: 1,
+	pages: 1,
+	orderBy: 'newest',
+	results: [resolvedArticle],
+};
+
 beforeAll(async () => {
 	authenticateRequests();
 	grantPermissions([UserPermissions.DispatchAccess]);
 	// The default router resolves an article that is always found, so the
 	// auth/permission/validation cases below never hit the network.
 	const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
+	const searchArticles = mock(() => Promise.resolve(latestArticles));
 	server = await startTestServer(
 		express()
 			.use(express.json())
-			.use('/v1/content', createContentRouter(resolveArticle)),
+			.use('/v1/content', createContentRouter(resolveArticle, searchArticles)),
 	);
 	baseUrl = server.baseUrl;
 });
@@ -84,6 +98,23 @@ const withResolver = async (
 		express()
 			.use(express.json())
 			.use('/v1/content', createContentRouter(resolveArticle)),
+	);
+	try {
+		await run(testServer.baseUrl);
+	} finally {
+		await testServer.close();
+	}
+};
+
+const withSearcher = async (
+	searchArticles: () => Promise<CapiSearchResult>,
+	run: (baseUrl: string) => Promise<void>,
+): Promise<void> => {
+	const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
+	const testServer = await startTestServer(
+		express()
+			.use(express.json())
+			.use('/v1/content', createContentRouter(resolveArticle, searchArticles)),
 	);
 	try {
 		await run(testServer.baseUrl);
@@ -329,6 +360,49 @@ describe('POST /v1/content/articles/resolve', () => {
 			expect(((await response.json()) as { error: string }).error).toBe(
 				'bad_request',
 			);
+		});
+	});
+});
+
+describe('GET /v1/content/articles/latest', () => {
+	it('blocks unauthenticated requests', async () => {
+		await assertUnauthenticatedRequestBlocked(baseUrl, {
+			method: 'GET',
+			path: LATEST_ROUTE,
+		});
+	});
+
+	it('blocks requests without the dispatch permission', async () => {
+		await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+			method: 'GET',
+			path: LATEST_ROUTE,
+		});
+	});
+
+	it('returns the latest articles from CAPI', async () => {
+		const searchArticles = mock(() => Promise.resolve(latestArticles));
+
+		await withSearcher(searchArticles, async (url) => {
+			const response = await fetch(`${url}${LATEST_ROUTE}`);
+
+			expect(response.status).toBe(200);
+			expect(await response.json()).toEqual(latestArticles);
+			expect(searchArticles).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	it('returns 502 when CAPI cannot be reached', async () => {
+		const searchArticles = mock(() =>
+			Promise.reject(new CapiError('unavailable')),
+		);
+
+		await withSearcher(searchArticles, async (url) => {
+			const response = await fetch(`${url}${LATEST_ROUTE}`);
+
+			expect(response.status).toBe(502);
+			expect(await response.json()).toMatchObject({
+				error: 'capi_unavailable',
+			});
 		});
 	});
 });

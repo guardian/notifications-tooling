@@ -13,6 +13,7 @@ import { ConfigContext } from './config/ConfigContext';
 import { getAppConfig } from './config/get-config';
 import { EmailNotificationPage } from './EmailNotificationPage';
 import { HistoryPage } from './history/HistoryPage';
+import { LatestArticlesPage } from './latest/LatestArticlesPage';
 import { DispatchLandingTab } from './layout/DispatchLandingTab';
 import { NotFoundTab } from './layout/NotFoundTab';
 import { getAppRoutes } from './routes';
@@ -54,6 +55,10 @@ export function App() {
 							<Route path="report" element={<AppAlertDispatchReportTab />} />
 						</Route>
 					)}
+					<Route
+						path={appRoutes.latestArticles}
+						element={<LatestArticlesPage />}
+					/>
 					<Route path={appRoutes.history} element={<HistoryPage />} />
 					<Route path="*" element={<NotFoundTab />} />
 				</Route>
