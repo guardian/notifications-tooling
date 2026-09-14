@@ -83,24 +83,14 @@ const getNewsletterAlertType = (subject: string): string => {
 };
 
 export const getSenderDisplayName = (createdByEmail: string): string => {
-	if (!createdByEmail.includes('@')) {
-		return createdByEmail;
-	}
-
 	const [senderName] = createdByEmail.split('@');
-	if (!senderName) {
-		return createdByEmail;
-	}
-
-	const names = senderName.split(/[._-]+/).filter(Boolean);
+	const names = senderName?.split(/[._-]+/).filter(Boolean) ?? [];
 	if (names.length === 0) {
 		return createdByEmail;
 	}
 
 	return names
-		.map(
-			(name) => `${name[0]?.toUpperCase() ?? ''}${name.slice(1).toLowerCase()}`,
-		)
+		.map((name) => `${name[0]?.toUpperCase()}${name.slice(1).toLowerCase()}`)
 		.join(' ');
 };
 
