@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import type { ResolvedArticle } from '@models';
 import { CapiError } from '@models';
-import { fetchArticle } from './client';
+import { fetchArticle, searchLatestArticles } from './client';
 
 afterEach(() => {
 	mock.restore();
@@ -176,5 +176,130 @@ describe('fetchArticle', () => {
 				timeoutMs: 10_000,
 			}),
 		).rejects.toMatchObject({ name: 'CapiError', reason: 'invalid_response' });
+	});
+});
+
+describe('searchLatestArticles', () => {
+	it('returns articles ordered by published date, newest first', async () => {
+		const timeoutSignal = new AbortController().signal;
+		const timeout = spyOn(AbortSignal, 'timeout').mockReturnValue(
+			timeoutSignal,
+		);
+		const payload = {
+			response: {
+				status: 'ok',
+				total: 1,
+				startIndex: 1,
+				pageSize: 10,
+				currentPage: 2,
+				pages: 1,
+				orderBy: 'newest',
+				results: [capiPayload.response.content],
+			},
+		};
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json(payload),
+		);
+
+		const result = await searchLatestArticles({
+			endpoint: 'https://content.guardianapis.com',
+			apiKey: 'test-key',
+			timeoutMs: 10_000,
+			query: 'climate crisis',
+			section: 'environment',
+			page: 2,
+			pageSize: 10,
+		});
+
+		expect(result).toEqual(payload.response);
+		expect(timeout).toHaveBeenCalledWith(10_000);
+		expect(fetcher).toHaveBeenCalledWith(
+			new URL(
+				'https://content.guardianapis.com/search?api-key=test-key&order-by=newest&order-date=published&show-fields=all&page=2&page-size=10&q=climate+crisis&section=environment',
+			),
+			{ signal: timeoutSignal },
+		);
+	});
+
+	it('uses the first page with 20 results by default', async () => {
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({
+				response: {
+					status: 'ok',
+					total: 0,
+					startIndex: 0,
+					pageSize: 20,
+					currentPage: 1,
+					pages: 0,
+					orderBy: 'newest',
+					results: [],
+				},
+			}),
+		);
+
+		await searchLatestArticles({
+			endpoint: 'https://content.guardianapis.com',
+			apiKey: 'test-key',
+			timeoutMs: 10_000,
+		});
+
+		expect(fetcher).toHaveBeenCalledWith(
+			new URL(
+				'https://content.guardianapis.com/search?api-key=test-key&order-by=newest&order-date=published&show-fields=all&page=1&page-size=20',
+			),
+			expect.anything(),
+		);
+	});
+
+	it('rejects page sizes outside the CAPI range', () => {
+		expect(
+			searchLatestArticles({
+				endpoint: 'https://content.guardianapis.com',
+				apiKey: 'test-key',
+				timeoutMs: 10_000,
+				pageSize: 51,
+			}),
+		).rejects.toBeInstanceOf(RangeError);
+	});
+
+	it('classifies HTTP and network failures as unavailable', () => {
+		spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+			new Response('boom', { status: 500 }),
+		);
+
+		expect(
+			searchLatestArticles({
+				endpoint: 'https://content.guardianapis.com',
+				apiKey: 'test-key',
+				timeoutMs: 10_000,
+			}),
+		).rejects.toMatchObject({ name: 'CapiError', reason: 'unavailable' });
+
+		spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('offline'));
+
+		expect(
+			searchLatestArticles({
+				endpoint: 'https://content.guardianapis.com',
+				apiKey: 'test-key',
+				timeoutMs: 10_000,
+			}),
+		).rejects.toMatchObject({ name: 'CapiError', reason: 'unavailable' });
+	});
+
+	it('classifies malformed responses as invalid_response', () => {
+		spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ response: { status: 'ok', results: [] } }),
+		);
+
+		expect(
+			searchLatestArticles({
+				endpoint: 'https://content.guardianapis.com',
+				apiKey: 'test-key',
+				timeoutMs: 10_000,
+			}),
+		).rejects.toMatchObject({
+			name: 'CapiError',
+			reason: 'invalid_response',
+		});
 	});
 });
