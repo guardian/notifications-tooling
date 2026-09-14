@@ -75,6 +75,11 @@ export const DispatchLandingTab = () => {
 						paddingTop: semanticSpacing.stackMd,
 						[from.md]: {
 							flexDirection: 'row',
+							flexWrap: 'wrap',
+							justifyContent: 'flex-start',
+						},
+						[from.lg]: {
+							flexWrap: 'nowrap',
 							justifyContent: 'space-between',
 						},
 					}}
