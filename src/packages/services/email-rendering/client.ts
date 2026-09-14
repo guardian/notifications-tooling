@@ -10,6 +10,7 @@ type RenderEmailRequest = {
 	newsletterId: string;
 	headlineOverride?: string;
 	previewText?: string;
+	hideKicker?: boolean;
 	timeoutMs: number;
 };
 
@@ -62,6 +63,7 @@ export const renderEmail = async ({
 	newsletterId,
 	headlineOverride,
 	previewText,
+	hideKicker,
 	timeoutMs,
 }: RenderEmailRequest): Promise<string> => {
 	const articleId = articleIdFromUrl(articleUrl)
@@ -70,15 +72,29 @@ export const renderEmail = async ({
 		.join('/');
 	const renderUrl = new URL(`/notification/${articleId}.json`, endpoint);
 
+	console.log('renderEmail: requesting', {
+		renderUrl: renderUrl.toString(),
+		newsletterId,
+		headlineOverride,
+		previewText,
+		hideKicker,
+	});
+
 	let response: Response;
 	try {
 		response = await fetch(renderUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ newsletterId, headlineOverride, previewText }),
+			body: JSON.stringify({
+				newsletterId,
+				headlineOverride,
+				previewText,
+				hideKicker,
+			}),
 			signal: AbortSignal.timeout(timeoutMs),
 		});
 	} catch (error) {
+		console.log('renderEmail: request failed', error);
 		throw new EmailRenderingError(
 			undefined,
 			isTimeoutError(error) ? 'timeout' : 'network_error',
@@ -86,12 +102,16 @@ export const renderEmail = async ({
 		);
 	}
 
+	console.log('renderEmail: response received', { status: response.status });
+
 	if (!response.ok) {
 		throw new EmailRenderingError(response.status);
 	}
 
 	try {
-		return renderedNotificationSchema.parse(await response.json()).body;
+		const html = renderedNotificationSchema.parse(await response.json()).body;
+		console.log('renderEmail: parsed html', { length: html.length });
+		return html;
 	} catch (error) {
 		throw new EmailRenderingError(response.status, 'invalid_response', {
 			cause: error,
