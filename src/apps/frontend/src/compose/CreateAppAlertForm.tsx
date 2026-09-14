@@ -59,10 +59,9 @@ export const CreateAppAlertForm = () => {
 			onResetNotification={() =>
 				updateNotification({ type: 'reset-app-alert' })
 			}
-			onArticleImported={(article, requestedBlock) => {
+			onArticleImported={(article) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);
-				const articleThumbnailUrl =
-					getArticleThumbnail(article, requestedBlock).src ?? '';
+				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
 				setValue('articleThumbnailUrl', articleThumbnailUrl);
 			}}
