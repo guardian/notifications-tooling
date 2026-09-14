@@ -13,13 +13,11 @@ import { PreviewTextFormField } from './PreviewTextFormField';
 import { SubjectFormField } from './SubjectFormField';
 
 interface CreateNewsletterFormProps {
-	activeSectionHref: string;
 	showPreview: boolean;
 	onTogglePreview: (showPreview: boolean) => void;
 }
 
 export const CreateNewsletterForm = ({
-	activeSectionHref,
 	showPreview,
 	onTogglePreview,
 }: CreateNewsletterFormProps) => {
@@ -55,7 +53,6 @@ export const CreateNewsletterForm = ({
 
 	return (
 		<NotificationFormWrapper
-			activeSectionHref={activeSectionHref}
 			title="Create newsletter email"
 			formLabel="Create newsletter email"
 			channel="email"
@@ -78,10 +75,7 @@ export const CreateNewsletterForm = ({
 				}
 			}}
 		>
-			<NotificationFormSection
-				id="content-section"
-				isActive={activeSectionHref === '#content-section'}
-			>
+			<NotificationFormSection id="content-section">
 				<KickerFormField />
 				<SubjectFormField constraints={constraints} />
 				<PreviewTextFormField
@@ -90,10 +84,7 @@ export const CreateNewsletterForm = ({
 					onTogglePreview={onTogglePreview}
 				/>
 			</NotificationFormSection>
-			<NotificationFormSection
-				id="audience-section"
-				isActive={activeSectionHref === '#audience-section'}
-			>
+			<NotificationFormSection id="audience-section">
 				<AudienceSegmentsFormField />
 			</NotificationFormSection>
 		</NotificationFormWrapper>

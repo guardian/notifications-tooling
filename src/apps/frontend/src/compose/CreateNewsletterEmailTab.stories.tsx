@@ -84,6 +84,8 @@ export const SectionNavigation: Story = {
 		if (!window) {
 			throw new Error('Story window is not available');
 		}
+		window.history.replaceState(null, '', '#article-section');
+		window.dispatchEvent(new PopStateEvent('popstate'));
 
 		const expectActiveSection = async (id: string) => {
 			await waitFor(async () => {
@@ -112,6 +114,12 @@ export const SectionNavigation: Story = {
 			window.scrollTo({ top: 0 });
 			window.dispatchEvent(new Event('scroll'));
 			await expectActiveSection('article-section');
+		});
+
+		await step('a direct hash change updates the active section', async () => {
+			window.history.pushState(null, '', '#audience-section');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+			await expectActiveSection('audience-section');
 		});
 
 		await step('clicking Content updates the hash and highlight', async () => {
