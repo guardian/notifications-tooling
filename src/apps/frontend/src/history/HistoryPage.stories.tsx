@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
-import { expect, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import type { NotificationListResponse } from '../schemas';
 import { articleFixture } from '../testing/capi-fixtures';
@@ -163,8 +163,14 @@ const historyResponse: NotificationListResponse = {
 	],
 };
 
-const historyHandler = http.get(`${getApiBaseUrl()}/v1/notifications`, () =>
-	HttpResponse.json(historyResponse),
+const historyRequest = fn();
+const historyHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications`,
+	async () => {
+		historyRequest();
+		await delay(300);
+		return HttpResponse.json(historyResponse);
+	},
 );
 
 const loadingHistoryHandler = http.get(
@@ -181,7 +187,7 @@ const failedHistoryHandler = http.get(
 );
 
 const meta = {
-	title: 'Stand Frontend/HistoryPage',
+	title: 'Dispatch/History/HistoryPage',
 	component: HistoryPage,
 	parameters: {
 		layout: 'fullscreen',
@@ -198,6 +204,18 @@ export const Loaded: Story = {
 		await expect(
 			await canvas.findByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
+		const refreshButton = canvas.getByRole('button', {
+			name: 'Refresh activity',
+		});
+		historyRequest.mockClear();
+		await userEvent.click(refreshButton);
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(refreshButton).toBeDisabled();
+		});
+		await waitFor(async () => {
+			await expect(refreshButton).toBeEnabled();
+		});
 		await expect(
 			canvas.getByRole('link', {
 				name: 'Prime minister announces cabinet reshuffle',
@@ -225,10 +243,12 @@ export const Loading: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Loading history...')).toBeVisible();
 		await expect(
-			canvas.queryByRole('grid', { name: 'Sent alerts' }),
-		).not.toBeInTheDocument();
+			canvas.getByRole('status', { name: 'Loading alert history' }),
+		).toHaveAttribute('aria-busy', 'true');
+		await expect(
+			canvas.getByRole('grid', { name: 'Loading sent alerts' }),
+		).toBeVisible();
 	},
 };
 

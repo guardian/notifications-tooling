@@ -1,10 +1,9 @@
-import type { Result } from '../api-client/client';
 import type { ApiError } from '../api-client/errors';
-import type { SendNotificationResponse } from '../schemas';
+import type { SendNotificationResult } from '../utils/send-notification';
 import { acceptedEmailSendResponse } from './api-fixtures';
 
 export const mockSendNotification = () => {
-	return new Promise<Result<SendNotificationResponse>>((resolve) => {
+	return new Promise<SendNotificationResult>((resolve) => {
 		setTimeout(() => {
 			resolve({
 				success: true,
@@ -15,7 +14,7 @@ export const mockSendNotification = () => {
 };
 
 export const mockSendRejectedNotification = (apiError: ApiError) => () => {
-	return new Promise<Result<SendNotificationResponse>>((resolve) => {
+	return new Promise<SendNotificationResult>((resolve) => {
 		setTimeout(() => {
 			resolve({
 				success: false,

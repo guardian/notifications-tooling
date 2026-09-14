@@ -49,6 +49,13 @@ export const HistoryPage = () => {
 			}
 			limit={limit}
 			handlePageChange={handlePageChange}
+			handleRefresh={() => void notificationHistory.refetch()}
+			isRefreshing={notificationHistory.isFetching}
+			lastUpdatedAt={
+				notificationHistory.dataUpdatedAt
+					? new Date(notificationHistory.dataUpdatedAt).toISOString()
+					: undefined
+			}
 			currentPage={currentPage}
 		/>
 	);

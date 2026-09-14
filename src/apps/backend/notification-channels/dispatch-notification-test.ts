@@ -21,6 +21,7 @@ export type TestDispatchOutcomes = {
 export const dispatchNotificationTest = async (
 	request: NotificationTestSendRequest,
 	testId: string,
+	createdByEmail: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
 ): Promise<TestDispatchOutcomes> => {
 	if (request.options.dryRun) {
@@ -33,7 +34,7 @@ export const dispatchNotificationTest = async (
 	// false 202.
 	const [newsletter, appPush] = await Promise.all([
 		dispatchNewsletterTest(request, testId, dependencies),
-		dispatchAppPushTest(request, testId, dependencies),
+		dispatchAppPushTest(request, testId, createdByEmail, dependencies),
 	]);
 
 	return {

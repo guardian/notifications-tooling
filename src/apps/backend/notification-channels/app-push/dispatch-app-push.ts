@@ -75,7 +75,10 @@ export const groupAppPushTopicsByType = (
 	return [...pushesByKey.values()];
 };
 
-export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
+export const resolveAppPushDispatch = (
+	request: NotificationSendRequest,
+	createdByEmail: string,
+) => {
 	const plan = request.channels[NotificationChannel.AppPushNotification];
 	if (!plan) {
 		return;
@@ -89,12 +92,12 @@ export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 
 	return {
 		item,
-		sender: request.sender,
+		createdByEmail,
 		pushes: groupAppPushTopicsByType(plan.audience.items),
 	};
 };
 
-/** The content, sender and grouped pushes a single app-push dispatch sends. */
+/** The content, author and grouped pushes a single app-push dispatch sends. */
 export type ResolvedAppPushDispatch = NonNullable<
 	ReturnType<typeof resolveAppPushDispatch>
 >;
@@ -102,10 +105,10 @@ export type ResolvedAppPushDispatch = NonNullable<
 /**
  * Sends one mobile-n10n push per resolved topic-type group and maps each to a
  * dispatch outcome. Shared by the production and internal-test push flows, which
- * differ only in how they resolve the content, sender and pushes.
+ * differ only in how they resolve the content, author and pushes.
  */
 export const sendResolvedAppPushes = async (
-	{ item, sender, pushes }: ResolvedAppPushDispatch,
+	{ item, createdByEmail, pushes }: ResolvedAppPushDispatch,
 	dependencies: DispatchNotificationDependencies,
 ): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
 	const [endpoint, apiKey] = await Promise.all([
@@ -134,7 +137,9 @@ export const sendResolvedAppPushes = async (
 				apiKey: environment.MOBILE_N10N_API_KEY,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 				id,
-				sender,
+				// Ophan attributes on this single string; send the author's email so
+				// the notification is traced to them rather than the app.
+				sender: createdByEmail,
 				title: push.titleOverride ?? item.title,
 				body: item.body,
 				link: item.link,

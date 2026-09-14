@@ -5,6 +5,7 @@ import type { NotificationSendRequest } from '../../routers/notifications/schema
 import { dispatchNotification } from '../dispatch-notification';
 import {
 	baseRequest,
+	createdByEmail,
 	createDependencies,
 	newsletterItem,
 	notificationId,
@@ -35,6 +36,7 @@ describe('dispatchNotification (newsletter channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 		expect(renderEmail).toHaveBeenNthCalledWith(1, {

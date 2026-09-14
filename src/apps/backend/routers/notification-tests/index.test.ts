@@ -142,6 +142,7 @@ describe('POST /v1/notification-tests', () => {
 					options: { dryRun: false },
 				},
 				expect.any(String),
+				expect.any(String),
 			);
 			expect(typeof body.id).toBe('string');
 			expect(body.kind).toBe('test');
@@ -184,7 +185,11 @@ describe('POST /v1/notification-tests', () => {
 			const body = (await response.json()) as { dryRun: boolean };
 
 			expect(response.status).toBe(202);
-			expect(dispatchRequest).toHaveBeenCalledWith(request, expect.any(String));
+			expect(dispatchRequest).toHaveBeenCalledWith(
+				request,
+				expect.any(String),
+				expect.any(String),
+			);
 			expect(body.dryRun).toBe(true);
 		} finally {
 			await dispatchServer.close();
@@ -247,6 +252,7 @@ describe('POST /v1/notification-tests', () => {
 			expect(response.status).toBe(202);
 			expect(dispatchRequest).toHaveBeenCalledWith(
 				{ ...request, options: { dryRun: false } },
+				expect.any(String),
 				expect.any(String),
 			);
 			expect(typeof body.id).toBe('string');
@@ -330,7 +336,11 @@ describe('POST /v1/notification-tests', () => {
 				}),
 				'ada.lovelace@guardian.co.uk',
 			);
-			expect(dispatchRequest).toHaveBeenCalledWith(expect.anything(), body.id);
+			expect(dispatchRequest).toHaveBeenCalledWith(
+				expect.anything(),
+				body.id,
+				'ada.lovelace@guardian.co.uk',
+			);
 			expect(body.dispatches).toEqual([
 				{
 					id: 'd1',

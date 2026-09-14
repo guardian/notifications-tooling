@@ -163,6 +163,7 @@ const listRecentNotifications: ListRecentNotifications = async (options) => {
 type DispatchValidatedNotification = (
 	request: NotificationSendRequest,
 	notificationId: string,
+	createdByEmail: string,
 ) => Promise<DispatchOutcomes>;
 
 export const createNotificationsRouter = (
@@ -196,6 +197,7 @@ export const createNotificationsRouter = (
 				const { error, ...outcomes } = await dispatchRequest(
 					body,
 					notification.id,
+					notification.createdByEmail,
 				);
 				const persisted = await store.recordOutcomes(notification, outcomes);
 				outcomesRecorded = true;

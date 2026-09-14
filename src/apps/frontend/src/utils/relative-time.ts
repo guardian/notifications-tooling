@@ -13,7 +13,7 @@ const absoluteTimeFormatter = new Intl.DateTimeFormat('en-GB', {
 	timeZone: 'Europe/London',
 });
 
-export type RelativeTimeStyle = 'short' | 'long';
+export type RelativeTimeStyle = 'short' | 'long' | 'long-minutes';
 
 /**
  * Parses a CAPI `iso8601` publication date, returning `undefined` when the
@@ -62,12 +62,12 @@ export const formatRelativeTime = (
 	}
 	if (elapsedMs < HOUR_MS) {
 		const minutes = Math.floor(elapsedMs / MINUTE_MS);
-		return style === 'long'
+		return style !== 'short'
 			? longRelativeLabel(minutes, 'min')
 			: `${minutes}m ago`;
 	}
 	const hours = Math.floor(elapsedMs / HOUR_MS);
-	return style === 'long' ? longRelativeLabel(hours, 'hour') : `${hours}h ago`;
+	return style !== 'short' ? longRelativeLabel(hours, 'hour') : `${hours}h ago`;
 };
 
 /** Full date and time, used as the tooltip/screen-reader detail for a relative label. */
@@ -91,6 +91,9 @@ export const getRefreshIntervalMs = (
 	}
 	if (style === 'long' && elapsedMs < MINUTE_MS) {
 		return SECOND_MS;
+	}
+	if (style === 'long-minutes' && elapsedMs < MINUTE_MS) {
+		return MINUTE_MS - elapsedMs;
 	}
 	const regularIntervalMs =
 		elapsedMs < HOUR_MS ? 30 * SECOND_MS : 5 * MINUTE_MS;
