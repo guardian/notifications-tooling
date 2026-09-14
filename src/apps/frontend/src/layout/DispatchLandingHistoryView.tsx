@@ -78,7 +78,7 @@ export const DispatchLandingHistoryView = ({
 			)}
 			{error}
 			{!isLoading && !error && (
-				<HistoryTable notifications={notifications} dispatchLandingPage />
+				<HistoryTable notifications={notifications} showUserName />
 			)}
 			{!isLoading && !error && notifications.length === 0 && (
 				<Typography variant="bodyMd" cssOverrides={historyViewStyles.empty}>

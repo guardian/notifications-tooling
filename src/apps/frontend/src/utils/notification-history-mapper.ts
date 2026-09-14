@@ -87,19 +87,19 @@ export const getSenderDisplayName = (createdByEmail: string): string => {
 		return createdByEmail;
 	}
 
-	const [localPart] = createdByEmail.split('@');
-	if (!localPart) {
+	const [senderName] = createdByEmail.split('@');
+	if (!senderName) {
 		return createdByEmail;
 	}
 
-	const words = localPart.split(/[._-]+/).filter(Boolean);
-	if (words.length === 0) {
+	const names = senderName.split(/[._-]+/).filter(Boolean);
+	if (names.length === 0) {
 		return createdByEmail;
 	}
 
-	return words
+	return names
 		.map(
-			(word) => `${word[0]?.toUpperCase() ?? ''}${word.slice(1).toLowerCase()}`,
+			(name) => `${name[0]?.toUpperCase() ?? ''}${name.slice(1).toLowerCase()}`,
 		)
 		.join(' ');
 };

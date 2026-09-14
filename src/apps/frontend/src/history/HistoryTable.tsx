@@ -23,7 +23,7 @@ import type { HistoryNotification, HistoryStatus } from './HistoryView';
 
 interface HistoryTableProps {
 	notifications?: HistoryNotification[];
-	dispatchLandingPage?: boolean;
+	showUserName?: boolean;
 }
 
 const getChannelName = (channel: HistoryNotification['channel']) =>
@@ -71,15 +71,15 @@ const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
 
 const SentByUserDetails = ({
 	sentByUser,
-	dispatchLandingPage = false,
+	showUserName = false,
 }: {
 	sentByUser: string;
-	dispatchLandingPage: boolean;
+	showUserName: boolean;
 }) => {
 	return (
 		<span css={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-			{dispatchLandingPage ? getSenderDisplayName(sentByUser) : sentByUser}
-			{dispatchLandingPage && (
+			{showUserName ? getSenderDisplayName(sentByUser) : sentByUser}
+			{showUserName && (
 				<Tooltip
 					label="Sender email"
 					theme={{
@@ -96,7 +96,7 @@ const SentByUserDetails = ({
 
 export const HistoryTable = ({
 	notifications = [],
-	dispatchLandingPage = false,
+	showUserName = false,
 }: HistoryTableProps) => {
 	return (
 		<Table
@@ -179,7 +179,7 @@ export const HistoryTable = ({
 								</span>
 								<SentByUserDetails
 									sentByUser={notification.sentBy}
-									dispatchLandingPage={dispatchLandingPage}
+									showUserName={showUserName}
 								/>
 							</TableCell>
 							<TableCell
