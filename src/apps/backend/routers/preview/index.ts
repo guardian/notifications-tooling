@@ -23,13 +23,14 @@ type FetchEmailPreview = (
 	segment: NewsletterSegment,
 ) => Promise<string>;
 
-const fetchEmailPreview: FetchEmailPreview = async (articleUrl, segment) => {
-	const emailRenderingEndpoint = await getSSMParameter(
-		'EMAIL_RENDERING_ENDPOINT',
-	);
+export const buildEmailPreviewRenderRequest = (
+	articleUrl: string,
+	segment: NewsletterSegment,
+	emailRenderingEndpoint: string,
+) => {
 	const blockId = determineBlockId(articleUrl);
 
-	return await renderEmail({
+	return {
 		endpoint: emailRenderingEndpoint,
 		articleUrl,
 		...(blockId ? { blockId } : {}),
@@ -38,7 +39,17 @@ const fetchEmailPreview: FetchEmailPreview = async (articleUrl, segment) => {
 		// send a non-empty string so that the preview text element will be rendered
 		// and the frontend back add the text content client-side
 		previewText: ' ',
-	});
+	};
+};
+
+const fetchEmailPreview: FetchEmailPreview = async (articleUrl, segment) => {
+	const emailRenderingEndpoint = await getSSMParameter(
+		'EMAIL_RENDERING_ENDPOINT',
+	);
+
+	return await renderEmail(
+		buildEmailPreviewRenderRequest(articleUrl, segment, emailRenderingEndpoint),
+	);
 };
 
 export const createPreviewRouter = (

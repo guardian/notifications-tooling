@@ -11,7 +11,7 @@ import {
 	installPermissionsStoreMock,
 } from '../../utils/test-utils/permissions';
 import type { TestServer } from '../../utils/test-utils/server';
-import { createPreviewRouter } from '.';
+import { buildEmailPreviewRenderRequest, createPreviewRouter } from '.';
 
 installPandaAuthMock();
 installPermissionsStoreMock();
@@ -36,9 +36,33 @@ afterAll(async () => {
 });
 
 describe('POST /v1/preview/email', () => {
-	it('preserves a liveblog block URL and returns the preview contract', async () => {
+	it('builds an email-rendering request with a liveblog block id', () => {
+		const blockId = '6a9af4938f0834a1091dfae4';
 		const article =
-			'https://www.theguardian.com/world/live/2026/sep/04/latest-developments#block-6a9af4938f0834a1091dfae4';
+			`https://www.theguardian.com/world/live/2026/sep/04/latest-developments` +
+			`?page=with%3Ablock-${blockId}#block-${blockId}`;
+
+		expect(
+			buildEmailPreviewRenderRequest(
+				article,
+				newsletterSegments.UK,
+				'https://email-rendering.example.com',
+			),
+		).toEqual({
+			endpoint: 'https://email-rendering.example.com',
+			articleUrl: article,
+			blockId,
+			newsletterId: newsletterSegments.UK.emailRenderingNewsletterId,
+			timeoutMs: 10_000,
+			previewText: ' ',
+		});
+	});
+
+	it('preserves a liveblog block URL and returns the preview contract', async () => {
+		const blockId = '6a9af4938f0834a1091dfae4';
+		const article =
+			`https://www.theguardian.com/world/live/2026/sep/04/latest-developments` +
+			`?page=with%3Ablock-${blockId}#block-${blockId}`;
 
 		const response = await fetch(`${server.baseUrl}/v1/preview/email`, {
 			method: 'POST',
