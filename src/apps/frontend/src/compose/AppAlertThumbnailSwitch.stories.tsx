@@ -21,7 +21,7 @@ const ControlledSwitch = (
 };
 
 const meta = {
-	title: 'Stand Frontend/AppAlertThumbnailSwitch',
+	title: 'Dispatch/Compose/AppAlertThumbnailSwitch',
 	component: AppAlertThumbnailSwitch,
 	parameters: {
 		docs: {

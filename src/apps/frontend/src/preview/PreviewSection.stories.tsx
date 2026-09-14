@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 import { PreviewSection } from './PreviewSection';
 
 const meta = {
-	title: 'Stand Frontend/PreviewSection',
+	title: 'Dispatch/Preview/PreviewSection',
 	component: PreviewSection,
 	args: {
 		title: 'Preview',

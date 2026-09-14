@@ -82,3 +82,114 @@ export const acceptedEmailSendResponse: SendNotificationResponse = {
 		},
 	],
 };
+
+export const failedAppPushSendResponse: SendNotificationResponse = {
+	...acceptedEmailSendResponse,
+	id: 'push-failed-1234',
+	idempotencyKey: 'push-failed-idempotency-key',
+	status: 'failed',
+	dispatches: [
+		{
+			...acceptedEmailSendResponse.dispatches[0]!,
+			id: 'push-dispatch-uk',
+			channel: 'app-push',
+			requested: {
+				channel: 'app-push',
+				topicType: 'breaking-news',
+				editions: ['international'],
+			},
+			resolved: {
+				channel: 'app-push',
+				topics: [{ type: 'breaking', name: 'international' }],
+				importance: 'Major',
+			},
+			status: 'failure',
+			providerRef: null,
+			failureReason: 'http_error',
+			providerStatusCode: 500,
+		},
+	],
+};
+
+export const unconfirmedAppPushSendResponse: SendNotificationResponse = {
+	...failedAppPushSendResponse,
+	id: 'push-unconfirmed-1234',
+	dispatches: [],
+};
+
+export const failedNewsletterSendResponse: SendNotificationResponse = {
+	...acceptedEmailSendResponse,
+	id: 'email-failed-1234',
+	idempotencyKey: 'email-failed-idempotency-key',
+	status: 'failed',
+	dispatches: [
+		{
+			...acceptedEmailSendResponse.dispatches[0]!,
+			status: 'failure',
+			providerRef: null,
+			failureReason: 'http_error',
+			providerStatusCode: 500,
+		},
+	],
+};
+
+export const partiallyDeliveredNewsletterSendResponse: SendNotificationResponse =
+	{
+		...failedNewsletterSendResponse,
+		id: 'email-partial-1234',
+		status: 'partially_delivered',
+		dispatches: [
+			{
+				...acceptedEmailSendResponse.dispatches[0]!,
+			},
+			{
+				...failedNewsletterSendResponse.dispatches[0]!,
+				id: 'dispatch-us-failed',
+				requested: { channel: 'newsletter', segment: 'US' },
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId: 'braze-campaign-2',
+					emailRenderingId: 'briefing-us',
+				},
+			},
+		],
+	};
+
+export const partiallyDeliveredAppPushSendResponse: SendNotificationResponse = {
+	...failedAppPushSendResponse,
+	id: 'push-partial-1234',
+	status: 'partially_delivered',
+	dispatches: [
+		{
+			...failedAppPushSendResponse.dispatches[0]!,
+			id: 'push-dispatch-uk',
+			requested: {
+				channel: 'app-push',
+				topicType: 'breaking-news',
+				editions: ['uk'],
+			},
+			resolved: {
+				channel: 'app-push',
+				topics: [{ type: 'breaking', name: 'uk' }],
+				importance: 'Major',
+			},
+			status: 'success',
+			failureReason: null,
+			providerStatusCode: 201,
+		},
+		{
+			...failedAppPushSendResponse.dispatches[0]!,
+			id: 'push-dispatch-us',
+			requested: {
+				channel: 'app-push',
+				topicType: 'breaking-news',
+				editions: ['us'],
+			},
+			resolved: {
+				channel: 'app-push',
+				topics: [{ type: 'breaking', name: 'us' }],
+				importance: 'Major',
+			},
+		},
+	],
+};

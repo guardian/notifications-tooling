@@ -4,8 +4,9 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "bun build --watch src/index.html --public-path=/ --outdir=dist --sourcemap --target=browser",
-		"build": "bun build ./src/index.html --outdir=dist --sourcemap=none --target=browser --minify --public-path=/ --production",
+		"copy-assets": "mkdir -p dist && cp -R public/. dist/",
+		"dev": "rm -rf dist && bun run copy-assets && bun build --watch src/index.html --public-path=/ --outdir=dist --sourcemap --target=browser",
+		"build": "rm -rf dist && bun run copy-assets && bun build ./src/index.html --outdir=dist --sourcemap=none --target=browser --minify --public-path=/ --production",
 		"start": "NODE_ENV=production bun src/index.ts",
 		"typecheck": "tsc --noEmit",
 		"test": "bun test",
@@ -27,21 +28,21 @@
 		"zod": "4.5.4"
 	},
 	"devDependencies": {
-		"@happy-dom/global-registrator": "20.12.2",
-		"@storybook/addon-docs": "10.5.10",
-		"@storybook/addon-vitest": "10.5.10",
-		"@storybook/builder-vite": "10.5.10",
-		"@storybook/react-vite": "10.5.10",
+		"@happy-dom/global-registrator": "20.14.0",
+		"@storybook/addon-docs": "10.6.0",
+		"@storybook/addon-vitest": "10.6.0",
+		"@storybook/builder-vite": "10.6.0",
+		"@storybook/react-vite": "10.6.0",
 		"@types/bun": "1.4.0",
 		"@types/react": "19.2.18",
-		"@types/react-dom": "19.2.5",
+		"@types/react-dom": "19.2.7",
 		"@vitest/browser-playwright": "4.1.11",
 		"@vitest/coverage-v8": "4.1.11",
-		"eslint-plugin-storybook": "10.5.10",
+		"eslint-plugin-storybook": "10.6.0",
 		"msw": "2.15.0",
 		"msw-storybook-addon": "3.0.0",
 		"playwright": "1.62.1",
-		"storybook": "10.5.10",
+		"storybook": "10.6.0",
 		"vitest": "4.1.11"
 	}
 }

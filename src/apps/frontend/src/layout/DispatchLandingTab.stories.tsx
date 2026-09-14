@@ -1,7 +1,7 @@
 import type { AppConfig } from '@models';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { http, HttpResponse } from 'msw';
-import { expect, within } from 'storybook/test';
+import { delay, http, HttpResponse } from 'msw';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import { ConfigContext } from '../config/ConfigContext';
 import type { NotificationListResponse } from '../schemas';
@@ -21,8 +21,14 @@ const historyResponse: NotificationListResponse = {
 	notifications: [],
 };
 
-const historyHandler = http.get(`${getApiBaseUrl()}/v1/notifications`, () =>
-	HttpResponse.json(historyResponse),
+const historyRequest = fn();
+const historyHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications`,
+	async () => {
+		historyRequest();
+		await delay(300);
+		return HttpResponse.json(historyResponse);
+	},
 );
 
 const now = Date.now();
@@ -120,7 +126,7 @@ const sinceAwareHistoryHandler = http.get(
 );
 
 const meta = {
-	title: 'Stand Frontend/DispatchLandingTab',
+	title: 'Dispatch/Layout/DispatchLandingTab',
 	component: DispatchLandingTab,
 	parameters: {
 		layout: 'fullscreen',
@@ -154,8 +160,39 @@ export const Default: Story = {
 			canvas.getByRole('heading', { name: 'Welcome to Dispatch' }),
 		).toBeInTheDocument();
 		await expect(
-			await canvas.findByText('No alerts have been sent yet.'),
+			await canvas.findByRole('heading', { name: 'No alerts yet' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('grid', { name: 'Sent alerts' }),
+		).not.toBeInTheDocument();
+		await expect(canvas.getByText('Last updated:')).toBeInTheDocument();
+		const refreshButton = canvas.getByRole('button', {
+			name: 'Refresh activity',
+		});
+		const activitySummary = canvas.getByRole('group', {
+			name: 'Activity summary',
+		});
+		await expect(
+			within(activitySummary).getByText('Newsletter email'),
+		).toBeInTheDocument();
+		await expect(
+			within(activitySummary).getByText('App alert'),
+		).toBeInTheDocument();
+		await expect(
+			within(activitySummary).getByText('Last updated:'),
+		).toBeInTheDocument();
+		await expect(within(activitySummary).getByRole('button')).toBe(
+			refreshButton,
+		);
+		historyRequest.mockClear();
+		await userEvent.click(refreshButton);
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(refreshButton).toBeDisabled();
+		});
+		await waitFor(async () => {
+			await expect(refreshButton).toBeEnabled();
+		});
 		await expect(
 			canvas.getByRole('link', { name: 'Create newsletter email' }),
 		).toHaveAttribute('href', '/newsletter-email/create');

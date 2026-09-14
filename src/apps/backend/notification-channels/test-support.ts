@@ -27,6 +27,7 @@ export const baseRequest = {
 
 export const notificationId = 'notif-2f1c9a7e';
 export const testId = 'test-9c1d5b2a';
+export const createdByEmail = 'ada.lovelace@guardian.co.uk';
 
 const ssmParameters: Record<string, string> = {
 	BRAZE_API_KEY: 'test-api-key',

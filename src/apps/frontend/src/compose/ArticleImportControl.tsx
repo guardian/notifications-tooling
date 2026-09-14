@@ -9,7 +9,10 @@ import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { parseArticleUrlInputToContentId } from '../utils/form-validation';
+import {
+	getArticleUrlInputFailureMessage,
+	parseArticleUrlInputToContentId,
+} from '../utils/form-validation';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { NotificationFormContext } from './NotificationContext';
 
@@ -104,12 +107,13 @@ export const ArticleImportControl = ({
 
 	const showImportedArticle =
 		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
+	const articleUrlError = failure
+		? getArticleUrlInputFailureMessage(failure)
+		: undefined;
+	const missingArticleError =
+		!content && submitCount > 0 ? 'Paste a URL to fetch an article' : undefined;
 	const articleError =
-		failure ??
-		fetchArticleError ??
-		(!content && submitCount > 0
-			? 'Paste a URL to fetch an article'
-			: undefined);
+		articleUrlError ?? fetchArticleError ?? missingArticleError;
 
 	return (
 		<div
