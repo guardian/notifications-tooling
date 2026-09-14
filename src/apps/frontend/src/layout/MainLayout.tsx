@@ -1,10 +1,14 @@
 import { css } from '@emotion/react';
+import { baseColors } from '@guardian/stand';
 import { Avatar } from '@guardian/stand/Avatar';
+import { Badge } from '@guardian/stand/Badge';
 import { Favicon } from '@guardian/stand/Favicon';
 import { Layout } from '@guardian/stand/Layout';
 import {
 	TopBar,
 	TopBarContainerLeft,
+	TopBarContainerRight,
+	TopBarItem,
 	TopBarNavigation,
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
@@ -31,6 +35,8 @@ export const MainLayout = ({ children }: Props) => {
 	const routes = getAppRoutes(config);
 	const { user } = config ?? {};
 	const { pathname } = useLocation();
+	const stage = config?.stage;
+	const shouldShowEnvBadge = stage !== undefined && stage !== 'PROD';
 
 	return (
 		<Layout>
@@ -59,6 +65,22 @@ export const MainLayout = ({ children }: Props) => {
 							),
 						)}
 					</TopBarContainerLeft>
+					{shouldShowEnvBadge && (
+						<TopBarContainerRight>
+							<TopBarItem>
+								<Badge
+									size="md"
+									weight="strong"
+									cssOverrides={css({
+										color: 'white',
+										backgroundColor: baseColors.magenta['200'],
+									})}
+								>
+									{stage}
+								</Badge>
+							</TopBarItem>
+						</TopBarContainerRight>
+					)}
 					{user && (
 						<Avatar
 							src={user.avatarUrl}
