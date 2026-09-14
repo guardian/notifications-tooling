@@ -27,4 +27,19 @@ describe('The Notifications stack', () => {
 			'Dispatch-euwest-1-PROD',
 		]);
 	});
+
+	it('configures API Gateway to decode binary image responses', () => {
+		const app = new App();
+		const stack = new DispatchStack(
+			app,
+			'Dispatch',
+			{ stack: 'notifications', stage: 'TEST', env: { region: 'eu-west-1' } },
+			'dispatch',
+		);
+		const template = Template.fromStack(stack);
+
+		template.hasResourceProperties('AWS::ApiGateway::RestApi', {
+			BinaryMediaTypes: ['image/*'],
+		});
+	});
 });

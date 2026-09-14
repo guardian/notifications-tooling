@@ -160,8 +160,11 @@ export const Default: Story = {
 			canvas.getByRole('heading', { name: 'Welcome to Dispatch' }),
 		).toBeInTheDocument();
 		await expect(
-			await canvas.findByText('No alerts have been sent yet.'),
+			await canvas.findByRole('heading', { name: 'No alerts yet' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('grid', { name: 'Sent alerts' }),
+		).not.toBeInTheDocument();
 		await expect(canvas.getByText('Last updated:')).toBeInTheDocument();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
@@ -181,11 +184,6 @@ export const Default: Story = {
 		await expect(within(activitySummary).getByRole('button')).toBe(
 			refreshButton,
 		);
-		await expect(
-			refreshButton.compareDocumentPosition(
-				canvas.getByRole('grid', { name: 'Sent alerts' }),
-			) & Node.DOCUMENT_POSITION_FOLLOWING,
-		).toBeTruthy();
 		historyRequest.mockClear();
 		await userEvent.click(refreshButton);
 		await waitFor(async () => {

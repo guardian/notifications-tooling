@@ -1,7 +1,8 @@
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
-import { HistoryTable } from '../history/HistoryTable';
+import { HistoryEmptyState } from '../history/HistoryEmptyState';
+import { HistoryTable, HistoryTableSkeleton } from '../history/HistoryTable';
 import type { HistoryNotification } from '../history/HistoryView';
 import {
 	activePillTheme,
@@ -86,15 +87,13 @@ export const DispatchLandingHistoryView = ({
 					</div>
 				)}
 			</div>
-			{isLoading && (
-				<Typography variant="bodyMd">Loading 24 hour history...</Typography>
-			)}
+			{isLoading && <HistoryTableSkeleton />}
 			{error}
-			{!isLoading && !error && <HistoryTable notifications={notifications} />}
+			{!isLoading && !error && notifications.length > 0 && (
+				<HistoryTable notifications={notifications} />
+			)}
 			{!isLoading && !error && notifications.length === 0 && (
-				<Typography variant="bodyMd" cssOverrides={historyViewStyles.empty}>
-					No alerts have been sent yet.
-				</Typography>
+				<HistoryEmptyState />
 			)}
 		</>
 	);
