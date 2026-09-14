@@ -1,3 +1,4 @@
+import { semanticSpacing } from '@guardian/stand';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
@@ -58,7 +59,6 @@ export const DispatchLandingTab = () => {
 			<div
 				css={{
 					width: '100%',
-					maxWidth: '983px',
 				}}
 			>
 				<Typography variant="titleXl" element={'h1'}>
@@ -70,9 +70,9 @@ export const DispatchLandingTab = () => {
 						flexDirection: 'column',
 						gap: '12px',
 						width: '100%',
-						marginTop: '16px',
-						marginBottom: '16px',
-						paddingTop: '12px',
+						marginTop: semanticSpacing.stackMd,
+						marginBottom: semanticSpacing.stackLg,
+						paddingTop: semanticSpacing.stackMd,
 						[from.md]: {
 							flexDirection: 'row',
 							justifyContent: 'space-between',

@@ -8,7 +8,6 @@ import {
 import { Icon } from '@guardian/stand/Icon';
 import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
-import { from } from '@guardian/stand/utils';
 import type { ComponentProps } from 'react';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
 
@@ -31,9 +30,6 @@ const tileStyles = {
 		alignItems: 'stretch',
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		borderRadius: semanticRadius.cornerSm,
-		[from.md]: {
-			width: '300px',
-		},
 	}),
 	topRow: css({
 		display: 'flex',
