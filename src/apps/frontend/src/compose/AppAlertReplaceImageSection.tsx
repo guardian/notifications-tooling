@@ -5,57 +5,35 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { useImageUrlCheck } from '../hooks/use-image-url-check';
 import { validateGuardianImageUrl } from '../utils/form-validation';
+import type { AppAlertFormValues } from '../utils/notification-forms';
+
+export type AppAlertReplacementImageFormValues = AppAlertFormValues & {
+	replacementImageUrl?: string;
+};
 
 interface AppAlertReplaceImageSectionProps {
-	replacementImageUrl: string;
-	onReplacementImageUrlChange: (replacementImageUrl: string) => void;
 	onUpdate: (replacementImageUrl: string) => void;
 	errorMessage?: string;
 }
 
-const checkImageUrlExists = async (
-	imageUrl: string,
-): Promise<{ exists: boolean; error?: string }> => {
-	if (!imageUrl.trim()) {
-		return { exists: false, error: 'Image URL is empty' };
-	}
-
-	try {
-		const response = await fetch(imageUrl, {
-			method: 'HEAD',
-		});
-
-		if (!response.ok) {
-			const statusSummary = response.statusText
-				? `HTTP ${response.status} ${response.statusText}`
-				: `HTTP ${response.status}`;
-			return {
-				exists: false,
-				error: `Image URL returned ${statusSummary}`,
-			};
-		}
-
-		return { exists: true };
-	} catch (err) {
-		const errorMessage =
-			err instanceof Error ? err.message : 'Network error or CORS issue';
-		return { exists: false, error: `Unable to verify image: ${errorMessage}` };
-	}
-};
-
 export const AppAlertReplaceImageSection = ({
-	replacementImageUrl,
-	onReplacementImageUrlChange,
 	onUpdate,
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
+	const { clearErrors, control, setValue } =
+		useFormContext<AppAlertReplacementImageFormValues>();
 	const [imageUpdated, setImageUpdated] = useState(false);
-	const [isCheckingImage, setIsCheckingImage] = useState(false);
-	const [imageCheckError, setImageCheckError] = useState<{
-		url: string;
-		message: string;
-	} | null>(null);
+	const { isCheckingImage, imageCheckError, checkImageUrl, clearError } =
+		useImageUrlCheck();
+	const replacementImageUrl =
+		useWatch<AppAlertReplacementImageFormValues, 'replacementImageUrl'>({
+			control,
+			name: 'replacementImageUrl',
+			defaultValue: '',
+		}) ?? '';
 
 	const trimmedReplacementImageUrl = replacementImageUrl.trim();
 	const validationError = validateGuardianImageUrl(trimmedReplacementImageUrl);
@@ -72,33 +50,22 @@ export const AppAlertReplaceImageSection = ({
 			return;
 		}
 
-		// If empty URL, fall back to original image
 		if (!trimmedReplacementImageUrl) {
-			onReplacementImageUrlChange('');
-			setImageCheckError(null);
+			setValue('replacementImageUrl', '', { shouldDirty: true });
+			clearError();
+			clearErrors('articleThumbnailUrl');
 			onUpdate('');
 			setImageUpdated(true);
 			return;
 		}
 
-		// Clear previous error and check image
-		setImageCheckError(null);
-		setIsCheckingImage(true);
+		const result = await checkImageUrl(trimmedReplacementImageUrl);
 
-		const result = await checkImageUrlExists(trimmedReplacementImageUrl);
-		setIsCheckingImage(false);
-
-		if (result.error) {
-			// Image fetch failed; keep existing thumbnail unchanged
-			setImageCheckError({
-				url: trimmedReplacementImageUrl,
-				message: result.error,
-			});
+		if (!result.success) {
 			setImageUpdated(false);
 			return;
 		}
 
-		// Image is valid, proceed with update
 		onUpdate(trimmedReplacementImageUrl);
 		setImageUpdated(true);
 	};
@@ -128,7 +95,10 @@ export const AppAlertReplaceImageSection = ({
 					value={replacementImageUrl}
 					placeholder="Enter replacement image URL..."
 					onChange={(url) => {
-						onReplacementImageUrlChange(url);
+						setValue('replacementImageUrl', url, {
+							shouldDirty: true,
+						});
+						clearErrors('articleThumbnailUrl');
 						setImageUpdated(false);
 					}}
 					id="replacement-image-URL"
