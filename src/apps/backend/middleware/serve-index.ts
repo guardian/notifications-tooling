@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { isRunningLocally } from '@config';
+import { env, isRunningLocally } from '@config';
 import { getSSMParameter } from '@config/ssm';
 import type { AppConfig } from '@models';
 import type { Request, RequestHandler, Response } from 'express';
@@ -45,6 +45,7 @@ export const serveIndex: RequestHandler = async (
 		user: req.user!,
 		permissions,
 		DISABLE_APP_SEND_TAB: DISABLE_APP_SEND_TAB.toLowerCase() === 'true',
+		stage: env.STAGE,
 	};
 	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,

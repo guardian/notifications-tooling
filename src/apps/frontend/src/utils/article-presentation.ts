@@ -24,6 +24,6 @@ export const getArticlePresentation = ({
 		publishedDate: isLiveblog
 			? content.fields?.lastModified
 			: content.webPublicationDate,
-		thumbnail: getArticleThumbnail(content, liveblogBlock),
+		thumbnail: getArticleThumbnail(content),
 	};
 };

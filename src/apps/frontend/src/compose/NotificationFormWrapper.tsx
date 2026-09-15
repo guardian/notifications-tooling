@@ -19,7 +19,6 @@ import { NotificationFormContext } from './NotificationContext';
 import { NotificationFormSection } from './NotificationFormSection';
 
 interface NotificationFormWrapperProps {
-	activeSectionHref: string;
 	title: string;
 	formLabel: string;
 	channel: ChannelOption;
@@ -33,7 +32,6 @@ interface NotificationFormWrapperProps {
 }
 
 export const NotificationFormWrapper = ({
-	activeSectionHref,
 	title,
 	formLabel,
 	channel,
@@ -82,10 +80,7 @@ export const NotificationFormWrapper = ({
 						},
 					}}
 				>
-					<NotificationFormSection
-						id="article-section"
-						isActive={activeSectionHref === '#article-section'}
-					>
+					<NotificationFormSection id="article-section">
 						<ArticleImportControl
 							articleInputText={articleInputText}
 							setArticleInputText={setArticleInputText}
@@ -98,16 +93,10 @@ export const NotificationFormWrapper = ({
 
 					{children}
 
-					<NotificationFormSection
-						id="delivery-timing-section"
-						isActive={activeSectionHref === '#delivery-timing-section'}
-					>
+					<NotificationFormSection id="delivery-timing-section">
 						<DeliveryOptionFormField channel={channel} />
 					</NotificationFormSection>
-					<NotificationFormSection
-						id="send-button-section"
-						isActive={activeSectionHref === '#send-button-section'}
-					>
+					<NotificationFormSection id="send-button-section">
 						<SendButton>{sendButtonLabel}</SendButton>
 					</NotificationFormSection>
 				</div>

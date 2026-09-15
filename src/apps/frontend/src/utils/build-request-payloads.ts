@@ -75,7 +75,6 @@ export const buildAppAlertRequest = ({
 	content,
 	idempotencyKey,
 	requestedUrl,
-	requestedBlock,
 }: BuildRequestArgs<AppAlertFormValues> & {
 	alertTypeLabel: string;
 }): SendNotificationRequest => {
@@ -88,7 +87,7 @@ export const buildAppAlertRequest = ({
 	} = values;
 	let thumbnailUrl = articleThumbnailUrl;
 	if (thumbnailUrl === undefined || thumbnailUrl === '') {
-		thumbnailUrl = getArticleThumbnail(content, requestedBlock).src;
+		thumbnailUrl = getArticleThumbnail(content).src;
 	}
 
 	return {

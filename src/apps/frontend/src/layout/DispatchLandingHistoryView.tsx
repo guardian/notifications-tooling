@@ -90,7 +90,7 @@ export const DispatchLandingHistoryView = ({
 			{isLoading && <HistoryTableSkeleton />}
 			{error}
 			{!isLoading && !error && notifications.length > 0 && (
-				<HistoryTable notifications={notifications} />
+				<HistoryTable notifications={notifications} showUserName />
 			)}
 			{!isLoading && !error && notifications.length === 0 && (
 				<HistoryEmptyState />

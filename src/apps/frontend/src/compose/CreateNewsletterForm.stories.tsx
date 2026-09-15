@@ -24,24 +24,20 @@ import { CreateNewsletterForm } from './CreateNewsletterForm';
 
 type StoryArgs = {
 	notificationState: NotificationState;
-	activeSectionHref: string;
 	showPreview: boolean;
 	onTogglePreview: (showPreview: boolean) => void;
 };
 type Story = StoryObj<StoryArgs>;
 
 const ControlledCreateNewsletterForm = ({
-	activeSectionHref,
 	initialShowPreview,
 }: {
-	activeSectionHref: string;
 	initialShowPreview: boolean;
 }) => {
 	const [showPreview, setShowPreview] = useState(initialShowPreview);
 
 	return (
 		<CreateNewsletterForm
-			activeSectionHref={activeSectionHref}
 			showPreview={showPreview}
 			onTogglePreview={setShowPreview}
 		/>
@@ -62,17 +58,13 @@ const meta: Meta<StoryArgs> = {
 	},
 	args: {
 		notificationState: defaultState,
-		activeSectionHref: '#article-section',
 		showPreview: true,
 		onTogglePreview: () => {},
 	},
 	render: (args) => {
-		const { activeSectionHref, notificationState, showPreview } = args;
+		const { notificationState, showPreview } = args;
 		return WithNotificationContext(
-			<ControlledCreateNewsletterForm
-				activeSectionHref={activeSectionHref}
-				initialShowPreview={showPreview}
-			/>,
+			<ControlledCreateNewsletterForm initialShowPreview={showPreview} />,
 			notificationState,
 			{},
 			'email',
@@ -359,12 +351,9 @@ const buildErrorStory = (error: ApiError): Story => ({
 		},
 	},
 	render: (args) => {
-		const { activeSectionHref, notificationState, showPreview } = args;
+		const { notificationState, showPreview } = args;
 		return WithNotificationContext(
-			<ControlledCreateNewsletterForm
-				activeSectionHref={activeSectionHref}
-				initialShowPreview={showPreview}
-			/>,
+			<ControlledCreateNewsletterForm initialShowPreview={showPreview} />,
 			notificationState,
 			{
 				sendNotification: mockSendRejectedNotification(error),
