@@ -53,6 +53,7 @@ describe('POST /v1/preview/email', () => {
 			articleUrl: article,
 			blockId,
 			newsletterId: newsletterSegments.UK.emailRenderingNewsletterId,
+			hideKicker: true,
 			timeoutMs: 10_000,
 			previewText: ' ',
 		});

@@ -4,7 +4,14 @@ import { buildErrorEnvelope } from '../error-envelope';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express detects error middleware by its 4-arg signature
 export const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
-	req.log.error(err);
+	req.log.error(
+		{
+			err,
+			method: req.method,
+			path: req.originalUrl,
+		},
+		'Unhandled request error',
+	);
 
 	if (err instanceof DuplicateIdempotencyKeyError) {
 		res

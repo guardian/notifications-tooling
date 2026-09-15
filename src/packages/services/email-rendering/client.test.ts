@@ -46,6 +46,41 @@ describe('renderEmail', () => {
 		);
 	});
 
+	it('serializes hideKicker when provided', async () => {
+		const timeoutSignal = new AbortController().signal;
+		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
+			Response.json({ body: '<html>Rendered</html>' }),
+		);
+
+		await renderEmail({
+			endpoint: 'https://email-rendering.example.com',
+			articleUrl: 'https://www.theguardian.com/world/2026/jul/22/example-story',
+			newsletterId: 'breaking-news-uk',
+			headlineOverride: 'Breaking news headline',
+			previewText: 'A summary of the breaking news.',
+			hideKicker: true,
+			timeoutMs: 10_000,
+		});
+
+		expect(fetcher).toHaveBeenCalledWith(
+			new URL(
+				'https://email-rendering.example.com/notification/world/2026/jul/22/example-story.json',
+			),
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					newsletterId: 'breaking-news-uk',
+					headlineOverride: 'Breaking news headline',
+					previewText: 'A summary of the breaking news.',
+					hideKicker: true,
+				}),
+				signal: timeoutSignal,
+			},
+		);
+	});
+
 	it('throws a safe error when rendering fails', () => {
 		spyOn(globalThis, 'fetch').mockResolvedValue(
 			new Response('sensitive response', { status: 500 }),

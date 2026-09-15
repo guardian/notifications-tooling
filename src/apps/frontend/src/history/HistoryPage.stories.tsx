@@ -216,14 +216,16 @@ export const Loaded: Story = {
 		await waitFor(async () => {
 			await expect(refreshButton).toBeEnabled();
 		});
+		const articleLink = canvas.getByRole('link', {
+			name: /Prime minister announces cabinet reshuffle/,
+		});
+		await expect(articleLink).toHaveAttribute(
+			'href',
+			'https://www.theguardian.com/politics',
+		);
 		await expect(
 			canvas.getByRole('link', {
-				name: 'Prime minister announces cabinet reshuffle',
-			}),
-		).toHaveAttribute('href', 'https://www.theguardian.com/politics');
-		await expect(
-			canvas.getByRole('link', {
-				name: 'Extreme weather disrupts travel across Europe',
+				name: /Extreme weather disrupts travel across Europe/,
 			}),
 		).toBeInTheDocument();
 		await expect(canvas.getAllByText('No image')).toHaveLength(2);

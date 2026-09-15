@@ -45,6 +45,7 @@ describe('dispatchNotification (newsletter channel)', () => {
 			newsletterId: newsletterSegments.UK.emailRenderingNewsletterId,
 			headlineOverride: newsletterItem.title,
 			previewText: newsletterItem.body,
+			hideKicker: true,
 			timeoutMs: 10_000,
 		});
 		expect(renderEmail).toHaveBeenNthCalledWith(2, {
@@ -53,6 +54,7 @@ describe('dispatchNotification (newsletter channel)', () => {
 			newsletterId: newsletterSegments.US.emailRenderingNewsletterId,
 			headlineOverride: newsletterItem.title,
 			previewText: newsletterItem.body,
+			hideKicker: true,
 			timeoutMs: 10_000,
 		});
 		expect(loadBrazeClient).toHaveBeenCalledTimes(1);

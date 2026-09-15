@@ -11,6 +11,7 @@ type RenderEmailRequest = {
 	newsletterId: string;
 	headlineOverride?: string;
 	previewText?: string;
+	hideKicker?: boolean;
 	timeoutMs: number;
 };
 
@@ -64,6 +65,7 @@ export const renderEmail = async ({
 	newsletterId,
 	headlineOverride,
 	previewText,
+	hideKicker,
 	timeoutMs,
 }: RenderEmailRequest): Promise<string> => {
 	const articleId = articleIdFromUrl(articleUrl)
@@ -82,6 +84,7 @@ export const renderEmail = async ({
 				newsletterId,
 				headlineOverride,
 				previewText,
+				hideKicker,
 			}),
 			signal: AbortSignal.timeout(timeoutMs),
 		});
