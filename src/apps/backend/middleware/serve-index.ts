@@ -18,6 +18,12 @@ const configPlaceholder = '<!--APP_CONFIG-->';
 
 let cachedTemplate: string | undefined;
 
+const presenceHostByStage: Record<NonNullable<AppConfig['stage']>, string> = {
+	DEV: 'presence.code.dev-gutools.co.uk',
+	CODE: 'presence.code.dev-gutools.co.uk',
+	PROD: 'presence.gutools.co.uk',
+};
+
 /**
  * Reads Bun's built `index.html` once and caches it. The file only changes at
  * build time, so there is no need to re-read it per request.
@@ -41,11 +47,16 @@ export const serveIndex: RequestHandler = async (
 ) => {
 	const DISABLE_APP_SEND_TAB = await getSSMParameter('DISABLE_APP_SEND_TAB');
 	const permissions = await listUserPermissions(req.user!.email);
+	const presenceHost = presenceHostByStage[env.STAGE];
 	const config: AppConfig = {
 		user: req.user!,
 		permissions,
 		DISABLE_APP_SEND_TAB: DISABLE_APP_SEND_TAB.toLowerCase() === 'true',
 		stage: env.STAGE,
+		presence: {
+			clientUrl: `https://${presenceHost}/client/1/lib.js`,
+			endpoint: `wss://${presenceHost}/socket`,
+		},
 	};
 	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,
