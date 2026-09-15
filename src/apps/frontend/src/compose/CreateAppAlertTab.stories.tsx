@@ -111,9 +111,10 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 	parameters: {
 		msw: {
 			handlers: [
-				http.head(
-					'https://media.guim.co.uk/replacement-thumbnail.jpg',
-					() => new HttpResponse(null, { status: 200 }),
+				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
+					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+						headers: { 'Content-Type': 'image/svg+xml' },
+					}),
 				),
 			],
 		},
@@ -215,11 +216,12 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 	parameters: {
 		msw: {
 			handlers: [
-				http.head(
-					'https://media.guim.co.uk/replacement-thumbnail.jpg',
-					() => new HttpResponse(null, { status: 200 }),
+				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
+					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+						headers: { 'Content-Type': 'image/svg+xml' },
+					}),
 				),
-				http.head(
+				http.get(
 					'https://media.guim.co.uk/broken-thumbnail.jpg',
 					() =>
 						new HttpResponse(null, {
@@ -259,9 +261,7 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 		await userEvent.clear(replacementInput);
 		await userEvent.type(replacementInput, brokenReplacementThumbnailUrl);
 		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
-		await expect(
-			await canvas.findByText('Image URL returned HTTP 403 Forbidden'),
-		).toBeVisible();
+		await expect(await canvas.findByText('Unable to load image')).toBeVisible();
 		await expect(canvas.queryByText('Image updated')).not.toBeInTheDocument();
 
 		for (const thumbnail of [

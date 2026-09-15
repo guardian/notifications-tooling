@@ -275,9 +275,10 @@ export const WithReplacementThumbnail: Story = {
 	parameters: {
 		msw: {
 			handlers: [
-				http.head(
-					'https://media.guim.co.uk/replacement-thumbnail.jpg',
-					() => new HttpResponse(null, { status: 200 }),
+				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
+					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+						headers: { 'Content-Type': 'image/svg+xml' },
+					}),
 				),
 			],
 		},
