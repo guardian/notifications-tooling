@@ -11,6 +11,8 @@ const createResponse = () => {
 };
 
 const request = {
+	method: 'POST',
+	originalUrl: '/v1/notifications',
 	log: { error: mock(() => undefined) },
 } as unknown as Request;
 
@@ -36,14 +38,23 @@ describe('errorMiddleware', () => {
 
 	it('keeps unexpected failures internal', () => {
 		const { response, status, json } = createResponse();
+		const error = new Error('Unexpected failure');
 
 		errorMiddleware(
-			new Error('Unexpected failure'),
+			error,
 			request,
 			response,
 			mock(() => undefined),
 		);
 
+		expect(request.log.error).toHaveBeenLastCalledWith(
+			{
+				err: error,
+				method: 'POST',
+				path: '/v1/notifications',
+			},
+			'Unhandled request error',
+		);
 		expect(status).toHaveBeenCalledWith(500);
 		expect(json).toHaveBeenCalledWith({
 			error: 'internal_error',
