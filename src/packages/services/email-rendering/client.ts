@@ -10,6 +10,7 @@ type RenderEmailRequest = {
 	newsletterId: string;
 	headlineOverride?: string;
 	previewText?: string;
+	hideKicker?: boolean;
 	timeoutMs: number;
 };
 
@@ -62,6 +63,7 @@ export const renderEmail = async ({
 	newsletterId,
 	headlineOverride,
 	previewText,
+	hideKicker,
 	timeoutMs,
 }: RenderEmailRequest): Promise<string> => {
 	const articleId = articleIdFromUrl(articleUrl)
@@ -75,7 +77,12 @@ export const renderEmail = async ({
 		response = await fetch(renderUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ newsletterId, headlineOverride, previewText }),
+			body: JSON.stringify({
+				newsletterId,
+				headlineOverride,
+				previewText,
+				hideKicker,
+			}),
 			signal: AbortSignal.timeout(timeoutMs),
 		});
 	} catch (error) {
