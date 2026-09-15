@@ -1,6 +1,9 @@
+import { useState } from 'react';
+import { validateGuardianImageUrl } from '../utils/form-validation';
+
 export type ImageUrlCheckResult = { exists: boolean; error?: string };
 
-export const checkImageUrl = async (
+const checkImageUrl = async (
 	imageUrl: string,
 ): Promise<ImageUrlCheckResult> => {
 	const trimmedImageUrl = imageUrl.trim();
@@ -16,4 +19,69 @@ export const checkImageUrl = async (
 			resolve({ exists: false, error: 'Unable to load image' });
 		image.src = trimmedImageUrl;
 	});
+};
+
+interface UseImageUrlCheckOptions {
+	imageUrl: string;
+	onImageUrlChange: (imageUrl: string) => void;
+	onUpdate: (imageUrl: string) => void;
+	externalError?: string;
+}
+
+export const useImageUrlCheck = ({
+	imageUrl,
+	onImageUrlChange,
+	onUpdate,
+	externalError,
+}: UseImageUrlCheckOptions) => {
+	const [imageUpdated, setImageUpdated] = useState(false);
+	const [isCheckingImage, setIsCheckingImage] = useState(false);
+	const [imageCheckError, setImageCheckError] = useState<string>();
+	const trimmedImageUrl = imageUrl.trim();
+	const validationError = validateGuardianImageUrl(trimmedImageUrl);
+
+	const handleImageUrlChange = (nextImageUrl: string) => {
+		onImageUrlChange(nextImageUrl);
+		setImageCheckError(undefined);
+		setImageUpdated(false);
+	};
+
+	const handleUpdateClick = async () => {
+		if (validationError) {
+			onUpdate('');
+			setImageUpdated(false);
+			return;
+		}
+
+		if (!trimmedImageUrl) {
+			onUpdate('');
+			setImageUpdated(true);
+			return;
+		}
+
+		setIsCheckingImage(true);
+		try {
+			const result = await checkImageUrl(trimmedImageUrl);
+			if (!result.exists) {
+				setImageCheckError(result.error ?? 'Image does not exist');
+				onUpdate('');
+				setImageUpdated(false);
+				return;
+			}
+
+			onUpdate(trimmedImageUrl);
+			setImageUpdated(true);
+		} finally {
+			setIsCheckingImage(false);
+		}
+	};
+
+	return {
+		displayedErrorMessage: validationError ?? imageCheckError ?? externalError,
+		handleImageUrlChange,
+		handleUpdateClick,
+		imageUpdated,
+		isCheckingImage,
+		validationError,
+	};
 };
