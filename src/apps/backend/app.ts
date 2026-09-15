@@ -11,10 +11,12 @@ import { clientAssetsDir } from './client-assets';
 import { buildErrorEnvelope } from './error-envelope';
 import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { errorMiddleware } from './middleware/error-middleware';
+import { grafanaCorsMiddleware } from './middleware/grafana-cors';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { contentRouter } from './routers/content';
 import { docsRouter } from './routers/docs';
+import { grafanaRouter } from './routers/grafana';
 import { healthRouter } from './routers/health';
 import { notificationTestsRouter } from './routers/notification-tests';
 import { notificationsRouter } from './routers/notifications';
@@ -28,8 +30,10 @@ app.disable('x-powered-by');
 app.use(httpLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(['/metrics', '/query'], grafanaCorsMiddleware);
 
 app.use('/health', healthRouter);
+app.use('/', grafanaRouter);
 
 const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
 const fingerprintedAssetPattern = /-[a-z0-9]{8}\.[^.]+(?:\.map)?$/i;

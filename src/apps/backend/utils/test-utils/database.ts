@@ -18,6 +18,10 @@ const mockedDb = {
 	execute: dbExecuteMock,
 };
 
+export const listSendsWithDispatchesInWindowMock = mock(() =>
+	Promise.resolve([] as unknown[]),
+);
+
 const createNotificationsRepository = () => ({
 	create: mock(() =>
 		Promise.resolve(buildPersistedNotification().notification),
@@ -38,6 +42,7 @@ const createNotificationsRepository = () => ({
 	),
 	findById: mock(() => Promise.resolve(null)),
 	findByIdWithDispatches: mock(() => Promise.resolve(null)),
+	listSendsWithDispatchesInWindow: listSendsWithDispatchesInWindowMock,
 });
 
 const createNotificationDispatchesRepository = () => ({
