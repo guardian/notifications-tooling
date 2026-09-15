@@ -69,7 +69,7 @@ const styles = {
 	}),
 };
 
-export const HTMLPreview = () => {
+export const NewsletterEmailPreview = () => {
 	const {
 		notification: { content },
 		requestEmailHtml,
