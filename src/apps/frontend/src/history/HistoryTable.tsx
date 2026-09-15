@@ -148,8 +148,6 @@ export const HistoryTable = ({
 										<ExternalLink
 											href={notification.href}
 											cssOverrides={historyViewStyles.title}
-											target="_blank"
-											rel="noopener noreferrer"
 										>
 											{notification.title}
 										</ExternalLink>
