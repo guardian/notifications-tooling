@@ -30,6 +30,8 @@ type TestServer = Awaited<ReturnType<typeof startTestServer>>;
 const createMockRequest = () =>
 	({
 		id: 'req-test-id',
+		method: 'POST',
+		originalUrl: '/v1/notifications',
 		log: { error: mock(() => undefined) },
 	}) as unknown as Request;
 
@@ -72,7 +74,14 @@ describe('errorMiddleware', () => {
 
 		errorMiddleware(cause, request, response, (() => {}) as NextFunction);
 
-		expect(request.log.error).toHaveBeenCalledWith(cause);
+		expect(request.log.error).toHaveBeenCalledWith(
+			{
+				err: cause,
+				method: 'POST',
+				path: '/v1/notifications',
+			},
+			'Unhandled request error',
+		);
 		expect(status).toHaveBeenCalledWith(500);
 		expect(envelope().error).toBe('internal_error');
 		expect(envelope().message.length).toBeGreaterThan(0);

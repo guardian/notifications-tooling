@@ -99,6 +99,7 @@ export const dispatchNewsletterTest = async (
 				newsletterId: emailRenderingId,
 				headlineOverride: item.title,
 				previewText: item.body,
+				hideKicker: true,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 			}),
 		});

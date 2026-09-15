@@ -71,7 +71,7 @@ export const Default: Story = {
 		).toBeInTheDocument();
 		await expect(
 			canvas.getByRole('link', {
-				name: 'Prime minister announces cabinet reshuffle',
+				name: /Prime minister announces cabinet reshuffle/,
 			}),
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Sent')).toBeInTheDocument();

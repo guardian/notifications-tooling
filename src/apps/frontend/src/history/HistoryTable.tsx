@@ -1,7 +1,6 @@
 import { baseColors } from '@guardian/stand';
 import { Badge } from '@guardian/stand/Badge';
 import { Icon } from '@guardian/stand/Icon';
-import { Link } from '@guardian/stand/Link';
 import {
 	Table,
 	TableBody,
@@ -14,6 +13,7 @@ import { Typography } from '@guardian/stand/Typography';
 import type { DisplayAppAlertTopicEditionId } from '@models';
 import { useRelativeTime } from '../hooks/use-relative-time';
 import { historyViewStyles } from '../themes';
+import { ExternalLink } from '../ui/ExternalLink';
 import { FlagAtom } from '../ui/FlagAtom';
 import { phoneIphoneIcon } from '../ui/FlagIcons';
 import { SendTimeTooltip } from '../ui/SendTimeTooltip';
@@ -145,12 +145,12 @@ export const HistoryTable = ({
 										</div>
 									)}
 									<div css={historyViewStyles.notificationDetails}>
-										<Link
+										<ExternalLink
 											href={notification.href}
 											cssOverrides={historyViewStyles.title}
 										>
 											{notification.title}
-										</Link>
+										</ExternalLink>
 										<Typography
 											variant="bodyXs"
 											cssOverrides={historyViewStyles.channel}
