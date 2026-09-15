@@ -1,6 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { articleFixture } from '../testing/capi-fixtures';
+import {
+	failedAppPushSendResponse,
+	partiallyDeliveredAppPushSendResponse,
+	unconfirmedAppPushSendResponse,
+} from '../testing/api-fixtures';
+import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
 import {
 	completePushParams,
 	populatedPushState,
@@ -19,7 +24,7 @@ type StoryArgs = {
 type Story = StoryObj<StoryArgs>;
 
 const meta: Meta<StoryArgs> = {
-	title: 'Stand Frontend/CreateAppAlertForm',
+	title: 'Dispatch/Compose/CreateAppAlertForm',
 	component: CreateAppAlertForm,
 	parameters: {
 		layout: 'fullscreen',
@@ -108,6 +113,94 @@ export const ValidationErrors: Story = {
 		await expect(
 			canvas.getByText('Paste a URL to fetch an article'),
 		).toBeVisible();
+	},
+};
+
+export const MobileNotificationServiceFailure: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			sendFailure: {
+				failure: 'dispatch-fail',
+				notification: failedAppPushSendResponse,
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const screen = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			await screen.findByText('The app alert had delivery issues'),
+		).toBeVisible();
+		await expect(
+			screen.getByText(
+				'The mobile notification service reported a failure for all destinations.',
+			),
+		).toBeVisible();
+		await expect(
+			screen.getByText('Delivery not confirmed for: International'),
+		).toBeVisible();
+		await expect(screen.getByText('Reference: push-failed-1234')).toBeVisible();
+		await expect(
+			screen.queryByRole('button', { name: 'Try Again' }),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const UnconfirmedMobileNotificationDelivery: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			sendFailure: {
+				failure: 'dispatch-fail',
+				notification: unconfirmedAppPushSendResponse,
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const screen = within(canvasElement.ownerDocument.body);
+
+		await expect(await screen.findByText('Something went wrong')).toBeVisible();
+		await expect(
+			screen.getByText("We couldn't confirm whether the app alert was sent."),
+		).toBeVisible();
+		await expect(
+			screen.getByText('Reference: push-unconfirmed-1234'),
+		).toBeVisible();
+		await expect(
+			screen.queryByRole('button', { name: 'Try Again' }),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const PartialMobileNotificationServiceFailure: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			sendFailure: {
+				failure: 'dispatch-fail',
+				notification: partiallyDeliveredAppPushSendResponse,
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const screen = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			await screen.findByText('The app alert had partial delivery issues'),
+		).toBeVisible();
+		await expect(
+			screen.getByText('Accepted for delivery to: UK'),
+		).toBeVisible();
+		await expect(
+			screen.getByText('Delivery not confirmed for: US'),
+		).toBeVisible();
+		await expect(
+			screen.getByText('Reference: push-partial-1234'),
+		).toBeVisible();
+		await expect(
+			screen.queryByRole('button', { name: 'Try Again' }),
+		).not.toBeInTheDocument();
 	},
 };
 
@@ -246,6 +339,40 @@ export const RejectsNonGuardianReplacementThumbnail: Story = {
 	},
 };
 
+export const WithLiveblogMainBlockThumbnail: Story = {
+	args: {
+		notificationState: {
+			...populatedPushState,
+			fetchedArticleId: liveblogFixture.id,
+			content: {
+				...liveblogFixture,
+				fields: {
+					headline: liveblogFixture.fields?.headline ?? 'Latest developments',
+					lastModified: liveblogFixture.fields?.lastModified ?? '',
+				},
+			},
+		},
+		formValues: {
+			...completePushParams,
+			headline: liveblogFixture.fields?.headline ?? 'Latest developments',
+			articleThumbnailUrl: '',
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const thumbnailToggle = canvas.getByRole('button', {
+			name: 'Show article thumbnail image',
+		});
+
+		await expect(thumbnailToggle).toBeEnabled();
+		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(canvas.getByAltText('Latest liveblog update')).toHaveAttribute(
+			'src',
+			'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+		);
+	},
+};
+
 export const WithThumbnailTurnedOff: Story = {
 	args: {
 		notificationState: populatedPushState,
@@ -273,38 +400,6 @@ export const WithThumbnailTurnedOff: Story = {
 				'Thumbnail for A rhyme to recall rising temperatures',
 			),
 		).toBeVisible();
-	},
-};
-
-export const WithoutThumbnail: Story = {
-	args: {
-		notificationState: {
-			...populatedPushState,
-			content: {
-				...articleFixture,
-				fields: { ...articleFixture.fields, thumbnail: '' },
-			},
-		},
-		formValues: {
-			...completePushParams,
-			includeThumbnail: false,
-			articleThumbnailUrl: '',
-		},
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		const thumbnailToggle = canvas.getByRole('button', {
-			name: 'Show article thumbnail image',
-		});
-
-		await expect(canvas.getByText('Article imported')).toBeVisible();
-		await expect(thumbnailToggle).toBeDisabled();
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
-		await expect(
-			canvas.queryByAltText(
-				'Thumbnail for A rhyme to recall rising temperatures',
-			),
-		).not.toBeInTheDocument();
 	},
 };
 
@@ -356,5 +451,35 @@ export const FetchArticleError: Story = {
 			isFetchingContent: false,
 			fetchArticleError: 'Failed to fetch article',
 		},
+	},
+};
+
+export const NonGuardianArticleUrl: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			'https://www.example.com/world/2026/sep/08/article',
+		);
+
+		await expect(
+			canvas.getByText('Paste a Guardian article URL beginning with https://.'),
+		).toBeVisible();
+	},
+};
+
+export const IncompleteGuardianArticleUrl: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			'https://www.theguardian.com/world',
+		);
+
+		await expect(
+			canvas.getByText(
+				'This Guardian link looks incomplete. Paste the full article URL.',
+			),
+		).toBeVisible();
 	},
 };

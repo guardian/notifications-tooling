@@ -5,6 +5,7 @@ import type { NotificationSendRequest } from '../routers/notifications/schemas/n
 import { dispatchNotification } from './dispatch-notification';
 import {
 	baseRequest,
+	createdByEmail,
 	createDependencies,
 	newsletterItem,
 	notificationId,
@@ -37,7 +38,12 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(renderEmail).toHaveBeenCalledTimes(1);
 		expect(sendBrazeCampaign).toHaveBeenCalledTimes(1);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
@@ -71,6 +77,7 @@ describe('dispatchNotification', () => {
 		const { error } = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -103,7 +110,12 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(renderEmail).not.toHaveBeenCalled();
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
 		expect(sendAppNotification).not.toHaveBeenCalled();

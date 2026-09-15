@@ -9,7 +9,7 @@ import {
 	AppNotificationApiError,
 	type AppNotificationImportance,
 } from '@services';
-import { determineArticleId } from '@utils';
+import { determineArticleId, determineBlockId } from '@utils';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { AppPushDispatchOutcome } from '../dispatch-outcome';
@@ -75,7 +75,10 @@ export const groupAppPushTopicsByType = (
 	return [...pushesByKey.values()];
 };
 
-export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
+export const resolveAppPushDispatch = (
+	request: NotificationSendRequest,
+	createdByEmail: string,
+) => {
 	const plan = request.channels[NotificationChannel.AppPushNotification];
 	if (!plan) {
 		return;
@@ -89,22 +92,25 @@ export const resolveAppPushDispatch = (request: NotificationSendRequest) => {
 
 	return {
 		item,
-		sender: request.sender,
+		createdByEmail,
 		pushes: groupAppPushTopicsByType(plan.audience.items),
 	};
 };
 
-export const dispatchAppPush = async (
-	resolvedDispatch: ReturnType<typeof resolveAppPushDispatch>,
-	_notificationId: string,
+/** The content, author and grouped pushes a single app-push dispatch sends. */
+export type ResolvedAppPushDispatch = NonNullable<
+	ReturnType<typeof resolveAppPushDispatch>
+>;
+
+/**
+ * Sends one mobile-n10n push per resolved topic-type group and maps each to a
+ * dispatch outcome. Shared by the production and internal-test push flows, which
+ * differ only in how they resolve the content, author and pushes.
+ */
+export const sendResolvedAppPushes = async (
+	{ item, createdByEmail, pushes }: ResolvedAppPushDispatch,
 	dependencies: DispatchNotificationDependencies,
 ): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
-	if (!resolvedDispatch) {
-		return { outcomes: [] };
-	}
-
-	const { item, sender, pushes } = resolvedDispatch;
-
 	const [endpoint, apiKey] = await Promise.all([
 		dependencies.getSSMParameter('MOBILE_N10N_ENDPOINT'),
 		dependencies.getSSMParameter('MOBILE_N10N_API_KEY'),
@@ -117,6 +123,8 @@ export const dispatchAppPush = async (
 
 	// Derive the CAPI content id so the apps deep-link; falls back to the raw URL.
 	const contentApiId = determineArticleId(item.link);
+	// A liveblog block link deep-links to that block; absent for plain articles.
+	const blockId = determineBlockId(item.link);
 
 	// A fresh id per topic-type push; returned so each POST can be persisted.
 	const dispatched = pushes.map((push) => ({ id: randomUUID(), push }));
@@ -129,11 +137,14 @@ export const dispatchAppPush = async (
 				apiKey: environment.MOBILE_N10N_API_KEY,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 				id,
-				sender,
+				// Ophan attributes on this single string; send the author's email so
+				// the notification is traced to them rather than the app.
+				sender: createdByEmail,
 				title: push.titleOverride ?? item.title,
 				body: item.body,
 				link: item.link,
 				contentApiId,
+				...(blockId ? { blockId } : {}),
 				importance: push.importance,
 				topics: push.topics,
 				media: item.media,
@@ -152,6 +163,7 @@ export const dispatchAppPush = async (
 			channel: 'app-push' as const,
 			topics: push.topics,
 			importance: push.importance,
+			...(blockId ? { blockId } : {}),
 		};
 		if (result.status === 'fulfilled') {
 			return {
@@ -180,4 +192,16 @@ export const dispatchAppPush = async (
 	});
 
 	return { outcomes, error: firstSettledError(settled) };
+};
+
+export const dispatchAppPush = async (
+	resolvedDispatch: ReturnType<typeof resolveAppPushDispatch>,
+	_notificationId: string,
+	dependencies: DispatchNotificationDependencies,
+): Promise<ChannelDispatchResult<AppPushDispatchOutcome>> => {
+	if (!resolvedDispatch) {
+		return { outcomes: [] };
+	}
+
+	return sendResolvedAppPushes(resolvedDispatch, dependencies);
 };

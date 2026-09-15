@@ -4,7 +4,7 @@
  *
  * It is included in `src/index.html`.
  */
-
+import './tracking-pixel';
 // Guardian design-system global styles: reset, fonts and design tokens.
 import '@guardian/stand/util/reset.css';
 import '@guardian/stand/fonts/OpenSans.css';

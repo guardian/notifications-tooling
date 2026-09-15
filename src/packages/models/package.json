@@ -8,6 +8,6 @@
 	},
 	"dependencies": {
 		"@guardian/pan-domain-node": "1.2.5",
-		"zod": "4.4.3"
+		"zod": "4.5.4"
 	}
 }

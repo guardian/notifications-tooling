@@ -3,8 +3,10 @@ import {
 	formatAbsoluteTime,
 	formatRelativeTime,
 	getRefreshIntervalMs,
+	isRelativeTime,
 	parsePublicationDate,
 } from '../utils/relative-time';
+import type { RelativeTimeStyle } from '../utils/relative-time';
 
 interface RelativeTime {
 	/** Short relative label, e.g. `2m ago`. */
@@ -13,6 +15,8 @@ interface RelativeTime {
 	formattedAbsoluteTime: string;
 	/** The original ISO 8601 timestamp, for a `<time dateTime>` attribute. */
 	iso8601: string;
+	/** Whether the label represents a time within the past 24 hours. */
+	isRelative: boolean;
 }
 
 /**
@@ -21,14 +25,18 @@ interface RelativeTime {
  * article was published "just now". Returns `undefined` for missing or
  * unparseable timestamps.
  */
-export const useRelativeTime = (iso8601?: string): RelativeTime | undefined => {
+export const useRelativeTime = (
+	iso8601?: string,
+	style: RelativeTimeStyle = 'short',
+): RelativeTime | undefined => {
 	const date = useMemo(() => parsePublicationDate(iso8601), [iso8601]);
 	const [, tick] = useReducer((count: number) => count + 1, 0);
+	const now = new Date();
 
 	// Derived from the current time rather than held in state, so it stays
 	// correct when `iso8601` changes without an effect having to re-sync it.
-	const label = date ? formatRelativeTime(date) : undefined;
-	const intervalMs = date ? getRefreshIntervalMs(date) : undefined;
+	const label = date ? formatRelativeTime(date, now, style) : undefined;
+	const intervalMs = date ? getRefreshIntervalMs(date, now, style) : undefined;
 
 	useEffect(() => {
 		if (intervalMs === undefined) {
@@ -44,5 +52,10 @@ export const useRelativeTime = (iso8601?: string): RelativeTime | undefined => {
 		return undefined;
 	}
 
-	return { label, formattedAbsoluteTime: formatAbsoluteTime(date), iso8601 };
+	return {
+		label,
+		formattedAbsoluteTime: formatAbsoluteTime(date),
+		iso8601,
+		isRelative: isRelativeTime(date, now),
+	};
 };

@@ -4,6 +4,7 @@ import { AppNotificationApiError } from '@services';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import {
 	anyString,
+	createdByEmail,
 	createDependencies,
 	pushItem,
 	testId,
@@ -33,6 +34,7 @@ describe('dispatchAppPushTest', () => {
 		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest(),
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -70,6 +72,7 @@ describe('dispatchAppPushTest', () => {
 		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest({ options: { dryRun: true } }),
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -102,6 +105,7 @@ describe('dispatchAppPushTest', () => {
 		const { outcomes, error } = await dispatchAppPushTest(
 			testPushRequest(),
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -133,6 +137,7 @@ describe('dispatchAppPushTest', () => {
 		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest({ channels: {} }),
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 

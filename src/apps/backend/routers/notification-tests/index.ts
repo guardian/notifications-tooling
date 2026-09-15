@@ -22,6 +22,7 @@ import {
 type DispatchValidatedNotificationTest = (
 	request: NotificationTestSendRequest,
 	testId: string,
+	createdByEmail: string,
 ) => Promise<TestDispatchOutcomes>;
 
 export const createNotificationTestsRouter = (
@@ -51,6 +52,7 @@ export const createNotificationTestsRouter = (
 				const { error, ...outcomes } = await dispatchRequest(
 					body,
 					notification.id,
+					notification.createdByEmail,
 				);
 				const persisted = await store.recordOutcomes(notification, outcomes);
 				outcomesRecorded = true;

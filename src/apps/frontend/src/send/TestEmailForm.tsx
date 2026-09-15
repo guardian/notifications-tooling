@@ -11,6 +11,7 @@ import type { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from '../compose/NotificationContext';
 import { ConfigContext } from '../config/ConfigContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { senderId } from '../utils/build-request-payloads';
 import { validateGuardianEmail } from '../utils/form-validation';
 import { composeNewsletterSubject } from '../utils/newsletter-subject';
 import type { NewsletterFormValues } from '../utils/notification-forms';
@@ -25,6 +26,7 @@ type TestSendParams = {
 	emailSubjectLine: string;
 	subject: string;
 	preview: string;
+	showPreview: boolean;
 	webUrl: string;
 };
 
@@ -40,6 +42,7 @@ const getSendParams = (
 	const {
 		audienceSegments = [],
 		preview = '',
+		showPreview = true,
 		subject = '',
 		kicker,
 	} = parameters;
@@ -55,6 +58,7 @@ const getSendParams = (
 		emailSubjectLine,
 		subject,
 		preview,
+		showPreview,
 		webUrl: content.webUrl,
 	};
 };
@@ -65,6 +69,7 @@ const makePayload = ({
 	audienceSegments,
 	subject,
 	preview,
+	showPreview,
 	webUrl,
 }: TestSendParams): TestEmailSendRequest => ({
 	channels: {
@@ -89,12 +94,12 @@ const makePayload = ({
 			'lead-story': {
 				type: 'newsletter',
 				title: subject,
-				body: preview,
+				body: showPreview ? preview : '',
 				link: webUrl,
 			},
 		},
 	},
-	sender: 'notifications-tooling-spa/v1',
+	sender: senderId,
 });
 
 export const TestEmailForm = () => {

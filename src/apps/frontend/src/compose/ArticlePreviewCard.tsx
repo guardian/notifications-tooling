@@ -1,35 +1,38 @@
 import { Link } from '@guardian/stand/Link';
 import { Typography } from '@guardian/stand/Typography';
-import type { ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from '@models';
 import { useRelativeTime } from '../hooks/use-relative-time';
 import { articlePreviewCardTheme } from '../themes';
+import { getArticlePresentation } from '../utils/article-presentation';
 import { getPillarColor } from '../utils/pillar-colors';
 
 interface ArticlePreviewCardProps {
 	content: ResolvedArticle;
+	requestedUrl?: string;
+	requestedBlock?: CapiBlock;
 	showThumbnail?: boolean;
 }
 
 export const ArticlePreviewCard = ({
 	content,
+	requestedUrl,
+	requestedBlock,
 	showThumbnail = true,
 }: ArticlePreviewCardProps) => {
+	const { sectionName, pillarId, pillarName } = content;
 	const {
-		sectionName,
-		pillarId,
-		pillarName,
-		webTitle,
-		fields,
-		webPublicationDate,
-		webUrl,
-	} = content;
-	const headline = fields?.headline ?? webTitle;
-	const thumbnail = fields?.thumbnail;
+		headline,
+		isLiveblog,
+		linkUrl,
+		liveblogBlock,
+		publishedDate,
+		thumbnail,
+	} = getArticlePresentation({ content, requestedUrl, requestedBlock });
 	const pillarColor = getPillarColor(pillarId);
-	const publishedAt = useRelativeTime(webPublicationDate);
+	const publishedAt = useRelativeTime(publishedDate);
 
 	return (
-		<div css={articlePreviewCardTheme.card}>
+		<div css={articlePreviewCardTheme.card(isLiveblog)}>
 			<div css={articlePreviewCardTheme.details}>
 				{(sectionName ?? pillarName) && (
 					<Typography
@@ -48,7 +51,39 @@ export const ArticlePreviewCard = ({
 					</Typography>
 				)}
 
-				{publishedAt && (
+				{isLiveblog && (
+					<div css={articlePreviewCardTheme.liveStatus}>
+						<Typography
+							variant="bodyBoldXs"
+							element="span"
+							cssOverrides={articlePreviewCardTheme.liveIndicator}
+						>
+							<span
+								css={articlePreviewCardTheme.liveIndicatorDot}
+								aria-hidden="true"
+							/>
+							Live
+						</Typography>
+						{publishedAt && (
+							<Typography
+								variant="bodyXs"
+								element="span"
+								cssOverrides={articlePreviewCardTheme.updated}
+							>
+								Updated{' '}
+								<time
+									dateTime={publishedAt.iso8601}
+									title={publishedAt.formattedAbsoluteTime}
+									css={articlePreviewCardTheme.publishedRelative}
+								>
+									{publishedAt.label}
+								</time>
+							</Typography>
+						)}
+					</div>
+				)}
+
+				{publishedAt && !isLiveblog && (
 					<Typography
 						variant="bodyXs"
 						element="p"
@@ -73,21 +108,31 @@ export const ArticlePreviewCard = ({
 					{headline}
 				</Typography>
 
+				{liveblogBlock?.id && (
+					<Typography
+						variant="bodyBoldXs"
+						element="p"
+						cssOverrides={articlePreviewCardTheme.liveblogBlockId}
+					>
+						Liveblog block ID: {liveblogBlock.id}
+					</Typography>
+				)}
+
 				<Link
 					cssOverrides={articlePreviewCardTheme.url}
-					href={webUrl}
+					href={linkUrl}
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					{webUrl}
+					{linkUrl}
 				</Link>
 			</div>
 
-			{thumbnail && showThumbnail && (
+			{thumbnail.src && showThumbnail && (
 				<img
-					src={thumbnail}
-					alt={`Thumbnail for ${headline}`}
-					css={articlePreviewCardTheme.thumbnail}
+					src={thumbnail.src}
+					alt={thumbnail.alt ?? `Thumbnail for ${headline}`}
+					css={articlePreviewCardTheme.thumbnail(isLiveblog)}
 				/>
 			)}
 		</div>

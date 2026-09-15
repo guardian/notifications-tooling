@@ -3,8 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { parseHistorySearchParams } from '../utils/history-search-params';
+import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
 import { HistoryView } from './HistoryView';
-import { mapNotificationToHistoryNotification } from './notification-history-mapper';
 
 export const HistoryPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -49,6 +49,13 @@ export const HistoryPage = () => {
 			}
 			limit={limit}
 			handlePageChange={handlePageChange}
+			handleRefresh={() => void notificationHistory.refetch()}
+			isRefreshing={notificationHistory.isFetching}
+			lastUpdatedAt={
+				notificationHistory.dataUpdatedAt
+					? new Date(notificationHistory.dataUpdatedAt).toISOString()
+					: undefined
+			}
 			currentPage={currentPage}
 		/>
 	);

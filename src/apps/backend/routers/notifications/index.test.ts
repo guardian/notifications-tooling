@@ -138,6 +138,7 @@ describe('POST /v1/notifications', () => {
 						options: { dryRun: false, scheduledFor: null },
 					},
 					expect.any(String),
+					expect.any(String),
 				);
 			} finally {
 				await dispatchServer.close();
@@ -275,6 +276,7 @@ describe('POST /v1/notifications', () => {
 				expect(dispatchRequest).toHaveBeenCalledWith(
 					expect.anything(),
 					body.id,
+					'ada.lovelace@guardian.co.uk',
 				);
 				expect(body.dispatches).toEqual([
 					{

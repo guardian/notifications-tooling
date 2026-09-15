@@ -1,6 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
-import type { ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from '@models';
 import {
 	type FormEventHandler,
 	type PropsWithChildren,
@@ -26,8 +26,10 @@ interface NotificationFormWrapperProps {
 	sendButtonLabel: string;
 	onSubmit: FormEventHandler<HTMLFormElement>;
 	onResetNotification: () => void;
-	onArticleImported: (article: ResolvedArticle) => void;
-	showArticleThumbnail?: boolean;
+	onArticleImported: (
+		article: ResolvedArticle,
+		requestedBlock?: CapiBlock,
+	) => void;
 }
 
 export const NotificationFormWrapper = ({
@@ -39,7 +41,6 @@ export const NotificationFormWrapper = ({
 	onSubmit,
 	onResetNotification,
 	onArticleImported,
-	showArticleThumbnail,
 	children,
 }: PropsWithChildren<NotificationFormWrapperProps>) => {
 	const { notification } = useContext(NotificationFormContext);
@@ -91,7 +92,6 @@ export const NotificationFormWrapper = ({
 							lockArticleInputText={lockArticleInputText}
 							setLockArticleInputText={setLockArticleInputText}
 							onArticleImported={onArticleImported}
-							showThumbnail={showArticleThumbnail}
 						/>
 						<ChannelDisplay channel={channel} />
 					</NotificationFormSection>

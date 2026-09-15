@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
 import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
+import { getArticleThumbnail } from '../utils/article-thumbnail';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
@@ -39,6 +40,8 @@ export const CreateAppAlertForm = ({
 					topicTypes.find(({ id }) => id === values.alertType)?.label ??
 					values.alertType,
 				content: notification.content,
+				requestedUrl: notification.requestedUrl,
+				requestedBlock: notification.requestedBlock,
 				idempotencyKey: crypto.randomUUID(),
 			}),
 		});
@@ -63,10 +66,12 @@ export const CreateAppAlertForm = ({
 			onResetNotification={() =>
 				updateNotification({ type: 'reset-app-alert' })
 			}
-			onArticleImported={(article) => {
+			onArticleImported={(article, requestedBlock) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);
-				setValue('includeThumbnail', Boolean(article.fields?.thumbnail));
-				setValue('articleThumbnailUrl', article.fields?.thumbnail ?? '');
+				const articleThumbnailUrl =
+					getArticleThumbnail(article, requestedBlock).src ?? '';
+				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
+				setValue('articleThumbnailUrl', articleThumbnailUrl);
 			}}
 		>
 			<NotificationFormSection

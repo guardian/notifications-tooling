@@ -6,6 +6,7 @@ import { dispatchNotification } from '../dispatch-notification';
 import {
 	anyString,
 	baseRequest,
+	createdByEmail,
 	createDependencies,
 	notificationId,
 	pushItem,
@@ -35,6 +36,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
@@ -43,7 +45,7 @@ describe('dispatchNotification (app-push channel)', () => {
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
 			id: anyString,
-			sender: baseRequest.sender,
+			sender: createdByEmail,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
@@ -78,6 +80,82 @@ describe('dispatchNotification (app-push channel)', () => {
 		]);
 	});
 
+	it('forwards the liveblog block id derived from a block link', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: {
+				items: {
+					lead: {
+						...pushItem,
+						link: 'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-5dd7ca0f8f080fd59fb15354',
+					},
+				},
+			},
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
+
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				contentApiId: 'politics/live/2026/jul/19/election-live',
+				blockId: '5dd7ca0f8f080fd59fb15354',
+			}),
+		);
+	});
+
+	it('records the block id in the resolved dispatch outcome', async () => {
+		const { dependencies } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: {
+				items: {
+					lead: {
+						...pushItem,
+						link: 'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-5dd7ca0f8f080fd59fb15354',
+					},
+				},
+			},
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
+
+		expect(outcomes.appPush[0]?.resolved).toEqual({
+			channel: 'app-push',
+			topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+			importance: 'Major',
+			blockId: '5dd7ca0f8f080fd59fb15354',
+		});
+	});
+
 	it('sends one push per topic type when types are mixed', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
@@ -100,6 +178,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
@@ -181,7 +260,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		};
 
 		const { outcomes, error } = await dispatchAppPush(
-			resolveAppPushDispatch(request),
+			resolveAppPushDispatch(request, createdByEmail),
 			notificationId,
 			dependencies,
 		);
@@ -242,7 +321,12 @@ describe('dispatchNotification (app-push channel)', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
 				id: anyString,
@@ -273,13 +357,18 @@ describe('dispatchNotification (app-push channel)', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(sendAppNotification).toHaveBeenCalledWith({
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
 			id: anyString,
-			sender: baseRequest.sender,
+			sender: createdByEmail,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
@@ -308,7 +397,12 @@ describe('dispatchNotification (app-push channel)', () => {
 
 		let dispatchError: unknown;
 		try {
-			await dispatchNotification(request, notificationId, dependencies);
+			await dispatchNotification(
+				request,
+				notificationId,
+				createdByEmail,
+				dependencies,
+			);
 		} catch (error) {
 			dispatchError = error;
 		}
@@ -343,6 +437,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -422,6 +517,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 

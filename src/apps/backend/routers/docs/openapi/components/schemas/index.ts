@@ -14,6 +14,7 @@ import {
 } from './grafana-query';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
+import { liveblogBlockSchema } from './liveblog-block';
 import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationConflictErrorSchema } from './notification-conflict-error';
@@ -27,6 +28,7 @@ import { notificationUnprocessableErrorSchema } from './notification-unprocessab
 import { notificationValidationErrorSchema } from './notification-validation-error';
 import { notificationValidationIssueSchema } from './notification-validation-issue';
 import { resolveArticleRequestSchema } from './resolve-article-request';
+import { resolveArticleResponseSchema } from './resolve-article-response';
 import { resolvedArticleSchema } from './resolved-article';
 import { unauthenticatedSchema } from './unauthenticated';
 import { userResponseSchema, userSchema } from './user';
@@ -54,7 +56,9 @@ export const schemas = {
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
 	EmailChannelConfig: emailChannelConfigSchema,
+	LiveblogBlock: liveblogBlockSchema,
 	ResolveArticleRequest: resolveArticleRequestSchema,
+	ResolveArticleResponse: resolveArticleResponseSchema,
 	ResolvedArticle: resolvedArticleSchema,
 	ArticleResolutionError: articleResolutionErrorSchema,
 	User: userSchema,

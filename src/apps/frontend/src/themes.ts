@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import {
 	baseColors,
 	baseSpacing,
@@ -6,12 +6,14 @@ import {
 	semanticRadius,
 	semanticSizing,
 	semanticSpacing,
+	semanticTypography,
 } from '@guardian/stand';
 import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { ButtonTheme } from '@guardian/stand/Button';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
+import { from, until } from '@guardian/stand/utils';
 
 export const topBarHeight = '4rem';
 
@@ -40,6 +42,13 @@ export const topBarTheme: TopBarTheme = {
 	},
 	toolName: {
 		color: semanticColors.text.strongerInverse,
+		hoverLink: {
+			color: semanticColors.text.strongerInverse,
+			backgroundColor: 'transparent',
+			pressed: {
+				backgroundColor: 'transparent',
+			},
+		},
 	},
 	navigation: {
 		shared: {
@@ -146,21 +155,53 @@ export const activePillTheme = {
 };
 
 export const articlePreviewCardTheme = {
-	card: css({
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'flex-start',
-		justifyContent: 'space-between',
-		gap: semanticSpacing.stackMd,
-		padding: semanticSpacing.stackSm,
-		borderRadius: semanticRadius.cornerSm,
-		backgroundColor: baseColors.neutral[850],
-		maxWidth: '500px',
-	}),
+	card: (isLiveblog: boolean) =>
+		css({
+			display: 'flex',
+			flexDirection: 'row',
+			alignItems: 'flex-start',
+			justifyContent: 'space-between',
+			gap: semanticSpacing.stackMd,
+			padding: semanticSpacing.stackSm,
+			borderRadius: semanticRadius.cornerSm,
+			backgroundColor: baseColors.neutral[850],
+			maxWidth: isLiveblog ? '900px' : '500px',
+			'@media (max-width: 600px)': isLiveblog
+				? { flexDirection: 'column', alignItems: 'stretch' }
+				: undefined,
+		}),
 	details: css({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: semanticSpacing.stackXxs,
+		minWidth: 0,
+		flex: 1,
+	}),
+	liveStatus: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+	}),
+	liveIndicator: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
+		padding: `${baseSpacing['2Px']} ${baseSpacing['6Px']}`,
+		color: semanticColors.text.strongerInverse,
+		backgroundColor: semanticColors.text.error,
+		textTransform: 'uppercase',
+	}),
+	liveIndicatorDot: css({
+		width: '8px',
+		height: '8px',
+		borderRadius: '50%',
+		backgroundColor: semanticColors.text.strongerInverse,
+	}),
+	liveblogBlockId: css({
+		fontSize: '12px',
+		fontWeight: 700,
+		color: semanticColors.text.success,
+		margin: 0,
 	}),
 	sectionLabel: (color: string) =>
 		css({
@@ -176,6 +217,10 @@ export const articlePreviewCardTheme = {
 		color: semanticColors.text.weak,
 		margin: 0,
 	}),
+	updated: css({
+		fontSize: '12px',
+		color: semanticColors.text.strong,
+	}),
 	publishedRelative: css({
 		fontWeight: 700,
 		color: semanticColors.text.strong,
@@ -185,12 +230,14 @@ export const articlePreviewCardTheme = {
 		color: semanticColors.text.link,
 		overflowWrap: 'anywhere',
 	}),
-	thumbnail: css({
-		width: '120px',
-		borderRadius: semanticRadius.cornerXs,
-		objectFit: 'cover',
-		flexShrink: 0,
-	}),
+	thumbnail: (isLiveblog: boolean) =>
+		css({
+			width: '124px',
+			aspectRatio: isLiveblog ? '5 / 4' : undefined,
+			borderRadius: semanticRadius.cornerXs,
+			objectFit: 'cover',
+			flexShrink: 0,
+		}),
 };
 
 export const audienceSegmentStyles = {
@@ -308,4 +355,282 @@ export const replaceThumbnailButtonTheme: ButtonTheme = {
 			},
 		},
 	},
+};
+
+export const dispatchLandingTheme = {
+	dispatchMainContainer: css({
+		flow: 'vertical',
+		paddingTop: semanticSpacing.stackLg,
+		paddingInline: semanticSpacing.stackMd,
+		width: '100%',
+		maxWidth: '983px',
+		gap: semanticSpacing.stackLg,
+		[from.md]: {
+			paddingInline: semanticSpacing.stackLg,
+		},
+	}),
+	dispatchTableSection: css({
+		width: '100%',
+		maxWidth: '983px',
+		marginTop: '16px',
+		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		paddingTop: '12px',
+		gap: semanticSpacing.stackMd,
+	}),
+	activityHeading: css({
+		marginBottom: semanticSpacing.stackSm,
+	}),
+	activityControls: css({
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: semanticSpacing.stackSm,
+		marginBottom: semanticSpacing.stackMd,
+	}),
+	activityCounters: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+	}),
+};
+
+const skeletonPulse = keyframes({
+	'0%, 100%': { opacity: 0.45 },
+	'50%': { opacity: 1 },
+});
+
+const skeletonBase = {
+	display: 'block',
+	backgroundColor: semanticColors.fill.neutralWeak,
+	animation: `${skeletonPulse} 1.5s ease-in-out infinite`,
+	'@media (prefers-reduced-motion: reduce)': {
+		animation: 'none',
+	},
+} as const;
+
+export const historyViewStyles = {
+	container: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackMd,
+		padding: semanticSpacing.stackLg,
+	}),
+	header: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackLg,
+		[from.md]: {
+			flexDirection: 'row',
+			alignItems: 'center',
+		},
+	}),
+	headerActions: css({
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: semanticSpacing.stackSm,
+		minWidth: 0,
+		[from.md]: {
+			marginLeft: 'auto',
+		},
+	}),
+	refreshControls: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		whiteSpace: 'nowrap',
+	}),
+	titleBlock: css({
+		display: 'flex',
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	}),
+	notification: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackSm,
+		minWidth: 0,
+	}),
+	thumbnail: css({
+		width: '60px',
+		height: '60px',
+		flexShrink: 0,
+		objectFit: 'cover',
+	}),
+	thumbnailFallback: css({
+		display: 'flex',
+		width: '60px',
+		height: '60px',
+		flexShrink: 0,
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: semanticSpacing.stackXxs,
+		textAlign: 'center',
+		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+	}),
+	notificationDetails: css({
+		display: 'flex',
+		minWidth: 0,
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXxs,
+	}),
+	title: css({
+		display: '-webkit-box',
+		overflow: 'hidden',
+		WebkitBoxOrient: 'vertical',
+		WebkitLineClamp: 2,
+	}),
+	channel: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		color: semanticColors.text.weak,
+	}),
+	notificationType: css({
+		display: 'none',
+		'@media (min-width: 600px)': {
+			display: 'inline',
+		},
+	}),
+	regions: css({
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		flexWrap: 'wrap',
+		'& svg': {
+			display: 'block',
+			width: '24px',
+			height: '18px',
+		},
+	}),
+	table: css({
+		'@media (min-width: 600px) and (max-width: 1055.9px)': {
+			'& [role="row"]': {
+				gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+			},
+		},
+	}),
+	tableHeader: css({
+		'& > tr > *': {
+			padding: '16px',
+		},
+		'& > tr > :not(:first-of-type)': {
+			display: 'none',
+			[from.lg]: {
+				display: 'block',
+			},
+		},
+	}),
+	tableRow: css({
+		rowGap: semanticSpacing.stackXs,
+		paddingBlock: semanticSpacing.stackXs,
+		[from.lg]: {
+			rowGap: 0,
+			paddingBlock: 0,
+		},
+	}),
+	notificationCell: css({
+		'@media (min-width: 600px) and (max-width: 1055.9px)': {
+			alignSelf: 'start',
+		},
+		'@media (min-width: 600px) and (max-width: 829.9px)': {
+			gridColumn: '1',
+			gridRow: '1 / span 4',
+		},
+	}),
+	metadataCell: (row: number) =>
+		css({
+			paddingBlock: 0,
+			[until.lg]: {
+				display: 'grid',
+				gridTemplateColumns: '80px minmax(0, 1fr)',
+				alignItems: 'center',
+			},
+			'@media (min-width: 600px) and (max-width: 829.9px)': {
+				gridColumn: '2',
+				gridRow: String(row),
+			},
+		}),
+	compactLabel: css({
+		color: semanticColors.text.weak,
+		[until.lg]: {
+			display: 'inline',
+		},
+		[from.lg]: {
+			display: 'none',
+		},
+	}),
+	metadataValue: css({
+		minWidth: 0,
+	}),
+	sendTimeValue: css({
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
+	}),
+	statusBadge: css({
+		boxSizing: 'border-box',
+		height: '18px',
+		paddingBlock: 0,
+		paddingInline: '6px',
+		whiteSpace: 'nowrap',
+		[from.lg]: {
+			height: '24px',
+			paddingInline: '8px',
+			font: semanticTypography.headingSm.font,
+			letterSpacing: semanticTypography.headingSm.letterSpacing,
+		},
+	}),
+	empty: css({
+		display: 'flex',
+		minHeight: '280px',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: semanticSpacing.stackXs,
+		padding: semanticSpacing.stackLg,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		textAlign: 'center',
+	}),
+	emptyIcon: css({
+		display: 'grid',
+		width: '48px',
+		height: '48px',
+		placeItems: 'center',
+		marginBottom: semanticSpacing.stackXs,
+		borderRadius: '50%',
+		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+	}),
+	emptyCopy: css({
+		maxWidth: '420px',
+		color: semanticColors.text.weak,
+	}),
+	skeletonThumbnail: css({
+		...skeletonBase,
+		width: '60px',
+		height: '60px',
+		flexShrink: 0,
+	}),
+	skeletonNotificationDetails: css({
+		display: 'flex',
+		width: 'min(100%, 320px)',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXs,
+	}),
+	skeletonLine: (width: string) =>
+		css({
+			...skeletonBase,
+			width,
+			height: '14px',
+		}),
+	skeletonMetadata: css({
+		...skeletonBase,
+		width: '70%',
+		height: '14px',
+	}),
 };

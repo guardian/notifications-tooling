@@ -30,6 +30,8 @@ export const notificationReducer = (
 				...state,
 				fetchedArticleId: action.content.id,
 				content: action.content,
+				requestedUrl: action.requestedUrl,
+				requestedBlock: action.requestedBlock,
 				isFetchingContent: false,
 				fetchArticleError: undefined,
 			};
@@ -40,6 +42,8 @@ export const notificationReducer = (
 				...state,
 				fetchedArticleId: undefined,
 				content: undefined,
+				requestedUrl: undefined,
+				requestedBlock: undefined,
 				isFetchingContent: false,
 				fetchArticleError: action.errorMessage,
 			};

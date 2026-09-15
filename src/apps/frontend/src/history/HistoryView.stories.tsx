@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { articleFixture } from '../testing/capi-fixtures';
 import { type HistoryNotification, HistoryView } from './HistoryView';
 
@@ -44,7 +44,7 @@ const paginatedNotifications: HistoryNotification[] = Array.from(
 );
 
 const meta = {
-	title: 'Stand Frontend/HistoryView',
+	title: 'Dispatch/History/HistoryView',
 	component: HistoryView,
 	parameters: {
 		layout: 'fullscreen',
@@ -61,8 +61,10 @@ export const Default: Story = {
 		currentPage: 1,
 		limit: 10,
 		handlePageChange: () => undefined,
+		handleRefresh: fn(),
+		lastUpdatedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
 	},
-	play: async ({ canvasElement }) => {
+	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
 			canvas.getByRole('grid', { name: 'Sent alerts' }),
@@ -76,9 +78,29 @@ export const Default: Story = {
 		await expect(canvas.getByText('Partially sent')).toBeInTheDocument();
 		await expect(canvas.getByText('No image')).toBeInTheDocument();
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(1);
+		const lastUpdated = canvas.getByText('Last updated:');
+		await expect(lastUpdated).toBeInTheDocument();
+		await expect(within(lastUpdated).getByRole('time')).toHaveTextContent(
+			/^5 mins? ago$/,
+		);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Refresh activity' }),
+		);
+		await expect(args.handleRefresh).toHaveBeenCalledOnce();
 		await expect(
 			canvas.getByRole('img', { name: 'International' }),
 		).toBeInTheDocument();
+		const recentSendTime = canvas
+			.getAllByRole('time')
+			.find((element) =>
+				element.matches(`time[datetime="${notifications[0]?.sentAt}"]`),
+			);
+		await expect(recentSendTime).toBeDefined();
+		await expect(recentSendTime).toHaveTextContent(/^\d+ mins? ago$/);
+		await expect(recentSendTime).toHaveAttribute(
+			'datetime',
+			notifications[0]?.sentAt,
+		);
 	},
 };
 
@@ -89,12 +111,19 @@ export const Empty: Story = {
 		currentPage: 1,
 		limit: 10,
 		handlePageChange: () => undefined,
+		handleRefresh: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
-			canvas.getByText('No alerts have been sent yet.'),
+			canvas.getByRole('heading', { name: 'No alerts yet' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Alerts will appear here after they have been sent.'),
+		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('grid', { name: 'Sent alerts' }),
+		).not.toBeInTheDocument();
 	},
 };
 
@@ -106,13 +135,16 @@ export const Loading: Story = {
 		limit: 10,
 		isLoading: true,
 		handlePageChange: () => undefined,
+		handleRefresh: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Loading history...')).toBeInTheDocument();
 		await expect(
-			canvas.queryByRole('grid', { name: 'Sent alerts' }),
-		).not.toBeInTheDocument();
+			canvas.getByRole('status', { name: 'Loading alert history' }),
+		).toHaveAttribute('aria-busy', 'true');
+		await expect(
+			canvas.getByRole('grid', { name: 'Loading sent alerts' }),
+		).toBeInTheDocument();
 		await expect(
 			canvas.queryByRole('navigation', { name: 'Pagination' }),
 		).not.toBeInTheDocument();
@@ -127,6 +159,7 @@ export const Error: Story = {
 		limit: 10,
 		error: 'Unable to load notification history. Try again.',
 		handlePageChange: () => undefined,
+		handleRefresh: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -149,6 +182,8 @@ export const WithPagination: Story = {
 		limit: 10,
 		currentPage: 1,
 		handlePageChange: () => undefined,
+		handleRefresh: () => undefined,
+		lastUpdatedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -156,6 +191,18 @@ export const WithPagination: Story = {
 			canvas.getByRole('navigation', { name: 'Pagination' }),
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Results: 1–10 of 80')).toBeInTheDocument();
+		const refreshButton = canvas.getByRole('button', {
+			name: 'Refresh activity',
+		});
+		await expect(refreshButton).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('navigation', { name: 'Pagination' }),
+		).toBeInTheDocument();
+		await expect(
+			refreshButton.compareDocumentPosition(
+				canvas.getByRole('navigation', { name: 'Pagination' }),
+			) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 		await expect(
 			canvas.getByRole('button', { name: 'Go to page 2' }),
 		).toBeInTheDocument();
