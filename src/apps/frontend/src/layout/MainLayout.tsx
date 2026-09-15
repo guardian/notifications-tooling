@@ -1,17 +1,16 @@
 import { css } from '@emotion/react';
 import { baseColors } from '@guardian/stand';
+import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Avatar } from '@guardian/stand/Avatar';
-import { Badge } from '@guardian/stand/Badge';
 import { Favicon } from '@guardian/stand/Favicon';
 import { Layout } from '@guardian/stand/Layout';
 import {
 	TopBar,
 	TopBarContainerLeft,
-	TopBarContainerRight,
-	TopBarItem,
 	TopBarNavigation,
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
+import { Typography } from '@guardian/stand/Typography';
 import type { AppConfig } from '@models';
 import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -65,22 +64,6 @@ export const MainLayout = ({ children }: Props) => {
 							),
 						)}
 					</TopBarContainerLeft>
-					{shouldShowEnvBadge && (
-						<TopBarContainerRight>
-							<TopBarItem>
-								<Badge
-									size="md"
-									weight="strong"
-									cssOverrides={css({
-										color: 'white',
-										backgroundColor: baseColors.magenta['200'],
-									})}
-								>
-									{stage}
-								</Badge>
-							</TopBarItem>
-						</TopBarContainerRight>
-					)}
 					{user && (
 						<Avatar
 							src={user.avatarUrl}
@@ -90,6 +73,26 @@ export const MainLayout = ({ children }: Props) => {
 						/>
 					)}
 				</TopBar>
+				{shouldShowEnvBadge && (
+					<AlertBanner
+						level="information"
+						theme={{
+							information: {
+								backgroundColor:
+									stage === 'CODE'
+										? baseColors.magenta['800']
+										: baseColors.neutral['600'],
+							},
+						}}
+					>
+						<Typography
+							variant="headingCompactMd"
+							color={baseColors.neutral['0']}
+						>
+							You are working in the {stage} Environment
+						</Typography>
+					</AlertBanner>
+				)}
 			</Layout.TopBar>
 			{children}
 		</Layout>
