@@ -12,11 +12,15 @@ import { FALLBACK_TOPIC_TYPES } from './audience-fallbacks';
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
 
 /**
- * Reads the per-channel constraints the backend derives from the same config it
- * validates sends against, so the UI's guidance cannot drift from the rules.
+ * Reads the audiences the backend will accept for each channel — app-push topic
+ * types with their editions, and newsletter segments — derived from the same
+ * config it validates sends against, so a picker cannot offer an audience the
+ * send would reject.
  *
- * Failure is deliberately not surfaced: callers read
- * {@link NEWSLETTER_EMAIL_LIMIT_FALLBACKS} when `data` is absent.
+ * Failure is deliberately not surfaced: every consumer substitutes a hardcoded
+ * audience list when `data` is absent — see {@link useAppAlertTopicTypes},
+ * `useNewsletterEmailSegmentOptions` and `useTopicEditionOptions` — so the
+ * composer stays usable when the read fails.
  */
 export const useChannelAudiences = () =>
 	useQuery<ChannelAudienceResponse>({
@@ -44,8 +48,8 @@ export const useChannelAudiences = () =>
 				throw error;
 			}
 		},
-		// Limits are editorial config that changes on a deploy cadence, not per
-		// session, so refetching them on every mount is pure noise.
+		// Audiences are editorial config that changes on a deploy cadence, not
+		// per session, so refetching them on every mount is pure noise.
 		staleTime: Infinity,
 	});
 
