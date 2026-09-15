@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'bun:test';
-import { parseArticleUrlInputToContentId } from './form-validation';
+import { parseArticleUrlInputToArticleId } from './form-validation';
 
-describe('parseArticleUrlInputToContentId', () => {
+describe('parseArticleUrlInputToArticleId', () => {
 	it('parses the id from a valid Guardian article link', () => {
 		expect(
-			parseArticleUrlInputToContentId(
+			parseArticleUrlInputToArticleId(
 				'https://www.theguardian.com/film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change',
 			),
 		).toEqual({
@@ -15,7 +15,7 @@ describe('parseArticleUrlInputToContentId', () => {
 	});
 	it('rejects non-guardian urls', () => {
 		expect(
-			parseArticleUrlInputToContentId(
+			parseArticleUrlInputToArticleId(
 				'https://www.example.com/film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change',
 			),
 		).toEqual({
@@ -24,21 +24,21 @@ describe('parseArticleUrlInputToContentId', () => {
 	});
 	it('accepts Guardian subdomains and short links', () => {
 		expect(
-			parseArticleUrlInputToContentId(
+			parseArticleUrlInputToArticleId(
 				'https://amp.theguardian.com/world/2026/sep/08/article',
 			),
 		).toEqual({
 			articleId: 'world/2026/sep/08/article',
 			webUrl: 'https://amp.theguardian.com/world/2026/sep/08/article',
 		});
-		expect(parseArticleUrlInputToContentId('https://gu.com/p/abc12')).toEqual({
+		expect(parseArticleUrlInputToArticleId('https://gu.com/p/abc12')).toEqual({
 			articleId: 'p/abc12',
 			webUrl: 'https://gu.com/p/abc12',
 		});
 	});
 	it('rejects non-https Guardian urls', () => {
 		expect(
-			parseArticleUrlInputToContentId(
+			parseArticleUrlInputToArticleId(
 				'http://www.theguardian.com/world/2026/sep/08/article',
 			),
 		).toEqual({
@@ -47,7 +47,7 @@ describe('parseArticleUrlInputToContentId', () => {
 	});
 	it('preserves query params and hash', () => {
 		expect(
-			parseArticleUrlInputToContentId(
+			parseArticleUrlInputToArticleId(
 				'https://www.theguardian.com/film/2026/jul/23/ryan-gosling-hand-la-la-land-poster-change?foo=bar&baz=foo#baz',
 			),
 		).toEqual({
@@ -58,14 +58,14 @@ describe('parseArticleUrlInputToContentId', () => {
 	});
 	it('rejects paths with only one components', () => {
 		expect(
-			parseArticleUrlInputToContentId('https://www.theguardian.com/uk'),
+			parseArticleUrlInputToArticleId('https://www.theguardian.com/uk'),
 		).toEqual({
 			failure: 'incomplete-article-url',
 		});
 	});
 	it('rejects paths with characters other than letters, numbers and dashes between in the segments', () => {
 		expect(
-			parseArticleUrlInputToContentId(
+			parseArticleUrlInputToArticleId(
 				'https://www.theguardian.com/film/****/jul/23/ryan-gosling-hand-la-la-land-poster-change',
 			),
 		).toEqual({
@@ -74,7 +74,7 @@ describe('parseArticleUrlInputToContentId', () => {
 	});
 	it('will accept an article id and use the default domain', () => {
 		expect(
-			parseArticleUrlInputToContentId('global/2025/jan/02/my-headline'),
+			parseArticleUrlInputToArticleId('global/2025/jan/02/my-headline'),
 		).toEqual({
 			articleId: 'global/2025/jan/02/my-headline',
 			webUrl: 'https://www.theguardian.com/global/2025/jan/02/my-headline',
@@ -82,7 +82,7 @@ describe('parseArticleUrlInputToContentId', () => {
 	});
 	it('will accept an article id with a leading slash', () => {
 		expect(
-			parseArticleUrlInputToContentId('/global/2025/jan/02/my-headline'),
+			parseArticleUrlInputToArticleId('/global/2025/jan/02/my-headline'),
 		).toEqual({
 			articleId: 'global/2025/jan/02/my-headline',
 			webUrl: 'https://www.theguardian.com/global/2025/jan/02/my-headline',

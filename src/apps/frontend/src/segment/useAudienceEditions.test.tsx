@@ -3,21 +3,21 @@ import type { ChannelAudienceResponse } from '@models';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../../happydom-setup';
-import { FALLBACK_NEWSLETTER_SEGMENTS } from './audience-fallbacks';
-import { EDITION_OPTIONS } from './EditionOptions';
+import { FALLBACK_NEWSLETTER_EMAIL_SEGMENTS } from './audience-fallbacks';
+import { EDITION_OPTIONS } from './edition-options';
 import {
-	useNewsletterSegmentOptions,
+	useNewsletterEmailSegmentOptions,
 	useTopicEditionOptions,
-} from './use-audience-editions';
+} from './useAudienceEditions';
 
-const TEST_NEWSLETTER_SEGMENTS: ChannelAudienceResponse['channels']['newsletter']['segments'] =
+const TEST_NEWSLETTER_EMAIL_SEGMENTS: ChannelAudienceResponse['channels']['newsletter']['segments'] =
 	[
 		{ id: 'UK', label: 'United Kingdom' },
 		{ id: 'US', label: 'United States' },
 		{ id: 'AU', label: 'Australia' },
 	];
 
-const TEST_PUSH_TOPIC: ChannelAudienceResponse['channels']['app-push']['topicTypes'][number] =
+const TEST_APP_ALERT_TOPIC: ChannelAudienceResponse['channels']['app-push']['topicTypes'][number] =
 	{
 		id: 'joke-for-today',
 		label: 'a daily regional joke',
@@ -36,10 +36,10 @@ const TEST_PUSH_TOPIC: ChannelAudienceResponse['channels']['app-push']['topicTyp
 const testData: ChannelAudienceResponse = {
 	channels: {
 		newsletter: {
-			segments: TEST_NEWSLETTER_SEGMENTS,
+			segments: TEST_NEWSLETTER_EMAIL_SEGMENTS,
 		},
 		'app-push': {
-			topicTypes: [TEST_PUSH_TOPIC],
+			topicTypes: [TEST_APP_ALERT_TOPIC],
 		},
 	},
 };
@@ -103,7 +103,7 @@ describe('useTopicEditionOptions', () => {
 	});
 	it('when asked for push data with a matching topic id in the data, returns the editions for that topic', () => {
 		const { output, cleanUp } = renderTestComponent({
-			topicId: TEST_PUSH_TOPIC.id,
+			topicId: TEST_APP_ALERT_TOPIC.id,
 		});
 		expect(output).toEqual([
 			{
@@ -121,7 +121,7 @@ describe('useTopicEditionOptions', () => {
 	it('when asked for push data with a topic but the data is undefined, returns the fallback', () => {
 		testResponse.data = undefined;
 		const { output, cleanUp } = renderTestComponent({
-			topicId: TEST_PUSH_TOPIC.id,
+			topicId: TEST_APP_ALERT_TOPIC.id,
 		});
 		expect(output).toEqual(EDITION_OPTIONS);
 
@@ -129,8 +129,8 @@ describe('useTopicEditionOptions', () => {
 	});
 });
 
-const NewsletterSegmentOptionsTestComponent = () => {
-	const editions = useNewsletterSegmentOptions();
+const NewsletterEmailSegmentOptionsTestComponent = () => {
+	const editions = useNewsletterEmailSegmentOptions();
 	return createElement(
 		'output',
 		{ 'data-testid': 'editions' },
@@ -138,7 +138,7 @@ const NewsletterSegmentOptionsTestComponent = () => {
 	);
 };
 
-describe('useNewsletterSegmentOptions', () => {
+describe('useNewsletterEmailSegmentOptions', () => {
 	beforeEach(() => {
 		testResponse.data = testData;
 	});
@@ -149,7 +149,7 @@ describe('useNewsletterSegmentOptions', () => {
 		const root = createRoot(container);
 
 		act(() => {
-			root.render(createElement(NewsletterSegmentOptionsTestComponent));
+			root.render(createElement(NewsletterEmailSegmentOptionsTestComponent));
 		});
 		const output: unknown = JSON.parse(
 			container.querySelector('[data-testid="editions"]')?.textContent ??
@@ -170,7 +170,10 @@ describe('useNewsletterSegmentOptions', () => {
 		const { output, cleanUp } = renderTestComponent();
 
 		expect(output).toEqual(
-			TEST_NEWSLETTER_SEGMENTS.map(({ id, label }) => ({ code: id, label })),
+			TEST_NEWSLETTER_EMAIL_SEGMENTS.map(({ id, label }) => ({
+				code: id,
+				label,
+			})),
 		);
 		cleanUp();
 	});
@@ -180,7 +183,7 @@ describe('useNewsletterSegmentOptions', () => {
 		const { output, cleanUp } = renderTestComponent();
 
 		expect(output).toEqual(
-			FALLBACK_NEWSLETTER_SEGMENTS.map(({ id, label }) => ({
+			FALLBACK_NEWSLETTER_EMAIL_SEGMENTS.map(({ id, label }) => ({
 				code: id,
 				label,
 			})),

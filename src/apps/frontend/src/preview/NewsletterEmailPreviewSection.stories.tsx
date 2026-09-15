@@ -1,35 +1,33 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, waitFor, within } from 'storybook/test';
 import { mockRequestEmailHtml } from '../testing/mock-fetch-email';
-import type { completeEmailParams } from '../testing/story-helpers';
-import {
-	populatedEmailState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
-import type { RequestEmailHtml } from '../types';
-import { EmailPreviewSection } from './EmailPreviewSection';
+import type { completeNewsletterEmailFormValues } from '../testing/story-fixtures';
+import { populatedNewsletterEmailComposerState } from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState, RequestEmailHtml } from '../types';
+import { NewsletterEmailPreviewSection } from './NewsletterEmailPreviewSection';
 
 type StoryArgs = {
-	notificationState: NotificationState;
-	formValues?: Partial<typeof completeEmailParams>;
+	composerState: NotificationComposerState;
+	formValues?: Partial<typeof completeNewsletterEmailFormValues>;
 	requestEmailHtml?: RequestEmailHtml;
 };
 
 const meta: Meta<StoryArgs> = {
-	title: 'Dispatch/Preview/EmailPreviewSection',
-	component: EmailPreviewSection,
+	title: 'Dispatch/Preview/NewsletterEmailPreviewSection',
+	component: NewsletterEmailPreviewSection,
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 	},
-	render: ({ notificationState, formValues, requestEmailHtml }) =>
-		WithNotificationContext(
-			<EmailPreviewSection />,
-			notificationState,
+	render: function Render({ composerState, formValues, requestEmailHtml }) {
+		return useNotificationFormStory(
+			<NewsletterEmailPreviewSection />,
+			composerState,
 			{ requestEmailHtml },
-			'email',
+			'newsletter',
 			formValues,
-		),
+		);
+	},
 	parameters: {
 		docs: {
 			description: {
@@ -66,14 +64,14 @@ export const WithDeliveryTiming: Story = {};
 
 export const WithSegments: Story = {
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 		formValues: { audienceSegments: ['UK', 'US'] },
 	},
 };
 
 export const FullyPopulated: Story = {
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 		formValues: { audienceSegments: ['UK', 'US', 'AU'] },
 	},
 };
@@ -84,8 +82,8 @@ const requestBlockEmailHtml = fn(mockRequestEmailHtml);
 
 export const RequestedLiveblogBlock: Story = {
 	args: {
-		notificationState: {
-			...populatedEmailState,
+		composerState: {
+			...populatedNewsletterEmailComposerState,
 			requestedUrl: requestedLiveblogUrl,
 		},
 		formValues: { audienceSegments: ['UK'] },

@@ -7,21 +7,51 @@ import {
 } from '../testing/capi-fixtures';
 import {
 	buildAppAlertRequest,
-	buildNewsletterRequest,
+	buildNewsletterEmailRequest,
 } from './build-request-payloads';
 
 describe('notification request builders', () => {
+	it.each([
+		['breaking-news', 'Breaking news: Edited subject'],
+		['exclusive', 'Exclusive: Edited subject'],
+		['none', 'Edited subject'],
+	] as const)(
+		'composes the %s kicker into the subject line, not the subject text',
+		(kicker, subjectLine) => {
+			const request = buildNewsletterEmailRequest({
+				values: {
+					kicker,
+					subjectText: 'Edited subject',
+					previewText: '',
+					includePreviewText: false,
+					audienceSegments: ['UK'],
+					deliveryOption: 'immediate',
+				},
+				article: articleFixture,
+				idempotencyKey: 'newsletter-operation-id',
+			});
+
+			expect(request.content.items['lead-story']).toMatchObject({
+				title: 'Edited subject',
+				body: '',
+			});
+			expect(request.channels).toMatchObject({
+				newsletter: { compose: { subject: subjectLine } },
+			});
+		},
+	);
+
 	it('builds a valid newsletter request with article media', () => {
-		const request = buildNewsletterRequest({
+		const request = buildNewsletterEmailRequest({
 			values: {
 				kicker: 'exclusive',
-				subject: 'A developing story',
-				preview: 'What readers need to know.',
+				subjectText: 'A developing story',
+				previewText: 'What readers need to know.',
 				audienceSegments: ['UK', 'AU'],
 				deliveryOption: 'immediate',
-				showPreview: true,
+				includePreviewText: true,
 			},
-			content: articleFixture,
+			article: articleFixture,
 			idempotencyKey: 'newsletter-operation-id',
 		});
 
@@ -59,7 +89,7 @@ describe('notification request builders', () => {
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',
-			content: articleFixture,
+			article: articleFixture,
 			idempotencyKey: 'app-alert-operation-id',
 		});
 
@@ -89,18 +119,18 @@ describe('notification request builders', () => {
 		});
 	});
 
-	it('uses the requested liveblog block URL and main image for a newsletter', () => {
+	it('uses the requested liveblog block URL and main image for a newsletter email', () => {
 		const requestedUrl = `${liveblogFixture.webUrl}?filterKeyEvents=false#${requestedLiveblogBlock.id}`;
-		const request = buildNewsletterRequest({
+		const request = buildNewsletterEmailRequest({
 			values: {
 				kicker: 'exclusive',
-				subject: 'Requested liveblog update',
-				preview: 'The latest update.',
+				subjectText: 'Requested liveblog update',
+				previewText: 'The latest update.',
 				audienceSegments: ['UK'],
 				deliveryOption: 'immediate',
-				showPreview: true,
+				includePreviewText: true,
 			},
-			content: liveblogFixture,
+			article: liveblogFixture,
 			requestedUrl,
 			idempotencyKey: 'liveblog-newsletter-operation-id',
 		});
@@ -126,7 +156,7 @@ describe('notification request builders', () => {
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',
-			content: articleFixture,
+			article: articleFixture,
 			idempotencyKey: 'app-alert-with-replacement-thumbnail',
 		});
 
@@ -149,7 +179,7 @@ describe('notification request builders', () => {
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',
-			content: {
+			article: {
 				...liveblogFixture,
 				fields: {
 					headline: liveblogFixture.fields?.headline ?? 'Latest developments',
@@ -182,7 +212,7 @@ describe('notification request builders', () => {
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',
-			content: liveblogFixture,
+			article: liveblogFixture,
 			requestedUrl,
 			requestedBlock: requestedLiveblogBlock,
 			idempotencyKey: 'requested-liveblog-block-operation-id',
@@ -210,7 +240,7 @@ describe('notification request builders', () => {
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',
-			content: articleFixture,
+			article: articleFixture,
 			idempotencyKey: 'app-alert-without-thumbnail',
 		});
 
@@ -218,19 +248,19 @@ describe('notification request builders', () => {
 	});
 
 	it('rejects content that does not match the request channel', () => {
-		const newsletterRequest = buildNewsletterRequest({
+		const newsletterEmailRequest = buildNewsletterEmailRequest({
 			values: {
 				kicker: 'exclusive',
-				subject: 'A developing story',
-				preview: 'What readers need to know.',
+				subjectText: 'A developing story',
+				previewText: 'What readers need to know.',
 				audienceSegments: ['UK'],
 				deliveryOption: 'immediate',
-				showPreview: true,
+				includePreviewText: true,
 			},
-			content: articleFixture,
+			article: articleFixture,
 			idempotencyKey: 'newsletter-operation-id',
 		});
-		const appPushRequest = buildAppAlertRequest({
+		const appAlertRequest = buildAppAlertRequest({
 			values: {
 				alertType: 'breaking-news',
 				headline: 'A developing story',
@@ -240,20 +270,20 @@ describe('notification request builders', () => {
 				deliveryOption: 'appImmediate',
 			},
 			alertTypeLabel: 'Breaking news',
-			content: articleFixture,
+			article: articleFixture,
 			idempotencyKey: 'app-alert-operation-id',
 		});
 
 		expect(
 			sendNotificationRequestSchema.safeParse({
-				...newsletterRequest,
-				content: appPushRequest.content,
+				...newsletterEmailRequest,
+				content: appAlertRequest.content,
 			}).success,
 		).toBeFalse();
 		expect(
 			sendNotificationRequestSchema.safeParse({
-				...appPushRequest,
-				content: newsletterRequest.content,
+				...appAlertRequest,
+				content: newsletterEmailRequest.content,
 			}).success,
 		).toBeFalse();
 	});

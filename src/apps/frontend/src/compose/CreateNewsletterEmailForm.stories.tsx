@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import type { ApiError } from '../api-client/errors';
 import {
 	badRequestError,
@@ -12,41 +12,48 @@ import {
 	partiallyDeliveredNewsletterSendResponse,
 	unauthenticatedError,
 } from '../testing/api-fixtures';
-import { mockSendRejectedNotification } from '../testing/mock-send-notification';
 import {
-	completeEmailParams,
-	populatedEmailState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
-import { defaultState } from '../utils/notification-reducer';
-import { CreateNewsletterForm } from './CreateNewsletterForm';
+	mockSendNotification,
+	mockSendRejectedNotification,
+} from '../testing/mock-send-notification';
+import {
+	completeNewsletterEmailFormValues,
+	populatedNewsletterEmailComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import { defaultComposerState } from '../utils/notification-composer-reducer';
+import { CreateNewsletterEmailForm } from './CreateNewsletterEmailForm';
+import type { NotificationFormContextProps } from './NotificationFormContext';
 
 type StoryArgs = {
-	notificationState: NotificationState;
-	showPreview: boolean;
-	onTogglePreview: (showPreview: boolean) => void;
+	composerState: NotificationComposerState;
+	includePreviewText: boolean;
+	onIncludePreviewTextChange: (includePreviewText: boolean) => void;
+	sendNotification?: NotificationFormContextProps['sendNotification'];
 };
 type Story = StoryObj<StoryArgs>;
 
-const ControlledCreateNewsletterForm = ({
-	initialShowPreview,
+const ControlledCreateNewsletterEmailForm = ({
+	initialIncludePreviewText,
 }: {
-	initialShowPreview: boolean;
+	initialIncludePreviewText: boolean;
 }) => {
-	const [showPreview, setShowPreview] = useState(initialShowPreview);
+	const [includePreviewText, setIncludePreviewText] = useState(
+		initialIncludePreviewText,
+	);
 
 	return (
-		<CreateNewsletterForm
-			showPreview={showPreview}
-			onTogglePreview={setShowPreview}
+		<CreateNewsletterEmailForm
+			includePreviewText={includePreviewText}
+			onIncludePreviewTextChange={setIncludePreviewText}
 		/>
 	);
 };
 
 const meta: Meta<StoryArgs> = {
-	title: 'Dispatch/Compose/CreateNewsletterForm',
-	component: CreateNewsletterForm,
+	title: 'Dispatch/Compose/CreateNewsletterEmailForm',
+	component: CreateNewsletterEmailForm,
 	parameters: {
 		layout: 'fullscreen',
 		docs: {
@@ -57,18 +64,20 @@ const meta: Meta<StoryArgs> = {
 		},
 	},
 	args: {
-		notificationState: defaultState,
-		showPreview: true,
-		onTogglePreview: () => {},
+		composerState: defaultComposerState,
+		includePreviewText: true,
+		onIncludePreviewTextChange: () => {},
 	},
-	render: (args) => {
-		const { notificationState, showPreview } = args;
-		return WithNotificationContext(
-			<ControlledCreateNewsletterForm initialShowPreview={showPreview} />,
-			notificationState,
-			{},
-			'email',
-			notificationState.content ? completeEmailParams : undefined,
+	render: function Render(args) {
+		const { composerState, includePreviewText } = args;
+		return useNotificationFormStory(
+			<ControlledCreateNewsletterEmailForm
+				initialIncludePreviewText={includePreviewText}
+			/>,
+			composerState,
+			{ sendNotification: args.sendNotification },
+			'newsletter',
+			composerState.article ? completeNewsletterEmailFormValues : undefined,
 		);
 	},
 };
@@ -124,6 +133,23 @@ export const SelectNoKicker: Story = {
 		await expect(
 			canvas.getByLabelText('Subject character count'),
 		).toHaveTextContent('0/46');
+
+		const subjectTextInput = canvas.getByLabelText('Subject');
+		const subjectText = 'Edited subject text';
+		await userEvent.type(subjectTextInput, subjectText);
+		await expect(subjectTextInput).toHaveValue(subjectText);
+		await expect(
+			canvas.getByLabelText('Subject character count'),
+		).toHaveTextContent(`${subjectText.length}/46`);
+
+		await userEvent.click(kicker);
+		await userEvent.click(
+			screen.getByRole('option', { name: 'Breaking news' }),
+		);
+		await expect(subjectTextInput).toHaveValue(subjectText);
+		await expect(
+			canvas.getByLabelText('Subject character count'),
+		).toHaveTextContent(`${'Breaking news: '.length + subjectText.length}/46`);
 	},
 };
 
@@ -147,8 +173,8 @@ export const ValidationErrors: Story = {
 
 export const NewsletterDeliveryFailure: Story = {
 	args: {
-		notificationState: {
-			...populatedEmailState,
+		composerState: {
+			...populatedNewsletterEmailComposerState,
 			sendFailure: {
 				failure: 'dispatch-fail',
 				notification: failedNewsletterSendResponse,
@@ -177,8 +203,8 @@ export const NewsletterDeliveryFailure: Story = {
 
 export const PartialNewsletterDeliveryFailure: Story = {
 	args: {
-		notificationState: {
-			...populatedEmailState,
+		composerState: {
+			...populatedNewsletterEmailComposerState,
 			sendFailure: {
 				failure: 'dispatch-fail',
 				notification: partiallyDeliveredNewsletterSendResponse,
@@ -207,13 +233,13 @@ export const PartialNewsletterDeliveryFailure: Story = {
 
 export const PastRecommendedStillSends: Story = {
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const subject = canvas.getByLabelText('Subject');
-		await userEvent.clear(subject);
-		await userEvent.type(subject, 'a'.repeat(140));
+		const subjectTextInput = canvas.getByLabelText('Subject');
+		await userEvent.clear(subjectTextInput);
+		await userEvent.type(subjectTextInput, 'a'.repeat(140));
 
 		await expect(canvas.getByText('Warning')).toBeVisible();
 		await expect(canvas.getByText('Recommended')).toBeVisible();
@@ -239,9 +265,9 @@ export const PastRecommendedStillSends: Story = {
 
 export const Empty: Story = {
 	args: {
-		notificationState: {
-			isFetchingContent: false,
-			confirmSendModalOpen: false,
+		composerState: {
+			isFetchingArticle: false,
+			isSendConfirmationOpen: false,
 			isWaitingForSend: false,
 		},
 	},
@@ -249,18 +275,18 @@ export const Empty: Story = {
 
 export const FetchingArticle: Story = {
 	args: {
-		notificationState: {
-			...defaultState,
-			isFetchingContent: true,
+		composerState: {
+			...defaultComposerState,
+			isFetchingArticle: true,
 		},
 	},
 };
 
 export const FetchArticleError: Story = {
 	args: {
-		notificationState: {
-			...defaultState,
-			isFetchingContent: false,
+		composerState: {
+			...defaultComposerState,
+			isFetchingArticle: false,
 			fetchArticleError: 'Failed to fetch article',
 		},
 	},
@@ -277,24 +303,24 @@ export const FetchArticleError: Story = {
 	},
 };
 
-export const PopulatedEmail: Story = {
+export const PopulatedNewsletterEmail: Story = {
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 	},
 };
 
-export const PreviewToggleHidesField: Story = {
+export const PreviewTextToggleHidesField: Story = {
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const toggle = canvas.getByRole('button', { name: 'Show preview text' });
-		const previewInput = canvas.getByLabelText('Preview text');
+		const previewTextInput = canvas.getByLabelText('Preview text');
 
-		await expect(previewInput).toBeVisible();
-		await userEvent.clear(previewInput);
-		await userEvent.type(previewInput, 'Saved preview text');
+		await expect(previewTextInput).toBeVisible();
+		await userEvent.clear(previewTextInput);
+		await userEvent.type(previewTextInput, 'Saved preview text');
 		await userEvent.click(toggle);
 		await expect(toggle).toHaveAttribute('aria-pressed', 'false');
 		await expect(canvas.queryByLabelText('Preview text')).toBeNull();
@@ -306,9 +332,56 @@ export const PreviewToggleHidesField: Story = {
 	},
 };
 
+const sendNewsletterEmailWithoutPreviewText =
+	fn<NotificationFormContextProps['sendNotification']>(mockSendNotification);
+
+export const PreviewTextExcludedFromSend: Story = {
+	args: {
+		composerState: populatedNewsletterEmailComposerState,
+		sendNotification: sendNewsletterEmailWithoutPreviewText,
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		const screen = within(canvasElement.ownerDocument.body);
+		const subjectText = 'Edited subject text';
+		const subjectTextInput = canvas.getByLabelText('Subject');
+		await userEvent.clear(subjectTextInput);
+		await userEvent.type(subjectTextInput, subjectText);
+		await userEvent.clear(canvas.getByLabelText('Preview text'));
+		await userEvent.type(
+			canvas.getByLabelText('Preview text'),
+			'Saved preview text',
+		);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Show preview text' }),
+		);
+		await expect(
+			canvas.queryByLabelText('Preview text'),
+		).not.toBeInTheDocument();
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send newsletter email' }),
+		);
+		await userEvent.click(
+			await screen.findByRole('button', { name: 'Confirm send' }),
+		);
+
+		await waitFor(() => expect(args.sendNotification).toHaveBeenCalledOnce());
+		const request = sendNewsletterEmailWithoutPreviewText.mock.calls[0]?.[0];
+		await expect(request).toHaveProperty(
+			'content.items.lead-story.title',
+			subjectText,
+		);
+		await expect(request).toHaveProperty('content.items.lead-story.body', '');
+		await expect(request).toHaveProperty(
+			'channels.newsletter.compose.subject',
+			`Exclusive: ${subjectText}`,
+		);
+	},
+};
+
 export const SubmitWithNativeForm: Story = {
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -329,20 +402,20 @@ export const SubmitWithNativeForm: Story = {
 	},
 };
 
-export const ConfirmationStep: Story = {
+export const SendConfirmationStep: Story = {
 	args: {
-		notificationState: {
-			...populatedEmailState,
-			confirmSendModalOpen: true,
+		composerState: {
+			...populatedNewsletterEmailComposerState,
+			isSendConfirmationOpen: true,
 		},
 	},
 };
 
-export const SendingEmail: Story = {
+export const SendingNewsletterEmail: Story = {
 	args: {
-		notificationState: {
-			...populatedEmailState,
-			confirmSendModalOpen: true,
+		composerState: {
+			...populatedNewsletterEmailComposerState,
+			isSendConfirmationOpen: true,
 			isWaitingForSend: true,
 		},
 	},
@@ -350,22 +423,24 @@ export const SendingEmail: Story = {
 
 const buildErrorStory = (error: ApiError): Story => ({
 	args: {
-		notificationState: {
-			...populatedEmailState,
+		composerState: {
+			...populatedNewsletterEmailComposerState,
 			isWaitingForSend: false,
 			sendFailure: error,
 		},
 	},
-	render: (args) => {
-		const { notificationState, showPreview } = args;
-		return WithNotificationContext(
-			<ControlledCreateNewsletterForm initialShowPreview={showPreview} />,
-			notificationState,
+	render: function Render(args) {
+		const { composerState, includePreviewText } = args;
+		return useNotificationFormStory(
+			<ControlledCreateNewsletterEmailForm
+				initialIncludePreviewText={includePreviewText}
+			/>,
+			composerState,
 			{
 				sendNotification: mockSendRejectedNotification(error),
 			},
-			'email',
-			completeEmailParams,
+			'newsletter',
+			completeNewsletterEmailFormValues,
 		);
 	},
 });

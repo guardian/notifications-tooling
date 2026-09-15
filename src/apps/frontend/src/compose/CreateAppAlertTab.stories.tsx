@@ -2,17 +2,17 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
-	completePushParams,
-	populatedPushState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
+	completeAppAlertFormValues,
+	populatedAppAlertComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import { defaultAppAlertComposerState } from '../utils/notification-composer-reducer';
 import type { AppAlertFormValues } from '../utils/notification-forms';
-import { defaultAppAlertState } from '../utils/notification-reducer';
 import { CreateAppAlertTab } from './CreateAppAlertTab';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
 	containerMinWidth: string;
 };
@@ -21,7 +21,7 @@ const meta = {
 	title: 'Dispatch/Compose/CreateAppAlertTab',
 	component: CreateAppAlertTab,
 	args: {
-		notificationState: defaultAppAlertState,
+		composerState: defaultAppAlertComposerState,
 		containerMinWidth: '1600px',
 	},
 	argTypes: {
@@ -40,8 +40,8 @@ const meta = {
 			},
 		},
 	},
-	render: (args: StoryArgs) => {
-		const { formValues, notificationState, containerMinWidth } = args;
+	render: function Render(args: StoryArgs) {
+		const { formValues, composerState, containerMinWidth } = args;
 		return (
 			<div
 				style={{
@@ -51,11 +51,11 @@ const meta = {
 					boxSizing: 'border-box',
 				}}
 			>
-				{WithNotificationContext(
+				{useNotificationFormStory(
 					<CreateAppAlertTab />,
-					notificationState,
+					composerState,
 					{},
-					'push',
+					'app-push',
 					formValues,
 				)}
 			</div>
@@ -78,13 +78,13 @@ export const Default: Story = {
 	},
 };
 
-export const ConfirmationStep: Story = {
+export const SendConfirmationStep: Story = {
 	args: {
-		notificationState: {
-			...populatedPushState,
-			confirmSendModalOpen: true,
+		composerState: {
+			...populatedAppAlertComposerState,
+			isSendConfirmationOpen: true,
 		},
-		formValues: completePushParams,
+		formValues: completeAppAlertFormValues,
 	},
 	play: async ({ canvasElement }) => {
 		const screen = within(canvasElement.ownerDocument.body);
@@ -104,8 +104,8 @@ export const ConfirmationStep: Story = {
 
 export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 	args: {
-		notificationState: populatedPushState,
-		formValues: completePushParams,
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

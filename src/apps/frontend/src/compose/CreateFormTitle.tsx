@@ -5,7 +5,7 @@ import { TextLinkButton } from '../ui/TextLinkButton';
 
 export interface CreateFormTitleProps {
 	title: string;
-	setArticleInputText: (setArticleInputText: string) => void;
+	setArticleInputText: (articleInputText: string) => void;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
 	onResetNotification: () => void;
 }
