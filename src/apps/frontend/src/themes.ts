@@ -458,6 +458,7 @@ export const historyViewStyles = {
 		height: '60px',
 		flexShrink: 0,
 		objectFit: 'cover',
+		borderRadius: semanticRadius.cornerSm,
 	}),
 	thumbnailFallback: css({
 		display: 'flex',
