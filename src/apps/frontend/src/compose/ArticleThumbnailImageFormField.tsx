@@ -20,8 +20,7 @@ export const ArticleThumbnailImageFormField = () => {
 	} = useFormContext<AppAlertReplacementImageFormValues>();
 	const { notification } = useContext(NotificationFormContext);
 	const originalArticleThumbnailUrl =
-		getArticleThumbnail(notification.content, notification.requestedBlock)
-			.src ?? '';
+		getArticleThumbnail(notification.content).src ?? '';
 	const replacementImageUrl =
 		useWatch<AppAlertReplacementImageFormValues, 'replacementImageUrl'>({
 			control,
