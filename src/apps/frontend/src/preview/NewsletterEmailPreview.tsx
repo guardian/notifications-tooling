@@ -74,18 +74,35 @@ export const NewsletterEmailPreview = () => {
 		notification: { content },
 		requestEmailHtml,
 	} = useContext(NotificationFormContext);
+	const { webUrl } = content ?? {};
 	const parameters = useWatch<NewsletterFormValues>();
+	const stringifiedAudience = (parameters.audienceSegments ?? []).join();
+
 	const [previewContainerElement, setPreviewContainerElement] =
 		useState<HTMLElement | null>(null);
-
-	const [emailHtml, setEmailHtml] = useState<string>();
-	const [errorMessage, setErrorMessage] = useState<string>();
-	const [infoMessage, setInfoMessage] = useState<string>();
+	const [preview, setPreview] = useState<PreviewData>();
 	const [isLoading, setIsLoading] = useState(false);
-	const stringifiedAudience = (parameters.audienceSegments ?? []).join();
-	const { webUrl } = content ?? {};
 
-	const getPreview = useCallback(async (): Promise<PreviewData> => {
+	useEffect(() => {
+		const articleElement = previewContainerElement?.querySelector('article');
+		if (!articleElement) {
+			return;
+		}
+		articleElement.innerHTML = preview?.html ?? '';
+		if (preview?.html) {
+			modifyContent(articleElement, parameters);
+		}
+	}, [previewContainerElement, preview, parameters]);
+
+	useEffect(() => {
+		const articleElement = previewContainerElement?.querySelector('article');
+		if (!articleElement) {
+			return;
+		}
+		modifyContent(articleElement, parameters);
+	}, [parameters, previewContainerElement]);
+
+	const getPreviewData = useCallback(async (): Promise<PreviewData> => {
 		if (!webUrl) {
 			return {
 				info: 'No article loaded',
@@ -117,41 +134,18 @@ export const NewsletterEmailPreview = () => {
 	}, [webUrl, requestEmailHtml, stringifiedAudience]);
 
 	useEffect(() => {
-		if (!previewContainerElement) {
-			return;
-		}
-
-		const articleElement = previewContainerElement.querySelector('article');
-		if (!articleElement) {
-			return;
-		}
-		articleElement.innerHTML = emailHtml ?? '';
-	}, [previewContainerElement, emailHtml]);
-
-	useEffect(() => {
-		if (!previewContainerElement) {
-			return;
-		}
-
-		modifyContent(previewContainerElement, parameters);
-	}, [parameters, previewContainerElement]);
-
-	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect -- ok
 		setIsLoading(true);
-		setErrorMessage(undefined);
-		getPreview()
-			.then((result) => {
-				setEmailHtml(result.html);
-				setErrorMessage(result.error);
-				setInfoMessage(result.info);
-			})
-			.catch((err) => {
-				console.error(err);
-				setErrorMessage('failed to load');
-			})
-			.finally(() => setIsLoading(false));
-	}, [getPreview]);
+		setPreview((preview) => ({
+			errorMessage: undefined,
+			info: undefined,
+			html: preview?.html,
+		}));
+		void getPreviewData().then((result) => {
+			setPreview(result);
+			setIsLoading(false);
+		});
+	}, [getPreviewData]);
 
 	return (
 		<figure>
@@ -159,16 +153,16 @@ export const NewsletterEmailPreview = () => {
 				<Typography variant="labelFormMd">Newsletter email preview</Typography>
 			</figcaption>
 
-			{errorMessage && (
-				<InlineMessage level="error">{errorMessage}</InlineMessage>
+			{preview?.error && (
+				<InlineMessage level="error">{preview.error}</InlineMessage>
 			)}
-			{infoMessage && (
-				<InlineMessage level="information">{infoMessage}</InlineMessage>
+			{preview?.info && (
+				<InlineMessage level="information">{preview.info}</InlineMessage>
 			)}
 
 			<div ref={setPreviewContainerElement} css={styles.previewFrame}>
 				<article></article>
-				{!emailHtml && (
+				{!preview?.html && (
 					<div css={styles.placeHolder}>Generated newsletter email preview</div>
 				)}
 				{isLoading && (
