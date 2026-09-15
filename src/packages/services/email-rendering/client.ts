@@ -72,14 +72,6 @@ export const renderEmail = async ({
 		.join('/');
 	const renderUrl = new URL(`/notification/${articleId}.json`, endpoint);
 
-	console.log('renderEmail: requesting', {
-		renderUrl: renderUrl.toString(),
-		newsletterId,
-		headlineOverride,
-		previewText,
-		hideKicker,
-	});
-
 	let response: Response;
 	try {
 		response = await fetch(renderUrl, {
@@ -94,7 +86,6 @@ export const renderEmail = async ({
 			signal: AbortSignal.timeout(timeoutMs),
 		});
 	} catch (error) {
-		console.log('renderEmail: request failed', error);
 		throw new EmailRenderingError(
 			undefined,
 			isTimeoutError(error) ? 'timeout' : 'network_error',
@@ -102,15 +93,12 @@ export const renderEmail = async ({
 		);
 	}
 
-	console.log('renderEmail: response received', { status: response.status });
-
 	if (!response.ok) {
 		throw new EmailRenderingError(response.status);
 	}
 
 	try {
 		const html = renderedNotificationSchema.parse(await response.json()).body;
-		console.log('renderEmail: parsed html', { length: html.length });
 		return html;
 	} catch (error) {
 		throw new EmailRenderingError(response.status, 'invalid_response', {
