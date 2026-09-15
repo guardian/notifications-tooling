@@ -62,6 +62,11 @@ export const Default: Story = {
 		await expect(canvas.getByText('Create app alert')).toBeInTheDocument();
 		await expect(canvas.getByText('Article')).toBeInTheDocument();
 		await expect(canvas.getByText('Alert type')).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', {
+				name: 'Choose an alert type Alert type',
+			}),
+		).toBeVisible();
 		await expect(canvas.getByText('Editions')).toBeInTheDocument();
 		await expect(canvas.getByText('Headline')).toBeInTheDocument();
 		await expect(canvas.getByText('Delivery and timing')).toBeInTheDocument();
@@ -78,7 +83,7 @@ export const UpdatesFormFields: Story = {
 		const canvas = within(canvasElement);
 		const screen = within(canvasElement.ownerDocument.body);
 		const alertType = canvas.getByRole('button', {
-			name: 'Breaking news Alert type',
+			name: 'Choose an alert type Alert type',
 		});
 		const unitedKingdom = canvas.getByRole('checkbox', {
 			name: 'Select United Kingdom',
@@ -106,15 +111,33 @@ export const UpdatesFormFields: Story = {
 export const ValidationErrors: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
+		const screen = within(canvasElement.ownerDocument.body);
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Send app alert' }),
 		);
 
+		await expect(canvas.getByText('Please select an alert type')).toBeVisible();
 		await expect(canvas.getByText('Headline is required')).toBeVisible();
 		await expect(canvas.getByText('Please select an edition')).toBeVisible();
 		await expect(
 			canvas.getByText('Paste a URL to fetch an article'),
 		).toBeVisible();
+
+		await userEvent.click(
+			canvas.getByRole('button', {
+				name: 'Choose an alert type Alert type',
+			}),
+		);
+		await userEvent.click(
+			await screen.findByRole('option', { name: 'Sports news' }),
+		);
+
+		await expect(
+			canvas.getByRole('button', { name: 'Sports news Alert type' }),
+		).toBeVisible();
+		await expect(
+			canvas.queryByText('Please select an alert type'),
+		).not.toBeInTheDocument();
 	},
 };
 

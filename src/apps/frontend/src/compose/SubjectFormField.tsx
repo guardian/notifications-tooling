@@ -18,9 +18,10 @@ export const SubjectFormField = ({ constraints }: SubjectFormFieldProps) => {
 	const subjectLimits =
 		constraints?.channels.newsletter.compose.subject ??
 		NEWSLETTER_LIMIT_FALLBACKS.title;
-	const kickerLabel = ['breaking-news', 'exclusive'].includes(kicker)
-		? kickerNameMap[kicker]
-		: undefined;
+	const kickerLabel =
+		kicker === 'breaking-news' || kicker === 'exclusive'
+			? kickerNameMap[kicker]
+			: undefined;
 	const placeholderText = kickerLabel
 		? `${kickerLabel}: Enter a subject line here...`
 		: 'Enter a subject line here...';

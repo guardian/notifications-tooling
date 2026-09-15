@@ -13,11 +13,12 @@ export const KickerFormField = () => {
 		<Controller
 			control={control}
 			name="kicker"
-			render={({ field }) => (
+			render={({ field, fieldState }) => (
 				<Select
 					name={field.name}
 					label="Kicker"
 					description="Choose the kicker for the email newsletter"
+					placeholder="Choose a kicker"
 					onChange={(key) => {
 						const result = kickerSchema.safeParse(
 							typeof key === 'string' ? key.split('//').at(1) : undefined,
@@ -27,7 +28,9 @@ export const KickerFormField = () => {
 						}
 					}}
 					selectionMode="single"
-					value={toOptionKey(field.value)}
+					value={field.value ? toOptionKey(field.value) : null}
+					isInvalid={fieldState.invalid}
+					error={fieldState.error?.message}
 				>
 					<Option id={toOptionKey('breaking-news')}>
 						{kickerNameMap['breaking-news']}
