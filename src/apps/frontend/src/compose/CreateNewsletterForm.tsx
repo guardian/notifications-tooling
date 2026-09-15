@@ -38,6 +38,7 @@ export const CreateNewsletterForm = ({
 			request: buildNewsletterRequest({
 				values: valuesToSend,
 				content: notification.content,
+				requestedUrl: notification.requestedUrl,
 				idempotencyKey: crypto.randomUUID(),
 			}),
 		});

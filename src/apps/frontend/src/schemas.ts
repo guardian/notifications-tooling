@@ -192,11 +192,13 @@ export const notificationDispatchSchema = z.strictObject({
 			channel: z.literal('app-push'),
 			topics: z.array(z.object({ type: z.string(), name: z.string() })),
 			importance: z.enum(['Major', 'Minor']),
+			blockId: z.string().optional(),
 		}),
 		z.object({
 			channel: z.literal('newsletter'),
 			brazeCampaignId: z.string().optional(),
 			emailRenderingId: z.string(),
+			blockId: z.string().optional(),
 		}),
 	]),
 	status: z.enum(['success', 'failure']),

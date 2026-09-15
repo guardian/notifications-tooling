@@ -7,7 +7,7 @@ import type {
 } from '@models';
 import { emailPreviewRequestSchema, UserPermissions } from '@models';
 import { EmailRenderingError, renderEmail } from '@services';
-import { determineArticleId } from '@utils';
+import { determineArticleId, determineBlockId } from '@utils';
 import { type Request, type Response, Router } from 'express';
 import validate from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';
@@ -23,21 +23,34 @@ type FetchEmailPreview = (
 	segment: NewsletterSegment,
 ) => Promise<string>;
 
-const fetchEmailPreview: FetchEmailPreview = async (articleUrl, segment) => {
-	const emailRenderingEndpoint = await getSSMParameter(
-		'EMAIL_RENDERING_ENDPOINT',
-	);
+export const buildEmailPreviewRenderRequest = (
+	articleUrl: string,
+	segment: NewsletterSegment,
+	emailRenderingEndpoint: string,
+) => {
+	const blockId = determineBlockId(articleUrl);
 
-	return await renderEmail({
+	return {
 		endpoint: emailRenderingEndpoint,
 		articleUrl,
+		...(blockId ? { blockId } : {}),
 		newsletterId: segment.emailRenderingNewsletterId,
 		timeoutMs: EMAIL_RENDERING_REQUEST_TIMEOUT_MS,
 		hideKicker: true,
 		// send a non-empty string so that the preview text element will be rendered
 		// and the frontend back add the text content client-side
 		previewText: ' ',
-	});
+	};
+};
+
+const fetchEmailPreview: FetchEmailPreview = async (articleUrl, segment) => {
+	const emailRenderingEndpoint = await getSSMParameter(
+		'EMAIL_RENDERING_ENDPOINT',
+	);
+
+	return await renderEmail(
+		buildEmailPreviewRenderRequest(articleUrl, segment, emailRenderingEndpoint),
+	);
 };
 
 export const createPreviewRouter = (

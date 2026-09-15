@@ -88,6 +88,31 @@ describe('notification request builders', () => {
 			},
 		});
 	});
+
+	it('uses the requested liveblog block URL and main image for a newsletter', () => {
+		const requestedUrl = `${liveblogFixture.webUrl}?filterKeyEvents=false#${requestedLiveblogBlock.id}`;
+		const request = buildNewsletterRequest({
+			values: {
+				kicker: 'exclusive',
+				subject: 'Requested liveblog update',
+				preview: 'The latest update.',
+				audienceSegments: ['UK'],
+				deliveryOption: 'immediate',
+				showPreview: true,
+			},
+			content: liveblogFixture,
+			requestedUrl,
+			idempotencyKey: 'liveblog-newsletter-operation-id',
+		});
+
+		expect(request.content.items['lead-story']).toMatchObject({
+			link: requestedUrl,
+			media: {
+				imageUrl: liveblogFixture.fields?.thumbnail,
+				thumbnailUrl: liveblogFixture.fields?.thumbnail,
+			},
+		});
+	});
 	it('uses a replacement thumbnail URL in app-push media', () => {
 		const replacementThumbnailUrl =
 			'https://media.guim.co.uk/replacement-thumbnail.jpg';

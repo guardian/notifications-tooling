@@ -22,6 +22,7 @@ export const buildNewsletterRequest = ({
 	values,
 	content,
 	idempotencyKey,
+	requestedUrl,
 }: BuildRequestArgs<NewsletterFormValues>): SendNotificationRequest => {
 	const { subject: headline, preview, audienceSegments, kicker } = values;
 	const thumbnailUrl = getArticleThumbnail(content).src;
@@ -36,7 +37,7 @@ export const buildNewsletterRequest = ({
 					type: 'newsletter',
 					title: headline,
 					body: preview,
-					link: content.webUrl,
+					link: requestedUrl ?? content.webUrl,
 					...(thumbnailUrl
 						? {
 								media: {

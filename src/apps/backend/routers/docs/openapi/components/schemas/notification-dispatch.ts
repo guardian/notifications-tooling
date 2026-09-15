@@ -91,6 +91,12 @@ export const notificationDispatchSchema = {
 						channel: { type: 'string', enum: ['newsletter'] },
 						brazeCampaignId: { type: 'string', example: 'braze-campaign-1' },
 						emailRenderingId: { type: 'string', example: 'briefing-uk' },
+						blockId: {
+							type: 'string',
+							description:
+								'The liveblog block selected as the email destination, present only when the article link named one.',
+							example: '5dd7ca0f8f080fd59fb15354',
+						},
 					},
 				},
 			],
