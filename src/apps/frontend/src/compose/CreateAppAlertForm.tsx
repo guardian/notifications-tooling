@@ -2,46 +2,46 @@ import { type FormEvent, useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
-import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
+import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import { getArticleThumbnail } from '../utils/article-thumbnail';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
 import { HeadlineFormField } from './HeadlineFormField';
-import { NotificationFormContext } from './NotificationContext';
+import { NotificationFormContext } from './NotificationFormContext';
 import { NotificationFormSection } from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 
 export const CreateAppAlertForm = () => {
 	const { handleSubmit, setError, setValue } =
 		useFormContext<AppAlertFormValues>();
-	const { notification, updateNotification } = useContext(
+	const { composerState, dispatchComposerAction } = useContext(
 		NotificationFormContext,
 	);
 
 	const { data: constraints } = useChannelConstraints();
-	const topicTypes = useAppPushTopicTypes();
+	const topicTypes = useAppAlertTopicTypes();
 	const prepareSend = (values: AppAlertFormValues) => {
-		if (!notification.content) {
+		if (!composerState.article) {
 			return;
 		}
-		updateNotification({
+		dispatchComposerAction({
 			type: 'prepare-send',
 			request: buildAppAlertRequest({
 				values,
 				alertTypeLabel:
 					topicTypes.find(({ id }) => id === values.alertType)?.label ??
 					values.alertType,
-				content: notification.content,
-				requestedUrl: notification.requestedUrl,
-				requestedBlock: notification.requestedBlock,
+				article: composerState.article,
+				requestedUrl: composerState.requestedUrl,
+				requestedBlock: composerState.requestedBlock,
 				idempotencyKey: crypto.randomUUID(),
 			}),
 		});
 	};
-	const submitForm = (event: FormEvent<HTMLFormElement>) => {
-		if (!notification.content) {
+	const handleSubmitForm = (event: FormEvent<HTMLFormElement>) => {
+		if (!composerState.article) {
 			setError('root.article', {
 				message: 'Paste a URL to fetch an article',
 			});
@@ -53,11 +53,11 @@ export const CreateAppAlertForm = () => {
 		<NotificationFormWrapper
 			title="Create app alert"
 			formLabel="Create app alert"
-			channel="push"
+			channel="app-push"
 			sendButtonLabel="Send app alert"
-			onSubmit={submitForm}
+			onSubmit={handleSubmitForm}
 			onResetNotification={() =>
-				updateNotification({ type: 'reset-app-alert' })
+				dispatchComposerAction({ type: 'reset-app-alert' })
 			}
 			onArticleImported={(article) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);

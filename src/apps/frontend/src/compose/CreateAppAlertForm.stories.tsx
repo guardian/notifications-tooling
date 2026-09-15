@@ -11,17 +11,17 @@ import {
 	requestedLiveblogBlock,
 } from '../testing/capi-fixtures';
 import {
-	completePushParams,
-	populatedPushState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
+	completeAppAlertFormValues,
+	populatedAppAlertComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import { defaultAppAlertComposerState } from '../utils/notification-composer-reducer';
 import type { AppAlertFormValues } from '../utils/notification-forms';
-import { defaultAppAlertState } from '../utils/notification-reducer';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
 };
 type Story = StoryObj<StoryArgs>;
@@ -39,17 +39,17 @@ const meta: Meta<StoryArgs> = {
 		},
 	},
 	args: {
-		notificationState: defaultAppAlertState,
+		composerState: defaultAppAlertComposerState,
 	},
-	render: (args) => {
-		const { formValues, notificationState } = args;
-		return WithNotificationContext(
+	render: function Render(args) {
+		const { formValues, composerState } = args;
+		return useNotificationFormStory(
 			<CreateAppAlertForm />,
-			notificationState,
+			composerState,
 			{},
-			'push',
+			'app-push',
 			formValues ??
-				(notificationState.content ? completePushParams : undefined),
+				(composerState.article ? completeAppAlertFormValues : undefined),
 		);
 	},
 };
@@ -120,8 +120,8 @@ export const ValidationErrors: Story = {
 
 export const MobileNotificationServiceFailure: Story = {
 	args: {
-		notificationState: {
-			...populatedPushState,
+		composerState: {
+			...populatedAppAlertComposerState,
 			sendFailure: {
 				failure: 'dispatch-fail',
 				notification: failedAppPushSendResponse,
@@ -151,8 +151,8 @@ export const MobileNotificationServiceFailure: Story = {
 
 export const UnconfirmedMobileNotificationDelivery: Story = {
 	args: {
-		notificationState: {
-			...populatedPushState,
+		composerState: {
+			...populatedAppAlertComposerState,
 			sendFailure: {
 				failure: 'dispatch-fail',
 				notification: unconfirmedAppPushSendResponse,
@@ -177,8 +177,8 @@ export const UnconfirmedMobileNotificationDelivery: Story = {
 
 export const PartialMobileNotificationServiceFailure: Story = {
 	args: {
-		notificationState: {
-			...populatedPushState,
+		composerState: {
+			...populatedAppAlertComposerState,
 			sendFailure: {
 				failure: 'dispatch-fail',
 				notification: partiallyDeliveredAppPushSendResponse,
@@ -208,7 +208,7 @@ export const PartialMobileNotificationServiceFailure: Story = {
 
 export const PastRecommendedStillSends: Story = {
 	args: {
-		notificationState: populatedPushState,
+		composerState: populatedAppAlertComposerState,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -235,7 +235,7 @@ export const PastRecommendedStillSends: Story = {
 
 export const WithImportedArticle: Story = {
 	args: {
-		notificationState: populatedPushState,
+		composerState: populatedAppAlertComposerState,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -248,8 +248,8 @@ export const WithImportedArticle: Story = {
 
 export const WithThumbnail: Story = {
 	args: {
-		notificationState: populatedPushState,
-		formValues: completePushParams,
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -268,8 +268,8 @@ export const WithThumbnail: Story = {
 
 export const WithReplacementThumbnail: Story = {
 	args: {
-		notificationState: populatedPushState,
-		formValues: completePushParams,
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -319,8 +319,8 @@ export const WithReplacementThumbnail: Story = {
 
 export const RejectsNonGuardianReplacementThumbnail: Story = {
 	args: {
-		notificationState: populatedPushState,
-		formValues: completePushParams,
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -343,10 +343,10 @@ export const RejectsNonGuardianReplacementThumbnail: Story = {
 
 export const RequestedLiveblogBlockUsesMainPresentation: Story = {
 	args: {
-		notificationState: {
-			...populatedPushState,
+		composerState: {
+			...populatedAppAlertComposerState,
 			fetchedArticleId: liveblogFixture.id,
-			content: {
+			article: {
 				...liveblogFixture,
 				fields: {
 					headline: liveblogFixture.fields?.headline ?? 'Latest developments',
@@ -357,7 +357,7 @@ export const RequestedLiveblogBlockUsesMainPresentation: Story = {
 			requestedUrl: `${liveblogFixture.webUrl}#${requestedLiveblogBlock.id}`,
 		},
 		formValues: {
-			...completePushParams,
+			...completeAppAlertFormValues,
 			headline: liveblogFixture.fields?.headline ?? 'Latest developments',
 			articleThumbnailUrl: '',
 		},
@@ -382,8 +382,8 @@ export const RequestedLiveblogBlockUsesMainPresentation: Story = {
 
 export const WithThumbnailTurnedOff: Story = {
 	args: {
-		notificationState: populatedPushState,
-		formValues: { ...completePushParams, includeThumbnail: false },
+		composerState: populatedAppAlertComposerState,
+		formValues: { ...completeAppAlertFormValues, includeThumbnail: false },
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -412,7 +412,7 @@ export const WithThumbnailTurnedOff: Story = {
 
 export const SubmitWithNativeForm: Story = {
 	args: {
-		notificationState: populatedPushState,
+		composerState: populatedAppAlertComposerState,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -433,10 +433,10 @@ export const SubmitWithNativeForm: Story = {
 
 export const Empty: Story = {
 	args: {
-		notificationState: {
-			...defaultAppAlertState,
-			isFetchingContent: false,
-			confirmSendModalOpen: false,
+		composerState: {
+			...defaultAppAlertComposerState,
+			isFetchingArticle: false,
+			isSendConfirmationOpen: false,
 			isWaitingForSend: false,
 		},
 	},
@@ -444,18 +444,18 @@ export const Empty: Story = {
 
 export const FetchingArticle: Story = {
 	args: {
-		notificationState: {
-			...defaultAppAlertState,
-			isFetchingContent: true,
+		composerState: {
+			...defaultAppAlertComposerState,
+			isFetchingArticle: true,
 		},
 	},
 };
 
 export const FetchArticleError: Story = {
 	args: {
-		notificationState: {
-			...defaultAppAlertState,
-			isFetchingContent: false,
+		composerState: {
+			...defaultAppAlertComposerState,
+			isFetchingArticle: false,
 			fetchArticleError: 'Failed to fetch article',
 		},
 	},

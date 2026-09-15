@@ -1,45 +1,24 @@
 import type {
 	CapiBlock,
-	DisplayAppAlertTopicEditionId,
 	EmailPreviewRequest,
 	EmailPreviewResponse,
-	NewsletterSegmentId,
 	ResolvedArticle,
 } from '@models';
 import type { Result } from './api-client/client';
 import type { SendNotificationRequest } from './schemas';
 import type { SendNotificationFailure } from './utils/send-notification';
 
-export type TabName = 'create' | 'history';
-export type ChannelOption = 'email' | 'push';
-export type KickerId = 'breaking-news' | 'exclusive';
+export type ChannelOption = 'newsletter' | 'app-push';
 export type DeliveryOption = 'immediate' | 'appImmediate';
 
-export type EmailNotification = {
-	type: 'email';
-	kicker?: KickerId;
-	subject?: string;
-	preview?: string;
-	emailHtml?: string;
-	audienceSegments?: NewsletterSegmentId[];
-	emailDeliveryOption?: DeliveryOption;
-};
-
-export type PushNotification = {
-	type: 'push';
-	alertType?: string;
-	headline?: string;
-	pushDeliveryOption?: DeliveryOption;
-	editions?: DisplayAppAlertTopicEditionId[];
-};
-export type NotificationState = {
-	isFetchingContent: boolean;
+export type NotificationComposerState = {
+	isFetchingArticle: boolean;
 	fetchedArticleId?: string;
 	fetchArticleError?: string;
-	content?: ResolvedArticle;
+	article?: ResolvedArticle;
 	requestedUrl?: string;
 	requestedBlock?: CapiBlock;
-	confirmSendModalOpen: boolean;
+	isSendConfirmationOpen: boolean;
 	isWaitingForSend: boolean;
 	sendFailure?: SendNotificationFailure;
 	pendingRequest?: SendNotificationRequest;
@@ -49,13 +28,13 @@ export type RequestEmailHtml = {
 	(request: EmailPreviewRequest): Promise<Result<EmailPreviewResponse>>;
 };
 
-export type NotificationAction =
+export type NotificationComposerAction =
 	| {
 			type: 'waiting-for-article';
 	  }
 	| {
 			type: 'receive-article';
-			content: ResolvedArticle;
+			article: ResolvedArticle;
 			requestedUrl?: string;
 			requestedBlock?: CapiBlock;
 	  }
@@ -64,7 +43,7 @@ export type NotificationAction =
 			errorMessage: string;
 	  }
 	| {
-			type: 'set-show-confirm-send';
+			type: 'set-send-confirmation-open';
 			isOpen: boolean;
 	  }
 	| {

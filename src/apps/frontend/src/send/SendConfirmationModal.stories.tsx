@@ -2,27 +2,27 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
-	completeEmailParams,
-	completePushParams,
-	populatedEmailState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { ChannelOption, NotificationState } from '../types';
+	completeAppAlertFormValues,
+	completeNewsletterEmailFormValues,
+	populatedNewsletterEmailComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { ChannelOption, NotificationComposerState } from '../types';
 import {
 	buildAppAlertRequest,
-	buildNewsletterRequest,
+	buildNewsletterEmailRequest,
 } from '../utils/build-request-payloads';
-import { defaultAppAlertState } from '../utils/notification-reducer';
-import { SendNotificationModal } from './SendNotificationModal';
+import { defaultAppAlertComposerState } from '../utils/notification-composer-reducer';
+import { SendConfirmationModal } from './SendConfirmationModal';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
 	channel: ChannelOption;
 };
 
 const meta = {
-	title: 'Dispatch/Send/SendNotificationModal',
-	component: SendNotificationModal,
+	title: 'Dispatch/Send/SendConfirmationModal',
+	component: SendConfirmationModal,
 	parameters: {
 		layout: 'fullscreen',
 		docs: {
@@ -33,24 +33,25 @@ const meta = {
 		},
 	},
 	args: {
-		channel: 'email',
-		notificationState: {
-			...populatedEmailState,
-			confirmSendModalOpen: true,
-			pendingRequest: buildNewsletterRequest({
-				values: completeEmailParams,
-				content: articleFixture,
+		channel: 'newsletter',
+		composerState: {
+			...populatedNewsletterEmailComposerState,
+			isSendConfirmationOpen: true,
+			pendingRequest: buildNewsletterEmailRequest({
+				values: completeNewsletterEmailFormValues,
+				article: articleFixture,
 				idempotencyKey: 'storybook-newsletter',
 			}),
 		},
 	},
-	render: ({ channel, notificationState }: StoryArgs) =>
-		WithNotificationContext(
-			<SendNotificationModal />,
-			notificationState,
+	render: function Render({ channel, composerState }: StoryArgs) {
+		return useNotificationFormStory(
+			<SendConfirmationModal />,
+			composerState,
 			{},
 			channel,
-		),
+		);
+	},
 } satisfies Meta<StoryArgs>;
 
 export default meta;
@@ -74,14 +75,14 @@ export const NewsletterEmail: Story = {
 
 export const AppAlert: Story = {
 	args: {
-		channel: 'push',
-		notificationState: {
-			...defaultAppAlertState,
-			confirmSendModalOpen: true,
+		channel: 'app-push',
+		composerState: {
+			...defaultAppAlertComposerState,
+			isSendConfirmationOpen: true,
 			pendingRequest: buildAppAlertRequest({
-				values: completePushParams,
+				values: completeAppAlertFormValues,
 				alertTypeLabel: 'Breaking news',
-				content: articleFixture,
+				article: articleFixture,
 				idempotencyKey: 'storybook-app-alert',
 			}),
 		},

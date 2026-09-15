@@ -13,7 +13,8 @@ interface PreviewPillListProps<Id extends string> {
 	title: string;
 	options: Array<PreviewPillOption<Id>>;
 	selected: Id[];
-	isConfirmation?: boolean;
+	muted?: boolean;
+	showTitle?: boolean;
 	renderIcon?: (id: Id) => ReactNode;
 }
 
@@ -21,7 +22,8 @@ export const PreviewPillList = <Id extends string>({
 	title,
 	options,
 	selected,
-	isConfirmation = false,
+	muted = false,
+	showTitle = true,
 	renderIcon,
 }: PreviewPillListProps<Id>) => {
 	if (selected.length === 0) {
@@ -36,7 +38,7 @@ export const PreviewPillList = <Id extends string>({
 				gap: semanticSpacing.stackXs,
 			}}
 		>
-			{!isConfirmation && <Typography variant="bodyBoldMd">{title}</Typography>}
+			{showTitle && <Typography variant="bodyBoldMd">{title}</Typography>}
 			<div
 				css={{
 					display: 'flex',
@@ -51,11 +53,7 @@ export const PreviewPillList = <Id extends string>({
 					return (
 						<div
 							key={id}
-							css={
-								isConfirmation
-									? previewPillStyles.confirmationPill
-									: previewPillStyles.pill
-							}
+							css={muted ? previewPillStyles.mutedPill : previewPillStyles.pill}
 						>
 							{icon && <div css={previewPillStyles.icon}>{icon}</div>}
 							<Typography

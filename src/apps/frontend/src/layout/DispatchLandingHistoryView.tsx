@@ -9,7 +9,7 @@ import {
 	dispatchLandingTheme,
 	historyViewStyles,
 } from '../themes';
-import { phoneIphoneIcon } from '../ui/FlagIcons';
+import { phoneIphoneIcon } from '../ui/flag-icons';
 import { LastUpdated } from '../ui/LastUpdated';
 import { RefreshButton } from '../ui/RefreshButton';
 
@@ -18,7 +18,7 @@ interface DispatchLandingHistoryViewProps {
 	isLoading?: boolean;
 	isRefreshing?: boolean;
 	lastUpdatedAt?: string;
-	handleRefresh: () => void;
+	onRefresh: () => void;
 	error?: ReactNode;
 }
 
@@ -27,21 +27,21 @@ export const DispatchLandingHistoryView = ({
 	isLoading = false,
 	isRefreshing = false,
 	lastUpdatedAt,
-	handleRefresh,
+	onRefresh,
 	error,
 }: DispatchLandingHistoryViewProps) => {
-	const newsletterCount = notifications.filter(
-		(n) => n.channel === 'email',
+	const newsletterEmailCount = notifications.filter(
+		(n) => n.channel === 'newsletter',
 	).length;
 	const appAlertCount = notifications.filter(
-		(n) => n.channel === 'push',
+		(n) => n.channel === 'app-push',
 	).length;
 
 	const selectedPills = [
 		{
 			label: 'Newsletter email',
 			icon: 'mail',
-			count: newsletterCount,
+			count: newsletterEmailCount,
 		},
 		{
 			label: 'App alert',
@@ -62,7 +62,7 @@ export const DispatchLandingHistoryView = ({
 			>
 				<div css={dispatchLandingTheme.activityCounters}>
 					{selectedPills.map((pill) => (
-						<div key={pill.label} css={activePillTheme.isConfirmationStyle}>
+						<div key={pill.label} css={activePillTheme.outlinedPill}>
 							{pill.icon === 'mail' ? (
 								<Icon symbol={'mail'} size="md" />
 							) : (
@@ -80,10 +80,7 @@ export const DispatchLandingHistoryView = ({
 				{!isLoading && !error && (
 					<div css={historyViewStyles.refreshControls}>
 						{lastUpdatedAt && <LastUpdated updatedAt={lastUpdatedAt} />}
-						<RefreshButton
-							onRefresh={handleRefresh}
-							isRefreshing={isRefreshing}
-						/>
+						<RefreshButton onRefresh={onRefresh} isRefreshing={isRefreshing} />
 					</div>
 				)}
 			</div>

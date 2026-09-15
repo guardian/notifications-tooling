@@ -9,12 +9,12 @@ const meta = {
 	title: 'Dispatch/Compose/NotificationTextInput',
 	component: NotificationTextInput,
 	args: {
-		name: 'subject',
+		name: 'subjectText',
 		label: 'Subject',
 		description: 'Choose the subject line for the email newsletter',
 		value: 'this is my subject text',
-		update: () => {},
-		softLimit: 46,
+		onChange: () => {},
+		recommendedLimit: 46,
 	},
 } satisfies Meta<typeof NotificationTextInput>;
 
@@ -28,6 +28,36 @@ export const Default: Story = {
 
 export const Disabled: Story = {
 	args: { isDisabled: true },
+};
+
+export const JustBelowRecommended: Story = {
+	args: {
+		value: 'a'.repeat(45),
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(canvas.getByText('Recommended')).toBeVisible();
+		await expect(canvas.queryByText('Warning')).not.toBeInTheDocument();
+		await expect(
+			canvas.getByLabelText('Subject character count'),
+		).toHaveTextContent('45/46');
+	},
+};
+
+export const AtRecommended: Story = {
+	args: {
+		value: 'a'.repeat(46),
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(canvas.getByText('Warning')).toBeVisible();
+		await expect(canvas.queryByText('Recommended')).not.toBeInTheDocument();
+		await expect(
+			canvas.getByLabelText('Subject character count'),
+		).toHaveTextContent('46/46');
+	},
 };
 
 export const PastRecommended: Story = {
@@ -62,6 +92,25 @@ export const WithPrefixBreakingNews: PrefixedStory = {
 		await expect(
 			canvas.getByLabelText('Subject character count'),
 		).toHaveTextContent('45/46');
+		await expect(canvas.getByText('Recommended')).toBeVisible();
+		await expect(canvas.queryByText('Warning')).not.toBeInTheDocument();
+	},
+};
+
+export const WithPrefixAtRecommended: PrefixedStory = {
+	args: {
+		value: 'This is Guardian breaking news!',
+		prefix: 'Breaking news: ',
+	},
+	render: renderWithPrefix,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(canvas.getByText('Warning')).toBeVisible();
+		await expect(canvas.queryByText('Recommended')).not.toBeInTheDocument();
+		await expect(
+			canvas.getByLabelText('Subject character count'),
+		).toHaveTextContent('46/46');
 	},
 };
 

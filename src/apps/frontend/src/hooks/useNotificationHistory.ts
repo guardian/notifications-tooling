@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
-import { redirectToLogin } from '../api-client/redirectToLogin';
+import { redirectToLogin } from '../api-client/redirect-to-login';
 import {
 	type NotificationListResponse,
 	notificationListResponseSchema,

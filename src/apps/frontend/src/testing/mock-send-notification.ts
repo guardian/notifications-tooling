@@ -1,13 +1,13 @@
 import type { ApiError } from '../api-client/errors';
 import type { SendNotificationResult } from '../utils/send-notification';
-import { acceptedEmailSendResponse } from './api-fixtures';
+import { deliveredNewsletterEmailSendResponse } from './api-fixtures';
 
 export const mockSendNotification = () => {
 	return new Promise<SendNotificationResult>((resolve) => {
 		setTimeout(() => {
 			resolve({
 				success: true,
-				data: acceptedEmailSendResponse,
+				data: deliveredNewsletterEmailSendResponse,
 			});
 		}, 500);
 	});

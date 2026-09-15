@@ -2,18 +2,18 @@ import { describe, expect, it } from 'bun:test';
 import {
 	appAlertFormSchema,
 	defaultAppAlertFormValues,
-	defaultNewsletterFormValues,
-	newsletterFormSchema,
-	validateNewsletterPreview,
+	defaultNewsletterEmailFormValues,
+	newsletterEmailFormSchema,
+	validateNewsletterEmailPreviewText,
 } from './notification-forms';
 
 describe('notification form length rules', () => {
 	it('accepts a newsletter subject and preview of any length', () => {
-		const result = newsletterFormSchema.safeParse({
-			...defaultNewsletterFormValues,
+		const result = newsletterEmailFormSchema.safeParse({
+			...defaultNewsletterEmailFormValues,
 			kicker: 'exclusive',
-			subject: 'a'.repeat(500),
-			preview: 'b'.repeat(500),
+			subjectText: 'a'.repeat(500),
+			previewText: 'b'.repeat(500),
 			audienceSegments: ['UK'],
 		});
 
@@ -90,10 +90,10 @@ describe('notification form length rules', () => {
 
 	it('still requires each text field to be present', () => {
 		expect(
-			newsletterFormSchema.safeParse({
-				...defaultNewsletterFormValues,
-				subject: '   ',
-				preview: 'Preview',
+			newsletterEmailFormSchema.safeParse({
+				...defaultNewsletterEmailFormValues,
+				subjectText: '   ',
+				previewText: 'Preview',
 				audienceSegments: ['UK'],
 			}).success,
 		).toBe(false);
@@ -107,34 +107,52 @@ describe('notification form length rules', () => {
 		).toBe(false);
 	});
 
-	it('requires preview text only when preview is shown', () => {
-		expect(validateNewsletterPreview('   ', true)).toBe(
+	it('requires preview text only when it is included', () => {
+		expect(validateNewsletterEmailPreviewText('   ', true)).toBe(
 			'Preview text is required',
 		);
 
-		expect(validateNewsletterPreview('   ', false)).toBeUndefined();
-		expect(validateNewsletterPreview('Preview', true)).toBeUndefined();
+		expect(validateNewsletterEmailPreviewText('   ', false)).toBeUndefined();
+		expect(validateNewsletterEmailPreviewText('Preview', true)).toBeUndefined();
 	});
 
-	it('validates preview text on submit when show preview is enabled', () => {
+	it('validates preview text on submit when inclusion is enabled', () => {
 		expect(
-			newsletterFormSchema.safeParse({
-				...defaultNewsletterFormValues,
-				subject: 'Subject',
-				preview: '   ',
-				showPreview: true,
+			newsletterEmailFormSchema.safeParse({
+				...defaultNewsletterEmailFormValues,
+				subjectText: 'Subject',
+				previewText: '   ',
+				includePreviewText: true,
 				audienceSegments: ['UK'],
 			}).success,
 		).toBe(false);
 
 		expect(
-			newsletterFormSchema.safeParse({
-				...defaultNewsletterFormValues,
-				subject: 'Subject',
-				preview: '   ',
-				showPreview: false,
+			newsletterEmailFormSchema.safeParse({
+				...defaultNewsletterEmailFormValues,
+				subjectText: 'Subject',
+				previewText: '   ',
+				includePreviewText: false,
 				audienceSegments: ['UK'],
 			}).success,
 		).toBe(true);
+	});
+
+	it('reports required text errors against the renamed form fields', () => {
+		const result = newsletterEmailFormSchema.safeParse({
+			...defaultNewsletterEmailFormValues,
+			subjectText: '   ',
+			previewText: '   ',
+			includePreviewText: true,
+			audienceSegments: ['UK'],
+		});
+
+		expect(result.success).toBe(false);
+		expect(
+			result.error?.issues.map(({ path, message }) => ({ path, message })),
+		).toEqual([
+			{ path: ['subjectText'], message: 'Subject is required' },
+			{ path: ['previewText'], message: 'Preview text is required' },
+		]);
 	});
 });

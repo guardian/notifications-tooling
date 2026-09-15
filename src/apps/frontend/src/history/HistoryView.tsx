@@ -3,6 +3,7 @@ import { Typography } from '@guardian/stand/Typography';
 import type { DisplayAppAlertTopicEditionId } from '@models';
 import type { ReactNode } from 'react';
 import { historyViewStyles, layoutMainTheme } from '../themes';
+import type { ChannelOption } from '../types';
 import { LastUpdated } from '../ui/LastUpdated';
 import { RefreshButton } from '../ui/RefreshButton';
 import { HistoryEmptyState } from './HistoryEmptyState';
@@ -16,7 +17,7 @@ export interface HistoryNotification {
 	title: string;
 	href: string;
 	thumbnailUrl?: string;
-	channel: 'email' | 'push';
+	channel: ChannelOption;
 	alertType: string;
 	sentBy: string;
 	sentTo: DisplayAppAlertTopicEditionId[];
@@ -33,8 +34,8 @@ interface HistoryViewProps {
 	isRefreshing?: boolean;
 	error?: ReactNode;
 	lastUpdatedAt?: string;
-	handlePageChange: (page: number) => void;
-	handleRefresh: () => void;
+	onPageChange: (page: number) => void;
+	onRefresh: () => void;
 }
 
 export const HistoryView = ({
@@ -46,8 +47,8 @@ export const HistoryView = ({
 	error,
 	lastUpdatedAt,
 	currentPage,
-	handlePageChange,
-	handleRefresh,
+	onPageChange,
+	onRefresh,
 }: HistoryViewProps) => {
 	return (
 		<Layout.Main theme={layoutMainTheme}>
@@ -66,7 +67,7 @@ export const HistoryView = ({
 							<div css={historyViewStyles.refreshControls}>
 								{lastUpdatedAt && <LastUpdated updatedAt={lastUpdatedAt} />}
 								<RefreshButton
-									onRefresh={handleRefresh}
+									onRefresh={onRefresh}
 									isRefreshing={isRefreshing}
 								/>
 							</div>
@@ -74,7 +75,7 @@ export const HistoryView = ({
 								<HistoryPagination
 									currentPage={currentPage}
 									totalItems={totalItems}
-									onPageChange={handlePageChange}
+									onPageChange={onPageChange}
 									limit={limit}
 								/>
 							)}

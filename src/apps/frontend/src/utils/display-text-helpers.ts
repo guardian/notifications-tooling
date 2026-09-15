@@ -1,8 +1,8 @@
 import type { ChannelOption } from '../types';
 
 const channelDescriptions = {
-	email: 'newsletter email',
-	push: 'app alert',
+	newsletter: 'newsletter email',
+	'app-push': 'app alert',
 };
 
 export const getChannelDescription = (channel?: ChannelOption) =>

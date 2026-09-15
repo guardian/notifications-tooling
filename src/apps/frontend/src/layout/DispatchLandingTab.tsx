@@ -18,12 +18,12 @@ const dispatchClickableTiles = [
 	{
 		title: 'Create a newsletter email',
 		icon: 'mail',
-		href: notificationRoutes.email.create,
+		href: notificationRoutes.newsletter.create,
 	},
 	{
 		title: 'Create an app alert',
 		icon: 'appAlert',
-		href: notificationRoutes.push.create,
+		href: notificationRoutes['app-push'].create,
 	},
 	{
 		title: 'History',
@@ -45,6 +45,7 @@ export const DispatchLandingTab = () => {
 	};
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();
+	const handleRefresh = () => void notificationHistory.refetch();
 	const notifications =
 		notificationHistory.data?.notifications.flatMap((notification) => {
 			const historyNotification = mapNotificationToHistoryNotification(
@@ -103,7 +104,7 @@ export const DispatchLandingTab = () => {
 								? new Date(notificationHistory.dataUpdatedAt).toISOString()
 								: undefined
 						}
-						handleRefresh={() => void notificationHistory.refetch()}
+						onRefresh={handleRefresh}
 						error={
 							notificationHistory.isError ? (
 								<InlineMessage level="error">
