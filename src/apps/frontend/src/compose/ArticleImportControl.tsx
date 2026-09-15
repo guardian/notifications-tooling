@@ -8,6 +8,7 @@ import type { CapiBlock, ResolvedArticle } from '@models';
 import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';
+import { ArticlePresenceIndicator } from '../presence/PresenceIndicator';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import {
 	getArticleUrlInputFailureMessage,
@@ -212,11 +213,14 @@ export const ArticleImportControl = ({
 			</div>
 
 			{showImportedArticle && content && (
-				<ArticlePreviewCard
-					content={content}
-					requestedUrl={notification.requestedUrl}
-					requestedBlock={notification.requestedBlock}
-				/>
+				<>
+					<ArticlePreviewCard
+						content={content}
+						requestedUrl={notification.requestedUrl}
+						requestedBlock={notification.requestedBlock}
+					/>
+					<ArticlePresenceIndicator contentId={fetchedArticleId} />
+				</>
 			)}
 		</div>
 	);

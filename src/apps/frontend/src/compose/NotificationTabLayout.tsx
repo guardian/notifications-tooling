@@ -10,7 +10,6 @@ import { from } from '@guardian/stand/utils';
 import type { ReactNode } from 'react';
 import { useContext } from 'react';
 import { SideNavigationPanel } from '../layout/SideNavigationPanel';
-import { ArticlePresenceIndicator } from '../presence/PresenceIndicator';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
 import { NoSendPermissionWarning } from './NoSendPermissionWarning';
@@ -30,7 +29,7 @@ export const NotificationTabLayout = ({
 	previewSection,
 }: NotificationTabLayoutProps) => {
 	const {
-		notification: { content, fetchedArticleId },
+		notification: { content },
 	} = useContext(NotificationFormContext);
 	const hasPreview = Boolean(content);
 
@@ -40,7 +39,6 @@ export const NotificationTabLayout = ({
 				<SideNavigationPanel channel={channel} />
 			</Layout.Sidebar>
 			<Layout.Main theme={layoutMainTheme}>
-				<ArticlePresenceIndicator contentId={fetchedArticleId} />
 				<Grid
 					cssOverrides={css({
 						height: '100%',
