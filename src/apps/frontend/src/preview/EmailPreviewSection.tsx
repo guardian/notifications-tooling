@@ -12,7 +12,7 @@ import {
 	defaultNewsletterFormValues,
 	type NewsletterFormValues,
 } from '../utils/notification-forms';
-import { HTMLPreview } from './HTMLPreview';
+import { NewsletterEmailPreview } from './NewsletterEmailPreview';
 import { PreviewSection } from './PreviewSection';
 
 export const EmailPreviewSection = () => {
@@ -55,7 +55,7 @@ export const EmailPreviewSection = () => {
 					Email appearance may vary across different email clients and devices
 				</Typography>
 			</AlertBanner>
-			<HTMLPreview />
+			<NewsletterEmailPreview />
 			<TestEmailForm />
 		</PreviewSection>
 	);
