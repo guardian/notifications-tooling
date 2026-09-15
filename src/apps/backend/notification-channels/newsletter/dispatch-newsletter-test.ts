@@ -1,10 +1,7 @@
 import { newsletterSegments, NotificationChannel } from '@config';
-import type {
-	BrazeFailureReason,
-	EmailRenderingFailureReason,
-} from '@services';
 import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
+import type { NewsletterDispatchOutcome } from '../dispatch-outcome';
 import {
 	type ChannelDispatchResult,
 	defaultDependencies,
@@ -16,6 +13,7 @@ import {
 import {
 	newsletterEnvironmentSchema,
 	newsletterFailureReason,
+	newsletterStatusCode,
 } from './dispatch-newsletter';
 
 const testEmailEnvironmentSchema = z.object({
@@ -35,22 +33,15 @@ const testEmailEnvironmentSchema = z.object({
 });
 
 /**
- * The outcome of one test-email send (one per rendering variant). `dispatchId`
- * is Braze's `dispatch_id` from the test send, kept for tracking.
+ * Sends one Braze test email per rendering variant to the registered test
+ * recipients. `resolved.emailRenderingId` is the actual email-rendering id used
+ * to render the variant, so persisted rows record what was really dispatched.
  */
-export type NewsletterTestDispatchOutcome = {
-	testId: string;
-	variant: string;
-	dispatchId?: string;
-	status: 'success' | 'failure';
-	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
-};
-
 export const dispatchNewsletterTest = async (
 	request: NotificationTestSendRequest,
-	testId: string,
+	_testId: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
-): Promise<ChannelDispatchResult<NewsletterTestDispatchOutcome>> => {
+): Promise<ChannelDispatchResult<NewsletterDispatchOutcome>> => {
 	const plan = request.channels[NotificationChannel.Newsletter];
 	if (!plan) {
 		return { outcomes: [] };
@@ -65,15 +56,13 @@ export const dispatchNewsletterTest = async (
 		NotificationChannel.Newsletter,
 	);
 	const [
-		brazeApiKey,
-		brazeRestEndpoint,
+		brazeClient,
 		emailRenderingEndpoint,
 		brazeAppId,
 		brazeTestEmailFrom,
 		brazeTestEmailReplyTo,
 	] = await Promise.all([
-		dependencies.getSSMParameter('BRAZE_API_KEY'),
-		dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
+		dependencies.loadBrazeClient(),
 		dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
 		dependencies.getSSMParameter('BRAZE_APP_ID'),
 		dependencies.getSSMParameter('BRAZE_TEST_EMAIL_FROM'),
@@ -81,8 +70,6 @@ export const dispatchNewsletterTest = async (
 	]);
 
 	const environment = newsletterEnvironmentSchema.parse({
-		BRAZE_API_KEY: brazeApiKey,
-		BRAZE_REST_ENDPOINT: brazeRestEndpoint,
 		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
 	});
 	const configuration = testEmailEnvironmentSchema.parse({
@@ -95,14 +82,21 @@ export const dispatchNewsletterTest = async (
 	);
 
 	// All variants must render before any Braze call; a render failure aborts.
-	const renderedVariants: Array<{ segmentId: string; html: string }> = [];
+	const renderedVariants: Array<{
+		segmentId: string;
+		emailRenderingId: string;
+		html: string;
+	}> = [];
 	for (const segmentId of plan.variants) {
+		const emailRenderingId =
+			newsletterSegments[segmentId].emailRenderingNewsletterId;
 		renderedVariants.push({
 			segmentId,
+			emailRenderingId,
 			html: await dependencies.renderEmail({
 				endpoint: environment.EMAIL_RENDERING_ENDPOINT,
 				articleUrl: item.link,
-				newsletterId: newsletterSegments[segmentId].emailRenderingNewsletterId,
+				newsletterId: emailRenderingId,
 				headlineOverride: item.title,
 				previewText: item.body,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
@@ -110,9 +104,7 @@ export const dispatchNewsletterTest = async (
 		});
 	}
 
-	await dependencies.registerBrazeTestEmailRecipients({
-		apiKey: environment.BRAZE_API_KEY,
-		restEndpoint: environment.BRAZE_REST_ENDPOINT,
+	await brazeClient.registerTestEmailRecipients({
 		recipientEmails,
 		timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 	});
@@ -120,9 +112,7 @@ export const dispatchNewsletterTest = async (
 	// allSettled so one variant's send failure does not abort the others.
 	const settled = await Promise.allSettled(
 		renderedVariants.map(({ html }) =>
-			dependencies.sendBrazeTestEmail({
-				apiKey: environment.BRAZE_API_KEY,
-				restEndpoint: environment.BRAZE_REST_ENDPOINT,
+			brazeClient.sendTestEmail({
 				appId: configuration.BRAZE_APP_ID,
 				from: configuration.BRAZE_TEST_EMAIL_FROM,
 				replyTo: configuration.BRAZE_TEST_EMAIL_REPLY_TO,
@@ -134,25 +124,29 @@ export const dispatchNewsletterTest = async (
 		),
 	);
 
-	const outcomes = settled.map(
-		(result, index): NewsletterTestDispatchOutcome => {
-			const { segmentId } = renderedVariants[index]!;
-			if (result.status === 'fulfilled') {
-				return {
-					testId,
-					variant: segmentId,
-					dispatchId: result.value.dispatch_id,
-					status: 'success',
-				};
-			}
+	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
+		const { segmentId, emailRenderingId } = renderedVariants[index]!;
+		const requested = { channel: 'newsletter' as const, segment: segmentId };
+		const resolved = { channel: 'newsletter' as const, emailRenderingId };
+		if (result.status === 'fulfilled') {
 			return {
-				testId,
-				variant: segmentId,
-				status: 'failure',
-				failureReason: newsletterFailureReason(result.reason),
+				requested,
+				resolved,
+				status: 'success',
+				providerRef: result.value.dispatch_id ?? null,
+				failureReason: null,
+				providerStatusCode: result.value.status,
 			};
-		},
-	);
+		}
+		return {
+			requested,
+			resolved,
+			status: 'failure',
+			providerRef: null,
+			failureReason: newsletterFailureReason(result.reason),
+			providerStatusCode: newsletterStatusCode(result.reason) ?? null,
+		};
+	});
 
 	return { outcomes, error: firstSettledError(settled) };
 };

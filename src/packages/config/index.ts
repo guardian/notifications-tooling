@@ -30,5 +30,4 @@ export const permissionsStoreStage = env.STAGE === 'PROD' ? 'PROD' : 'CODE';
 export * from './env';
 export * from './audiences';
 export * from './channels';
-export * from './permissions';
 export * from './urls';

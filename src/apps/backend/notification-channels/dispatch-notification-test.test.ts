@@ -5,6 +5,7 @@ import type { NotificationTestSendRequest } from '../routers/notifications/schem
 import { dispatchNotificationTest } from './dispatch-notification-test';
 import {
 	anyString,
+	createdByEmail,
 	createDependencies,
 	newsletterItem,
 	pushItem,
@@ -36,6 +37,7 @@ describe('dispatchNotificationTest', () => {
 		const outcomes = await dispatchNotificationTest(
 			request,
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -43,14 +45,34 @@ describe('dispatchNotificationTest', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 		expect(outcomes.newsletter).toEqual([
 			{
-				testId,
-				variant: 'UK',
-				dispatchId: 'test-dispatch-123',
+				requested: { channel: 'newsletter', segment: 'UK' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: 'breaking-news-uk',
+				},
 				status: 'success',
+				providerRef: 'test-dispatch-123',
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 		]);
 		expect(outcomes.appPush).toEqual([
-			{ testId, id: anyString, topicType: 'test', status: 'success' },
+			{
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
+				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
+			},
 		]);
 	});
 
@@ -72,6 +94,7 @@ describe('dispatchNotificationTest', () => {
 		const outcomes = await dispatchNotificationTest(
 			request,
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -109,6 +132,7 @@ describe('dispatchNotificationTest', () => {
 		const outcomes = await dispatchNotificationTest(
 			request,
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -142,16 +166,16 @@ describe('dispatchNotificationTest', () => {
 			},
 		};
 
-		// The push failure is rethrown so the endpoint returns the documented
-		// 502/504 instead of a false 202.
-		let dispatchError: unknown;
-		try {
-			await dispatchNotificationTest(request, testId, dependencies);
-		} catch (error) {
-			dispatchError = error;
-		}
+		// The push failure is returned (not thrown) so the router can persist every
+		// outcome, then surface the documented 502/504 instead of a false 202.
+		const { error } = await dispatchNotificationTest(
+			request,
+			testId,
+			createdByEmail,
+			dependencies,
+		);
 
-		expect(dispatchError).toBe(pushError);
+		expect(error).toBe(pushError);
 
 		// Neither channel aborts the other: the newsletter is still attempted.
 		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(1);

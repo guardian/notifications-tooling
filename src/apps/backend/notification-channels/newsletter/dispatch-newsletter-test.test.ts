@@ -8,6 +8,7 @@ describe('dispatchNewsletterTest', () => {
 	it('renders and sends test newsletters directly to normalized recipients', async () => {
 		const {
 			dependencies,
+			loadBrazeClient,
 			renderEmail,
 			sendBrazeCampaign,
 			registerBrazeTestEmailRecipients,
@@ -52,16 +53,13 @@ describe('dispatchNewsletterTest', () => {
 			previewText: newsletterItem.body,
 			timeoutMs: 10_000,
 		});
+		expect(loadBrazeClient).toHaveBeenCalledTimes(1);
 		expect(registerBrazeTestEmailRecipients).toHaveBeenCalledWith({
-			apiKey: 'test-api-key',
-			restEndpoint: 'https://rest.example.braze.eu',
 			recipientEmails: ['test.user@guardian.co.uk'],
 			timeoutMs: 10_000,
 		});
 		expect(sendBrazeTestEmail).toHaveBeenCalledTimes(2);
 		expect(sendBrazeTestEmail).toHaveBeenCalledWith({
-			apiKey: 'test-api-key',
-			restEndpoint: 'https://rest.example.braze.eu',
 			appId: 'test-app-id',
 			from: 'dev testing <dev-testing@email.theguardian.com>',
 			replyTo: 'NO_REPLY_TO',
@@ -73,16 +71,26 @@ describe('dispatchNewsletterTest', () => {
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
 		expect(outcomes).toEqual([
 			{
-				testId,
-				variant: 'UK',
-				dispatchId: 'test-dispatch-123',
+				requested: { channel: 'newsletter', segment: 'UK' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: newsletterSegments.UK.emailRenderingNewsletterId,
+				},
 				status: 'success',
+				providerRef: 'test-dispatch-123',
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 			{
-				testId,
-				variant: 'US',
-				dispatchId: 'test-dispatch-123',
+				requested: { channel: 'newsletter', segment: 'US' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: newsletterSegments.US.emailRenderingNewsletterId,
+				},
 				status: 'success',
+				providerRef: 'test-dispatch-123',
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 		]);
 	});

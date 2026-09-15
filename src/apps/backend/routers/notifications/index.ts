@@ -1,7 +1,14 @@
-import { randomUUID } from 'node:crypto';
-import { UserPermissions } from '@config';
-import { Router } from 'express';
+import {
+	createNotificationsRepository,
+	getDb,
+	type ListRecentNotificationsOptions,
+	type NotificationListPage,
+	type NotificationWithDispatches,
+} from '@database';
+import { UserPermissions } from '@models';
+import { type RequestHandler, Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
+import { z } from 'zod';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
@@ -10,12 +17,18 @@ import {
 	type DispatchOutcomes,
 } from '../../notification-channels/dispatch-notification';
 import {
+	httpStatusForNotification,
+	type SendNotificationStore,
+	sendNotificationStore,
+	toNotificationResponse,
+	toNotificationSummary,
+} from '../../persistence/persist-notification';
+import { notificationListQuerySchema } from './schemas/notification-list-query';
+import type { NotificationListQuery } from './schemas/notification-list-query';
+import {
 	type NotificationSendRequest,
 	notificationSendRequestSchema,
 } from './schemas/notification-send-request';
-
-/** How long (seconds) an accepted notification may still be cancelled. */
-const CANCELLATION_WINDOW_SECONDS = 5 * 60;
 
 /**
  * Zod issue codes meaning the body is *structurally* wrong (a 400 per the
@@ -71,20 +84,103 @@ export const handleValidationErrors: ErrorRequestHandler = (
 	});
 };
 
+/** Route param: the stored notification's UUID primary key. */
+const notificationIdParamsSchema = { id: z.uuid() };
+
+/**
+ * express-zod-safe error hook for `GET /v1/notifications/:id`. A non-UUID id
+ * can never match a stored notification, so it is a structural `400` rather
+ * than a `404`.
+ */
+export const handleNotificationIdValidationError: ErrorRequestHandler = (
+	errors,
+	req,
+	res,
+) => {
+	const details = errors.flatMap((item) =>
+		item.errors.issues.map((issue) => ({
+			code: issue.code,
+			path: toJsonPointer(issue.path),
+			message: issue.message,
+		})),
+	);
+
+	res.status(400).json({
+		...buildErrorEnvelope(
+			req,
+			'bad_request',
+			'The notification id must be a valid UUID.',
+		),
+		details,
+	});
+};
+
+/**
+ * express-zod-safe error hook for `GET /v1/notifications`. Malformed pagination
+ * query params are always a structural `400`.
+ */
+export const handleNotificationListValidationError: ErrorRequestHandler = (
+	errors,
+	req,
+	res,
+) => {
+	const details = errors.flatMap((item) =>
+		item.errors.issues.map((issue) => ({
+			code: issue.code,
+			path: toJsonPointer(issue.path),
+			message: issue.message,
+		})),
+	);
+
+	res.status(400).json({
+		...buildErrorEnvelope(
+			req,
+			'bad_request',
+			'The pagination query parameters are invalid.',
+		),
+		details,
+	});
+};
+
+type FindNotificationById = (
+	id: string,
+) => Promise<NotificationWithDispatches | null>;
+
+const findNotificationByIdWithDispatches: FindNotificationById = async (id) => {
+	const db = await getDb();
+	return createNotificationsRepository(db).findByIdWithDispatches(id);
+};
+
+type ListRecentNotifications = (
+	options: ListRecentNotificationsOptions,
+) => Promise<NotificationListPage>;
+
+const listRecentNotifications: ListRecentNotifications = async (options) => {
+	const db = await getDb();
+	return createNotificationsRepository(db).listRecent(options);
+};
+
 type DispatchValidatedNotification = (
 	request: NotificationSendRequest,
 	notificationId: string,
+	createdByEmail: string,
 ) => Promise<DispatchOutcomes>;
 
 export const createNotificationsRouter = (
 	dispatchRequest: DispatchValidatedNotification = dispatchNotification,
+	store: SendNotificationStore = sendNotificationStore,
+	findNotification: FindNotificationById = findNotificationByIdWithDispatches,
+	listNotifications: ListRecentNotifications = listRecentNotifications,
 ) => {
 	const notificationsRouter = Router();
 
 	notificationsRouter.post(
 		'/',
 		authMiddleware,
-		requirePermissions([UserPermissions.DispatchAccess]),
+		requirePermissions([
+			UserPermissions.DispatchAccess,
+			UserPermissions.SendNotification,
+		]),
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
@@ -92,41 +188,128 @@ export const createNotificationsRouter = (
 		async (req, res) => {
 			const body = req.body;
 
-			// Mint the id before dispatch so each channel adapter can tag its
-			// downstream calls with it. Becomes the store's primary key later.
-			const notificationId = randomUUID();
-			const { appPush, newsletter } = await dispatchRequest(
-				body,
-				notificationId,
-			);
+			// Record the envelope first so the DB mints the id; each channel
+			// adapter then tags its downstream calls with that same id.
+			const notification = await store.create(body, req.user!.email);
 
-			// Outcomes are not persisted yet; log them so sends can be introspected.
-			req.log.info(
-				{ notificationId, appPush, newsletter },
-				'Dispatched notification channels',
-			);
+			let outcomesRecorded = false;
+			try {
+				const { error, ...outcomes } = await dispatchRequest(
+					body,
+					notification.id,
+					notification.createdByEmail,
+				);
+				const persisted = await store.recordOutcomes(notification, outcomes);
+				outcomesRecorded = true;
 
-			const statusUrl = `/v1/notifications/${notificationId}/status`;
+				if (error !== undefined) {
+					req.log.warn(
+						{
+							notificationId: notification.id,
+							status: persisted.notification.status,
+							err: error,
+							...outcomes,
+						},
+						'Recorded notification with provider failures',
+					);
+				} else {
+					req.log.info(
+						{
+							notificationId: notification.id,
+							status: persisted.notification.status,
+							...outcomes,
+						},
+						'Dispatched and recorded notification channels',
+					);
+				}
 
-			const plans = Object.keys(body.channels).map((channel) => ({
-				channel,
-				planId: `${notificationId}#${channel}`,
-				status: 'accepted' as const,
-			}));
+				res
+					.status(httpStatusForNotification(persisted.notification.status))
+					.json(toNotificationResponse(persisted));
+			} catch (error) {
+				// Dispatch or persistence threw before any outcome was recorded (e.g.
+				// a config, SSM, or DB failure); flag the stored row failed and return
+				// it so the caller sees the failure rather than a terse error
+				// envelope. When outcomes were recorded the status is already
+				// accurate, so rethrow to surface anything unexpected.
+				if (!outcomesRecorded) {
+					const failed = await store
+						.markFailed(notification)
+						.catch(() => notification);
 
-			const expiresAt =
-				Math.floor(Date.now() / 1000) + CANCELLATION_WINDOW_SECONDS;
+					res
+						.status(httpStatusForNotification(failed.status))
+						.json(
+							toNotificationResponse({ notification: failed, dispatches: [] }),
+						);
 
-			res.status(202).json({
-				notificationId,
-				status: 'accepted',
-				plans,
-				statusUrl,
-				cancellable: {
-					cancelUrl: `/v1/notifications/${notificationId}/cancel`,
-					expiresAt,
-				},
+					return;
+				}
+
+				throw error;
+			}
+		},
+	);
+
+	notificationsRouter.get(
+		'/',
+		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
+		// Cast to a plain handler: the schema's transform narrows `query` to
+		// numbers, which is not assignable from Express's `ParsedQs` overload.
+		validate({
+			query: notificationListQuerySchema,
+			handler: handleNotificationListValidationError,
+		}) as unknown as RequestHandler,
+		async (req, res) => {
+			// express-zod-safe has coerced the query and applied the defaults.
+			const { since, limit, offset } =
+				req.query as unknown as NotificationListQuery;
+			const { notifications, total } = await listNotifications({
+				since,
+				limit,
+				offset,
 			});
+
+			res.status(200).json({
+				total,
+				limit,
+				offset,
+				notifications: notifications.map(toNotificationSummary),
+			});
+		},
+	);
+
+	notificationsRouter.get(
+		'/:id',
+		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
+		validate({
+			params: notificationIdParamsSchema,
+			handler: handleNotificationIdValidationError,
+		}),
+		async (req, res) => {
+			const notification = await findNotification(req.params.id);
+
+			if (!notification) {
+				res
+					.status(404)
+					.json(
+						buildErrorEnvelope(
+							req,
+							'not_found',
+							'No notification exists with the given id.',
+						),
+					);
+				return;
+			}
+
+			res.status(200).json(
+				toNotificationResponse({
+					notification,
+					dispatches: notification.dispatches,
+				}),
+			);
 		},
 	);
 

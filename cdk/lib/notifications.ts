@@ -172,6 +172,7 @@ export class DispatchStack extends GuStack {
 					'It provides a frontend for users to configure and send notifications, and a ' +
 					'backend responsible for forwarding requests to relevant downstream services e.g. ' +
 					'app and email notification APIs.',
+				binaryMediaTypes: ['image/*'],
 				deployOptions: {
 					...apiThrottleOptions,
 					loggingLevel: MethodLoggingLevel.ERROR,

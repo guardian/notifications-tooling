@@ -1,0 +1,628 @@
+import {
+	afterAll,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	mock,
+} from 'bun:test';
+import {
+	createNotificationDispatchesRepository,
+	createNotificationsRepository,
+} from '@database';
+import {
+	buildDispatch,
+	buildNotification,
+	setupTestDatabase,
+} from '@database/test-helpers';
+import { httpLogger } from '@http-logger';
+import { UserPermissions } from '@models';
+import { BrazeApiError } from '@services';
+import express from 'express';
+import { errorMiddleware } from '../../middleware/error-middleware';
+import {
+	authenticateRequests,
+	installPandaAuthMock,
+} from '../../utils/test-utils/panda-auth';
+import {
+	grantPermissions,
+	installPermissionsStoreMock,
+} from '../../utils/test-utils/permissions';
+import type { TestServer } from '../../utils/test-utils/server';
+
+// Stub Panda verification and the permissions store before the app (and its
+// real clients) are imported. The router is imported dynamically below so the
+// real pan-domain auth module (which polls S3 on construction) never loads
+// before the mock is installed. The database is deliberately NOT mocked: this
+// suite drives the endpoint against a real Postgres via the app's own `getDb`.
+installPandaAuthMock();
+installPermissionsStoreMock();
+const { startTestServer } = await import('../../utils/test-utils/server');
+const { createNotificationsRouter } = await import('.');
+
+let database: Awaited<ReturnType<typeof setupTestDatabase>>;
+let notifications: ReturnType<typeof createNotificationsRepository>;
+let dispatches: ReturnType<typeof createNotificationDispatchesRepository>;
+let server: TestServer;
+let baseUrl: string;
+
+beforeAll(async () => {
+	database = await setupTestDatabase();
+	notifications = createNotificationsRepository(database.db);
+	dispatches = createNotificationDispatchesRepository(database.db);
+
+	authenticateRequests();
+	grantPermissions([
+		UserPermissions.DispatchAccess,
+		UserPermissions.SendNotification,
+	]);
+	server = await startTestServer();
+	baseUrl = server.baseUrl;
+});
+
+afterAll(async () => {
+	await server.close();
+	await database.close();
+});
+
+beforeEach(() => database.truncate());
+
+describe('GET /v1/notifications/:id (real Postgres)', () => {
+	it('returns the persisted notification and its dispatches', async () => {
+		const notification = await notifications.create(buildNotification());
+		await dispatches.upsert(
+			buildDispatch(notification.id, {
+				providerRef: 'mobile-n10n-1',
+			}),
+		);
+		await dispatches.upsert(
+			buildDispatch(notification.id, {
+				channel: 'newsletter',
+				requested: { channel: 'newsletter', segment: 'morning-briefing-uk' },
+				resolved: {
+					channel: 'newsletter',
+					emailRenderingId: 'morning-briefing-uk',
+				},
+			}),
+		);
+
+		const response = await fetch(
+			`${baseUrl}/v1/notifications/${notification.id}`,
+		);
+
+		expect(response.status).toBe(200);
+
+		const body = (await response.json()) as {
+			id: string;
+			idempotencyKey: string;
+			status: string;
+			content: unknown;
+			channels: unknown;
+			createdAt: string;
+			dispatches: Array<{
+				channel: string;
+				requested: Record<string, unknown>;
+				providerRef: string | null;
+				status: string;
+			}>;
+		};
+
+		expect(body.id).toBe(notification.id);
+		expect(body.idempotencyKey).toBe(notification.idempotencyKey);
+		expect(body.status).toBe('accepted');
+		expect(body.content).toEqual(notification.content);
+		expect(body.channels).toEqual(notification.channels);
+		expect(typeof body.createdAt).toBe('string');
+
+		expect(body.dispatches.map((dispatch) => dispatch.requested)).toEqual([
+			{ channel: 'app-push', topicType: 'breaking-news', editions: ['uk'] },
+			{ channel: 'newsletter', segment: 'morning-briefing-uk' },
+		]);
+		expect(body.dispatches[0]).toMatchObject({
+			channel: 'app-push',
+			requested: {
+				channel: 'app-push',
+				topicType: 'breaking-news',
+				editions: ['uk'],
+			},
+			providerRef: 'mobile-n10n-1',
+			status: 'success',
+		});
+	});
+
+	it('returns 404 when no notification exists with the id', async () => {
+		const response = await fetch(
+			`${baseUrl}/v1/notifications/11111111-1111-4111-8111-111111111111`,
+		);
+
+		expect(response.status).toBe(404);
+		const body = (await response.json()) as { error: string };
+		expect(body.error).toBe('not_found');
+	});
+});
+
+/** A minimal, fully valid single-channel app-push request. */
+const validPushRequest = () => ({
+	idempotencyKey: 'push-2026-07-08',
+	sender: 'notifications-tooling-spa/v1',
+	content: {
+		items: {
+			lead: {
+				type: 'app-push',
+				title: 'Ukraine summit begins',
+				body: 'World leaders gather in Geneva as talks open.',
+				link: 'https://www.theguardian.com/world/2026/jul/08/ukraine-summit',
+			},
+		},
+	},
+	channels: {
+		'app-push': {
+			audience: {
+				type: 'topic',
+				items: [{ type: 'breaking-news', name: 'uk' }],
+			},
+			compose: { use: 'lead' },
+		},
+	},
+});
+
+/**
+ * A custom app that mounts the notifications router with a stubbed dispatcher
+ * but the real, default `sendNotificationStore`, so the endpoint persists to the
+ * same Postgres the test asserts against.
+ */
+const startDispatchServer = (
+	dispatch: NonNullable<Parameters<typeof createNotificationsRouter>[0]>,
+) => {
+	const testApp = express();
+	testApp.use(httpLogger);
+	testApp.use(express.json());
+	testApp.use('/v1/notifications', createNotificationsRouter(dispatch));
+	testApp.use(errorMiddleware);
+	return startTestServer(testApp);
+};
+
+describe('POST /v1/notifications (real Postgres)', () => {
+	it('persists the notification and its dispatch outcomes when every target delivers', async () => {
+		const dispatch = mock(() =>
+			Promise.resolve({
+				appPush: [
+					{
+						requested: {
+							channel: 'app-push' as const,
+							topicType: 'breaking-news',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push' as const,
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major' as const,
+						},
+						status: 'success' as const,
+						providerRef: 'mobile-n10n-1',
+						failureReason: null,
+						providerStatusCode: null,
+					},
+				],
+				newsletter: [],
+			}),
+		);
+		const dispatchServer = await startDispatchServer(dispatch);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notifications`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(validPushRequest()),
+				},
+			);
+
+			// Every target delivered, so the send reads as created + delivered.
+			expect(response.status).toBe(201);
+			const body = (await response.json()) as { id: string; status: string };
+			expect(body.status).toBe('delivered');
+
+			const stored = await notifications.findByIdWithDispatches(body.id);
+			expect(stored).not.toBeNull();
+			expect(stored).toMatchObject({
+				idempotencyKey: 'push-2026-07-08',
+				kind: 'send',
+				status: 'delivered',
+				sender: 'notifications-tooling-spa/v1',
+				createdByEmail: 'ada.lovelace@guardian.co.uk',
+				dryRun: false,
+			});
+			expect(stored?.content).toEqual(validPushRequest().content);
+			expect(stored?.dispatches).toHaveLength(1);
+			expect(stored?.dispatches[0]).toMatchObject({
+				channel: 'app-push',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
+				providerRef: 'mobile-n10n-1',
+				status: 'success',
+			});
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
+	it('rolls a mix of outcomes up to partially_delivered and stores each dispatch', async () => {
+		const dispatch = mock(() =>
+			Promise.resolve({
+				appPush: [
+					{
+						requested: {
+							channel: 'app-push' as const,
+							topicType: 'breaking-news',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push' as const,
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major' as const,
+						},
+						status: 'success' as const,
+						providerRef: 'mobile-n10n-1',
+						failureReason: null,
+						providerStatusCode: null,
+					},
+				],
+				newsletter: [
+					{
+						requested: {
+							channel: 'newsletter' as const,
+							segment: 'morning-briefing-uk',
+						},
+						resolved: {
+							channel: 'newsletter' as const,
+							brazeCampaignId: 'braze-campaign-1',
+							emailRenderingId: 'braze-newsletter-1',
+						},
+						status: 'failure' as const,
+						providerRef: null,
+						failureReason: 'unknown' as const,
+						providerStatusCode: 500,
+					},
+				],
+			}),
+		);
+		const dispatchServer = await startDispatchServer(dispatch);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notifications`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(validPushRequest()),
+				},
+			);
+
+			expect(response.status).toBe(502);
+			const body = (await response.json()) as { id: string; status: string };
+			expect(body.status).toBe('partially_delivered');
+
+			const stored = await notifications.findByIdWithDispatches(body.id);
+			expect(stored?.status).toBe('partially_delivered');
+			expect(stored?.dispatches).toHaveLength(2);
+
+			const newsletter = stored?.dispatches.find(
+				(dispatchRow) => dispatchRow.channel === 'newsletter',
+			);
+			expect(newsletter).toMatchObject({
+				requested: { channel: 'newsletter', segment: 'morning-briefing-uk' },
+				status: 'failure',
+				providerStatusCode: 500,
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId: 'braze-campaign-1',
+					emailRenderingId: 'braze-newsletter-1',
+				},
+			});
+
+			// The failed segment is denormalised onto the row for the list endpoint.
+			expect(stored?.failedTargets).toEqual({
+				topics: [],
+				segments: [{ segmentId: 'morning-briefing-uk' }],
+			});
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
+	it('registers each failed app-push edition on the notification when a topic type fails', async () => {
+		const dispatch = mock(() =>
+			Promise.resolve({
+				appPush: [
+					{
+						requested: {
+							channel: 'app-push' as const,
+							topicType: 'breaking-news',
+							editions: ['uk', 'us'],
+						},
+						resolved: {
+							channel: 'app-push' as const,
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major' as const,
+						},
+						status: 'failure' as const,
+						providerRef: 'mobile-n10n-1',
+						failureReason: 'unknown' as const,
+						providerStatusCode: 500,
+					},
+					{
+						requested: {
+							channel: 'app-push' as const,
+							topicType: 'sport',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push' as const,
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Minor' as const,
+						},
+						status: 'success' as const,
+						providerRef: 'mobile-n10n-2',
+						failureReason: null,
+						providerStatusCode: null,
+					},
+				],
+				newsletter: [],
+			}),
+		);
+		const dispatchServer = await startDispatchServer(dispatch);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notifications`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(validPushRequest()),
+				},
+			);
+
+			expect(response.status).toBe(502);
+			const body = (await response.json()) as { id: string; status: string };
+			expect(body.status).toBe('partially_delivered');
+
+			const stored = await notifications.findByIdWithDispatches(body.id);
+			expect(stored?.status).toBe('partially_delivered');
+			expect(stored?.dispatches).toHaveLength(2);
+
+			const failed = stored?.dispatches.find(
+				(dispatchRow) => dispatchRow.status === 'failure',
+			);
+			expect(failed).toMatchObject({
+				channel: 'app-push',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk', 'us'],
+				},
+				providerRef: 'mobile-n10n-1',
+				providerStatusCode: 500,
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'uk' }],
+					importance: 'Major',
+				},
+			});
+
+			// Each failed edition is denormalised onto the row as a topicType/edition
+			// pair, derived from the structured `requested` for the list endpoint.
+			expect(stored?.failedTargets).toEqual({
+				topics: [
+					{ topicType: 'breaking-news', edition: 'uk' },
+					{ topicType: 'breaking-news', edition: 'us' },
+				],
+				segments: [],
+			});
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
+	it('persists a dry run as accepted with no dispatches', async () => {
+		const dispatch = mock(() =>
+			Promise.resolve({ appPush: [], newsletter: [] }),
+		);
+		const dispatchServer = await startDispatchServer(dispatch);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notifications`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						...validPushRequest(),
+						options: { dryRun: true },
+					}),
+				},
+			);
+
+			expect(response.status).toBe(202);
+			const body = (await response.json()) as { id: string; status: string };
+			expect(body.status).toBe('accepted');
+
+			const stored = await notifications.findByIdWithDispatches(body.id);
+			expect(stored).toMatchObject({ status: 'accepted', dryRun: true });
+			expect(stored?.dispatches).toHaveLength(0);
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+
+	it('records the notification as failed when dispatch throws before any outcome', async () => {
+		let dispatchedId: string | undefined;
+		const dispatch = mock((_request: unknown, notificationId: string) => {
+			dispatchedId = notificationId;
+			return Promise.reject(
+				new BrazeApiError('campaign trigger', 'http_error', 500),
+			);
+		});
+		const dispatchServer = await startDispatchServer(dispatch);
+
+		try {
+			const response = await fetch(
+				`${dispatchServer.baseUrl}/v1/notifications`,
+				{
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(validPushRequest()),
+				},
+			);
+
+			expect(response.status).toBe(502);
+
+			const stored = await notifications.findByIdWithDispatches(dispatchedId!);
+			expect(stored?.status).toBe('failed');
+			expect(stored?.dispatches).toHaveLength(0);
+		} finally {
+			await dispatchServer.close();
+		}
+	});
+});
+
+const daysAgo = (days: number): Date =>
+	new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+/** The `since` cut-off (Unix seconds) used by the list-endpoint tests. */
+const sinceParam = Math.floor(daysAgo(14).getTime() / 1000);
+
+describe('GET /v1/notifications (real Postgres)', () => {
+	type ListResponse = {
+		total: number;
+		limit: number;
+		offset: number;
+		notifications: Array<{ id: string; dispatches?: unknown }>;
+	};
+
+	it('lists notifications at or after the since cut-off, newest first, without dispatches', async () => {
+		const recent = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		await dispatches.upsert(buildDispatch(recent.id));
+		const alsoRecent = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(13),
+		});
+		// A test notification within the window: excluded from the list and total.
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			createdAt: daysAgo(2),
+		});
+		// Created before the cut-off: excluded from the list and the total.
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(20),
+		});
+
+		const response = await fetch(
+			`${baseUrl}/v1/notifications?since=${sinceParam}`,
+		);
+
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as ListResponse;
+
+		expect(body.total).toBe(2);
+		expect(body.limit).toBe(10);
+		expect(body.offset).toBe(0);
+		expect(body.notifications.map((row) => row.id)).toEqual([
+			recent.id,
+			alsoRecent.id,
+		]);
+		// The list endpoint does not join dispatches.
+		expect(body.notifications[0]).not.toHaveProperty('dispatches');
+	});
+
+	it('paginates with limit and offset while reporting the full cut-off total', async () => {
+		const first = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		const second = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(2),
+		});
+		const third = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(3),
+		});
+
+		const firstPage = (await (
+			await fetch(
+				`${baseUrl}/v1/notifications?limit=2&offset=0&since=${sinceParam}`,
+			)
+		).json()) as ListResponse;
+		expect(firstPage.total).toBe(3);
+		expect(firstPage.limit).toBe(2);
+		expect(firstPage.notifications.map((row) => row.id)).toEqual([
+			first.id,
+			second.id,
+		]);
+
+		const secondPage = (await (
+			await fetch(
+				`${baseUrl}/v1/notifications?limit=2&offset=2&since=${sinceParam}`,
+			)
+		).json()) as ListResponse;
+		expect(secondPage.total).toBe(3);
+		expect(secondPage.offset).toBe(2);
+		expect(secondPage.notifications.map((row) => row.id)).toEqual([third.id]);
+	});
+
+	it('returns an empty page but the full total when offset exceeds the range', async () => {
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+
+		const body = (await (
+			await fetch(
+				`${baseUrl}/v1/notifications?limit=10&offset=50&since=${sinceParam}`,
+			)
+		).json()) as ListResponse;
+
+		expect(body.total).toBe(1);
+		expect(body.notifications).toEqual([]);
+	});
+
+	it('excludes test notifications from the list and the total', async () => {
+		const send = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			createdAt: daysAgo(1),
+		});
+
+		const body = (await (
+			await fetch(`${baseUrl}/v1/notifications?since=${sinceParam}`)
+		).json()) as ListResponse;
+
+		expect(body.total).toBe(1);
+		expect(body.notifications.map((row) => row.id)).toEqual([send.id]);
+	});
+
+	it('rejects an invalid limit with a 400', async () => {
+		const response = await fetch(
+			`${baseUrl}/v1/notifications?limit=nope&offset=0&since=${sinceParam}`,
+		);
+
+		expect(response.status).toBe(400);
+		const body = (await response.json()) as { error: string };
+		expect(body.error).toBe('bad_request');
+	});
+});

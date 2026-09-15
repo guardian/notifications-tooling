@@ -8,14 +8,30 @@ const react = guardian.configs.react.map((config) => ({
 export default [
 	{
 		ignores: [
+			'**/coverage/**',
 			'**/dist/**',
 			'cdk/cdk.out/**',
 			'**/storybook-static/**',
 			'docker/**',
 			'!docker/docker-compose.local.yml',
 			'**/*.d.ts',
-			'**/storybook-static/**',
 		],
+	},
+	{
+		// `import/order` derives its `builtin` group from `module.builtinModules`,
+		// which lists `bun:*` under Bun but not under Node. The ESLint language
+		// server in Zed/VS Code runs on Node, so without this these modules would
+		// be grouped differently in the IDE than on the command line.
+		settings: {
+			'import-x/core-modules': [
+				'bun',
+				'bun:ffi',
+				'bun:jsc',
+				'bun:sqlite',
+				'bun:test',
+				'bun:wrap',
+			],
+		},
 	},
 	...guardian.configs.recommended,
 	...react,

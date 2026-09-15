@@ -4,7 +4,7 @@
  *
  * It is included in `src/index.html`.
  */
-
+import './tracking-pixel';
 // Guardian design-system global styles: reset, fonts and design tokens.
 import '@guardian/stand/util/reset.css';
 import '@guardian/stand/fonts/OpenSans.css';
@@ -16,7 +16,7 @@ import { StrictMode } from 'react';
 import { RouterProvider as ReactAriaRouterProvider } from 'react-aria-components';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
-import { queryClient } from './api/queryClient';
+import { queryClient } from './api-client/queryClient';
 import { App } from './App';
 
 const RoutedApp = () => {

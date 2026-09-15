@@ -6,9 +6,18 @@ import {
 	newsletterSegments,
 	NotificationChannel,
 	notificationChannelContentLimits,
-	UserPermissions,
 } from '@config';
+import type {
+	AppAlertTopicEditionId,
+	AppAlertTopicOption,
+	NewsletterSegment,
+	NewsletterSegmentId,
+	TopicTypeEditionOption,
+} from '@models';
+import { UserPermissions } from '@models';
+import type { BrazeCampaignDetails } from '@services';
 import { type Request, type Response, Router } from 'express';
+import { loadBrazeClient } from '../../braze-client';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
 
@@ -17,14 +26,12 @@ import { requirePermissions } from '../../middleware/permissions-middleware';
  * drive its UI (character counters, segment caps). Keyed by channel under
  * `channels`.
  *
- * Each text field carries all three limits. The SPA drives its counters from
- * `recommended` and `editorialLimit`; `validationCap` is the only one this
- * service enforces, and wiring it to a character counter would erase the
- * editorial guidance the counter exists to show.
+ * The SPA drives its counters from `recommended` alone. A field only carries a
+ * `validationCap` if the broker rejects past it, so most fields now omit one.
  *
  * Derived from the very same config the backend validates incoming
- * `POST /v1/notifications` requests against, so the client-side hints and the
- * server-side rules can never drift apart.
+ * `POST /v1/notifications` requests against, so where a cap does exist the
+ * client-side hints and the server-side rules can never drift apart.
  */
 export const channelConstraints = {
 	channels: {
@@ -60,10 +67,22 @@ export const channelConstraints = {
 } as const;
 
 /** Reduces a segment config record to the public `{ id, label }` pairs. */
-const toSegmentOptions = (
-	segments: Record<string, { label: string }>,
-): Array<{ id: string; label: string }> =>
-	Object.entries(segments).map(([id, { label }]) => ({ id, label }));
+const toAppAlertTopicSegmentOptions = (
+	segments: Partial<Record<AppAlertTopicEditionId, { label: string }>>,
+): TopicTypeEditionOption[] =>
+	Object.entries(segments).map(([id, { label }]) => ({
+		id: id as AppAlertTopicEditionId,
+		label,
+	}));
+
+/** Reduces a segment config record to the public `{ id, label }` pairs. */
+const toNewsletterSegmentOptions = (
+	segments: Partial<Record<NewsletterSegmentId, NewsletterSegment>>,
+): Array<{ id: NewsletterSegmentId; label: string }> =>
+	Object.entries(segments).map(([id, { label }]) => ({
+		id: id as NewsletterSegmentId,
+		label,
+	}));
 
 /**
  * Reduces the curated app-push topic types to the public `{ id, label }` pairs,
@@ -75,15 +94,11 @@ const toTopicTypeOptions = (
 		string,
 		{ label: string; editions: Record<string, { label: string }> }
 	>,
-): Array<{
-	id: string;
-	label: string;
-	editions: Array<{ id: string; label: string }>;
-}> =>
+): AppAlertTopicOption[] =>
 	Object.entries(topicTypes).map(([id, { label, editions }]) => ({
 		id,
 		label,
-		editions: toSegmentOptions(editions),
+		editions: toAppAlertTopicSegmentOptions(editions),
 	}));
 
 /**
@@ -100,10 +115,13 @@ export const channelAudiences = {
 			topicTypes: toTopicTypeOptions(appPushTopicTypes),
 		},
 		[NotificationChannel.Newsletter]: {
-			segments: toSegmentOptions(newsletterSegments),
+			segments: toNewsletterSegmentOptions(newsletterSegments),
 		},
 	},
 } as const;
+
+const isCampaignLive = (data?: BrazeCampaignDetails): boolean | null =>
+	data ? !data.archived && !data.draft && data.enabled : null;
 
 /**
  * `GET /v1/channels/constraints`. Returns the per-channel validation rules
@@ -135,6 +153,41 @@ export const channelsRouter = Router()
 	// not requiring permissions for this endpoint as could be
 	// needed for troubleshooting by engineers on rota
 	// who wouldn't necessarily have DispatchAccess
-	.get('/config/email', authMiddleware, (_req: Request, res: Response) => {
-		res.json(newsletterSegments);
-	});
+	.get(
+		'/config/email',
+		authMiddleware,
+		async (_req: Request, res: Response) => {
+			const brazeClient = await loadBrazeClient();
+
+			const editions = ['UK', 'US', 'AU'] as Array<
+				keyof typeof newsletterSegments
+			>;
+
+			const [ukDetails, usDetails, auDetails] = await Promise.all(
+				editions.map((key) =>
+					brazeClient.getCampaignDetails({
+						campaignId: newsletterSegments[key].brazeCampaignId,
+						timeoutMs: 2000,
+					}),
+				),
+			);
+
+			res.json({
+				UK: {
+					...newsletterSegments.UK,
+					campaignLive: isCampaignLive(ukDetails?.data),
+					...ukDetails,
+				},
+				US: {
+					...newsletterSegments.US,
+					campaignLive: isCampaignLive(usDetails?.data),
+					...usDetails,
+				},
+				AU: {
+					...newsletterSegments.AU,
+					campaignLive: isCampaignLive(auDetails?.data),
+					...auDetails,
+				},
+			});
+		},
+	);

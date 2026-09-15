@@ -7,7 +7,7 @@ import z from 'zod';
 export const resolveArticleRequestSchema = z.strictObject({
 	article: z.string().trim().min(1).meta({
 		description:
-			'The article to resolve, as either a bare CAPI content id (e.g. `environment/2026/jul/19/a-headline`) or any Guardian article URL: a public front-end link (`www.`/`amp.`/`m.theguardian.com`, `gu.com`) or an internal gutools preview/viewer link. The id is taken from the URL path, so the host, query string and fragment are ignored.',
+			'The article to resolve, as either a bare CAPI content id (e.g. `environment/2026/jul/19/a-headline`) or any Guardian article URL: a public front-end link (`www.`/`amp.`/`m.theguardian.com`, `gu.com`) or an internal gutools preview/viewer link. A `#block-...` fragment on a liveblog URL selects that block.',
 		example: 'https://www.theguardian.com/environment/2026/jul/19/a-headline',
 	}),
 });
@@ -50,6 +50,35 @@ export class CapiError extends Error {
  *
  * see https://open-platform.theguardian.com/documentation/item for the model
  */
+export const capiBlockSchema = z.looseObject({
+	id: z.string().optional(),
+	elements: z
+		.array(
+			z.looseObject({
+				type: z.string(),
+				assets: z
+					.array(
+						z.looseObject({
+							file: z.string().optional(),
+							typeData: z
+								.looseObject({
+									width: z.number().optional(),
+								})
+								.optional(),
+						}),
+					)
+					.optional(),
+				imageTypeData: z
+					.looseObject({
+						alt: z.string().optional(),
+					})
+					.optional(),
+			}),
+		)
+		.optional(),
+});
+export type CapiBlock = z.infer<typeof capiBlockSchema>;
+
 const capiContentSchema = z.looseObject({
 	id: z.string(),
 	type: z.string(),
@@ -60,6 +89,12 @@ const capiContentSchema = z.looseObject({
 	webUrl: z.string(),
 	webPublicationDate: z.string().optional(),
 	fields: z.record(z.string(), z.string()).optional(),
+	blocks: z
+		.looseObject({
+			main: capiBlockSchema.optional(),
+			body: z.array(capiBlockSchema).optional(),
+		})
+		.optional(),
 });
 
 /** The full CAPI content item for the resolved article. */
@@ -75,6 +110,8 @@ export type CapiResponse = z.infer<typeof capiResponseSchema>;
 
 export const resolveArticleResponseSchema = z.object({
 	article: capiContentSchema,
+	requestedUrl: z.string().optional(),
+	requestedBlock: capiBlockSchema.optional(),
 });
 export type ResolveArticleResponse = z.infer<
 	typeof resolveArticleResponseSchema

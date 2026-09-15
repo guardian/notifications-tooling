@@ -61,3 +61,43 @@ export const determineArticleId = (input: string): string | undefined => {
 
 	return segments.join('/');
 };
+
+/** The prefix a liveblog deep-link uses to name a block in `?page=`. */
+const withBlockPrefix = 'with:block-';
+
+/** A liveblog block id: word chars and hyphens (CAPI block ids / UUIDs). */
+const blockIdSegment = /^[\w-]+$/;
+
+/**
+ * Extracts the liveblog block id from a Guardian article URL that deep-links to
+ * a single block. Such links carry `?page=with:block-<id>` (and usually a
+ * matching `#block-<id>` fragment), which `determineArticleId` deliberately
+ * drops when resolving the content id. Sending the block id to mobile-n10n lets
+ * the apps open the liveblog at that block; without it they open at the top.
+ *
+ * Returns `undefined` for a bare article id, a non-`http(s)` URL, or any link
+ * without a block reference.
+ */
+export const determineBlockId = (input: string): string | undefined => {
+	let url: URL;
+	try {
+		url = new URL(input.trim());
+	} catch {
+		return undefined;
+	}
+
+	if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+		return undefined;
+	}
+
+	const page = url.searchParams.get('page');
+	const fromQuery = page?.startsWith(withBlockPrefix)
+		? page.slice(withBlockPrefix.length)
+		: undefined;
+	const fromHash = url.hash.startsWith('#block-')
+		? url.hash.slice('#block-'.length)
+		: undefined;
+
+	const blockId = fromQuery ?? fromHash;
+	return blockId && blockIdSegment.test(blockId) ? blockId : undefined;
+};

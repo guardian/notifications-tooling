@@ -111,23 +111,65 @@ export const channelAudiencesSchema = {
 	},
 } as const;
 
-export const emailChannelConfigSchema = {
+const emailChannelConfigEntrySchema = {
 	type: 'object',
-	description: 'Per-channel per-channel email config, keyed by channel.',
+	required: [
+		'label',
+		'brazeCampaignId',
+		'emailRenderingNewsletterId',
+		'campaignLive',
+	],
 	properties: {
-		additionalProperties: {
+		label: {
+			type: 'string',
+		},
+		brazeCampaignId: {
+			type: 'string',
+		},
+		emailRenderingNewsletterId: {
+			type: 'string',
+		},
+		campaignLive: {
+			type: ['boolean', 'null'],
+			description:
+				'Whether the Braze campaign is live, or null when unavailable.',
+		},
+		data: {
 			type: 'object',
+			required: ['name', 'archived', 'enabled', 'draft', 'schedule_type'],
 			properties: {
-				label: {
-					type: 'string',
-				},
-				brazeCampaignId: {
-					type: 'string',
-				},
-				emailRenderingNewsletterId: {
-					type: 'string',
+				name: { type: 'string' },
+				created_at: { type: 'string' },
+				updated_at: { type: 'string' },
+				description: { type: 'string' },
+				archived: { type: 'boolean' },
+				enabled: { type: 'boolean' },
+				draft: { type: 'boolean' },
+				schedule_type: { type: 'string' },
+				channels: {
+					type: 'array',
+					items: { type: 'string' },
 				},
 			},
 		},
+		status: {
+			type: 'integer',
+			description: 'The HTTP status returned by Braze, when available.',
+		},
+		errorMessage: {
+			type: 'string',
+			description: 'The Braze error message, when the campaign lookup fails.',
+		},
 	},
-};
+} as const;
+
+export const emailChannelConfigSchema = {
+	type: 'object',
+	description: 'Email configuration and Braze status, keyed by edition.',
+	required: ['UK', 'US', 'AU'],
+	properties: {
+		UK: emailChannelConfigEntrySchema,
+		US: emailChannelConfigEntrySchema,
+		AU: emailChannelConfigEntrySchema,
+	},
+} as const;

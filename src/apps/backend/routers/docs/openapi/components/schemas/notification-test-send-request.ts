@@ -4,5 +4,5 @@ import { notificationTestSendRequestSchema } from '../../../../notifications/sch
 /** The test-send request schema, generated from the runtime Zod validator. */
 export const notificationTestSendRequestJsonSchema = z.toJSONSchema(
 	notificationTestSendRequestSchema,
-	{ target: 'openapi-3.0', io: 'input' },
+	{ target: 'draft-2020-12', io: 'input' },
 );

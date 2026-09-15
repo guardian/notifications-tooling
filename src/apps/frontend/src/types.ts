@@ -1,0 +1,92 @@
+import type {
+	CapiBlock,
+	DisplayAppAlertTopicEditionId,
+	EmailPreviewRequest,
+	EmailPreviewResponse,
+	NewsletterSegmentId,
+	ResolvedArticle,
+} from '@models';
+import type { Result } from './api-client/client';
+import type { SendNotificationRequest } from './schemas';
+import type { SendNotificationFailure } from './utils/send-notification';
+
+export type TabName = 'create' | 'history';
+export type ChannelOption = 'email' | 'push';
+export type KickerId = 'breaking-news' | 'exclusive';
+export type DeliveryOption = 'immediate' | 'appImmediate';
+
+export type EmailNotification = {
+	type: 'email';
+	kicker?: KickerId;
+	subject?: string;
+	preview?: string;
+	emailHtml?: string;
+	audienceSegments?: NewsletterSegmentId[];
+	emailDeliveryOption?: DeliveryOption;
+};
+
+export type PushNotification = {
+	type: 'push';
+	alertType?: string;
+	headline?: string;
+	pushDeliveryOption?: DeliveryOption;
+	editions?: DisplayAppAlertTopicEditionId[];
+};
+export type NotificationState = {
+	isFetchingContent: boolean;
+	fetchedArticleId?: string;
+	fetchArticleError?: string;
+	content?: ResolvedArticle;
+	requestedUrl?: string;
+	requestedBlock?: CapiBlock;
+	confirmSendModalOpen: boolean;
+	isWaitingForSend: boolean;
+	sendFailure?: SendNotificationFailure;
+	pendingRequest?: SendNotificationRequest;
+};
+
+export type RequestEmailHtml = {
+	(request: EmailPreviewRequest): Promise<Result<EmailPreviewResponse>>;
+};
+
+export type NotificationAction =
+	| {
+			type: 'waiting-for-article';
+	  }
+	| {
+			type: 'receive-article';
+			content: ResolvedArticle;
+			requestedUrl?: string;
+			requestedBlock?: CapiBlock;
+	  }
+	| {
+			type: 'report-article-error';
+			errorMessage: string;
+	  }
+	| {
+			type: 'set-show-confirm-send';
+			isOpen: boolean;
+	  }
+	| {
+			type: 'prepare-send';
+			request: SendNotificationRequest;
+	  }
+	| {
+			type: 'waiting-for-send';
+	  }
+	| {
+			type: 'receive-send-failure';
+			failure: SendNotificationFailure;
+	  }
+	| {
+			type: 'complete-send';
+	  }
+	| {
+			type: 'dismiss-send-error';
+	  }
+	| {
+			type: 'reset-newsletter-email';
+	  }
+	| {
+			type: 'reset-app-alert';
+	  };

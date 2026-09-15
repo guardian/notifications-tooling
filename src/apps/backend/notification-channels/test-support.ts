@@ -27,6 +27,7 @@ export const baseRequest = {
 
 export const notificationId = 'notif-2f1c9a7e';
 export const testId = 'test-9c1d5b2a';
+export const createdByEmail = 'ada.lovelace@guardian.co.uk';
 
 const ssmParameters: Record<string, string> = {
 	BRAZE_API_KEY: 'test-api-key',
@@ -43,33 +44,53 @@ export const createDependencies = () => {
 	const getSSMParameter = mock((key: string) =>
 		Promise.resolve(ssmParameters[key] ?? ''),
 	);
-	const sendAppNotification = mock(() => Promise.resolve({ id: 'n10n-id' }));
+	const sendAppNotification = mock(() =>
+		Promise.resolve({ id: 'n10n-id', status: 201 }),
+	);
 	const renderEmail = mock(() =>
 		Promise.resolve('<html>Rendered newsletter</html>'),
 	);
 	const sendBrazeCampaign = mock(() =>
-		Promise.resolve({ message: 'success', dispatch_id: 'dispatch-123' }),
+		Promise.resolve({
+			message: 'success',
+			dispatch_id: 'dispatch-123',
+			status: 201,
+		}),
 	);
 	const registerBrazeTestEmailRecipients = mock(() => Promise.resolve());
 	const sendBrazeTestEmail = mock(() =>
-		Promise.resolve({ message: 'success', dispatch_id: 'test-dispatch-123' }),
+		Promise.resolve({
+			message: 'success',
+			dispatch_id: 'test-dispatch-123',
+			status: 201,
+		}),
 	);
+	const getCampaignDetails = mock(() =>
+		Promise.resolve({ data: undefined, status: 200 }),
+	);
+	const brazeClient = {
+		sendCampaign: sendBrazeCampaign,
+		registerTestEmailRecipients: registerBrazeTestEmailRecipients,
+		sendTestEmail: sendBrazeTestEmail,
+		getCampaignDetails,
+	};
+	const loadBrazeClient = mock(() => Promise.resolve(brazeClient));
 	const dependencies: DispatchNotificationDependencies = {
 		getSSMParameter,
+		loadBrazeClient,
 		renderEmail,
 		sendAppNotification,
-		sendBrazeCampaign,
-		registerBrazeTestEmailRecipients,
-		sendBrazeTestEmail,
 	};
 
 	return {
 		dependencies,
 		getSSMParameter,
+		loadBrazeClient,
 		renderEmail,
 		sendAppNotification,
 		sendBrazeCampaign,
 		registerBrazeTestEmailRecipients,
 		sendBrazeTestEmail,
+		getCampaignDetails,
 	};
 };

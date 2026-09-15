@@ -1,9 +1,6 @@
-import {
-	isRunningLocally,
-	permissionsStoreStage,
-	UserPermissions,
-} from '@config';
+import { isRunningLocally, permissionsStoreStage } from '@config';
 import { init } from '@guardian/permissions-client';
+import { UserPermissions } from '@models';
 
 // Only permissions on this whitelist are exposed to users; anything else the
 // store returns is filtered out.

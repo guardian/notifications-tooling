@@ -9,5 +9,5 @@ import { notificationSendRequestSchema } from '../../../../notifications/schemas
  */
 export const notificationSendRequestJsonSchema = z.toJSONSchema(
 	notificationSendRequestSchema,
-	{ target: 'openapi-3.0', io: 'input' },
+	{ target: 'draft-2020-12', io: 'input' },
 );

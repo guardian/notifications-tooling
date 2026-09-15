@@ -7,36 +7,28 @@
  * Hard-coded stub until resolved from the downstream services.
  */
 
+import type { NewsletterSegment, NewsletterSegmentId } from '@models';
 import { configurationStage, type Env } from './env';
 
-export interface NewsletterSegment {
-	label: string;
-	brazeCampaignId: string;
-	emailRenderingNewsletterId: string;
-}
-
-/**
- * ID of a test campaign created in the live Braze account for dry-runs on PROD.
- * The audience should be restricted to internal Guardian users
- * */
-const LIVE_ACCOUNT_TEST_CAMPAIGN_ID = '79a123db-4bec-413b-a20c-207ff285adfd';
-
 // TODO: Move this configuration into settings backed by JSON in S3 or RDS.
-const newsletterSegmentsByStage = {
+const newsletterSegmentsByStage: Record<
+	'CODE' | 'PROD',
+	Record<NewsletterSegmentId, NewsletterSegment>
+> = {
 	CODE: {
 		UK: {
-			label: 'UK',
+			label: 'United Kingdom',
 			brazeCampaignId: 'da019800-869e-4e1d-9c2e-029741829af1',
 			emailRenderingNewsletterId: 'breaking-news-uk',
 		},
 		US: {
-			label: 'US',
+			label: 'United States',
 			brazeCampaignId: 'a945e3ae-165b-46d7-b163-0ca1c6beb2f4',
 			// this is the right id for the CODE version of this newsletter - the PROD version below does have different casing
 			emailRenderingNewsletterId: 'breakingnewsus',
 		},
 		AU: {
-			label: 'AU',
+			label: 'Australia',
 			brazeCampaignId: '5da1b754-42f4-440d-9eec-0d595190a0f0',
 			emailRenderingNewsletterId: 'breaking-news-au',
 		},
@@ -49,18 +41,16 @@ const newsletterSegmentsByStage = {
 		},
 		US: {
 			label: 'US',
-			brazeCampaignId: LIVE_ACCOUNT_TEST_CAMPAIGN_ID,
+			brazeCampaignId: '93b0c12d-8c7e-43be-b3b5-88a149ba511f',
 			emailRenderingNewsletterId: 'breaking-news-us',
 		},
 		AU: {
 			label: 'AU',
-			brazeCampaignId: '',
-			emailRenderingNewsletterId: '',
+			brazeCampaignId: '149aa55d-570a-40a5-82d4-8f44a713ad58',
+			emailRenderingNewsletterId: 'breaking-news-australia',
 		},
 	},
-} as const satisfies Record<'CODE' | 'PROD', Record<string, NewsletterSegment>>;
-
-type NewsletterSegmentId = keyof typeof newsletterSegmentsByStage.CODE;
+} as const;
 
 export const getNewsletterSegments = (
 	stage: Env['STAGE'],
@@ -109,8 +99,166 @@ interface AppPushTopicType {
  * News tool emits. The raw topic coordinates are kept out of the public
  * contract. The internal test topic lives in `internalAppPushTestTopicTypes`,
  * not here, so it can never be targeted by a production send.
+ *
+ * Duplicated per stage (`codeAppPushTopicTypes` / `prodAppPushTopicTypes`) so
+ * CODE and PROD can be configured independently.
  */
-const curatedAppPushTopicTypes = {
+const codeAppPushTopicTypes = {
+	'breaking-news': {
+		label: 'Breaking news',
+		importance: AppPushImportance.Major,
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+			},
+		},
+	},
+	sport: {
+		label: 'Sports news',
+		importance: AppPushImportance.Minor,
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				titleOverride: 'Sport news',
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				titleOverride: 'Sports news',
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				titleOverride: 'Sport news',
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+				titleOverride: 'Sport news',
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+				titleOverride: 'Sport news',
+			},
+		},
+	},
+	'editors-picks': {
+		label: "Editors' picks",
+		importance: AppPushImportance.Minor,
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+		},
+	},
+	'one-not-to-miss': {
+		label: 'One not to miss',
+		importance: AppPushImportance.Minor,
+		editions: {
+			uk: {
+				label: 'UK',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			us: {
+				label: 'US',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			au: {
+				label: 'AU',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			international: {
+				label: 'International',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+			europe: {
+				label: 'Europe',
+				mobileN10nTopic: {
+					type: 'breaking',
+					name: 'internal-dispatch-test',
+				},
+			},
+		},
+	},
+} as const satisfies Record<string, AppPushTopicType>;
+
+/**
+ * PROD duplicate of {@link codeAppPushTopicTypes}. Currently identical, but kept
+ * separate so PROD topic coordinates can diverge without affecting CODE.
+ */
+const prodAppPushTopicTypes = {
 	'breaking-news': {
 		label: 'Breaking news',
 		importance: AppPushImportance.Major,
@@ -129,12 +277,13 @@ const curatedAppPushTopicTypes = {
 		},
 	},
 	sport: {
-		label: 'Sport news',
+		label: 'Sports news',
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
 				label: 'UK',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
+				titleOverride: 'Sport news',
 			},
 			us: {
 				label: 'US',
@@ -144,14 +293,17 @@ const curatedAppPushTopicTypes = {
 			au: {
 				label: 'AU',
 				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
+				titleOverride: 'Sport news',
 			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
+				titleOverride: 'Sport news',
 			},
 			europe: {
 				label: 'Europe',
 				mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
+				titleOverride: 'Sport news',
 			},
 		},
 	},
@@ -218,7 +370,7 @@ const curatedAppPushTopicTypes = {
 /**
  * The internal test topic type. Its single edition resolves to mobile-n10n's
  * `internal-test` topic, which only internal test devices subscribe to. Kept out
- * of `curatedAppPushTopicTypes` so it is accepted solely by
+ * of the curated topic types so it is accepted solely by
  * `POST /v1/notification-tests`, never the production notifications endpoint.
  */
 const internalAppPushTestTopicTypes = {
@@ -235,21 +387,22 @@ const internalAppPushTestTopicTypes = {
 } as const satisfies Record<string, AppPushTopicType>;
 
 /**
- * Separated per stage to mirror newsletter segments. mobile-n10n topic
- * coordinates are the same across environments (unlike Braze campaign ids), so
- * CODE and PROD currently share the same curated set; the split lets either
- * stage diverge without disturbing the other.
+ * Separated per stage to mirror newsletter segments. CODE and PROD hold
+ * duplicate curated sets so either stage can be configured independently
+ * without disturbing the other.
  */
 const appPushTopicTypesByStage = {
-	CODE: curatedAppPushTopicTypes,
-	PROD: curatedAppPushTopicTypes,
+	CODE: codeAppPushTopicTypes,
+	PROD: prodAppPushTopicTypes,
 } as const satisfies Record<'CODE' | 'PROD', Record<string, AppPushTopicType>>;
 
 export type AppPushTopicTypeId = keyof typeof appPushTopicTypesByStage.CODE;
 
+// Keyed by string, not the full `AppPushTopicTypeId` union: a stage may expose a
+// subset of the curated topic types (e.g. PROD while others are still rolling out).
 export const getAppPushTopicTypes = (
 	stage: Env['STAGE'],
-): Record<AppPushTopicTypeId, AppPushTopicType> =>
+): Record<string, AppPushTopicType> =>
 	appPushTopicTypesByStage[stage === 'PROD' ? 'PROD' : 'CODE'];
 
 export const appPushTopicTypes = getAppPushTopicTypes(configurationStage);
@@ -263,10 +416,10 @@ export type AppPushTestTopicTypeId = keyof typeof internalAppPushTestTopicTypes;
 export const appPushTestTopicTypes = internalAppPushTestTopicTypes;
 
 /** Production and internal-test topic types share a resolver. */
-const resolvableAppPushTopicTypes: Record<
-	AppPushTopicTypeId | AppPushTestTopicTypeId,
-	AppPushTopicType
-> = { ...appPushTopicTypes, ...appPushTestTopicTypes };
+const resolvableAppPushTopicTypes: Record<string, AppPushTopicType> = {
+	...appPushTopicTypes,
+	...appPushTestTopicTypes,
+};
 
 /** Resolves a (topic type, edition) pair to its downstream topic and importance. */
 export const resolveAppPushTopic = (
@@ -280,7 +433,7 @@ export const resolveAppPushTopic = (
 	  }
 	| undefined => {
 	const topicType = resolvableAppPushTopicTypes[topicTypeId];
-	const edition = topicType.editions[editionId];
+	const edition = topicType?.editions[editionId];
 	if (!edition) {
 		return undefined;
 	}

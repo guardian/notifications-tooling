@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { UserPermissions } from '@config';
+import { UserPermissions } from '@models';
 import type * as PermissionsStore from './permissions-store';
 
 // Back the store with a controllable mock so no real S3 client is built and we

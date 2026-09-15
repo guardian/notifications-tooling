@@ -23,6 +23,12 @@ export type SendAppNotificationRequest = {
 	 * external URL.
 	 */
 	contentApiId?: string;
+	/**
+	 * Liveblog block id derived from `link`. When set (alongside `contentApiId`),
+	 * mobile-n10n appends `?page=with:block-<id>` so the apps open the liveblog at
+	 * that block instead of the top.
+	 */
+	blockId?: string;
 	importance: AppNotificationImportance;
 	topics: ReadonlyArray<{ type: string; name: string }>;
 	media?: {
@@ -33,8 +39,8 @@ export type SendAppNotificationRequest = {
 	dryRun?: boolean;
 };
 
-/** mobile-n10n's `POST /push/topic` success body (`PushResult`). */
-export type AppNotificationResult = { id: string };
+/** mobile-n10n's `POST /push/topic` success (`PushResult`) plus its HTTP status. */
+export type AppNotificationResult = { id: string; status: number };
 
 export type AppNotificationFailureReason =
 	'http_error' | 'timeout' | 'network_error' | 'invalid_response';
@@ -87,6 +93,7 @@ export const sendAppNotification = async ({
 	body,
 	link,
 	contentApiId,
+	blockId,
 	importance,
 	topics,
 	media,
@@ -103,6 +110,8 @@ export const sendAppNotification = async ({
 		);
 	}
 
+	const thumbnailUrl = media?.thumbnailUrl ?? media?.imageUrl;
+
 	const payload = {
 		id: id ?? crypto.randomUUID(),
 		type: 'news',
@@ -111,20 +120,27 @@ export const sendAppNotification = async ({
 		sender,
 		// A Guardian link (contentApiId + `item-trimmed` GITContent prefix) so the
 		// apps open the article in place; an external URL when no id is derivable.
-		// `link.title` mirrors the message (the headline), as Fronts does.
+		// `link.title` mirrors the message (the headline), as Fronts does. A liveblog
+		// `blockId` deep-links to a single block; mobile-n10n builds the block URL.
 		link: contentApiId
 			? {
 					contentApiId,
 					title: body,
 					git: { mobileAggregatorPrefix: 'item-trimmed' },
+					...(blockId ? { blockId } : {}),
 				}
 			: { url: link },
 		importance,
 		topic: topics.map(({ type, name }) => ({ type, name })),
 		debug: false,
 		dryRun,
-		...(media ? { imageUrl: media.imageUrl } : {}),
-		...(media?.thumbnailUrl ? { thumbnailUrl: media.thumbnailUrl } : {}),
+		// Always send media as `thumbnailUrl`, never `imageUrl`. On Android, an
+		// `imageUrl` routes the push into a big-picture notification path that builds
+		// the notification before attaching the tap intent, so it arrives without a
+		// click action and the article can't be opened; `thumbnailUrl` uses the path
+		// that attaches the intent. Prefer the thumbnail crop, falling back to the
+		// lead image, and send nothing when neither is supplied.
+		...(thumbnailUrl ? { thumbnailUrl } : {}),
 	};
 
 	const url = new URL('/push/topic', endpoint).toString();
@@ -153,7 +169,8 @@ export const sendAppNotification = async ({
 	}
 
 	try {
-		return pushResultSchema.parse(await response.json());
+		const result = pushResultSchema.parse(await response.json());
+		return { ...result, status: response.status };
 	} catch (error) {
 		throw new AppNotificationApiError('invalid_response', response.status, {
 			cause: error,

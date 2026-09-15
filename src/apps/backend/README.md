@@ -8,8 +8,9 @@ endpoints.
 
 Locally, notification channel configuration is read from the CODE SSM namespace
 using the `composer` AWS profile. Fetch fresh Composer credentials through Janus
-before starting the backend. An ignored `.env.local` file may define any of the
-variables in `.env.example` when a local override is needed.
+before starting the backend. Ignored `.env` or `.env.local` files in this
+package may define any of the variables in `.env.example` when a local override
+is needed.
 
 - `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send`, `users.track`, and
   `messages.send` permissions.

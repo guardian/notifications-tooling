@@ -4,6 +4,7 @@ import { AppNotificationApiError } from '@services';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import {
 	anyString,
+	createdByEmail,
 	createDependencies,
 	pushItem,
 	testId,
@@ -33,6 +34,7 @@ describe('dispatchAppPushTest', () => {
 		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest(),
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
@@ -45,7 +47,22 @@ describe('dispatchAppPushTest', () => {
 			}),
 		);
 		expect(outcomes).toEqual([
-			{ testId, id: anyString, topicType: 'test', status: 'success' },
+			{
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
+				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
+			},
 		]);
 	});
 
@@ -55,12 +72,28 @@ describe('dispatchAppPushTest', () => {
 		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest({ options: { dryRun: true } }),
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
 		expect(outcomes).toEqual([
-			{ testId, id: anyString, topicType: 'test', status: 'success' },
+			{
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
+				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
+			},
 		]);
 	});
 
@@ -72,16 +105,26 @@ describe('dispatchAppPushTest', () => {
 		const { outcomes, error } = await dispatchAppPushTest(
 			testPushRequest(),
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 
 		expect(outcomes).toEqual([
 			{
-				testId,
-				id: anyString,
-				topicType: 'test',
+				requested: {
+					channel: 'app-push',
+					topicType: 'test',
+					editions: ['test'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'failure',
+				providerRef: anyString,
 				failureReason: 'http_error',
+				providerStatusCode: 400,
 			},
 		]);
 		// The failure is surfaced so the orchestrator can rethrow it as a 502/504.
@@ -94,6 +137,7 @@ describe('dispatchAppPushTest', () => {
 		const { outcomes } = await dispatchAppPushTest(
 			testPushRequest({ channels: {} }),
 			testId,
+			createdByEmail,
 			dependencies,
 		);
 

@@ -1,5 +1,3 @@
-import { acceptedNotificationSchema } from './accepted-notification';
-import { acceptedTestNotificationSchema } from './accepted-test-notification';
 import { articleResolutionErrorSchema } from './article-resolution-error';
 import {
 	channelAudiencesSchema,
@@ -10,15 +8,21 @@ import { emailPreviewErrorSchema } from './email-preview-error';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
+import { liveblogBlockSchema } from './liveblog-block';
+import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
-import { notificationPlanAcceptanceSchema } from './notification-plan-acceptance';
-import { notificationProviderErrorSchema } from './notification-provider-error';
+import { notificationConflictErrorSchema } from './notification-conflict-error';
+import { notificationDispatchSchema } from './notification-dispatch';
+import { notificationListSchema } from './notification-list';
+import { notificationNotFoundSchema } from './notification-not-found';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
+import { notificationSummarySchema } from './notification-summary';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
 import { notificationValidationErrorSchema } from './notification-validation-error';
 import { notificationValidationIssueSchema } from './notification-validation-issue';
 import { resolveArticleRequestSchema } from './resolve-article-request';
+import { resolveArticleResponseSchema } from './resolve-article-response';
 import { resolvedArticleSchema } from './resolved-article';
 import { unauthenticatedSchema } from './unauthenticated';
 import { userResponseSchema, userSchema } from './user';
@@ -27,20 +31,24 @@ import { userResponseSchema, userSchema } from './user';
 export const schemas = {
 	HealthStatus: healthStatusSchema,
 	NotificationChannel: notificationChannelSchema,
+	Notification: notificationSchema,
+	NotificationSummary: notificationSummarySchema,
+	NotificationList: notificationListSchema,
+	NotificationDispatch: notificationDispatchSchema,
+	NotificationNotFound: notificationNotFoundSchema,
+	NotificationConflictError: notificationConflictErrorSchema,
 	NotificationSendRequest: notificationSendRequestJsonSchema,
 	NotificationTestSendRequest: notificationTestSendRequestJsonSchema,
-	NotificationPlanAcceptance: notificationPlanAcceptanceSchema,
-	AcceptedNotification: acceptedNotificationSchema,
-	AcceptedTestNotification: acceptedTestNotificationSchema,
 	NotificationValidationIssue: notificationValidationIssueSchema,
 	NotificationValidationError: notificationValidationErrorSchema,
 	EmailRenderingContentError: emailRenderingContentErrorSchema,
 	NotificationUnprocessableError: notificationUnprocessableErrorSchema,
-	NotificationProviderError: notificationProviderErrorSchema,
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
 	EmailChannelConfig: emailChannelConfigSchema,
+	LiveblogBlock: liveblogBlockSchema,
 	ResolveArticleRequest: resolveArticleRequestSchema,
+	ResolveArticleResponse: resolveArticleResponseSchema,
 	ResolvedArticle: resolvedArticleSchema,
 	ArticleResolutionError: articleResolutionErrorSchema,
 	User: userSchema,

@@ -1,5 +1,5 @@
 import { describe, expect, it, mock } from 'bun:test';
-import { BrazeApiError, EmailRenderingError } from '@services';
+import { DuplicateIdempotencyKeyError } from '@database';
 import type { Request, Response } from 'express';
 import { errorMiddleware } from './error-middleware';
 
@@ -15,88 +15,22 @@ const request = {
 } as unknown as Request;
 
 describe('errorMiddleware', () => {
-	it('returns a safe validation error when email rendering cannot find an article', () => {
+	it('returns a conflict when the idempotency key was already used', () => {
 		const { response, status, json } = createResponse();
 
 		errorMiddleware(
-			new EmailRenderingError(404),
+			new DuplicateIdempotencyKeyError('morning-briefing-2026-07-08'),
 			request,
 			response,
 			mock(() => undefined),
 		);
 
-		expect(status).toHaveBeenCalledWith(422);
+		expect(status).toHaveBeenCalledWith(409);
 		expect(json).toHaveBeenCalledWith({
-			error: 'email_rendering_failed',
-			message: 'The article could not be found by email rendering.',
-		});
-	});
-
-	it('returns a safe upstream error when email rendering fails', () => {
-		const { response, status, json } = createResponse();
-
-		errorMiddleware(
-			new EmailRenderingError(500),
-			request,
-			response,
-			mock(() => undefined),
-		);
-
-		expect(status).toHaveBeenCalledWith(502);
-		expect(json).toHaveBeenCalledWith({
-			error: 'email_rendering_failed',
-			message: 'Email rendering is currently unavailable.',
-		});
-	});
-
-	it('returns a gateway timeout when email rendering times out', () => {
-		const { response, status, json } = createResponse();
-
-		errorMiddleware(
-			new EmailRenderingError(undefined, 'timeout'),
-			request,
-			response,
-			mock(() => undefined),
-		);
-
-		expect(status).toHaveBeenCalledWith(504);
-		expect(json).toHaveBeenCalledWith({
-			error: 'email_rendering_failed',
-			message: 'Email rendering is currently unavailable.',
-		});
-	});
-
-	it('returns a safe upstream error when Braze rejects a request', () => {
-		const { response, status, json } = createResponse();
-
-		errorMiddleware(
-			new BrazeApiError('test email send', 'http_error', 503),
-			request,
-			response,
-			mock(() => undefined),
-		);
-
-		expect(status).toHaveBeenCalledWith(502);
-		expect(json).toHaveBeenCalledWith({
-			error: 'braze_request_failed',
-			message: 'Braze could not complete the request.',
-		});
-	});
-
-	it('returns a gateway timeout when Braze times out', () => {
-		const { response, status, json } = createResponse();
-
-		errorMiddleware(
-			new BrazeApiError('campaign trigger', 'timeout'),
-			request,
-			response,
-			mock(() => undefined),
-		);
-
-		expect(status).toHaveBeenCalledWith(504);
-		expect(json).toHaveBeenCalledWith({
-			error: 'braze_request_failed',
-			message: 'Braze could not complete the request.',
+			error: 'idempotency_key_conflict',
+			message:
+				"idempotencyKey 'morning-briefing-2026-07-08' has already been used.",
+			requestId: undefined,
 		});
 	});
 

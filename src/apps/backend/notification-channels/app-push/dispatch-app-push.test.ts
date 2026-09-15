@@ -6,6 +6,7 @@ import { dispatchNotification } from '../dispatch-notification';
 import {
 	anyString,
 	baseRequest,
+	createdByEmail,
 	createDependencies,
 	notificationId,
 	pushItem,
@@ -35,6 +36,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
@@ -43,26 +45,115 @@ describe('dispatchNotification (app-push channel)', () => {
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
 			id: anyString,
-			sender: baseRequest.sender,
+			sender: createdByEmail,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
 			contentApiId: 'world/2026/jul/22/lead',
 			importance: 'Major',
 			topics: [
-				{ type: 'breaking', name: 'uk' },
-				{ type: 'breaking', name: 'us' },
+				{ type: 'breaking', name: 'internal-dispatch-test' },
+				{ type: 'breaking', name: 'internal-dispatch-test' },
 			],
 			media: undefined,
 		});
 		expect(outcomes.appPush).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk', 'us'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [
+						{ type: 'breaking', name: 'internal-dispatch-test' },
+						{ type: 'breaking', name: 'internal-dispatch-test' },
+					],
+					importance: 'Major',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 		]);
+	});
+
+	it('forwards the liveblog block id derived from a block link', async () => {
+		const { dependencies, sendAppNotification } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: {
+				items: {
+					lead: {
+						...pushItem,
+						link: 'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-5dd7ca0f8f080fd59fb15354',
+					},
+				},
+			},
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
+
+		expect(sendAppNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				contentApiId: 'politics/live/2026/jul/19/election-live',
+				blockId: '5dd7ca0f8f080fd59fb15354',
+			}),
+		);
+	});
+
+	it('records the block id in the resolved dispatch outcome', async () => {
+		const { dependencies } = createDependencies();
+		const request: NotificationSendRequest = {
+			...baseRequest,
+			content: {
+				items: {
+					lead: {
+						...pushItem,
+						link: 'https://www.theguardian.com/politics/live/2026/jul/19/election-live?page=with:block-5dd7ca0f8f080fd59fb15354',
+					},
+				},
+			},
+			channels: {
+				[NotificationChannel.AppPushNotification]: {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		};
+
+		const outcomes = await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
+
+		expect(outcomes.appPush[0]?.resolved).toEqual({
+			channel: 'app-push',
+			topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+			importance: 'Major',
+			blockId: '5dd7ca0f8f080fd59fb15354',
+		});
 	});
 
 	it('sends one push per topic type when types are mixed', async () => {
@@ -87,6 +178,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
@@ -94,28 +186,48 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Major',
-				topics: [{ type: 'breaking', name: 'uk' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'uk-sport' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(outcomes.appPush).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Major',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 		]);
 	});
@@ -127,7 +239,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		sendAppNotification.mockImplementation(() => {
 			call += 1;
 			return call === 1
-				? Promise.resolve({ id: 'n10n-id' })
+				? Promise.resolve({ id: 'n10n-id', status: 201 })
 				: Promise.reject(pushError);
 		});
 		const request: NotificationSendRequest = {
@@ -148,7 +260,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		};
 
 		const { outcomes, error } = await dispatchAppPush(
-			resolveAppPushDispatch(request),
+			resolveAppPushDispatch(request, createdByEmail),
 			notificationId,
 			dependencies,
 		);
@@ -157,17 +269,36 @@ describe('dispatchNotification (app-push channel)', () => {
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
 		expect(outcomes).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Major',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'failure',
+				providerRef: anyString,
 				failureReason: 'http_error',
+				providerStatusCode: 400,
 			},
 		]);
 		// The failure is surfaced so the orchestrator can rethrow it as a 502/504.
@@ -190,12 +321,17 @@ describe('dispatchNotification (app-push channel)', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
 				id: anyString,
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'uk-sport' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 	});
@@ -221,19 +357,24 @@ describe('dispatchNotification (app-push channel)', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(sendAppNotification).toHaveBeenCalledWith({
 			endpoint: 'https://n10n.example.com',
 			apiKey: 'test-n10n-key',
 			timeoutMs: 10_000,
 			id: anyString,
-			sender: baseRequest.sender,
+			sender: createdByEmail,
 			title: pushItem.title,
 			body: pushItem.body,
 			link: pushItem.link,
 			contentApiId: 'world/2026/jul/22/lead',
 			importance: 'Major',
-			topics: [{ type: 'breaking', name: 'uk' }],
+			topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			media,
 		});
 	});
@@ -256,7 +397,12 @@ describe('dispatchNotification (app-push channel)', () => {
 
 		let dispatchError: unknown;
 		try {
-			await dispatchNotification(request, notificationId, dependencies);
+			await dispatchNotification(
+				request,
+				notificationId,
+				createdByEmail,
+				dependencies,
+			);
 		} catch (error) {
 			dispatchError = error;
 		}
@@ -269,7 +415,7 @@ describe('dispatchNotification (app-push channel)', () => {
 		expect(sendAppNotification).not.toHaveBeenCalled();
 	});
 
-	it('sends the US sport edition as its own push with the overridden title', async () => {
+	it('sends sport editions with their regional titles', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -291,42 +437,63 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 
-		// The override splits US out of the generic sport group into its own push.
+		// The regional titles split UK and US into separate pushes.
 		expect(sendAppNotification).toHaveBeenCalledTimes(2);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				title: pushItem.title,
+				title: 'Sport news',
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'uk-sport' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
 				title: 'Sports news',
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'us-sport' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(outcomes.appPush).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['us'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 		]);
 	});
 
-	it('splits the overridden US sport edition out when mixed with other topic types and sport editions', async () => {
+	it('splits sport editions by regional title when mixed with other topic types', async () => {
 		const { dependencies, sendAppNotification } = createDependencies();
 		const request: NotificationSendRequest = {
 			...baseRequest,
@@ -350,25 +517,26 @@ describe('dispatchNotification (app-push channel)', () => {
 		const outcomes = await dispatchNotification(
 			request,
 			notificationId,
+			createdByEmail,
 			dependencies,
 		);
 
-		// breaking-news (1) + grouped uk/au sport (1) + overridden us sport (1).
+		// breaking-news (1) + grouped uk/au sport (1) + US sport (1).
 		expect(sendAppNotification).toHaveBeenCalledTimes(3);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
 				title: pushItem.title,
 				importance: 'Major',
-				topics: [{ type: 'breaking', name: 'uk' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(sendAppNotification).toHaveBeenCalledWith(
 			expect.objectContaining({
-				title: pushItem.title,
+				title: 'Sport news',
 				importance: 'Minor',
 				topics: [
-					{ type: 'breaking', name: 'uk-sport' },
-					{ type: 'breaking', name: 'au-sport' },
+					{ type: 'breaking', name: 'internal-dispatch-test' },
+					{ type: 'breaking', name: 'internal-dispatch-test' },
 				],
 			}),
 		);
@@ -376,27 +544,60 @@ describe('dispatchNotification (app-push channel)', () => {
 			expect.objectContaining({
 				title: 'Sports news',
 				importance: 'Minor',
-				topics: [{ type: 'breaking', name: 'us-sport' }],
+				topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
 			}),
 		);
 		expect(outcomes.appPush).toEqual([
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'breaking-news',
+				requested: {
+					channel: 'app-push',
+					topicType: 'breaking-news',
+					editions: ['uk'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Major',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['uk', 'au'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [
+						{ type: 'breaking', name: 'internal-dispatch-test' },
+						{ type: 'breaking', name: 'internal-dispatch-test' },
+					],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 			{
-				notificationId,
-				id: anyString,
-				topicType: 'sport',
+				requested: {
+					channel: 'app-push',
+					topicType: 'sport',
+					editions: ['us'],
+				},
+				resolved: {
+					channel: 'app-push',
+					topics: [{ type: 'breaking', name: 'internal-dispatch-test' }],
+					importance: 'Minor',
+				},
 				status: 'success',
+				providerRef: anyString,
+				failureReason: null,
+				providerStatusCode: 201,
 			},
 		]);
 	});

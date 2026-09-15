@@ -1,10 +1,17 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import { UserPermissions } from '@config';
+import type {
+	NotificationListPage,
+	NotificationWithDispatches,
+} from '@database';
 import { httpLogger } from '@http-logger';
-import { AppNotificationApiError, BrazeApiError } from '@services';
+import { UserPermissions } from '@models';
+import { BrazeApiError } from '@services';
 import express from 'express';
 import { errorMiddleware } from '../../middleware/error-middleware';
-import { installDatabaseMock } from '../../utils/test-utils/database';
+import {
+	installDatabaseMock,
+	mockNotificationStore,
+} from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,
@@ -36,7 +43,10 @@ let baseUrl: string;
 
 beforeAll(async () => {
 	authenticateRequests();
-	grantPermissions([UserPermissions.DispatchAccess]);
+	grantPermissions([
+		UserPermissions.DispatchAccess,
+		UserPermissions.SendNotification,
+	]);
 	server = await startTestServer();
 	baseUrl = server.baseUrl;
 });
@@ -107,7 +117,7 @@ describe('POST /v1/notifications', () => {
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
-				createNotificationsRouter(dispatchRequest),
+				createNotificationsRouter(dispatchRequest, mockNotificationStore()),
 			);
 			const dispatchServer = await startTestServer(testApp);
 
@@ -128,13 +138,14 @@ describe('POST /v1/notifications', () => {
 						options: { dryRun: false, scheduledFor: null },
 					},
 					expect.any(String),
+					expect.any(String),
 				);
 			} finally {
 				await dispatchServer.close();
 			}
 		});
 
-		it('accepts a valid request with 202 and the acceptance envelope', async () => {
+		it('accepts a valid request with 202 and the stored notification resource', async () => {
 			const testApp = express();
 			testApp.use(httpLogger);
 			testApp.use(express.json());
@@ -142,6 +153,7 @@ describe('POST /v1/notifications', () => {
 				'/v1/notifications',
 				createNotificationsRouter(
 					mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+					mockNotificationStore(),
 				),
 			);
 			const dispatchServer = await startTestServer(testApp);
@@ -159,32 +171,135 @@ describe('POST /v1/notifications', () => {
 				expect(response.status).toBe(202);
 
 				const body = (await response.json()) as {
-					notificationId: string;
+					id: string;
+					kind: string;
 					status: string;
-					plans: Array<{ channel: string; planId: string; status: string }>;
-					statusUrl: string;
-					cancellable: { cancelUrl: string; expiresAt: number };
+					dryRun: boolean;
+					scheduledFor: string | null;
+					createdAt: string;
+					dispatches: unknown[];
 				};
 
+				expect(typeof body.id).toBe('string');
+				expect(body.id.length).toBeGreaterThan(0);
+				expect(body.kind).toBe('send');
+				// No dispatches were returned, so the status stays accepted.
 				expect(body.status).toBe('accepted');
-				expect(typeof body.notificationId).toBe('string');
-				expect(body.notificationId.length).toBeGreaterThan(0);
+				expect(body.dryRun).toBe(false);
+				expect(body.dispatches).toEqual([]);
+			} finally {
+				await dispatchServer.close();
+			}
+		});
 
-				expect(body.plans).toEqual([
+		it('persists the notification and exposes the recorded dispatches', async () => {
+			const dispatchRequest = mock(() =>
+				Promise.resolve({
+					appPush: [
+						{
+							requested: {
+								channel: 'app-push' as const,
+								topicType: 'breaking-news',
+								editions: ['uk'],
+							},
+							resolved: {
+								channel: 'app-push' as const,
+								topics: [{ type: 'breaking', name: 'uk' }],
+								importance: 'Major' as const,
+							},
+							status: 'success' as const,
+							providerRef: 'push-1',
+							failureReason: null,
+							providerStatusCode: null,
+						},
+					],
+					newsletter: [],
+				}),
+			);
+			const store = mockNotificationStore({
+				dispatches: [
 					{
+						id: 'd1',
+						notificationId: '00000000-0000-0000-0000-000000000000',
 						channel: 'app-push',
-						planId: `${body.notificationId}#app-push`,
-						status: 'accepted',
+						requested: {
+							channel: 'app-push',
+							topicType: 'breaking-news',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push',
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major',
+						},
+						providerRef: 'push-1',
+						status: 'success',
+						failureReason: null,
+						providerStatusCode: null,
+						createdAt: new Date(0),
+						updatedAt: new Date(0),
+					},
+				],
+			});
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(dispatchRequest, store),
+			);
+			const dispatchServer = await startTestServer(testApp);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				// Every target succeeded, so the send reads as created + delivered.
+				expect(response.status).toBe(201);
+				const body = (await response.json()) as {
+					id: string;
+					status: string;
+					dispatches: Array<Record<string, unknown>>;
+				};
+
+				expect(body.status).toBe('delivered');
+				expect(store.create).toHaveBeenCalledWith(
+					expect.objectContaining({ idempotencyKey: 'push-2026-07-08' }),
+					'ada.lovelace@guardian.co.uk',
+				);
+				expect(dispatchRequest).toHaveBeenCalledWith(
+					expect.anything(),
+					body.id,
+					'ada.lovelace@guardian.co.uk',
+				);
+				expect(body.dispatches).toEqual([
+					{
+						id: 'd1',
+						channel: 'app-push',
+						requested: {
+							channel: 'app-push',
+							topicType: 'breaking-news',
+							editions: ['uk'],
+						},
+						resolved: {
+							channel: 'app-push',
+							topics: [{ type: 'breaking', name: 'uk' }],
+							importance: 'Major',
+						},
+						status: 'success',
+						providerRef: 'push-1',
+						failureReason: null,
+						providerStatusCode: null,
+						createdAt: '1970-01-01T00:00:00.000Z',
+						updatedAt: '1970-01-01T00:00:00.000Z',
 					},
 				]);
-
-				expect(body.statusUrl).toBe(
-					`/v1/notifications/${body.notificationId}/status`,
-				);
-				expect(body.cancellable.cancelUrl).toBe(
-					`/v1/notifications/${body.notificationId}/cancel`,
-				);
-				expect(typeof body.cancellable.expiresAt).toBe('number');
 			} finally {
 				await dispatchServer.close();
 			}
@@ -192,22 +307,31 @@ describe('POST /v1/notifications', () => {
 	});
 
 	describe('provider failures surface as the documented HTTP codes', () => {
-		// Dispatch rethrows the underlying provider error; errorMiddleware maps it.
-		const startFailingServer = (rejection: Error) => {
+		// Dispatch that throws before any outcome is recorded (a config, SSM, or
+		// DB failure) leaves the row flagged failed and returns it, not a 202.
+		const startFailingServer = (
+			rejection: Error,
+			store = mockNotificationStore(),
+		) => {
 			const testApp = express();
 			testApp.use(httpLogger);
 			testApp.use(express.json());
 			testApp.use(
 				'/v1/notifications',
-				createNotificationsRouter(mock(() => Promise.reject(rejection))),
+				createNotificationsRouter(
+					mock(() => Promise.reject(rejection)),
+					store,
+				),
 			);
 			testApp.use(errorMiddleware);
 			return startTestServer(testApp);
 		};
 
-		it('maps an upstream provider rejection to 502', async () => {
+		it('records the row as failed and returns a 502 when dispatch throws before recording outcomes', async () => {
+			const store = mockNotificationStore();
 			const dispatchServer = await startFailingServer(
 				new BrazeApiError('campaign trigger', 'http_error', 500),
+				store,
 			);
 
 			try {
@@ -221,17 +345,79 @@ describe('POST /v1/notifications', () => {
 				);
 
 				expect(response.status).toBe(502);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('braze_request_failed');
+				const body = (await response.json()) as {
+					status: string;
+					dispatches: unknown[];
+				};
+				expect(body.status).toBe('failed');
+				expect(body.dispatches).toEqual([]);
+
+				// The row is flagged failed; no outcomes could be recorded.
+				expect(store.markFailed).toHaveBeenCalledTimes(1);
+				expect(store.recordOutcomes).not.toHaveBeenCalled();
 			} finally {
 				await dispatchServer.close();
 			}
 		});
 
-		it('maps an upstream provider timeout to 504', async () => {
-			const dispatchServer = await startFailingServer(
-				new AppNotificationApiError('timeout'),
+		it('records outcomes and returns the notification body with a 502 when every target failed', async () => {
+			const rejection = new BrazeApiError(
+				'campaign trigger',
+				'http_error',
+				500,
 			);
+			// The error is returned alongside the outcomes rather than thrown.
+			const dispatchRequest = mock(() =>
+				Promise.resolve({
+					appPush: [],
+					newsletter: [
+						{
+							requested: { channel: 'newsletter' as const, segment: 'UK' },
+							resolved: {
+								channel: 'newsletter' as const,
+								brazeCampaignId: 'campaign-1',
+								emailRenderingId: 'newsletter-uk',
+							},
+							status: 'failure' as const,
+							providerRef: null,
+							failureReason: 'http_error' as const,
+							providerStatusCode: 500,
+						},
+					],
+					error: rejection,
+				}),
+			);
+			const store = mockNotificationStore({
+				notification: { status: 'failed' },
+				dispatches: [
+					{
+						id: 'd1',
+						notificationId: '00000000-0000-0000-0000-000000000000',
+						channel: 'newsletter',
+						requested: { channel: 'newsletter', segment: 'UK' },
+						resolved: {
+							channel: 'newsletter',
+							brazeCampaignId: 'campaign-1',
+							emailRenderingId: 'newsletter-uk',
+						},
+						providerRef: null,
+						status: 'failure',
+						failureReason: 'http_error',
+						providerStatusCode: 500,
+						createdAt: new Date(0),
+						updatedAt: new Date(0),
+					},
+				],
+			});
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(dispatchRequest, store),
+			);
+			testApp.use(errorMiddleware);
+			const dispatchServer = await startTestServer(testApp);
 
 			try {
 				const response = await fetch(
@@ -243,9 +429,107 @@ describe('POST /v1/notifications', () => {
 					},
 				);
 
-				expect(response.status).toBe(504);
-				const body = (await response.json()) as { error: string };
-				expect(body.error).toBe('app_notification_failed');
+				expect(response.status).toBe(502);
+
+				// The recorded notification is returned, not the terse error envelope,
+				// so the caller sees each target's outcome.
+				const body = (await response.json()) as {
+					status: string;
+					dispatches: Array<Record<string, unknown>>;
+				};
+				expect(body.status).toBe('failed');
+				expect(body.dispatches).toHaveLength(1);
+				expect(body.dispatches[0]).toMatchObject({
+					status: 'failure',
+					failureReason: 'http_error',
+					providerStatusCode: 500,
+				});
+
+				// Outcomes are persisted and the rolled-up status is left intact.
+				expect(store.recordOutcomes).toHaveBeenCalledTimes(1);
+				expect(store.markFailed).not.toHaveBeenCalled();
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+
+		it('records outcomes and returns the notification body with a 502 on partial delivery', async () => {
+			const rejection = new BrazeApiError(
+				'campaign trigger',
+				'http_error',
+				500,
+			);
+			// One target succeeded, one was rejected; the error rides alongside the
+			// outcomes rather than being thrown.
+			const dispatchRequest = mock(() =>
+				Promise.resolve({
+					appPush: [
+						{
+							requested: {
+								channel: 'app-push' as const,
+								topicType: 'breaking-news',
+								editions: ['uk'],
+							},
+							resolved: {
+								channel: 'app-push' as const,
+								topics: [{ type: 'breaking', name: 'uk' }],
+								importance: 'Major' as const,
+							},
+							status: 'success' as const,
+							providerRef: 'push-1',
+							failureReason: null,
+							providerStatusCode: null,
+						},
+					],
+					newsletter: [
+						{
+							requested: { channel: 'newsletter' as const, segment: 'UK' },
+							resolved: {
+								channel: 'newsletter' as const,
+								brazeCampaignId: 'campaign-1',
+								emailRenderingId: 'newsletter-uk',
+							},
+							status: 'failure' as const,
+							providerRef: null,
+							failureReason: 'http_error' as const,
+							providerStatusCode: 500,
+						},
+					],
+					error: rejection,
+				}),
+			);
+			const store = mockNotificationStore({
+				notification: { status: 'partially_delivered' },
+			});
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(dispatchRequest, store),
+			);
+			testApp.use(errorMiddleware);
+			const dispatchServer = await startTestServer(testApp);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(502);
+				const body = (await response.json()) as { status: string };
+				expect(body.status).toBe('partially_delivered');
+
+				// Outcomes are persisted (successful and failed targets alike) so a
+				// re-send can skip what already succeeded.
+				expect(store.recordOutcomes).toHaveBeenCalledTimes(1);
+				// The rolled-up status is left intact, not clobbered to 'failed'.
+				expect(store.markFailed).not.toHaveBeenCalled();
 			} finally {
 				await dispatchServer.close();
 			}
@@ -360,6 +644,384 @@ describe('POST /v1/notifications', () => {
 
 			const body = (await response.json()) as { error: string };
 			expect(body.error).toBe('validation_failed');
+		});
+	});
+});
+
+const notificationId = '11111111-1111-4111-8111-111111111111';
+
+/** A stored notification with a single successful app-push dispatch. */
+const storedNotification = (): NotificationWithDispatches => ({
+	id: notificationId,
+	idempotencyKey: 'push-2026-07-08',
+	kind: 'send',
+	status: 'delivered',
+	sender: 'notifications-tooling-spa/v1',
+	createdByEmail: 'editor@theguardian.com',
+	dryRun: false,
+	scheduledFor: null,
+	content: { items: { lead: { type: 'app-push', title: 'Ukraine summit' } } },
+	channels: { 'app-push': { compose: { use: 'lead' } } },
+	failedTargets: { topics: [], segments: [] },
+	createdAt: new Date('2026-07-08T09:00:00.000Z'),
+	updatedAt: new Date('2026-07-08T09:00:05.000Z'),
+	dispatches: [
+		{
+			id: '22222222-2222-4222-8222-222222222222',
+			notificationId,
+			channel: 'app-push',
+			requested: {
+				channel: 'app-push',
+				topicType: 'breaking-news',
+				editions: ['uk'],
+			},
+			resolved: {
+				channel: 'app-push',
+				topics: [{ type: 'breaking', name: 'uk' }],
+				importance: 'Major',
+			},
+			providerRef: 'mob-123',
+			status: 'success',
+			failureReason: null,
+			providerStatusCode: null,
+			createdAt: new Date('2026-07-08T09:00:01.000Z'),
+			updatedAt: new Date('2026-07-08T09:00:01.000Z'),
+		},
+	],
+});
+
+const startLookupServer = (
+	findNotification: (id: string) => Promise<NotificationWithDispatches | null>,
+) => {
+	const testApp = express();
+	testApp.use(httpLogger);
+	testApp.use(express.json());
+	testApp.use(
+		'/v1/notifications',
+		createNotificationsRouter(
+			mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+			mockNotificationStore(),
+			findNotification,
+		),
+	);
+	return startTestServer(testApp);
+};
+
+describe('GET /v1/notifications/:id', () => {
+	describe('authentication', () => {
+		it('blocks unauthenticated GET /v1/notifications/:id', async () => {
+			await assertUnauthenticatedRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: `/v1/notifications/${notificationId}`,
+			});
+		});
+	});
+
+	describe('permissions', () => {
+		it('blocks GET /v1/notifications/:id without the dispatch permission', async () => {
+			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: `/v1/notifications/${notificationId}`,
+			});
+		});
+	});
+
+	describe('happy path', () => {
+		it('returns the persisted notification and its dispatches', async () => {
+			const findNotification = mock(() =>
+				Promise.resolve(storedNotification()),
+			);
+			const lookupServer = await startLookupServer(findNotification);
+
+			try {
+				const response = await fetch(
+					`${lookupServer.baseUrl}/v1/notifications/${notificationId}`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(findNotification).toHaveBeenCalledWith(notificationId);
+
+				const body = (await response.json()) as {
+					id: string;
+					status: string;
+					createdAt: string;
+					dispatches: Array<Record<string, unknown>>;
+				};
+
+				expect(body.id).toBe(notificationId);
+				expect(body.status).toBe('delivered');
+				expect(body.createdAt).toBe('2026-07-08T09:00:00.000Z');
+				expect(body.dispatches).toHaveLength(1);
+				expect(body.dispatches[0]).toMatchObject({
+					channel: 'app-push',
+					requested: {
+						channel: 'app-push',
+						topicType: 'breaking-news',
+						editions: ['uk'],
+					},
+					providerRef: 'mob-123',
+					status: 'success',
+					providerStatusCode: null,
+				});
+				// The notificationId is redundant on each nested dispatch.
+				expect(body.dispatches[0]).not.toHaveProperty('notificationId');
+			} finally {
+				await lookupServer.close();
+			}
+		});
+	});
+
+	describe('not found', () => {
+		it('returns 404 when no notification exists with the id', async () => {
+			const lookupServer = await startLookupServer(() => Promise.resolve(null));
+
+			try {
+				const response = await fetch(
+					`${lookupServer.baseUrl}/v1/notifications/${notificationId}`,
+				);
+
+				expect(response.status).toBe(404);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('not_found');
+			} finally {
+				await lookupServer.close();
+			}
+		});
+	});
+
+	describe('bad request', () => {
+		it('returns 400 when the id is not a valid UUID', async () => {
+			const findNotification = mock(() =>
+				Promise.resolve(storedNotification()),
+			);
+			const lookupServer = await startLookupServer(findNotification);
+
+			try {
+				const response = await fetch(
+					`${lookupServer.baseUrl}/v1/notifications/not-a-uuid`,
+				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as {
+					error: string;
+					details: Array<{ path: string }>;
+				};
+				expect(body.error).toBe('bad_request');
+				expect(body.details.some((detail) => detail.path === '/id')).toBe(true);
+				expect(findNotification).not.toHaveBeenCalled();
+			} finally {
+				await lookupServer.close();
+			}
+		});
+	});
+});
+
+/** A one-notification page (no dispatches) for the list endpoint tests. */
+const storedListPage = (): NotificationListPage => ({
+	total: 3,
+	notifications: [
+		{
+			id: notificationId,
+			idempotencyKey: 'push-2026-07-08',
+			kind: 'send',
+			status: 'partially_delivered',
+			sender: 'notifications-tooling-spa/v1',
+			createdByEmail: 'editor@theguardian.com',
+			dryRun: false,
+			scheduledFor: null,
+			content: { items: { lead: { type: 'app-push' } } },
+			channels: { 'app-push': { compose: { use: 'lead' } } },
+			failedTargets: {
+				topics: [{ topicType: 'sport', edition: 'uk' }],
+				segments: [],
+			},
+			createdAt: new Date('2026-07-08T09:00:00.000Z'),
+			updatedAt: new Date('2026-07-08T09:00:05.000Z'),
+		},
+	],
+});
+
+const startListServer = (
+	listNotifications: (options: {
+		since?: Date;
+		limit?: number;
+		offset?: number;
+	}) => Promise<NotificationListPage>,
+) => {
+	const testApp = express();
+	testApp.use(httpLogger);
+	testApp.use(express.json());
+	testApp.use(
+		'/v1/notifications',
+		createNotificationsRouter(
+			mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+			mockNotificationStore(),
+			mock(() => Promise.resolve(null)),
+			listNotifications,
+		),
+	);
+	return startTestServer(testApp);
+};
+
+describe('GET /v1/notifications', () => {
+	describe('authentication', () => {
+		it('blocks unauthenticated GET /v1/notifications', async () => {
+			await assertUnauthenticatedRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: '/v1/notifications',
+			});
+		});
+	});
+
+	describe('permissions', () => {
+		it('blocks GET /v1/notifications without the dispatch permission', async () => {
+			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: '/v1/notifications',
+			});
+		});
+	});
+
+	describe('happy path', () => {
+		it('returns the window total and a page of notifications without dispatches', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=5&offset=2&since=1700000000`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 5,
+					offset: 2,
+				});
+
+				const body = (await response.json()) as {
+					total: number;
+					limit: number;
+					offset: number;
+					notifications: Array<Record<string, unknown>>;
+				};
+
+				expect(body.total).toBe(3);
+				expect(body.limit).toBe(5);
+				expect(body.offset).toBe(2);
+				expect(body.notifications).toHaveLength(1);
+				expect(body.notifications[0]).toMatchObject({
+					id: notificationId,
+					status: 'partially_delivered',
+					failedTargets: {
+						topics: [{ topicType: 'sport', edition: 'uk' }],
+						segments: [],
+					},
+					createdAt: '2026-07-08T09:00:00.000Z',
+				});
+				// The list endpoint does not join dispatches.
+				expect(body.notifications[0]).not.toHaveProperty('dispatches');
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('defaults to limit 10 / offset 0 when neither is supplied', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?since=1700000000`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+				});
+
+				const body = (await response.json()) as {
+					limit: number;
+					offset: number;
+				};
+				expect(body.limit).toBe(10);
+				expect(body.offset).toBe(0);
+			} finally {
+				await listServer.close();
+			}
+		});
+	});
+
+	describe('bad request', () => {
+		it('returns 400 when limit is out of the 1–50 range', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=51&offset=0&since=1700000000`,
+				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('bad_request');
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('returns 400 when only one of limit/offset is supplied', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=5&since=1700000000`,
+				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('bad_request');
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('defaults since to 14 days ago when it is missing', async () => {
+			let calledWith:
+				{ since?: Date; limit?: number; offset?: number } | undefined;
+			const listNotifications = mock(
+				(options: { since?: Date; limit?: number; offset?: number }) => {
+					calledWith = options;
+					return Promise.resolve(storedListPage());
+				},
+			);
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const before = Date.now();
+				const response = await fetch(`${listServer.baseUrl}/v1/notifications`);
+				const after = Date.now();
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledTimes(1);
+				expect(calledWith?.limit).toBe(10);
+				expect(calledWith?.offset).toBe(0);
+
+				const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+				const since = calledWith?.since;
+				expect(since).toBeInstanceOf(Date);
+				expect(since!.getTime()).toBeGreaterThanOrEqual(
+					before - fourteenDaysMs,
+				);
+				expect(since!.getTime()).toBeLessThanOrEqual(after - fourteenDaysMs);
+			} finally {
+				await listServer.close();
+			}
 		});
 	});
 });

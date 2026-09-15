@@ -10,7 +10,7 @@ export const staticAssetsMiddleware: RequestHandler = express.static(
 		immutable: true,
 		setHeaders: (res, filePath) => {
 			if (filePath.endsWith('index.html')) {
-				res.setHeader('Cache-Control', 'no-cache');
+				res.setHeader('Cache-Control', 'no-store, max-age=0');
 			}
 		},
 	},

@@ -5,6 +5,7 @@ import type { NotificationSendRequest } from '../routers/notifications/schemas/n
 import { dispatchNotification } from './dispatch-notification';
 import {
 	baseRequest,
+	createdByEmail,
 	createDependencies,
 	newsletterItem,
 	notificationId,
@@ -37,7 +38,12 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(renderEmail).toHaveBeenCalledTimes(1);
 		expect(sendBrazeCampaign).toHaveBeenCalledTimes(1);
 		expect(sendAppNotification).toHaveBeenCalledTimes(1);
@@ -66,16 +72,16 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		// The newsletter failure is rethrown so the endpoint returns the
-		// documented 502/504 instead of a false 202.
-		let dispatchError: unknown;
-		try {
-			await dispatchNotification(request, notificationId, dependencies);
-		} catch (error) {
-			dispatchError = error;
-		}
+		// The newsletter failure is returned (not thrown) so the router can persist
+		// every outcome, then surface the documented 502/504 instead of a false 202.
+		const { error } = await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 
-		expect(dispatchError).toBe(renderingError);
+		expect(error).toBe(renderingError);
 
 		// Neither channel aborts the other: the push is still attempted.
 		expect(renderEmail).toHaveBeenCalledTimes(1);
@@ -104,7 +110,12 @@ describe('dispatchNotification', () => {
 			},
 		};
 
-		await dispatchNotification(request, notificationId, dependencies);
+		await dispatchNotification(
+			request,
+			notificationId,
+			createdByEmail,
+			dependencies,
+		);
 		expect(renderEmail).not.toHaveBeenCalled();
 		expect(sendBrazeCampaign).not.toHaveBeenCalled();
 		expect(sendAppNotification).not.toHaveBeenCalled();

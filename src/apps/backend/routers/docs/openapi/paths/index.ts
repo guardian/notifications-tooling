@@ -6,7 +6,7 @@ import {
 import { resolveArticlePath } from './content';
 import { healthPath } from './health';
 import { notificationTestsPath } from './notification-tests';
-import { notificationsPath } from './notifications';
+import { notificationByIdPath, notificationsPath } from './notifications';
 import { emailPreviewPath } from './preview';
 import { userPath } from './user';
 
@@ -19,6 +19,7 @@ export const paths = {
 	'/v1/content/articles/resolve': resolveArticlePath,
 	'/v1/notification-tests': notificationTestsPath,
 	'/v1/notifications': notificationsPath,
+	'/v1/notifications/{id}': notificationByIdPath,
 	'/v1/preview/email': emailPreviewPath,
 	'/v1/user': userPath,
 } as const;

@@ -46,6 +46,45 @@ export const spawnAws = (awsArgs: string[], config: RemoteMigrationConfig) => {
 	});
 };
 
+export const getCurrentSessionOwnerArn = (config: RemoteMigrationConfig) =>
+	runAws(
+		['sts', 'get-caller-identity', '--query', 'Arn', '--output', 'text'],
+		config,
+	);
+
+export const getLatestActivePortForwardSessionId = (
+	config: RemoteMigrationConfig,
+	instanceId: string,
+	ownerArn: string,
+) =>
+	runAws(
+		[
+			'ssm',
+			'describe-sessions',
+			'--state',
+			'Active',
+			'--filters',
+			`key=Target,value=${instanceId}`,
+			`key=Owner,value=${ownerArn}`,
+			'--query',
+			"reverse(sort_by(Sessions[?DocumentName=='AWS-StartPortForwardingSessionToRemoteHost'], &StartDate)) | [0].SessionId",
+			'--output',
+			'text',
+		],
+		config,
+	);
+
+export const terminateSession = (
+	config: RemoteMigrationConfig,
+	sessionId: string,
+) => {
+	if (!sessionId || sessionId === 'None') {
+		return;
+	}
+
+	runAws(['ssm', 'terminate-session', '--session-id', sessionId], config);
+};
+
 export const getDatabaseSecretString = (config: RemoteMigrationConfig) =>
 	runAws(
 		[

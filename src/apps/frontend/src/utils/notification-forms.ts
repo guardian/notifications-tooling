@@ -1,0 +1,88 @@
+import { displayAppAlertTopicEditionId, newsletterSegmentId } from '@models';
+import { z } from 'zod';
+import { kickerSchema } from '../schemas';
+import {
+	guardianImageUrlValidationMessage,
+	validateGuardianImageUrl,
+} from './form-validation';
+
+/**
+ * No length blocks composition: the character counter is guidance and the
+ * broker caps nothing an editor can type. These schemas therefore check
+ * presence and shape only.
+ */
+export const newsletterFormSchema = z
+	.object({
+		dispatchId: z.string().optional(),
+		kicker: kickerSchema,
+		subject: z.string().trim().min(1, 'Subject is required'),
+		preview: z.string().trim(),
+		showPreview: z.boolean(),
+		audienceSegments: z
+			.array(newsletterSegmentId)
+			.min(1, 'Please select an audience segment'),
+		deliveryOption: z.literal('immediate'),
+	})
+	.superRefine(({ preview, showPreview }, context) => {
+		const previewError = validateNewsletterPreview(preview, showPreview);
+
+		if (previewError) {
+			context.addIssue({
+				code: 'custom',
+				message: previewError,
+				path: ['preview'],
+			});
+		}
+	});
+
+export const appAlertFormSchema = z.object({
+	dispatchId: z.string().optional(),
+	// The selectable alert types are the topic types the backend exposes via
+	// `GET /v1/channels/audiences`, so this cannot be a fixed enum. The select
+	// constrains the value to that list, and the broker rejects unknown ids.
+	alertType: z.string().min(1, 'Please select an alert type'),
+	headline: z.string().trim().min(1, 'Headline is required'),
+	editions: z
+		.array(displayAppAlertTopicEditionId)
+		.min(1, 'Please select an edition'),
+	includeThumbnail: z.boolean(),
+	articleThumbnailUrl: z
+		.string()
+		.refine((url) => !validateGuardianImageUrl(url), {
+			message: guardianImageUrlValidationMessage,
+		})
+		.optional(),
+	deliveryOption: z.literal('appImmediate'),
+});
+
+export type NewsletterFormValues = z.infer<typeof newsletterFormSchema>;
+export type AppAlertFormValues = z.infer<typeof appAlertFormSchema>;
+
+export const validateNewsletterPreview = (
+	preview: NewsletterFormValues['preview'],
+	showPreview: boolean,
+) => {
+	if (showPreview && preview.trim().length === 0) {
+		return 'Preview text is required';
+	}
+
+	return undefined;
+};
+
+export const defaultNewsletterFormValues: NewsletterFormValues = {
+	kicker: 'breaking-news',
+	subject: '',
+	preview: '',
+	showPreview: true,
+	audienceSegments: [],
+	deliveryOption: 'immediate',
+};
+
+export const defaultAppAlertFormValues: AppAlertFormValues = {
+	alertType: 'breaking-news',
+	headline: '',
+	editions: [],
+	includeThumbnail: true,
+	articleThumbnailUrl: '',
+	deliveryOption: 'appImmediate',
+};

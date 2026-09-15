@@ -1,12 +1,11 @@
 import type { NotificationSendRequest } from '../routers/notifications/schemas/notification-send-request';
 import {
-	type AppPushDispatchOutcome,
 	dispatchAppPush,
 	resolveAppPushDispatch,
 } from './app-push/dispatch-app-push';
+import type { DispatchOutcome } from './dispatch-outcome';
 import {
 	dispatchNewsletter,
-	type NewsletterDispatchOutcome,
 	resolveNewsletterDispatch,
 } from './newsletter/dispatch-newsletter';
 import {
@@ -14,15 +13,21 @@ import {
 	type DispatchNotificationDependencies,
 } from './shared';
 
-/** Per-channel dispatch outcomes returned for future persistence. */
+/**
+ * Per-channel dispatch outcomes returned for persistence, plus the first
+ * provider rejection (if any). Both channels always run to completion; `error`
+ * lets the router persist every outcome and then surface the documented 502/504.
+ */
 export type DispatchOutcomes = {
-	appPush: AppPushDispatchOutcome[];
-	newsletter: NewsletterDispatchOutcome[];
+	appPush: DispatchOutcome[];
+	newsletter: DispatchOutcome[];
+	error?: unknown;
 };
 
 export const dispatchNotification = async (
 	request: NotificationSendRequest,
 	notificationId: string,
+	createdByEmail: string,
 	dependencies: DispatchNotificationDependencies = defaultDependencies,
 ): Promise<DispatchOutcomes> => {
 	if (request.options.dryRun) {
@@ -34,7 +39,7 @@ export const dispatchNotification = async (
 	}
 
 	const newsletterDispatch = resolveNewsletterDispatch(request);
-	const appPushDispatch = resolveAppPushDispatch(request);
+	const appPushDispatch = resolveAppPushDispatch(request, createdByEmail);
 
 	// Both channels are attempted in full (each isolates its own targets via
 	// allSettled); outcomes are returned for future persistence. Nothing is
@@ -44,14 +49,12 @@ export const dispatchNotification = async (
 		dispatchAppPush(appPushDispatch, notificationId, dependencies),
 	]);
 
-	// A provider rejection on either channel surfaces as the documented 502/504
-	// (via errorMiddleware) rather than a false 202. Both channels still ran.
-	const error = newsletter.error ?? appPush.error;
-	if (error !== undefined) {
-		throw error instanceof Error
-			? error
-			: new Error('Notification dispatch failed.', { cause: error });
-	}
-
-	return { appPush: appPush.outcomes, newsletter: newsletter.outcomes };
+	// Both channels ran to completion; the first provider rejection (if any) is
+	// returned so the router can persist every outcome before surfacing it as the
+	// documented 502/504 (via errorMiddleware) rather than a false 202.
+	return {
+		appPush: appPush.outcomes,
+		newsletter: newsletter.outcomes,
+		error: newsletter.error ?? appPush.error,
+	};
 };

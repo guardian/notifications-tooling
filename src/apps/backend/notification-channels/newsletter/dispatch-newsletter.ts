@@ -7,6 +7,7 @@ import {
 } from '@services';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
+import type { NewsletterDispatchOutcome } from '../dispatch-outcome';
 import {
 	type ChannelDispatchResult,
 	type DispatchNotificationDependencies,
@@ -16,30 +17,25 @@ import {
 } from '../shared';
 
 export const newsletterEnvironmentSchema = z.object({
-	BRAZE_API_KEY: z.string().trim().min(1),
-	BRAZE_REST_ENDPOINT: z.url(),
 	EMAIL_RENDERING_ENDPOINT: z.url(),
 });
 
 /**
- * The outcome of one newsletter send (one per targeted segment). `dispatchId` is
- * Braze's `dispatch_id` from the campaign-trigger response, kept for tracking.
+ * `campaignId` and `emailRenderingId` are the actual downstream ids sent to
+ * Braze and email-rendering (not the internal segment mapping key), so persisted
+ * rows and logs record what was really dispatched.
  */
-export type NewsletterDispatchOutcome = {
-	notificationId: string;
-	segmentId: string;
-	campaignId: string;
-	dispatchId?: string;
-	status: 'success' | 'failure';
-	failureReason?: BrazeFailureReason | EmailRenderingFailureReason | 'unknown';
-};
-
 export const newsletterFailureReason = (
 	error: unknown,
 ): BrazeFailureReason | EmailRenderingFailureReason | 'unknown' =>
 	error instanceof BrazeApiError || error instanceof EmailRenderingError
 		? error.reason
 		: 'unknown';
+
+export const newsletterStatusCode = (error: unknown): number | undefined =>
+	error instanceof BrazeApiError || error instanceof EmailRenderingError
+		? error.status
+		: undefined;
 
 export const resolveNewsletterDispatch = (request: NotificationSendRequest) => {
 	const plan = request.channels[NotificationChannel.Newsletter];
@@ -79,7 +75,7 @@ export const resolveNewsletterDispatch = (request: NotificationSendRequest) => {
 
 export const dispatchNewsletter = async (
 	resolvedDispatch: ReturnType<typeof resolveNewsletterDispatch>,
-	notificationId: string,
+	_notificationId: string,
 	dependencies: DispatchNotificationDependencies,
 ): Promise<ChannelDispatchResult<NewsletterDispatchOutcome>> => {
 	if (!resolvedDispatch) {
@@ -88,16 +84,12 @@ export const dispatchNewsletter = async (
 
 	const { item, plan, segments } = resolvedDispatch;
 
-	const [brazeApiKey, brazeRestEndpoint, emailRenderingEndpoint] =
-		await Promise.all([
-			dependencies.getSSMParameter('BRAZE_API_KEY'),
-			dependencies.getSSMParameter('BRAZE_REST_ENDPOINT'),
-			dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
-		]);
+	const [brazeClient, emailRenderingEndpoint] = await Promise.all([
+		dependencies.loadBrazeClient(),
+		dependencies.getSSMParameter('EMAIL_RENDERING_ENDPOINT'),
+	]);
 
 	const environment = newsletterEnvironmentSchema.parse({
-		BRAZE_API_KEY: brazeApiKey,
-		BRAZE_REST_ENDPOINT: brazeRestEndpoint,
 		EMAIL_RENDERING_ENDPOINT: emailRenderingEndpoint,
 	});
 
@@ -114,36 +106,44 @@ export const dispatchNewsletter = async (
 			});
 
 			// Braze returns one dispatch_id per send; kept for tracking.
-			const { dispatch_id: dispatchId } = await dependencies.sendBrazeCampaign({
-				apiKey: environment.BRAZE_API_KEY,
-				restEndpoint: environment.BRAZE_REST_ENDPOINT,
-				campaignId: brazeCampaignId,
-				html,
-				subject: plan.compose.subject,
-				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-			});
+			const { dispatch_id: dispatchId, status } =
+				await brazeClient.sendCampaign({
+					campaignId: brazeCampaignId,
+					html,
+					subject: plan.compose.subject,
+					timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
+				});
 
-			return dispatchId;
+			return { dispatchId, status };
 		}),
 	);
 
 	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
-		const { segmentId, brazeCampaignId } = segments[index]!;
+		const { segmentId, brazeCampaignId, emailRenderingNewsletterId } =
+			segments[index]!;
+		const requested = { channel: 'newsletter' as const, segment: segmentId };
+		const resolved = {
+			channel: 'newsletter' as const,
+			brazeCampaignId,
+			emailRenderingId: emailRenderingNewsletterId,
+		};
 		if (result.status === 'fulfilled') {
 			return {
-				notificationId,
-				segmentId,
-				campaignId: brazeCampaignId,
-				dispatchId: result.value,
+				requested,
+				resolved,
 				status: 'success',
+				providerRef: result.value.dispatchId ?? null,
+				failureReason: null,
+				providerStatusCode: result.value.status,
 			};
 		}
 		return {
-			notificationId,
-			segmentId,
-			campaignId: brazeCampaignId,
+			requested,
+			resolved,
 			status: 'failure',
+			providerRef: null,
 			failureReason: newsletterFailureReason(result.reason),
+			providerStatusCode: newsletterStatusCode(result.reason) ?? null,
 		};
 	});
 
