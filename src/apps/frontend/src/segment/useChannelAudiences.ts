@@ -6,7 +6,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
-import { redirectToLogin } from '../api-client/redirectToLogin';
+import { redirectToLogin } from '../api-client/redirect-to-login';
 import { FALLBACK_TOPIC_TYPES } from './audience-fallbacks';
 
 export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
@@ -16,7 +16,7 @@ export const channelAudiencesQueryKey = ['channels', 'audience'] as const;
  * validates sends against, so the UI's guidance cannot drift from the rules.
  *
  * Failure is deliberately not surfaced: callers read
- * {@link NEWSLETTER_LIMIT_FALLBACKS} when `data` is absent.
+ * {@link NEWSLETTER_EMAIL_LIMIT_FALLBACKS} when `data` is absent.
  */
 export const useChannelAudiences = () =>
 	useQuery<ChannelAudienceResponse>({
@@ -55,7 +55,7 @@ export const useChannelAudiences = () =>
  * While the query is in flight or if it failed we fall back to
  * {@link FALLBACK_TOPIC_TYPES}.
  */
-export const useAppPushTopicTypes = (): AppAlertTopicOption[] => {
+export const useAppAlertTopicTypes = (): AppAlertTopicOption[] => {
 	const { data: audiences } = useChannelAudiences();
 	return audiences?.channels['app-push'].topicTypes ?? FALLBACK_TOPIC_TYPES;
 };

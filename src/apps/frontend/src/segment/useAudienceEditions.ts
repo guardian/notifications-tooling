@@ -3,20 +3,22 @@ import {
 	type NewsletterSegmentId,
 	toDisplayEditionId,
 } from '@models';
-import { FALLBACK_NEWSLETTER_SEGMENTS } from './audience-fallbacks';
-import { EDITION_OPTIONS } from './EditionOptions';
+import { FALLBACK_NEWSLETTER_EMAIL_SEGMENTS } from './audience-fallbacks';
+import { EDITION_OPTIONS } from './edition-options';
 import type { SegmentOption } from './SegmentPicker';
 import { useChannelAudiences } from './useChannelAudiences';
 
-export const useNewsletterSegmentOptions = (): Array<
+export const useNewsletterEmailSegmentOptions = (): Array<
 	SegmentOption<NewsletterSegmentId>
 > => {
 	const { data: audiences } = useChannelAudiences();
 	const segments = audiences?.channels.newsletter.segments;
-	return (segments ?? FALLBACK_NEWSLETTER_SEGMENTS).map(({ id, label }) => ({
-		code: id,
-		label,
-	}));
+	return (segments ?? FALLBACK_NEWSLETTER_EMAIL_SEGMENTS).map(
+		({ id, label }) => ({
+			code: id,
+			label,
+		}),
+	);
 };
 
 export const useTopicEditionOptions = (

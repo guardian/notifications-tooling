@@ -11,11 +11,11 @@ import {
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
 import type { DisplayAppAlertTopicEditionId } from '@models';
-import { useRelativeTime } from '../hooks/use-relative-time';
+import { useRelativeTime } from '../hooks/useRelativeTime';
 import { historyViewStyles } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
+import { phoneIphoneIcon } from '../ui/flag-icons';
 import { FlagAtom } from '../ui/FlagAtom';
-import { phoneIphoneIcon } from '../ui/FlagIcons';
 import { SendTimeTooltip } from '../ui/SendTimeTooltip';
 import { Tooltip } from '../ui/Tooltip';
 import { getSenderDisplayName } from '../utils/notification-history-mapper';
@@ -33,7 +33,7 @@ const tableColumns = {
 } as const;
 
 const getChannelName = (channel: HistoryNotification['channel']) =>
-	channel === 'push' ? 'App alert' : 'Newsletter email';
+	channel === 'app-push' ? 'App alert' : 'Newsletter email';
 
 const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
 	UK: 'United Kingdom',
@@ -155,7 +155,7 @@ export const HistoryTable = ({
 											variant="bodyXs"
 											cssOverrides={historyViewStyles.channel}
 										>
-											{notification.channel === 'push' ? (
+											{notification.channel === 'app-push' ? (
 												<Icon size="sm">{phoneIphoneIcon}</Icon>
 											) : (
 												<Icon size="sm" symbol="mail" />

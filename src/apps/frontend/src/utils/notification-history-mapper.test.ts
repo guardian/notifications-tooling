@@ -78,7 +78,7 @@ describe('mapNotificationToHistoryNotification', () => {
 		expect(notification).toMatchObject({
 			title: '‘National scandal’: extreme heat linked to 40,000',
 			href: 'https://www.theguardian.com/environment/2026/aug/26/deaths-england-hottest-days-extreme-weather',
-			channel: 'email',
+			channel: 'newsletter',
 			alertType: 'Breaking news',
 			sentBy: 'joshua.anderson@guardian.co.uk',
 			sentTo: ['AU'],
@@ -185,7 +185,7 @@ describe('mapNotificationToHistoryNotification', () => {
 
 		expect(notification).toMatchObject({
 			title: 'Full time',
-			channel: 'push',
+			channel: 'app-push',
 			alertType: 'Sports news',
 			thumbnailUrl: 'https://media.guim.co.uk/thumb.jpg',
 			sentTo: ['INT', 'EU'],

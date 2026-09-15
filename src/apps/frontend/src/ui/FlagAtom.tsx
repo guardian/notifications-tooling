@@ -8,7 +8,7 @@ import {
 	internationalGlobe,
 	ukFlag,
 	usFlag,
-} from './FlagIcons';
+} from './flag-icons';
 
 export const FlagAtom = ({
 	segmentCode,

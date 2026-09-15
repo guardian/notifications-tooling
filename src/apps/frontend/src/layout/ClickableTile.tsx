@@ -10,7 +10,7 @@ import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import type { ComponentProps } from 'react';
-import { phoneIphoneIcon } from '../ui/FlagIcons';
+import { phoneIphoneIcon } from '../ui/flag-icons';
 
 type IconSymbol = ComponentProps<typeof Icon>['symbol'];
 

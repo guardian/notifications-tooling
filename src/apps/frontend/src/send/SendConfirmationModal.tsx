@@ -1,33 +1,33 @@
 import { Button } from '@guardian/stand/Button';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { useContext } from 'react';
-import { NotificationFormContext } from '../compose/NotificationContext';
-import { useSendNotification } from '../hooks/use-send-notification';
+import { NotificationFormContext } from '../compose/NotificationFormContext';
+import { useSendNotification } from '../hooks/useSendNotification';
 import type { SendNotificationRequest } from '../schemas';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { getChannelDescription } from '../utils/display-text-helpers';
 
-export const SendNotificationModal = () => {
-	const { channel, notification, updateNotification } = useContext(
+export const SendConfirmationModal = () => {
+	const { channel, composerState, dispatchComposerAction } = useContext(
 		NotificationFormContext,
 	);
 	const sendNotification = useSendNotification();
-	const { confirmSendModalOpen, isWaitingForSend, pendingRequest } =
-		notification;
+	const { isSendConfirmationOpen, isWaitingForSend, pendingRequest } =
+		composerState;
 	const channelDescription = getChannelDescription(channel);
 
-	const handleSending =
+	const handleConfirmSend =
 		(sendNotificationRequest: SendNotificationRequest) => () =>
 			sendNotification(sendNotificationRequest);
 
 	return (
 		<Modal
-			isOpen={confirmSendModalOpen}
+			isOpen={isSendConfirmationOpen}
 			onOpenChange={(isOpen) => {
 				if (isWaitingForSend) {
 					return;
 				}
-				updateNotification({ type: 'set-show-confirm-send', isOpen });
+				dispatchComposerAction({ type: 'set-send-confirmation-open', isOpen });
 			}}
 			theme={{
 				overlay: {
@@ -48,8 +48,8 @@ export const SendNotificationModal = () => {
 						isDisabled={isWaitingForSend}
 						variant="tertiary"
 						onPress={() => {
-							updateNotification({
-								type: 'set-show-confirm-send',
+							dispatchComposerAction({
+								type: 'set-send-confirmation-open',
 								isOpen: false,
 							});
 						}}
@@ -59,7 +59,9 @@ export const SendNotificationModal = () => {
 					<Button
 						isDisabled={isWaitingForSend || !pendingRequest}
 						icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
-						onPress={pendingRequest ? handleSending(pendingRequest) : undefined}
+						onPress={
+							pendingRequest ? handleConfirmSend(pendingRequest) : undefined
+						}
 					>
 						Confirm send
 					</Button>

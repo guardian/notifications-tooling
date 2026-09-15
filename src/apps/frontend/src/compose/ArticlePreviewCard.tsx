@@ -1,25 +1,25 @@
 import { Typography } from '@guardian/stand/Typography';
 import type { CapiBlock, ResolvedArticle } from '@models';
-import { useRelativeTime } from '../hooks/use-relative-time';
+import { useRelativeTime } from '../hooks/useRelativeTime';
 import { articlePreviewCardTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
 import { getArticlePresentation } from '../utils/article-presentation';
 import { getPillarColor } from '../utils/pillar-colors';
 
 interface ArticlePreviewCardProps {
-	content: ResolvedArticle;
+	article: ResolvedArticle;
 	requestedUrl?: string;
 	requestedBlock?: CapiBlock;
 	showThumbnail?: boolean;
 }
 
 export const ArticlePreviewCard = ({
-	content,
+	article,
 	requestedUrl,
 	requestedBlock,
 	showThumbnail = true,
 }: ArticlePreviewCardProps) => {
-	const { sectionName, pillarId, pillarName } = content;
+	const { sectionName, pillarId, pillarName } = article;
 	const {
 		headline,
 		isLiveblog,
@@ -27,7 +27,7 @@ export const ArticlePreviewCard = ({
 		liveblogBlock,
 		publishedDate,
 		thumbnail,
-	} = getArticlePresentation({ content, requestedUrl, requestedBlock });
+	} = getArticlePresentation({ article, requestedUrl, requestedBlock });
 	const pillarColor = getPillarColor(pillarId);
 	const publishedAt = useRelativeTime(publishedDate);
 

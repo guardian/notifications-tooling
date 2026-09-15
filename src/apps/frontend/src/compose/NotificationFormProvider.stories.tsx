@@ -12,12 +12,12 @@ import {
 import { htmlToSingleLineText } from '../utils/html-helpers';
 import type {
 	AppAlertFormValues,
-	NewsletterFormValues,
+	NewsletterEmailFormValues,
 } from '../utils/notification-forms';
 import { ArticleImportControl } from './ArticleImportControl';
 import {
 	AppAlertNotificationFormProvider,
-	NewsletterNotificationFormProvider,
+	NewsletterEmailNotificationFormProvider,
 } from './NotificationFormProvider';
 
 const resolveArticleHandler = http.post(
@@ -37,11 +37,11 @@ const invalidLiveblogBlockHandler = http.post(
 		),
 );
 
-const NewsletterSubject = () => {
-	const subject = useWatch<NewsletterFormValues, 'subject'>({
-		name: 'subject',
+const NewsletterEmailSubjectText = () => {
+	const subjectText = useWatch<NewsletterEmailFormValues, 'subjectText'>({
+		name: 'subjectText',
 	});
-	return <output aria-label="Newsletter subject">{subject}</output>;
+	return <output aria-label="Newsletter subject">{subjectText}</output>;
 };
 
 const AppAlertHeadline = () => {
@@ -56,19 +56,19 @@ type ArticleImportProps = Omit<
 	'onArticleImported'
 >;
 
-const NewsletterArticleImport = (props: ArticleImportProps) => {
-	const { setValue } = useFormContext<NewsletterFormValues>();
+const NewsletterEmailArticleImport = (props: ArticleImportProps) => {
+	const { setValue } = useFormContext<NewsletterEmailFormValues>();
 	return (
 		<ArticleImportControl
 			{...props}
 			onArticleImported={(article) => {
 				const { headline, standfirst } = article.fields ?? {};
 				if (headline) {
-					setValue('subject', headline);
+					setValue('subjectText', headline);
 				}
-				const preview = htmlToSingleLineText(standfirst);
-				if (preview) {
-					setValue('preview', preview);
+				const previewText = htmlToSingleLineText(standfirst);
+				if (previewText) {
+					setValue('previewText', previewText);
 				}
 			}}
 		/>
@@ -88,30 +88,32 @@ const AppAlertArticleImport = (props: ArticleImportProps) => {
 };
 
 const ProviderHarness = () => {
-	const [channel, setChannel] = useState<'newsletter' | 'app-alert'>(
+	const [channel, setChannel] = useState<'newsletter' | 'app-push'>(
 		'newsletter',
 	);
-	const [newsletterArticleInputText, setNewsletterArticleInputText] =
+	const [newsletterEmailArticleInputText, setNewsletterEmailArticleInputText] =
 		useState('');
-	const [newsletterLockArticleInputText, setNewsletterLockArticleInputText] =
-		useState(false);
+	const [
+		newsletterEmailLockArticleInputText,
+		setNewsletterEmailLockArticleInputText,
+	] = useState(false);
 	const [appAlertArticleInputText, setAppAlertArticleInputText] = useState('');
 	const [appAlertLockArticleInputText, setAppAlertLockArticleInputText] =
 		useState(false);
 	return (
 		<>
 			<button onClick={() => setChannel('newsletter')}>Newsletter</button>
-			<button onClick={() => setChannel('app-alert')}>App alert</button>
+			<button onClick={() => setChannel('app-push')}>App alert</button>
 			{channel === 'newsletter' ? (
-				<NewsletterNotificationFormProvider>
-					<NewsletterSubject />
-					<NewsletterArticleImport
-						articleInputText={newsletterArticleInputText}
-						setArticleInputText={setNewsletterArticleInputText}
-						lockArticleInputText={newsletterLockArticleInputText}
-						setLockArticleInputText={setNewsletterLockArticleInputText}
+				<NewsletterEmailNotificationFormProvider>
+					<NewsletterEmailSubjectText />
+					<NewsletterEmailArticleImport
+						articleInputText={newsletterEmailArticleInputText}
+						setArticleInputText={setNewsletterEmailArticleInputText}
+						lockArticleInputText={newsletterEmailLockArticleInputText}
+						setLockArticleInputText={setNewsletterEmailLockArticleInputText}
 					/>
-				</NewsletterNotificationFormProvider>
+				</NewsletterEmailNotificationFormProvider>
 			) : (
 				<AppAlertNotificationFormProvider>
 					<AppAlertHeadline />

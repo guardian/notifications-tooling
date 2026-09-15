@@ -18,7 +18,8 @@ interface FlagPreviewPillProps<
 	title: string;
 	options: Array<FlagPreviewPillOption<Code>>;
 	selected: Code[];
-	isConfirmation?: boolean;
+	muted?: boolean;
+	showTitle?: boolean;
 }
 
 export const FlagPreviewPill = <
@@ -27,13 +28,15 @@ export const FlagPreviewPill = <
 	title,
 	options,
 	selected,
-	isConfirmation = false,
+	muted = false,
+	showTitle = true,
 }: FlagPreviewPillProps<Code>) => (
 	<PreviewPillList
 		title={title}
 		options={options.map(({ code, label }) => ({ id: code, label }))}
 		selected={selected}
-		isConfirmation={isConfirmation}
+		muted={muted}
+		showTitle={showTitle}
 		renderIcon={(code) => <FlagAtom segmentCode={code} />}
 	/>
 );
