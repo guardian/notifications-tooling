@@ -216,6 +216,10 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 		msw: {
 			handlers: [
 				http.head(
+					'https://media.guim.co.uk/replacement-thumbnail.jpg',
+					() => new HttpResponse(null, { status: 200 }),
+				),
+				http.head(
 					'https://media.guim.co.uk/broken-thumbnail.jpg',
 					() =>
 						new HttpResponse(null, {
@@ -229,6 +233,8 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
 		const brokenReplacementThumbnailUrl =
 			'https://media.guim.co.uk/broken-thumbnail.jpg';
 
@@ -240,11 +246,23 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 		const replacementInput = canvas.getByRole('textbox', {
 			name: 'replacement image URL',
 		});
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
+		for (const thumbnail of [
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		}
+
+		await userEvent.clear(replacementInput);
 		await userEvent.type(replacementInput, brokenReplacementThumbnailUrl);
 		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
 		await expect(
 			await canvas.findByText('Image URL returned HTTP 403 Forbidden'),
 		).toBeVisible();
+		await expect(canvas.queryByText('Image updated')).not.toBeInTheDocument();
 
 		for (const thumbnail of [
 			canvas.getByAltText('Article thumbnail'),

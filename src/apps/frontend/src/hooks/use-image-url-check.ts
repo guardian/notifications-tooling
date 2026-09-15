@@ -1,8 +1,6 @@
-import { useCallback, useState } from 'react';
-
 export type ImageUrlCheckResult = { exists: boolean; error?: string };
 
-export const checkImageUrlExists = async (
+export const checkImageUrl = async (
 	imageUrl: string,
 ): Promise<ImageUrlCheckResult> => {
 	const trimmedImageUrl = imageUrl.trim();
@@ -35,48 +33,4 @@ export const checkImageUrlExists = async (
 			error: `Unable to verify image: ${errorMessage}`,
 		};
 	}
-};
-
-export const useImageUrlCheck = () => {
-	const [isCheckingImage, setIsCheckingImage] = useState(false);
-	const [imageCheckError, setImageCheckError] = useState<{
-		url: string;
-		message: string;
-	} | null>(null);
-
-	const clearError = useCallback(() => {
-		setImageCheckError(null);
-	}, []);
-
-	const checkImageUrl = useCallback(
-		async (imageUrl: string) => {
-			const trimmedImageUrl = imageUrl.trim();
-			clearError();
-			setIsCheckingImage(true);
-
-			try {
-				const result = await checkImageUrlExists(trimmedImageUrl);
-
-				if (!result.exists) {
-					setImageCheckError({
-						url: trimmedImageUrl,
-						message: result.error ?? 'Image does not exist',
-					});
-					return { success: false as const, error: result.error };
-				}
-
-				return { success: true as const };
-			} finally {
-				setIsCheckingImage(false);
-			}
-		},
-		[clearError],
-	);
-
-	return {
-		isCheckingImage,
-		imageCheckError,
-		checkImageUrl,
-		clearError,
-	};
 };

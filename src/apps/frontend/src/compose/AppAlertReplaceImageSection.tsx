@@ -5,6 +5,7 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
+import { checkImageUrl } from '../hooks/use-image-url-check';
 import { validateGuardianImageUrl } from '../utils/form-validation';
 
 interface AppAlertReplaceImageSectionProps {
@@ -31,6 +32,7 @@ export const AppAlertReplaceImageSection = ({
 
 	const handleUpdateClick = async () => {
 		if (validationError) {
+			onUpdate('');
 			setImageUpdated(false);
 			return;
 		}
@@ -43,24 +45,16 @@ export const AppAlertReplaceImageSection = ({
 
 		setIsCheckingImage(true);
 		try {
-			const response = await fetch(trimmedReplacementImageUrl, {
-				method: 'HEAD',
-			});
-			if (!response.ok) {
-				const status = response.statusText
-					? `${response.status} ${response.statusText}`
-					: response.status;
-				setImageCheckError(`Image URL returned HTTP ${status}`);
+			const result = await checkImageUrl(trimmedReplacementImageUrl);
+			if (!result.exists) {
+				setImageCheckError(result.error ?? 'Image does not exist');
+				onUpdate('');
 				setImageUpdated(false);
 				return;
 			}
 
 			onUpdate(trimmedReplacementImageUrl);
 			setImageUpdated(true);
-		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Network error';
-			setImageCheckError(`Unable to verify image: ${message}`);
-			setImageUpdated(false);
 		} finally {
 			setIsCheckingImage(false);
 		}
