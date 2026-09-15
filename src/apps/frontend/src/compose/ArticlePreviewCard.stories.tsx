@@ -90,9 +90,10 @@ export const RequestedLiveblogBlock: PreviewCardStory = {
 		await expect(
 			canvas.getByText(`Liveblog block ID: ${requestedLiveblogBlock.id}`),
 		).toBeInTheDocument();
-		await expect(
-			canvas.getByRole('link', { name: new RegExp(requestedLiveblogBlock.id) }),
-		).toHaveAttribute(
+		const articleLink = canvas.getByRole('link', {
+			name: new RegExp(`${requestedLiveblogBlock.id}.*opens in a new tab`),
+		});
+		await expect(articleLink).toHaveAttribute(
 			'href',
 			expect.stringContaining(`#${requestedLiveblogBlock.id}`),
 		);

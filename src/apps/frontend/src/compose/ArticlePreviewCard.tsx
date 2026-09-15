@@ -1,8 +1,8 @@
-import { Link } from '@guardian/stand/Link';
 import { Typography } from '@guardian/stand/Typography';
 import type { CapiBlock, ResolvedArticle } from '@models';
 import { useRelativeTime } from '../hooks/use-relative-time';
 import { articlePreviewCardTheme } from '../themes';
+import { ExternalLink } from '../ui/ExternalLink';
 import { getArticlePresentation } from '../utils/article-presentation';
 import { getPillarColor } from '../utils/pillar-colors';
 
@@ -118,14 +118,9 @@ export const ArticlePreviewCard = ({
 					</Typography>
 				)}
 
-				<Link
-					cssOverrides={articlePreviewCardTheme.url}
-					href={linkUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
+				<ExternalLink cssOverrides={articlePreviewCardTheme.url} href={linkUrl}>
 					{linkUrl}
-				</Link>
+				</ExternalLink>
 			</div>
 
 			{thumbnail.src && showThumbnail && (
