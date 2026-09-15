@@ -7,28 +7,23 @@ import { useContext, useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { replaceThumbnailButtonTheme } from '../themes';
 import { getArticleThumbnail } from '../utils/article-thumbnail';
+import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertReplaceImageSection } from './AppAlertReplaceImageSection';
-import type { AppAlertReplacementImageFormValues } from './AppAlertReplaceImageSection';
 import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
 import { NotificationFormContext } from './NotificationContext';
 
 export const ArticleThumbnailImageFormField = () => {
 	const {
+		clearErrors,
 		control,
 		formState: { errors },
 		setValue,
-	} = useFormContext<AppAlertReplacementImageFormValues>();
+	} = useFormContext<AppAlertFormValues>();
 	const { notification } = useContext(NotificationFormContext);
 	const originalArticleThumbnailUrl =
 		getArticleThumbnail(notification.content).src ?? '';
-	const replacementImageUrl =
-		useWatch<AppAlertReplacementImageFormValues, 'replacementImageUrl'>({
-			control,
-			name: 'replacementImageUrl',
-			defaultValue: '',
-		}) ?? '';
 	const articleThumbnailUrl =
-		useWatch<AppAlertReplacementImageFormValues, 'articleThumbnailUrl'>({
+		useWatch<AppAlertFormValues, 'articleThumbnailUrl'>({
 			control,
 			name: 'articleThumbnailUrl',
 			defaultValue: '',
@@ -36,6 +31,7 @@ export const ArticleThumbnailImageFormField = () => {
 	const hasThumbnail = Boolean(
 		articleThumbnailUrl || originalArticleThumbnailUrl,
 	);
+	const [replacementImageUrl, setReplacementImageUrl] = useState('');
 	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	return (
 		<div
@@ -101,6 +97,11 @@ export const ArticleThumbnailImageFormField = () => {
 								</Button>
 								{openReplaceSection && (
 									<AppAlertReplaceImageSection
+										replacementImageUrl={replacementImageUrl}
+										onReplacementImageUrlChange={(replacementImageUrl) => {
+											setReplacementImageUrl(replacementImageUrl);
+											clearErrors('articleThumbnailUrl');
+										}}
 										errorMessage={errors.articleThumbnailUrl?.message}
 										onUpdate={(replacementImageUrl) => {
 											const nextThumbnailUrl =

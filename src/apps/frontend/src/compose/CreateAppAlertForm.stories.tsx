@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { http, HttpResponse } from 'msw';
+import { expect, userEvent, within } from 'storybook/test';
 import {
 	failedAppPushSendResponse,
 	partiallyDeliveredAppPushSendResponse,
@@ -271,65 +272,54 @@ export const WithReplacementThumbnail: Story = {
 		notificationState: populatedPushState,
 		formValues: completePushParams,
 	},
+	parameters: {
+		msw: {
+			handlers: [
+				http.head(
+					'https://media.guim.co.uk/replacement-thumbnail.jpg',
+					() => new HttpResponse(null, { status: 200 }),
+				),
+			],
+		},
+	},
 	play: async ({ canvasElement }) => {
-		const fetchSpy = globalThis.fetch;
-		globalThis.fetch = (async (input, init) => {
-			const url = input instanceof Request ? input.url : String(input);
-			if (
-				init?.method === 'HEAD' &&
-				url.includes('replacement-thumbnail.jpg')
-			) {
-				return new Response(null, { status: 200, statusText: 'OK' });
-			}
-			return fetchSpy(input, init);
-		}) as typeof fetch;
+		const canvas = within(canvasElement);
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const thumbnail = canvas.getByAltText(
+			'Thumbnail for A rhyme to recall rising temperatures',
+		);
 
-		try {
-			const canvas = within(canvasElement);
-			const replacementThumbnailUrl =
-				'https://media.guim.co.uk/replacement-thumbnail.jpg';
-			const thumbnail = canvas.getByAltText(
-				'Thumbnail for A rhyme to recall rising temperatures',
-			);
+		await expect(thumbnail).toHaveAttribute(
+			'src',
+			articleFixture.fields?.thumbnail,
+		);
 
-			await expect(thumbnail).toHaveAttribute(
-				'src',
-				articleFixture.fields?.thumbnail,
-			);
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		const updateButton = canvas.getByRole('button', { name: 'Update' });
 
-			await userEvent.click(
-				canvas.getByRole('button', { name: 'Replace image' }),
-			);
-			const replacementInput = canvas.getByRole('textbox', {
-				name: 'replacement image URL',
-			});
-			const updateButton = canvas.getByRole('button', { name: 'Update' });
+		await userEvent.clear(replacementInput);
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await userEvent.click(updateButton);
 
-			await userEvent.clear(replacementInput);
-			await userEvent.type(replacementInput, replacementThumbnailUrl);
-			await userEvent.click(updateButton);
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
+		await expect(thumbnail).toHaveAttribute(
+			'src',
+			articleFixture.fields?.thumbnail,
+		);
 
-			await waitFor(async () => {
-				const updateButton = canvas.getByRole('button', { name: 'Update' });
-				await expect(updateButton).toHaveTextContent('Update');
-			});
-
-			await expect(thumbnail).toHaveAttribute(
-				'src',
-				articleFixture.fields?.thumbnail,
-			);
-			await expect(canvas.getByText('Image updated')).toBeVisible();
-
-			await userEvent.click(
-				canvas.getByRole('button', { name: 'Send app alert' }),
-			);
-			const screen = within(canvasElement.ownerDocument.body);
-			await expect(
-				await screen.findByText('Are you sure you want to send the app alert?'),
-			).toBeVisible();
-		} finally {
-			globalThis.fetch = fetchSpy;
-		}
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		);
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			await screen.findByText('Are you sure you want to send the app alert?'),
+		).toBeVisible();
 	},
 };
 
