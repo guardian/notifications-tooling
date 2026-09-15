@@ -98,8 +98,7 @@ export const renderEmail = async ({
 	}
 
 	try {
-		const html = renderedNotificationSchema.parse(await response.json()).body;
-		return html;
+		return renderedNotificationSchema.parse(await response.json()).body;
 	} catch (error) {
 		throw new EmailRenderingError(response.status, 'invalid_response', {
 			cause: error,
