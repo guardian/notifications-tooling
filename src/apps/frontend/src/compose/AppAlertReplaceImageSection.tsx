@@ -5,6 +5,7 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
+import { checkImageUrl } from '../hooks/use-image-url-check';
 import { validateGuardianImageUrl } from '../utils/form-validation';
 
 interface AppAlertReplaceImageSectionProps {
@@ -21,9 +22,43 @@ export const AppAlertReplaceImageSection = ({
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
 	const [imageUpdated, setImageUpdated] = useState(false);
+	const [isCheckingImage, setIsCheckingImage] = useState(false);
+	const [imageCheckError, setImageCheckError] = useState<string>();
+
 	const trimmedReplacementImageUrl = replacementImageUrl.trim();
 	const validationError = validateGuardianImageUrl(trimmedReplacementImageUrl);
-	const displayedErrorMessage = validationError ?? errorMessage;
+	const displayedErrorMessage =
+		validationError ?? imageCheckError ?? errorMessage;
+
+	const handleUpdateClick = async () => {
+		if (validationError) {
+			onUpdate('');
+			setImageUpdated(false);
+			return;
+		}
+
+		if (!trimmedReplacementImageUrl) {
+			onUpdate('');
+			setImageUpdated(true);
+			return;
+		}
+
+		setIsCheckingImage(true);
+		try {
+			const result = await checkImageUrl(trimmedReplacementImageUrl);
+			if (!result.exists) {
+				setImageCheckError(result.error ?? 'Image does not exist');
+				onUpdate('');
+				setImageUpdated(false);
+				return;
+			}
+
+			onUpdate(trimmedReplacementImageUrl);
+			setImageUpdated(true);
+		} finally {
+			setIsCheckingImage(false);
+		}
+	};
 
 	return (
 		<>
@@ -51,6 +86,7 @@ export const AppAlertReplaceImageSection = ({
 					placeholder="Enter replacement image URL..."
 					onChange={(url) => {
 						onReplacementImageUrlChange(url);
+						setImageCheckError(undefined);
 						setImageUpdated(false);
 					}}
 					id="replacement-image-URL"
@@ -60,16 +96,10 @@ export const AppAlertReplaceImageSection = ({
 					icon="refresh"
 					size="md"
 					variant="secondary"
-					onClick={() => {
-						if (validationError) {
-							setImageUpdated(false);
-							return;
-						}
-						onUpdate(trimmedReplacementImageUrl);
-						setImageUpdated(true);
-					}}
+					isDisabled={!!validationError || isCheckingImage}
+					onClick={() => void handleUpdateClick()}
 				>
-					Update
+					{isCheckingImage ? 'Checking...' : 'Update'}
 				</Button>
 			</div>
 
