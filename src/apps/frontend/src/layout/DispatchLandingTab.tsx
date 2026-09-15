@@ -1,6 +1,8 @@
+import { css } from '@emotion/react';
 import { semanticSpacing } from '@guardian/stand';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Layout } from '@guardian/stand/Layout';
+import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import { useState } from 'react';
@@ -9,12 +11,12 @@ import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { dispatchLandingTheme } from '../themes';
+import { phoneIphoneIcon } from '../ui/FlagIcons';
 import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
-import { ClickableTile } from './ClickableTile';
 import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
 
-const dispatchClickableTiles = [
+const dispatchTiles = [
 	{
 		title: 'Create a newsletter email',
 		icon: 'mail',
@@ -22,7 +24,7 @@ const dispatchClickableTiles = [
 	},
 	{
 		title: 'Create an app alert',
-		icon: 'appAlert',
+		icon: phoneIphoneIcon,
 		href: notificationRoutes.push.create,
 	},
 	{
@@ -84,13 +86,22 @@ export const DispatchLandingTab = () => {
 						},
 					}}
 				>
-					{dispatchClickableTiles.map((tile) => (
-						<ClickableTile
+					{dispatchTiles.map((tile) => (
+						<Tile
+							size={'sm'}
 							key={tile.title}
-							title={tile.title}
-							icon={tile.icon}
 							href={tile.href}
-						/>
+							icon={tile.icon}
+							typography="headingMd"
+							cssOverrides={css({
+								width: '100%',
+								[from.md]: {
+									width: '300px',
+								},
+							})}
+						>
+							{tile.title}
+						</Tile>
 					))}
 				</div>
 				<div css={dispatchLandingTheme.dispatchTableSection}>
