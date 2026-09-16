@@ -30,12 +30,6 @@ export const DispatchCreateNotificationModal = ({
 		<Modal
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			cssOverrides={css({
-				[from.lg]: {
-					top: '284px',
-					marginLeft: '650px',
-				},
-			})}
 			theme={{
 				overlay: {
 					position: 'fixed',

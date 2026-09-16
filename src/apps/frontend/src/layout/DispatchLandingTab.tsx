@@ -16,6 +16,17 @@ import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
 import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
 
+const landingTileStyles = css({
+	width: '100%',
+	[between.md.and.lg]: {
+		flex: '1 1 0',
+		width: 'auto',
+	},
+	[from.lg]: {
+		width: '325px',
+	},
+});
+
 export const DispatchLandingTab = () => {
 	const [searchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
@@ -59,78 +70,36 @@ export const DispatchLandingTab = () => {
 						paddingTop: semanticSpacing.stackMd,
 						[from.md]: {
 							flexDirection: 'row',
-							flexWrap: 'wrap',
-							justifyContent: 'flex-start',
-						},
-						[between.md.and.lg]: {
-							flexWrap: 'nowrap',
 						},
 						[from.lg]: {
-							flexWrap: 'nowrap',
 							justifyContent: 'space-between',
 						},
 					}}
 				>
 					<Tile
-						size={'sm'}
+						size="sm"
 						href={notificationRoutes.email.create}
-						icon={'mail'}
+						icon="mail"
 						typography="headingMd"
-						cssOverrides={css({
-							width: '100%',
-							[from.md]: {
-								width: '280px',
-							},
-							[between.md.and.lg]: {
-								flex: '1 1 0',
-								width: 'auto',
-							},
-							[from.lg]: {
-								width: '325px',
-							},
-						})}
+						cssOverrides={landingTileStyles}
 					>
 						Create a newsletter email
 					</Tile>
 					<Tile
-						size={'sm'}
+						size="sm"
 						href={notificationRoutes.push.create}
 						icon={phoneIphoneIcon}
 						typography="headingMd"
-						cssOverrides={css({
-							width: '100%',
-							[from.md]: {
-								width: '280px',
-							},
-							[between.md.and.lg]: {
-								flex: '1 1 0',
-								width: 'auto',
-							},
-							[from.lg]: {
-								width: '325px',
-							},
-						})}
+						cssOverrides={landingTileStyles}
 					>
 						Create an app alert
 					</Tile>
 					<Tile
-						size={'sm'}
-						href={'/history'}
-						icon={'history'}
+						size="sm"
+						href="/history"
+						icon="history"
 						typography="headingMd"
-						cssOverrides={css({
-							width: '100%',
-							[from.md]: {
-								width: '280px',
-							},
-							[between.md.and.lg]: {
-								flex: '1 1 0',
-								width: 'auto',
-							},
-							[from.lg]: {
-								width: '325px',
-							},
-						})}
+						cssOverrides={landingTileStyles}
 					>
 						History
 					</Tile>
