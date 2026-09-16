@@ -32,12 +32,12 @@ export const Default: Story = {
 
 		await userEvent.click(
 			canvas.getByRole('button', {
-				name: 'Click Open Latest Published Content',
+				name: 'Open Latest Published Content',
 			}),
 		);
 
 		await expect(
-			await screen.findByRole('dialog', { name: 'Choose a notification type' }),
+			await screen.findByRole('dialog', { name: 'Choose an alert type for this content' }),
 		).toBeVisible();
 		await expect(
 			screen.getByRole('link', { name: 'Create a newsletter email' }),
@@ -49,7 +49,7 @@ export const Default: Story = {
 		await userEvent.click(screen.getByRole('button', { name: 'Close Modal' }));
 		await waitFor(() =>
 			expect(
-				screen.queryByRole('dialog', { name: 'Choose a notification type' }),
+				screen.queryByRole('dialog', { name: 'Choose an alert type for this content' }),
 			).not.toBeInTheDocument(),
 		);
 	},
@@ -65,7 +65,7 @@ export const AppAlertDisabled: Story = {
 
 		await userEvent.click(
 			canvas.getByRole('button', {
-				name: 'Click Open Latest Published Content',
+				name: 'Open Latest Published Content',
 			}),
 		);
 

@@ -4,7 +4,7 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Layout } from '@guardian/stand/Layout';
 import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
-import { from } from '@guardian/stand/utils';
+import { between, from } from '@guardian/stand/utils';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
@@ -62,6 +62,9 @@ export const DispatchLandingTab = () => {
 							flexWrap: 'wrap',
 							justifyContent: 'flex-start',
 						},
+						[between.md.and.lg]: {
+							flexWrap: 'nowrap',
+						},
 						[from.lg]: {
 							flexWrap: 'nowrap',
 							justifyContent: 'space-between',
@@ -70,14 +73,20 @@ export const DispatchLandingTab = () => {
 				>
 					<Tile
 						size={'sm'}
-						key={'newsletter-email'}
 						href={notificationRoutes.email.create}
 						icon={'mail'}
 						typography="headingMd"
 						cssOverrides={css({
 							width: '100%',
 							[from.md]: {
-								width: '300px',
+								width: '280px',
+							},
+							[between.md.and.lg]: {
+								flex: '1 1 0',
+								width: 'auto',
+							},
+							[from.lg]: {
+								width: '325px',
 							},
 						})}
 					>
@@ -85,14 +94,20 @@ export const DispatchLandingTab = () => {
 					</Tile>
 					<Tile
 						size={'sm'}
-						key={'app-alert'}
 						href={notificationRoutes.push.create}
 						icon={phoneIphoneIcon}
 						typography="headingMd"
 						cssOverrides={css({
 							width: '100%',
 							[from.md]: {
-								width: '300px',
+								width: '280px',
+							},
+							[between.md.and.lg]: {
+								flex: '1 1 0',
+								width: 'auto',
+							},
+							[from.lg]: {
+								width: '325px',
 							},
 						})}
 					>
@@ -100,14 +115,20 @@ export const DispatchLandingTab = () => {
 					</Tile>
 					<Tile
 						size={'sm'}
-						key={'history'}
 						href={'/history'}
 						icon={'history'}
 						typography="headingMd"
 						cssOverrides={css({
 							width: '100%',
 							[from.md]: {
-								width: '300px',
+								width: '280px',
+							},
+							[between.md.and.lg]: {
+								flex: '1 1 0',
+								width: 'auto',
+							},
+							[from.lg]: {
+								width: '325px',
 							},
 						})}
 					>

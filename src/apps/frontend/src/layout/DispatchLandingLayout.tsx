@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import { semanticColors } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
+import { from } from '@guardian/stand/utils';
 import { layoutMainTheme } from '../themes';
 import { DispatchLandingTab } from './DispatchLandingTab';
 import { LatestPublishedContent } from './LatestPublishedContent';
@@ -13,7 +14,7 @@ export const DispatchLandingLayout = () => {
 				<Grid
 					cssOverrides={css({
 						height: '100%',
-						'@media (min-width: 1310px)': {
+						[from.lg]: {
 							flexWrap: 'nowrap',
 						},
 					})}
@@ -25,23 +26,22 @@ export const DispatchLandingLayout = () => {
 				>
 					<>
 						<Item
-							size={'grow'}
+							size={{ sm: 12, md: 12, lg: 8 }}
 							cssOverrides={css({
-								maxWidth: '826px',
+								maxWidth: '1056px',
 								minWidth: 0,
 							})}
 						>
 							<DispatchLandingTab />
 						</Item>
 						<Item
-							size={'grow'}
+							size={{ sm: 12, md: 12, lg: 4 }}
 							cssOverrides={css({
-								display: 'none',
 								justifyContent: 'center',
 								alignItems: 'flex-start',
 								backgroundColor: semanticColors.bg.raisedLevel1,
 								flow: 'vertical',
-								['@media (min-width: 1310px)']: {
+								[from.lg]: {
 									display: 'flex',
 									flex: '0 0 474px',
 									marginLeft: 'auto',

@@ -1,8 +1,5 @@
 import { css } from '@emotion/react';
-import {
-	semanticRadius,
-	semanticSpacing,
-} from '@guardian/stand';
+import { semanticRadius, semanticSpacing } from '@guardian/stand';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
 import { from } from '@guardian/stand/utils';
