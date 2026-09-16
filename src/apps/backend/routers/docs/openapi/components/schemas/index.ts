@@ -7,11 +7,11 @@ import { channelConstraintsSchema } from './channel-constraints';
 import { emailPreviewErrorSchema } from './email-preview-error';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { grafanaMetricsSchema } from './grafana-metrics';
-import { grafanaQueryRequestJsonSchema } from './grafana-query-request';
 import {
 	grafanaQueryErrorSchema,
 	grafanaQueryResponseSchema,
 } from './grafana-query';
+import { grafanaQueryRequestJsonSchema } from './grafana-query-request';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { liveblogBlockSchema } from './liveblog-block';

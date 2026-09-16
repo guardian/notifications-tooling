@@ -11,8 +11,8 @@ import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
 import {
-	grafanaQueryRequestSchema,
 	type GrafanaQueryRequest,
+	grafanaQueryRequestSchema,
 } from './grafana-query-request';
 
 const grafanaAccessMiddleware = [
