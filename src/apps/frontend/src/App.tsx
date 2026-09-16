@@ -13,7 +13,7 @@ import { ConfigContext } from './config/ConfigContext';
 import { getAppConfig } from './config/get-config';
 import { EmailNotificationPage } from './EmailNotificationPage';
 import { HistoryPage } from './history/HistoryPage';
-import { DispatchLandingTab } from './layout/DispatchLandingTab';
+import { DispatchLandingLayout } from './layout/DispatchLandingLayout';
 import { NotFoundTab } from './layout/NotFoundTab';
 import { getAppRoutes } from './routes';
 import {
@@ -29,7 +29,7 @@ export function App() {
 		<ConfigContext.Provider value={config}>
 			<Routes>
 				<Route element={<EmailNotificationPage />}>
-					<Route index element={<DispatchLandingTab />} />
+					<Route index element={<DispatchLandingLayout />} />
 					<Route
 						path="newsletter-email"
 						element={
