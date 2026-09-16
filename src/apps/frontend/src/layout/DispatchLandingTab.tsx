@@ -1,6 +1,8 @@
+import { css } from '@emotion/react';
 import { semanticSpacing } from '@guardian/stand';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Layout } from '@guardian/stand/Layout';
+import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import { useState } from 'react';
@@ -9,28 +11,10 @@ import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { dispatchLandingTheme } from '../themes';
+import { phoneIphoneIcon } from '../ui/FlagIcons';
 import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
-import { ClickableTile } from './ClickableTile';
 import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
-
-const dispatchClickableTiles = [
-	{
-		title: 'Create a newsletter email',
-		icon: 'mail',
-		href: notificationRoutes.email.create,
-	},
-	{
-		title: 'Create an app alert',
-		icon: 'appAlert',
-		href: notificationRoutes.push.create,
-	},
-	{
-		title: 'History',
-		icon: 'history',
-		href: '/history',
-	},
-] as const;
 
 export const DispatchLandingTab = () => {
 	const [searchParams] = useSearchParams();
@@ -84,14 +68,51 @@ export const DispatchLandingTab = () => {
 						},
 					}}
 				>
-					{dispatchClickableTiles.map((tile) => (
-						<ClickableTile
-							key={tile.title}
-							title={tile.title}
-							icon={tile.icon}
-							href={tile.href}
-						/>
-					))}
+					<Tile
+						size={'sm'}
+						key={'newsletter-email'}
+						href={notificationRoutes.email.create}
+						icon={'mail'}
+						typography="headingMd"
+						cssOverrides={css({
+							width: '100%',
+							[from.md]: {
+								width: '300px',
+							},
+						})}
+					>
+						Create a newsletter email
+					</Tile>
+					<Tile
+						size={'sm'}
+						key={'app-alert'}
+						href={notificationRoutes.push.create}
+						icon={phoneIphoneIcon}
+						typography="headingMd"
+						cssOverrides={css({
+							width: '100%',
+							[from.md]: {
+								width: '300px',
+							},
+						})}
+					>
+						Create an app alert
+					</Tile>
+					<Tile
+						size={'sm'}
+						key={'history'}
+						href={'/history'}
+						icon={'history'}
+						typography="headingMd"
+						cssOverrides={css({
+							width: '100%',
+							[from.md]: {
+								width: '300px',
+							},
+						})}
+					>
+						History
+					</Tile>
 				</div>
 				<div css={dispatchLandingTheme.dispatchTableSection}>
 					<DispatchLandingHistoryView
