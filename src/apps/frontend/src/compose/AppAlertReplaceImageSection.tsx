@@ -5,7 +5,8 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useState } from 'react';
-import { validateGuardianImageUrl } from '../utils/form-validation';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { validateGridCropPageUrl } from '../utils/form-validation';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -14,6 +15,37 @@ interface AppAlertReplaceImageSectionProps {
 	errorMessage?: string;
 }
 
+// TO DO - define as config values, determined by stage
+const GRID_API_URI = 'https://api.media.gutools.co.uk';
+const GRID_URI = 'https://media.gutools.co.uk';
+
+type GridLookUpResult =
+	{ success: true; imageUrl: string } | { success: false; error: Error };
+
+const getGridImageUrl = async (
+	gridApiUri: string,
+	cropId: string,
+	imageId: string,
+): Promise<GridLookUpResult> => {
+	// TO DO - query the grid api, extract the smallest version of the crop
+	console.log('returning placeholder image instead of fetching from grid for', {
+		gridApiUri,
+		cropId,
+		imageId,
+	});
+	return new Promise((resolve) => {
+		setTimeout(
+			() =>
+				resolve({
+					success: true,
+					imageUrl:
+						'https://media.guim.co.uk/70e4e976acdf31057677978113db2010c9e2c818/0_0_1261_1009/500.jpg',
+				}),
+			1000,
+		);
+	});
+};
+
 export const AppAlertReplaceImageSection = ({
 	replacementImageUrl,
 	onReplacementImageUrlChange,
@@ -21,9 +53,13 @@ export const AppAlertReplaceImageSection = ({
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
 	const [imageUpdated, setImageUpdated] = useState(false);
-	const trimmedReplacementImageUrl = replacementImageUrl.trim();
-	const validationError = validateGuardianImageUrl(trimmedReplacementImageUrl);
-	const displayedErrorMessage = validationError ?? errorMessage;
+	const [isProcessingUrl, setIsProcessingUrl] = useState(false);
+	const validationResult = validateGridCropPageUrl(
+		replacementImageUrl.trim(),
+		GRID_URI,
+	);
+	const displayedErrorMessage =
+		validationResult.validationError ?? errorMessage;
 
 	return (
 		<>
@@ -61,12 +97,26 @@ export const AppAlertReplaceImageSection = ({
 					size="md"
 					variant="secondary"
 					onClick={() => {
-						if (validationError) {
+						if (!validationResult.success) {
 							setImageUpdated(false);
 							return;
 						}
-						onUpdate(trimmedReplacementImageUrl);
-						setImageUpdated(true);
+
+						const { cropId, imageId } = validationResult;
+
+						setIsProcessingUrl(true);
+						void getGridImageUrl(GRID_API_URI, cropId, imageId).then(
+							(result) => {
+								if (!result.success) {
+									alert('image process fail');
+									console.error(result.error);
+									return;
+								}
+								onUpdate(result.imageUrl);
+								setImageUpdated(true);
+								setIsProcessingUrl(false);
+							},
+						);
 					}}
 				>
 					Update
@@ -75,6 +125,12 @@ export const AppAlertReplaceImageSection = ({
 
 			{displayedErrorMessage && (
 				<InlineMessage level="error">{displayedErrorMessage}</InlineMessage>
+			)}
+
+			{isProcessingUrl && (
+				<div>
+					<LoadingSpinner />
+				</div>
 			)}
 
 			{imageUpdated && replacementImageUrl && (

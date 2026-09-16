@@ -88,6 +88,70 @@ export const validateGuardianEmail = (emailInput: string) => {
 	return undefined;
 };
 
+const gridCropPathPattern = /\/images\/([0-9a-f]{40})/i;
+const gridCropParamPattern = /\d+_\d+_\d+_\d+/i;
+
+type GridCropUrlValidationResult =
+	| {
+			success: true;
+			validatedUrl: URL;
+			cropId: string;
+			imageId: string;
+			validationError?: undefined;
+	  }
+	| {
+			success: false;
+			validationError?: string;
+			validatedUrl?: undefined;
+	  };
+
+export const validateGridCropPageUrl = (
+	imageUrl: string,
+	gridOrigin: string,
+): GridCropUrlValidationResult => {
+	if (imageUrl.length === 0) {
+		return { success: false };
+	}
+
+	try {
+		const url = new URL(imageUrl);
+
+		if (url.origin !== gridOrigin) {
+			return {
+				success: false,
+				validationError: `Please enter a grid crop page, starting with ${gridOrigin}`,
+			};
+		}
+
+		if (!gridCropPathPattern.test(url.pathname)) {
+			return {
+				success: false,
+				validationError: `Please enter a grid crop page - this is not an image page`,
+			};
+		}
+
+		const cropId = url.searchParams.get('crop') ?? '';
+		if (!gridCropParamPattern.test(cropId)) {
+			return {
+				success: false,
+				validationError: `Please enter a grid crop page - this needs the "crop" parameter`,
+			};
+		}
+
+		return {
+			success: true,
+			validatedUrl: url,
+			cropId,
+			imageId: url.pathname.split('/').pop() ?? '',
+		};
+	} catch {
+		return {
+			success: false,
+			validationError: `Please enter a grid crop page`,
+		};
+	}
+};
+
 const guardianImageUrlHosts = ['media.guim.co.uk', 'i.guim.co.uk'];
 export const guardianImageUrlValidationMessage =
 	'Please enter a valid Guardian image URL';
