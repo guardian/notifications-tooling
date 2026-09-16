@@ -4,6 +4,7 @@ import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { layoutMainTheme } from '../themes';
 import { DispatchLandingTab } from './DispatchLandingTab';
+import { LatestPublishedContent } from './LatestPublishedContent';
 
 export const DispatchLandingLayout = () => {
 	return (
@@ -47,7 +48,9 @@ export const DispatchLandingLayout = () => {
 									maxWidth: '474px',
 								},
 							})}
-						></Item>
+						>
+							<LatestPublishedContent />
+						</Item>
 					</>
 				</Grid>
 			</Layout.Main>
