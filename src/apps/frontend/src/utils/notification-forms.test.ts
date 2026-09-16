@@ -23,6 +23,7 @@ describe('notification form length rules', () => {
 	it('accepts an app-alert headline of any length', () => {
 		const result = appAlertFormSchema.safeParse({
 			...defaultAppAlertFormValues,
+			alertType: 'breaking-news',
 			headline: 'a'.repeat(500),
 			editions: ['UK'],
 		});
@@ -33,6 +34,7 @@ describe('notification form length rules', () => {
 	it('accepts an empty or valid app-alert thumbnail URL', () => {
 		const values = {
 			...defaultAppAlertFormValues,
+			alertType: 'breaking-news',
 			headline: 'A developing story',
 			editions: ['UK'] as const,
 		};
@@ -107,6 +109,35 @@ describe('notification form length rules', () => {
 		).toBe(false);
 	});
 
+	it('starts without a kicker and requires one on submit', () => {
+		expect(defaultNewsletterFormValues.kicker).toBe('');
+
+		const result = newsletterFormSchema.safeParse({
+			...defaultNewsletterFormValues,
+			subject: 'Subject',
+			preview: 'Preview',
+			audienceSegments: ['UK'],
+		});
+
+		expect(
+			result.error?.issues.find(({ path }) => path[0] === 'kicker')?.message,
+		).toBe('Please select a kicker');
+	});
+
+	it('starts without an alert type and requires one on submit', () => {
+		expect(defaultAppAlertFormValues.alertType).toBe('');
+
+		const result = appAlertFormSchema.safeParse({
+			...defaultAppAlertFormValues,
+			headline: 'A developing story',
+			editions: ['UK'],
+		});
+
+		expect(
+			result.error?.issues.find(({ path }) => path[0] === 'alertType')?.message,
+		).toBe('Please select an alert type');
+	});
+
 	it('requires preview text only when preview is shown', () => {
 		expect(validateNewsletterPreview('   ', true)).toBe(
 			'Preview text is required',
@@ -120,6 +151,7 @@ describe('notification form length rules', () => {
 		expect(
 			newsletterFormSchema.safeParse({
 				...defaultNewsletterFormValues,
+				kicker: 'none',
 				subject: 'Subject',
 				preview: '   ',
 				showPreview: true,
@@ -130,6 +162,7 @@ describe('notification form length rules', () => {
 		expect(
 			newsletterFormSchema.safeParse({
 				...defaultNewsletterFormValues,
+				kicker: 'none',
 				subject: 'Subject',
 				preview: '   ',
 				showPreview: false,

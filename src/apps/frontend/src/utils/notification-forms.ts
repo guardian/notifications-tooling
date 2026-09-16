@@ -14,7 +14,9 @@ import {
 export const newsletterFormSchema = z
 	.object({
 		dispatchId: z.string().optional(),
-		kicker: kickerSchema,
+		kicker: z
+			.union([kickerSchema, z.literal('')])
+			.refine((kicker): boolean => kicker !== '', 'Please select a kicker'),
 		subject: z.string().trim().min(1, 'Subject is required'),
 		preview: z.string().trim(),
 		showPreview: z.boolean(),
@@ -40,7 +42,12 @@ export const appAlertFormSchema = z.object({
 	// The selectable alert types are the topic types the backend exposes via
 	// `GET /v1/channels/audiences`, so this cannot be a fixed enum. The select
 	// constrains the value to that list, and the broker rejects unknown ids.
-	alertType: z.string().min(1, 'Please select an alert type'),
+	alertType: z
+		.string()
+		.refine(
+			(alertType): boolean => alertType !== '',
+			'Please select an alert type',
+		),
 	headline: z.string().trim().min(1, 'Headline is required'),
 	editions: z
 		.array(displayAppAlertTopicEditionId)
@@ -70,7 +77,7 @@ export const validateNewsletterPreview = (
 };
 
 export const defaultNewsletterFormValues: NewsletterFormValues = {
-	kicker: 'breaking-news',
+	kicker: '',
 	subject: '',
 	preview: '',
 	showPreview: true,
@@ -79,7 +86,7 @@ export const defaultNewsletterFormValues: NewsletterFormValues = {
 };
 
 export const defaultAppAlertFormValues: AppAlertFormValues = {
-	alertType: 'breaking-news',
+	alertType: '',
 	headline: '',
 	editions: [],
 	includeThumbnail: true,

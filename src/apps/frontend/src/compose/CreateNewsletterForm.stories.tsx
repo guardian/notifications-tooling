@@ -83,6 +83,9 @@ export const Default: Story = {
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Article')).toBeInTheDocument();
 		await expect(canvas.getByText('Kicker')).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', { name: 'Choose a kicker Kicker' }),
+		).toBeVisible();
 		await expect(canvas.getByText('Subject')).toBeInTheDocument();
 		await expect(canvas.getByText('Show preview text')).toBeInTheDocument();
 		await expect(canvas.getByText('Preview text')).toBeInTheDocument();
@@ -110,7 +113,9 @@ export const SelectNoKicker: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const screen = within(canvasElement.ownerDocument.body);
-		const kicker = canvas.getByRole('button', { name: 'Breaking news Kicker' });
+		const kicker = canvas.getByRole('button', {
+			name: 'Choose a kicker Kicker',
+		});
 
 		await userEvent.click(kicker);
 		await userEvent.click(screen.getByRole('option', { name: 'None' }));
@@ -130,6 +135,7 @@ export const ValidationErrors: Story = {
 		);
 
 		await expect(canvas.getByText('Subject is required')).toBeVisible();
+		await expect(canvas.getByText('Please select a kicker')).toBeVisible();
 		await expect(
 			canvas.getByText('Please select an audience segment'),
 		).toBeVisible();
