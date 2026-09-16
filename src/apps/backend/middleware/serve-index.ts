@@ -40,12 +40,16 @@ export const serveIndex: RequestHandler = async (
 	res: Response,
 ) => {
 	const DISABLE_APP_SEND_TAB = await getSSMParameter('DISABLE_APP_SEND_TAB');
+	const GRID_API_URI = await getSSMParameter('GRID_API_URI');
+	const GRID_URI = await getSSMParameter('GRID_URI');
 	const permissions = await listUserPermissions(req.user!.email);
 	const config: AppConfig = {
 		user: req.user!,
 		permissions,
 		DISABLE_APP_SEND_TAB: DISABLE_APP_SEND_TAB.toLowerCase() === 'true',
 		stage: env.STAGE,
+		gridApiUri: GRID_API_URI,
+		gridUri: GRID_URI,
 	};
 	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,

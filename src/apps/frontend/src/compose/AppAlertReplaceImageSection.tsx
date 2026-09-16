@@ -4,7 +4,8 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { ConfigContext } from '../config/ConfigContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { validateGridCropPageUrl } from '../utils/form-validation';
 
@@ -15,15 +16,11 @@ interface AppAlertReplaceImageSectionProps {
 	errorMessage?: string;
 }
 
-// TO DO - define as config values, determined by stage
-const GRID_API_URI = 'https://api.media.gutools.co.uk';
-const GRID_URI = 'https://media.gutools.co.uk';
-
 type GridLookUpResult =
 	{ success: true; imageUrl: string } | { success: false; error: Error };
 
 const getGridImageUrl = async (
-	gridApiUri: string,
+	gridApiUri: string | undefined,
 	cropId: string,
 	imageId: string,
 ): Promise<GridLookUpResult> => {
@@ -52,11 +49,12 @@ export const AppAlertReplaceImageSection = ({
 	onUpdate,
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
+	const { gridApiUri, gridUri } = useContext(ConfigContext) ?? {};
 	const [imageUpdated, setImageUpdated] = useState(false);
 	const [isProcessingUrl, setIsProcessingUrl] = useState(false);
 	const validationResult = validateGridCropPageUrl(
 		replacementImageUrl.trim(),
-		GRID_URI,
+		gridUri,
 	);
 	const displayedErrorMessage =
 		validationResult.validationError ?? errorMessage;
@@ -105,18 +103,16 @@ export const AppAlertReplaceImageSection = ({
 						const { cropId, imageId } = validationResult;
 
 						setIsProcessingUrl(true);
-						void getGridImageUrl(GRID_API_URI, cropId, imageId).then(
-							(result) => {
-								if (!result.success) {
-									alert('image process fail');
-									console.error(result.error);
-									return;
-								}
-								onUpdate(result.imageUrl);
-								setImageUpdated(true);
-								setIsProcessingUrl(false);
-							},
-						);
+						void getGridImageUrl(gridApiUri, cropId, imageId).then((result) => {
+							if (!result.success) {
+								alert('image process fail');
+								console.error(result.error);
+								return;
+							}
+							onUpdate(result.imageUrl);
+							setImageUpdated(true);
+							setIsProcessingUrl(false);
+						});
 					}}
 				>
 					Update

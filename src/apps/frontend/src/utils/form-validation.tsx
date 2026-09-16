@@ -107,7 +107,7 @@ type GridCropUrlValidationResult =
 
 export const validateGridCropPageUrl = (
 	imageUrl: string,
-	gridOrigin: string,
+	gridOrigin: string | undefined,
 ): GridCropUrlValidationResult => {
 	if (imageUrl.length === 0) {
 		return { success: false };
@@ -152,7 +152,11 @@ export const validateGridCropPageUrl = (
 	}
 };
 
-const guardianImageUrlHosts = ['media.guim.co.uk', 'i.guim.co.uk'];
+const guardianImageUrlHosts = [
+	'media.guim.co.uk',
+	'i.guim.co.uk',
+	'media.guimcode.co.uk',
+];
 export const guardianImageUrlValidationMessage =
 	'Please enter a valid Guardian image URL';
 
