@@ -16,24 +16,6 @@ import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
 import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
 
-const dispatchTiles = [
-	{
-		title: 'Create a newsletter email',
-		icon: 'mail',
-		href: notificationRoutes.email.create,
-	},
-	{
-		title: 'Create an app alert',
-		icon: phoneIphoneIcon,
-		href: notificationRoutes.push.create,
-	},
-	{
-		title: 'History',
-		icon: 'history',
-		href: '/history',
-	},
-] as const;
-
 export const DispatchLandingTab = () => {
 	const [searchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
@@ -86,23 +68,51 @@ export const DispatchLandingTab = () => {
 						},
 					}}
 				>
-					{dispatchTiles.map((tile) => (
-						<Tile
-							size={'sm'}
-							key={tile.title}
-							href={tile.href}
-							icon={tile.icon}
-							typography="headingMd"
-							cssOverrides={css({
-								width: '100%',
-								[from.md]: {
-									width: '300px',
-								},
-							})}
-						>
-							{tile.title}
-						</Tile>
-					))}
+					<Tile
+						size={'sm'}
+						key={'newsletter-email'}
+						href={notificationRoutes.email.create}
+						icon={'mail'}
+						typography="headingMd"
+						cssOverrides={css({
+							width: '100%',
+							[from.md]: {
+								width: '300px',
+							},
+						})}
+					>
+						Create a newsletter email
+					</Tile>
+					<Tile
+						size={'sm'}
+						key={'app-alert'}
+						href={notificationRoutes.push.create}
+						icon={phoneIphoneIcon}
+						typography="headingMd"
+						cssOverrides={css({
+							width: '100%',
+							[from.md]: {
+								width: '300px',
+							},
+						})}
+					>
+						Create an app alert
+					</Tile>
+					<Tile
+						size={'sm'}
+						key={'history'}
+						href={'/history'}
+						icon={'history'}
+						typography="headingMd"
+						cssOverrides={css({
+							width: '100%',
+							[from.md]: {
+								width: '300px',
+							},
+						})}
+					>
+						History
+					</Tile>
 				</div>
 				<div css={dispatchLandingTheme.dispatchTableSection}>
 					<DispatchLandingHistoryView
