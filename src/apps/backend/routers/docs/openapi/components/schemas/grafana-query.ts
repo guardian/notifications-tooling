@@ -1,36 +1,4 @@
-/** The request body and response payloads used by the Grafana datasource. */
-export const grafanaQueryRequestSchema = {
-	type: 'object',
-	required: ['range', 'targets'],
-	properties: {
-		range: {
-			type: 'object',
-			required: ['from', 'to'],
-			properties: {
-				from: { type: 'string', format: 'date-time' },
-				to: { type: 'string', format: 'date-time' },
-			},
-		},
-		targets: {
-			type: 'array',
-			minItems: 1,
-			maxItems: 1,
-			items: {
-				type: 'object',
-				required: ['target'],
-				properties: {
-					target: {
-						type: 'string',
-						enum: ['notifications'],
-						example: 'notifications',
-					},
-					refId: { type: 'string', example: 'A' },
-				},
-			},
-		},
-	},
-} as const;
-
+/** The response and error payloads used by the Grafana datasource. */
 export const grafanaQueryResponseSchema = {
 	type: 'array',
 	items: {
@@ -50,5 +18,9 @@ export const grafanaQueryErrorSchema = {
 	properties: {
 		error: { type: 'string', example: 'invalid_query' },
 		message: { type: 'string' },
+		requestId: {
+			type: 'string',
+			description: 'Correlates this failure with the backend log record.',
+		},
 	},
 } as const;

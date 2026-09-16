@@ -7,9 +7,9 @@ import { channelConstraintsSchema } from './channel-constraints';
 import { emailPreviewErrorSchema } from './email-preview-error';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { grafanaMetricsSchema } from './grafana-metrics';
+import { grafanaQueryRequestJsonSchema } from './grafana-query-request';
 import {
 	grafanaQueryErrorSchema,
-	grafanaQueryRequestSchema,
 	grafanaQueryResponseSchema,
 } from './grafana-query';
 import { healthStatusSchema } from './health-status';
@@ -37,7 +37,7 @@ import { userResponseSchema, userSchema } from './user';
 export const schemas = {
 	HealthStatus: healthStatusSchema,
 	GrafanaMetrics: grafanaMetricsSchema,
-	GrafanaQueryRequest: grafanaQueryRequestSchema,
+	GrafanaQueryRequest: grafanaQueryRequestJsonSchema,
 	GrafanaQueryResponse: grafanaQueryResponseSchema,
 	GrafanaQueryError: grafanaQueryErrorSchema,
 	NotificationChannel: notificationChannelSchema,

@@ -136,10 +136,86 @@ describe('Grafana datasource endpoints', () => {
 		});
 
 		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({
+		expect(await response.json()).toMatchObject({
 			error: 'range_too_large',
 			message: 'Grafana query range must not exceed 90 days.',
 		});
+	});
+
+	it('rejects a range where from is after to', async () => {
+		const response = await fetch(`${server.baseUrl}/query`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				range: {
+					from: '2026-09-09T00:00:00.000Z',
+					to: '2026-09-01T00:00:00.000Z',
+				},
+				targets: [{ target: 'notifications', refId: 'A' }],
+			}),
+		});
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({
+			error: 'invalid_query',
+			message: 'Grafana query range.from and range.to are required dates.',
+		});
+	});
+
+	it('rejects a malformed date in the query range', async () => {
+		const response = await fetch(`${server.baseUrl}/query`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				range: { from: 'not-a-date', to: '2026-09-09T00:00:00.000Z' },
+				targets: [{ target: 'notifications', refId: 'A' }],
+			}),
+		});
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({
+			error: 'invalid_query',
+			message: 'Grafana query range.from and range.to are required dates.',
+		});
+	});
+
+	it('flags a truncated result set with a Grafana notice instead of hiding it', async () => {
+		listSendsWithDispatchesInWindowMock.mockImplementationOnce(() =>
+			Promise.resolve(
+				Array.from({ length: 5000 }, () => {
+					const persisted = buildPersistedNotification({});
+					return {
+						...persisted.notification,
+						dispatches: persisted.dispatches,
+					};
+				}),
+			),
+		);
+
+		const response = await fetch(`${server.baseUrl}/query`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				range: {
+					from: '2026-09-01T00:00:00.000Z',
+					to: '2026-09-09T00:00:00.000Z',
+				},
+				targets: [{ target: 'notifications', refId: 'A' }],
+			}),
+		});
+
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as Array<{
+			rows: unknown[][];
+			meta?: { notices: Array<{ severity: string; text: string }> };
+		}>;
+		expect(body[0]?.rows).toHaveLength(5000);
+		expect(body[0]?.meta?.notices).toEqual([
+			{
+				severity: 'warning',
+				text: 'Showing the latest 5000 notifications; narrow the query range to see all results.',
+			},
+		]);
 	});
 
 	it('rejects an unsupported metric', async () => {
@@ -156,7 +232,7 @@ describe('Grafana datasource endpoints', () => {
 		});
 
 		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({
+		expect(await response.json()).toMatchObject({
 			error: 'unsupported_metric',
 			message: "The supported metric is 'notifications'.",
 		});

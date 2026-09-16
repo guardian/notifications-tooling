@@ -74,7 +74,13 @@ app.use('/v1/user', userRouter);
 app.use('/v1/preview', previewRouter);
 app.use('/docs/api', docsRouter);
 
-const serverRoutePrefixes = ['/health', '/v1', '/docs/api'];
+const serverRoutePrefixes = [
+	'/health',
+	'/v1',
+	'/docs/api',
+	'/metrics',
+	'/query',
+];
 const frontendAssetPathPattern =
 	/\.(?:avif|css|gif|ico|jpe?g|js|map|png|svg|webmanifest|webp|woff2?)$/i;
 
