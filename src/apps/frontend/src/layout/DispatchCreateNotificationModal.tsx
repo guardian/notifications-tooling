@@ -30,16 +30,20 @@ export const DispatchCreateNotificationModal = ({
 		<Modal
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
+			cssOverrides={css({
+				[from.lg]: {
+					top: '284px',
+					marginLeft: '650px',
+				},
+			})}
 			theme={{
 				overlay: {
 					position: 'fixed',
 				},
 				modal: {
 					width: '484px',
-					maxWidth: '484px',
+					maxWidth: 'min(484px, 90svw)',
 					maxHeight: '352px',
-					top: '284px',
-					marginLeft: '650px',
 					borderRadius: semanticRadius.cornerMd,
 					padding: {
 						top: semanticSpacing.stackMd,

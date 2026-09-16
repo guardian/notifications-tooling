@@ -37,7 +37,9 @@ export const Default: Story = {
 		);
 
 		await expect(
-			await screen.findByRole('dialog', { name: 'Choose an alert type for this content' }),
+			await screen.findByRole('dialog', {
+				name: 'Choose an alert type for this content',
+			}),
 		).toBeVisible();
 		await expect(
 			screen.getByRole('link', { name: 'Create a newsletter email' }),
@@ -49,7 +51,9 @@ export const Default: Story = {
 		await userEvent.click(screen.getByRole('button', { name: 'Close Modal' }));
 		await waitFor(() =>
 			expect(
-				screen.queryByRole('dialog', { name: 'Choose an alert type for this content' }),
+				screen.queryByRole('dialog', {
+					name: 'Choose an alert type for this content',
+				}),
 			).not.toBeInTheDocument(),
 		);
 	},
