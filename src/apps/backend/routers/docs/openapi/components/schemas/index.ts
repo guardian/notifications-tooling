@@ -1,4 +1,5 @@
 import { articleResolutionErrorSchema } from './article-resolution-error';
+import { capiUnavailableErrorSchema } from './capi-unavailable-error';
 import {
 	channelAudiencesSchema,
 	emailChannelConfigSchema,
@@ -10,6 +11,7 @@ import { emailPreviewResponseJsonSchema } from './email-preview-response';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
+import { latestArticlesResponseJsonSchema } from './latest-articles-response';
 import { liveblogBlockSchema } from './liveblog-block';
 import { notificationSchema } from './notification';
 import { notificationChannelSchema } from './notification-channel';
@@ -48,6 +50,8 @@ export const schemas = {
 	ChannelConstraints: channelConstraintsSchema,
 	ChannelAudiences: channelAudiencesSchema,
 	EmailChannelConfig: emailChannelConfigSchema,
+	CapiUnavailableError: capiUnavailableErrorSchema,
+	LatestArticlesResponse: latestArticlesResponseJsonSchema,
 	LiveblogBlock: liveblogBlockSchema,
 	ResolveArticleRequest: resolveArticleRequestSchema,
 	ResolveArticleResponse: resolveArticleResponseSchema,

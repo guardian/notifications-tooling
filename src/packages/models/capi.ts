@@ -108,6 +108,60 @@ export const capiResponseSchema = z.object({
 });
 export type CapiResponse = z.infer<typeof capiResponseSchema>;
 
+const capiSearchResultSchema = z.looseObject({
+	sectionName: z.string().optional(),
+	webPublicationDate: z.iso.datetime().optional(),
+	webTitle: z.string(),
+	webUrl: z.url(),
+	fields: z
+		.object({
+			headline: z.string().optional(),
+			productionOffice: z.enum(['UK', 'US', 'AUS']).optional(),
+			thumbnail: z.url().optional(),
+		})
+		.optional(),
+	tags: z
+		.array(
+			z.looseObject({
+				id: z.string(),
+			}),
+		)
+		.default([]),
+});
+
+export const capiSearchResponseSchema = z.object({
+	response: z.object({
+		status: z.literal('ok'),
+		results: z.array(capiSearchResultSchema),
+	}),
+});
+
+export const productionOfficeSchema = z.enum(['uk', 'us', 'au']);
+export type ProductionOffice = z.infer<typeof productionOfficeSchema>;
+
+export const audienceRegionSchema = z.enum(['uk', 'us', 'au', 'global']);
+export type AudienceRegion = z.infer<typeof audienceRegionSchema>;
+export const intendedAudienceSchema = z.array(audienceRegionSchema);
+export type IntendedAudience = z.infer<typeof intendedAudienceSchema>;
+
+export const latestArticleSchema = z.object({
+	webUrl: z.url(),
+	publishedAt: z.iso.datetime(),
+	headline: z.string(),
+	section: z.string(),
+	thumbnail: z.url().optional(),
+	productionOffice: productionOfficeSchema.optional(),
+	intendedAudience: intendedAudienceSchema,
+});
+export type LatestArticle = z.infer<typeof latestArticleSchema>;
+
+export const latestArticlesResponseSchema = z.object({
+	articles: z.array(latestArticleSchema),
+});
+export type LatestArticlesResponse = z.infer<
+	typeof latestArticlesResponseSchema
+>;
+
 export const resolveArticleResponseSchema = z.object({
 	article: capiContentSchema,
 	requestedUrl: z.string().optional(),

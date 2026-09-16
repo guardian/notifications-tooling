@@ -20,3 +20,19 @@ describe('email preview OpenAPI contract', () => {
 		).toEqual(['articleId', 'html', 'newsletterId']);
 	});
 });
+
+describe('latest articles OpenAPI contract', () => {
+	it('registers the route with its generated response schema', () => {
+		const latestArticlesPath =
+			openApiDocument.paths['/v1/content/articles/latest'].get;
+
+		expect(
+			latestArticlesPath.responses['200'].content['application/json'].schema
+				.$ref,
+		).toBe('#/components/schemas/LatestArticlesResponse');
+		expect(
+			latestArticlesPath.responses['502'].content['application/json'].schema
+				.$ref,
+		).toBe('#/components/schemas/CapiUnavailableError');
+	});
+});

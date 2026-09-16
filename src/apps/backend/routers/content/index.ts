@@ -1,12 +1,17 @@
 import { getSSMParameter } from '@config/ssm';
-import type { ResolveArticleRequest, ResolveArticleResponse } from '@models';
+import type {
+	LatestArticle,
+	LatestArticlesResponse,
+	ResolveArticleRequest,
+	ResolveArticleResponse,
+} from '@models';
 import {
 	CapiError,
 	resolveArticleRequestSchema,
 	type ResolvedArticle,
 	UserPermissions,
 } from '@models';
-import { fetchArticle } from '@services';
+import { fetchArticle, fetchLatestArticles } from '@services';
 import { determineArticleId } from '@utils';
 import { type Request, type Response, Router } from 'express';
 import validate from 'express-zod-safe';
@@ -17,8 +22,10 @@ import { handleValidationErrors } from '../notifications';
 
 /** CAPI is given a fixed request timeout; it is not configurable per stage. */
 const CAPI_REQUEST_TIMEOUT_MS = 10_000;
+const latestArticlesWindowMs = 24 * 60 * 60 * 1000;
 
 type ResolveArticle = (articleId: string) => Promise<ResolvedArticle>;
+type ListLatestArticles = (fromDate: Date) => Promise<LatestArticle[]>;
 
 /**
  * Default resolver: reads the CAPI endpoint and key from SSM, then looks the
@@ -39,10 +46,52 @@ const resolveArticleFromCapi: ResolveArticle = async (articleId) => {
 	});
 };
 
+const listLatestArticlesFromCapi: ListLatestArticles = async (fromDate) => {
+	const [endpoint, apiKey] = await Promise.all([
+		getSSMParameter('CAPI_ENDPOINT'),
+		getSSMParameter('CAPI_API_KEY'),
+	]);
+
+	return fetchLatestArticles({
+		endpoint,
+		apiKey,
+		fromDate,
+		timeoutMs: CAPI_REQUEST_TIMEOUT_MS,
+	});
+};
+
 export const createContentRouter = (
 	resolveArticle: ResolveArticle = resolveArticleFromCapi,
-) =>
-	Router().post(
+	listLatestArticles: ListLatestArticles = listLatestArticlesFromCapi,
+	now: () => Date = () => new Date(),
+) => {
+	const router = Router();
+
+	router.get(
+		'/articles/latest',
+		authMiddleware,
+		requirePermissions([UserPermissions.DispatchAccess]),
+		async (req: Request, res: Response) => {
+			try {
+				const fromDate = new Date(now().getTime() - latestArticlesWindowMs);
+				const articles = await listLatestArticles(fromDate);
+				const responseBody: LatestArticlesResponse = { articles };
+				return res.status(200).json(responseBody);
+			} catch {
+				return res
+					.status(502)
+					.json(
+						buildErrorEnvelope(
+							req,
+							'capi_unavailable',
+							'The Content API could not be reached. Please try again.',
+						),
+					);
+			}
+		},
+	);
+
+	router.post(
 		'/articles/resolve',
 		authMiddleware,
 		requirePermissions([UserPermissions.DispatchAccess]),
@@ -130,5 +179,8 @@ export const createContentRouter = (
 			}
 		},
 	);
+
+	return router;
+};
 
 export const contentRouter = createContentRouter();
