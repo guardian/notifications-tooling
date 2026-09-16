@@ -1,6 +1,5 @@
 import { css } from '@emotion/react';
 import {
-	semanticColors,
 	semanticRadius,
 	semanticSpacing,
 } from '@guardian/stand';
@@ -51,8 +50,6 @@ export const DispatchCreateNotificationModal = ({
 						left: semanticSpacing.stackLg,
 						right: semanticSpacing.stackLg,
 					},
-					gap: '10px',
-					color: semanticColors.bg.base,
 					boxShadow: '0px 2px 6px 0px #0000004D',
 				},
 			}}
@@ -68,15 +65,6 @@ export const DispatchCreateNotificationModal = ({
 							gap: semanticSpacing.stackSm,
 						})}
 					>
-						<Tile
-							size="sm"
-							href={routes.createNewsletterEmail}
-							icon="mail"
-							typography="headingMd"
-							cssOverrides={tileStyles}
-						>
-							Create a newsletter email
-						</Tile>
 						{routes.createAppAlert && (
 							<Tile
 								size="sm"
@@ -88,6 +76,15 @@ export const DispatchCreateNotificationModal = ({
 								Create an app alert
 							</Tile>
 						)}
+						<Tile
+							size="sm"
+							href={routes.createNewsletterEmail}
+							icon="mail"
+							typography="headingMd"
+							cssOverrides={tileStyles}
+						>
+							Create a newsletter email
+						</Tile>
 					</div>
 				</Dialog.Content>
 			</Dialog>
