@@ -11,6 +11,7 @@ import { emailPreviewResponseJsonSchema } from './email-preview-response';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
+import { latestArticleJsonSchema } from './latest-article';
 import { latestArticlesResponseJsonSchema } from './latest-articles-response';
 import { liveblogBlockSchema } from './liveblog-block';
 import { notificationSchema } from './notification';
@@ -51,6 +52,7 @@ export const schemas = {
 	ChannelAudiences: channelAudiencesSchema,
 	EmailChannelConfig: emailChannelConfigSchema,
 	CapiUnavailableError: capiUnavailableErrorSchema,
+	LatestArticle: latestArticleJsonSchema,
 	LatestArticlesResponse: latestArticlesResponseJsonSchema,
 	LiveblogBlock: liveblogBlockSchema,
 	ResolveArticleRequest: resolveArticleRequestSchema,

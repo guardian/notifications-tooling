@@ -3,11 +3,12 @@ import {
 	channelsConstraintsPath,
 	emailConfigPath,
 } from './channels';
-import { latestArticlesPath, resolveArticlePath } from './content';
 import { healthPath } from './health';
+import { latestArticlesPath } from './latest-articles';
 import { notificationTestsPath } from './notification-tests';
 import { notificationByIdPath, notificationsPath } from './notifications';
 import { emailPreviewPath } from './preview';
+import { resolveArticlePath } from './resolve-article';
 import { userPath } from './user';
 
 /** The `paths` block of the OpenAPI document, keyed by route. */

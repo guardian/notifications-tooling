@@ -95,7 +95,10 @@ const withResolver = async (
 };
 
 const withLatestArticlesServer = async (
-	listLatestArticles: (fromDate: Date) => Promise<LatestArticle[]>,
+	listLatestArticles: (
+		fromDate: Date,
+		toDate: Date,
+	) => Promise<LatestArticle[]>,
 	run: (baseUrl: string) => Promise<void>,
 ): Promise<void> => {
 	const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
@@ -153,6 +156,7 @@ describe('GET /v1/content/articles/latest', () => {
 			expect(await response.json()).toEqual({ articles });
 			expect(listLatestArticles).toHaveBeenCalledWith(
 				new Date('2026-09-15T13:03:00.000Z'),
+				new Date('2026-09-16T13:03:00.000Z'),
 			);
 		});
 	});

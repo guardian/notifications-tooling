@@ -34,5 +34,21 @@ describe('latest articles OpenAPI contract', () => {
 			latestArticlesPath.responses['502'].content['application/json'].schema
 				.$ref,
 		).toBe('#/components/schemas/CapiUnavailableError');
+		expect(
+			openApiDocument.components.schemas.LatestArticlesResponse,
+		).toMatchObject({
+			properties: {
+				articles: {
+					items: { $ref: '#/components/schemas/LatestArticle' },
+				},
+			},
+		});
+		expect(openApiDocument.components.schemas.LatestArticle.required).toEqual([
+			'webUrl',
+			'publishedAt',
+			'headline',
+			'section',
+			'intendedAudience',
+		]);
 	});
 });

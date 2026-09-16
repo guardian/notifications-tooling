@@ -25,7 +25,10 @@ const CAPI_REQUEST_TIMEOUT_MS = 10_000;
 const latestArticlesWindowMs = 24 * 60 * 60 * 1000;
 
 type ResolveArticle = (articleId: string) => Promise<ResolvedArticle>;
-type ListLatestArticles = (fromDate: Date) => Promise<LatestArticle[]>;
+type ListLatestArticles = (
+	fromDate: Date,
+	toDate: Date,
+) => Promise<LatestArticle[]>;
 
 /**
  * Default resolver: reads the CAPI endpoint and key from SSM, then looks the
@@ -46,7 +49,10 @@ const resolveArticleFromCapi: ResolveArticle = async (articleId) => {
 	});
 };
 
-const listLatestArticlesFromCapi: ListLatestArticles = async (fromDate) => {
+const listLatestArticlesFromCapi: ListLatestArticles = async (
+	fromDate,
+	toDate,
+) => {
 	const [endpoint, apiKey] = await Promise.all([
 		getSSMParameter('CAPI_ENDPOINT'),
 		getSSMParameter('CAPI_API_KEY'),
@@ -56,6 +62,7 @@ const listLatestArticlesFromCapi: ListLatestArticles = async (fromDate) => {
 		endpoint,
 		apiKey,
 		fromDate,
+		toDate,
 		timeoutMs: CAPI_REQUEST_TIMEOUT_MS,
 	});
 };
@@ -73,8 +80,9 @@ export const createContentRouter = (
 		requirePermissions([UserPermissions.DispatchAccess]),
 		async (req: Request, res: Response) => {
 			try {
-				const fromDate = new Date(now().getTime() - latestArticlesWindowMs);
-				const articles = await listLatestArticles(fromDate);
+				const toDate = now();
+				const fromDate = new Date(toDate.getTime() - latestArticlesWindowMs);
+				const articles = await listLatestArticles(fromDate, toDate);
 				const responseBody: LatestArticlesResponse = { articles };
 				return res.status(200).json(responseBody);
 			} catch {

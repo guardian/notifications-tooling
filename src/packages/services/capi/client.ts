@@ -24,6 +24,7 @@ type FetchLatestArticlesRequest = {
 	endpoint: string;
 	apiKey: string;
 	fromDate: Date;
+	toDate: Date;
 	timeoutMs: number;
 };
 
@@ -92,11 +93,14 @@ export const fetchLatestArticles = async ({
 	endpoint,
 	apiKey,
 	fromDate,
+	toDate,
 	timeoutMs,
 }: FetchLatestArticlesRequest): Promise<LatestArticle[]> => {
 	const searchUrl = new URL('/search', endpoint);
 	searchUrl.searchParams.set('api-key', apiKey);
 	searchUrl.searchParams.set('from-date', fromDate.toISOString());
+	searchUrl.searchParams.set('to-date', toDate.toISOString());
+	searchUrl.searchParams.set('type', 'article|liveblog');
 	searchUrl.searchParams.set('order-by', 'newest');
 	searchUrl.searchParams.set('page-size', '200');
 	searchUrl.searchParams.set(

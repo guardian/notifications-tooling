@@ -189,7 +189,7 @@ describe('fetchArticle', () => {
 });
 
 describe('fetchLatestArticles', () => {
-	it('requests and maps recent articles newest first', async () => {
+	it('requests and maps recent articles and liveblogs newest first', async () => {
 		const timeoutSignal = new AbortController().signal;
 		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
 		const fetcher = spyOn(globalThis, 'fetch').mockResolvedValue(
@@ -208,6 +208,7 @@ describe('fetchLatestArticles', () => {
 						},
 						{
 							id: 'uk-news/2026/sep/16/newer',
+							type: 'liveblog',
 							sectionName: 'UK news',
 							webPublicationDate: '2026-09-16T12:00:00.000Z',
 							webTitle: 'Newer article',
@@ -231,6 +232,7 @@ describe('fetchLatestArticles', () => {
 			endpoint: 'https://content.guardianapis.com',
 			apiKey: 'test-key',
 			fromDate: new Date('2026-09-15T13:03:00.000Z'),
+			toDate: new Date('2026-09-16T13:03:00.000Z'),
 			timeoutMs: 10_000,
 		});
 
@@ -254,7 +256,7 @@ describe('fetchLatestArticles', () => {
 		]);
 		expect(fetcher).toHaveBeenCalledWith(
 			new URL(
-				'https://content.guardianapis.com/search?api-key=test-key&from-date=2026-09-15T13%3A03%3A00.000Z&order-by=newest&page-size=200&show-fields=headline%2Cthumbnail%2CproductionOffice&show-tags=tracking',
+				'https://content.guardianapis.com/search?api-key=test-key&from-date=2026-09-15T13%3A03%3A00.000Z&to-date=2026-09-16T13%3A03%3A00.000Z&type=article%7Cliveblog&order-by=newest&page-size=200&show-fields=headline%2Cthumbnail%2CproductionOffice&show-tags=tracking',
 			),
 			{ signal: timeoutSignal },
 		);
@@ -290,6 +292,7 @@ describe('fetchLatestArticles', () => {
 			endpoint: 'https://content.guardianapis.com',
 			apiKey: 'test-key',
 			fromDate: new Date('2026-09-15T13:03:00.000Z'),
+			toDate: new Date('2026-09-16T13:03:00.000Z'),
 			timeoutMs: 10_000,
 		});
 
@@ -297,7 +300,7 @@ describe('fetchLatestArticles', () => {
 		expect(fetcher).toHaveBeenNthCalledWith(
 			2,
 			new URL(
-				'https://content.guardianapis.com/content/world/2026/sep/16/article-199/next?api-key=test-key&from-date=2026-09-15T13%3A03%3A00.000Z&order-by=newest&page-size=200&show-fields=headline%2Cthumbnail%2CproductionOffice&show-tags=tracking',
+				'https://content.guardianapis.com/content/world/2026/sep/16/article-199/next?api-key=test-key&from-date=2026-09-15T13%3A03%3A00.000Z&to-date=2026-09-16T13%3A03%3A00.000Z&type=article%7Cliveblog&order-by=newest&page-size=200&show-fields=headline%2Cthumbnail%2CproductionOffice&show-tags=tracking',
 			),
 			{ signal: timeoutSignal },
 		);
@@ -324,6 +327,7 @@ describe('fetchLatestArticles', () => {
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
 				fromDate: new Date('2026-09-15T13:03:00.000Z'),
+				toDate: new Date('2026-09-16T13:03:00.000Z'),
 				timeoutMs: 10_000,
 			}),
 		).rejects.toMatchObject({ name: 'CapiError', reason: 'unavailable' });
@@ -353,6 +357,7 @@ describe('fetchLatestArticles', () => {
 			endpoint: 'https://content.guardianapis.com',
 			apiKey: 'test-key',
 			fromDate: new Date('2026-09-15T13:03:00.000Z'),
+			toDate: new Date('2026-09-16T13:03:00.000Z'),
 			timeoutMs: 10_000,
 		});
 
@@ -399,6 +404,7 @@ describe('fetchLatestArticles', () => {
 			endpoint: 'https://content.guardianapis.com',
 			apiKey: 'test-key',
 			fromDate: new Date('2026-09-15T13:03:00.000Z'),
+			toDate: new Date('2026-09-16T13:03:00.000Z'),
 			timeoutMs: 10_000,
 		});
 
@@ -428,6 +434,7 @@ describe('fetchLatestArticles', () => {
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
 				fromDate: new Date('2026-09-15T13:03:00.000Z'),
+				toDate: new Date('2026-09-16T13:03:00.000Z'),
 				timeoutMs: 10_000,
 			}),
 		).rejects.toMatchObject({ name: 'CapiError', reason: 'invalid_response' });
@@ -459,6 +466,7 @@ describe('fetchLatestArticles', () => {
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
 				fromDate: new Date('2026-09-15T13:03:00.000Z'),
+				toDate: new Date('2026-09-16T13:03:00.000Z'),
 				timeoutMs: 10_000,
 			}),
 		).rejects.toMatchObject({ name: 'CapiError', reason: 'invalid_response' });
