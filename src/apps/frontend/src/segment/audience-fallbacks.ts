@@ -35,7 +35,7 @@ export const FALLBACK_TOPIC_TYPES: AppAlertTopicOption[] = [
 	},
 ];
 
-export const FALLBACK_NEWSLETTER_SEGMENTS: NewsletterSegmentOption[] = [
+export const FALLBACK_NEWSLETTER_EMAIL_SEGMENTS: NewsletterSegmentOption[] = [
 	{ id: 'UK', label: 'United Kingdom' },
 	{ id: 'US', label: 'United States' },
 	{ id: 'AU', label: 'Australia' },

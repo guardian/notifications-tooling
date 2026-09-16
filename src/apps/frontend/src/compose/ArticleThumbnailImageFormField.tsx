@@ -10,7 +10,7 @@ import { getArticleThumbnail } from '../utils/article-thumbnail';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertReplaceImageSection } from './AppAlertReplaceImageSection';
 import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
-import { NotificationFormContext } from './NotificationContext';
+import { NotificationFormContext } from './NotificationFormContext';
 
 export const ArticleThumbnailImageFormField = () => {
 	const {
@@ -19,9 +19,9 @@ export const ArticleThumbnailImageFormField = () => {
 		formState: { errors },
 		setValue,
 	} = useFormContext<AppAlertFormValues>();
-	const { notification } = useContext(NotificationFormContext);
+	const { composerState } = useContext(NotificationFormContext);
 	const originalArticleThumbnailUrl =
-		getArticleThumbnail(notification.content).src ?? '';
+		getArticleThumbnail(composerState.article).src ?? '';
 	const articleThumbnailUrl =
 		useWatch<AppAlertFormValues, 'articleThumbnailUrl'>({
 			control,

@@ -3,9 +3,9 @@ import { baseSizing, semanticColors, semanticSpacing } from '@guardian/stand';
 import { TextArea } from '@guardian/stand/TextArea';
 import { Typography } from '@guardian/stand/Typography';
 import { Controller, useFormContext } from 'react-hook-form';
-import { NEWSLETTER_LIMIT_FALLBACKS } from '../hooks/useChannelConstraints';
+import { NEWSLETTER_EMAIL_LIMIT_FALLBACKS } from '../hooks/useChannelConstraints';
 import type { ChannelConstraintsResponse } from '../schemas';
-import { type NewsletterFormValues } from '../utils/notification-forms';
+import { type NewsletterEmailFormValues } from '../utils/notification-forms';
 import { CharacterCount } from './CharacterCount';
 import { PreviewTextToggle } from './PreviewTextToggle';
 
@@ -29,15 +29,15 @@ export const PreviewTextFormField = ({
 	showPreview,
 	onTogglePreview,
 }: PreviewTextFormFieldProps) => {
-	const { clearErrors, control } = useFormContext<NewsletterFormValues>();
-	const previewLimits =
+	const { clearErrors, control } = useFormContext<NewsletterEmailFormValues>();
+	const previewTextLimits =
 		constraints?.channels.newsletter.content.body ??
-		NEWSLETTER_LIMIT_FALLBACKS.body;
+		NEWSLETTER_EMAIL_LIMIT_FALLBACKS.body;
 
 	return (
 		<Controller
 			control={control}
-			name="preview"
+			name="previewText"
 			render={({ field, fieldState }) => (
 				<div css={styles.container}>
 					<Typography variant="labelFormMd">Preview text</Typography>
@@ -49,7 +49,7 @@ export const PreviewTextFormField = ({
 						onChange={(isSelected) => {
 							onTogglePreview(isSelected);
 							if (!isSelected) {
-								clearErrors('preview');
+								clearErrors('previewText');
 							}
 						}}
 					/>
@@ -78,7 +78,7 @@ export const PreviewTextFormField = ({
 							/>
 							<CharacterCount
 								count={field.value.length}
-								softLimit={previewLimits.recommended}
+								recommendedLimit={previewTextLimits.recommended}
 								fieldDescription="Preview text"
 							/>
 						</div>

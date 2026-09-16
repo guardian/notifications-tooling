@@ -1,38 +1,41 @@
-import type { NotificationAction, NotificationState } from '../types';
+import type {
+	NotificationComposerAction,
+	NotificationComposerState,
+} from '../types';
 
-export const defaultState: NotificationState = {
-	isFetchingContent: false,
+export const defaultComposerState: NotificationComposerState = {
+	isFetchingArticle: false,
 	isWaitingForSend: false,
-	confirmSendModalOpen: false,
+	isSendConfirmationOpen: false,
 };
 
-export const defaultAppAlertState: NotificationState = {
-	isFetchingContent: false,
+export const defaultAppAlertComposerState: NotificationComposerState = {
+	isFetchingArticle: false,
 	isWaitingForSend: false,
-	confirmSendModalOpen: false,
+	isSendConfirmationOpen: false,
 };
 
-export const notificationReducer = (
-	prevState: NotificationState,
-	action: NotificationAction,
-): NotificationState => {
+export const notificationComposerReducer = (
+	prevState: NotificationComposerState,
+	action: NotificationComposerAction,
+): NotificationComposerState => {
 	const state = structuredClone(prevState);
 	switch (action.type) {
 		case 'waiting-for-article':
 			return {
 				...state,
-				isFetchingContent: true,
+				isFetchingArticle: true,
 				fetchArticleError: undefined,
 			};
 
 		case 'receive-article': {
 			return {
 				...state,
-				fetchedArticleId: action.content.id,
-				content: action.content,
+				fetchedArticleId: action.article.id,
+				article: action.article,
 				requestedUrl: action.requestedUrl,
 				requestedBlock: action.requestedBlock,
-				isFetchingContent: false,
+				isFetchingArticle: false,
 				fetchArticleError: undefined,
 			};
 		}
@@ -41,23 +44,23 @@ export const notificationReducer = (
 			return {
 				...state,
 				fetchedArticleId: undefined,
-				content: undefined,
+				article: undefined,
 				requestedUrl: undefined,
 				requestedBlock: undefined,
-				isFetchingContent: false,
+				isFetchingArticle: false,
 				fetchArticleError: action.errorMessage,
 			};
 		}
 
-		case 'set-show-confirm-send': {
-			state.confirmSendModalOpen = action.isOpen;
+		case 'set-send-confirmation-open': {
+			state.isSendConfirmationOpen = action.isOpen;
 			return state;
 		}
 
 		case 'prepare-send': {
 			return {
 				...state,
-				confirmSendModalOpen: true,
+				isSendConfirmationOpen: true,
 				pendingRequest: action.request,
 			};
 		}
@@ -73,27 +76,27 @@ export const notificationReducer = (
 			return {
 				...state,
 				isWaitingForSend: false,
-				confirmSendModalOpen: false,
+				isSendConfirmationOpen: false,
 				sendFailure: action.failure,
 			};
 		}
 
 		case 'complete-send': {
-			return structuredClone(defaultState);
+			return structuredClone(defaultComposerState);
 		}
 
 		case 'reset-newsletter-email': {
-			if (state.isFetchingContent || state.isWaitingForSend) {
+			if (state.isFetchingArticle || state.isWaitingForSend) {
 				return state;
 			}
-			return structuredClone(defaultState);
+			return structuredClone(defaultComposerState);
 		}
 
 		case 'reset-app-alert': {
-			if (state.isFetchingContent || state.isWaitingForSend) {
+			if (state.isFetchingArticle || state.isWaitingForSend) {
 				return state;
 			}
-			return structuredClone(defaultAppAlertState);
+			return structuredClone(defaultAppAlertComposerState);
 		}
 
 		case 'dismiss-send-error': {

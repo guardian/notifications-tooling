@@ -2,7 +2,7 @@ import { type ClickableTileProps, Tile } from '@guardian/stand/Tile';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { notificationRoutes } from '../routes';
-import { phoneIphoneIcon } from '../ui/FlagIcons';
+import { phoneIphoneIcon } from '../ui/flag-icons';
 
 type StoryArgs = Pick<ClickableTileProps, 'href' | 'icon'> & {
 	title: string;
@@ -14,7 +14,7 @@ const meta = {
 	args: {
 		title: 'Create a newsletter email',
 		icon: 'mail',
-		href: notificationRoutes.email.create,
+		href: notificationRoutes.newsletter.create,
 	},
 	parameters: {
 		layout: 'centered',
@@ -42,7 +42,7 @@ export const Newsletter: Story = {
 		const canvas = within(canvasElement);
 		await expect(
 			canvas.getByRole('link', { name: 'Create a newsletter email' }),
-		).toHaveAttribute('href', notificationRoutes.email.create);
+		).toHaveAttribute('href', notificationRoutes.newsletter.create);
 	},
 };
 
@@ -50,13 +50,13 @@ export const AppAlert: Story = {
 	args: {
 		title: 'Create an app alert',
 		icon: phoneIphoneIcon,
-		href: notificationRoutes.push.create,
+		href: notificationRoutes['app-push'].create,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
 			canvas.getByRole('link', { name: 'Create an app alert' }),
-		).toHaveAttribute('href', notificationRoutes.push.create);
+		).toHaveAttribute('href', notificationRoutes['app-push'].create);
 	},
 };
 

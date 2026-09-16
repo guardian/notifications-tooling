@@ -7,9 +7,9 @@ interface ArticleThumbnail {
 }
 
 export const getArticleThumbnail = (
-	content?: ResolvedArticle,
+	article?: ResolvedArticle,
 ): ArticleThumbnail => {
-	const image = getSelectedLiveblogBlock(content)?.elements?.find(
+	const image = getSelectedLiveblogBlock(article)?.elements?.find(
 		({ type }) => type === 'image',
 	);
 	const preferredAsset = image?.assets?.find(
@@ -20,6 +20,6 @@ export const getArticleThumbnail = (
 	return {
 		alt: image?.imageTypeData?.alt,
 		src:
-			preferredAsset?.file ?? fallbackAsset?.file ?? content?.fields?.thumbnail,
+			preferredAsset?.file ?? fallbackAsset?.file ?? article?.fields?.thumbnail,
 	};
 };

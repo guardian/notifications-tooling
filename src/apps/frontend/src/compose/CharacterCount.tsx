@@ -9,7 +9,7 @@ import { Typography } from '@guardian/stand/Typography';
 
 interface Props {
 	count: number;
-	softLimit: number;
+	recommendedLimit: number;
 	fieldDescription: string;
 }
 
@@ -56,10 +56,10 @@ const styles = {
 export const CharacterCount = ({
 	count,
 
-	softLimit,
+	recommendedLimit,
 	fieldDescription,
 }: Props) => {
-	const warningLevel = count < softLimit ? undefined : 'warn';
+	const warningLevel = count < recommendedLimit ? undefined : 'warn';
 
 	return (
 		<div css={styles.container}>
@@ -75,7 +75,7 @@ export const CharacterCount = ({
 					</Badge>
 				)}
 				<Typography variant="bodySm">
-					{softLimit} characters or fewer preferred
+					{recommendedLimit} characters or fewer preferred
 				</Typography>
 			</div>
 			<div
@@ -87,7 +87,7 @@ export const CharacterCount = ({
 					{count}
 				</Typography>
 				<Typography>/</Typography>
-				<Typography>{softLimit}</Typography>
+				<Typography>{recommendedLimit}</Typography>
 			</div>
 		</div>
 	);

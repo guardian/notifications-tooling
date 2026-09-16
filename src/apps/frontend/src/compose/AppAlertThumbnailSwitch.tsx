@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
-import { ToggleSwitchTheme } from '../themes';
+import { toggleSwitchTheme } from '../themes';
 
 interface AppAlertThumbnailSwitchProps {
 	isSelected: boolean;
@@ -29,11 +29,11 @@ export const AppAlertThumbnailSwitch = ({
 				isDisabled={isDisabled}
 				isSelected={isSelected}
 				onChange={onChange}
-				css={ToggleSwitchTheme.baseStyle(isSelected)}
+				css={toggleSwitchTheme.baseStyle(isSelected)}
 			>
 				<Icon
 					symbol={isSelected ? 'check_circle' : 'circle'}
-					cssOverrides={ToggleSwitchTheme.thumb(isSelected)}
+					cssOverrides={toggleSwitchTheme.thumb(isSelected)}
 				/>
 			</ToggleButton>
 			<Typography variant="labelFormInlineSm">
