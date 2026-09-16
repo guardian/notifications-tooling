@@ -1,6 +1,7 @@
 import type {
 	AudienceRegion,
 	CapiResponse,
+	CapiSearchResponse,
 	IntendedAudience,
 	LatestArticle,
 	ProductionOffice,
@@ -34,6 +35,9 @@ const productionOfficeByCapiValue: Record<string, ProductionOffice> = {
 	AUS: 'au',
 };
 
+const encodeCapiId = (articleId: string): string =>
+	articleId.split('/').map(encodeURIComponent).join('/');
+
 const deriveIntendedAudience = (
 	tags: Array<{ id: string }>,
 ): IntendedAudience => {
@@ -54,7 +58,7 @@ export const fetchArticle = async ({
 	articleId,
 	timeoutMs,
 }: FetchArticleRequest): Promise<ResolvedArticle> => {
-	const encodedId = articleId.split('/').map(encodeURIComponent).join('/');
+	const encodedId = encodeCapiId(articleId);
 	const url = new URL(`/${encodedId}`, endpoint);
 	url.searchParams.set('api-key', apiKey);
 	url.searchParams.set('show-fields', 'all');
@@ -90,67 +94,82 @@ export const fetchLatestArticles = async ({
 	fromDate,
 	timeoutMs,
 }: FetchLatestArticlesRequest): Promise<LatestArticle[]> => {
-	const url = new URL('/search', endpoint);
-	url.searchParams.set('api-key', apiKey);
-	url.searchParams.set('from-date', fromDate.toISOString());
-	url.searchParams.set('order-by', 'newest');
-	url.searchParams.set('page-size', '200');
-	url.searchParams.set('show-fields', 'headline,thumbnail,productionOffice');
-	url.searchParams.set('show-tags', 'tracking');
+	const searchUrl = new URL('/search', endpoint);
+	searchUrl.searchParams.set('api-key', apiKey);
+	searchUrl.searchParams.set('from-date', fromDate.toISOString());
+	searchUrl.searchParams.set('order-by', 'newest');
+	searchUrl.searchParams.set('page-size', '200');
+	searchUrl.searchParams.set(
+		'show-fields',
+		'headline,thumbnail,productionOffice',
+	);
+	searchUrl.searchParams.set('show-tags', 'tracking');
 
-	let response: Response;
-	try {
-		response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
-	} catch (error) {
-		throw new CapiError('unavailable', { cause: error });
-	}
+	const signal = AbortSignal.timeout(timeoutMs);
+	const results: CapiSearchResponse['response']['results'] = [];
+	let pageUrl: URL | undefined = searchUrl;
 
-	if (!response.ok) {
-		throw new CapiError('unavailable');
-	}
-
-	try {
-		const parsed = capiSearchResponseSchema.parse(await response.json());
-		return parsed.response.results
-			.flatMap(
-				({
-					webUrl,
-					webPublicationDate,
-					webTitle,
-					sectionName,
-					fields,
-					tags,
-				}) => {
-					if (!sectionName || !webPublicationDate) {
-						return [];
-					}
-
-					return [
-						{
-							webUrl,
-							publishedAt: webPublicationDate,
-							headline: fields?.headline ?? webTitle,
-							section: sectionName,
-							...(fields?.thumbnail ? { thumbnail: fields.thumbnail } : {}),
-							...(fields?.productionOffice
-								? {
-										productionOffice:
-											productionOfficeByCapiValue[fields.productionOffice],
-									}
-								: {}),
-							intendedAudience: deriveIntendedAudience(tags),
-						} satisfies LatestArticle,
-					];
-				},
-			)
-			.sort(
-				(first, second) =>
-					Date.parse(second.publishedAt) - Date.parse(first.publishedAt),
-			);
-	} catch (error) {
-		if (error instanceof CapiError) {
-			throw error;
+	while (pageUrl) {
+		let response: Response;
+		try {
+			response = await fetch(pageUrl, { signal });
+		} catch (error) {
+			throw new CapiError('unavailable', { cause: error });
 		}
-		throw new CapiError('invalid_response', { cause: error });
+
+		if (!response.ok) {
+			throw new CapiError('unavailable');
+		}
+
+		let parsed: CapiSearchResponse;
+		try {
+			parsed = capiSearchResponseSchema.parse(await response.json());
+		} catch (error) {
+			throw new CapiError('invalid_response', { cause: error });
+		}
+
+		const pageResults = parsed.response.results;
+		results.push(...pageResults);
+		const lastResult = pageResults.at(-1);
+
+		if (pageResults.length < parsed.response.pageSize || !lastResult) {
+			pageUrl = undefined;
+		} else {
+			pageUrl = new URL(
+				`/content/${encodeCapiId(lastResult.id)}/next`,
+				endpoint,
+			);
+			pageUrl.search = searchUrl.search;
+		}
 	}
+
+	return results
+		.flatMap(
+			({ webUrl, webPublicationDate, webTitle, sectionName, fields, tags }) => {
+				if (!sectionName || !webPublicationDate) {
+					return [];
+				}
+
+				return [
+					{
+						webUrl,
+						publishedAt: webPublicationDate,
+						headline: fields?.headline ?? webTitle,
+						section: sectionName,
+						...(fields?.thumbnail ? { thumbnail: fields.thumbnail } : {}),
+						...(fields?.productionOffice
+							? {
+									productionOffice:
+										productionOfficeByCapiValue[fields.productionOffice],
+								}
+							: {}),
+						intendedAudience: deriveIntendedAudience(tags),
+					} satisfies LatestArticle,
+				];
+			},
+		)
+		.sort(
+			(first, second) =>
+				Date.parse(second.publishedAt) - Date.parse(first.publishedAt),
+		);
 };

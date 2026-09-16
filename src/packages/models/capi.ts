@@ -109,6 +109,7 @@ export const capiResponseSchema = z.object({
 export type CapiResponse = z.infer<typeof capiResponseSchema>;
 
 const capiSearchResultSchema = z.looseObject({
+	id: z.string(),
 	sectionName: z.string().optional(),
 	webPublicationDate: z.iso.datetime().optional(),
 	webTitle: z.string(),
@@ -132,9 +133,11 @@ const capiSearchResultSchema = z.looseObject({
 export const capiSearchResponseSchema = z.object({
 	response: z.object({
 		status: z.literal('ok'),
+		pageSize: z.number().int().positive(),
 		results: z.array(capiSearchResultSchema),
 	}),
 });
+export type CapiSearchResponse = z.infer<typeof capiSearchResponseSchema>;
 
 export const productionOfficeSchema = z.enum(['uk', 'us', 'au']);
 export type ProductionOffice = z.infer<typeof productionOfficeSchema>;

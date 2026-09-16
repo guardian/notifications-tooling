@@ -27,6 +27,15 @@ const capiPayload = {
 	},
 };
 
+const capiSearchResult = (index: number) => ({
+	id: `world/2026/sep/16/article-${index}`,
+	sectionName: 'World news',
+	webPublicationDate: '2026-09-16T12:00:00.000Z',
+	webTitle: `Article ${index}`,
+	webUrl: `https://www.theguardian.com/world/2026/sep/16/article-${index}`,
+	tags: [],
+});
+
 describe('fetchArticle', () => {
 	it('returns the full CAPI content item verbatim', async () => {
 		const timeoutSignal = new AbortController().signal;
@@ -187,6 +196,7 @@ describe('fetchLatestArticles', () => {
 			Response.json({
 				response: {
 					status: 'ok',
+					pageSize: 200,
 					results: [
 						{
 							id: 'world/2026/sep/15/older',
@@ -250,6 +260,75 @@ describe('fetchLatestArticles', () => {
 		);
 	});
 
+	it('fetches every page using the last result as the cursor', async () => {
+		const timeoutSignal = new AbortController().signal;
+		spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+		const firstPageResults = Array.from({ length: 200 }, (_, index) =>
+			capiSearchResult(index),
+		);
+		const fetcher = spyOn(globalThis, 'fetch')
+			.mockResolvedValueOnce(
+				Response.json({
+					response: {
+						status: 'ok',
+						pageSize: 200,
+						results: firstPageResults,
+					},
+				}),
+			)
+			.mockResolvedValueOnce(
+				Response.json({
+					response: {
+						status: 'ok',
+						pageSize: 200,
+						results: [capiSearchResult(200)],
+					},
+				}),
+			);
+
+		const articles = await fetchLatestArticles({
+			endpoint: 'https://content.guardianapis.com',
+			apiKey: 'test-key',
+			fromDate: new Date('2026-09-15T13:03:00.000Z'),
+			timeoutMs: 10_000,
+		});
+
+		expect(articles).toHaveLength(201);
+		expect(fetcher).toHaveBeenNthCalledWith(
+			2,
+			new URL(
+				'https://content.guardianapis.com/content/world/2026/sep/16/article-199/next?api-key=test-key&from-date=2026-09-15T13%3A03%3A00.000Z&order-by=newest&page-size=200&show-fields=headline%2Cthumbnail%2CproductionOffice&show-tags=tracking',
+			),
+			{ signal: timeoutSignal },
+		);
+	});
+
+	it('classifies a failure while fetching a later page as unavailable', () => {
+		const firstPageResults = Array.from({ length: 200 }, (_, index) =>
+			capiSearchResult(index),
+		);
+		spyOn(globalThis, 'fetch')
+			.mockResolvedValueOnce(
+				Response.json({
+					response: {
+						status: 'ok',
+						pageSize: 200,
+						results: firstPageResults,
+					},
+				}),
+			)
+			.mockResolvedValueOnce(new Response(null, { status: 503 }));
+
+		expect(
+			fetchLatestArticles({
+				endpoint: 'https://content.guardianapis.com',
+				apiKey: 'test-key',
+				fromDate: new Date('2026-09-15T13:03:00.000Z'),
+				timeoutMs: 10_000,
+			}),
+		).rejects.toMatchObject({ name: 'CapiError', reason: 'unavailable' });
+	});
+
 	it('skips results without a section or publication date', async () => {
 		const result = {
 			id: 'world/2026/sep/16/incomplete',
@@ -261,6 +340,7 @@ describe('fetchLatestArticles', () => {
 			Response.json({
 				response: {
 					status: 'ok',
+					pageSize: 200,
 					results: [
 						{ ...result, webPublicationDate: '2026-09-16T12:00:00.000Z' },
 						{ ...result, sectionName: 'World news' },
@@ -297,6 +377,7 @@ describe('fetchLatestArticles', () => {
 			Response.json({
 				response: {
 					status: 'ok',
+					pageSize: 200,
 					results: [
 						result('uk', 'UK', [
 							{ id: 'tracking/audience/global' },
@@ -337,7 +418,9 @@ describe('fetchLatestArticles', () => {
 
 	it('classifies a non-ok CAPI status as invalid_response', () => {
 		spyOn(globalThis, 'fetch').mockResolvedValue(
-			Response.json({ response: { status: 'error', results: [] } }),
+			Response.json({
+				response: { status: 'error', pageSize: 200, results: [] },
+			}),
 		);
 
 		expect(
@@ -355,6 +438,7 @@ describe('fetchLatestArticles', () => {
 			Response.json({
 				response: {
 					status: 'ok',
+					pageSize: 200,
 					results: [
 						{
 							id: 'world/2026/sep/16/invalid-date',
