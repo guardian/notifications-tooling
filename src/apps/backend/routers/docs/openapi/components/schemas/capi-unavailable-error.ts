@@ -14,7 +14,7 @@ export const capiUnavailableErrorSchema = {
 		},
 		requestId: {
 			type: 'string',
-			description: 'Correlation id echoed back for tracing.',
+			description: 'Request id echoed back for tracing.',
 		},
 	},
 } as const;

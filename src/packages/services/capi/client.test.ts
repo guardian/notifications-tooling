@@ -322,7 +322,7 @@ describe('fetchLatestArticles', () => {
 			)
 			.mockResolvedValueOnce(new Response(null, { status: 503 }));
 
-		expect(
+		return expect(
 			fetchLatestArticles({
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
@@ -429,7 +429,7 @@ describe('fetchLatestArticles', () => {
 			}),
 		);
 
-		expect(
+		return expect(
 			fetchLatestArticles({
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
@@ -461,7 +461,7 @@ describe('fetchLatestArticles', () => {
 			}),
 		);
 
-		expect(
+		return expect(
 			fetchLatestArticles({
 				endpoint: 'https://content.guardianapis.com',
 				apiKey: 'test-key',
