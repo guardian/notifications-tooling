@@ -1,14 +1,23 @@
 import { Button } from '@guardian/stand/Button';
+import { useState } from 'react';
+import { DispatchCreateNotificationModal } from './DispatchCreateNotificationModal';
 
-const handleClick = () => {
-	window.open('https://www.theguardian.com/uk', '_blank');
-};
 export const LatestPublishedContent = () => {
+	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =
+		useState(false);
+
 	return (
 		<>
-			<Button variant={'tertiary'} onClick={handleClick}>
-				Click Open Latest Published Content
+			<Button
+				variant="tertiary"
+				onPress={() => setIsCreateNotificationModalOpen(true)}
+			>
+				 Open Latest Published Content
 			</Button>
+			<DispatchCreateNotificationModal
+				isOpen={isCreateNotificationModalOpen}
+				onOpenChange={setIsCreateNotificationModalOpen}
+			/>
 		</>
 	);
 };
