@@ -1,5 +1,9 @@
 import { css } from '@emotion/react';
-import { semanticSpacing } from '@guardian/stand';
+import {
+	semanticColors,
+	semanticRadius,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
 import { from } from '@guardian/stand/utils';
@@ -22,7 +26,7 @@ export const DispatchCreateNotificationModal = ({
 	const tileStyles = css({
 		width: '100%',
 		[from.md]: {
-			width: '300px',
+			width: '420px',
 		},
 	});
 
@@ -33,6 +37,23 @@ export const DispatchCreateNotificationModal = ({
 			theme={{
 				overlay: {
 					position: 'fixed',
+				},
+				modal: {
+					width: '484px',
+					maxWidth: '484px',
+					maxHeight: '352px',
+					top: '284px',
+					marginLeft: '650px',
+					borderRadius: semanticRadius.cornerMd,
+					padding: {
+						top: semanticSpacing.stackMd,
+						bottom: semanticSpacing.stackLg,
+						left: semanticSpacing.stackLg,
+						right: semanticSpacing.stackLg,
+					},
+					gap: '10px',
+					color: semanticColors.bg.base,
+					boxShadow: '0px 2px 6px 0px #0000004D',
 				},
 			}}
 		>

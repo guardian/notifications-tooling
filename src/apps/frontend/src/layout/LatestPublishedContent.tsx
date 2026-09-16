@@ -12,7 +12,7 @@ export const LatestPublishedContent = () => {
 				variant="tertiary"
 				onPress={() => setIsCreateNotificationModalOpen(true)}
 			>
-				 Open Latest Published Content
+				Open Latest Published Content
 			</Button>
 			<DispatchCreateNotificationModal
 				isOpen={isCreateNotificationModalOpen}
