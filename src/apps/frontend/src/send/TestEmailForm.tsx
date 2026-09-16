@@ -26,7 +26,7 @@ type TestSendParams = {
 	subjectLine: string;
 	subjectText: string;
 	previewText: string;
-	includePreviewText: boolean;
+	showPreview: boolean;
 	webUrl: string;
 };
 
@@ -43,7 +43,7 @@ const getSendParams = (
 	const {
 		audienceSegments = [],
 		previewText = '',
-		includePreviewText = true,
+		showPreview = true,
 		subjectText = '',
 		kicker,
 	} = formValues;
@@ -59,7 +59,7 @@ const getSendParams = (
 		subjectLine,
 		subjectText,
 		previewText,
-		includePreviewText,
+		showPreview,
 		webUrl: requestedUrl ?? article.webUrl,
 	};
 };
@@ -70,7 +70,7 @@ const makePayload = ({
 	audienceSegments,
 	subjectText,
 	previewText,
-	includePreviewText,
+	showPreview,
 	webUrl,
 }: TestSendParams): TestEmailSendRequest => ({
 	channels: {
@@ -95,7 +95,7 @@ const makePayload = ({
 			'lead-story': {
 				type: 'newsletter',
 				title: subjectText,
-				body: includePreviewText ? previewText : '',
+				body: showPreview ? previewText : '',
 				link: webUrl,
 			},
 		},

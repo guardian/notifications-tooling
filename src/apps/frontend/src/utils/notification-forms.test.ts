@@ -154,7 +154,7 @@ describe('notification form length rules', () => {
 				kicker: 'none',
 				subjectText: 'Subject',
 				previewText: '   ',
-				includePreviewText: true,
+				showPreview: true,
 				audienceSegments: ['UK'],
 			}).success,
 		).toBe(false);
@@ -165,7 +165,7 @@ describe('notification form length rules', () => {
 				kicker: 'none',
 				subjectText: 'Subject',
 				previewText: '   ',
-				includePreviewText: false,
+				showPreview: false,
 				audienceSegments: ['UK'],
 			}).success,
 		).toBe(true);
@@ -177,7 +177,7 @@ describe('notification form length rules', () => {
 			kicker: 'none',
 			subjectText: '   ',
 			previewText: '   ',
-			includePreviewText: true,
+			showPreview: true,
 			audienceSegments: ['UK'],
 		});
 

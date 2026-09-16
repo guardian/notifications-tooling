@@ -8,7 +8,7 @@ import type { SendNotificationRequest } from '../schemas';
 import { notificationHistoryQueryKey } from './useNotificationHistory';
 
 export const useSendNotification = () => {
-	const { channel, sendNotification, dispatchComposerAction } = useContext(
+	const { channel, sendNotification, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
 	const { setValue } = useFormContext<{ notificationId?: string }>();
@@ -16,10 +16,10 @@ export const useSendNotification = () => {
 	const queryClient = useQueryClient();
 
 	return (request: SendNotificationRequest) => {
-		dispatchComposerAction({ type: 'waiting-for-send' });
+		updateComposerState({ type: 'waiting-for-send' });
 		void sendNotification(request).then((result) => {
 			if (!result.success) {
-				dispatchComposerAction({
+				updateComposerState({
 					type: 'receive-send-failure',
 					failure: result.failure,
 				});
@@ -29,7 +29,7 @@ export const useSendNotification = () => {
 			void queryClient.invalidateQueries({
 				queryKey: notificationHistoryQueryKey,
 			});
-			dispatchComposerAction({ type: 'complete-send' });
+			updateComposerState({ type: 'complete-send' });
 			void navigate(notificationRoutes[channel].report);
 		});
 	};

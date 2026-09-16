@@ -9,7 +9,7 @@ import { NotificationTabLayout } from './NotificationTabLayout';
 export const CreateNewsletterEmailTab = () => {
 	const { reset, setValue, watch } =
 		useFormContext<NewsletterEmailFormValues>();
-	const includePreviewText = watch('includePreviewText');
+	const showPreview = watch('showPreview');
 
 	useEffect(() => reset(), [reset]);
 
@@ -19,9 +19,9 @@ export const CreateNewsletterEmailTab = () => {
 			previewToggle={<NewsletterEmailPreviewToggle />}
 			form={
 				<CreateNewsletterEmailForm
-					includePreviewText={includePreviewText}
-					onIncludePreviewTextChange={(isSelected) => {
-						setValue('includePreviewText', isSelected, {
+					showPreview={showPreview}
+					onTogglePreview={(isSelected) => {
+						setValue('showPreview', isSelected, {
 							shouldValidate: true,
 						});
 					}}

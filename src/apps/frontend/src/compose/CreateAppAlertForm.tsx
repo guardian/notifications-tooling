@@ -16,7 +16,7 @@ import { NotificationFormWrapper } from './NotificationFormWrapper';
 export const CreateAppAlertForm = () => {
 	const { handleSubmit, setError, setValue } =
 		useFormContext<AppAlertFormValues>();
-	const { composerState, dispatchComposerAction } = useContext(
+	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
 
@@ -26,7 +26,7 @@ export const CreateAppAlertForm = () => {
 		if (!composerState.article) {
 			return;
 		}
-		dispatchComposerAction({
+		updateComposerState({
 			type: 'prepare-send',
 			request: buildAppAlertRequest({
 				values,
@@ -57,7 +57,7 @@ export const CreateAppAlertForm = () => {
 			sendButtonLabel="Send app alert"
 			onSubmit={handleSubmitForm}
 			onResetNotification={() =>
-				dispatchComposerAction({ type: 'reset-app-alert' })
+				updateComposerState({ type: 'reset-app-alert' })
 			}
 			onArticleImported={(article) => {
 				setValue('headline', article.fields?.headline ?? article.webTitle);

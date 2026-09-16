@@ -19,16 +19,16 @@ export const newsletterEmailFormSchema = z
 			.refine((kicker): boolean => kicker !== '', 'Please select a kicker'),
 		subjectText: z.string().trim().min(1, 'Subject is required'),
 		previewText: z.string().trim(),
-		includePreviewText: z.boolean(),
+		showPreview: z.boolean(),
 		audienceSegments: z
 			.array(newsletterSegmentId)
 			.min(1, 'Please select an audience segment'),
 		deliveryOption: z.literal('immediate'),
 	})
-	.superRefine(({ previewText, includePreviewText }, context) => {
+	.superRefine(({ previewText, showPreview }, context) => {
 		const previewTextError = validateNewsletterEmailPreviewText(
 			previewText,
-			includePreviewText,
+			showPreview,
 		);
 
 		if (previewTextError) {
@@ -72,9 +72,9 @@ export type AppAlertFormValues = z.infer<typeof appAlertFormSchema>;
 
 export const validateNewsletterEmailPreviewText = (
 	previewText: NewsletterEmailFormValues['previewText'],
-	includePreviewText: boolean,
+	showPreview: boolean,
 ) => {
-	if (includePreviewText && previewText.trim().length === 0) {
+	if (showPreview && previewText.trim().length === 0) {
 		return 'Preview text is required';
 	}
 
@@ -85,7 +85,7 @@ export const defaultNewsletterEmailFormValues: NewsletterEmailFormValues = {
 	kicker: '',
 	subjectText: '',
 	previewText: '',
-	includePreviewText: true,
+	showPreview: true,
 	audienceSegments: [],
 	deliveryOption: 'immediate',
 };

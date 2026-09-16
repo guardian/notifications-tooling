@@ -11,8 +11,8 @@ import { PreviewTextToggle } from './PreviewTextToggle';
 
 interface PreviewTextFormFieldProps {
 	constraints?: ChannelConstraintsResponse;
-	includePreviewText: boolean;
-	onIncludePreviewTextChange: (includePreviewText: boolean) => void;
+	showPreview: boolean;
+	onTogglePreview: (showPreview: boolean) => void;
 }
 
 const styles = {
@@ -26,8 +26,8 @@ const styles = {
 
 export const PreviewTextFormField = ({
 	constraints,
-	includePreviewText,
-	onIncludePreviewTextChange,
+	showPreview,
+	onTogglePreview,
 }: PreviewTextFormFieldProps) => {
 	const { clearErrors, control } = useFormContext<NewsletterEmailFormValues>();
 	const previewTextLimits =
@@ -45,15 +45,15 @@ export const PreviewTextFormField = ({
 						Choose the preview text for the email newsletter
 					</Typography>
 					<PreviewTextToggle
-						isSelected={includePreviewText}
+						isSelected={showPreview}
 						onChange={(isSelected) => {
-							onIncludePreviewTextChange(isSelected);
+							onTogglePreview(isSelected);
 							if (!isSelected) {
 								clearErrors('previewText');
 							}
 						}}
 					/>
-					{includePreviewText && (
+					{showPreview && (
 						<div>
 							<TextArea
 								name={field.name}

@@ -28,25 +28,23 @@ import type { NotificationFormContextProps } from './NotificationFormContext';
 
 type StoryArgs = {
 	composerState: NotificationComposerState;
-	includePreviewText: boolean;
-	onIncludePreviewTextChange: (includePreviewText: boolean) => void;
+	showPreview: boolean;
+	onTogglePreview: (showPreview: boolean) => void;
 	sendNotification?: NotificationFormContextProps['sendNotification'];
 };
 type Story = StoryObj<StoryArgs>;
 
 const ControlledCreateNewsletterEmailForm = ({
-	initialIncludePreviewText,
+	initialShowPreview,
 }: {
-	initialIncludePreviewText: boolean;
+	initialShowPreview: boolean;
 }) => {
-	const [includePreviewText, setIncludePreviewText] = useState(
-		initialIncludePreviewText,
-	);
+	const [showPreview, setShowPreview] = useState(initialShowPreview);
 
 	return (
 		<CreateNewsletterEmailForm
-			includePreviewText={includePreviewText}
-			onIncludePreviewTextChange={setIncludePreviewText}
+			showPreview={showPreview}
+			onTogglePreview={setShowPreview}
 		/>
 	);
 };
@@ -65,15 +63,13 @@ const meta: Meta<StoryArgs> = {
 	},
 	args: {
 		composerState: defaultComposerState,
-		includePreviewText: true,
-		onIncludePreviewTextChange: () => {},
+		showPreview: true,
+		onTogglePreview: () => {},
 	},
 	render: function Render(args) {
-		const { composerState, includePreviewText } = args;
+		const { composerState, showPreview } = args;
 		return useNotificationFormStory(
-			<ControlledCreateNewsletterEmailForm
-				initialIncludePreviewText={includePreviewText}
-			/>,
+			<ControlledCreateNewsletterEmailForm initialShowPreview={showPreview} />,
 			composerState,
 			{ sendNotification: args.sendNotification },
 			'newsletter',
@@ -430,11 +426,9 @@ const buildErrorStory = (error: ApiError): Story => ({
 		},
 	},
 	render: function Render(args) {
-		const { composerState, includePreviewText } = args;
+		const { composerState, showPreview } = args;
 		return useNotificationFormStory(
-			<ControlledCreateNewsletterEmailForm
-				initialIncludePreviewText={includePreviewText}
-			/>,
+			<ControlledCreateNewsletterEmailForm initialShowPreview={showPreview} />,
 			composerState,
 			{
 				sendNotification: mockSendRejectedNotification(error),

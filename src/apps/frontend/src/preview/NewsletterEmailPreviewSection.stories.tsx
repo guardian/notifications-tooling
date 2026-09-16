@@ -1,10 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, waitFor, within } from 'storybook/test';
+import { useFormContext } from 'react-hook-form';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { PreviewTextFormField } from '../compose/PreviewTextFormField';
 import { mockRequestEmailHtml } from '../testing/mock-fetch-email';
-import type { completeNewsletterEmailFormValues } from '../testing/story-fixtures';
+import { mockRequestTestEmailSend } from '../testing/mock-request-test-email-send';
+import { completeNewsletterEmailFormValues } from '../testing/story-fixtures';
 import { populatedNewsletterEmailComposerState } from '../testing/story-fixtures';
 import { useNotificationFormStory } from '../testing/useNotificationFormStory';
 import type { NotificationComposerState, RequestEmailHtml } from '../types';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { NewsletterEmailPreviewSection } from './NewsletterEmailPreviewSection';
 
 type StoryArgs = {
@@ -95,6 +99,77 @@ export const RequestedLiveblogBlock: Story = {
 				article: requestedLiveblogUrl,
 				audience: ['UK'],
 			}),
+		);
+	},
+};
+
+const PreviewTextToggleHarness = () => {
+	const { watch, setValue } = useFormContext<NewsletterEmailFormValues>();
+	return (
+		<>
+			<PreviewTextFormField
+				showPreview={watch('showPreview')}
+				onTogglePreview={(showPreview) =>
+					setValue('showPreview', showPreview, { shouldValidate: true })
+				}
+			/>
+			<NewsletterEmailPreviewSection />
+		</>
+	);
+};
+
+const requestPreviewTextTestEmail = fn(mockRequestTestEmailSend);
+
+export const PreviewTextToggleUpdatesHtmlAndTestEmail: Story = {
+	render: function Render({ composerState }) {
+		return useNotificationFormStory(
+			<PreviewTextToggleHarness />,
+			composerState,
+			{ requestTestEmailSend: requestPreviewTextTestEmail },
+			'newsletter',
+			{
+				...completeNewsletterEmailFormValues,
+				previewText: 'Saved preview text',
+			},
+		);
+	},
+	play: async ({ canvasElement }) => {
+		requestPreviewTextTestEmail.mockClear();
+		const canvas = within(canvasElement);
+		const toggle = canvas.getByRole('button', { name: 'Show preview text' });
+		const preview = canvas.getByTitle<HTMLIFrameElement>('preview');
+		const previewBodyText = () =>
+			new DOMParser()
+				.parseFromString(preview.srcdoc, 'text/html')
+				.querySelector('h2 ~ div')?.textContent;
+
+		await waitFor(() => expect(previewBodyText()).toBe('Saved preview text'));
+		await userEvent.type(
+			canvas.getByPlaceholderText('name@theguardian.com'),
+			'joe.blogs@theguardian.com',
+		);
+
+		for (const [index, expectedBody] of [
+			'Saved preview text',
+			'',
+			'Saved preview text',
+		].entries()) {
+			if (index > 0) {
+				await userEvent.click(toggle);
+			}
+			await waitFor(() => expect(previewBodyText()).toBe(expectedBody));
+			await userEvent.click(canvas.getByRole('button', { name: 'Send test' }));
+			await expect(canvas.findByText('Test email sent')).resolves.toBeVisible();
+			await expect(requestPreviewTextTestEmail).toHaveBeenCalledTimes(
+				index + 1,
+			);
+			await expect(
+				requestPreviewTextTestEmail.mock.calls[index]?.[0],
+			).toHaveProperty('content.items.lead-story.body', expectedBody);
+		}
+
+		await expect(canvas.getByLabelText('Preview text')).toHaveValue(
+			'Saved preview text',
 		);
 	},
 };

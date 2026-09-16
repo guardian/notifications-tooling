@@ -8,7 +8,7 @@ import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { getChannelDescription } from '../utils/display-text-helpers';
 
 export const SendConfirmationModal = () => {
-	const { channel, composerState, dispatchComposerAction } = useContext(
+	const { channel, composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
 	const sendNotification = useSendNotification();
@@ -27,7 +27,7 @@ export const SendConfirmationModal = () => {
 				if (isWaitingForSend) {
 					return;
 				}
-				dispatchComposerAction({ type: 'set-send-confirmation-open', isOpen });
+				updateComposerState({ type: 'set-send-confirmation-open', isOpen });
 			}}
 			theme={{
 				overlay: {
@@ -48,7 +48,7 @@ export const SendConfirmationModal = () => {
 						isDisabled={isWaitingForSend}
 						variant="tertiary"
 						onPress={() => {
-							dispatchComposerAction({
+							updateComposerState({
 								type: 'set-send-confirmation-open',
 								isOpen: false,
 							});

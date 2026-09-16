@@ -16,7 +16,7 @@ const modifyContent = (
 	const body = document.createElement('body');
 	body.innerHTML = emailHtml;
 
-	const { subjectText, previewText, includePreviewText = true } = formValues;
+	const { subjectText, previewText, showPreview = true } = formValues;
 	const subjectTextElement = body.querySelector('h2');
 	const previewTextElement =
 		subjectTextElement?.parentElement?.querySelector<HTMLElement>('h2~div');
@@ -25,9 +25,7 @@ const modifyContent = (
 		subjectTextElement.innerText = subjectText;
 	}
 	if (previewTextElement) {
-		previewTextElement.innerText = includePreviewText
-			? (previewText ?? '')
-			: '';
+		previewTextElement.innerText = showPreview ? (previewText ?? '') : '';
 	}
 	Array.from(body.querySelectorAll('a')).forEach((link) =>
 		link.removeAttribute('href'),

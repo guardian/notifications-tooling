@@ -20,7 +20,7 @@ import {
 	NewsletterEmailNotificationFormProvider,
 } from './NotificationFormProvider';
 
-const resolveArticleHandler = http.post(
+const resolveArticleFromCapiHandler = http.post(
 	`${getApiBaseUrl()}/v1/content/articles/resolve`,
 	() => HttpResponse.json({ article: articleFixture }),
 );
@@ -135,7 +135,7 @@ const meta = {
 	parameters: {
 		msw: {
 			handlers: [
-				resolveArticleHandler,
+				resolveArticleFromCapiHandler,
 				channelConstraintsHandler,
 				channelAudiencesHandler,
 			],

@@ -2,7 +2,7 @@ import type { ResolveArticleResponse } from '@models';
 import type { Result } from '../api-client/client';
 import { articleFixture } from './capi-fixtures';
 
-export const mockResolveArticle = (): Promise<
+export const mockResolveArticleFromCapi = (): Promise<
 	Result<ResolveArticleResponse>
 > => {
 	return new Promise<Result<ResolveArticleResponse>>((resolve) => {

@@ -54,9 +54,8 @@ export const ArticleImportControl = ({
 	setLockArticleInputText,
 	onArticleImported,
 }: ArticleImportControlProps) => {
-	const { composerState, dispatchComposerAction, resolveArticle } = useContext(
-		NotificationFormContext,
-	);
+	const { composerState, updateComposerState, resolveArticleFromCapi } =
+		useContext(NotificationFormContext);
 	const {
 		clearErrors,
 		formState: { submitCount },
@@ -70,7 +69,7 @@ export const ArticleImportControl = ({
 
 	const handleFetchArticle = () => {
 		if (articleInputText === '') {
-			dispatchComposerAction({
+			updateComposerState({
 				type: 'report-article-error',
 				errorMessage: 'Paste a URL to fetch an article',
 			});
@@ -81,13 +80,13 @@ export const ArticleImportControl = ({
 			return;
 		}
 
-		dispatchComposerAction({ type: 'waiting-for-article' });
-		void resolveArticle({
+		updateComposerState({ type: 'waiting-for-article' });
+		void resolveArticleFromCapi({
 			article: webUrl,
 		}).then((result) => {
 			if (!result.success) {
 				// TO DO - error reporting/telemetry
-				return dispatchComposerAction({
+				return updateComposerState({
 					type: 'report-article-error',
 					errorMessage: getUserFacingError(result.failure),
 				});
@@ -95,7 +94,7 @@ export const ArticleImportControl = ({
 			const { article, requestedUrl, requestedBlock } = result.data;
 			onArticleImported(article, requestedBlock);
 			clearErrors('root');
-			dispatchComposerAction({
+			updateComposerState({
 				type: 'receive-article',
 				article,
 				requestedUrl,

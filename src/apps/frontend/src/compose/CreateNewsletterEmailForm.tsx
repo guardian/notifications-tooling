@@ -13,15 +13,15 @@ import { PreviewTextFormField } from './PreviewTextFormField';
 import { SubjectFormField } from './SubjectFormField';
 
 interface CreateNewsletterEmailFormProps {
-	includePreviewText: boolean;
-	onIncludePreviewTextChange: (includePreviewText: boolean) => void;
+	showPreview: boolean;
+	onTogglePreview: (showPreview: boolean) => void;
 }
 
 export const CreateNewsletterEmailForm = ({
-	includePreviewText,
-	onIncludePreviewTextChange,
+	showPreview,
+	onTogglePreview,
 }: CreateNewsletterEmailFormProps) => {
-	const { composerState, dispatchComposerAction } = useContext(
+	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
 	const { handleSubmit, setError, setValue } =
@@ -32,10 +32,8 @@ export const CreateNewsletterEmailForm = ({
 		if (!composerState.article) {
 			return;
 		}
-		const valuesToSend = includePreviewText
-			? values
-			: { ...values, previewText: '' };
-		dispatchComposerAction({
+		const valuesToSend = showPreview ? values : { ...values, previewText: '' };
+		updateComposerState({
 			type: 'prepare-send',
 			request: buildNewsletterEmailRequest({
 				values: valuesToSend,
@@ -62,11 +60,11 @@ export const CreateNewsletterEmailForm = ({
 			sendButtonLabel="Send newsletter email"
 			onSubmit={handleSubmitForm}
 			onResetNotification={() => {
-				onIncludePreviewTextChange(true);
-				dispatchComposerAction({ type: 'reset-newsletter-email' });
+				onTogglePreview(true);
+				updateComposerState({ type: 'reset-newsletter-email' });
 			}}
 			onArticleImported={(article) => {
-				onIncludePreviewTextChange(true);
+				onTogglePreview(true);
 
 				const { headline, standfirst } = article.fields ?? {};
 				if (headline) {
@@ -83,8 +81,8 @@ export const CreateNewsletterEmailForm = ({
 				<SubjectFormField constraints={constraints} />
 				<PreviewTextFormField
 					constraints={constraints}
-					includePreviewText={includePreviewText}
-					onIncludePreviewTextChange={onIncludePreviewTextChange}
+					showPreview={showPreview}
+					onTogglePreview={onTogglePreview}
 				/>
 			</NotificationFormSection>
 			<NotificationFormSection id="audience-section">

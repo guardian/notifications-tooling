@@ -260,7 +260,7 @@ const getFailure = (
 };
 
 export const SendFailedModal = () => {
-	const { channel, composerState, dispatchComposerAction } = useContext(
+	const { channel, composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
 	const sendNotification = useSendNotification();
@@ -278,7 +278,7 @@ export const SendFailedModal = () => {
 			isOpen={!!failure}
 			onOpenChange={(isOpen) => {
 				if (!isOpen) {
-					dispatchComposerAction({
+					updateComposerState({
 						type: 'dismiss-send-error',
 					});
 				}
@@ -315,7 +315,7 @@ export const SendFailedModal = () => {
 						) : (
 							<Button
 								onPress={() => {
-									dispatchComposerAction({
+									updateComposerState({
 										type: 'dismiss-send-error',
 									});
 								}}

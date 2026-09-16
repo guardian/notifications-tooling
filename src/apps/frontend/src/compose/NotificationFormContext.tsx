@@ -16,8 +16,8 @@ import type { TestEmailRequestFunction } from '../utils/send-test-email';
 export interface NotificationFormContextProps {
 	channel: ChannelOption;
 	composerState: NotificationComposerState;
-	dispatchComposerAction: ActionDispatch<[NotificationComposerAction]>;
-	resolveArticle: {
+	updateComposerState: ActionDispatch<[NotificationComposerAction]>;
+	resolveArticleFromCapi: {
 		(request: ResolveArticleRequest): Promise<Result<ResolveArticleResponse>>;
 	};
 	// TO DO - get the required payload from the backend
@@ -38,12 +38,12 @@ export const NotificationFormContext =
 			isWaitingForSend: false,
 			isSendConfirmationOpen: false,
 		},
-		dispatchComposerAction: () => {},
-		resolveArticle: () =>
+		updateComposerState: () => {},
+		resolveArticleFromCapi: () =>
 			Promise.resolve({
 				success: false,
 				failure: new ApiError({
-					message: 'no capiFetch implementation provided',
+					message: 'no resolveArticleFromCapi implementation provided',
 					failure: 'fetch-fail',
 				}),
 			}),

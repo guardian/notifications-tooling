@@ -14,7 +14,7 @@ export const completeNewsletterEmailFormValues: NewsletterEmailFormValues = {
 	kicker: 'exclusive',
 	subjectText: articleFixture.fields?.headline ?? '',
 	previewText: parseHtml(articleFixture.fields?.standfirst).textContent,
-	includePreviewText: true,
+	showPreview: true,
 	deliveryOption: 'immediate',
 	audienceSegments: ['AU', 'UK'],
 };

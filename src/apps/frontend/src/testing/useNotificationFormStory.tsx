@@ -22,7 +22,7 @@ import {
 } from '../utils/notification-forms';
 import { mockRequestEmailHtml } from './mock-fetch-email';
 import { mockRequestTestEmailSend } from './mock-request-test-email-send';
-import { mockResolveArticle } from './mock-resolve-article';
+import { mockResolveArticleFromCapi } from './mock-resolve-article-from-capi';
 import { mockSendNotification } from './mock-send-notification';
 
 export const useNotificationFormStory = (
@@ -31,13 +31,13 @@ export const useNotificationFormStory = (
 	functions: Partial<
 		Omit<
 			NotificationFormContextProps,
-			'channel' | 'composerState' | 'dispatchComposerAction'
+			'channel' | 'composerState' | 'updateComposerState'
 		>
 	> = {},
 	channel: ChannelOption = 'newsletter',
 	formValues?: Partial<NewsletterEmailFormValues> | Partial<AppAlertFormValues>,
 ) => {
-	const [currentComposerState, dispatchComposerAction] = useReducer<
+	const [currentComposerState, updateComposerState] = useReducer<
 		NotificationComposerState,
 		[NotificationComposerAction]
 	>(notificationComposerReducer, composerState);
@@ -65,7 +65,7 @@ export const useNotificationFormStory = (
 	});
 
 	const {
-		resolveArticle = mockResolveArticle,
+		resolveArticleFromCapi = mockResolveArticleFromCapi,
 		sendNotification = mockSendNotification,
 		requestEmailHtml = mockRequestEmailHtml,
 		requestTestEmailSend = mockRequestTestEmailSend,
@@ -76,8 +76,8 @@ export const useNotificationFormStory = (
 			value={{
 				channel,
 				composerState: currentComposerState,
-				dispatchComposerAction,
-				resolveArticle,
+				updateComposerState,
+				resolveArticleFromCapi,
 				sendNotification,
 				requestEmailHtml,
 				requestTestEmailSend,

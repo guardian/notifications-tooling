@@ -20,7 +20,7 @@ import {
 	newsletterEmailFormSchema,
 	type NewsletterEmailFormValues,
 } from '../utils/notification-forms';
-import { resolveArticle } from '../utils/resolve-article';
+import { resolveArticleFromCapi } from '../utils/resolve-article-from-capi';
 import { sendNotification } from '../utils/send-notification';
 import { requestTestEmailSend } from '../utils/send-test-email';
 import { NotificationFormContext } from './NotificationFormContext';
@@ -32,7 +32,7 @@ type NotificationComposer = readonly [
 
 const NotificationFormProvider = ({
 	children,
-	composer: [composerState, dispatchComposerAction],
+	composer: [composerState, updateComposerState],
 	channel,
 }: {
 	children: ReactNode;
@@ -43,8 +43,8 @@ const NotificationFormProvider = ({
 		value={{
 			channel,
 			composerState,
-			dispatchComposerAction,
-			resolveArticle,
+			updateComposerState,
+			resolveArticleFromCapi,
 			requestEmailHtml,
 			sendNotification,
 			requestTestEmailSend,
