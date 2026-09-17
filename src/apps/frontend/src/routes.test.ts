@@ -2,7 +2,9 @@ import { describe, expect, it } from 'bun:test';
 import {
 	getAppRoutes,
 	getTopBarNavigationItems,
+	guardianMainUrl,
 	notificationRoutes,
+	toGuardianArticleUrl,
 	withArticleUrl,
 } from './routes';
 import { mockAppConfig } from './testing/app-config';
@@ -43,21 +45,43 @@ describe('notification channel routes', () => {
 	});
 });
 
-describe('withArticleUrl', () => {
-	it('adds an encoded, trimmed article URL to a route', () => {
+describe('article URL route helpers', () => {
+	it('stores only the encoded relative path, query, and hash', () => {
 		expect(
 			withArticleUrl(
 				'/app-alert/create',
-				'  https://www.theguardian.com/world/example?foo=bar  ',
+				'  https://www.theguardian.com/world/example?foo=bar#block-1  ',
 			),
 		).toBe(
-			'/app-alert/create?articleUrl=https%3A%2F%2Fwww.theguardian.com%2Fworld%2Fexample%3Ffoo%3Dbar',
+			'/app-alert/create?articleUrl=%2Fworld%2Fexample%3Ffoo%3Dbar%23block-1',
 		);
 	});
 
-	it('leaves a route unchanged when the article URL is blank', () => {
+	it('accepts an existing relative article URL', () => {
+		expect(withArticleUrl('/app-alert/create', '/world/example')).toBe(
+			'/app-alert/create?articleUrl=%2Fworld%2Fexample',
+		);
+	});
+
+	it('leaves a route unchanged for blank, malformed, or external URLs', () => {
 		expect(withArticleUrl('/newsletter-email/create', ' ')).toBe(
 			'/newsletter-email/create',
 		);
+		expect(
+			withArticleUrl('/newsletter-email/create', 'https://example.com/x'),
+		).toBe('/newsletter-email/create');
+		expect(withArticleUrl('/newsletter-email/create', 'https://[')).toBe(
+			'/newsletter-email/create',
+		);
+	});
+
+	it('reconstructs a canonical Guardian URL from a relative value', () => {
+		expect(toGuardianArticleUrl('/world/example?foo=bar#block-1')).toBe(
+			`${guardianMainUrl}/world/example?foo=bar#block-1`,
+		);
+		expect(
+			toGuardianArticleUrl('https://example.com/world/example'),
+		).toBeUndefined();
+		expect(toGuardianArticleUrl('//example.com/world/example')).toBeUndefined();
 	});
 });
