@@ -10,11 +10,14 @@ import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
 import { HeadlineFormField } from './HeadlineFormField';
 import { NotificationFormContext } from './NotificationFormContext';
-import { NotificationFormSection } from './NotificationFormSection';
+import {
+	jumpToFormSection,
+	NotificationFormSection,
+} from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 
 export const CreateAppAlertForm = () => {
-	const { handleSubmit, setError, setValue } =
+	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<AppAlertFormValues>();
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
@@ -41,12 +44,27 @@ export const CreateAppAlertForm = () => {
 		});
 	};
 	const handleSubmitForm = (event: FormEvent<HTMLFormElement>) => {
-		if (!composerState.article) {
-			setError('root.article', {
-				message: 'Paste a URL to fetch an article',
-			});
-		}
-		void handleSubmit(prepareSend)(event);
+		clearErrors();
+		void handleSubmit(
+			(values) => {
+				if (!composerState.article) {
+					jumpToFormSection('article-section');
+					return;
+				}
+				prepareSend(values);
+			},
+			(errors) => {
+				if (!composerState.article) {
+					jumpToFormSection('article-section');
+				} else if (errors.alertType || errors.editions) {
+					jumpToFormSection('alert-section');
+				} else if (errors.headline || errors.articleThumbnailUrl) {
+					jumpToFormSection('content-section');
+				} else if (errors.deliveryOption) {
+					jumpToFormSection('delivery-timing-section');
+				}
+			},
+		)(event);
 	};
 
 	return (
