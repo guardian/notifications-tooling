@@ -16,7 +16,13 @@ import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes, getTopBarNavigationItems } from '../routes';
-import { faviconTheme, layer, topBarTheme } from '../themes';
+import {
+	faviconTheme,
+	layer,
+	stickyHeaderHeightProperty,
+	topBarHeight,
+	topBarTheme,
+} from '../themes';
 
 interface Props {
 	children: ReactNode;
@@ -36,9 +42,16 @@ export const MainLayout = ({ children }: Props) => {
 	const { pathname } = useLocation();
 	const stage = config?.stage;
 	const shouldShowEnvBadge = stage !== undefined && stage !== 'PROD';
+	const stickyHeaderHeight = shouldShowEnvBadge
+		? `calc(${topBarHeight} + ${semanticSizing.height.md})`
+		: topBarHeight;
 
 	return (
-		<Layout>
+		<Layout
+			cssOverrides={css({
+				[stickyHeaderHeightProperty]: stickyHeaderHeight,
+			})}
+		>
 			<Layout.TopBar
 				cssOverrides={css({ position: 'sticky', top: 0, zIndex: layer.topBar })}
 			>
