@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -17,7 +17,7 @@ export type ListRecentNotificationsOptions = {
 	since: Date;
 	limit?: number;
 	offset?: number;
-	/** Case-insensitive substring matched against content and sender email. */
+	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
 };
 
@@ -142,10 +142,12 @@ export const createNotificationsRepository = (db: Database) => ({
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
 			searchPattern
-				? or(
-						ilike(notifications.createdByEmail, searchPattern),
-						ilike(sql`${notifications.content}::text`, searchPattern),
-					)
+				? sql<boolean>`exists (
+						select 1
+						from jsonb_each(coalesce(${notifications.content}->'items', '{}'::jsonb)) as content_item
+						where content_item.value->>'body' ilike ${searchPattern}
+							or content_item.value->>'title' ilike ${searchPattern}
+					)`
 				: undefined,
 		);
 

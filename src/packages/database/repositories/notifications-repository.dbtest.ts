@@ -185,27 +185,53 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		expect(secondPage.notifications.map((row) => row.id)).toEqual([third.id]);
 	});
 
-	it('searches content and sender while reporting the filtered total', async () => {
-		const contentMatch = await notifications.create({
+	it('searches body and title fields while reporting the filtered total', async () => {
+		const bodyMatch = await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(1),
 			content: {
-				'lead-story': {
-					type: 'app-push',
-					title: 'Breaking news',
-					body: 'Northern lights visible tonight',
-					link: 'https://www.theguardian.com/science',
+				items: {
+					'lead-story': {
+						type: 'app-push',
+						title: 'Breaking news',
+						body: 'Northern lights visible tonight',
+						link: 'https://www.theguardian.com/science',
+					},
 				},
 			},
 		});
-		const senderMatch = await notifications.create({
+		const titleMatch = await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(2),
-			createdByEmail: 'northern.editor@guardian.co.uk',
+			content: {
+				items: {
+					briefing: {
+						type: 'newsletter',
+						title: 'The Northern briefing',
+						body: 'The stories shaping the day',
+						link: 'https://www.theguardian.com/newsletters',
+					},
+				},
+			},
 		});
 		await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(3),
+			createdByEmail: 'northern.editor@guardian.co.uk',
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(4),
+			content: {
+				items: {
+					'lead-story': {
+						type: 'app-push',
+						title: 'Breaking news',
+						body: 'Read our latest report',
+						link: 'https://www.theguardian.com/northern-lights',
+					},
+				},
+			},
 		});
 
 		const page = await notifications.listRecent({
@@ -215,7 +241,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		});
 
 		expect(page.total).toBe(2);
-		expect(page.notifications.map(({ id }) => id)).toEqual([contentMatch.id]);
+		expect(page.notifications.map(({ id }) => id)).toEqual([bodyMatch.id]);
 
 		const secondPage = await notifications.listRecent({
 			since: daysAgo(14),
@@ -224,7 +250,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 			offset: 1,
 		});
 		expect(secondPage.notifications.map(({ id }) => id)).toEqual([
-			senderMatch.id,
+			titleMatch.id,
 		]);
 	});
 
