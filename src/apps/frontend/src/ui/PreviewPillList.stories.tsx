@@ -39,9 +39,10 @@ export const WithIcons: Story = {
 	},
 };
 
-export const Confirmation: Story = {
+export const DispatchReport: Story = {
 	args: {
-		isConfirmation: true,
+		muted: true,
+		showTitle: false,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

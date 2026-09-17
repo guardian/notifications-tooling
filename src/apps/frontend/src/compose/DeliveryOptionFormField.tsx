@@ -3,7 +3,7 @@ import { DeliveryAndTimingSelector } from '../send/DeliveryAndTimingSelector';
 import type { ChannelOption } from '../types';
 import type {
 	AppAlertFormValues,
-	NewsletterFormValues,
+	NewsletterEmailFormValues,
 } from '../utils/notification-forms';
 
 interface DeliveryOptionFormFieldProps {
@@ -14,7 +14,7 @@ export const DeliveryOptionFormField = ({
 	channel,
 }: DeliveryOptionFormFieldProps) => {
 	const { control } = useFormContext<
-		AppAlertFormValues | NewsletterFormValues
+		AppAlertFormValues | NewsletterEmailFormValues
 	>();
 
 	return (

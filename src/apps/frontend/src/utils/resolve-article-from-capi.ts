@@ -6,7 +6,7 @@ import {
 import type { Result } from '../api-client/client';
 import { safeFetchJsonAndParse } from '../api-client/client';
 
-export const fetchCapiDataFromApi = (
+export const resolveArticleFromCapi = (
 	request: ResolveArticleRequest,
 ): Promise<Result<ResolveArticleResponse>> =>
 	safeFetchJsonAndParse(

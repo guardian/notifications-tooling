@@ -11,7 +11,7 @@ import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { dispatchLandingTheme } from '../themes';
-import { phoneIphoneIcon } from '../ui/FlagIcons';
+import { phoneIphoneIcon } from '../ui/flag-icons';
 import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
 import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
@@ -40,6 +40,7 @@ export const DispatchLandingTab = () => {
 	};
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();
+	const handleRefresh = () => void notificationHistory.refetch();
 	const notifications =
 		notificationHistory.data?.notifications.flatMap((notification) => {
 			const historyNotification = mapNotificationToHistoryNotification(
@@ -114,7 +115,7 @@ export const DispatchLandingTab = () => {
 								? new Date(notificationHistory.dataUpdatedAt).toISOString()
 								: undefined
 						}
-						handleRefresh={() => void notificationHistory.refetch()}
+						onRefresh={handleRefresh}
 						error={
 							notificationHistory.isError ? (
 								<InlineMessage level="error">

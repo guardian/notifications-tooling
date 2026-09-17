@@ -1,10 +1,10 @@
 import type { Kicker } from '../schemas';
 import { kickerNameMap } from './option-values';
 
-export const composeNewsletterSubject = (
-	subject: string,
+export const composeNewsletterEmailSubjectLine = (
+	subjectText: string,
 	kicker?: Kicker | '',
 ) =>
 	kicker && kicker !== 'none'
-		? `${kickerNameMap[kicker]}: ${subject}`
-		: subject;
+		? `${kickerNameMap[kicker]}: ${subjectText}`
+		: subjectText;

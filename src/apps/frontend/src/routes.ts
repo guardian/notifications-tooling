@@ -1,11 +1,11 @@
 import type { AppConfig } from '@models';
 
 export const notificationRoutes = {
-	email: {
+	newsletter: {
 		create: '/newsletter-email/create',
 		report: '/newsletter-email/report',
 	},
-	push: {
+	'app-push': {
 		create: '/app-alert/create',
 		report: '/app-alert/report',
 	},
@@ -14,14 +14,14 @@ export const notificationRoutes = {
 export const getAppRoutes = (config: AppConfig | undefined) => {
 	return {
 		dispatchLanding: '/',
-		createNewsletterEmail: notificationRoutes.email.create,
-		newsletterEmailReport: notificationRoutes.email.report,
+		createNewsletterEmail: notificationRoutes.newsletter.create,
+		newsletterEmailReport: notificationRoutes.newsletter.report,
 		createAppAlert: config?.DISABLE_APP_SEND_TAB
 			? undefined
-			: notificationRoutes.push.create,
+			: notificationRoutes['app-push'].create,
 		appAlertReport: config?.DISABLE_APP_SEND_TAB
 			? undefined
-			: notificationRoutes.push.report,
+			: notificationRoutes['app-push'].report,
 		history: '/history',
 	};
 };

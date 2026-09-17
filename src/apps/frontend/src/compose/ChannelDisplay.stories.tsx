@@ -19,7 +19,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const NewsletterEmail: Story = {
-	args: { channel: 'email' },
+	args: { channel: 'newsletter' },
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByRole('region', { name: 'Channel' })).toBeVisible();
@@ -29,7 +29,7 @@ export const NewsletterEmail: Story = {
 };
 
 export const AppAlert: Story = {
-	args: { channel: 'push' },
+	args: { channel: 'app-push' },
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('App alert')).toBeVisible();

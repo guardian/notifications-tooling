@@ -3,22 +3,22 @@ import './index.css';
 import { useState } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
 import type { AppConfig } from '../../../packages/models';
+import { AccessControlledLayout } from './AccessControlledLayout';
 import { CreateAppAlertTab } from './compose/CreateAppAlertTab';
 import { CreateNewsletterEmailTab } from './compose/CreateNewsletterEmailTab';
 import {
 	AppAlertNotificationFormProvider,
-	NewsletterNotificationFormProvider,
+	NewsletterEmailNotificationFormProvider,
 } from './compose/NotificationFormProvider';
 import { ConfigContext } from './config/ConfigContext';
 import { getAppConfig } from './config/get-config';
-import { EmailNotificationPage } from './EmailNotificationPage';
 import { HistoryPage } from './history/HistoryPage';
 import { DispatchLandingLayout } from './layout/DispatchLandingLayout';
 import { NotFoundTab } from './layout/NotFoundTab';
 import { getAppRoutes } from './routes';
 import {
 	AppAlertDispatchReportTab,
-	NewsletterDispatchReportTab,
+	NewsletterEmailDispatchReportTab,
 } from './send/DispatchReport';
 
 export function App() {
@@ -33,13 +33,16 @@ export function App() {
 					<Route
 						path="newsletter-email"
 						element={
-							<NewsletterNotificationFormProvider>
+							<NewsletterEmailNotificationFormProvider>
 								<Outlet />
-							</NewsletterNotificationFormProvider>
+							</NewsletterEmailNotificationFormProvider>
 						}
 					>
 						<Route path="create" element={<CreateNewsletterEmailTab />} />
-						<Route path="report" element={<NewsletterDispatchReportTab />} />
+						<Route
+							path="report"
+							element={<NewsletterEmailDispatchReportTab />}
+						/>
 					</Route>
 					{appRoutes.createAppAlert && (
 						<Route
