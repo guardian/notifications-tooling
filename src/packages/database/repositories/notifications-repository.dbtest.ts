@@ -185,6 +185,49 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		expect(secondPage.notifications.map((row) => row.id)).toEqual([third.id]);
 	});
 
+	it('searches content and sender while reporting the filtered total', async () => {
+		const contentMatch = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+			content: {
+				'lead-story': {
+					type: 'app-push',
+					title: 'Breaking news',
+					body: 'Northern lights visible tonight',
+					link: 'https://www.theguardian.com/science',
+				},
+			},
+		});
+		const senderMatch = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(2),
+			createdByEmail: 'northern.editor@guardian.co.uk',
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(3),
+		});
+
+		const page = await notifications.listRecent({
+			since: daysAgo(14),
+			search: 'NORTHERN',
+			limit: 1,
+		});
+
+		expect(page.total).toBe(2);
+		expect(page.notifications.map(({ id }) => id)).toEqual([contentMatch.id]);
+
+		const secondPage = await notifications.listRecent({
+			since: daysAgo(14),
+			search: 'northern',
+			limit: 1,
+			offset: 1,
+		});
+		expect(secondPage.notifications.map(({ id }) => id)).toEqual([
+			senderMatch.id,
+		]);
+	});
+
 	it('excludes test notifications from the page and the total', async () => {
 		const send = await notifications.create({
 			...buildNotification(),

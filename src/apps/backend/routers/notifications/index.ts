@@ -280,12 +280,13 @@ export const createNotificationsRouter = (
 		}) as unknown as RequestHandler,
 		async (req, res) => {
 			// express-zod-safe has coerced the query and applied the defaults.
-			const { since, limit, offset } =
+			const { since, limit, offset, search } =
 				req.query as unknown as NotificationListQuery;
 			const { notifications, total } = await listNotifications({
 				since,
 				limit,
 				offset,
+				search,
 			});
 
 			res.status(200).json({

@@ -20,3 +20,17 @@ describe('email preview OpenAPI contract', () => {
 		).toEqual(['articleId', 'html', 'newsletterId']);
 	});
 });
+
+describe('notification history OpenAPI contract', () => {
+	it('documents the bounded search query parameter', () => {
+		const searchParameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'search');
+
+		expect(searchParameter).toMatchObject({
+			in: 'query',
+			required: false,
+			schema: { type: 'string', minLength: 1, maxLength: 200 },
+		});
+	});
+});
