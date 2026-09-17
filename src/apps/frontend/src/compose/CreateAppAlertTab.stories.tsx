@@ -79,6 +79,10 @@ export const Default: Story = {
 };
 
 export const RepeatedInvalidSubmitScrollsToFirstError: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: { ...completeAppAlertFormValues, alertType: '' },
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const document = canvasElement.ownerDocument;
@@ -86,21 +90,83 @@ export const RepeatedInvalidSubmitScrollsToFirstError: Story = {
 		if (!window) {
 			throw new Error('Story window is not available');
 		}
-		const nativeScrollTo = window.scrollTo.bind(window);
-		const scrollTo = fn((options?: ScrollToOptions) => nativeScrollTo(options));
-		window.scrollTo = scrollTo;
+		const alertSection = document.getElementById('alert-section');
+		if (!alertSection) {
+			throw new Error('Alert section is not available');
+		}
+		const nativeScrollIntoView = alertSection.scrollIntoView.bind(alertSection);
+		const scrollIntoView = fn((options?: ScrollIntoViewOptions) =>
+			nativeScrollIntoView(options),
+		);
+		alertSection.scrollIntoView = scrollIntoView;
 		const sendButton = canvas.getByRole('button', { name: 'Send app alert' });
 		const submitFromBottom = async (expectedScrollCount: number) => {
 			sendButton.scrollIntoView({ block: 'center' });
 			await userEvent.click(sendButton);
 			await waitFor(async () => {
-				await expect(scrollTo).toHaveBeenCalledTimes(expectedScrollCount);
-				await expect(window.location.hash).toBe('#article-section');
+				await expect(scrollIntoView).toHaveBeenCalledTimes(expectedScrollCount);
+				await expect(scrollIntoView).toHaveBeenLastCalledWith({
+					block: 'start',
+				});
+				await expect(window.location.hash).toBe('#alert-section');
+				await expect(
+					canvas.getByRole('button', {
+						name: 'Choose an alert type Alert type',
+					}),
+				).toHaveFocus();
 			});
 		};
 
 		await submitFromBottom(1);
 		await submitFromBottom(2);
+	},
+};
+
+export const InvalidContentJumpsToContentSection: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: { ...completeAppAlertFormValues, headline: '' },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const window = canvasElement.ownerDocument.defaultView;
+		if (!window) {
+			throw new Error('Story window is not available');
+		}
+		const sendButton = canvas.getByRole('button', { name: 'Send app alert' });
+		sendButton.scrollIntoView({ block: 'center' });
+		await userEvent.click(sendButton);
+
+		await waitFor(async () => {
+			await expect(window.location.hash).toBe('#content-section');
+			await expect(
+				canvas.getByRole('textbox', { name: 'Headline' }),
+			).toHaveFocus();
+		});
+	},
+};
+
+export const InvalidDeliveryJumpsToDeliverySection: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: { ...completeAppAlertFormValues, deliveryOption: undefined },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const window = canvasElement.ownerDocument.defaultView;
+		if (!window) {
+			throw new Error('Story window is not available');
+		}
+		const sendButton = canvas.getByRole('button', { name: 'Send app alert' });
+		sendButton.scrollIntoView({ block: 'center' });
+		await userEvent.click(sendButton);
+
+		await waitFor(async () => {
+			await expect(window.location.hash).toBe('#delivery-timing-section');
+			await expect(
+				canvas.getByRole('button', { name: /Immediate Sends right now/ }),
+			).toHaveFocus();
+		});
 	},
 };
 

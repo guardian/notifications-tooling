@@ -13,7 +13,10 @@ import { useNavigate } from 'react-router-dom';
 import { useActiveSectionHref } from '../hooks/useActiveSectionHref';
 import { layer, stickyHeaderHeight } from '../themes';
 import type { ChannelOption } from '../types';
-import { ACTIVE_SECTION_VIEWPORT_POSITION } from './constants';
+import {
+	ACTIVE_SECTION_VIEWPORT_POSITION,
+	FORM_SECTION_JUMP_EVENT,
+} from './constants';
 
 const getStep = (id: string, label: string): StepNavStep => ({
 	id,
@@ -98,6 +101,14 @@ export const SideNavigationPanel = ({
 			return element ? [{ item, element }] : [];
 		});
 		let animationFrameId: number | undefined;
+		let formJumpUnlockTimeoutId: number | undefined;
+		const handleFormSectionJump = () => {
+			isClickLockedRef.current = true;
+			window.clearTimeout(formJumpUnlockTimeoutId);
+			formJumpUnlockTimeoutId = window.setTimeout(() => {
+				isClickLockedRef.current = false;
+			}, 100);
+		};
 
 		const selectItem = (item: (typeof PANEL_ITEMS)[number]) => {
 			if (locationHashRef.current !== item.id) {
@@ -151,10 +162,16 @@ export const SideNavigationPanel = ({
 		}
 		window.addEventListener('scroll', handleViewportChange, { passive: true });
 		window.addEventListener('resize', handleViewportChange);
+		window.addEventListener(FORM_SECTION_JUMP_EVENT, handleFormSectionJump);
 
 		return () => {
 			window.removeEventListener('scroll', handleViewportChange);
 			window.removeEventListener('resize', handleViewportChange);
+			window.removeEventListener(
+				FORM_SECTION_JUMP_EVENT,
+				handleFormSectionJump,
+			);
+			window.clearTimeout(formJumpUnlockTimeoutId);
 			if (animationFrameId !== undefined) {
 				window.cancelAnimationFrame(animationFrameId);
 			}

@@ -12,7 +12,7 @@ import {
 } from '@guardian/stand/TopBar';
 import { Typography } from '@guardian/stand/Typography';
 import type { AppConfig } from '@models';
-import { type ReactNode, useContext } from 'react';
+import { type ReactNode, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes, getTopBarNavigationItems } from '../routes';
@@ -45,6 +45,10 @@ export const MainLayout = ({ children }: Props) => {
 	const stickyHeaderHeight = shouldShowEnvBadge
 		? `calc(${topBarHeight} + ${semanticSizing.height.md})`
 		: topBarHeight;
+
+	useEffect(() => {
+		window.scrollTo(0, 0);
+	}, [pathname]);
 
 	return (
 		<Layout

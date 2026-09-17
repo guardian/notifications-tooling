@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import { baseColors, semanticSizing, semanticSpacing } from '@guardian/stand';
 import type { PropsWithChildren } from 'react';
 import { useActiveSectionHref } from '../hooks/useActiveSectionHref';
-import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
+import { FORM_SECTION_JUMP_EVENT } from '../layout/constants';
 import { stickyHeaderHeight } from '../themes';
 
 export const jumpToFormSection = (sectionId: string) => {
@@ -10,19 +10,12 @@ export const jumpToFormSection = (sectionId: string) => {
 	if (!section) {
 		return;
 	}
-	const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-	const targetTop =
-		sectionId === 'article-section'
-			? 0
-			: Math.max(
-					1,
-					sectionTop -
-						window.innerHeight * ACTIVE_SECTION_VIEWPORT_POSITION +
-						1,
-				);
-	window.scrollTo({
-		top: targetTop,
-	});
+	const firstControl = section.querySelector<HTMLElement>(
+		'input:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+	);
+	firstControl?.focus({ preventScroll: true });
+	window.dispatchEvent(new Event(FORM_SECTION_JUMP_EVENT));
+	section.scrollIntoView({ block: 'start' });
 	window.history.replaceState(window.history.state, '', `#${sectionId}`);
 	window.dispatchEvent(new PopStateEvent('popstate'));
 };
