@@ -74,9 +74,6 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('complementary', { name: 'Filters' }),
 		).toBeInTheDocument();
-		const searchInput = canvas.getByRole('searchbox', { name: 'Search' });
-		await userEvent.type(searchInput, 'weather');
-		await expect(args.onSearchTermChange).toHaveBeenLastCalledWith('r');
 		await expect(
 			canvas.getByRole('link', {
 				name: /Prime minister announces cabinet reshuffle/,

@@ -1,5 +1,6 @@
 import { TextInput } from '@guardian/stand/TextInput';
 import { historyViewStyles } from '../themes';
+import { MAXIMUM_SEARCH_LENGTH } from '../utils/history-search-params';
 
 interface HistoryFiltersProps {
 	searchTerm: string;
@@ -17,6 +18,7 @@ export const HistoryFilters = ({
 			placeholder="Search"
 			value={searchTerm}
 			onChange={onSearchTermChange}
+			maxLength={MAXIMUM_SEARCH_LENGTH}
 			fluid
 		/>
 	</aside>
