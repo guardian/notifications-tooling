@@ -16,6 +16,8 @@ import type { TopBarTheme } from '@guardian/stand/TopBar';
 import { from, until } from '@guardian/stand/utils';
 
 export const topBarHeight = '4rem';
+export const stickyHeaderHeightProperty = '--sticky-header-height';
+export const stickyHeaderHeight = `var(${stickyHeaderHeightProperty}, ${topBarHeight})`;
 
 export const layer = {
 	stickyContent: 1,

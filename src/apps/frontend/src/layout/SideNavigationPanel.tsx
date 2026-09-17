@@ -11,7 +11,7 @@ import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveSectionHref } from '../hooks/useActiveSectionHref';
-import { layer, topBarHeight } from '../themes';
+import { layer, stickyHeaderHeight } from '../themes';
 import type { ChannelOption } from '../types';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from './constants';
 
@@ -183,7 +183,7 @@ export const SideNavigationPanel = ({
 		<div
 			css={css({
 				position: 'sticky',
-				top: topBarHeight,
+				top: stickyHeaderHeight,
 				zIndex: layer.stickyContent,
 			})}
 		>
