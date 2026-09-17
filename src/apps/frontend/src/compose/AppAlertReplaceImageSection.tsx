@@ -4,8 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useState } from 'react';
-import { validateGuardianImageUrl } from '../utils/form-validation';
+import { useImageUrlCheck } from '../hooks/use-image-url-check';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -20,10 +19,19 @@ export const AppAlertReplaceImageSection = ({
 	onUpdate,
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
-	const [imageUpdated, setImageUpdated] = useState(false);
-	const trimmedReplacementImageUrl = replacementImageUrl.trim();
-	const validationError = validateGuardianImageUrl(trimmedReplacementImageUrl);
-	const displayedErrorMessage = validationError ?? errorMessage;
+	const {
+		checkAndUpdateImage,
+		handleImageUrlChange,
+		imageUpdated,
+		isCheckingImage,
+		isUpdateDisabled,
+		displayedErrorMessage,
+	} = useImageUrlCheck({
+		imageUrl: replacementImageUrl,
+		onImageUrlChange: onReplacementImageUrlChange,
+		onUpdate,
+		errorMessage,
+	});
 
 	return (
 		<>
@@ -49,10 +57,7 @@ export const AppAlertReplaceImageSection = ({
 					size="md"
 					value={replacementImageUrl}
 					placeholder="Enter replacement image URL..."
-					onChange={(url) => {
-						onReplacementImageUrlChange(url);
-						setImageUpdated(false);
-					}}
+					onChange={handleImageUrlChange}
 					id="replacement-image-URL"
 				/>
 				<Button
@@ -60,16 +65,10 @@ export const AppAlertReplaceImageSection = ({
 					icon="refresh"
 					size="md"
 					variant="secondary"
-					onClick={() => {
-						if (validationError) {
-							setImageUpdated(false);
-							return;
-						}
-						onUpdate(trimmedReplacementImageUrl);
-						setImageUpdated(true);
-					}}
+					isDisabled={isUpdateDisabled}
+					onClick={() => void checkAndUpdateImage()}
 				>
-					Update
+					{isCheckingImage ? 'Checking...' : 'Update'}
 				</Button>
 			</div>
 

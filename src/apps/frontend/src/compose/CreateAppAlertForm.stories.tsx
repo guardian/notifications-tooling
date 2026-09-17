@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
 import {
 	failedAppPushSendResponse,
@@ -294,6 +295,17 @@ export const WithReplacementThumbnail: Story = {
 		composerState: populatedAppAlertComposerState,
 		formValues: completeAppAlertFormValues,
 	},
+	parameters: {
+		msw: {
+			handlers: [
+				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
+					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+						headers: { 'Content-Type': 'image/svg+xml' },
+					}),
+				),
+			],
+		},
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const replacementThumbnailUrl =
@@ -317,18 +329,13 @@ export const WithReplacementThumbnail: Story = {
 
 		await userEvent.clear(replacementInput);
 		await userEvent.type(replacementInput, replacementThumbnailUrl);
-		await expect(thumbnail).toHaveAttribute(
-			'src',
-			articleFixture.fields?.thumbnail,
-		);
-
 		await userEvent.click(updateButton);
 
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
 		await expect(thumbnail).toHaveAttribute(
 			'src',
 			articleFixture.fields?.thumbnail,
 		);
-		await expect(canvas.getByText('Image updated')).toBeVisible();
 
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Send app alert' }),
