@@ -1,4 +1,5 @@
 import { InlineMessage } from '@guardian/stand/InlineMessage';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
@@ -8,6 +9,7 @@ import { HistoryView } from './HistoryView';
 
 export const HistoryPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
+	const [searchTerm, setSearchTerm] = useState('');
 	const historyQuery = parseHistorySearchParams(searchParams);
 	const notificationHistory = useNotificationHistory(historyQuery);
 	const channelAudiences = useChannelAudiences();
@@ -59,6 +61,8 @@ export const HistoryPage = () => {
 					: undefined
 			}
 			currentPage={currentPage}
+			searchTerm={searchTerm}
+			onSearchTermChange={setSearchTerm}
 		/>
 	);
 };

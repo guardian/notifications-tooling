@@ -60,8 +60,10 @@ export const Default: Story = {
 		totalItems: notifications.length,
 		currentPage: 1,
 		limit: 10,
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: fn(),
+		onSearchTermChange: fn(),
 		lastUpdatedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
 	},
 	play: async ({ args, canvasElement }) => {
@@ -69,6 +71,12 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('complementary', { name: 'Filters' }),
+		).toBeInTheDocument();
+		const searchInput = canvas.getByRole('searchbox', { name: 'Search' });
+		await userEvent.type(searchInput, 'weather');
+		await expect(args.onSearchTermChange).toHaveBeenLastCalledWith('r');
 		await expect(
 			canvas.getByRole('link', {
 				name: /Prime minister announces cabinet reshuffle/,
@@ -110,8 +118,10 @@ export const Empty: Story = {
 		totalItems: 0,
 		currentPage: 1,
 		limit: 10,
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -134,8 +144,10 @@ export const Loading: Story = {
 		currentPage: 1,
 		limit: 10,
 		isLoading: true,
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -158,8 +170,10 @@ export const Error: Story = {
 		currentPage: 1,
 		limit: 10,
 		error: 'Unable to load notification history. Try again.',
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -181,8 +195,10 @@ export const WithPagination: Story = {
 		totalItems: paginatedNotifications.length,
 		limit: 10,
 		currentPage: 1,
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
 		lastUpdatedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
 	},
 	play: async ({ canvasElement }) => {

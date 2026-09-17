@@ -412,6 +412,25 @@ const skeletonBase = {
 } as const;
 
 export const historyViewStyles = {
+	page: css({
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr)',
+		[from.md]: {
+			gridTemplateColumns: '18rem minmax(0, 1fr)',
+		},
+	}),
+	filters: css({
+		display: 'flex',
+		flexDirection: 'column',
+		padding: semanticSpacing.stackSm,
+		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		backgroundColor: semanticColors.fill.neutralWeak,
+		[from.md]: {
+			minHeight: `calc(100vh - ${stickyHeaderHeight})`,
+			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			borderBottom: 0,
+		},
+	}),
 	container: css({
 		display: 'flex',
 		flexDirection: 'column',
