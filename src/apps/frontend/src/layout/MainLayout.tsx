@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { baseColors } from '@guardian/stand';
+import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Avatar } from '@guardian/stand/Avatar';
 import { Favicon } from '@guardian/stand/Favicon';
@@ -80,16 +80,20 @@ export const MainLayout = ({ children }: Props) => {
 							information: {
 								backgroundColor:
 									stage === 'CODE'
-										? baseColors.magenta['800']
-										: baseColors.neutral['600'],
+										? semanticColors.fill.informationWeak
+										: semanticColors.fill.neutralWeak,
+							},
+							shared: {
+								height: semanticSizing.height.md,
 							},
 						}}
+						cssOverrides={css({
+							borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+						})}
+						showIcon
 					>
-						<Typography
-							variant="headingCompactMd"
-							color={baseColors.neutral['0']}
-						>
-							You are working in the {stage} Environment
+						<Typography variant="bodySm" color={semanticColors.text.strong}>
+							You are working in the Dispatch {stage} Environment
 						</Typography>
 					</AlertBanner>
 				)}
