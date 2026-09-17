@@ -155,7 +155,7 @@ export const grafanaQueryHandler = async (req: Request, res: Response) => {
 		{
 			type: 'table',
 			columns: grafanaTableColumns,
-			rows: toGrafanaRows(notifications),
+			rows: toGrafanaRows(notifications.slice(0, maxNotifications)),
 			...(meta ? { meta } : {}),
 		},
 	]);
