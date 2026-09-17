@@ -4,6 +4,7 @@ import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import { ConfigContext } from '../config/ConfigContext';
+import { DispatchLandingLayout } from '../layout/DispatchLandingLayout';
 import { MainLayout } from '../layout/MainLayout';
 import type { NotificationListResponse } from '../schemas';
 import { mockAppConfig } from '../testing/app-config';
@@ -144,7 +145,7 @@ const meta = {
 	render: ({ appConfig }: StoryArgs) => (
 		<ConfigContext.Provider value={appConfig}>
 			<MainLayout>
-				<DispatchLandingPage />
+				<DispatchLandingLayout />
 			</MainLayout>
 		</ConfigContext.Provider>
 	),
@@ -199,6 +200,26 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('link', { name: 'Create app alert' }),
 		).toHaveAttribute('href', '/app-alert/create');
+		await expect(
+			canvas.getByRole('button', { name: 'Open Latest Published Content' }),
+		).toBeInTheDocument();
+	},
+};
+
+export const Production: Story = {
+	args: {
+		appConfig: { ...mockAppConfig, stage: 'PROD' },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'Welcome to Dispatch' }),
+		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('button', {
+				name: 'Open Latest Published Content',
+			}),
+		).not.toBeInTheDocument();
 	},
 };
 

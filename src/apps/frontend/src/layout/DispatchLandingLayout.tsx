@@ -3,11 +3,16 @@ import { semanticColors } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
+import { useContext } from 'react';
 import { DispatchLandingPage } from '../compose/DispatchLandingPage';
+import { ConfigContext } from '../config/ConfigContext';
 import { layoutMainTheme } from '../themes';
 import { LatestPublishedContent } from './LatestPublishedContent';
 
 export const DispatchLandingLayout = () => {
+	const config = useContext(ConfigContext);
+	const shouldShowLatestPublishedContent = config?.stage !== 'PROD';
+
 	return (
 		<>
 			<Layout.Main theme={layoutMainTheme}>
@@ -34,23 +39,25 @@ export const DispatchLandingLayout = () => {
 						>
 							<DispatchLandingPage />
 						</Item>
-						<Item
-							size={{ sm: 12, md: 12, lg: 4 }}
-							cssOverrides={css({
-								justifyContent: 'center',
-								alignItems: 'flex-start',
-								backgroundColor: semanticColors.bg.raisedLevel1,
-								flow: 'vertical',
-								[from.lg]: {
-									display: 'flex',
-									flex: '0 0 474px',
-									marginLeft: 'auto',
-									maxWidth: '474px',
-								},
-							})}
-						>
-							<LatestPublishedContent />
-						</Item>
+						{shouldShowLatestPublishedContent && (
+							<Item
+								size={{ sm: 12, md: 12, lg: 4 }}
+								cssOverrides={css({
+									justifyContent: 'center',
+									alignItems: 'flex-start',
+									backgroundColor: semanticColors.bg.raisedLevel1,
+									flow: 'vertical',
+									[from.lg]: {
+										display: 'flex',
+										flex: '0 0 474px',
+										marginLeft: 'auto',
+										maxWidth: '474px',
+									},
+								})}
+							>
+								<LatestPublishedContent />
+							</Item>
+						)}
 					</>
 				</Grid>
 			</Layout.Main>
