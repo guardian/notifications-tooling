@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
+import {
+	completeNewsletterEmailFormValues,
+	populatedNewsletterEmailComposerState,
+} from '../testing/story-fixtures';
 import { useNotificationFormStory } from '../testing/useNotificationFormStory';
 import type { NotificationComposerState } from '../types';
 import { defaultComposerState } from '../utils/notification-composer-reducer';
@@ -73,6 +77,45 @@ export const Default: Story = {
 				'The preview for the newsletter email will be shown below.',
 			),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const RepeatedInvalidSubmitScrollsToFirstError: Story = {
+	args: {
+		composerState: populatedNewsletterEmailComposerState,
+		formValues: { ...completeNewsletterEmailFormValues, kicker: '' },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const document = canvasElement.ownerDocument;
+		const window = document.defaultView;
+		if (!window) {
+			throw new Error('Story window is not available');
+		}
+		const contentSection = document.getElementById('content-section');
+		if (!contentSection) {
+			throw new Error('Content section is not available');
+		}
+		const nativeScrollIntoView =
+			contentSection.scrollIntoView.bind(contentSection);
+		const scrollIntoView = fn((options?: ScrollIntoViewOptions) =>
+			nativeScrollIntoView(options),
+		);
+		contentSection.scrollIntoView = scrollIntoView;
+		const sendButton = canvas.getByRole('button', {
+			name: 'Send newsletter email',
+		});
+		const submitFromBottom = async (expectedScrollCount: number) => {
+			sendButton.scrollIntoView({ block: 'center' });
+			await userEvent.click(sendButton);
+			await waitFor(async () => {
+				await expect(scrollIntoView).toHaveBeenCalledTimes(expectedScrollCount);
+				await expect(window.location.hash).toBe('#content-section');
+			});
+		};
+
+		await submitFromBottom(1);
+		await submitFromBottom(2);
 	},
 };
 

@@ -102,7 +102,10 @@ export const SideNavigationPanel = ({
 		const selectItem = (item: (typeof PANEL_ITEMS)[number]) => {
 			if (locationHashRef.current !== item.id) {
 				locationHashRef.current = item.id;
-				void navigate({ hash: item.id }, { replace: true });
+				void navigate(
+					{ hash: item.id },
+					{ replace: true, preventScrollReset: true },
+				);
 			}
 		};
 		const updateActiveSection = () => {
@@ -161,7 +164,7 @@ export const SideNavigationPanel = ({
 	const handleTileClick = (href: string) => {
 		if (locationHashRef.current !== href) {
 			locationHashRef.current = href;
-			void navigate({ hash: href });
+			void navigate({ hash: href }, { preventScrollReset: true });
 		}
 
 		isClickLockedRef.current = true;

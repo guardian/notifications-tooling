@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeAppAlertFormValues,
@@ -75,6 +75,39 @@ export const Default: Story = {
 		await expect(
 			canvas.queryByText('The preview for the app alert will be shown below.'),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const RepeatedInvalidSubmitScrollsToFirstError: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const document = canvasElement.ownerDocument;
+		const window = document.defaultView;
+		if (!window) {
+			throw new Error('Story window is not available');
+		}
+		const articleSection = document.getElementById('article-section');
+		if (!articleSection) {
+			throw new Error('Article section is not available');
+		}
+		const nativeScrollIntoView =
+			articleSection.scrollIntoView.bind(articleSection);
+		const scrollIntoView = fn((options?: ScrollIntoViewOptions) =>
+			nativeScrollIntoView(options),
+		);
+		articleSection.scrollIntoView = scrollIntoView;
+		const sendButton = canvas.getByRole('button', { name: 'Send app alert' });
+		const submitFromBottom = async (expectedScrollCount: number) => {
+			sendButton.scrollIntoView({ block: 'center' });
+			await userEvent.click(sendButton);
+			await waitFor(async () => {
+				await expect(scrollIntoView).toHaveBeenCalledTimes(expectedScrollCount);
+				await expect(window.location.hash).toBe('#article-section');
+			});
+		};
+
+		await submitFromBottom(1);
+		await submitFromBottom(2);
 	},
 };
 

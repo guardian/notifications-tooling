@@ -4,6 +4,12 @@ import type { PropsWithChildren } from 'react';
 import { useActiveSectionHref } from '../hooks/useActiveSectionHref';
 import { stickyHeaderHeight } from '../themes';
 
+export const jumpToFormSection = (sectionId: string) => {
+	document.getElementById(sectionId)?.scrollIntoView({ block: 'start' });
+	window.history.replaceState(window.history.state, '', `#${sectionId}`);
+	window.dispatchEvent(new PopStateEvent('popstate'));
+};
+
 export const NotificationFormSection = ({
 	id,
 	children,

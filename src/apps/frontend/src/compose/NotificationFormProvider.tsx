@@ -66,6 +66,7 @@ export const NewsletterEmailNotificationFormProvider = ({
 	const newsletterEmailForm = useForm<NewsletterEmailFormValues>({
 		defaultValues: defaultNewsletterEmailFormValues,
 		resolver: zodResolver(newsletterEmailFormSchema),
+		shouldFocusError: false,
 	});
 	return (
 		<FormProvider {...newsletterEmailForm}>
@@ -91,6 +92,7 @@ export const AppAlertNotificationFormProvider = ({
 	const appAlertForm = useForm<AppAlertFormValues>({
 		defaultValues: defaultAppAlertFormValues,
 		resolver: zodResolver(appAlertFormSchema),
+		shouldFocusError: false,
 	});
 	return (
 		<FormProvider {...appAlertForm}>

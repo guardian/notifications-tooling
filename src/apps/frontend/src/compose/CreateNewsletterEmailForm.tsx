@@ -7,7 +7,10 @@ import { htmlToSingleLineText } from '../utils/html-helpers';
 import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { KickerFormField } from './KickerFormField';
 import { NotificationFormContext } from './NotificationFormContext';
-import { NotificationFormSection } from './NotificationFormSection';
+import {
+	jumpToFormSection,
+	NotificationFormSection,
+} from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 import { PreviewTextFormField } from './PreviewTextFormField';
 import { SubjectFormField } from './SubjectFormField';
@@ -24,7 +27,7 @@ export const CreateNewsletterEmailForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
-	const { handleSubmit, setError, setValue } =
+	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<NewsletterEmailFormValues>();
 
 	const { data: constraints } = useChannelConstraints();
@@ -44,12 +47,27 @@ export const CreateNewsletterEmailForm = ({
 		});
 	};
 	const handleSubmitForm = (event: FormEvent<HTMLFormElement>) => {
-		if (!composerState.article) {
-			setError('root.article', {
-				message: 'Paste a URL to fetch an article',
-			});
-		}
-		void handleSubmit(prepareSend)(event);
+		clearErrors();
+		void handleSubmit(
+			(values) => {
+				if (!composerState.article) {
+					jumpToFormSection('article-section');
+					return;
+				}
+				prepareSend(values);
+			},
+			(errors) => {
+				if (!composerState.article) {
+					jumpToFormSection('article-section');
+				} else if (errors.kicker || errors.subjectText || errors.previewText) {
+					jumpToFormSection('content-section');
+				} else if (errors.audienceSegments) {
+					jumpToFormSection('audience-section');
+				} else if (errors.deliveryOption) {
+					jumpToFormSection('delivery-timing-section');
+				}
+			},
+		)(event);
 	};
 
 	return (

@@ -55,6 +55,7 @@ export const useNotificationFormStory = (
 			...newsletterEmailValues,
 		},
 		resolver: zodResolver(newsletterEmailFormSchema),
+		shouldFocusError: false,
 	});
 	const appAlertForm = useForm({
 		defaultValues: {
@@ -62,6 +63,7 @@ export const useNotificationFormStory = (
 			...appAlertValues,
 		},
 		resolver: zodResolver(appAlertFormSchema),
+		shouldFocusError: false,
 	});
 
 	const {
