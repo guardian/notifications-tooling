@@ -62,10 +62,6 @@ export const Empty: Story = {
 	},
 };
 
-export const WithChannel: Story = {};
-
-export const WithDeliveryTiming: Story = {};
-
 export const WithSegments: Story = {
 	args: {
 		composerState: populatedNewsletterEmailComposerState,
