@@ -1,4 +1,4 @@
-import type { CropAsset, ImageData } from '@models';
+import type { CropAsset, CropData, ImageData } from '@models';
 import { gridImage } from '@models';
 
 type Result<T> = { success: true; data: T } | { success: false; error: Error };
@@ -32,10 +32,7 @@ const fetchImageData = async (
 	}
 };
 
-const extractAsset = (
-	imageData: ImageData,
-	cropId: string,
-): Result<CropAsset> => {
+const findCrop = (imageData: ImageData, cropId: string): Result<CropData> => {
 	const crop = imageData.exports?.find((crop) => crop.id === cropId);
 	if (!crop) {
 		return {
@@ -43,6 +40,13 @@ const extractAsset = (
 			error: new Error('Could not find crop'),
 		};
 	}
+	return {
+		success: true,
+		data: crop,
+	};
+};
+
+const extractAsset = (crop: CropData): Result<CropAsset> => {
 	const assetsSmallestFirst = crop.assets?.sort(
 		(assetA, assetB) =>
 			(assetA.dimensions?.width ?? 0) - (assetB.dimensions?.width ?? 0),
@@ -67,6 +71,20 @@ const extractAsset = (
 	};
 };
 
+const isFiveFourCrop = (crop: CropData): boolean | undefined => {
+	const { specification, master } = crop;
+	if (specification?.aspectRatio) {
+		return specification.aspectRatio === '5:4';
+	}
+
+	const { width, height } = master?.dimensions ?? {};
+	if (!width || !height) {
+		return undefined;
+	}
+	const aspectRatio = width / height;
+	return Math.abs(aspectRatio - 5 / 4) < 0.05;
+};
+
 export const getGridImageUrl = async (
 	gridApiUri: string | undefined,
 	cropId: string,
@@ -76,7 +94,20 @@ export const getGridImageUrl = async (
 	if (!dataResult.success) {
 		return dataResult;
 	}
-	const assetResult = extractAsset(dataResult.data, cropId);
+
+	const cropResult = findCrop(dataResult.data, cropId);
+	if (!cropResult.success) {
+		return cropResult;
+	}
+
+	if (!isFiveFourCrop(cropResult.data)) {
+		return {
+			success: false,
+			error: new Error('not a 5:4 crop'),
+		};
+	}
+
+	const assetResult = extractAsset(cropResult.data);
 	if (!assetResult.success) {
 		return assetResult;
 	}

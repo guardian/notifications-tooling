@@ -26,12 +26,13 @@ export const AppAlertReplaceImageSection = ({
 	const { gridApiUri, gridUri } = useContext(ConfigContext) ?? {};
 	const [imageUpdated, setImageUpdated] = useState(false);
 	const [isWaitingForGrid, setIsWaitingForGrid] = useState(false);
+	const [gridImageError, setGridImageError] = useState<string>();
 	const validationResult = parseImageSourceUrl(
 		replacementImageUrl.trim(),
 		gridUri,
 	);
 	const displayedErrorMessage =
-		validationResult.relevantFailure ?? errorMessage;
+		gridImageError ?? validationResult.relevantFailure ?? errorMessage;
 
 	return (
 		<>
@@ -73,17 +74,18 @@ export const AppAlertReplaceImageSection = ({
 							const { cropId, imageId } =
 								validationResult.gridCropUrlValidationResult;
 
+							setGridImageError(undefined);
 							setIsWaitingForGrid(true);
 							void getGridImageUrl(gridApiUri, cropId, imageId).then(
 								(result) => {
+									setIsWaitingForGrid(false);
 									if (!result.success) {
-										alert('image process fail');
 										console.error(result.error);
+										setGridImageError(result.error.message);
 										return;
 									}
 									onUpdate(result.data);
 									setImageUpdated(true);
-									setIsWaitingForGrid(false);
 								},
 							);
 							return;
