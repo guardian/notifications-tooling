@@ -92,7 +92,7 @@ export const NewsletterEmailPreview = () => {
 		if (preview?.html) {
 			modifyContent(articleElement, parameters);
 		}
-	}, [previewContainerElement, preview, parameters]);
+	}, [previewContainerElement, preview?.html, parameters]);
 
 	useEffect(() => {
 		const articleElement = previewContainerElement?.querySelector('article');
