@@ -25,6 +25,8 @@ import type { DeliveryOption } from '../types';
 import { scheduleIcon } from '../ui/flag-icons';
 import {
 	capitalise,
+	getAlternateChannel,
+	getAlternateChannelDescription,
 	getChannelDescription,
 } from '../utils/display-text-helpers';
 import { composeNewsletterEmailSubjectLine } from '../utils/newsletter-email-subject';
@@ -251,12 +253,14 @@ interface DispatchReportProps {
 	channel: ChannelOption;
 	children: ReactNode;
 	onCreateNew: () => void;
+	onCopyToAnotherChannel: () => void;
 }
 
 export const DispatchReport = ({
 	channel,
 	children,
 	onCreateNew,
+	onCopyToAnotherChannel,
 }: DispatchReportProps) => {
 	const notificationDescription = capitalise(getChannelDescription(channel));
 
@@ -310,7 +314,26 @@ export const DispatchReport = ({
 				}}
 			>
 				<Button variant="primary" onClick={onCreateNew}>
-					Create new {getChannelDescription(channel)}
+					<Typography
+						variant="bodySm"
+						css={{
+							fontSize: '14px',
+							color: semanticColors.text.strongerInverse,
+						}}
+					>
+						Create a new {getChannelDescription(channel)}
+					</Typography>
+				</Button>
+				<Button variant="tertiary" onClick={onCopyToAnotherChannel}>
+					<Typography
+						variant="bodySm"
+						css={{
+							fontSize: '14px',
+							color: semanticColors.text.strong,
+						}}
+					>
+						Copy to {getAlternateChannelDescription(channel)}
+					</Typography>
 				</Button>
 			</div>
 		</section>
@@ -350,6 +373,13 @@ const DispatchReportTab = ({
 							reset();
 							setValue('notificationId', undefined);
 							void navigate(notificationRoutes[channel].create);
+						}}
+						onCopyToAnotherChannel={() => {
+							reset();
+							setValue('notificationId', undefined);
+							void navigate(
+								notificationRoutes[getAlternateChannel(channel)].create,
+							);
 						}}
 					>
 						{children}

@@ -19,6 +19,7 @@ type StoryArgs = {
 	composerState: NotificationComposerState;
 	channel: ChannelOption;
 	onStartNew: () => void;
+	onCopyToAnotherChannel: () => void;
 };
 type Story = StoryObj<StoryArgs>;
 
@@ -26,9 +27,14 @@ const DispatchReportStory = ({
 	composerState,
 	channel,
 	onStartNew,
+	onCopyToAnotherChannel,
 }: StoryArgs) =>
 	useNotificationFormStory(
-		<DispatchReport channel={channel} onCreateNew={onStartNew}>
+		<DispatchReport
+			channel={channel}
+			onCreateNew={onStartNew}
+			onCopyToAnotherChannel={onCopyToAnotherChannel}
+		>
 			{channel === 'newsletter' ? (
 				<NewsletterEmailDispatchDetails />
 			) : (
@@ -57,6 +63,7 @@ const meta: Meta<StoryArgs> = {
 	args: {
 		channel: 'newsletter',
 		onStartNew: fn(),
+		onCopyToAnotherChannel: fn(),
 		composerState: defaultComposerState,
 	},
 };
