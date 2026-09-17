@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { baseColors, semanticColors, semanticSpacing } from '@guardian/stand';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Badge } from '@guardian/stand/Badge';
 import { useState } from 'react';
 import { useNotificationDetail } from '../hooks/useNotificationDetail';
@@ -120,7 +120,7 @@ export const HistoryFailureTooltip = ({
 			onOpenChange={(isOpen) => isOpen && setHasOpened(true)}
 			theme={{
 				color: semanticColors.text.strongerInverse,
-				backgroundColor: baseColors.neutral[100],
+				backgroundColor: semanticColors.fill.strong,
 			}}
 			cssOverrides={css({
 				maxWidth: '30rem',
