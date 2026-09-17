@@ -19,8 +19,7 @@ export const HistoryPage = () => {
 	});
 	const channelAudiences = useChannelAudiences();
 
-	const limit = historyQuery.limit;
-	const offset = historyQuery.offset;
+	const { limit, offset } = historyQuery;
 	const currentPage = Math.max(1, Math.floor(offset / limit) + 1);
 
 	const handlePageChange = (page: number) => {
