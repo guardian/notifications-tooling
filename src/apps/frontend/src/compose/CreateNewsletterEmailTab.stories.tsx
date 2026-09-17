@@ -106,6 +106,9 @@ export const ImportsArticleFromSearchParam: Story = {
 		await expect(canvas.getByLabelText('Subject')).toHaveValue(
 			articleFixture.fields?.headline,
 		);
+		await expect(canvas.getByLabelText('Preview text')).toHaveValue(
+			completeNewsletterEmailFormValues.previewText,
+		);
 	},
 };
 

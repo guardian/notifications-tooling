@@ -104,6 +104,9 @@ export const ImportsArticleFromSearchParam: Story = {
 		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
 			articleFixture.fields?.headline,
 		);
+		await expect(
+			canvas.getByRole('button', { name: 'Show article thumbnail image' }),
+		).toHaveAttribute('aria-pressed', 'true');
 	},
 };
 
