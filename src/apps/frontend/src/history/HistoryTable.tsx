@@ -19,12 +19,12 @@ import { FlagAtom } from '../ui/FlagAtom';
 import { SendTimeTooltip } from '../ui/SendTimeTooltip';
 import { Tooltip } from '../ui/Tooltip';
 import { getSenderDisplayName } from '../utils/notification-history-mapper';
+import { HistoryFailureTooltip } from './HistoryFailureTooltip';
 import type { HistoryNotification, HistoryStatus } from './HistoryView';
 
 interface HistoryTableProps {
 	notifications?: HistoryNotification[];
 	showUserName?: boolean;
-	onSelectFailure?: (notification: HistoryNotification) => void;
 }
 
 const tableColumns = {
@@ -104,7 +104,6 @@ const SentByUserDetails = ({
 export const HistoryTable = ({
 	notifications = [],
 	showUserName = false,
-	onSelectFailure,
 }: HistoryTableProps) => {
 	return (
 		<Table
@@ -230,23 +229,9 @@ export const HistoryTable = ({
 									Status:{' '}
 								</span>
 								<span css={historyViewStyles.metadataValue}>
-									{(notification.status === 'Failed' ||
-										notification.status === 'Partially sent') &&
-									onSelectFailure ? (
-										<button
-											type="button"
-											onClick={() => onSelectFailure(notification)}
-											css={historyViewStyles.failureStatusButton}
-										>
-											<Badge
-												color={statusColors[notification.status]}
-												size="xs"
-												weight="strong"
-												cssOverrides={historyViewStyles.statusBadge}
-											>
-												{notification.status}
-											</Badge>
-										</button>
+									{notification.status === 'Failed' ||
+									notification.status === 'Partially sent' ? (
+										<HistoryFailureTooltip notification={notification} />
 									) : (
 										<Badge
 											color={statusColors[notification.status]}

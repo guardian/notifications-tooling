@@ -277,7 +277,7 @@ export const Loaded: Story = {
 			}),
 		).toHaveAttribute('href', 'https://www.theguardian.com/politics');
 		const failedNotification = canvas.getByRole('button', {
-			name: 'Partially sent',
+			name: 'Partially sent: Show failure details for Extreme weather disrupts travel across Europe',
 		});
 		await expect(failedNotification).toBeInTheDocument();
 		await expect(
@@ -288,7 +288,9 @@ export const Loaded: Story = {
 		await expect(canvas.getAllByText('No image')).toHaveLength(2);
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(2);
 		await expect(
-			canvas.getByRole('button', { name: 'Failed' }),
+			canvas.getByRole('button', {
+				name: 'Failed: Show failure details for Final score and match report',
+			}),
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Accepted')).toBeInTheDocument();
 		await expect(
@@ -297,44 +299,11 @@ export const Loaded: Story = {
 
 		await userEvent.click(failedNotification);
 		const page = within(document.body);
-		const dialog = await page.findByRole('dialog', {
-			name: 'Dispatch details for Extreme weather disrupts travel across Europe',
-		});
-		await expect(
-			within(dialog).getAllByRole('heading', {
-				name: 'Extreme weather disrupts travel across Europe was only partly accepted',
-			})[0],
-		).toBeVisible();
-		await expect(
-			within(dialog).getByText('Failed channel: Newsletter email'),
-		).toBeVisible();
-		await expect(
-			within(dialog).getByText(
-				'The downstream service accepted some destination requests and rejected others.',
-			),
-		).toBeVisible();
-		await expect(
-			within(dialog).getByText('Affected destination: US'),
-		).toBeVisible();
-		await expect(
-			within(dialog).getByText('The downstream service rejected the request.'),
-		).toBeVisible();
-		await expect(
-			within(dialog).getByText('Provider status code: 500'),
-		).toBeVisible();
-		await expect(
-			within(dialog).getByText('Accepted provider reference: AU: dispatch-au'),
-		).toBeVisible();
-		await expect(
-			within(dialog).getByText(
-				/It does not confirm delivery to individual recipients\./,
-			),
-		).toBeVisible();
-		await expect(
-			within(dialog).getByRole('button', {
-				name: 'Create another newsletter email',
-			}),
-		).toBeVisible();
+		const tooltip = await page.findByRole('tooltip');
+		await expect(tooltip).toHaveTextContent(
+			"Partial failure: Couldn't send to US via newsletter email. The downstream service rejected the request. Provider status: 500. Please contact Central Production for support.",
+		);
+		await expect(page.queryByRole('dialog')).not.toBeInTheDocument();
 	},
 };
 
