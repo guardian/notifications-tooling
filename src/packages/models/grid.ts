@@ -15,7 +15,7 @@ type Specification = z.infer<typeof specification>;
 
 const cropAsset = z.object({
 	secureUrl: z.string().optional(),
-	file: z.string().optional(),
+	file: z.string(),
 	mimeType: z.string().optional(),
 	dimensions: z
 		.object({

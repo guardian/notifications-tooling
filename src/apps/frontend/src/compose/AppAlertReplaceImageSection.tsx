@@ -8,6 +8,7 @@ import { useContext, useState } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { parseImageSourceUrl } from '../utils/form-validation';
+import { getGridImageUrl } from '../utils/grid-api';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -15,33 +16,6 @@ interface AppAlertReplaceImageSectionProps {
 	onUpdate: (replacementImageUrl: string) => void;
 	errorMessage?: string;
 }
-
-type GridLookUpResult =
-	{ success: true; imageUrl: string } | { success: false; error: Error };
-
-const getGridImageUrl = async (
-	gridApiUri: string | undefined,
-	cropId: string,
-	imageId: string,
-): Promise<GridLookUpResult> => {
-	// TO DO - query the grid api, extract the smallest version of the crop
-	console.log('returning placeholder image instead of fetching from grid for', {
-		gridApiUri,
-		cropId,
-		imageId,
-	});
-	return new Promise((resolve) => {
-		setTimeout(
-			() =>
-				resolve({
-					success: true,
-					imageUrl:
-						'https://media.guim.co.uk/70e4e976acdf31057677978113db2010c9e2c818/0_0_1261_1009/500.jpg',
-				}),
-			1000,
-		);
-	});
-};
 
 export const AppAlertReplaceImageSection = ({
 	replacementImageUrl,
@@ -107,7 +81,7 @@ export const AppAlertReplaceImageSection = ({
 										console.error(result.error);
 										return;
 									}
-									onUpdate(result.imageUrl);
+									onUpdate(result.data);
 									setImageUpdated(true);
 									setIsWaitingForGrid(false);
 								},
