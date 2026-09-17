@@ -1,7 +1,26 @@
 import type { CropAsset, CropData, ImageData } from '@models';
 import { gridImage } from '@models';
 
-type Result<T> = { success: true; data: T } | { success: false; error: Error };
+type Result<T> =
+	{ success: true; data: T } | { success: false; errorMessage: string };
+
+const failWith = (
+	errorMessage: string,
+): { success: false; errorMessage: string } => ({
+	success: false,
+	errorMessage,
+});
+
+// TO DO - user friendly messages or use an enum
+const errorMessages = {
+	notFound: 'image not found on the grid',
+	forbidden: 'your credentials have maybe expired',
+	fetchFailure: 'fetch failed',
+	parseFailure: 'parse failed',
+	cropMissing: 'could not find the requested image crop',
+	noAsset: 'could not find a suitable image asset',
+	wrongAspect: 'please choose a 5:4 image crop',
+};
 
 // TO DO - what is our desired size?
 const DESIRED_MINIMUM_ASSET_WIDTH = 200;
@@ -10,35 +29,43 @@ const fetchImageData = async (
 	gridApiUri: string | undefined,
 	imageId: string,
 ): Promise<Result<ImageData>> => {
-	try {
-		const response = await fetch(`${gridApiUri}/images/${imageId}`, {
-			credentials: 'include',
-		});
-		const json: unknown = await response.json();
-		const { data } = gridImage.parse(json);
-		if (!data) {
-			return {
-				success: false,
-				error: new Error('no image data'),
-			};
+	const response = await fetch(`${gridApiUri}/images/${imageId}`, {
+		credentials: 'include',
+	}).catch((err) => {
+		console.error('grid fetch failed', err);
+		return undefined;
+	});
+	if (!response?.ok) {
+		if (response?.status === 404) {
+			return failWith(errorMessages.notFound);
 		}
-		return { success: true, data };
-	} catch (exception) {
-		return {
-			success: false,
-			error:
-				exception instanceof Error ? exception : new Error('unknown exception'),
-		};
+		if (response?.status === 403) {
+			return failWith(errorMessages.forbidden);
+		}
+
+		return failWith(errorMessages.fetchFailure);
 	}
+
+	const json: unknown = await response.json().catch((err) => {
+		console.error('json parse failed', err);
+		return undefined;
+	});
+	const gridImageParseResult = gridImage.safeParse(json);
+	if (!gridImageParseResult.success) {
+		console.warn('parse failure', json, gridImageParseResult.error.issues);
+		return failWith(errorMessages.parseFailure);
+	}
+
+	if (!gridImageParseResult.data.data) {
+		return failWith(errorMessages.parseFailure);
+	}
+	return { success: true, data: gridImageParseResult.data.data };
 };
 
 const findCrop = (imageData: ImageData, cropId: string): Result<CropData> => {
 	const crop = imageData.exports?.find((crop) => crop.id === cropId);
 	if (!crop) {
-		return {
-			success: false,
-			error: new Error('Could not find crop'),
-		};
+		return failWith(errorMessages.cropMissing);
 	}
 	return {
 		success: true,
@@ -59,10 +86,7 @@ const extractAsset = (crop: CropData): Result<CropAsset> => {
 		) ?? assetsSmallestFirst?.pop();
 
 	if (!assetToUse) {
-		return {
-			success: false,
-			error: new Error('No assets'),
-		};
+		return failWith(errorMessages.noAsset);
 	}
 
 	return {
@@ -101,10 +125,7 @@ export const getGridImageUrl = async (
 	}
 
 	if (!isFiveFourCrop(cropResult.data)) {
-		return {
-			success: false,
-			error: new Error('not a 5:4 crop'),
-		};
+		return failWith(errorMessages.wrongAspect);
 	}
 
 	const assetResult = extractAsset(cropResult.data);

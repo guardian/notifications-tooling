@@ -80,8 +80,7 @@ export const AppAlertReplaceImageSection = ({
 								(result) => {
 									setIsWaitingForGrid(false);
 									if (!result.success) {
-										console.error(result.error);
-										setGridImageError(result.error.message);
+										setGridImageError(result.errorMessage);
 										return;
 									}
 									onUpdate(result.data);
