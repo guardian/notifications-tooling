@@ -8,7 +8,7 @@ import { WithNotificationContext } from '../testing/story-helpers';
 import type { NotificationState } from '../types';
 import type { NewsletterFormValues } from '../utils/notification-forms';
 import { defaultState } from '../utils/notification-reducer';
-import { NewsletterEmailPreview } from './NewsletterEmailPreview';
+import { NewsletterEmailPreview } from './HTMLPreview';
 
 type StoryArgs = {
 	notificationState: NotificationState;

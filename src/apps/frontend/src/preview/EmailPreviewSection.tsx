@@ -12,7 +12,7 @@ import {
 	defaultNewsletterFormValues,
 	type NewsletterFormValues,
 } from '../utils/notification-forms';
-import { NewsletterEmailPreview } from './NewsletterEmailPreview';
+import { NewsletterEmailPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
 
 export const EmailPreviewSection = () => {
