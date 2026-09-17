@@ -86,22 +86,15 @@ export const RepeatedInvalidSubmitScrollsToFirstError: Story = {
 		if (!window) {
 			throw new Error('Story window is not available');
 		}
-		const articleSection = document.getElementById('article-section');
-		if (!articleSection) {
-			throw new Error('Article section is not available');
-		}
-		const nativeScrollIntoView =
-			articleSection.scrollIntoView.bind(articleSection);
-		const scrollIntoView = fn((options?: ScrollIntoViewOptions) =>
-			nativeScrollIntoView(options),
-		);
-		articleSection.scrollIntoView = scrollIntoView;
+		const nativeScrollTo = window.scrollTo.bind(window);
+		const scrollTo = fn((options?: ScrollToOptions) => nativeScrollTo(options));
+		window.scrollTo = scrollTo;
 		const sendButton = canvas.getByRole('button', { name: 'Send app alert' });
 		const submitFromBottom = async (expectedScrollCount: number) => {
 			sendButton.scrollIntoView({ block: 'center' });
 			await userEvent.click(sendButton);
 			await waitFor(async () => {
-				await expect(scrollIntoView).toHaveBeenCalledTimes(expectedScrollCount);
+				await expect(scrollTo).toHaveBeenCalledTimes(expectedScrollCount);
 				await expect(window.location.hash).toBe('#article-section');
 			});
 		};
