@@ -211,6 +211,22 @@ const partialFailureDetail: NotificationResource = {
 			createdAt: '2026-08-27T08:30:01.000Z',
 			updatedAt: '2026-08-27T08:30:03.000Z',
 		},
+		{
+			id: '885b46f3-dcc5-4e74-bc9a-15c20a995cb3',
+			channel: 'newsletter',
+			requested: { channel: 'newsletter', segment: 'UK' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'campaign-uk',
+				emailRenderingId: 'render-uk',
+			},
+			status: 'failure',
+			providerRef: null,
+			failureReason: 'timeout',
+			providerStatusCode: 504,
+			createdAt: '2026-08-27T08:30:01.000Z',
+			updatedAt: '2026-08-27T08:30:04.000Z',
+		},
 	],
 };
 
@@ -300,8 +316,16 @@ export const Loaded: Story = {
 		await userEvent.click(failedNotification);
 		const page = within(document.body);
 		const tooltip = await page.findByRole('tooltip');
+		const failures = within(tooltip).getAllByRole('listitem');
+		await expect(failures).toHaveLength(2);
+		await expect(failures[0]).toHaveTextContent(
+			'US via newsletter email. The downstream service rejected the request. Provider status: 500.',
+		);
+		await expect(failures[1]).toHaveTextContent(
+			'UK via newsletter email. The downstream service did not respond in time. Provider status: 504.',
+		);
 		await expect(tooltip).toHaveTextContent(
-			"Partial failure: Couldn't send to US via newsletter email. The downstream service rejected the request. Provider status: 500. Please contact Central Production for support.",
+			'Please contact Central Production for support.',
 		);
 		await expect(page.queryByRole('dialog')).not.toBeInTheDocument();
 	},

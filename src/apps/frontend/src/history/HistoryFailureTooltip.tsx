@@ -28,38 +28,16 @@ const destinationName = (
 		? `${dispatch.requested.topicType}: ${dispatch.requested.editions.join(', ')}`
 		: dispatch.requested.segment;
 
-const summarizeFailure = (notification: NotificationResource) => {
-	const failedDispatches = notification.dispatches.filter(
-		({ status }) => status === 'failure',
-	);
-	const channels = [
-		...new Set(failedDispatches.map(({ channel }) => channelNames[channel])),
-	];
-	const destinations = failedDispatches.map(destinationName);
-	const reasons = [
-		...new Set(
-			failedDispatches.map(
-				({ failureReason }) =>
-					failureReasonDescriptions[failureReason ?? 'unknown'] ??
-					failureReasonDescriptions.unknown,
-			),
-		),
-	];
-	const statusCodes = [
-		...new Set(
-			failedDispatches.flatMap(({ providerStatusCode }) =>
-				providerStatusCode === null ? [] : [providerStatusCode],
-			),
-		),
-	];
-
-	return {
-		channels,
-		destinations,
-		reasons,
-		statusCodes,
-	};
-};
+const failureListStyles = css({
+	margin: `${semanticSpacing.stackXs} 0`,
+	paddingLeft: semanticSpacing.stackLg,
+	li: {
+		marginBottom: semanticSpacing.stackXs,
+	},
+	'li:last-child': {
+		marginBottom: 0,
+	},
+});
 
 const FailureTooltipContent = ({
 	notification,
@@ -77,17 +55,35 @@ const FailureTooltipContent = ({
 		return <>Failure details could not be loaded.</>;
 	}
 
-	const summary = summarizeFailure(notification);
+	const failedDispatches = notification.dispatches.filter(
+		({ status }) => status === 'failure',
+	);
+
+	if (failedDispatches.length === 0) {
+		return <>Failure details could not be loaded.</>;
+	}
+
 	return (
 		<>
-			Couldn&apos;t send to{' '}
-			{summary.destinations.join('; ') || 'the destination'}
-			{summary.channels.length > 0 ? ` via ${summary.channels.join(', ')}` : ''}
-			. {summary.reasons.join(' ')}
-			{summary.statusCodes.length > 0
-				? ` Provider status: ${summary.statusCodes.join(', ')}.`
-				: ''}
-			{' Please contact Central Production for support.'}
+			Couldn&apos;t send to:
+			<ul css={failureListStyles}>
+				{failedDispatches.map((dispatch) => {
+					const reason =
+						failureReasonDescriptions[dispatch.failureReason ?? 'unknown'] ??
+						failureReasonDescriptions.unknown;
+
+					return (
+						<li key={dispatch.id}>
+							<strong>{destinationName(dispatch)}</strong> via{' '}
+							{channelNames[dispatch.channel]}. {reason}
+							{dispatch.providerStatusCode !== null
+								? ` Provider status: ${dispatch.providerStatusCode}.`
+								: ''}
+						</li>
+					);
+				})}
+			</ul>
+			Please contact Central Production for support.
 		</>
 	);
 };
