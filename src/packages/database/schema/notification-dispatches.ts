@@ -45,6 +45,8 @@ export type DispatchResolved =
 			channel: 'newsletter';
 			brazeCampaignId?: string;
 			emailRenderingId: string;
+			/** Block ID that the email link opens within a liveblog. */
+			blockId?: string;
 	  };
 
 /**

@@ -1,6 +1,6 @@
 import { semanticColors } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-import { useRelativeTime } from '../hooks/use-relative-time';
+import { useRelativeTime } from '../hooks/useRelativeTime';
 
 interface LastUpdatedProps {
 	updatedAt: string;

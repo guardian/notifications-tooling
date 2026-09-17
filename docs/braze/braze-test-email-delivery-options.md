@@ -62,7 +62,10 @@ This validates the rendered email rather than the production campaign's delivery
 configuration. Because the campaign template only inserts the supplied body,
 the content is close to production, but campaign-specific tracking, link
 wrapping, Liquid context, frequency caps, eligibility, and analytics are not
-exercised by a direct test send.
+exercised by a direct test send. Before sending, Dispatch removes
+email-rendering's `##braze_utm##` campaign placeholders and their query
+separators so unexpanded placeholders cannot corrupt URL fragments such as
+liveblog block anchors.
 
 ## Test profile identity
 

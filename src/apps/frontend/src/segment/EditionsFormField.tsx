@@ -1,6 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import type { AppAlertFormValues } from '../utils/notification-forms';
-import { EDITION_OPTIONS } from './EditionOptions';
+import { EDITION_OPTIONS } from './edition-options';
 import { SegmentPicker } from './SegmentPicker';
 
 export const EditionsFormField = () => {

@@ -8,13 +8,13 @@ import type { NewsletterSegmentId, ResolvedArticle } from '@models';
 import { useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';
-import { NotificationFormContext } from '../compose/NotificationContext';
+import { NotificationFormContext } from '../compose/NotificationFormContext';
 import { ConfigContext } from '../config/ConfigContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { senderId } from '../utils/build-request-payloads';
 import { validateGuardianEmail } from '../utils/form-validation';
-import { composeNewsletterSubject } from '../utils/newsletter-subject';
-import type { NewsletterFormValues } from '../utils/notification-forms';
+import { composeNewsletterEmailSubjectLine } from '../utils/newsletter-email-subject';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import type {
 	TestEmailResponse,
 	TestEmailSendRequest,
@@ -23,52 +23,53 @@ import type {
 type TestSendParams = {
 	emailInput: string;
 	audienceSegments: NewsletterSegmentId[];
-	emailSubjectLine: string;
-	subject: string;
-	preview: string;
+	subjectLine: string;
+	subjectText: string;
+	previewText: string;
 	showPreview: boolean;
 	webUrl: string;
 };
 
 const getSendParams = (
 	emailInput: string,
-	parameters: Partial<NewsletterFormValues>,
-	content?: ResolvedArticle,
+	formValues: Partial<NewsletterEmailFormValues>,
+	article?: ResolvedArticle,
+	requestedUrl?: string,
 ): TestSendParams | undefined => {
-	if (!content) {
+	if (!article) {
 		return undefined;
 	}
 
 	const {
 		audienceSegments = [],
-		preview = '',
+		previewText = '',
 		showPreview = true,
-		subject = '',
+		subjectText = '',
 		kicker,
-	} = parameters;
+	} = formValues;
 	if (audienceSegments.length === 0) {
 		return;
 	}
 
-	const emailSubjectLine = composeNewsletterSubject(subject, kicker);
+	const subjectLine = composeNewsletterEmailSubjectLine(subjectText, kicker);
 
 	return {
 		emailInput,
 		audienceSegments,
-		emailSubjectLine,
-		subject,
-		preview,
+		subjectLine,
+		subjectText,
+		previewText,
 		showPreview,
-		webUrl: content.webUrl,
+		webUrl: requestedUrl ?? article.webUrl,
 	};
 };
 
 const makePayload = ({
 	emailInput,
-	emailSubjectLine,
+	subjectLine,
 	audienceSegments,
-	subject,
-	preview,
+	subjectText,
+	previewText,
 	showPreview,
 	webUrl,
 }: TestSendParams): TestEmailSendRequest => ({
@@ -81,7 +82,7 @@ const makePayload = ({
 			variants: audienceSegments,
 			compose: {
 				items: ['lead-story'],
-				subject: emailSubjectLine,
+				subject: subjectLine,
 			},
 		},
 	},
@@ -93,8 +94,8 @@ const makePayload = ({
 		items: {
 			'lead-story': {
 				type: 'newsletter',
-				title: subject,
-				body: showPreview ? preview : '',
+				title: subjectText,
+				body: showPreview ? previewText : '',
 				link: webUrl,
 			},
 		},
@@ -103,38 +104,40 @@ const makePayload = ({
 });
 
 export const TestEmailForm = () => {
-	const { notification, requestTestEmailSend } = useContext(
+	const { composerState, requestTestEmailSend } = useContext(
 		NotificationFormContext,
 	);
-	const parameters = useWatch<NewsletterFormValues>();
+	const formValues = useWatch<NewsletterEmailFormValues>();
 	const { user } = useContext(ConfigContext) ?? {};
 	const [emailInput, setEmailInput] = useState(user?.email ?? '');
 	const [sendInProgress, setSendInProgress] = useState(false);
-	const [confirmation, setConfirmation] = useState<TestEmailResponse>();
+	const [testSendResponse, setTestSendResponse] = useState<TestEmailResponse>();
 	const [paramsLastUsed, setParamsLastUsed] = useState<TestSendParams>();
 	const [sendError, setSendError] = useState<ApiError>();
 
 	const emailValidationIssue = validateGuardianEmail(emailInput);
 	const sendParams = getSendParams(
 		emailInput,
-		parameters,
-		notification.content,
+		formValues,
+		composerState.article,
+		composerState.requestedUrl,
 	);
 
-	// remove the confirmation if the user changes anything that would
+	// remove the response if the user changes anything that would
 	// affect the request payload
 	useEffect(() => {
-		if (!confirmation || !paramsLastUsed) {
+		if (!testSendResponse || !paramsLastUsed) {
 			return;
 		}
 		const newSendParams = getSendParams(
 			emailInput,
-			parameters,
-			notification.content,
+			formValues,
+			composerState.article,
+			composerState.requestedUrl,
 		);
 		if (!newSendParams) {
 			// eslint-disable-next-line react-hooks/set-state-in-effect -- is ok
-			return setConfirmation(undefined);
+			return setTestSendResponse(undefined);
 		}
 
 		if (
@@ -142,14 +145,15 @@ export const TestEmailForm = () => {
 				return paramsLastUsed[key as keyof TestSendParams] !== value;
 			})
 		) {
-			return setConfirmation(undefined);
+			return setTestSendResponse(undefined);
 		}
 	}, [
-		confirmation,
+		testSendResponse,
 		paramsLastUsed,
 		emailInput,
-		notification.content,
-		parameters,
+		composerState.article,
+		composerState.requestedUrl,
+		formValues,
 	]);
 
 	const handleSend = () => {
@@ -157,7 +161,7 @@ export const TestEmailForm = () => {
 			return;
 		}
 
-		setConfirmation(undefined);
+		setTestSendResponse(undefined);
 		setSendError(undefined);
 		setSendInProgress(true);
 		setParamsLastUsed(sendParams);
@@ -167,7 +171,7 @@ export const TestEmailForm = () => {
 					console.error(result.failure);
 					return setSendError(result.failure);
 				}
-				setConfirmation(result.data);
+				setTestSendResponse(result.data);
 			})
 			.finally(() => {
 				setSendInProgress(false);
@@ -204,7 +208,7 @@ export const TestEmailForm = () => {
 					sendInProgress ||
 					!sendParams ||
 					!!emailValidationIssue ||
-					!!confirmation
+					!!testSendResponse
 				}
 				cssOverrides={css({
 					alignSelf: 'flex-start',
@@ -218,7 +222,7 @@ export const TestEmailForm = () => {
 				Send test
 			</Button>
 
-			{confirmation && (
+			{testSendResponse && (
 				<InlineMessage level="success">Test email sent</InlineMessage>
 			)}
 

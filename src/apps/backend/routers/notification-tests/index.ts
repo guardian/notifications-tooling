@@ -94,9 +94,26 @@ export const createNotificationTestsRouter = (
 				// envelope. When outcomes were recorded the status is already
 				// accurate, so rethrow to surface anything unexpected.
 				if (!outcomesRecorded) {
+					req.log.error(
+						{
+							err: error,
+							testId: notification.id,
+						},
+						'Notification test dispatch or outcome persistence failed',
+					);
+
 					const failed = await store
 						.markFailed(notification)
-						.catch(() => notification);
+						.catch((markError) => {
+							req.log.error(
+								{
+									err: markError,
+									testId: notification.id,
+								},
+								'Failed to persist notification test failure status',
+							);
+							return notification;
+						});
 
 					res
 						.status(httpStatusForNotification(failed.status))

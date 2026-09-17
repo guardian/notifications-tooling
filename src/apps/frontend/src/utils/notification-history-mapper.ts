@@ -77,8 +77,8 @@ const statusDisplay: Record<
 	failed: 'Failed',
 };
 
-const getNewsletterAlertType = (subject: string): string => {
-	const kicker = subject.match(/^(Breaking news|Exclusive):/i)?.[1];
+const getNewsletterEmailAlertType = (subjectLine: string): string => {
+	const kicker = subjectLine.match(/^(Breaking news|Exclusive):/i)?.[1];
 	return kicker ?? 'Newsletter';
 };
 
@@ -106,40 +106,46 @@ export const mapNotificationToHistoryNotification = (
 		return undefined;
 	}
 
-	const newsletter = payload.data.channels.newsletter;
-	const appPush = payload.data.channels['app-push'];
-	const channel = appPush ? 'push' : newsletter ? 'email' : undefined;
-	const contentKey = appPush?.compose.use ?? newsletter?.compose.items[0];
-	const content = contentKey
+	const newsletterEmailPlan = payload.data.channels.newsletter;
+	const appAlertPlan = payload.data.channels['app-push'];
+	const channel = appAlertPlan
+		? 'app-push'
+		: newsletterEmailPlan
+			? 'newsletter'
+			: undefined;
+	const contentKey =
+		appAlertPlan?.compose.use ?? newsletterEmailPlan?.compose.items[0];
+	const contentItem = contentKey
 		? payload.data.content.items[contentKey]
 		: undefined;
-	if (!channel || !content) {
+	if (!channel || !contentItem) {
 		return undefined;
 	}
 
-	const appPushAudience = appPush?.audience.items ?? [];
-	const sentTo = newsletter
-		? newsletter.audience.type === 'segment'
-			? newsletter.audience.items
-			: (newsletter.variants ?? [])
-		: appPushAudience
+	const appAlertAudience = appAlertPlan?.audience.items ?? [];
+	const sentTo = newsletterEmailPlan
+		? newsletterEmailPlan.audience.type === 'segment'
+			? newsletterEmailPlan.audience.items
+			: (newsletterEmailPlan.variants ?? [])
+		: appAlertAudience
 				.map(({ name }) => toEdition(name))
 				.filter(
 					(edition): edition is DisplayAppAlertTopicEditionId =>
 						edition !== undefined,
 				);
-	const topicTypeId = appPushAudience[0]?.type;
+	const topicTypeId = appAlertAudience[0]?.type;
 	const alertType = topicTypeId
 		? (audiences?.channels['app-push'].topicTypes.find(
 				({ id }) => id === topicTypeId,
 			)?.label ?? topicTypeId)
-		: getNewsletterAlertType(newsletter?.compose.subject ?? '');
+		: getNewsletterEmailAlertType(newsletterEmailPlan?.compose.subject ?? '');
 
 	return {
 		id: notification.id,
-		title: channel === 'push' ? content.body : content.title,
-		href: content.link,
-		thumbnailUrl: content.media?.thumbnailUrl ?? content.media?.imageUrl,
+		title: channel === 'app-push' ? contentItem.body : contentItem.title,
+		href: contentItem.link,
+		thumbnailUrl:
+			contentItem.media?.thumbnailUrl ?? contentItem.media?.imageUrl,
 		channel,
 		alertType,
 		sentBy: notification.createdByEmail,

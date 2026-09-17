@@ -6,15 +6,20 @@ import {
 	mockRequestTestEmailSend,
 } from '../testing/mock-request-test-email-send';
 import {
-	completeEmailParams,
-	populatedEmailState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
+	completeNewsletterEmailFormValues,
+	populatedNewsletterEmailComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import type {
+	TestEmailRequestFunction,
+	TestEmailSendRequest,
+} from '../utils/send-test-email';
 import { TestEmailForm } from './TestEmailForm';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
+	requestTestEmailSend?: TestEmailRequestFunction;
 };
 
 type Story = StoryObj<StoryArgs>;
@@ -23,16 +28,17 @@ const meta: Meta<StoryArgs> = {
 	title: 'Dispatch/Send/TestEmailForm',
 	component: TestEmailForm,
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 	},
-	render: ({ notificationState }) =>
-		WithNotificationContext(
+	render: function Render({ composerState, requestTestEmailSend }) {
+		return useNotificationFormStory(
 			<TestEmailForm />,
-			notificationState,
-			{},
-			'email',
-			completeEmailParams,
-		),
+			composerState,
+			{ requestTestEmailSend },
+			'newsletter',
+			completeNewsletterEmailFormValues,
+		);
+	},
 };
 
 export default meta;
@@ -97,11 +103,44 @@ export const SentTestEmail: Story = {
 	},
 };
 
+const requestedLiveblogUrl =
+	'https://www.theguardian.com/world/live/2026/sep/04/latest-developments#block-6a9af4938f0834a1091dfae4';
+let lastBlockTestEmailRequest: TestEmailSendRequest | undefined;
+const requestBlockTestEmailSend: TestEmailRequestFunction = (request) => {
+	lastBlockTestEmailRequest = request;
+	return mockRequestTestEmailSend(request);
+};
+
+export const RequestedLiveblogBlock: Story = {
+	args: {
+		composerState: {
+			...populatedNewsletterEmailComposerState,
+			requestedUrl: requestedLiveblogUrl,
+		},
+		requestTestEmailSend: requestBlockTestEmailSend,
+	},
+	play: async ({ canvasElement }) => {
+		lastBlockTestEmailRequest = undefined;
+		const canvas = within(canvasElement);
+		await userEvent.type(
+			canvas.getByPlaceholderText('name@theguardian.com'),
+			'joe.blogs@theguardian.com',
+		);
+		await userEvent.click(canvas.getByRole('button', { name: BUTTON_TEXT }));
+
+		await waitFor(() =>
+			expect(lastBlockTestEmailRequest?.content.items['lead-story']?.link).toBe(
+				requestedLiveblogUrl,
+			),
+		);
+	},
+};
+
 export const FailingTestEmail: Story = {
-	render: ({ notificationState }) =>
-		WithNotificationContext(
+	render: function Render({ composerState }) {
+		return useNotificationFormStory(
 			<TestEmailForm />,
-			notificationState,
+			composerState,
 			{
 				requestTestEmailSend: mockFailingRequestTestEmailSend(
 					new ApiError({
@@ -110,9 +149,10 @@ export const FailingTestEmail: Story = {
 					}),
 				),
 			},
-			'email',
-			completeEmailParams,
-		),
+			'newsletter',
+			completeNewsletterEmailFormValues,
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
@@ -129,11 +169,11 @@ export const FailingTestEmail: Story = {
 };
 
 export const RetryAfterFailure: Story = {
-	render: ({ notificationState }) => {
+	render: function Render({ composerState }) {
 		let sendAttempts = 0;
-		return WithNotificationContext(
+		return useNotificationFormStory(
 			<TestEmailForm />,
-			notificationState,
+			composerState,
 			{
 				requestTestEmailSend: (request) => {
 					sendAttempts += 1;
@@ -147,8 +187,8 @@ export const RetryAfterFailure: Story = {
 						: mockRequestTestEmailSend(request);
 				},
 			},
-			'email',
-			completeEmailParams,
+			'newsletter',
+			completeNewsletterEmailFormValues,
 		);
 	},
 	play: async ({ canvasElement }) => {

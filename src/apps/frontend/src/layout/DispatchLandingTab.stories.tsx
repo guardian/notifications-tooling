@@ -209,10 +209,10 @@ export const RecentOnly: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
-			await canvas.findByRole('link', { name: 'Recent dispatch record' }),
+			await canvas.findByRole('link', { name: /Recent dispatch record/ }),
 		).toBeInTheDocument();
 		await expect(
-			canvas.queryByRole('link', { name: 'Older dispatch record' }),
+			canvas.queryByRole('link', { name: /Older dispatch record/ }),
 		).not.toBeInTheDocument();
 	},
 };

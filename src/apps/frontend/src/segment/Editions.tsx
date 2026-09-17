@@ -7,19 +7,19 @@ import {
 } from '@models';
 import { FlagAtom } from '../ui/FlagAtom';
 import { PreviewPillList } from '../ui/PreviewPillList';
-import { EDITION_OPTIONS } from './EditionOptions';
+import { EDITION_OPTIONS } from './edition-options';
 
-export interface AppPushTopicSelection {
+export interface AppAlertTopicSelection {
 	type: string;
 	name: string;
 }
 
 interface EditionsProps {
 	topicTypes: AppAlertTopicOption[];
-	selected: AppPushTopicSelection[];
+	selected: AppAlertTopicSelection[];
 }
 
-const selectionId = ({ type, name }: AppPushTopicSelection) =>
+const selectionId = ({ type, name }: AppAlertTopicSelection) =>
 	`${type}:${name}`;
 
 const editionLabels = Object.fromEntries(

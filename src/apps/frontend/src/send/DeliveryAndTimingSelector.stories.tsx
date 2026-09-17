@@ -22,7 +22,7 @@ export const Unselected: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: undefined,
 		onChange: () => {},
-		channel: 'email',
+		channel: 'newsletter',
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -34,11 +34,11 @@ export const Unselected: SelectorStory = {
 	},
 };
 
-export const ImmediateDeliveryInEmailNotification: SelectorStory = {
+export const ImmediateDeliveryInNewsletterEmail: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: 'immediate',
 		onChange: () => {},
-		channel: 'email',
+		channel: 'newsletter',
 	},
 };
 
@@ -46,7 +46,7 @@ export const ImmediateDeliveryInAppAlert: SelectorStory = {
 	args: {
 		selectedDeliveryTiming: 'appImmediate',
 		onChange: () => {},
-		channel: 'push',
+		channel: 'app-push',
 	},
 };
 
@@ -58,7 +58,7 @@ export const PreviewEmpty: SendInfoPreviewPillType = {
 };
 
 export const PreviewChannelOnly: SendInfoPreviewPillType = {
-	render: () => <SendInfoPreviewPill channel="email" />,
+	render: () => <SendInfoPreviewPill channel="newsletter" />,
 };
 
 export const PreviewDeliveryTimingOnly: SendInfoPreviewPillType = {
@@ -67,13 +67,13 @@ export const PreviewDeliveryTimingOnly: SendInfoPreviewPillType = {
 
 export const PreviewBoth: SendInfoPreviewPillType = {
 	render: () => (
-		<SendInfoPreviewPill channel="email" deliveryTiming="immediate" />
+		<SendInfoPreviewPill channel="newsletter" deliveryTiming="immediate" />
 	),
 };
 
 export const PreviewAppAlert: SendInfoPreviewPillType = {
 	render: () => (
-		<SendInfoPreviewPill channel="push" deliveryTiming="immediate" />
+		<SendInfoPreviewPill channel="app-push" deliveryTiming="immediate" />
 	),
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -94,7 +94,7 @@ export const PreviewAppAlert: SendInfoPreviewPillType = {
 export const PreviewAppAlertWithThumbnail: SendInfoPreviewPillType = {
 	render: () => (
 		<SendInfoPreviewPill
-			channel="push"
+			channel="app-push"
 			deliveryTiming="immediate"
 			includeThumbnail
 		/>

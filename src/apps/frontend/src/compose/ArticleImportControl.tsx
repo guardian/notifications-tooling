@@ -11,10 +11,10 @@ import type { ApiError } from '../api-client/errors';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import {
 	getArticleUrlInputFailureMessage,
-	parseArticleUrlInputToContentId,
+	parseArticleUrlInputToArticleId,
 } from '../utils/form-validation';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
-import { NotificationFormContext } from './NotificationContext';
+import { NotificationFormContext } from './NotificationFormContext';
 
 // TO DO - more helpful error UI
 // can we capture when article was taken down?
@@ -39,7 +39,7 @@ const getUserFacingError = (err: ApiError): string => {
 
 export interface ArticleImportControlProps {
 	articleInputText: string;
-	setArticleInputText: (setArticleInputText: string) => void;
+	setArticleInputText: (articleInputText: string) => void;
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
 	onArticleImported: (
@@ -54,23 +54,22 @@ export const ArticleImportControl = ({
 	setLockArticleInputText,
 	onArticleImported,
 }: ArticleImportControlProps) => {
-	const { notification, updateNotification, capiFetch } = useContext(
-		NotificationFormContext,
-	);
+	const { composerState, updateComposerState, resolveArticleFromCapi } =
+		useContext(NotificationFormContext);
 	const {
 		clearErrors,
 		formState: { submitCount },
 	} = useFormContext();
 
-	const { fetchedArticleId, isFetchingContent, fetchArticleError, content } =
-		notification;
+	const { fetchedArticleId, isFetchingArticle, fetchArticleError, article } =
+		composerState;
 
 	const { failure, webUrl, articleId } =
-		parseArticleUrlInputToContentId(articleInputText);
+		parseArticleUrlInputToArticleId(articleInputText);
 
-	const fetchArticle = () => {
+	const handleFetchArticle = () => {
 		if (articleInputText === '') {
-			updateNotification({
+			updateComposerState({
 				type: 'report-article-error',
 				errorMessage: 'Paste a URL to fetch an article',
 			});
@@ -81,13 +80,13 @@ export const ArticleImportControl = ({
 			return;
 		}
 
-		updateNotification({ type: 'waiting-for-article' });
-		void capiFetch({
+		updateComposerState({ type: 'waiting-for-article' });
+		void resolveArticleFromCapi({
 			article: webUrl,
 		}).then((result) => {
 			if (!result.success) {
 				// TO DO - error reporting/telemetry
-				return updateNotification({
+				return updateComposerState({
 					type: 'report-article-error',
 					errorMessage: getUserFacingError(result.failure),
 				});
@@ -95,9 +94,9 @@ export const ArticleImportControl = ({
 			const { article, requestedUrl, requestedBlock } = result.data;
 			onArticleImported(article, requestedBlock);
 			clearErrors('root');
-			updateNotification({
+			updateComposerState({
 				type: 'receive-article',
-				content: article,
+				article,
 				requestedUrl,
 				requestedBlock,
 			});
@@ -106,12 +105,12 @@ export const ArticleImportControl = ({
 	};
 
 	const showImportedArticle =
-		!isFetchingContent && !!fetchedArticleId && fetchedArticleId === articleId;
+		!isFetchingArticle && !!fetchedArticleId && fetchedArticleId === articleId;
 	const articleUrlError = failure
 		? getArticleUrlInputFailureMessage(failure)
 		: undefined;
 	const missingArticleError =
-		!content && submitCount > 0 ? 'Paste a URL to fetch an article' : undefined;
+		!article && submitCount > 0 ? 'Paste a URL to fetch an article' : undefined;
 	const articleError =
 		articleUrlError ?? fetchArticleError ?? missingArticleError;
 
@@ -159,7 +158,7 @@ export const ArticleImportControl = ({
 						size="sm"
 						value={articleInputText}
 						placeholder="https://www.theguardian.com/..."
-						isDisabled={isFetchingContent || lockArticleInputText}
+						isDisabled={isFetchingArticle || lockArticleInputText}
 						onChange={setArticleInputText}
 						cssOverrides={css({ width: '356px' })}
 					/>
@@ -167,11 +166,11 @@ export const ArticleImportControl = ({
 				{!lockArticleInputText && (
 					<Button
 						type="button"
-						isDisabled={isFetchingContent}
+						isDisabled={isFetchingArticle}
 						icon="upload"
 						size="sm"
 						variant="secondary"
-						onClick={fetchArticle}
+						onClick={handleFetchArticle}
 					>
 						Fetch
 					</Button>
@@ -179,7 +178,7 @@ export const ArticleImportControl = ({
 				{lockArticleInputText && (
 					<Button
 						type="button"
-						isDisabled={isFetchingContent}
+						isDisabled={isFetchingArticle}
 						icon="refresh"
 						size="sm"
 						variant="secondary"
@@ -200,7 +199,7 @@ export const ArticleImportControl = ({
 					paddingBottom: semanticSpacing.stackXs,
 				}}
 			>
-				{isFetchingContent && <LoadingSpinner />}
+				{isFetchingArticle && <LoadingSpinner />}
 
 				{showImportedArticle && (
 					<InlineMessage level="success">Article imported</InlineMessage>
@@ -211,11 +210,11 @@ export const ArticleImportControl = ({
 				)}
 			</div>
 
-			{showImportedArticle && content && (
+			{showImportedArticle && article && (
 				<ArticlePreviewCard
-					content={content}
-					requestedUrl={notification.requestedUrl}
-					requestedBlock={notification.requestedBlock}
+					article={article}
+					requestedUrl={composerState.requestedUrl}
+					requestedBlock={composerState.requestedBlock}
 				/>
 			)}
 		</div>

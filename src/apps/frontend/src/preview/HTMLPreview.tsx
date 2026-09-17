@@ -3,29 +3,29 @@ import { HtmlPreview } from '@guardian/stand/HtmlPreviewLoader';
 import { Typography } from '@guardian/stand/Typography';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import { NotificationFormContext } from '../compose/NotificationContext';
-import type { NewsletterFormValues } from '../utils/notification-forms';
+import { NotificationFormContext } from '../compose/NotificationFormContext';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 
 // TO DO - this function will work with the current format of the notification emails
 // but we should modidify the template used in email-rendering to include attributes
 // to more robustly identify the elements to update
 const modifyContent = (
 	emailHtml: string,
-	parameters: Partial<NewsletterFormValues>,
+	formValues: Partial<NewsletterEmailFormValues>,
 ): string => {
 	const body = document.createElement('body');
 	body.innerHTML = emailHtml;
 
-	const { subject, preview, showPreview = true } = parameters;
-	const headlineElement = body.querySelector('h2');
-	const previewElement =
-		headlineElement?.parentElement?.querySelector<HTMLElement>('h2~div');
+	const { subjectText, previewText, showPreview = true } = formValues;
+	const subjectTextElement = body.querySelector('h2');
+	const previewTextElement =
+		subjectTextElement?.parentElement?.querySelector<HTMLElement>('h2~div');
 
-	if (subject && headlineElement) {
-		headlineElement.innerText = subject;
+	if (subjectText && subjectTextElement) {
+		subjectTextElement.innerText = subjectText;
 	}
-	if (previewElement) {
-		previewElement.innerText = showPreview ? (preview ?? '') : '';
+	if (previewTextElement) {
+		previewTextElement.innerText = showPreview ? (previewText ?? '') : '';
 	}
 	Array.from(body.querySelectorAll('a')).forEach((link) =>
 		link.removeAttribute('href'),
@@ -36,15 +36,15 @@ const modifyContent = (
 
 export const HTMLPreview = () => {
 	const {
-		notification: { content },
+		composerState: { article, requestedUrl },
 		requestEmailHtml,
 	} = useContext(NotificationFormContext);
-	const parameters = useWatch<NewsletterFormValues>();
+	const formValues = useWatch<NewsletterEmailFormValues>();
 	const [emailHtml, setEmailHtml] = useState<string>();
 	const [errorMessage, setErrorMessage] = useState<string>();
 	const [isLoading, setIsLoading] = useState(false);
-	const stringifiedAudience = (parameters.audienceSegments ?? []).join();
-	const { webUrl } = content ?? {};
+	const stringifiedAudience = (formValues.audienceSegments ?? []).join();
+	const webUrl = requestedUrl ?? article?.webUrl;
 
 	const fetchHtml = useCallback(async () => {
 		if (!webUrl) {
@@ -85,7 +85,7 @@ export const HTMLPreview = () => {
 		<HtmlPreview
 			html={
 				emailHtml
-					? modifyContent(emailHtml, parameters)
+					? modifyContent(emailHtml, formValues)
 					: `<div>no article html</div> `
 			}
 			errorMessage={errorMessage}

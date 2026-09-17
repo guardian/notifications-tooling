@@ -23,12 +23,12 @@ const meta = {
 export default meta;
 type PreviewCardStory = StoryObj<typeof meta>;
 
-const publicationDate = (minsAgo: number): string =>
-	new Date(Date.now() - minsAgo).toISOString();
+const publicationDate = (millisecondsAgo: number): string =>
+	new Date(Date.now() - millisecondsAgo).toISOString();
 
 export const WithThumbnail: PreviewCardStory = {
 	args: {
-		content: articleFixture,
+		article: articleFixture,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -50,7 +50,7 @@ export const WithThumbnail: PreviewCardStory = {
 
 export const Liveblog: PreviewCardStory = {
 	args: {
-		content: liveblogFixture,
+		article: liveblogFixture,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -81,7 +81,7 @@ export const Liveblog: PreviewCardStory = {
 
 export const RequestedLiveblogBlock: PreviewCardStory = {
 	args: {
-		content: liveblogFixture,
+		article: liveblogFixture,
 		requestedUrl: `${liveblogFixture.webUrl}?filterKeyEvents=false#${requestedLiveblogBlock.id}`,
 		requestedBlock: requestedLiveblogBlock,
 	},
@@ -90,9 +90,10 @@ export const RequestedLiveblogBlock: PreviewCardStory = {
 		await expect(
 			canvas.getByText(`Liveblog block ID: ${requestedLiveblogBlock.id}`),
 		).toBeInTheDocument();
-		await expect(
-			canvas.getByRole('link', { name: new RegExp(requestedLiveblogBlock.id) }),
-		).toHaveAttribute(
+		const articleLink = canvas.getByRole('link', {
+			name: new RegExp(`${requestedLiveblogBlock.id}.*opens in a new tab`),
+		});
+		await expect(articleLink).toHaveAttribute(
 			'href',
 			expect.stringContaining(`#${requestedLiveblogBlock.id}`),
 		);
@@ -105,7 +106,7 @@ export const RequestedLiveblogBlock: PreviewCardStory = {
 
 export const JustPublished: PreviewCardStory = {
 	args: {
-		content: {
+		article: {
 			...articleFixture,
 			webPublicationDate: publicationDate(2 * 60 * 1000),
 		},
@@ -122,7 +123,7 @@ export const JustPublished: PreviewCardStory = {
 
 export const WithoutThumbnail: PreviewCardStory = {
 	args: {
-		content: {
+		article: {
 			...articleFixture,
 			fields: { ...articleFixture.fields, thumbnail: '' },
 		},
@@ -138,7 +139,7 @@ export const WithoutThumbnail: PreviewCardStory = {
 
 export const HiddenThumbnail: PreviewCardStory = {
 	args: {
-		content: articleFixture,
+		article: articleFixture,
 		showThumbnail: false,
 	},
 	play: async ({ canvasElement }) => {
@@ -152,7 +153,7 @@ export const HiddenThumbnail: PreviewCardStory = {
 
 export const WithoutHeadlineField: PreviewCardStory = {
 	args: {
-		content: { ...articleFixture, fields: undefined },
+		article: { ...articleFixture, fields: undefined },
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -162,7 +163,7 @@ export const WithoutHeadlineField: PreviewCardStory = {
 
 export const PublishedLongAgo: PreviewCardStory = {
 	args: {
-		content: {
+		article: {
 			...articleFixture,
 			webPublicationDate: publicationDate(30 * 24 * 60 * 60 * 1000),
 		},
@@ -177,7 +178,7 @@ export const PublishedLongAgo: PreviewCardStory = {
 
 export const WithoutPublicationDate: PreviewCardStory = {
 	args: {
-		content: { ...articleFixture, webPublicationDate: undefined },
+		article: { ...articleFixture, webPublicationDate: undefined },
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

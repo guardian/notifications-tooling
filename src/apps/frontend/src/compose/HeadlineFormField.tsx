@@ -11,9 +11,9 @@ interface HeadlineFormFieldProps {
 export const HeadlineFormField = ({ constraints }: HeadlineFormFieldProps) => {
 	const { control } = useFormContext<AppAlertFormValues>();
 
-	const appPush = constraints?.channels['app-push'];
+	const appAlertConstraints = constraints?.channels['app-push'];
 	const headlineLimits =
-		appPush?.content.body ?? APP_ALERT_LIMIT_FALLBACKS.headline;
+		appAlertConstraints?.content.body ?? APP_ALERT_LIMIT_FALLBACKS.headline;
 	return (
 		<Controller
 			control={control}
@@ -25,8 +25,8 @@ export const HeadlineFormField = ({ constraints }: HeadlineFormFieldProps) => {
 					description="Choose the headline for the app alert"
 					placeholder="Enter a headline here..."
 					value={field.value}
-					update={field.onChange}
-					softLimit={headlineLimits.recommended}
+					onChange={field.onChange}
+					recommendedLimit={headlineLimits.recommended}
 					error={fieldState.error?.message}
 				/>
 			)}

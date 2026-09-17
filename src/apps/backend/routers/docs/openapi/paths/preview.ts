@@ -10,7 +10,7 @@ export const emailPreviewPath = {
 			required: true,
 			content: {
 				'application/json': {
-					schema: { $ref: '#/components/schemas/ResolveArticleRequest' },
+					schema: { $ref: '#/components/schemas/EmailPreviewRequest' },
 				},
 			},
 		},
@@ -20,13 +20,7 @@ export const emailPreviewPath = {
 					'The email html was rendered. Returns the HTML, articleId and newsletter Id.',
 				content: {
 					'application/json': {
-						schema: {
-							type: 'object',
-							required: ['article'],
-							properties: {
-								article: { $ref: '#/components/schemas/ResolvedArticle' },
-							},
-						},
+						schema: { $ref: '#/components/schemas/EmailPreviewResponse' },
 					},
 				},
 			},

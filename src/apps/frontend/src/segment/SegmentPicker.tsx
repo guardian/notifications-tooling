@@ -62,7 +62,7 @@ export const SegmentPicker = <
 	onChange,
 	error,
 }: SegmentPickerProps<Code>) => {
-	const onToggle = (code: Code) => {
+	const handleToggle = (code: Code) => {
 		const next = selected.includes(code)
 			? selected.filter((selectedCode) => selectedCode !== code)
 			: [...selected, code];
@@ -109,7 +109,7 @@ export const SegmentPicker = <
 									theme={customTheme}
 									size="sm"
 									isSelected={isSelected}
-									onChange={() => onToggle(option.code)}
+									onChange={() => handleToggle(option.code)}
 									aria-label={`Select ${option.label}`}
 									cssOverrides={css({
 										width: '100%',
