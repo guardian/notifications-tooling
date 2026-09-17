@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, waitFor, within } from 'storybook/test';
-import type { NotificationFormContextProps } from '../compose/NotificationContext';
+import type { NotificationFormContextProps } from '../compose/NotificationFormContext';
 import { fetchFailError } from '../testing/api-fixtures';
 import { articleFixture } from '../testing/capi-fixtures';
 import { mockRequestEmailHtmlWithoutDelay } from '../testing/mock-fetch-email';
-import { WithNotificationContext } from '../testing/story-helpers';
-import type { NotificationState } from '../types';
-import type { NewsletterFormValues } from '../utils/notification-forms';
-import { defaultState } from '../utils/notification-reducer';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import { defaultAppAlertComposerState } from '../utils/notification-composer-reducer';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { NewsletterEmailPreview } from './HTMLPreview';
 
 type StoryArgs = {
-	notificationState: NotificationState;
-	formValues?: Partial<NewsletterFormValues>;
+	notificationState: NotificationComposerState;
+	formValues?: Partial<NewsletterEmailFormValues>;
 	functions?: Partial<
 		Omit<
 			NotificationFormContextProps,
@@ -27,16 +27,17 @@ const meta: Meta<StoryArgs> = {
 	title: 'Dispatch/Preview/NewsletterEmailPreview',
 	component: NewsletterEmailPreview,
 	args: {
-		notificationState: defaultState,
+		notificationState: defaultAppAlertComposerState,
 	},
-	render: ({ notificationState, formValues, functions }) =>
-		WithNotificationContext(
+	render: function Render({ notificationState, functions, formValues }) {
+		return useNotificationFormStory(
 			<NewsletterEmailPreview />,
 			notificationState,
 			functions,
-			'email',
+			'newsletter',
 			formValues,
-		),
+		);
+	},
 };
 
 export default meta;
@@ -51,8 +52,8 @@ export const Default: Story = {
 export const WithContentNoAudience: Story = {
 	args: {
 		notificationState: {
-			...defaultState,
-			content: articleFixture,
+			...defaultAppAlertComposerState,
+			article: articleFixture,
 		},
 	},
 	play: async ({ canvasElement }) => {
@@ -68,8 +69,8 @@ export const WithContentNoAudience: Story = {
 export const WithContentAndAudience: Story = {
 	args: {
 		notificationState: {
-			...defaultState,
-			content: articleFixture,
+			...defaultAppAlertComposerState,
+			article: articleFixture,
 		},
 		formValues: {
 			audienceSegments: ['UK'],
@@ -90,8 +91,8 @@ export const WithContentAndAudience: Story = {
 export const Loading: Story = {
 	args: {
 		notificationState: {
-			...defaultState,
-			content: articleFixture,
+			...defaultAppAlertComposerState,
+			article: articleFixture,
 		},
 		formValues: {
 			audienceSegments: ['UK'],
@@ -104,8 +105,8 @@ export const Loading: Story = {
 export const FailedToLoad: Story = {
 	args: {
 		notificationState: {
-			...defaultState,
-			content: articleFixture,
+			...defaultAppAlertComposerState,
+			article: articleFixture,
 		},
 		formValues: {
 			audienceSegments: ['UK'],
