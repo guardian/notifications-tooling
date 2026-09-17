@@ -4,11 +4,12 @@ import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import { ConfigContext } from '../config/ConfigContext';
+import { DispatchLandingLayout } from '../layout/DispatchLandingLayout';
+import { MainLayout } from '../layout/MainLayout';
 import type { NotificationListResponse } from '../schemas';
 import { mockAppConfig } from '../testing/app-config';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
-import { DispatchLandingTab } from './DispatchLandingTab';
-import { MainLayout } from './MainLayout';
+import { DispatchLandingPage } from './DispatchLandingPage';
 
 type StoryArgs = {
 	appConfig?: AppConfig;
@@ -126,8 +127,8 @@ const sinceAwareHistoryHandler = http.get(
 );
 
 const meta = {
-	title: 'Dispatch/Layout/DispatchLandingTab',
-	component: DispatchLandingTab,
+	title: 'Dispatch/Layout/DispatchLandingPage',
+	component: DispatchLandingPage,
 	parameters: {
 		layout: 'fullscreen',
 		msw: { handlers: [historyHandler, channelAudiencesHandler] },
@@ -144,7 +145,7 @@ const meta = {
 	render: ({ appConfig }: StoryArgs) => (
 		<ConfigContext.Provider value={appConfig}>
 			<MainLayout>
-				<DispatchLandingTab />
+				<DispatchLandingLayout />
 			</MainLayout>
 		</ConfigContext.Provider>
 	),
@@ -199,6 +200,45 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('link', { name: 'Create app alert' }),
 		).toHaveAttribute('href', '/app-alert/create');
+		await expect(
+			canvas.getByRole('button', { name: 'Open Latest Published Content' }),
+		).toBeInTheDocument();
+
+		const landingSection = canvas
+			.getByRole('heading', { name: 'Welcome to Dispatch' })
+			.closest('section');
+		const latestPublishedContentButton = canvas.getByRole('button', {
+			name: 'Open Latest Published Content',
+		});
+		if (!landingSection) {
+			throw new Error('Expected the Dispatch landing section to be rendered');
+		}
+		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
+			canvasElement.clientWidth,
+		);
+		await expect(
+			latestPublishedContentButton.getBoundingClientRect().left,
+		).toBeGreaterThanOrEqual(landingSection.getBoundingClientRect().right);
+	},
+};
+
+export const Production: Story = {
+	args: {
+		appConfig: { ...mockAppConfig, stage: 'PROD' },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'Welcome to Dispatch' }),
+		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('button', {
+				name: 'Open Latest Published Content',
+			}),
+		).not.toBeInTheDocument();
+		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
+			canvasElement.clientWidth,
+		);
 	},
 };
 
