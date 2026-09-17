@@ -4,6 +4,7 @@ import {
 	emailConfigPath,
 } from './channels';
 import { resolveArticlePath } from './content';
+import { grafanaMetricsPath, grafanaQueryPath } from './grafana';
 import { healthPath } from './health';
 import { notificationTestsPath } from './notification-tests';
 import { notificationByIdPath, notificationsPath } from './notifications';
@@ -13,6 +14,8 @@ import { userPath } from './user';
 /** The `paths` block of the OpenAPI document, keyed by route. */
 export const paths = {
 	'/health': healthPath,
+	'/metrics': grafanaMetricsPath,
+	'/query': grafanaQueryPath,
 	'/v1/channels/constraints': channelsConstraintsPath,
 	'/v1/channels/audiences': channelsAudiencesPath,
 	'/v1/channels/config/email': emailConfigPath,

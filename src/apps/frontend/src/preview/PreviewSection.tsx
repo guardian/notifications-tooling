@@ -4,7 +4,7 @@ import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import { from } from '@guardian/stand/utils';
 import type { ReactNode } from 'react';
-import { layer, topBarHeight } from '../themes';
+import { layer, stickyHeaderHeight } from '../themes';
 
 interface PreviewSectionProps {
 	title: string;
@@ -38,11 +38,11 @@ export const PreviewSection = ({
 				flexBasis: 474,
 				paddingTop: '48px',
 				position: 'sticky',
-				top: topBarHeight,
+				top: stickyHeaderHeight,
 				zIndex: layer.stickyContent,
 			},
 			'@media (min-width: 1310px)': {
-				height: `calc(100vh - ${topBarHeight})`,
+				height: `calc(100vh - ${stickyHeaderHeight})`,
 				overflowY: 'auto',
 			},
 		})}

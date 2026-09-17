@@ -1,9 +1,12 @@
+import { semanticSizing } from '@guardian/stand';
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { useNavigate } from 'react-router-dom';
+import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test';
 import { ConfigContext } from '../config/ConfigContext';
 import { mockAppConfig } from '../testing/app-config';
+import { stickyHeaderHeightProperty, topBarHeight } from '../themes';
 import { MainLayout } from './MainLayout';
 
 const meta = {
@@ -37,17 +40,83 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const RouteChangeControl = () => {
+	const navigate = useNavigate();
+	return (
+		<button type="button" onClick={() => void navigate('/history')}>
+			Change main route
+		</button>
+	);
+};
+
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
+		const layout = canvasElement.firstElementChild;
+		if (!layout) {
+			throw new Error('Expected the main layout to be rendered');
+		}
+
 		await expect(
 			canvas.getByText('Page content goes here'),
 		).toBeInTheDocument();
+		await expect(
+			canvas.queryByText(/You are working in the Dispatch/),
+		).not.toBeInTheDocument();
+		await expect(
+			getComputedStyle(layout).getPropertyValue(stickyHeaderHeightProperty),
+		).toBe(topBarHeight);
 		await expect(
 			canvas.getByRole('link', { name: 'Create newsletter email' }),
 		).toHaveAttribute('href', '/newsletter-email/create');
 		await expect(
 			canvas.getByRole('link', { name: 'Create app alert' }),
 		).toHaveAttribute('href', '/app-alert/create');
+	},
+};
+
+export const NonProductionEnvironment: Story = {
+	render: (args) => (
+		<ConfigContext.Provider value={{ ...mockAppConfig, stage: 'CODE' }}>
+			<MainLayout {...args} />
+		</ConfigContext.Provider>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const layout = canvasElement.firstElementChild;
+		if (!layout) {
+			throw new Error('Expected the main layout to be rendered');
+		}
+
+		await expect(
+			canvas.getByText('You are working in the Dispatch CODE Environment'),
+		).toBeInTheDocument();
+		await expect(
+			getComputedStyle(layout).getPropertyValue(stickyHeaderHeightProperty),
+		).toBe(`calc(${topBarHeight} + ${semanticSizing.height.md})`);
+	},
+};
+
+export const MainNavigationResetsScroll: Story = {
+	args: {
+		children: (
+			<Layout.Main>
+				<RouteChangeControl />
+			</Layout.Main>
+		),
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const window = canvasElement.ownerDocument.defaultView;
+		if (!window) {
+			throw new Error('Story window is not available');
+		}
+		const scrollTo = spyOn(window, 'scrollTo').mockImplementation(() => {});
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Change main route' }),
+		);
+
+		await waitFor(() => expect(scrollTo).toHaveBeenCalledWith(0, 0));
 	},
 };

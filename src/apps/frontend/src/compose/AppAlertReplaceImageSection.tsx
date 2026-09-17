@@ -4,11 +4,9 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { parseImageSourceUrl } from '../utils/form-validation';
-import { getGridImageUrl } from '../utils/grid-api';
+import { useImageUrlCheck } from '../hooks/use-image-url-check';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -24,15 +22,22 @@ export const AppAlertReplaceImageSection = ({
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
 	const { gridApiUri, gridUri } = useContext(ConfigContext) ?? {};
-	const [imageUpdated, setImageUpdated] = useState(false);
-	const [isWaitingForGrid, setIsWaitingForGrid] = useState(false);
-	const [gridImageError, setGridImageError] = useState<string>();
-	const validationResult = parseImageSourceUrl(
-		replacementImageUrl.trim(),
+
+	const {
+		checkAndUpdateImage,
+		handleImageUrlChange,
+		imageUpdated,
+		isCheckingImage,
+		isUpdateDisabled,
+		displayedErrorMessage,
+	} = useImageUrlCheck({
+		imageUrl: replacementImageUrl,
+		onImageUrlChange: onReplacementImageUrlChange,
+		onUpdate,
+		errorMessage,
 		gridUri,
-	);
-	const displayedErrorMessage =
-		gridImageError ?? validationResult.relevantFailure ?? errorMessage;
+		gridApiUri,
+	});
 
 	return (
 		<>
@@ -58,10 +63,7 @@ export const AppAlertReplaceImageSection = ({
 					size="md"
 					value={replacementImageUrl}
 					placeholder="Enter replacement image URL..."
-					onChange={(url) => {
-						onReplacementImageUrlChange(url);
-						setImageUpdated(false);
-					}}
+					onChange={handleImageUrlChange}
 					id="replacement-image-URL"
 				/>
 				<Button
@@ -69,48 +71,15 @@ export const AppAlertReplaceImageSection = ({
 					icon="refresh"
 					size="md"
 					variant="secondary"
-					onClick={() => {
-						if (validationResult.gridCropUrlValidationResult.success) {
-							const { cropId, imageId } =
-								validationResult.gridCropUrlValidationResult;
-
-							setGridImageError(undefined);
-							setIsWaitingForGrid(true);
-							void getGridImageUrl(gridApiUri, cropId, imageId).then(
-								(result) => {
-									setIsWaitingForGrid(false);
-									if (!result.success) {
-										setGridImageError(result.errorMessage);
-										return;
-									}
-									onUpdate(result.data);
-									setImageUpdated(true);
-								},
-							);
-							return;
-						}
-
-						if (validationResult.guardianImageUrlValidationResult.success) {
-							onUpdate(validationResult.guardianImageUrlValidationResult.url);
-							setImageUpdated(true);
-							return;
-						}
-
-						setImageUpdated(false);
-					}}
+					onClick={() => void checkAndUpdateImage()}
+					isDisabled={isUpdateDisabled}
 				>
-					Update
+					{isCheckingImage ? 'Checking...' : 'Update'}
 				</Button>
 			</div>
 
 			{displayedErrorMessage && (
 				<InlineMessage level="error">{displayedErrorMessage}</InlineMessage>
-			)}
-
-			{isWaitingForGrid && (
-				<div>
-					<LoadingSpinner />
-				</div>
 			)}
 
 			{imageUpdated && replacementImageUrl && (

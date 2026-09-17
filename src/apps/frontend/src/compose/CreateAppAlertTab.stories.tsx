@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
@@ -78,7 +79,7 @@ export const Default: Story = {
 	},
 };
 
-export const SendConfirmationStep: Story = {
+export const ConfirmationStep: Story = {
 	args: {
 		composerState: {
 			...populatedAppAlertComposerState,
@@ -107,6 +108,17 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		composerState: populatedAppAlertComposerState,
 		formValues: completeAppAlertFormValues,
 	},
+	parameters: {
+		msw: {
+			handlers: [
+				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
+					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+						headers: { 'Content-Type': 'image/svg+xml' },
+					}),
+				),
+			],
+		},
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
@@ -133,6 +145,7 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 
 		await userEvent.type(replacementInput, replacementThumbnailUrl);
 		await userEvent.click(updateButton);
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
 
 		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
 		for (const thumbnail of [iPhoneThumbnail, androidThumbnail]) {
@@ -192,5 +205,70 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		await expect(
 			canvas.queryByRole('textbox', { name: 'replacement image URL' }),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	parameters: {
+		msw: {
+			handlers: [
+				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
+					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+						headers: { 'Content-Type': 'image/svg+xml' },
+					}),
+				),
+				http.get(
+					'https://media.guim.co.uk/broken-thumbnail.jpg',
+					() =>
+						new HttpResponse(null, {
+							status: 403,
+							statusText: 'Forbidden',
+						}),
+				),
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const brokenReplacementThumbnailUrl =
+			'https://media.guim.co.uk/broken-thumbnail.jpg';
+
+		await userEvent.click(
+			canvas.getByRole('button', {
+				name: 'Replace image',
+			}),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
+		for (const thumbnail of [
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		}
+
+		await userEvent.clear(replacementInput);
+		await userEvent.type(replacementInput, brokenReplacementThumbnailUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+		await expect(await canvas.findByText('Unable to load image')).toBeVisible();
+		await expect(canvas.queryByText('Image updated')).not.toBeInTheDocument();
+
+		for (const thumbnail of [
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
+		}
 	},
 };
