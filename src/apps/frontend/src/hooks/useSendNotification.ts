@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
-import { notificationRoutes } from '../routes';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import type { SendNotificationRequest } from '../schemas';
 import { notificationHistoryQueryKey } from './useNotificationHistory';
 
@@ -30,7 +30,13 @@ export const useSendNotification = () => {
 				queryKey: notificationHistoryQueryKey,
 			});
 			updateComposerState({ type: 'complete-send' });
-			void navigate(notificationRoutes[channel].report);
+			const leadStory = request.content.items['lead-story'];
+			void navigate(
+				withArticleUrl(
+					notificationRoutes[channel].report,
+					leadStory?.link ?? '',
+				),
+			);
 		});
 	};
 };

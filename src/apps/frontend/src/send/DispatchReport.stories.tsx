@@ -88,7 +88,7 @@ export const NewsletterEmailSuccess: Story = {
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+			canvas.getByRole('button', { name: 'Create a new newsletter email' }),
 		);
 		await expect(args.onStartNew).toHaveBeenCalledOnce();
 	},
@@ -117,7 +117,7 @@ export const AppAlertSuccess: Story = {
 		).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new app alert' }),
+			canvas.getByRole('button', { name: 'Create a new app alert' }),
 		);
 		await expect(args.onStartNew).toHaveBeenCalledOnce();
 	},
@@ -143,7 +143,7 @@ export const NewsletterEmailReportRoute: Story = {
 		).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+			canvas.getByRole('button', { name: 'Create a new newsletter email' }),
 		);
 		await waitFor(() =>
 			expect(

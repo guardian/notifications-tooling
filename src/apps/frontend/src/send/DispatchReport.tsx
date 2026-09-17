@@ -13,8 +13,12 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { notificationRoutes } from '../routes';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+	articleUrlSearchParam,
+	notificationRoutes,
+	withArticleUrl,
+} from '../routes';
 import { EDITION_OPTIONS } from '../segment/edition-options';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
 import { useNewsletterEmailSegmentOptions } from '../segment/useAudienceEditions';
@@ -351,6 +355,7 @@ const DispatchReportTab = ({
 }) => {
 	const { reset, setValue } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
 
 	if (!notificationId) {
 		return <Navigate to={notificationRoutes[channel].create} replace />;
@@ -378,7 +383,10 @@ const DispatchReportTab = ({
 							reset();
 							setValue('notificationId', undefined);
 							void navigate(
-								notificationRoutes[getAlternateChannel(channel)].create,
+								withArticleUrl(
+									notificationRoutes[getAlternateChannel(channel)].create,
+									searchParams.get(articleUrlSearchParam) ?? '',
+								),
 							);
 						}}
 					>

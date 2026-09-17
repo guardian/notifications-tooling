@@ -11,6 +11,20 @@ export const notificationRoutes = {
 	},
 } as const;
 
+export const articleUrlSearchParam = 'articleUrl';
+
+export const withArticleUrl = (route: string, articleUrl: string): string => {
+	const trimmedArticleUrl = articleUrl.trim();
+	if (!trimmedArticleUrl) {
+		return route;
+	}
+
+	const searchParams = new URLSearchParams({
+		[articleUrlSearchParam]: trimmedArticleUrl,
+	});
+	return `${route}?${searchParams.toString()}`;
+};
+
 export const getAppRoutes = (config: AppConfig | undefined) => {
 	return {
 		dispatchLanding: '/',

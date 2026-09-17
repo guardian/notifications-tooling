@@ -5,7 +5,7 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import type { CapiBlock, ResolvedArticle } from '@models';
-import { useContext } from 'react';
+import { useContext, useEffect, useEffectEvent, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -39,6 +39,7 @@ const getUserFacingError = (err: ApiError): string => {
 
 export interface ArticleImportControlProps {
 	articleInputText: string;
+	autoFetch?: boolean;
 	setArticleInputText: (articleInputText: string) => void;
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
@@ -49,6 +50,7 @@ export interface ArticleImportControlProps {
 }
 export const ArticleImportControl = ({
 	articleInputText,
+	autoFetch = false,
 	setArticleInputText,
 	lockArticleInputText,
 	setLockArticleInputText,
@@ -103,6 +105,17 @@ export const ArticleImportControl = ({
 			setLockArticleInputText(true);
 		});
 	};
+	const autoFetchArticle = useEffectEvent(handleFetchArticle);
+
+	const hasAutoFetched = useRef(false);
+	useEffect(() => {
+		if (!autoFetch || hasAutoFetched.current) {
+			return;
+		}
+
+		hasAutoFetched.current = true;
+		autoFetchArticle();
+	}, [autoFetch]);
 
 	const showImportedArticle =
 		!isFetchingArticle && !!fetchedArticleId && fetchedArticleId === articleId;

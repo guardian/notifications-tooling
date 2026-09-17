@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
+import { notificationRoutes, withArticleUrl } from '../routes';
+import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeNewsletterEmailFormValues,
 	populatedNewsletterEmailComposerState,
@@ -77,6 +79,33 @@ export const Default: Story = {
 				'The preview for the newsletter email will be shown below.',
 			),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const ImportsArticleFromSearchParam: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+		await expect(canvas.getByLabelText('article URL')).toHaveValue(
+			articleFixture.webUrl,
+		);
+		await expect(canvas.getByLabelText('Subject')).toHaveValue(
+			articleFixture.fields?.headline,
+		);
 	},
 };
 
