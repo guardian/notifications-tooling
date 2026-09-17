@@ -1,6 +1,10 @@
-import { semanticColors, semanticSpacing } from '@guardian/stand';
+import { css } from '@emotion/react';
+import {
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
-import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Typography } from '@guardian/stand/Typography';
 import type { NotificationResource } from '../schemas';
@@ -90,80 +94,135 @@ export const HistoryFailureDetail = ({
 	const isPartialFailure = selected.status === 'Partially sent';
 
 	return (
-		<Modal isOpen onOpenChange={(isOpen) => !isOpen && onClose()}>
+		<Modal
+			isOpen
+			onOpenChange={(isOpen) => !isOpen && onClose()}
+			theme={{
+				overlay: { position: 'fixed' },
+				modal: {
+					position: 'fixed',
+					width: 'calc(100svw - 2rem)',
+					maxWidth: '40rem',
+					padding: {
+						top: semanticSpacing.stackMd,
+						bottom: semanticSpacing.stackLg,
+						left: semanticSpacing.stackLg,
+						right: semanticSpacing.stackLg,
+					},
+				},
+			}}
+			cssOverrides={css({ overflowY: 'auto' })}
+		>
 			<Dialog aria-label={`Dispatch details for ${selected.title}`}>
 				<Dialog.Dismiss ariaLabel="Close failure details" />
-				<Dialog.Header>
-					<InlineMessage level="error">
-						<Typography
-							element="h2"
-							variant="headingLg"
-							theme={{ color: semanticColors.text.error }}
-						>
-							{isPartialFailure
-								? `${selected.title} was only partly accepted`
-								: `${selected.title} was not accepted`}
-						</Typography>
-					</InlineMessage>
+				<Dialog.Header
+					variant="headingMd"
+					theme={{ marginBottom: semanticSpacing.stackMd }}
+					cssOverrides={css({ color: semanticColors.text.error })}
+				>
+					{isPartialFailure
+						? `${selected.title} was only partly accepted`
+						: `${selected.title} was not accepted`}
 				</Dialog.Header>
-				<Dialog.Content>
+				<Dialog.Content theme={{ marginBottom: semanticSpacing.stackLg }}>
 					<div
 						css={{
 							display: 'flex',
 							flexDirection: 'column',
-							gap: semanticSpacing.stackSm,
+							gap: semanticSpacing.stackMd,
 						}}
 					>
-						{isLoading && <Typography>Loading failure details...</Typography>}
+						{isLoading && (
+							<Typography variant="bodySm">
+								Loading failure details...
+							</Typography>
+						)}
 						{isError && (
-							<Typography>Failure details could not be loaded.</Typography>
+							<Typography variant="bodySm">
+								Failure details could not be loaded.
+							</Typography>
 						)}
 						{summary && (
 							<>
-								<Typography>
-									Failed channel{summary.failedChannels.length === 1 ? '' : 's'}
-									: {summary.failedChannels.join(', ') || 'Unknown'}
-								</Typography>
-								<Typography>
-									Affected destination
-									{summary.failedDestinations.length === 1 ? '' : 's'}:{' '}
-									{summary.failedDestinations.join('; ') || 'Unknown'}
-								</Typography>
-								<Typography>
-									{summary.hasAcceptedDestinations
-										? 'The downstream service accepted some destination requests and rejected others.'
-										: 'The downstream service rejected every destination request.'}
-								</Typography>
-								{summary.failureReasons.map((reason) => (
-									<Typography key={reason}>{reason}</Typography>
-								))}
-								{summary.failureStatusCodes.length > 0 && (
-									<Typography>
-										Provider status code
-										{summary.failureStatusCodes.length === 1 ? '' : 's'}:{' '}
-										{summary.failureStatusCodes.join(', ')}
+								<div
+									css={{
+										display: 'flex',
+										flexDirection: 'column',
+										gap: semanticSpacing.stackXs,
+									}}
+								>
+									<Typography variant="bodyBoldSm">
+										Failed channel
+										{summary.failedChannels.length === 1 ? '' : 's'}:{' '}
+										{summary.failedChannels.join(', ') || 'Unknown'}
 									</Typography>
-								)}
-								{summary.acceptedProviderReferences.length > 0 && (
+									<Typography variant="bodyBoldSm">
+										Affected destination
+										{summary.failedDestinations.length === 1 ? '' : 's'}:{' '}
+										{summary.failedDestinations.join('; ') || 'Unknown'}
+									</Typography>
+								</div>
+								<div
+									css={{
+										display: 'flex',
+										flexDirection: 'column',
+										gap: semanticSpacing.stackXs,
+									}}
+								>
 									<Typography variant="bodySm">
-										Accepted provider reference
-										{summary.acceptedProviderReferences.length === 1 ? '' : 's'}
-										: {summary.acceptedProviderReferences.join('; ')}
+										{summary.hasAcceptedDestinations
+											? 'The downstream service accepted some destination requests and rejected others.'
+											: 'The downstream service rejected every destination request.'}
 									</Typography>
-								)}
-								<Typography variant="bodySm">
-									Acceptance confirms that the downstream service queued the
-									request. It does not confirm delivery to individual
-									recipients.
-								</Typography>
-								<Typography variant="bodySm">
-									Sent by {selected.sentBy}. Tooling reference: {selected.id}
-								</Typography>
+									{summary.failureReasons.map((reason) => (
+										<Typography variant="bodySm" key={reason}>
+											{reason}
+										</Typography>
+									))}
+									{summary.failureStatusCodes.length > 0 && (
+										<Typography variant="bodySm">
+											Provider status code
+											{summary.failureStatusCodes.length === 1 ? '' : 's'}:{' '}
+											{summary.failureStatusCodes.join(', ')}
+										</Typography>
+									)}
+									{summary.acceptedProviderReferences.length > 0 && (
+										<Typography variant="bodySm">
+											Accepted provider reference
+											{summary.acceptedProviderReferences.length === 1
+												? ''
+												: 's'}
+											: {summary.acceptedProviderReferences.join('; ')}
+										</Typography>
+									)}
+								</div>
+								<div
+									css={{
+										display: 'flex',
+										flexDirection: 'column',
+										gap: semanticSpacing.stackXxs,
+										paddingTop: semanticSpacing.stackSm,
+										borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+										color: semanticColors.text.weak,
+									}}
+								>
+									<Typography variant="bodySm">
+										Acceptance confirms that the downstream service queued the
+										request. It does not confirm delivery to individual
+										recipients.
+									</Typography>
+									<Typography variant="bodySm">
+										Sent by: {selected.sentBy}
+									</Typography>
+									<Typography variant="bodySm">
+										Tooling reference: {selected.id}
+									</Typography>
+								</div>
 							</>
 						)}
 					</div>
 				</Dialog.Content>
-				<Dialog.Buttons>
+				<Dialog.Buttons theme={{ flexDirection: 'row' }}>
 					<Button onPress={onResolve}>
 						Create another{' '}
 						{selected.channel === 'app-push' ? 'app alert' : 'newsletter email'}

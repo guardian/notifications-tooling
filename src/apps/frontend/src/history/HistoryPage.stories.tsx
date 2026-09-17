@@ -277,13 +277,19 @@ export const Loaded: Story = {
 			}),
 		).toHaveAttribute('href', 'https://www.theguardian.com/politics');
 		const failedNotification = canvas.getByRole('button', {
-			name: 'Extreme weather disrupts travel across Europe',
+			name: 'Partially sent',
 		});
 		await expect(failedNotification).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('link', {
+				name: /Extreme weather disrupts travel across Europe/,
+			}),
+		).toBeInTheDocument();
 		await expect(canvas.getAllByText('No image')).toHaveLength(2);
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(2);
-		await expect(canvas.getByText('Partially sent')).toBeInTheDocument();
-		await expect(canvas.getByText('Failed')).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', { name: 'Failed' }),
+		).toBeInTheDocument();
 		await expect(canvas.getByText('Accepted')).toBeInTheDocument();
 		await expect(
 			canvas.getAllByRole('img', { name: 'Australia' }),

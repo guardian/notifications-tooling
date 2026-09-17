@@ -487,18 +487,11 @@ export const historyViewStyles = {
 		WebkitBoxOrient: 'vertical',
 		WebkitLineClamp: 2,
 	}),
-	failureTitle: css({
-		display: '-webkit-box',
+	failureStatusButton: css({
 		padding: 0,
 		border: 0,
-		color: 'inherit',
 		background: 'none',
-		font: 'inherit',
-		textAlign: 'left',
-		textDecoration: 'underline',
 		cursor: 'pointer',
-		WebkitBoxOrient: 'vertical',
-		WebkitLineClamp: 2,
 	}),
 	channel: css({
 		display: 'flex',

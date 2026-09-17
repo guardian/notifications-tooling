@@ -147,24 +147,12 @@ export const HistoryTable = ({
 										</div>
 									)}
 									<div css={historyViewStyles.notificationDetails}>
-										{(notification.status === 'Failed' ||
-											notification.status === 'Partially sent') &&
-										onSelectFailure ? (
-											<button
-												type="button"
-												onClick={() => onSelectFailure(notification)}
-												css={historyViewStyles.failureTitle}
-											>
-												{notification.title}
-											</button>
-										) : (
-											<ExternalLink
-												href={notification.href}
-												cssOverrides={historyViewStyles.title}
-											>
-												{notification.title}
-											</ExternalLink>
-										)}
+										<ExternalLink
+											href={notification.href}
+											cssOverrides={historyViewStyles.title}
+										>
+											{notification.title}
+										</ExternalLink>
 										<Typography
 											variant="bodyXs"
 											cssOverrides={historyViewStyles.channel}
@@ -242,14 +230,33 @@ export const HistoryTable = ({
 									Status:{' '}
 								</span>
 								<span css={historyViewStyles.metadataValue}>
-									<Badge
-										color={statusColors[notification.status]}
-										size="xs"
-										weight="strong"
-										cssOverrides={historyViewStyles.statusBadge}
-									>
-										{notification.status}
-									</Badge>
+									{(notification.status === 'Failed' ||
+										notification.status === 'Partially sent') &&
+									onSelectFailure ? (
+										<button
+											type="button"
+											onClick={() => onSelectFailure(notification)}
+											css={historyViewStyles.failureStatusButton}
+										>
+											<Badge
+												color={statusColors[notification.status]}
+												size="xs"
+												weight="strong"
+												cssOverrides={historyViewStyles.statusBadge}
+											>
+												{notification.status}
+											</Badge>
+										</button>
+									) : (
+										<Badge
+											color={statusColors[notification.status]}
+											size="xs"
+											weight="strong"
+											cssOverrides={historyViewStyles.statusBadge}
+										>
+											{notification.status}
+										</Badge>
+									)}
 								</span>
 							</TableCell>
 						</TableRow>
