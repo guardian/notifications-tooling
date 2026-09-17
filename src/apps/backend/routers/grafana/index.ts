@@ -134,13 +134,13 @@ export const grafanaQueryHandler = async (req: Request, res: Response) => {
 	).listSendsWithDispatchesInWindow({
 		from,
 		to,
-		limit: maxNotifications,
+		limit: maxNotifications + 1,
 	});
 
 	// Hitting the cap means older matches were dropped; surface a Grafana
 	// notice (rendered as a panel warning icon) rather than a silent gap.
 	const meta =
-		notifications.length === maxNotifications
+		notifications.length > maxNotifications
 			? {
 					notices: [
 						{

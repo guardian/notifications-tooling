@@ -182,7 +182,7 @@ describe('Grafana datasource endpoints', () => {
 	it('flags a truncated result set with a Grafana notice instead of hiding it', async () => {
 		listSendsWithDispatchesInWindowMock.mockImplementationOnce(() =>
 			Promise.resolve(
-				Array.from({ length: 5000 }, () => {
+				Array.from({ length: 5001 }, () => {
 					const persisted = buildPersistedNotification({});
 					return {
 						...persisted.notification,
