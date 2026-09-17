@@ -134,6 +134,31 @@ export const Empty: Story = {
 	},
 };
 
+export const NoSearchResults: Story = {
+	args: {
+		notifications: [],
+		totalItems: 0,
+		currentPage: 1,
+		limit: 10,
+		searchTerm: 'weather',
+		onPageChange: () => undefined,
+		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'No matching alerts' }),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Try a different search term.'),
+		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('heading', { name: 'No alerts yet' }),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const Loading: Story = {
 	args: {
 		notifications: [],

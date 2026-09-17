@@ -101,7 +101,7 @@ export const HistoryView = ({
 						<HistoryTable notifications={notifications} audiences={audiences} />
 					)}
 					{!isLoading && !error && notifications.length === 0 && (
-						<HistoryEmptyState />
+						<HistoryEmptyState isSearchResult={searchTerm.trim().length > 0} />
 					)}
 				</section>
 			</div>
