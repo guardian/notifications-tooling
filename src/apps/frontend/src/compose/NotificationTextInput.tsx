@@ -11,8 +11,8 @@ type Props = {
 	description: string;
 	placeholder?: string;
 	value: string;
-	update: { (value: string): void };
-	softLimit: number;
+	onChange: { (value: string): void };
+	recommendedLimit: number;
 	allowLineBreak?: boolean;
 	isDisabled?: boolean;
 	error?: string;
@@ -42,8 +42,8 @@ export const NotificationTextInput = ({
 	description,
 	placeholder,
 	value,
-	update,
-	softLimit,
+	onChange,
+	recommendedLimit,
 	allowLineBreak,
 	isDisabled,
 	error,
@@ -71,15 +71,15 @@ export const NotificationTextInput = ({
 				})}
 				onChange={(value) => {
 					if (allowLineBreak) {
-						update(value);
+						onChange(value);
 					} else {
-						update(value.replaceAll('\n', ''));
+						onChange(value.replaceAll('\n', ''));
 					}
 				}}
 			/>
 			<CharacterCount
 				count={value.length}
-				softLimit={softLimit}
+				recommendedLimit={recommendedLimit}
 				fieldDescription={label}
 			/>
 		</div>
@@ -91,8 +91,8 @@ export const NotificationTextInputWithPrefix = ({
 	description,
 	placeholder,
 	value,
-	update,
-	softLimit,
+	onChange,
+	recommendedLimit,
 	allowLineBreak,
 	isDisabled,
 	error,
@@ -152,16 +152,16 @@ export const NotificationTextInputWithPrefix = ({
 					})}
 					onChange={(value) => {
 						if (allowLineBreak) {
-							update(value);
+							onChange(value);
 						} else {
-							update(value.replaceAll('\n', ''));
+							onChange(value.replaceAll('\n', ''));
 						}
 					}}
 				/>
 			</div>
 			<CharacterCount
 				count={value && prefix ? prefix.length + value.length : value.length}
-				softLimit={softLimit}
+				recommendedLimit={recommendedLimit}
 				fieldDescription={label}
 			/>
 		</div>

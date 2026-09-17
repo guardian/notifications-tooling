@@ -2,18 +2,18 @@ import { describe, expect, it } from 'bun:test';
 import {
 	appAlertFormSchema,
 	defaultAppAlertFormValues,
-	defaultNewsletterFormValues,
-	newsletterFormSchema,
-	validateNewsletterPreview,
+	defaultNewsletterEmailFormValues,
+	newsletterEmailFormSchema,
+	validateNewsletterEmailPreviewText,
 } from './notification-forms';
 
 describe('notification form length rules', () => {
 	it('accepts a newsletter subject and preview of any length', () => {
-		const result = newsletterFormSchema.safeParse({
-			...defaultNewsletterFormValues,
+		const result = newsletterEmailFormSchema.safeParse({
+			...defaultNewsletterEmailFormValues,
 			kicker: 'exclusive',
-			subject: 'a'.repeat(500),
-			preview: 'b'.repeat(500),
+			subjectText: 'a'.repeat(500),
+			previewText: 'b'.repeat(500),
 			audienceSegments: ['UK'],
 		});
 
@@ -23,6 +23,7 @@ describe('notification form length rules', () => {
 	it('accepts an app-alert headline of any length', () => {
 		const result = appAlertFormSchema.safeParse({
 			...defaultAppAlertFormValues,
+			alertType: 'breaking-news',
 			headline: 'a'.repeat(500),
 			editions: ['UK'],
 		});
@@ -33,6 +34,7 @@ describe('notification form length rules', () => {
 	it('accepts an empty or valid app-alert thumbnail URL', () => {
 		const values = {
 			...defaultAppAlertFormValues,
+			alertType: 'breaking-news',
 			headline: 'A developing story',
 			editions: ['UK'] as const,
 		};
@@ -90,10 +92,10 @@ describe('notification form length rules', () => {
 
 	it('still requires each text field to be present', () => {
 		expect(
-			newsletterFormSchema.safeParse({
-				...defaultNewsletterFormValues,
-				subject: '   ',
-				preview: 'Preview',
+			newsletterEmailFormSchema.safeParse({
+				...defaultNewsletterEmailFormValues,
+				subjectText: '   ',
+				previewText: 'Preview',
 				audienceSegments: ['UK'],
 			}).success,
 		).toBe(false);
@@ -107,34 +109,84 @@ describe('notification form length rules', () => {
 		).toBe(false);
 	});
 
-	it('requires preview text only when preview is shown', () => {
-		expect(validateNewsletterPreview('   ', true)).toBe(
+	it('starts without a kicker and requires one on submit', () => {
+		expect(defaultNewsletterEmailFormValues.kicker).toBe('');
+
+		const result = newsletterEmailFormSchema.safeParse({
+			...defaultNewsletterEmailFormValues,
+			subjectText: 'Subject',
+			previewText: 'Preview',
+			audienceSegments: ['UK'],
+		});
+
+		expect(
+			result.error?.issues.find(({ path }) => path[0] === 'kicker')?.message,
+		).toBe('Please select a kicker');
+	});
+
+	it('starts without an alert type and requires one on submit', () => {
+		expect(defaultAppAlertFormValues.alertType).toBe('');
+
+		const result = appAlertFormSchema.safeParse({
+			...defaultAppAlertFormValues,
+			headline: 'A developing story',
+			editions: ['UK'],
+		});
+
+		expect(
+			result.error?.issues.find(({ path }) => path[0] === 'alertType')?.message,
+		).toBe('Please select an alert type');
+	});
+
+	it('requires preview text only when it is included', () => {
+		expect(validateNewsletterEmailPreviewText('   ', true)).toBe(
 			'Preview text is required',
 		);
 
-		expect(validateNewsletterPreview('   ', false)).toBeUndefined();
-		expect(validateNewsletterPreview('Preview', true)).toBeUndefined();
+		expect(validateNewsletterEmailPreviewText('   ', false)).toBeUndefined();
+		expect(validateNewsletterEmailPreviewText('Preview', true)).toBeUndefined();
 	});
 
-	it('validates preview text on submit when show preview is enabled', () => {
+	it('validates preview text on submit when inclusion is enabled', () => {
 		expect(
-			newsletterFormSchema.safeParse({
-				...defaultNewsletterFormValues,
-				subject: 'Subject',
-				preview: '   ',
+			newsletterEmailFormSchema.safeParse({
+				...defaultNewsletterEmailFormValues,
+				kicker: 'none',
+				subjectText: 'Subject',
+				previewText: '   ',
 				showPreview: true,
 				audienceSegments: ['UK'],
 			}).success,
 		).toBe(false);
 
 		expect(
-			newsletterFormSchema.safeParse({
-				...defaultNewsletterFormValues,
-				subject: 'Subject',
-				preview: '   ',
+			newsletterEmailFormSchema.safeParse({
+				...defaultNewsletterEmailFormValues,
+				kicker: 'none',
+				subjectText: 'Subject',
+				previewText: '   ',
 				showPreview: false,
 				audienceSegments: ['UK'],
 			}).success,
 		).toBe(true);
+	});
+
+	it('reports required text errors against the renamed form fields', () => {
+		const result = newsletterEmailFormSchema.safeParse({
+			...defaultNewsletterEmailFormValues,
+			kicker: 'none',
+			subjectText: '   ',
+			previewText: '   ',
+			showPreview: true,
+			audienceSegments: ['UK'],
+		});
+
+		expect(result.success).toBe(false);
+		expect(
+			result.error?.issues.map(({ path, message }) => ({ path, message })),
+		).toEqual([
+			{ path: ['subjectText'], message: 'Subject is required' },
+			{ path: ['previewText'], message: 'Preview text is required' },
+		]);
 	});
 });

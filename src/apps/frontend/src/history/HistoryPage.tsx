@@ -25,6 +25,7 @@ export const HistoryPage = () => {
 			return nextSearchParams;
 		});
 	};
+	const handleRefresh = () => void notificationHistory.refetch();
 
 	const notifications =
 		notificationHistory.data?.notifications.flatMap((notification) => {
@@ -48,8 +49,8 @@ export const HistoryPage = () => {
 				) : undefined
 			}
 			limit={limit}
-			handlePageChange={handlePageChange}
-			handleRefresh={() => void notificationHistory.refetch()}
+			onPageChange={handlePageChange}
+			onRefresh={handleRefresh}
 			isRefreshing={notificationHistory.isFetching}
 			lastUpdatedAt={
 				notificationHistory.dataUpdatedAt

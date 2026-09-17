@@ -15,26 +15,26 @@ import type { ReactNode } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { notificationRoutes } from '../routes';
-import { EDITION_OPTIONS } from '../segment/EditionOptions';
+import { EDITION_OPTIONS } from '../segment/edition-options';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
-import { useNewsletterSegmentOptions } from '../segment/use-audience-editions';
-import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
+import { useNewsletterEmailSegmentOptions } from '../segment/useAudienceEditions';
+import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
 import type { DeliveryOption } from '../types';
-import { scheduleIcon } from '../ui/FlagIcons';
+import { scheduleIcon } from '../ui/flag-icons';
 import {
 	capitalise,
 	getChannelDescription,
 } from '../utils/display-text-helpers';
-import { composeNewsletterSubject } from '../utils/newsletter-subject';
+import { composeNewsletterEmailSubjectLine } from '../utils/newsletter-email-subject';
 import type {
 	AppAlertFormValues,
-	NewsletterFormValues,
+	NewsletterEmailFormValues,
 } from '../utils/notification-forms';
 import {
 	defaultAppAlertFormValues,
-	defaultNewsletterFormValues,
+	defaultNewsletterEmailFormValues,
 } from '../utils/notification-forms';
 import { SendInfoPreviewPill } from './SendInfoPreviewPill';
 
@@ -97,7 +97,7 @@ const DeliveryParameter = ({
 }: {
 	deliveryTiming: DeliveryOption;
 }) => {
-	//This is temporary solution to display the delivery time in the confirmation page.
+	//This is temporary solution to display the delivery time in the report page.
 	const tempTime = new Date().toLocaleTimeString('en-GB', {
 		hour: '2-digit',
 		minute: '2-digit',
@@ -121,7 +121,8 @@ const DeliveryParameter = ({
 			>
 				<SendInfoPreviewPill
 					deliveryTiming={deliveryTiming}
-					isConfirmation={true}
+					muted
+					showTitle={false}
 				/>
 				<div
 					css={{
@@ -147,41 +148,45 @@ const DeliveryParameter = ({
 	);
 };
 
-export const NewsletterDispatchDetails = () => {
-	const kicker = useWatch<NewsletterFormValues, 'kicker'>({
+export const NewsletterEmailDispatchDetails = () => {
+	const kicker = useWatch<NewsletterEmailFormValues, 'kicker'>({
 		name: 'kicker',
-		defaultValue: defaultNewsletterFormValues.kicker,
+		defaultValue: defaultNewsletterEmailFormValues.kicker,
 	});
-	const subject = useWatch<NewsletterFormValues, 'subject'>({
-		name: 'subject',
+	const subjectText = useWatch<NewsletterEmailFormValues, 'subjectText'>({
+		name: 'subjectText',
 		defaultValue: '',
 	});
-	const audienceSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
+	const audienceSegments = useWatch<
+		NewsletterEmailFormValues,
+		'audienceSegments'
+	>({
 		name: 'audienceSegments',
-		defaultValue: defaultNewsletterFormValues.audienceSegments,
+		defaultValue: defaultNewsletterEmailFormValues.audienceSegments,
 	});
-	const deliveryOption = useWatch<NewsletterFormValues, 'deliveryOption'>({
+	const deliveryOption = useWatch<NewsletterEmailFormValues, 'deliveryOption'>({
 		name: 'deliveryOption',
-		defaultValue: defaultNewsletterFormValues.deliveryOption,
+		defaultValue: defaultNewsletterEmailFormValues.deliveryOption,
 	});
-	const options = useNewsletterSegmentOptions();
+	const options = useNewsletterEmailSegmentOptions();
 
 	return (
 		<section>
 			<ParameterLabel label="Subject">
 				<Typography variant="bodySm">
-					{composeNewsletterSubject(subject, kicker)}
+					{composeNewsletterEmailSubjectLine(subjectText, kicker)}
 				</Typography>
 			</ParameterLabel>
 			<ParameterLabel label="Channel">
-				<SendInfoPreviewPill channel="email" isConfirmation={true} />
+				<SendInfoPreviewPill channel="newsletter" muted showTitle={false} />
 			</ParameterLabel>
 			<ParameterLabel label="Audience segments">
 				<FlagPreviewPill
 					title="Audience segments"
 					options={options}
 					selected={audienceSegments}
-					isConfirmation={true}
+					muted
+					showTitle={false}
 				/>
 			</ParameterLabel>
 			<DeliveryParameter deliveryTiming={deliveryOption} />
@@ -190,7 +195,7 @@ export const NewsletterDispatchDetails = () => {
 };
 
 export const AppAlertDispatchDetails = () => {
-	const topicTypes = useAppPushTopicTypes();
+	const topicTypes = useAppAlertTopicTypes();
 	const alertType = useWatch<AppAlertFormValues, 'alertType'>({
 		name: 'alertType',
 		defaultValue: defaultAppAlertFormValues.alertType,
@@ -222,9 +227,10 @@ export const AppAlertDispatchDetails = () => {
 			</ParameterLabel>
 			<ParameterLabel label="Channel">
 				<SendInfoPreviewPill
-					channel="push"
+					channel="app-push"
 					includeThumbnail={includeThumbnail}
-					isConfirmation={true}
+					muted
+					showTitle={false}
 				/>
 			</ParameterLabel>
 			<ParameterLabel label="Editions">
@@ -232,7 +238,8 @@ export const AppAlertDispatchDetails = () => {
 					title="Editions"
 					options={EDITION_OPTIONS}
 					selected={editions}
-					isConfirmation={true}
+					muted
+					showTitle={false}
 				/>
 			</ParameterLabel>
 			<DeliveryParameter deliveryTiming={deliveryOption} />
@@ -312,17 +319,17 @@ export const DispatchReport = ({
 
 const DispatchReportTab = ({
 	channel,
-	dispatchId,
+	notificationId,
 	children,
 }: {
 	channel: ChannelOption;
-	dispatchId?: string;
+	notificationId?: string;
 	children: ReactNode;
 }) => {
-	const { reset, setValue } = useFormContext<{ dispatchId?: string }>();
+	const { reset, setValue } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
 
-	if (!dispatchId) {
+	if (!notificationId) {
 		return <Navigate to={notificationRoutes[channel].create} replace />;
 	}
 
@@ -341,7 +348,7 @@ const DispatchReportTab = ({
 						channel={channel}
 						onCreateNew={() => {
 							reset();
-							setValue('dispatchId', undefined);
+							setValue('notificationId', undefined);
 							void navigate(notificationRoutes[channel].create);
 						}}
 					>
@@ -353,23 +360,23 @@ const DispatchReportTab = ({
 	);
 };
 
-export const NewsletterDispatchReportTab = () => {
-	const dispatchId = useWatch<NewsletterFormValues, 'dispatchId'>({
-		name: 'dispatchId',
+export const NewsletterEmailDispatchReportTab = () => {
+	const notificationId = useWatch<NewsletterEmailFormValues, 'notificationId'>({
+		name: 'notificationId',
 	});
 	return (
-		<DispatchReportTab channel="email" dispatchId={dispatchId}>
-			<NewsletterDispatchDetails />
+		<DispatchReportTab channel="newsletter" notificationId={notificationId}>
+			<NewsletterEmailDispatchDetails />
 		</DispatchReportTab>
 	);
 };
 
 export const AppAlertDispatchReportTab = () => {
-	const dispatchId = useWatch<AppAlertFormValues, 'dispatchId'>({
-		name: 'dispatchId',
+	const notificationId = useWatch<AppAlertFormValues, 'notificationId'>({
+		name: 'notificationId',
 	});
 	return (
-		<DispatchReportTab channel="push" dispatchId={dispatchId}>
+		<DispatchReportTab channel="app-push" notificationId={notificationId}>
 			<AppAlertDispatchDetails />
 		</DispatchReportTab>
 	);

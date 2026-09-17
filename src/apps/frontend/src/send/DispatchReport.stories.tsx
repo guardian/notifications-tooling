@@ -1,44 +1,46 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import {
-	completeEmailParams,
-	completePushParams,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { ChannelOption, NotificationState } from '../types';
-import { defaultState } from '../utils/notification-reducer';
+	completeAppAlertFormValues,
+	completeNewsletterEmailFormValues,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { ChannelOption, NotificationComposerState } from '../types';
+import { defaultComposerState } from '../utils/notification-composer-reducer';
 import {
 	AppAlertDispatchDetails,
 	AppAlertDispatchReportTab,
 	DispatchReport,
-	NewsletterDispatchDetails,
-	NewsletterDispatchReportTab,
+	NewsletterEmailDispatchDetails,
+	NewsletterEmailDispatchReportTab,
 } from './DispatchReport';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
 	channel: ChannelOption;
 	onStartNew: () => void;
 };
 type Story = StoryObj<StoryArgs>;
 
 const DispatchReportStory = ({
-	notificationState,
+	composerState,
 	channel,
 	onStartNew,
 }: StoryArgs) =>
-	WithNotificationContext(
+	useNotificationFormStory(
 		<DispatchReport channel={channel} onCreateNew={onStartNew}>
-			{channel === 'email' ? (
-				<NewsletterDispatchDetails />
+			{channel === 'newsletter' ? (
+				<NewsletterEmailDispatchDetails />
 			) : (
 				<AppAlertDispatchDetails />
 			)}
 		</DispatchReport>,
-		notificationState,
+		composerState,
 		{},
 		channel,
-		channel === 'email' ? completeEmailParams : completePushParams,
+		channel === 'newsletter'
+			? completeNewsletterEmailFormValues
+			: completeAppAlertFormValues,
 	);
 
 const meta: Meta<StoryArgs> = {
@@ -53,15 +55,15 @@ const meta: Meta<StoryArgs> = {
 		},
 	},
 	args: {
-		channel: 'email',
+		channel: 'newsletter',
 		onStartNew: fn(),
-		notificationState: defaultState,
+		composerState: defaultComposerState,
 	},
 };
 
 export default meta;
 
-export const EmailSuccess: Story = {
+export const NewsletterEmailSuccess: Story = {
 	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
 
@@ -69,7 +71,9 @@ export const EmailSuccess: Story = {
 			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByText(`Exclusive: ${completeEmailParams.subject}`),
+			canvas.getByText(
+				`Exclusive: ${completeNewsletterEmailFormValues.subjectText}`,
+			),
 		).toBeVisible();
 		await expect(canvas.getByText('Newsletter email')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
@@ -85,7 +89,7 @@ export const EmailSuccess: Story = {
 
 export const AppAlertSuccess: Story = {
 	args: {
-		channel: 'push',
+		channel: 'app-push',
 		onStartNew: fn(),
 	},
 	play: async ({ args, canvasElement }) => {
@@ -95,7 +99,7 @@ export const AppAlertSuccess: Story = {
 			canvas.getByRole('heading', { name: 'App alert sent' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByText(`Breaking news: ${completePushParams.headline}`),
+			canvas.getByText(`Breaking news: ${completeAppAlertFormValues.headline}`),
 		).toBeVisible();
 		await expect(canvas.getByText('App alert')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
@@ -112,15 +116,19 @@ export const AppAlertSuccess: Story = {
 	},
 };
 
-export const NewsletterReportRoute: Story = {
-	render: () =>
-		WithNotificationContext(
-			<NewsletterDispatchReportTab />,
-			defaultState,
+export const NewsletterEmailReportRoute: Story = {
+	render: function Render() {
+		return useNotificationFormStory(
+			<NewsletterEmailDispatchReportTab />,
+			defaultComposerState,
 			{},
-			'email',
-			{ ...completeEmailParams, dispatchId: 'newsletter-dispatch-id' },
-		),
+			'newsletter',
+			{
+				...completeNewsletterEmailFormValues,
+				notificationId: 'newsletter-dispatch-id',
+			},
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -139,14 +147,18 @@ export const NewsletterReportRoute: Story = {
 };
 
 export const AppAlertReportRoute: Story = {
-	render: () =>
-		WithNotificationContext(
+	render: function Render() {
+		return useNotificationFormStory(
 			<AppAlertDispatchReportTab />,
-			defaultState,
+			defaultComposerState,
 			{},
-			'push',
-			{ ...completePushParams, dispatchId: 'app-alert-dispatch-id' },
-		),
+			'app-push',
+			{
+				...completeAppAlertFormValues,
+				notificationId: 'app-alert-dispatch-id',
+			},
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -155,15 +167,16 @@ export const AppAlertReportRoute: Story = {
 	},
 };
 
-export const ReportRouteRequiresSuccessfulDispatch: Story = {
-	render: () =>
-		WithNotificationContext(
-			<NewsletterDispatchReportTab />,
-			defaultState,
+export const ReportRouteRequiresNotificationId: Story = {
+	render: function Render() {
+		return useNotificationFormStory(
+			<NewsletterEmailDispatchReportTab />,
+			defaultComposerState,
 			{},
-			'email',
-			completeEmailParams,
-		),
+			'newsletter',
+			completeNewsletterEmailFormValues,
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(

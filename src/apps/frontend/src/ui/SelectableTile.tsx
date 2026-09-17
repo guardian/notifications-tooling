@@ -25,7 +25,7 @@ export const SelectableTile = ({
 	onChange,
 }: SelectableTileProps) => {
 	const isChecked = selectedValue === tileValue;
-	const toggleChecked = () => {
+	const handlePress = () => {
 		onChange(isChecked ? undefined : tileValue);
 	};
 
@@ -38,7 +38,7 @@ export const SelectableTile = ({
 			}}
 		>
 			<Button
-				onPress={toggleChecked}
+				onPress={handlePress}
 				variant="tertiary"
 				cssOverrides={selectableTileTheme.selectableTile(isChecked)}
 				aria-pressed={isChecked}

@@ -3,48 +3,48 @@ import { type ActionDispatch, type ReactNode, useReducer } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import type {
 	ChannelOption,
-	NotificationAction,
-	NotificationState,
+	NotificationComposerAction,
+	NotificationComposerState,
 } from '../types';
-import { fetchCapiDataFromApi } from '../utils/fetch-capi-content';
 import { requestEmailHtml } from '../utils/fetch-email-preview';
+import {
+	defaultAppAlertComposerState,
+	defaultComposerState,
+	notificationComposerReducer,
+} from '../utils/notification-composer-reducer';
 import {
 	appAlertFormSchema,
 	type AppAlertFormValues,
 	defaultAppAlertFormValues,
-	defaultNewsletterFormValues,
-	newsletterFormSchema,
-	type NewsletterFormValues,
+	defaultNewsletterEmailFormValues,
+	newsletterEmailFormSchema,
+	type NewsletterEmailFormValues,
 } from '../utils/notification-forms';
-import {
-	defaultAppAlertState,
-	defaultState,
-	notificationReducer,
-} from '../utils/notification-reducer';
+import { resolveArticleFromCapi } from '../utils/resolve-article-from-capi';
 import { sendNotification } from '../utils/send-notification';
 import { requestTestEmailSend } from '../utils/send-test-email';
-import { NotificationFormContext } from './NotificationContext';
+import { NotificationFormContext } from './NotificationFormContext';
 
-type NotificationDraft = readonly [
-	NotificationState,
-	ActionDispatch<[NotificationAction]>,
+type NotificationComposer = readonly [
+	NotificationComposerState,
+	ActionDispatch<[NotificationComposerAction]>,
 ];
 
 const NotificationFormProvider = ({
 	children,
-	draft: [notification, updateNotification],
+	composer: [composerState, updateComposerState],
 	channel,
 }: {
 	children: ReactNode;
-	draft: NotificationDraft;
+	composer: NotificationComposer;
 	channel: ChannelOption;
 }) => (
 	<NotificationFormContext.Provider
 		value={{
 			channel,
-			notification,
-			updateNotification,
-			capiFetch: fetchCapiDataFromApi,
+			composerState,
+			updateComposerState,
+			resolveArticleFromCapi,
 			requestEmailHtml,
 			sendNotification,
 			requestTestEmailSend,
@@ -54,22 +54,25 @@ const NotificationFormProvider = ({
 	</NotificationFormContext.Provider>
 );
 
-export const NewsletterNotificationFormProvider = ({
+export const NewsletterEmailNotificationFormProvider = ({
 	children,
 }: {
 	children: ReactNode;
 }) => {
-	const newsletter = useReducer<NotificationState, [NotificationAction]>(
-		notificationReducer,
-		defaultState,
-	);
-	const newsletterForm = useForm<NewsletterFormValues>({
-		defaultValues: defaultNewsletterFormValues,
-		resolver: zodResolver(newsletterFormSchema),
+	const newsletterEmailComposer = useReducer<
+		NotificationComposerState,
+		[NotificationComposerAction]
+	>(notificationComposerReducer, defaultComposerState);
+	const newsletterEmailForm = useForm<NewsletterEmailFormValues>({
+		defaultValues: defaultNewsletterEmailFormValues,
+		resolver: zodResolver(newsletterEmailFormSchema),
 	});
 	return (
-		<FormProvider {...newsletterForm}>
-			<NotificationFormProvider draft={newsletter} channel="email">
+		<FormProvider {...newsletterEmailForm}>
+			<NotificationFormProvider
+				composer={newsletterEmailComposer}
+				channel="newsletter"
+			>
 				{children}
 			</NotificationFormProvider>
 		</FormProvider>
@@ -81,17 +84,17 @@ export const AppAlertNotificationFormProvider = ({
 }: {
 	children: ReactNode;
 }) => {
-	const appAlert = useReducer<NotificationState, [NotificationAction]>(
-		notificationReducer,
-		defaultAppAlertState,
-	);
+	const appAlertComposer = useReducer<
+		NotificationComposerState,
+		[NotificationComposerAction]
+	>(notificationComposerReducer, defaultAppAlertComposerState);
 	const appAlertForm = useForm<AppAlertFormValues>({
 		defaultValues: defaultAppAlertFormValues,
 		resolver: zodResolver(appAlertFormSchema),
 	});
 	return (
 		<FormProvider {...appAlertForm}>
-			<NotificationFormProvider draft={appAlert} channel="push">
+			<NotificationFormProvider composer={appAlertComposer} channel="app-push">
 				{children}
 			</NotificationFormProvider>
 		</FormProvider>

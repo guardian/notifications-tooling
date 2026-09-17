@@ -8,14 +8,14 @@ import {
 	useState,
 } from 'react';
 import { SendButton } from '../send/SendButton';
+import { SendConfirmationModal } from '../send/SendConfirmationModal';
 import { SendFailedModal } from '../send/SendFailedModal';
-import { SendNotificationModal } from '../send/SendNotificationModal';
 import type { ChannelOption } from '../types';
 import { ArticleImportControl } from './ArticleImportControl';
 import { ChannelDisplay } from './ChannelDisplay';
 import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryOptionFormField } from './DeliveryOptionFormField';
-import { NotificationFormContext } from './NotificationContext';
+import { NotificationFormContext } from './NotificationFormContext';
 import { NotificationFormSection } from './NotificationFormSection';
 
 interface NotificationFormWrapperProps {
@@ -41,9 +41,9 @@ export const NotificationFormWrapper = ({
 	onArticleImported,
 	children,
 }: PropsWithChildren<NotificationFormWrapperProps>) => {
-	const { notification } = useContext(NotificationFormContext);
+	const { composerState } = useContext(NotificationFormContext);
 	const [articleInputText, setArticleInputText] = useState(
-		() => notification.content?.webUrl ?? '',
+		() => composerState.article?.webUrl ?? '',
 	);
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
@@ -101,7 +101,7 @@ export const NotificationFormWrapper = ({
 					</NotificationFormSection>
 				</div>
 			</form>
-			<SendNotificationModal />
+			<SendConfirmationModal />
 			<SendFailedModal />
 		</>
 	);

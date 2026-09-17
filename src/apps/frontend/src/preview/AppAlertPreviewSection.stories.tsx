@@ -4,29 +4,30 @@ import { expect, within } from 'storybook/test';
 import { FALLBACK_TOPIC_TYPES } from '../segment/audience-fallbacks';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
-	completePushParams,
-	populatedPushState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
-import { AppPreviewSection } from './AppPreviewSection';
+	completeAppAlertFormValues,
+	populatedAppAlertComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import { AppAlertPreviewSection } from './AppAlertPreviewSection';
 
-type StoryArgs = ComponentProps<typeof AppPreviewSection> & {
-	notificationState: NotificationState;
+type StoryArgs = ComponentProps<typeof AppAlertPreviewSection> & {
+	composerState: NotificationComposerState;
 	includeThumbnail: boolean;
 };
 
 const meta: Meta<StoryArgs> = {
-	title: 'Dispatch/Preview/AppPreviewSection',
-	component: AppPreviewSection,
-	render: ({ notificationState, includeThumbnail, ...args }) =>
-		WithNotificationContext(
-			<AppPreviewSection {...args} />,
-			notificationState,
+	title: 'Dispatch/Preview/AppAlertPreviewSection',
+	component: AppAlertPreviewSection,
+	render: function Render({ composerState, includeThumbnail, ...args }) {
+		return useNotificationFormStory(
+			<AppAlertPreviewSection {...args} />,
+			composerState,
 			{},
-			'push',
-			{ ...completePushParams, includeThumbnail },
-		),
+			'app-push',
+			{ ...completeAppAlertFormValues, includeThumbnail },
+		);
+	},
 	parameters: {
 		docs: {
 			description: {
@@ -37,7 +38,7 @@ const meta: Meta<StoryArgs> = {
 	},
 	args: {
 		topicTypes: FALLBACK_TOPIC_TYPES,
-		notificationState: populatedPushState,
+		composerState: populatedAppAlertComposerState,
 		includeThumbnail: true,
 	},
 };

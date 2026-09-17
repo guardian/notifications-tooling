@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
-import { WithNotificationContext } from '../testing/story-helpers';
-import type { NotificationState } from '../types';
-import type { NewsletterFormValues } from '../utils/notification-forms';
-import { defaultState } from '../utils/notification-reducer';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import { defaultComposerState } from '../utils/notification-composer-reducer';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
 
 type StoryArgs = {
-	notificationState: NotificationState;
-	formValues?: Partial<NewsletterFormValues>;
+	composerState: NotificationComposerState;
+	formValues?: Partial<NewsletterEmailFormValues>;
 	containerMinWidth: string;
 };
 
@@ -17,7 +17,7 @@ const meta: Meta<StoryArgs> = {
 	title: 'Dispatch/Compose/CreateNewsletterEmailTab',
 	component: CreateNewsletterEmailTab,
 	args: {
-		notificationState: defaultState,
+		composerState: defaultComposerState,
 		containerMinWidth: '1600px',
 	},
 	argTypes: {
@@ -36,8 +36,8 @@ const meta: Meta<StoryArgs> = {
 			},
 		},
 	},
-	render: (args) => {
-		const { notificationState, formValues, containerMinWidth } = args;
+	render: function Render(args) {
+		const { composerState, formValues, containerMinWidth } = args;
 		return (
 			<div
 				style={{
@@ -47,11 +47,11 @@ const meta: Meta<StoryArgs> = {
 					boxSizing: 'border-box',
 				}}
 			>
-				{WithNotificationContext(
+				{useNotificationFormStory(
 					<CreateNewsletterEmailTab />,
-					notificationState,
+					composerState,
 					{},
-					'email',
+					'newsletter',
 					formValues,
 				)}
 			</div>

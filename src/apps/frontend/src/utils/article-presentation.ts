@@ -3,27 +3,27 @@ import { getSelectedLiveblogBlock } from './article-liveblog';
 import { getArticleThumbnail } from './article-thumbnail';
 
 interface ArticlePresentationOptions {
-	content: ResolvedArticle;
+	article: ResolvedArticle;
 	requestedUrl?: string;
 	requestedBlock?: CapiBlock;
 }
 
 export const getArticlePresentation = ({
-	content,
+	article,
 	requestedUrl,
 	requestedBlock,
 }: ArticlePresentationOptions) => {
-	const isLiveblog = content.type === 'liveblog';
-	const liveblogBlock = getSelectedLiveblogBlock(content, requestedBlock);
+	const isLiveblog = article.type === 'liveblog';
+	const liveblogBlock = getSelectedLiveblogBlock(article, requestedBlock);
 
 	return {
-		headline: content.fields?.headline ?? content.webTitle,
+		headline: article.fields?.headline ?? article.webTitle,
 		isLiveblog,
-		linkUrl: requestedUrl ?? content.webUrl,
+		linkUrl: requestedUrl ?? article.webUrl,
 		liveblogBlock,
 		publishedDate: isLiveblog
-			? content.fields?.lastModified
-			: content.webPublicationDate,
-		thumbnail: getArticleThumbnail(content),
+			? article.fields?.lastModified
+			: article.webPublicationDate,
+		thumbnail: getArticleThumbnail(article),
 	};
 };

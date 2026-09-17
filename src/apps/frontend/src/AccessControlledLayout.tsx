@@ -5,7 +5,7 @@ import { ConfigContext } from './config/ConfigContext';
 import { MainLayout } from './layout/MainLayout';
 import { NoPermissionsTab } from './layout/NoPermissionsTab';
 
-export const EmailNotificationPage = () => {
+export const AccessControlledLayout = () => {
 	const config = useContext(ConfigContext);
 	const hasAccess = config?.permissions.includes(
 		UserPermissions.DispatchAccess,
