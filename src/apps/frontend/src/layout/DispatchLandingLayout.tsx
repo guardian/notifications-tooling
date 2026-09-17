@@ -3,8 +3,8 @@ import { semanticColors } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { Layout } from '@guardian/stand/Layout';
 import { from } from '@guardian/stand/utils';
+import { DispatchLandingPage } from '../compose/DispatchLandingPage';
 import { layoutMainTheme } from '../themes';
-import { DispatchLandingTab } from './DispatchLandingTab';
 import { LatestPublishedContent } from './LatestPublishedContent';
 
 export const DispatchLandingLayout = () => {
@@ -32,7 +32,7 @@ export const DispatchLandingLayout = () => {
 								minWidth: 0,
 							})}
 						>
-							<DispatchLandingTab />
+							<DispatchLandingPage />
 						</Item>
 						<Item
 							size={{ sm: 12, md: 12, lg: 4 }}

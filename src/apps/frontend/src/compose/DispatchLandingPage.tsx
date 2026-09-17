@@ -1,20 +1,19 @@
 import { css } from '@emotion/react';
 import { semanticSpacing } from '@guardian/stand';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
-import { Layout } from '@guardian/stand/Layout';
 import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import { between, from } from '@guardian/stand/utils';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
+import { DispatchLandingHistoryView } from '../layout/DispatchLandingHistoryView';
 import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { dispatchLandingTheme } from '../themes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
-import { DispatchLandingHistoryView } from './DispatchLandingHistoryView';
 
 const landingTileStyles = css({
 	width: '100%',
@@ -27,7 +26,7 @@ const landingTileStyles = css({
 	},
 });
 
-export const DispatchLandingTab = () => {
+export const DispatchLandingPage = () => {
 	const [searchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
 	const [last24HoursSince] = useState(() =>
@@ -51,7 +50,7 @@ export const DispatchLandingTab = () => {
 		}) ?? [];
 
 	return (
-		<Layout.Main css={dispatchLandingTheme.dispatchMainContainer}>
+		<section css={dispatchLandingTheme.dispatchMainContainer}>
 			<div
 				css={{
 					width: '100%',
@@ -126,6 +125,6 @@ export const DispatchLandingTab = () => {
 					/>
 				</div>
 			</div>
-		</Layout.Main>
+		</section>
 	);
 };

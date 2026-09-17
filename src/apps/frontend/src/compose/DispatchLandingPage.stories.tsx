@@ -4,11 +4,11 @@ import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import { ConfigContext } from '../config/ConfigContext';
+import { MainLayout } from '../layout/MainLayout';
 import type { NotificationListResponse } from '../schemas';
 import { mockAppConfig } from '../testing/app-config';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
-import { DispatchLandingTab } from './DispatchLandingTab';
-import { MainLayout } from './MainLayout';
+import { DispatchLandingPage } from './DispatchLandingPage';
 
 type StoryArgs = {
 	appConfig?: AppConfig;
@@ -126,8 +126,8 @@ const sinceAwareHistoryHandler = http.get(
 );
 
 const meta = {
-	title: 'Dispatch/Layout/DispatchLandingTab',
-	component: DispatchLandingTab,
+	title: 'Dispatch/Layout/DispatchLandingPage',
+	component: DispatchLandingPage,
 	parameters: {
 		layout: 'fullscreen',
 		msw: { handlers: [historyHandler, channelAudiencesHandler] },
@@ -144,7 +144,7 @@ const meta = {
 	render: ({ appConfig }: StoryArgs) => (
 		<ConfigContext.Provider value={appConfig}>
 			<MainLayout>
-				<DispatchLandingTab />
+				<DispatchLandingPage />
 			</MainLayout>
 		</ConfigContext.Provider>
 	),
