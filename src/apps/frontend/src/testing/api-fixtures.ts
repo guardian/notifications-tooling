@@ -50,7 +50,7 @@ export const fetchFailError = new ApiError({
 	message: 'Network request to /api/v1/notifications failed',
 });
 
-export const acceptedEmailSendResponse: SendNotificationResponse = {
+export const deliveredNewsletterEmailSendResponse: SendNotificationResponse = {
 	id: 'email-1234-abcd',
 	idempotencyKey: 'email-1234-abcd',
 	kind: 'send',
@@ -84,13 +84,13 @@ export const acceptedEmailSendResponse: SendNotificationResponse = {
 };
 
 export const failedAppPushSendResponse: SendNotificationResponse = {
-	...acceptedEmailSendResponse,
+	...deliveredNewsletterEmailSendResponse,
 	id: 'push-failed-1234',
 	idempotencyKey: 'push-failed-idempotency-key',
 	status: 'failed',
 	dispatches: [
 		{
-			...acceptedEmailSendResponse.dispatches[0]!,
+			...deliveredNewsletterEmailSendResponse.dispatches[0]!,
 			id: 'push-dispatch-uk',
 			channel: 'app-push',
 			requested: {
@@ -118,13 +118,13 @@ export const unconfirmedAppPushSendResponse: SendNotificationResponse = {
 };
 
 export const failedNewsletterSendResponse: SendNotificationResponse = {
-	...acceptedEmailSendResponse,
+	...deliveredNewsletterEmailSendResponse,
 	id: 'email-failed-1234',
 	idempotencyKey: 'email-failed-idempotency-key',
 	status: 'failed',
 	dispatches: [
 		{
-			...acceptedEmailSendResponse.dispatches[0]!,
+			...deliveredNewsletterEmailSendResponse.dispatches[0]!,
 			status: 'failure',
 			providerRef: null,
 			failureReason: 'http_error',
@@ -140,7 +140,7 @@ export const partiallyDeliveredNewsletterSendResponse: SendNotificationResponse 
 		status: 'partially_delivered',
 		dispatches: [
 			{
-				...acceptedEmailSendResponse.dispatches[0]!,
+				...deliveredNewsletterEmailSendResponse.dispatches[0]!,
 			},
 			{
 				...failedNewsletterSendResponse.dispatches[0]!,

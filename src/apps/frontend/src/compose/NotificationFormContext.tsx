@@ -6,8 +6,8 @@ import { ApiError } from '../api-client/errors';
 import type { SendNotificationRequest } from '../schemas';
 import type {
 	ChannelOption,
-	NotificationAction,
-	NotificationState,
+	NotificationComposerAction,
+	NotificationComposerState,
 	RequestEmailHtml,
 } from '../types';
 import type { SendNotificationResult } from '../utils/send-notification';
@@ -15,9 +15,9 @@ import type { TestEmailRequestFunction } from '../utils/send-test-email';
 
 export interface NotificationFormContextProps {
 	channel: ChannelOption;
-	notification: NotificationState;
-	updateNotification: ActionDispatch<[NotificationAction]>;
-	capiFetch: {
+	composerState: NotificationComposerState;
+	updateComposerState: ActionDispatch<[NotificationComposerAction]>;
+	resolveArticleFromCapi: {
 		(request: ResolveArticleRequest): Promise<Result<ResolveArticleResponse>>;
 	};
 	// TO DO - get the required payload from the backend
@@ -32,18 +32,18 @@ export interface NotificationFormContextProps {
 
 export const NotificationFormContext =
 	createContext<NotificationFormContextProps>({
-		channel: 'email',
-		notification: {
-			isFetchingContent: false,
+		channel: 'newsletter',
+		composerState: {
+			isFetchingArticle: false,
 			isWaitingForSend: false,
-			confirmSendModalOpen: false,
+			isSendConfirmationOpen: false,
 		},
-		updateNotification: () => {},
-		capiFetch: () =>
+		updateComposerState: () => {},
+		resolveArticleFromCapi: () =>
 			Promise.resolve({
 				success: false,
 				failure: new ApiError({
-					message: 'no capiFetch implementation provided',
+					message: 'no resolveArticleFromCapi implementation provided',
 					failure: 'fetch-fail',
 				}),
 			}),

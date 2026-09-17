@@ -140,7 +140,7 @@ export const activePillTheme = {
 		width: '20px',
 		gap: '10px',
 	}),
-	isConfirmationStyle: css({
+	outlinedPill: css({
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
 		borderRadius: semanticRadius.cornerXs,
 		height: semanticSizing.height.sm,
@@ -281,7 +281,7 @@ export const previewPillStyles = {
 		height: '18px',
 		gap: `${baseSpacing['10Px']}`,
 	}),
-	confirmationPill: css({
+	mutedPill: css({
 		backgroundColor: semanticColors.fill.weak,
 		color: semanticColors.text.weak,
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
@@ -294,7 +294,7 @@ export const previewPillStyles = {
 	}),
 };
 
-export const ToggleSwitchTheme = {
+export const toggleSwitchTheme = {
 	baseStyle: (selected: boolean) =>
 		css({
 			display: 'flex',

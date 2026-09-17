@@ -6,8 +6,8 @@ import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useContext } from 'react';
 import type { ApiError } from '../api-client/errors';
-import { NotificationFormContext } from '../compose/NotificationContext';
-import { useSendNotification } from '../hooks/use-send-notification';
+import { NotificationFormContext } from '../compose/NotificationFormContext';
+import { useSendNotification } from '../hooks/useSendNotification';
 import type {
 	ChannelAudienceResponse,
 	NotificationDispatch,
@@ -15,12 +15,12 @@ import type {
 	SendNotificationRequest,
 } from '../schemas';
 import {
-	FALLBACK_NEWSLETTER_SEGMENTS,
+	FALLBACK_NEWSLETTER_EMAIL_SEGMENTS,
 	FALLBACK_TOPIC_TYPES,
 } from '../segment/audience-fallbacks';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import type { ChannelOption } from '../types';
-import type { NotificationState } from '../types';
+import type { NotificationComposerState } from '../types';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { getChannelDescription } from '../utils/display-text-helpers';
 
@@ -32,8 +32,9 @@ const formatDispatchTarget = (
 		const segments = audiences?.channels.newsletter.segments ?? [];
 		return (
 			segments.find(({ id }) => id === requested.segment)?.label ??
-			FALLBACK_NEWSLETTER_SEGMENTS.find(({ id }) => id === requested.segment)
-				?.label ??
+			FALLBACK_NEWSLETTER_EMAIL_SEGMENTS.find(
+				({ id }) => id === requested.segment,
+			)?.label ??
 			requested.segment
 		);
 	}
@@ -67,7 +68,7 @@ const deriveDispatchFailureMessage = (
 		.filter(({ status }) => status === 'failure')
 		.map(({ requested }) => formatDispatchTarget(requested, audiences));
 	const upstreamService =
-		channel === 'push'
+		channel === 'app-push'
 			? 'mobile notification service'
 			: 'newsletter delivery service';
 
@@ -206,11 +207,11 @@ const checkIfCanRetry = (apiError: ApiError) => {
 };
 
 const getFailure = (
-	notification: NotificationState,
+	composerState: NotificationComposerState,
 	channel: ChannelOption,
 	audiences?: ChannelAudienceResponse,
 ) => {
-	const { sendFailure } = notification;
+	const { sendFailure } = composerState;
 	if (!sendFailure) {
 		return undefined;
 	}
@@ -259,14 +260,14 @@ const getFailure = (
 };
 
 export const SendFailedModal = () => {
-	const { channel, notification, updateNotification } = useContext(
+	const { channel, composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
 	const sendNotification = useSendNotification();
 	const { data: audiences } = useChannelAudiences();
 
-	const { isWaitingForSend, pendingRequest } = notification;
-	const failure = getFailure(notification, channel, audiences);
+	const { isWaitingForSend, pendingRequest } = composerState;
+	const failure = getFailure(composerState, channel, audiences);
 
 	const handleRetry =
 		(sendNotificationRequest: SendNotificationRequest) => () =>
@@ -277,7 +278,7 @@ export const SendFailedModal = () => {
 			isOpen={!!failure}
 			onOpenChange={(isOpen) => {
 				if (!isOpen) {
-					updateNotification({
+					updateComposerState({
 						type: 'dismiss-send-error',
 					});
 				}
@@ -314,7 +315,7 @@ export const SendFailedModal = () => {
 						) : (
 							<Button
 								onPress={() => {
-									updateNotification({
+									updateComposerState({
 										type: 'dismiss-send-error',
 									});
 								}}

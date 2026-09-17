@@ -22,6 +22,15 @@ One editorial intent to reach an audience, composed once and sent to one or more
 channels in a single request.
 _Avoid_: message, alert, push (as a noun for the whole thing)
 
+**Notification composer**:
+The editorial interface for importing an article, composing a notification and
+managing its send, including send confirmation and failures.
+
+**Article**:
+The Guardian article or liveblog imported as source material for a notification,
+distinct from the notification content an editor composes from it.
+_Avoid_: content (when referring to the imported article)
+
 **Content item**:
 A single reusable piece of notification content — title, body, link, optional
 media — identified by an author-chosen id. Items are declared once and referenced
@@ -40,16 +49,27 @@ Newsletter composes items into an email with a subject; app-push takes a single
 item.
 
 **Kicker**:
-An editorial label shown on a notification, such as Breaking News or Exclusive.
-Currently presentational only — the request contract has no field to carry it, so
-it does not reach any downstream service, and the preview displays it regardless.
+An optional editorial label for a notification, such as Breaking News or Exclusive.
+For a newsletter email, it prefixes the subject text to form the subject line.
+
+**Subject text**:
+The editable wording of a newsletter email's subject, excluding any kicker.
+_Avoid_: headline (when referring to the edited subject text)
+
+**Subject line**:
+The complete subject of a newsletter email, consisting of the subject text
+prefixed by a kicker when one is selected.
+_Avoid_: subject text (when referring to the complete subject line)
 
 **Preview**:
 The rendered approximation of a notification shown to an editor while composing.
-It is assembled in the browser, so it can show choices — the kicker among them —
-that no downstream service receives, and it is not a guarantee of what a reader
-will see.
+It is not a guarantee of what a reader will see.
 _Avoid_: proof, render, draft
+
+**Preview text**:
+Optional editorial text included in a newsletter email, distinct from its subject
+line and from the rendered preview.
+_Avoid_: preview (when referring to the authored text)
 
 ### Delivery
 
@@ -74,6 +94,11 @@ traceability.
 A request that is authenticated and fully validated but never dispatched
 downstream. The SPA currently sends only dry runs.
 _Avoid_: test mode, preview, simulation
+
+**Notification id**:
+The identifier of a recorded notification as a whole, not an individual dispatch
+outcome. It is distinct from an idempotency key and a request id.
+_Avoid_: dispatch id (when referring to the whole notification)
 
 **Idempotency key**:
 A client-generated identifier that marks two requests as the same intent, so a

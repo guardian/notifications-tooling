@@ -1,7 +1,7 @@
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { NEWSLETTER_LIMIT_FALLBACKS } from '../hooks/useChannelConstraints';
+import { NEWSLETTER_EMAIL_LIMIT_FALLBACKS } from '../hooks/useChannelConstraints';
 import type { ChannelConstraintsResponse } from '../schemas';
-import type { NewsletterFormValues } from '../utils/notification-forms';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { kickerNameMap } from '../utils/option-values';
 import { NotificationTextInputWithPrefix } from './NotificationTextInput';
 
@@ -10,17 +10,18 @@ interface SubjectFormFieldProps {
 }
 
 export const SubjectFormField = ({ constraints }: SubjectFormFieldProps) => {
-	const { control } = useFormContext<NewsletterFormValues>();
-	const kicker = useWatch<NewsletterFormValues, 'kicker'>({
+	const { control } = useFormContext<NewsletterEmailFormValues>();
+	const kicker = useWatch<NewsletterEmailFormValues, 'kicker'>({
 		control,
 		name: 'kicker',
 	});
-	const subjectLimits =
+	const subjectLineLimits =
 		constraints?.channels.newsletter.compose.subject ??
-		NEWSLETTER_LIMIT_FALLBACKS.title;
-	const kickerLabel = ['breaking-news', 'exclusive'].includes(kicker)
-		? kickerNameMap[kicker]
-		: undefined;
+		NEWSLETTER_EMAIL_LIMIT_FALLBACKS.title;
+	const kickerLabel =
+		kicker === 'breaking-news' || kicker === 'exclusive'
+			? kickerNameMap[kicker]
+			: undefined;
 	const placeholderText = kickerLabel
 		? `${kickerLabel}: Enter a subject line here...`
 		: 'Enter a subject line here...';
@@ -28,7 +29,7 @@ export const SubjectFormField = ({ constraints }: SubjectFormFieldProps) => {
 	return (
 		<Controller
 			control={control}
-			name="subject"
+			name="subjectText"
 			render={({ field, fieldState }) => (
 				<NotificationTextInputWithPrefix
 					name={field.name}
@@ -36,8 +37,8 @@ export const SubjectFormField = ({ constraints }: SubjectFormFieldProps) => {
 					description="Choose the subject line (kicker included in character count)"
 					placeholder={placeholderText}
 					value={field.value}
-					update={field.onChange}
-					softLimit={subjectLimits.recommended}
+					onChange={field.onChange}
+					recommendedLimit={subjectLineLimits.recommended}
 					error={fieldState.error?.message}
 					prefix={kickerLabel ? `${kickerLabel}: ` : undefined}
 				/>

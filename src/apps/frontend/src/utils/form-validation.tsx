@@ -27,7 +27,7 @@ export const getArticleUrlInputFailureMessage = (
 	}
 };
 
-export const parseArticleUrlInputToContentId = (
+export const parseArticleUrlInputToArticleId = (
 	articleInputText: string,
 ): {
 	articleId?: string;

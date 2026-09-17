@@ -1,23 +1,24 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
+import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 
 const toOptionKey = (value: string) => `alertType//${value}`;
 
 export const AlertTypeFormField = () => {
 	const { control } = useFormContext<AppAlertFormValues>();
-	const topicTypes = useAppPushTopicTypes();
+	const topicTypes = useAppAlertTopicTypes();
 
 	return (
 		<Controller
 			control={control}
 			name="alertType"
-			render={({ field }) => (
+			render={({ field, fieldState }) => (
 				<Select
 					name={field.name}
 					label="Alert type"
 					description="Choose the type of app alert"
+					placeholder="Choose an alert type"
 					onChange={(key) => {
 						const selectedAlertType =
 							typeof key === 'string' ? key.split('//').at(1) : undefined;
@@ -26,7 +27,9 @@ export const AlertTypeFormField = () => {
 						}
 					}}
 					selectionMode="single"
-					value={toOptionKey(field.value)}
+					value={field.value ? toOptionKey(field.value) : null}
+					isInvalid={fieldState.invalid}
+					error={fieldState.error?.message}
 				>
 					{topicTypes.map(({ id, label }) => (
 						<Option key={id} id={toOptionKey(id)}>

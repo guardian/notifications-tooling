@@ -5,8 +5,8 @@ import { Typography } from '@guardian/stand/Typography';
 import type { AppAlertTopicOption } from '@models';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { AppPreviewSection } from './AppPreviewSection';
-import { EmailPreviewSection } from './EmailPreviewSection';
+import { AppAlertPreviewSection } from './AppAlertPreviewSection';
+import { NewsletterEmailPreviewSection } from './NewsletterEmailPreviewSection';
 
 interface PreviewToggleProps {
 	children: ReactNode;
@@ -53,18 +53,18 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 	);
 };
 
-export const AppPreviewToggle = ({
+export const AppAlertPreviewToggle = ({
 	topicTypes,
 }: {
 	topicTypes: AppAlertTopicOption[];
 }) => (
 	<PreviewToggle>
-		<AppPreviewSection topicTypes={topicTypes} />
+		<AppAlertPreviewSection topicTypes={topicTypes} />
 	</PreviewToggle>
 );
 
-export const EmailPreviewToggle = () => (
+export const NewsletterEmailPreviewToggle = () => (
 	<PreviewToggle>
-		<EmailPreviewSection />
+		<NewsletterEmailPreviewSection />
 	</PreviewToggle>
 );

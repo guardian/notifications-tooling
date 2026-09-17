@@ -9,27 +9,27 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import { NotificationFormContext } from '../compose/NotificationContext';
+import { NotificationFormContext } from '../compose/NotificationFormContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import type { NewsletterFormValues } from '../utils/notification-forms';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 
 // TO DO - this function will work with the current format of the notification emails
 // but we should modify the template used in email-rendering to include attributes
 // to more robustly identify the elements to update
 const modifyContent = (
 	body: HTMLElement,
-	parameters: Partial<NewsletterFormValues>,
+	parameters: Partial<NewsletterEmailFormValues>,
 ) => {
-	const { subject, preview, showPreview } = parameters;
-	const headlineElement = body.querySelector('h2');
+	const { subjectText, previewText, showPreview } = parameters;
+	const subjectTextElement = body.querySelector('h2');
 	const previewElement =
-		headlineElement?.parentElement?.querySelector<HTMLElement>('h2~div');
+		subjectTextElement?.parentElement?.querySelector<HTMLElement>('h2~div');
 
-	if (subject && headlineElement) {
-		headlineElement.innerText = subject;
+	if (subjectText && subjectTextElement) {
+		subjectTextElement.innerText = subjectText;
 	}
 	if (previewElement) {
-		previewElement.innerText = showPreview && preview ? preview : '';
+		previewElement.innerText = showPreview && previewText ? previewText : '';
 	}
 	Array.from(body.querySelectorAll('a')).forEach((link) =>
 		link.removeAttribute('href'),
@@ -71,11 +71,11 @@ const styles = {
 
 export const NewsletterEmailPreview = () => {
 	const {
-		notification: { content },
+		composerState: { article, requestedUrl },
 		requestEmailHtml,
 	} = useContext(NotificationFormContext);
-	const { webUrl } = content ?? {};
-	const parameters = useWatch<NewsletterFormValues>();
+	const webUrl = requestedUrl ?? article?.webUrl;
+	const parameters = useWatch<NewsletterEmailFormValues>();
 	const stringifiedAudience = (parameters.audienceSegments ?? []).join();
 
 	const [previewContainerElement, setPreviewContainerElement] =

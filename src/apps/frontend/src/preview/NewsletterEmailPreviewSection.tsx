@@ -4,29 +4,32 @@ import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Typography } from '@guardian/stand/Typography';
 import { useWatch } from 'react-hook-form';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
-import { useNewsletterSegmentOptions } from '../segment/use-audience-editions';
+import { useNewsletterEmailSegmentOptions } from '../segment/useAudienceEditions';
 import { SendInfoPreviewPill } from '../send/SendInfoPreviewPill';
 import { TestEmailForm } from '../send/TestEmailForm';
 import { alertBannerCss, customAlertBannerTheme } from '../themes';
 import {
-	defaultNewsletterFormValues,
-	type NewsletterFormValues,
+	defaultNewsletterEmailFormValues,
+	type NewsletterEmailFormValues,
 } from '../utils/notification-forms';
 import { NewsletterEmailPreview } from './HTMLPreview';
 import { PreviewSection } from './PreviewSection';
 
-export const EmailPreviewSection = () => {
-	const segments = useNewsletterSegmentOptions();
-	const selectedSegments = useWatch<NewsletterFormValues, 'audienceSegments'>({
+export const NewsletterEmailPreviewSection = () => {
+	const segments = useNewsletterEmailSegmentOptions();
+	const selectedSegments = useWatch<
+		NewsletterEmailFormValues,
+		'audienceSegments'
+	>({
 		name: 'audienceSegments',
-		defaultValue: defaultNewsletterFormValues.audienceSegments,
+		defaultValue: defaultNewsletterEmailFormValues.audienceSegments,
 	});
 	const selectedDeliveryTiming = useWatch<
-		NewsletterFormValues,
+		NewsletterEmailFormValues,
 		'deliveryOption'
 	>({
 		name: 'deliveryOption',
-		defaultValue: defaultNewsletterFormValues.deliveryOption,
+		defaultValue: defaultNewsletterEmailFormValues.deliveryOption,
 	});
 	return (
 		<PreviewSection
@@ -34,7 +37,7 @@ export const EmailPreviewSection = () => {
 			description="The preview for the newsletter email will be shown below."
 		>
 			<SendInfoPreviewPill
-				channel="email"
+				channel="newsletter"
 				deliveryTiming={selectedDeliveryTiming}
 			/>
 			<FlagPreviewPill

@@ -2,48 +2,49 @@ import { type FormEvent, useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { AudienceSegmentsFormField } from '../segment/AudienceSegmentsFormField';
-import { buildNewsletterRequest } from '../utils/build-request-payloads';
+import { buildNewsletterEmailRequest } from '../utils/build-request-payloads';
 import { htmlToSingleLineText } from '../utils/html-helpers';
-import type { NewsletterFormValues } from '../utils/notification-forms';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { KickerFormField } from './KickerFormField';
-import { NotificationFormContext } from './NotificationContext';
+import { NotificationFormContext } from './NotificationFormContext';
 import { NotificationFormSection } from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 import { PreviewTextFormField } from './PreviewTextFormField';
 import { SubjectFormField } from './SubjectFormField';
 
-interface CreateNewsletterFormProps {
+interface CreateNewsletterEmailFormProps {
 	showPreview: boolean;
 	onTogglePreview: (showPreview: boolean) => void;
 }
 
-export const CreateNewsletterForm = ({
+export const CreateNewsletterEmailForm = ({
 	showPreview,
 	onTogglePreview,
-}: CreateNewsletterFormProps) => {
-	const { notification, updateNotification } = useContext(
+}: CreateNewsletterEmailFormProps) => {
+	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
 	const { handleSubmit, setError, setValue } =
-		useFormContext<NewsletterFormValues>();
+		useFormContext<NewsletterEmailFormValues>();
 
 	const { data: constraints } = useChannelConstraints();
-	const prepareSend = (values: NewsletterFormValues) => {
-		if (!notification.content) {
+	const prepareSend = (values: NewsletterEmailFormValues) => {
+		if (!composerState.article) {
 			return;
 		}
-		const valuesToSend = showPreview ? values : { ...values, preview: '' };
-		updateNotification({
+		const valuesToSend = showPreview ? values : { ...values, previewText: '' };
+		updateComposerState({
 			type: 'prepare-send',
-			request: buildNewsletterRequest({
+			request: buildNewsletterEmailRequest({
 				values: valuesToSend,
-				content: notification.content,
+				article: composerState.article,
+				requestedUrl: composerState.requestedUrl,
 				idempotencyKey: crypto.randomUUID(),
 			}),
 		});
 	};
-	const submitForm = (event: FormEvent<HTMLFormElement>) => {
-		if (!notification.content) {
+	const handleSubmitForm = (event: FormEvent<HTMLFormElement>) => {
+		if (!composerState.article) {
 			setError('root.article', {
 				message: 'Paste a URL to fetch an article',
 			});
@@ -55,23 +56,23 @@ export const CreateNewsletterForm = ({
 		<NotificationFormWrapper
 			title="Create newsletter email"
 			formLabel="Create newsletter email"
-			channel="email"
+			channel="newsletter"
 			sendButtonLabel="Send newsletter email"
-			onSubmit={submitForm}
+			onSubmit={handleSubmitForm}
 			onResetNotification={() => {
 				onTogglePreview(true);
-				updateNotification({ type: 'reset-newsletter-email' });
+				updateComposerState({ type: 'reset-newsletter-email' });
 			}}
 			onArticleImported={(article) => {
 				onTogglePreview(true);
 
 				const { headline, standfirst } = article.fields ?? {};
 				if (headline) {
-					setValue('subject', headline);
+					setValue('subjectText', headline);
 				}
-				const preview = htmlToSingleLineText(standfirst);
-				if (preview) {
-					setValue('preview', preview);
+				const previewText = htmlToSingleLineText(standfirst);
+				if (previewText) {
+					setValue('previewText', previewText);
 				}
 			}}
 		>

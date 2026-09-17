@@ -5,7 +5,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { type AppAlertTopicOption, toApiEditionId } from '@models';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
-import { NotificationFormContext } from '../compose/NotificationContext';
+import { NotificationFormContext } from '../compose/NotificationFormContext';
 import { Editions } from '../segment/Editions';
 import { SendInfoPreviewPill } from '../send/SendInfoPreviewPill';
 import { alertBannerCss, customAlertBannerTheme } from '../themes';
@@ -18,12 +18,14 @@ import { AndroidAlertPreview } from './AndroidAlertPreview';
 import { IPhoneAlertPreview } from './IPhoneAlertPreview';
 import { PreviewSection } from './PreviewSection';
 
-interface AppPreviewSectionProps {
+interface AppAlertPreviewSectionProps {
 	topicTypes: AppAlertTopicOption[];
 }
 
-export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
-	const { notification } = useContext(NotificationFormContext);
+export const AppAlertPreviewSection = ({
+	topicTypes,
+}: AppAlertPreviewSectionProps) => {
+	const { composerState } = useContext(NotificationFormContext);
 	const alertType = useWatch<AppAlertFormValues, 'alertType'>({
 		name: 'alertType',
 		defaultValue: defaultAppAlertFormValues.alertType,
@@ -53,7 +55,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 		name: toApiEditionId(edition),
 	}));
 	const thumbnailUrl = includeThumbnail
-		? articleThumbnailUrl || getArticleThumbnail(notification.content).src
+		? articleThumbnailUrl || getArticleThumbnail(composerState.article).src
 		: undefined;
 
 	return (
@@ -62,7 +64,7 @@ export const AppPreviewSection = ({ topicTypes }: AppPreviewSectionProps) => {
 			description="The preview for the app alert will be shown below."
 		>
 			<SendInfoPreviewPill
-				channel="push"
+				channel="app-push"
 				deliveryTiming="appImmediate"
 				includeThumbnail={includeThumbnail}
 			/>

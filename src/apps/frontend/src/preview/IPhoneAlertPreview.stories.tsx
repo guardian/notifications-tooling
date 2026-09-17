@@ -46,7 +46,7 @@ export const WithoutThumbnail: Story = {
 	},
 };
 
-export const WithArticleContent: Story = {
+export const WithArticle: Story = {
 	args: {
 		alertType: 'Environment',
 		headline: articleFixture.fields?.headline,

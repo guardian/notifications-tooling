@@ -5,6 +5,8 @@ import {
 } from './channel-audiences';
 import { channelConstraintsSchema } from './channel-constraints';
 import { emailPreviewErrorSchema } from './email-preview-error';
+import { emailPreviewRequestJsonSchema } from './email-preview-request';
+import { emailPreviewResponseJsonSchema } from './email-preview-response';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
@@ -56,4 +58,6 @@ export const schemas = {
 	Unauthenticated: unauthenticatedSchema,
 	InsufficientPermissions: insufficientPermissionsSchema,
 	EmailPreviewErrorSchema: emailPreviewErrorSchema,
+	EmailPreviewRequest: emailPreviewRequestJsonSchema,
+	EmailPreviewResponse: emailPreviewResponseJsonSchema,
 } as const;
