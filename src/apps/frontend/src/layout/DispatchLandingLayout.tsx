@@ -31,25 +31,33 @@ export const DispatchLandingLayout = () => {
 				>
 					<>
 						<Item
-							size={{ sm: 12, md: 12, lg: 8 }}
+							size={12}
 							cssOverrides={css({
-								maxWidth: '1056px',
 								minWidth: 0,
+								[from.lg]: {
+									flex: shouldShowLatestPublishedContent
+										? '1 1 1056px'
+										: '1 1 100%',
+									maxWidth: shouldShowLatestPublishedContent
+										? '1056px'
+										: 'none',
+								},
 							})}
 						>
 							<DispatchLandingPage />
 						</Item>
 						{shouldShowLatestPublishedContent && (
 							<Item
-								size={{ sm: 12, md: 12, lg: 4 }}
+								size={12}
 								cssOverrides={css({
 									justifyContent: 'center',
 									alignItems: 'flex-start',
 									backgroundColor: semanticColors.bg.raisedLevel1,
 									flow: 'vertical',
+									minWidth: 0,
 									[from.lg]: {
 										display: 'flex',
-										flex: '0 0 474px',
+										flex: '0 1 474px',
 										marginLeft: 'auto',
 										maxWidth: '474px',
 									},

@@ -203,6 +203,22 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('button', { name: 'Open Latest Published Content' }),
 		).toBeInTheDocument();
+
+		const landingSection = canvas
+			.getByRole('heading', { name: 'Welcome to Dispatch' })
+			.closest('section');
+		const latestPublishedContentButton = canvas.getByRole('button', {
+			name: 'Open Latest Published Content',
+		});
+		if (!landingSection) {
+			throw new Error('Expected the Dispatch landing section to be rendered');
+		}
+		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
+			canvasElement.clientWidth,
+		);
+		await expect(
+			latestPublishedContentButton.getBoundingClientRect().left,
+		).toBeGreaterThanOrEqual(landingSection.getBoundingClientRect().right);
 	},
 };
 
@@ -220,6 +236,9 @@ export const Production: Story = {
 				name: 'Open Latest Published Content',
 			}),
 		).not.toBeInTheDocument();
+		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
+			canvasElement.clientWidth,
+		);
 	},
 };
 
