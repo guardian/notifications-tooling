@@ -7,7 +7,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { useContext, useState } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { validateGridCropPageUrl } from '../utils/form-validation';
+import { parseImageSourceUrl } from '../utils/form-validation';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -51,13 +51,13 @@ export const AppAlertReplaceImageSection = ({
 }: AppAlertReplaceImageSectionProps) => {
 	const { gridApiUri, gridUri } = useContext(ConfigContext) ?? {};
 	const [imageUpdated, setImageUpdated] = useState(false);
-	const [isProcessingUrl, setIsProcessingUrl] = useState(false);
-	const validationResult = validateGridCropPageUrl(
+	const [isWaitingForGrid, setIsWaitingForGrid] = useState(false);
+	const validationResult = parseImageSourceUrl(
 		replacementImageUrl.trim(),
 		gridUri,
 	);
 	const displayedErrorMessage =
-		validationResult.validationError ?? errorMessage;
+		validationResult.relevantFailure ?? errorMessage;
 
 	return (
 		<>
@@ -95,24 +95,33 @@ export const AppAlertReplaceImageSection = ({
 					size="md"
 					variant="secondary"
 					onClick={() => {
-						if (!validationResult.success) {
-							setImageUpdated(false);
+						if (validationResult.gridCropUrlValidationResult.success) {
+							const { cropId, imageId } =
+								validationResult.gridCropUrlValidationResult;
+
+							setIsWaitingForGrid(true);
+							void getGridImageUrl(gridApiUri, cropId, imageId).then(
+								(result) => {
+									if (!result.success) {
+										alert('image process fail');
+										console.error(result.error);
+										return;
+									}
+									onUpdate(result.imageUrl);
+									setImageUpdated(true);
+									setIsWaitingForGrid(false);
+								},
+							);
 							return;
 						}
 
-						const { cropId, imageId } = validationResult;
-
-						setIsProcessingUrl(true);
-						void getGridImageUrl(gridApiUri, cropId, imageId).then((result) => {
-							if (!result.success) {
-								alert('image process fail');
-								console.error(result.error);
-								return;
-							}
-							onUpdate(result.imageUrl);
+						if (validationResult.guardianImageUrlValidationResult.success) {
+							onUpdate(validationResult.guardianImageUrlValidationResult.url);
 							setImageUpdated(true);
-							setIsProcessingUrl(false);
-						});
+							return;
+						}
+
+						setImageUpdated(false);
 					}}
 				>
 					Update
@@ -123,7 +132,7 @@ export const AppAlertReplaceImageSection = ({
 				<InlineMessage level="error">{displayedErrorMessage}</InlineMessage>
 			)}
 
-			{isProcessingUrl && (
+			{isWaitingForGrid && (
 				<div>
 					<LoadingSpinner />
 				</div>

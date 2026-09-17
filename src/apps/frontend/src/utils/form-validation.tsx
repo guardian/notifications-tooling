@@ -88,6 +88,12 @@ export const validateGuardianEmail = (emailInput: string) => {
 	return undefined;
 };
 
+type ImageSourceUrlParseFail = {
+	success: false;
+	validationError?: string;
+	validatedUrl?: undefined;
+};
+
 const gridCropPathPattern = /\/images\/([0-9a-f]{40})/i;
 const gridCropParamPattern = /\d+_\d+_\d+_\d+/i;
 
@@ -99,11 +105,7 @@ type GridCropUrlValidationResult =
 			imageId: string;
 			validationError?: undefined;
 	  }
-	| {
-			success: false;
-			validationError?: string;
-			validatedUrl?: undefined;
-	  };
+	| ImageSourceUrlParseFail;
 
 export const validateGridCropPageUrl = (
 	imageUrl: string,
@@ -115,6 +117,13 @@ export const validateGridCropPageUrl = (
 
 	try {
 		const url = new URL(imageUrl);
+
+		if (!gridOrigin) {
+			return {
+				success: false,
+				validationError: 'No grid origin URL configured',
+			};
+		}
 
 		if (url.origin !== gridOrigin) {
 			return {
@@ -178,4 +187,51 @@ export const validateGuardianImageUrl = (imageUrl: string) => {
 	} catch {
 		return guardianImageUrlValidationMessage;
 	}
+};
+
+type GuardianImageUrlValidationResult =
+	| {
+			success: true;
+			url: string;
+	  }
+	| ImageSourceUrlParseFail;
+
+export const parseImageSourceUrl = (
+	url: string,
+	gridOrigin: string | undefined,
+): {
+	gridCropUrlValidationResult: GridCropUrlValidationResult;
+	guardianImageUrlValidationResult: GuardianImageUrlValidationResult;
+	relevantFailure?: string;
+} => {
+	const guardianUrlValidationError = validateGuardianImageUrl(url);
+
+	const guardianImageUrlValidationResult: GuardianImageUrlValidationResult =
+		guardianUrlValidationError
+			? {
+					success: false,
+					validationError: guardianUrlValidationError,
+				}
+			: {
+					success: true,
+					url,
+				};
+
+	const gridCropUrlValidationResult = validateGridCropPageUrl(url, gridOrigin);
+
+	const noSuccess =
+		!guardianImageUrlValidationResult.success &&
+		!gridCropUrlValidationResult.success;
+
+	const relevantFailure = noSuccess
+		? gridOrigin && url.startsWith(gridOrigin)
+			? guardianImageUrlValidationResult.validationError
+			: guardianImageUrlValidationResult.validationError
+		: undefined;
+
+	return {
+		guardianImageUrlValidationResult,
+		gridCropUrlValidationResult,
+		relevantFailure,
+	};
 };
