@@ -6,7 +6,7 @@ import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes } from '../routes';
-import { phoneIphoneIcon } from '../ui/FlagIcons';
+import { phoneIphoneIcon } from '../ui/flag-icons';
 
 interface DispatchCreateNotificationModalProps {
 	isOpen: boolean;

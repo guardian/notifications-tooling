@@ -79,7 +79,7 @@ export const DispatchLandingTab = () => {
 				>
 					<Tile
 						size="sm"
-						href={notificationRoutes.email.create}
+						href={notificationRoutes.newsletter.create}
 						icon="mail"
 						typography="headingMd"
 						cssOverrides={landingTileStyles}
@@ -88,7 +88,7 @@ export const DispatchLandingTab = () => {
 					</Tile>
 					<Tile
 						size="sm"
-						href={notificationRoutes.push.create}
+						href={notificationRoutes['app-push'].create}
 						icon={phoneIphoneIcon}
 						typography="headingMd"
 						cssOverrides={landingTileStyles}

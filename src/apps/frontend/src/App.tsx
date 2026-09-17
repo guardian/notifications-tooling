@@ -28,7 +28,7 @@ export function App() {
 	return (
 		<ConfigContext.Provider value={config}>
 			<Routes>
-				<Route element={<EmailNotificationPage />}>
+				<Route element={<AccessControlledLayout />}>
 					<Route index element={<DispatchLandingLayout />} />
 					<Route
 						path="newsletter-email"
