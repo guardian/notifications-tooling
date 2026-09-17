@@ -12,6 +12,7 @@ export {
 } from './repositories/notification-dispatches-repository';
 export {
 	createNotificationsRepository,
+	type ListNotificationsInWindowOptions,
 	DuplicateIdempotencyKeyError,
 	type ListRecentNotificationsOptions,
 	type NewNotification,
