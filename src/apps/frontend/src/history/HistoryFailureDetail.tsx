@@ -166,9 +166,7 @@ export const HistoryFailureDetail = ({
 				<Dialog.Buttons>
 					<Button onPress={onResolve}>
 						Create another{' '}
-						{selected.channel === 'app-push'
-							? 'app alert'
-							: 'newsletter email'}
+						{selected.channel === 'app-push' ? 'app alert' : 'newsletter email'}
 					</Button>
 				</Dialog.Buttons>
 			</Dialog>
