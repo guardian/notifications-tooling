@@ -2,6 +2,7 @@ import type { AppConfig } from '@models';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ConfigContext } from '../config/ConfigContext';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import { mockAppConfig } from '../testing/app-config';
 import { articleFixture } from '../testing/capi-fixtures';
 import { LatestPublishedContent } from './LatestPublishedContent';
@@ -51,9 +52,10 @@ export const Default: Story = {
 			screen.getByRole('link', { name: 'Create an app alert' }),
 		).toHaveAttribute(
 			'href',
-			`/app-alert/create?${new URLSearchParams({
-				article: articleFixture.webUrl,
-			}).toString()}`,
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
 		);
 
 		await userEvent.click(screen.getByRole('button', { name: 'Close Modal' }));

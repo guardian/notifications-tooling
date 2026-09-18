@@ -12,6 +12,7 @@ import {
 import { Typography } from '@guardian/stand/Typography';
 import type { DisplayAppAlertTopicEditionId } from '@models';
 import { useRelativeTime } from '../hooks/useRelativeTime';
+import type { ChannelAudienceResponse } from '../schemas';
 import { historyViewStyles } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
 import { phoneIphoneIcon } from '../ui/flag-icons';
@@ -19,10 +20,12 @@ import { FlagAtom } from '../ui/FlagAtom';
 import { SendTimeTooltip } from '../ui/SendTimeTooltip';
 import { Tooltip } from '../ui/Tooltip';
 import { getSenderDisplayName } from '../utils/notification-history-mapper';
+import { HistoryFailureTooltip } from './HistoryFailureTooltip';
 import type { HistoryNotification, HistoryStatus } from './HistoryView';
 
 interface HistoryTableProps {
 	notifications?: HistoryNotification[];
+	audiences?: ChannelAudienceResponse;
 	showUserName?: boolean;
 }
 
@@ -102,6 +105,7 @@ const SentByUserDetails = ({
 
 export const HistoryTable = ({
 	notifications = [],
+	audiences,
 	showUserName = false,
 }: HistoryTableProps) => {
 	return (
@@ -228,14 +232,22 @@ export const HistoryTable = ({
 									Status:{' '}
 								</span>
 								<span css={historyViewStyles.metadataValue}>
-									<Badge
-										color={statusColors[notification.status]}
-										size="xs"
-										weight="strong"
-										cssOverrides={historyViewStyles.statusBadge}
-									>
-										{notification.status}
-									</Badge>
+									{notification.status === 'Failed' ||
+									notification.status === 'Partially sent' ? (
+										<HistoryFailureTooltip
+											notification={notification}
+											audiences={audiences}
+										/>
+									) : (
+										<Badge
+											color={statusColors[notification.status]}
+											size="xs"
+											weight="strong"
+											cssOverrides={historyViewStyles.statusBadge}
+										>
+											{notification.status}
+										</Badge>
+									)}
 								</span>
 							</TableCell>
 						</TableRow>

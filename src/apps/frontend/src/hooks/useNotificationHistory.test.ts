@@ -20,6 +20,22 @@ describe('notification history query keys', () => {
 		]);
 	});
 
+	it('separates search terms in the cache', () => {
+		expect(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				search: 'climate',
+			}),
+		).not.toEqual(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				search: 'sport',
+			}),
+		);
+	});
+
 	it('uses a stable cache scope for a moving date window', () => {
 		const firstMountKey = getNotificationHistoryQueryKey({
 			limit: 20,

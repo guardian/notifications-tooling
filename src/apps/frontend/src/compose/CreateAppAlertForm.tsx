@@ -16,11 +16,13 @@ import {
 } from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 
+interface CreateAppAlertFormProps {
+	initialArticleUrl?: string;
+}
+
 export const CreateAppAlertForm = ({
 	initialArticleUrl,
-}: {
-	initialArticleUrl?: string;
-}) => {
+}: CreateAppAlertFormProps) => {
 	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<AppAlertFormValues>();
 	const { composerState, updateComposerState } = useContext(

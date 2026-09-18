@@ -5,7 +5,7 @@ import { Tile } from '@guardian/stand/Tile';
 import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
-import { getAppRoutes } from '../routes';
+import { getAppRoutes, withArticleUrl } from '../routes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 
 interface DispatchCreateNotificationModalProps {
@@ -22,11 +22,7 @@ export const DispatchCreateNotificationModal = ({
 	const config = useContext(ConfigContext);
 	const routes = getAppRoutes(config);
 	const createAppAlertHref = routes.createAppAlert
-		? `${routes.createAppAlert}${
-				articleUrl
-					? `?${new URLSearchParams({ article: articleUrl }).toString()}`
-					: ''
-			}`
+		? withArticleUrl(routes.createAppAlert, articleUrl ?? '')
 		: undefined;
 	const tileStyles = css({
 		width: '100%',

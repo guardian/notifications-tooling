@@ -2,7 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
-import type { NotificationListResponse } from '../schemas';
+import type {
+	NotificationListResponse,
+	NotificationResource,
+} from '../schemas';
 import { articleFixture } from '../testing/capi-fixtures';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
 import { HistoryPage } from './HistoryPage';
@@ -163,13 +166,95 @@ const historyResponse: NotificationListResponse = {
 	],
 };
 
-const historyRequest = fn();
+const historyRequest = fn((requestUrl: URL) => requestUrl);
 const historyHandler = http.get(
 	`${getApiBaseUrl()}/v1/notifications`,
-	async () => {
-		historyRequest();
+	async ({ request }) => {
+		historyRequest(new URL(request.url));
 		await delay(300);
 		return HttpResponse.json(historyResponse);
+	},
+);
+
+const partialFailureDetail: NotificationResource = {
+	...historyResponse.notifications[1]!,
+	dispatches: [
+		{
+			id: 'a1495707-6400-4765-b019-c2409233a73c',
+			channel: 'newsletter',
+			requested: { channel: 'newsletter', segment: 'AU' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'campaign-au',
+				emailRenderingId: 'render-au',
+			},
+			status: 'success',
+			providerRef: 'dispatch-au',
+			failureReason: null,
+			providerStatusCode: 201,
+			createdAt: '2026-08-27T08:30:01.000Z',
+			updatedAt: '2026-08-27T08:30:02.000Z',
+		},
+		{
+			id: '17bc36c1-f8cb-47c8-a2f0-d12813b96796',
+			channel: 'newsletter',
+			requested: { channel: 'newsletter', segment: 'US' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'campaign-us',
+				emailRenderingId: 'render-us',
+			},
+			status: 'failure',
+			providerRef: null,
+			failureReason: 'http_error',
+			providerStatusCode: 500,
+			createdAt: '2026-08-27T08:30:01.000Z',
+			updatedAt: '2026-08-27T08:30:03.000Z',
+		},
+		{
+			id: '885b46f3-dcc5-4e74-bc9a-15c20a995cb3',
+			channel: 'newsletter',
+			requested: { channel: 'newsletter', segment: 'UK' },
+			resolved: {
+				channel: 'newsletter',
+				brazeCampaignId: 'campaign-uk',
+				emailRenderingId: 'render-uk',
+			},
+			status: 'failure',
+			providerRef: null,
+			failureReason: 'timeout',
+			providerStatusCode: null,
+			createdAt: '2026-08-27T08:30:01.000Z',
+			updatedAt: '2026-08-27T08:30:04.000Z',
+		},
+	],
+};
+
+const noOutcomeFailureDetail: NotificationResource = {
+	...historyResponse.notifications[2]!,
+	dispatches: [],
+};
+
+const failureDetailHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications/:notificationId`,
+	({ params }) =>
+		HttpResponse.json(
+			params.notificationId === noOutcomeFailureDetail.id
+				? noOutcomeFailureDetail
+				: partialFailureDetail,
+		),
+);
+
+const invalidSearchRequest = fn((requestUrl: URL) => requestUrl);
+const emptyHistoryHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications`,
+	({ request }) => {
+		invalidSearchRequest(new URL(request.url));
+		return HttpResponse.json({
+			...historyResponse,
+			total: 0,
+			notifications: [],
+		});
 	},
 );
 
@@ -191,7 +276,9 @@ const meta = {
 	component: HistoryPage,
 	parameters: {
 		layout: 'fullscreen',
-		msw: { handlers: [historyHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [historyHandler, failureDetailHandler, channelAudiencesHandler],
+		},
 	},
 } satisfies Meta<typeof HistoryPage>;
 
@@ -225,17 +312,119 @@ export const Loaded: Story = {
 		);
 		await expect(
 			canvas.getByRole('link', {
+				name: /Prime minister announces cabinet reshuffle/,
+			}),
+		).toHaveAttribute('href', 'https://www.theguardian.com/politics');
+		const failedNotification = canvas.getByRole('button', {
+			name: 'Partially sent: Show failure details for Extreme weather disrupts travel across Europe',
+		});
+		await expect(failedNotification).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('link', {
 				name: /Extreme weather disrupts travel across Europe/,
 			}),
 		).toBeInTheDocument();
 		await expect(canvas.getAllByText('No image')).toHaveLength(2);
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(2);
-		await expect(canvas.getByText('Partially sent')).toBeInTheDocument();
-		await expect(canvas.getByText('Failed')).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', {
+				name: 'Failed: Show failure details for Final score and match report',
+			}),
+		).toBeInTheDocument();
 		await expect(canvas.getByText('Accepted')).toBeInTheDocument();
 		await expect(
 			canvas.getAllByRole('img', { name: 'Australia' }),
 		).toHaveLength(2);
+
+		await userEvent.click(failedNotification);
+		const page = within(document.body);
+		const tooltip = await page.findByRole('tooltip');
+		const failures = await within(tooltip).findAllByRole('listitem');
+		await expect(failures).toHaveLength(2);
+		await expect(failures[0]).toHaveTextContent(
+			'United States via newsletter email. The downstream service rejected the request. Provider status: 500.',
+		);
+		await expect(failures[1]).toHaveTextContent(
+			'United Kingdom via newsletter email. The downstream service did not respond in time.',
+		);
+		await expect(failures[1]).not.toHaveTextContent('Provider status:');
+		await expect(tooltip).toHaveTextContent(
+			'Please contact Central Production for support.',
+		);
+		await expect(page.queryByRole('dialog')).not.toBeInTheDocument();
+	},
+};
+
+export const FailureWithoutDispatchOutcomes: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const failedNotification = await canvas.findByRole('button', {
+			name: 'Failed: Show failure details for Final score and match report',
+		});
+
+		await userEvent.click(failedNotification);
+		const tooltip = await within(document.body).findByRole('tooltip');
+		await waitFor(async () =>
+			expect(tooltip).toHaveTextContent(
+				'Failure: No per-destination failure details are available.',
+			),
+		);
+		await expect(tooltip).not.toHaveTextContent(
+			'Failure details could not be loaded.',
+		);
+	},
+};
+
+export const Search: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		historyRequest.mockClear();
+
+		const searchInput = canvas.getByRole('searchbox', { name: 'Search' });
+		await userEvent.type(searchInput, 'weather');
+
+		await expect(searchInput).toHaveValue('weather');
+		await expect(historyRequest).not.toHaveBeenCalled();
+		await expect(
+			new URLSearchParams(window.location.search).get('search'),
+		).toBe('weather');
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			const requestUrl = historyRequest.mock.calls[0]?.[0];
+			await expect(requestUrl?.searchParams.get('search')).toBe('weather');
+			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
+		});
+	},
+};
+
+export const InvalidSearch: Story = {
+	loaders: [
+		() => {
+			invalidSearchRequest.mockClear();
+			window.history.replaceState(
+				{},
+				'',
+				`${window.location.pathname}?search=${'a'.repeat(201)}`,
+			);
+			return {};
+		},
+	],
+	parameters: {
+		msw: { handlers: [emptyHistoryHandler, channelAudiencesHandler] },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByRole('heading', { name: 'No alerts yet' }),
+		).toBeVisible();
+		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
+			'',
+		);
+		await expect(invalidSearchRequest).toHaveBeenCalledOnce();
+		const requestUrl = invalidSearchRequest.mock.calls[0]?.[0];
+		await expect(requestUrl?.searchParams.has('search')).toBe(false);
 	},
 };
 

@@ -11,6 +11,48 @@ export const notificationRoutes = {
 	},
 } as const;
 
+export const articleUrlSearchParam = 'articleUrl';
+export const guardianMainUrl = 'https://www.theguardian.com';
+
+const isGuardianHostname = (hostname: string) =>
+	hostname === 'theguardian.com' || hostname.endsWith('.theguardian.com');
+
+export const withArticleUrl = (route: string, articleUrl: string): string => {
+	const trimmedArticleUrl = articleUrl.trim();
+	if (!trimmedArticleUrl) {
+		return route;
+	}
+
+	let parsedArticleUrl: URL;
+	try {
+		parsedArticleUrl = new URL(trimmedArticleUrl, guardianMainUrl);
+	} catch {
+		return route;
+	}
+	if (!isGuardianHostname(parsedArticleUrl.hostname)) {
+		return route;
+	}
+
+	const relativeArticleUrl = `${parsedArticleUrl.pathname}${parsedArticleUrl.search}${parsedArticleUrl.hash}`;
+	const searchParams = new URLSearchParams({
+		[articleUrlSearchParam]: relativeArticleUrl,
+	});
+	return `${route}?${searchParams.toString()}`;
+};
+
+export const toGuardianArticleUrl = (
+	relativeArticleUrl: string | null,
+): string | undefined => {
+	if (!relativeArticleUrl?.startsWith('/')) {
+		return undefined;
+	}
+
+	const articleUrl = new URL(relativeArticleUrl, guardianMainUrl);
+	return articleUrl.origin === guardianMainUrl
+		? articleUrl.toString()
+		: undefined;
+};
+
 export const getAppRoutes = (config: AppConfig | undefined) => {
 	return {
 		dispatchLanding: '/',

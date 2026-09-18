@@ -10,50 +10,15 @@ import { NotificationFormContext } from '../compose/NotificationFormContext';
 import { useSendNotification } from '../hooks/useSendNotification';
 import type {
 	ChannelAudienceResponse,
-	NotificationDispatch,
 	NotificationResource,
 	SendNotificationRequest,
 } from '../schemas';
-import {
-	FALLBACK_NEWSLETTER_EMAIL_SEGMENTS,
-	FALLBACK_TOPIC_TYPES,
-} from '../segment/audience-fallbacks';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import type { ChannelOption } from '../types';
 import type { NotificationComposerState } from '../types';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { getChannelDescription } from '../utils/display-text-helpers';
-
-const formatDispatchTarget = (
-	requested: NotificationDispatch['requested'],
-	audiences?: ChannelAudienceResponse,
-): string => {
-	if (requested.channel === 'newsletter') {
-		const segments = audiences?.channels.newsletter.segments ?? [];
-		return (
-			segments.find(({ id }) => id === requested.segment)?.label ??
-			FALLBACK_NEWSLETTER_EMAIL_SEGMENTS.find(
-				({ id }) => id === requested.segment,
-			)?.label ??
-			requested.segment
-		);
-	}
-
-	const topicTypes = audiences?.channels['app-push'].topicTypes ?? [];
-	const topic = topicTypes.find(({ id }) => id === requested.topicType);
-	const fallbackTopic = FALLBACK_TOPIC_TYPES.find(
-		({ id }) => id === requested.topicType,
-	);
-
-	return requested.editions
-		.map(
-			(edition) =>
-				topic?.editions.find(({ id }) => id === edition)?.label ??
-				fallbackTopic?.editions.find(({ id }) => id === edition)?.label ??
-				edition,
-		)
-		.join(', ');
-};
+import { formatDispatchTarget } from '../utils/format-dispatch-target';
 
 const deriveDispatchFailureMessage = (
 	notification: NotificationResource,

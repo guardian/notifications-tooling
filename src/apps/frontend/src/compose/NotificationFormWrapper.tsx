@@ -45,7 +45,7 @@ export const NotificationFormWrapper = ({
 }: PropsWithChildren<NotificationFormWrapperProps>) => {
 	const { composerState } = useContext(NotificationFormContext);
 	const [articleInputText, setArticleInputText] = useState(
-		() => composerState.article?.webUrl ?? initialArticleUrl ?? '',
+		() => initialArticleUrl ?? composerState.article?.webUrl ?? '',
 	);
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
@@ -85,12 +85,10 @@ export const NotificationFormWrapper = ({
 					<NotificationFormSection id="article-section">
 						<ArticleImportControl
 							articleInputText={articleInputText}
+							autoFetch={Boolean(initialArticleUrl)}
 							setArticleInputText={setArticleInputText}
 							lockArticleInputText={lockArticleInputText}
 							setLockArticleInputText={setLockArticleInputText}
-							fetchArticleOnMount={
-								Boolean(initialArticleUrl) && !composerState.article
-							}
 							onArticleImported={onArticleImported}
 						/>
 						<ChannelDisplay channel={channel} />

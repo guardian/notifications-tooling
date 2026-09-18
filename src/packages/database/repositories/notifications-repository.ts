@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, lte } from 'drizzle-orm';
+import { and, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -17,6 +17,8 @@ export type ListRecentNotificationsOptions = {
 	since: Date;
 	limit?: number;
 	offset?: number;
+	/** Case-insensitive substring matched against notification body and title fields. */
+	search?: string;
 };
 
 export type ListNotificationsInWindowOptions = {
@@ -132,10 +134,21 @@ export const createNotificationsRepository = (db: Database) => ({
 		since,
 		limit,
 		offset,
+		search,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
+		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
+		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
+			searchPattern
+				? sql<boolean>`exists (
+						select 1
+						from jsonb_each(coalesce(${notifications.content}->'items', '{}'::jsonb)) as content_item
+						where content_item.value->>'body' ilike ${searchPattern}
+							or content_item.value->>'title' ilike ${searchPattern}
+					)`
+				: undefined,
 		);
 
 		const [totals] = await db

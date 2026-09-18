@@ -39,10 +39,10 @@ const getUserFacingError = (err: ApiError): string => {
 
 export interface ArticleImportControlProps {
 	articleInputText: string;
+	autoFetch?: boolean;
 	setArticleInputText: (articleInputText: string) => void;
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
-	fetchArticleOnMount?: boolean;
 	onArticleImported: (
 		article: ResolvedArticle,
 		requestedBlock?: CapiBlock,
@@ -50,15 +50,14 @@ export interface ArticleImportControlProps {
 }
 export const ArticleImportControl = ({
 	articleInputText,
+	autoFetch = false,
 	setArticleInputText,
 	lockArticleInputText,
 	setLockArticleInputText,
-	fetchArticleOnMount = false,
 	onArticleImported,
 }: ArticleImportControlProps) => {
 	const { composerState, updateComposerState, resolveArticleFromCapi } =
 		useContext(NotificationFormContext);
-	const initialArticleFetchTriggered = useRef(false);
 	const {
 		clearErrors,
 		formState: { submitCount },
@@ -106,14 +105,17 @@ export const ArticleImportControl = ({
 			setLockArticleInputText(true);
 		});
 	};
-	const fetchInitialArticle = useEffectEvent(handleFetchArticle);
+	const autoFetchArticle = useEffectEvent(handleFetchArticle);
 
+	const initialArticleFetchTriggered = useRef(false);
 	useEffect(() => {
-		if (fetchArticleOnMount && !initialArticleFetchTriggered.current) {
-			initialArticleFetchTriggered.current = true;
-			fetchInitialArticle();
+		if (!autoFetch || initialArticleFetchTriggered.current) {
+			return;
 		}
-	}, [fetchArticleOnMount]);
+
+		initialArticleFetchTriggered.current = true;
+		autoFetchArticle();
+	}, [autoFetch]);
 
 	const showImportedArticle =
 		!isFetchingArticle && !!fetchedArticleId && fetchedArticleId === articleId;
