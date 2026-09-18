@@ -10,7 +10,6 @@ import {
 } from '@guardian/stand';
 import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { ButtonTheme } from '@guardian/stand/Button';
-import { componentCheckbox } from '@guardian/stand/Checkbox';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
@@ -412,8 +411,6 @@ const skeletonBase = {
 	},
 } as const;
 
-const checkboxIndicatorSize = componentCheckbox.input.sm.indicator.size;
-
 export const historyViewStyles = {
 	page: css({
 		display: 'grid',
@@ -478,20 +475,20 @@ export const historyViewStyles = {
 		width: 'var(--trigger-width)',
 	}),
 	categoryMenuItem: css({
+		gridTemplateColumns: 'minmax(0, 1fr)',
+		gridTemplateAreas: '"label"',
 		borderBottom: 'none',
-		'.material-symbols': {
-			alignSelf: 'center',
-			// The glyph is inset within its em box (18 of 24 units), so scale
-			// the font by 24/18 to paint a box of the indicator size
-			width: checkboxIndicatorSize,
-			height: checkboxIndicatorSize,
-			fontSize: `calc(${checkboxIndicatorSize} * 4 / 3)`,
-			alignItems: 'center',
-			justifyContent: 'center',
+		'& > .material-symbols': {
+			display: 'none',
 		},
-		'&[data-selected] .material-symbols': {
-			color: semanticColors.fill.selectedStrong,
-		},
+	}),
+	categoryCheckbox: css({
+		width: '100%',
+		pointerEvents: 'none',
+		cursor: 'inherit',
+	}),
+	visualOnly: css({
+		display: 'contents',
 	}),
 	container: css({
 		display: 'flex',
