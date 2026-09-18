@@ -322,6 +322,50 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		]);
 	});
 
+	it('filters rolled-up statuses while reporting the filtered total', async () => {
+		const accepted = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		const delivered = await notifications.create({
+			...buildNotification(),
+			status: 'delivered',
+			createdAt: daysAgo(2),
+		});
+		const partial = await notifications.create({
+			...buildNotification(),
+			status: 'partially_delivered',
+			createdAt: daysAgo(3),
+		});
+		const failed = await notifications.create({
+			...buildNotification(),
+			status: 'failed',
+			createdAt: daysAgo(4),
+		});
+
+		const sentPage = await notifications.listRecent({
+			since: daysAgo(14),
+			statuses: ['accepted', 'delivered'],
+		});
+
+		expect(sentPage.total).toBe(2);
+		expect(sentPage.notifications.map(({ id }) => id)).toEqual([
+			accepted.id,
+			delivered.id,
+		]);
+
+		const errorPage = await notifications.listRecent({
+			since: daysAgo(14),
+			statuses: ['partially_delivered', 'failed'],
+		});
+
+		expect(errorPage.total).toBe(2);
+		expect(errorPage.notifications.map(({ id }) => id)).toEqual([
+			partial.id,
+			failed.id,
+		]);
+	});
+
 	it('excludes test notifications from the page and the total', async () => {
 		const send = await notifications.create({
 			...buildNotification(),

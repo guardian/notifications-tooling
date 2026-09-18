@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -21,6 +21,8 @@ export type ListRecentNotificationsOptions = {
 	search?: string;
 	/** API edition ids matched against newsletter variants or app-push editions. */
 	audiences?: string[];
+	/** Rolled-up delivery statuses included in the result. */
+	statuses?: Notification['status'][];
 };
 
 export type ListNotificationsInWindowOptions = {
@@ -138,6 +140,7 @@ export const createNotificationsRepository = (db: Database) => ({
 		offset,
 		search,
 		audiences,
+		statuses,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
@@ -163,6 +166,7 @@ export const createNotificationsRepository = (db: Database) => ({
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
+			statuses?.length ? inArray(notifications.status, statuses) : undefined,
 			searchPattern
 				? sql<boolean>`exists (
 						select 1
