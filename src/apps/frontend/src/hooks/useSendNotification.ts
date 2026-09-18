@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
-import { notificationRoutes } from '../routes';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import type { SendNotificationRequest } from '../schemas';
 import type { SendNotificationResult } from '../utils/send-notification';
 import { notificationHistoryQueryKey } from './useNotificationHistory';
@@ -44,7 +44,13 @@ export const useSendNotification = () => {
 			}
 			setValue('notificationId', result.data.id);
 			updateComposerState({ type: 'complete-send' });
-			void navigate(notificationRoutes[channel].report);
+			const leadStory = request.content.items['lead-story'];
+			void navigate(
+				withArticleUrl(
+					notificationRoutes[channel].report,
+					leadStory?.link ?? '',
+				),
+			);
 		});
 	};
 };

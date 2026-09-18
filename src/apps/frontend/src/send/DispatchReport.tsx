@@ -13,8 +13,12 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { notificationRoutes } from '../routes';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+	articleUrlSearchParam,
+	notificationRoutes,
+	withArticleUrl,
+} from '../routes';
 import { EDITION_OPTIONS } from '../segment/edition-options';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
 import { useNewsletterEmailSegmentOptions } from '../segment/useAudienceEditions';
@@ -25,6 +29,8 @@ import type { DeliveryOption } from '../types';
 import { scheduleIcon } from '../ui/flag-icons';
 import {
 	capitalise,
+	getAlternateChannel,
+	getAlternateChannelDescription,
 	getChannelDescription,
 } from '../utils/display-text-helpers';
 import { composeNewsletterEmailSubjectLine } from '../utils/newsletter-email-subject';
@@ -251,12 +257,14 @@ interface DispatchReportProps {
 	channel: ChannelOption;
 	children: ReactNode;
 	onCreateNew: () => void;
+	onCopyToAnotherChannel: () => void;
 }
 
 export const DispatchReport = ({
 	channel,
 	children,
 	onCreateNew,
+	onCopyToAnotherChannel,
 }: DispatchReportProps) => {
 	const notificationDescription = capitalise(getChannelDescription(channel));
 
@@ -310,7 +318,26 @@ export const DispatchReport = ({
 				}}
 			>
 				<Button variant="primary" onClick={onCreateNew}>
-					Create new {getChannelDescription(channel)}
+					<Typography
+						variant="bodySm"
+						css={{
+							fontSize: '14px',
+							color: semanticColors.text.strongerInverse,
+						}}
+					>
+						Create a new {getChannelDescription(channel)}
+					</Typography>
+				</Button>
+				<Button variant="tertiary" onClick={onCopyToAnotherChannel}>
+					<Typography
+						variant="bodySm"
+						css={{
+							fontSize: '14px',
+							color: semanticColors.text.strong,
+						}}
+					>
+						Copy to {getAlternateChannelDescription(channel)}
+					</Typography>
 				</Button>
 			</div>
 		</section>
@@ -328,6 +355,7 @@ const DispatchReportTab = ({
 }) => {
 	const { reset, setValue } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
 
 	if (!notificationId) {
 		return <Navigate to={notificationRoutes[channel].create} replace />;
@@ -350,6 +378,14 @@ const DispatchReportTab = ({
 							reset();
 							setValue('notificationId', undefined);
 							void navigate(notificationRoutes[channel].create);
+						}}
+						onCopyToAnotherChannel={() => {
+							void navigate(
+								withArticleUrl(
+									notificationRoutes[getAlternateChannel(channel)].create,
+									searchParams.get(articleUrlSearchParam) ?? '',
+								),
+							);
 						}}
 					>
 						{children}

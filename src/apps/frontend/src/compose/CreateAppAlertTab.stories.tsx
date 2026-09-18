@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeAppAlertFormValues,
@@ -76,6 +77,36 @@ export const Default: Story = {
 		await expect(
 			canvas.queryByText('The preview for the app alert will be shown below.'),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const ImportsArticleFromSearchParam: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+		await expect(canvas.getByLabelText('article URL')).toHaveValue(
+			articleFixture.webUrl,
+		);
+		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+			articleFixture.fields?.headline,
+		);
+		await expect(
+			canvas.getByRole('button', { name: 'Show article thumbnail image' }),
+		).toHaveAttribute('aria-pressed', 'true');
 	},
 };
 

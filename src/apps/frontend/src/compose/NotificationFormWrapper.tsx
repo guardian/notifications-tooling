@@ -22,6 +22,7 @@ interface NotificationFormWrapperProps {
 	title: string;
 	formLabel: string;
 	channel: ChannelOption;
+	initialArticleUrl?: string;
 	sendButtonLabel: string;
 	onSubmit: FormEventHandler<HTMLFormElement>;
 	onResetNotification: () => void;
@@ -35,6 +36,7 @@ export const NotificationFormWrapper = ({
 	title,
 	formLabel,
 	channel,
+	initialArticleUrl,
 	sendButtonLabel,
 	onSubmit,
 	onResetNotification,
@@ -43,7 +45,7 @@ export const NotificationFormWrapper = ({
 }: PropsWithChildren<NotificationFormWrapperProps>) => {
 	const { composerState } = useContext(NotificationFormContext);
 	const [articleInputText, setArticleInputText] = useState(
-		() => composerState.article?.webUrl ?? '',
+		() => initialArticleUrl ?? composerState.article?.webUrl ?? '',
 	);
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
 
@@ -83,6 +85,7 @@ export const NotificationFormWrapper = ({
 					<NotificationFormSection id="article-section">
 						<ArticleImportControl
 							articleInputText={articleInputText}
+							autoFetch={Boolean(initialArticleUrl)}
 							setArticleInputText={setArticleInputText}
 							lockArticleInputText={lockArticleInputText}
 							setLockArticleInputText={setLockArticleInputText}

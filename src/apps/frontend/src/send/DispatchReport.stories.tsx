@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { notificationRoutes, withArticleUrl } from '../routes';
+import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeAppAlertFormValues,
 	completeNewsletterEmailFormValues,
@@ -19,6 +21,7 @@ type StoryArgs = {
 	composerState: NotificationComposerState;
 	channel: ChannelOption;
 	onStartNew: () => void;
+	onCopyToAnotherChannel: () => void;
 };
 type Story = StoryObj<StoryArgs>;
 
@@ -26,9 +29,14 @@ const DispatchReportStory = ({
 	composerState,
 	channel,
 	onStartNew,
+	onCopyToAnotherChannel,
 }: StoryArgs) =>
 	useNotificationFormStory(
-		<DispatchReport channel={channel} onCreateNew={onStartNew}>
+		<DispatchReport
+			channel={channel}
+			onCreateNew={onStartNew}
+			onCopyToAnotherChannel={onCopyToAnotherChannel}
+		>
 			{channel === 'newsletter' ? (
 				<NewsletterEmailDispatchDetails />
 			) : (
@@ -57,6 +65,7 @@ const meta: Meta<StoryArgs> = {
 	args: {
 		channel: 'newsletter',
 		onStartNew: fn(),
+		onCopyToAnotherChannel: fn(),
 		composerState: defaultComposerState,
 	},
 };
@@ -81,7 +90,7 @@ export const NewsletterEmailSuccess: Story = {
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+			canvas.getByRole('button', { name: 'Create a new newsletter email' }),
 		);
 		await expect(args.onStartNew).toHaveBeenCalledOnce();
 	},
@@ -110,7 +119,7 @@ export const AppAlertSuccess: Story = {
 		).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new app alert' }),
+			canvas.getByRole('button', { name: 'Create a new app alert' }),
 		);
 		await expect(args.onStartNew).toHaveBeenCalledOnce();
 	},
@@ -136,7 +145,7 @@ export const NewsletterEmailReportRoute: Story = {
 		).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+			canvas.getByRole('button', { name: 'Create a new newsletter email' }),
 		);
 		await waitFor(() =>
 			expect(
@@ -164,6 +173,100 @@ export const AppAlertReportRoute: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'App alert sent' }),
 		).toBeVisible();
+	},
+};
+
+export const NewsletterReportCopiesArticleToAppAlert: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes.newsletter.report,
+				articleFixture.webUrl,
+			),
+		);
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	render: function Render() {
+		return useNotificationFormStory(
+			<NewsletterEmailDispatchReportTab />,
+			defaultComposerState,
+			{},
+			'newsletter',
+			{
+				...completeNewsletterEmailFormValues,
+				notificationId: 'newsletter-dispatch-id',
+			},
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const destination = new URL(
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+			window.location.origin,
+		);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Copy to app alert' }),
+		);
+		await waitFor(async () => {
+			await expect(
+				window.location.pathname.endsWith(destination.pathname),
+			).toBe(true);
+			await expect(window.location.search).toBe(destination.search);
+		});
+	},
+};
+
+export const AppAlertReportCopiesArticleToNewsletter: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].report,
+				articleFixture.webUrl,
+			),
+		);
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	render: function Render() {
+		return useNotificationFormStory(
+			<AppAlertDispatchReportTab />,
+			defaultComposerState,
+			{},
+			'app-push',
+			{
+				...completeAppAlertFormValues,
+				notificationId: 'app-alert-dispatch-id',
+			},
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const destination = new URL(
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
+			window.location.origin,
+		);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Copy to newsletter email' }),
+		);
+		await waitFor(async () => {
+			await expect(
+				window.location.pathname.endsWith(destination.pathname),
+			).toBe(true);
+			await expect(window.location.search).toBe(destination.search);
+		});
 	},
 };
 

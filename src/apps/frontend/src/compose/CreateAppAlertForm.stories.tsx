@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
+import type { ComponentProps } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 import {
 	failedAppPushSendResponse,
@@ -21,7 +22,7 @@ import { defaultAppAlertComposerState } from '../utils/notification-composer-red
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 
-type StoryArgs = {
+type StoryArgs = ComponentProps<typeof CreateAppAlertForm> & {
 	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
 };
@@ -43,9 +44,9 @@ const meta: Meta<StoryArgs> = {
 		composerState: defaultAppAlertComposerState,
 	},
 	render: function Render(args) {
-		const { formValues, composerState } = args;
+		const { formValues, composerState, ...formProps } = args;
 		return useNotificationFormStory(
-			<CreateAppAlertForm />,
+			<CreateAppAlertForm {...formProps} />,
 			composerState,
 			{},
 			'app-push',

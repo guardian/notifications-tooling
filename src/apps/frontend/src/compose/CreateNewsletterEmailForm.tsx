@@ -16,11 +16,13 @@ import { PreviewTextFormField } from './PreviewTextFormField';
 import { SubjectFormField } from './SubjectFormField';
 
 interface CreateNewsletterEmailFormProps {
+	initialArticleUrl?: string;
 	showPreview: boolean;
 	onTogglePreview: (showPreview: boolean) => void;
 }
 
 export const CreateNewsletterEmailForm = ({
+	initialArticleUrl,
 	showPreview,
 	onTogglePreview,
 }: CreateNewsletterEmailFormProps) => {
@@ -75,6 +77,7 @@ export const CreateNewsletterEmailForm = ({
 			title="Create newsletter email"
 			formLabel="Create newsletter email"
 			channel="newsletter"
+			initialArticleUrl={initialArticleUrl}
 			sendButtonLabel="Send newsletter email"
 			onSubmit={handleSubmitForm}
 			onResetNotification={() => {
