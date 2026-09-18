@@ -447,8 +447,8 @@ export const historyViewStyles = {
 			background: 'transparent',
 		},
 		'&:focus-visible': {
-			outline: `2px solid ${semanticColors.border.focused}`,
-			outlineOffset: '2px',
+			outline: `${semanticSizing.border.md} solid ${semanticColors.border.focused}`,
+			outlineOffset: semanticSizing.border.md,
 		},
 	}),
 	clearFiltersHidden: css({
@@ -460,12 +460,12 @@ export const historyViewStyles = {
 	filterFields: css({
 		display: 'flex',
 		flexDirection: 'column',
-		gap: '32px',
+		gap: semanticSpacing.stackLg,
 	}),
 	searchIcon: css({
 		position: 'absolute',
 		left: semanticSpacing.stackSm,
-		bottom: '10px',
+		bottom: `calc((${semanticSizing.height.md} - ${semanticSizing.icon.md}) / 2)`,
 		pointerEvents: 'none',
 	}),
 	audienceField: css({
@@ -487,8 +487,8 @@ export const historyViewStyles = {
 		cursor: 'pointer',
 		font: 'inherit',
 		'&[data-focus-visible]': {
-			outline: `2px solid ${semanticColors.border.focused}`,
-			outlineOffset: '2px',
+			outline: `${semanticSizing.border.md} solid ${semanticColors.border.focused}`,
+			outlineOffset: semanticSizing.border.md,
 		},
 		'&[data-hovered], &:hover, &[data-pressed], &[aria-expanded="true"]': {
 			backgroundColor: semanticColors.bg.base,

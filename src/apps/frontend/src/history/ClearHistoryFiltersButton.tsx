@@ -6,18 +6,21 @@ import { parseHistorySearchParams } from '../utils/history-search-params';
 export const ClearHistoryFiltersButton = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const { search, audiences } = parseHistorySearchParams(searchParams);
-	const hasActiveFilters =
-		search !== undefined || (audiences?.length ?? 0) > 0;
+	const hasActiveFilters = search !== undefined || (audiences?.length ?? 0) > 0;
 
 	return (
 		<Button
 			type="button"
 			variant="tertiary"
 			size="sm"
-			cssOverrides={[
-				historyViewStyles.clearFilters,
-				!hasActiveFilters && historyViewStyles.clearFiltersHidden,
-			]}
+			cssOverrides={
+				hasActiveFilters
+					? historyViewStyles.clearFilters
+					: [
+							historyViewStyles.clearFilters,
+							historyViewStyles.clearFiltersHidden,
+						]
+			}
 			isDisabled={!hasActiveFilters}
 			aria-hidden={!hasActiveFilters}
 			onPress={() => setSearchParams(new URLSearchParams(), { replace: true })}
