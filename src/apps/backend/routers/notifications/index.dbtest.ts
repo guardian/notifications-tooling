@@ -252,7 +252,7 @@ describe('POST /v1/notifications (real Postgres)', () => {
 		}
 	});
 
-	it('rolls a mix of outcomes up to partially_delivered and stores each dispatch', async () => {
+	it('rolls a mix of outcomes up to partially delivered and stores each dispatch', async () => {
 		const dispatch = mock(() =>
 			Promise.resolve({
 				appPush: [

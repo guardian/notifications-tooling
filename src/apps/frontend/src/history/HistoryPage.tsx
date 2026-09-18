@@ -39,6 +39,7 @@ export const HistoryPage = () => {
 	return (
 		<HistoryView
 			notifications={notifications}
+			audiences={channelAudiences.data}
 			totalItems={notificationHistory.data?.total ?? 0}
 			isLoading={notificationHistory.isPending}
 			error={
