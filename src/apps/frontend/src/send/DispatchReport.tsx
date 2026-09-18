@@ -13,12 +13,13 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import {
-	articleUrlSearchParam,
-	notificationRoutes,
-	withArticleUrl,
-} from '../routes';
+	createNotificationPrefillState,
+	type NotificationPrefillState,
+} from '../compose/notification-prefill';
+import { useNotificationPrefill } from '../compose/useNotificationPrefill';
+import { notificationRoutes } from '../routes';
 import { EDITION_OPTIONS } from '../segment/edition-options';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
 import { useNewsletterEmailSegmentOptions } from '../segment/useAudienceEditions';
@@ -29,7 +30,6 @@ import type { DeliveryOption } from '../types';
 import { scheduleIcon } from '../ui/flag-icons';
 import {
 	capitalise,
-	getAlternateChannel,
 	getAlternateChannelDescription,
 	getChannelDescription,
 } from '../utils/display-text-helpers';
@@ -347,15 +347,19 @@ export const DispatchReport = ({
 const DispatchReportTab = ({
 	channel,
 	notificationId,
+	copyDestination,
 	children,
 }: {
 	channel: ChannelOption;
 	notificationId?: string;
+	copyDestination: {
+		route: string;
+		state: NotificationPrefillState<ChannelOption>;
+	};
 	children: ReactNode;
 }) => {
 	const { reset, setValue } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
-	const [searchParams] = useSearchParams();
 
 	if (!notificationId) {
 		return <Navigate to={notificationRoutes[channel].create} replace />;
@@ -380,12 +384,9 @@ const DispatchReportTab = ({
 							void navigate(notificationRoutes[channel].create);
 						}}
 						onCopyToAnotherChannel={() => {
-							void navigate(
-								withArticleUrl(
-									notificationRoutes[getAlternateChannel(channel)].create,
-									searchParams.get(articleUrlSearchParam) ?? '',
-								),
-							);
+							void navigate(copyDestination.route, {
+								state: copyDestination.state,
+							});
 						}}
 					>
 						{children}
@@ -400,8 +401,22 @@ export const NewsletterEmailDispatchReportTab = () => {
 	const notificationId = useWatch<NewsletterEmailFormValues, 'notificationId'>({
 		name: 'notificationId',
 	});
+	const subjectText = useWatch<NewsletterEmailFormValues, 'subjectText'>({
+		name: 'subjectText',
+	});
+	const prefill = useNotificationPrefill('newsletter');
 	return (
-		<DispatchReportTab channel="newsletter" notificationId={notificationId}>
+		<DispatchReportTab
+			channel="newsletter"
+			notificationId={notificationId}
+			copyDestination={{
+				route: notificationRoutes['app-push'].create,
+				state: createNotificationPrefillState('app-push', {
+					articleUrl: prefill?.articleUrl,
+					fields: { headline: subjectText.trim() },
+				}),
+			}}
+		>
 			<NewsletterEmailDispatchDetails />
 		</DispatchReportTab>
 	);
@@ -411,8 +426,22 @@ export const AppAlertDispatchReportTab = () => {
 	const notificationId = useWatch<AppAlertFormValues, 'notificationId'>({
 		name: 'notificationId',
 	});
+	const headline = useWatch<AppAlertFormValues, 'headline'>({
+		name: 'headline',
+	});
+	const prefill = useNotificationPrefill('app-push');
 	return (
-		<DispatchReportTab channel="app-push" notificationId={notificationId}>
+		<DispatchReportTab
+			channel="app-push"
+			notificationId={notificationId}
+			copyDestination={{
+				route: notificationRoutes.newsletter.create,
+				state: createNotificationPrefillState('newsletter', {
+					articleUrl: prefill?.articleUrl,
+					fields: { subjectText: headline },
+				}),
+			}}
+		>
 			<AppAlertDispatchDetails />
 		</DispatchReportTab>
 	);

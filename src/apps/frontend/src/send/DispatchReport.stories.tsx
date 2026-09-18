@@ -1,7 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { notificationRoutes, withArticleUrl } from '../routes';
+import { createNotificationPrefillState } from '../compose/notification-prefill';
+import { notificationRoutes } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
+import {
+	getWindowHistoryRecord,
+	getWindowHistoryState,
+	getWindowRouterState,
+} from '../testing/router-history';
 import {
 	completeAppAlertFormValues,
 	completeNewsletterEmailFormValues,
@@ -179,15 +185,18 @@ export const AppAlertReportRoute: Story = {
 export const NewsletterReportCopiesArticleToAppAlert: Story = {
 	beforeEach: () => {
 		const originalUrl = window.location.href;
+		const originalState = getWindowHistoryState();
 		window.history.replaceState(
-			null,
+			{
+				...getWindowHistoryRecord(),
+				usr: createNotificationPrefillState('newsletter', {
+					articleUrl: articleFixture.webUrl,
+				}),
+			},
 			'',
-			withArticleUrl(
-				notificationRoutes.newsletter.report,
-				articleFixture.webUrl,
-			),
+			notificationRoutes.newsletter.report,
 		);
-		return () => window.history.replaceState(null, '', originalUrl);
+		return () => window.history.replaceState(originalState, '', originalUrl);
 	},
 	render: function Render() {
 		return useNotificationFormStory(
@@ -197,28 +206,32 @@ export const NewsletterReportCopiesArticleToAppAlert: Story = {
 			'newsletter',
 			{
 				...completeNewsletterEmailFormValues,
+				subjectText: `  ${completeNewsletterEmailFormValues.subjectText}  `,
 				notificationId: 'newsletter-dispatch-id',
 			},
 		);
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const destination = new URL(
-			withArticleUrl(
-				notificationRoutes['app-push'].create,
-				articleFixture.webUrl,
-			),
-			window.location.origin,
-		);
 
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Copy to app alert' }),
 		);
 		await waitFor(async () => {
 			await expect(
-				window.location.pathname.endsWith(destination.pathname),
+				window.location.pathname.endsWith(
+					notificationRoutes['app-push'].create,
+				),
 			).toBe(true);
-			await expect(window.location.search).toBe(destination.search);
+			await expect(window.location.search).toBe('');
+			await expect(getWindowRouterState()).toEqual(
+				createNotificationPrefillState('app-push', {
+					articleUrl: articleFixture.webUrl,
+					fields: {
+						headline: completeNewsletterEmailFormValues.subjectText,
+					},
+				}),
+			);
 		});
 	},
 };
@@ -226,15 +239,18 @@ export const NewsletterReportCopiesArticleToAppAlert: Story = {
 export const AppAlertReportCopiesArticleToNewsletter: Story = {
 	beforeEach: () => {
 		const originalUrl = window.location.href;
+		const originalState = getWindowHistoryState();
 		window.history.replaceState(
-			null,
+			{
+				...getWindowHistoryRecord(),
+				usr: createNotificationPrefillState('app-push', {
+					articleUrl: articleFixture.webUrl,
+				}),
+			},
 			'',
-			withArticleUrl(
-				notificationRoutes['app-push'].report,
-				articleFixture.webUrl,
-			),
+			notificationRoutes['app-push'].report,
 		);
-		return () => window.history.replaceState(null, '', originalUrl);
+		return () => window.history.replaceState(originalState, '', originalUrl);
 	},
 	render: function Render() {
 		return useNotificationFormStory(
@@ -250,22 +266,23 @@ export const AppAlertReportCopiesArticleToNewsletter: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const destination = new URL(
-			withArticleUrl(
-				notificationRoutes.newsletter.create,
-				articleFixture.webUrl,
-			),
-			window.location.origin,
-		);
 
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Copy to newsletter email' }),
 		);
 		await waitFor(async () => {
 			await expect(
-				window.location.pathname.endsWith(destination.pathname),
+				window.location.pathname.endsWith(notificationRoutes.newsletter.create),
 			).toBe(true);
-			await expect(window.location.search).toBe(destination.search);
+			await expect(window.location.search).toBe('');
+			await expect(getWindowRouterState()).toEqual(
+				createNotificationPrefillState('newsletter', {
+					articleUrl: articleFixture.webUrl,
+					fields: {
+						subjectText: completeAppAlertFormValues.headline,
+					},
+				}),
+			);
 		});
 	},
 };

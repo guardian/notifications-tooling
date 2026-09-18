@@ -12,6 +12,7 @@ import {
 	partiallyDeliveredNewsletterSendResponse,
 	unauthenticatedError,
 } from '../testing/api-fixtures';
+import { liveblogFixture } from '../testing/capi-fixtures';
 import {
 	mockSendNotification,
 	mockSendRejectedNotification,
@@ -30,6 +31,7 @@ type StoryArgs = {
 	composerState: NotificationComposerState;
 	showPreview: boolean;
 	onTogglePreview: (showPreview: boolean) => void;
+	resolveArticleFromCapi?: NotificationFormContextProps['resolveArticleFromCapi'];
 	sendNotification?: NotificationFormContextProps['sendNotification'];
 };
 type Story = StoryObj<StoryArgs>;
@@ -67,11 +69,11 @@ const meta: Meta<StoryArgs> = {
 		onTogglePreview: () => {},
 	},
 	render: function Render(args) {
-		const { composerState, showPreview } = args;
+		const { composerState, resolveArticleFromCapi, showPreview } = args;
 		return useNotificationFormStory(
 			<ControlledCreateNewsletterEmailForm initialShowPreview={showPreview} />,
 			composerState,
-			{ sendNotification: args.sendNotification },
+			{ resolveArticleFromCapi, sendNotification: args.sendNotification },
 			'newsletter',
 			composerState.article ? completeNewsletterEmailFormValues : undefined,
 		);
@@ -111,6 +113,31 @@ export const UpdatesFormFields: Story = {
 		await userEvent.click(unitedKingdom);
 
 		await expect(unitedKingdom).toBeChecked();
+	},
+};
+
+export const ImportWithoutStandfirstPreservesPreviewText: Story = {
+	args: {
+		resolveArticleFromCapi: () =>
+			Promise.resolve({
+				success: true,
+				data: { article: liveblogFixture },
+			}),
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const previewText = 'Saved preview text';
+		const previewTextInput = canvas.getByLabelText('Preview text');
+
+		await userEvent.type(previewTextInput, previewText);
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			liveblogFixture.webUrl,
+		);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+		await expect(previewTextInput).toHaveValue(previewText);
 	},
 };
 

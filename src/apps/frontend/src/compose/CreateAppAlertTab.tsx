@@ -1,29 +1,41 @@
-import { useEffect } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
 import { AppAlertPreviewSection } from '../preview/AppAlertPreviewSection';
 import { AppAlertPreviewToggle } from '../preview/PreviewToggle';
-import { articleUrlSearchParam, toGuardianArticleUrl } from '../routes';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
-import type { AppAlertFormValues } from '../utils/notification-forms';
+import {
+	type AppAlertFormValues,
+	defaultAppAlertFormValues,
+} from '../utils/notification-forms';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
+import { useNotificationPrefill } from './useNotificationPrefill';
 
 export const CreateAppAlertTab = () => {
 	const { reset } = useFormContext<AppAlertFormValues>();
-	const [searchParams] = useSearchParams();
-	const initialArticleUrl = toGuardianArticleUrl(
-		searchParams.get(articleUrlSearchParam),
-	);
+	const routePrefill = useNotificationPrefill('app-push');
+	const [prefill] = useState(routePrefill);
 	const topicTypes = useAppAlertTopicTypes();
 
-	useEffect(() => reset(), [reset]);
+	useLayoutEffect(
+		() =>
+			reset(
+				{ ...defaultAppAlertFormValues, ...prefill?.fields },
+				{ keepDefaultValues: true },
+			),
+		[prefill, reset],
+	);
 
 	return (
 		<NotificationTabLayout
 			channel="app-push"
 			previewToggle={<AppAlertPreviewToggle topicTypes={topicTypes} />}
-			form={<CreateAppAlertForm initialArticleUrl={initialArticleUrl} />}
+			form={
+				<CreateAppAlertForm
+					initialArticleUrl={prefill?.articleUrl}
+					fieldOverrides={prefill?.fields}
+				/>
+			}
 			previewSection={<AppAlertPreviewSection topicTypes={topicTypes} />}
 		/>
 	);
