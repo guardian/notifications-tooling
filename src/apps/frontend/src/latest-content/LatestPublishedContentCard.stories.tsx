@@ -1,7 +1,36 @@
+import { css } from '@emotion/react';
+import {
+	Table,
+	TableBody,
+	TableColumnHeader,
+	TableHeader,
+} from '@guardian/stand/Table';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { mockLatestPublishedContent } from './latest-published-content';
 import { LatestPublishedContentCard } from './LatestPublishedContentCard';
+
+const tableColumns = { sm: 'minmax(0, 1fr)' } as const;
+const hiddenHeader = css({ display: 'none' });
+
+const CardStory = ({
+	args,
+	width,
+}: {
+	args: Parameters<typeof LatestPublishedContentCard>[0];
+	width: string;
+}) => (
+	<div style={{ width }}>
+		<Table aria-label="Latest published content card" columns={tableColumns}>
+			<TableHeader cssOverrides={hiddenHeader}>
+				<TableColumnHeader isRowHeader aria-label="Content" />
+			</TableHeader>
+			<TableBody>
+				<LatestPublishedContentCard {...args} />
+			</TableBody>
+		</Table>
+	</div>
+);
 
 const meta = {
 	title: 'Stand Frontend/DispatchLanding/LatestPublishedContentCard',
@@ -12,11 +41,7 @@ const meta = {
 	parameters: {
 		layout: 'centered',
 	},
-	render: (args) => (
-		<div style={{ width: '380px' }}>
-			<LatestPublishedContentCard {...args} />
-		</div>
-	),
+	render: (args) => <CardStory args={args} width="380px" />,
 } satisfies Meta<typeof LatestPublishedContentCard>;
 
 export default meta;
@@ -49,11 +74,7 @@ export const Default: Story = {
 };
 
 export const WideRow: Story = {
-	render: (args) => (
-		<div style={{ width: '676px' }}>
-			<LatestPublishedContentCard {...args} />
-		</div>
-	),
+	render: (args) => <CardStory args={args} width="676px" />,
 };
 
 export const NoImage: Story = {
