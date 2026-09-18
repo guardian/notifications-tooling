@@ -18,7 +18,7 @@ type GridCropUrlValidationResult =
 const gridUrlValidationMessages = {
 	noConfig: 'No grid origin URL configured',
 	notGridUrl: 'Please enter a valid Guardian image URL',
-	wrongPage: 'Please enter the URL for a 5:4 crop page',
+	notImageCropPage: 'Please enter the URL for a 5:4 crop page',
 };
 
 export const validateGridCropPageUrl = (
@@ -53,7 +53,7 @@ export const validateGridCropPageUrl = (
 		) {
 			return {
 				success: false,
-				validationError: gridUrlValidationMessages.wrongPage,
+				validationError: gridUrlValidationMessages.notImageCropPage,
 			};
 		}
 

@@ -2,6 +2,8 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
+import { Link } from '@guardian/stand/Link';
+import { LinkButton } from '@guardian/stand/LinkButton';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
@@ -30,6 +32,7 @@ export const AppAlertReplaceImageSection = ({
 		isCheckingImage,
 		isUpdateDisabled,
 		displayedErrorMessage,
+		imageCheckRemedy,
 	} = useImageUrlCheck({
 		imageUrl: replacementImageUrl,
 		onImageUrlChange: onReplacementImageUrlChange,
@@ -80,6 +83,30 @@ export const AppAlertReplaceImageSection = ({
 
 			{displayedErrorMessage && (
 				<InlineMessage level="error">{displayedErrorMessage}</InlineMessage>
+			)}
+			<InlineMessage level="error">{'displayedErrorMessage'}</InlineMessage>
+
+			{imageCheckRemedy === 'authenticate' && gridUri && (
+				<LinkButton
+					icon="open_in_new"
+					target="_blank"
+					rel="noopener noreferrer"
+					size="sm"
+					variant="secondary"
+					href={gridUri}
+				>
+					Open Grid to refresh credentials
+				</LinkButton>
+			)}
+
+			{imageCheckRemedy !== 'contact-cp' && (
+				<Typography>
+					Please contact{' '}
+					<Link href='mailto:central.production@theguardian.com"'>
+						Central Production
+					</Link>{' '}
+					if the problem persists
+				</Typography>
 			)}
 
 			{imageUpdated && replacementImageUrl && (

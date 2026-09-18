@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { parseImageSourceUrl } from '../utils/form-validation';
+import type { GridErrorRemedy } from '../utils/grid-api';
 import { getGridImageUrl } from '../utils/grid-api';
 
 export type ImageUrlCheckResult = { exists: boolean; error?: string };
@@ -42,6 +43,7 @@ export const useImageUrlCheck = ({
 	const [imageUpdated, setImageUpdated] = useState(false);
 	const [isCheckingImage, setIsCheckingImage] = useState(false);
 	const [imageCheckError, setImageCheckError] = useState<string>();
+	const [imageCheckRemedy, setImageCheckRemedy] = useState<GridErrorRemedy>();
 
 	const trimmedImageUrl = imageUrl.trim();
 
@@ -54,6 +56,7 @@ export const useImageUrlCheck = ({
 	};
 
 	const checkAndUpdateImage = async () => {
+		setImageCheckRemedy(undefined);
 		if (!trimmedImageUrl) {
 			onUpdate('');
 			setImageUpdated(true);
@@ -80,6 +83,7 @@ export const useImageUrlCheck = ({
 
 			if (!gridFetchResult.success) {
 				setImageCheckError(gridFetchResult.errorMessage);
+				setImageCheckRemedy(gridFetchResult.remedy);
 				onUpdate('');
 				setIsCheckingImage(false);
 				return;
@@ -111,5 +115,6 @@ export const useImageUrlCheck = ({
 		isUpdateDisabled: validationResult.type === 'failure' || isCheckingImage,
 		displayedErrorMessage:
 			validationResult.validationError ?? imageCheckError ?? errorMessage,
+		imageCheckRemedy,
 	};
 };

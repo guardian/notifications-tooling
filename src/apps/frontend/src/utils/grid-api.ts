@@ -1,25 +1,32 @@
 import type { CropAsset, CropData, ImageData } from '@models';
 import { gridImage } from '@models';
 
-type Result<T> =
-	{ success: true; data: T } | { success: false; errorMessage: string };
+export type GridErrorRemedy = 'authenticate' | 'contact-cp';
 
-const failWith = (
-	errorMessage: string,
-): { success: false; errorMessage: string } => ({
+type Failure = {
+	success: false;
+	errorMessage: string;
+	remedy?: GridErrorRemedy;
+};
+
+type Result<T> = { success: true; data: T } | Failure;
+
+const failWith = (errorMessage: string, remedy?: GridErrorRemedy): Failure => ({
 	success: false,
 	errorMessage,
+	remedy,
 });
 
 // TO DO - user friendly messages or use an enum
 const errorMessages = {
-	notFound: 'image not found on the grid',
-	forbidden: 'your credentials have maybe expired',
-	fetchFailure: 'fetch failed',
-	parseFailure: 'parse failed',
-	cropMissing: 'could not find the requested image crop',
-	noAsset: 'could not find a suitable image asset',
-	wrongAspect: 'please choose a 5:4 image crop',
+	notFound: 'The image requested was not found on the grid',
+	forbidden: 'Your Authentication credentials for the grid have expired',
+	fetchFailure:
+		'Failed to retrieve the image details from the grid. Please try again',
+	parseFailure: 'The response from the grid was not in the expected format',
+	cropMissing: 'The crop requested was could not found on the grid',
+	noAsset: 'The crop requested did not include a suitable image asset',
+	wrongAspect: 'Please choose a 5:4 image crop',
 };
 
 // TO DO - what is our desired size?
@@ -40,7 +47,7 @@ const fetchImageData = async (
 			return failWith(errorMessages.notFound);
 		}
 		if (response?.status === 403 || response?.status === 401) {
-			return failWith(errorMessages.forbidden);
+			return failWith(errorMessages.forbidden, 'authenticate');
 		}
 
 		return failWith(errorMessages.fetchFailure);
@@ -53,11 +60,11 @@ const fetchImageData = async (
 	const gridImageParseResult = gridImage.safeParse(json);
 	if (!gridImageParseResult.success) {
 		console.warn('parse failure', json, gridImageParseResult.error.issues);
-		return failWith(errorMessages.parseFailure);
+		return failWith(errorMessages.parseFailure, 'contact-cp');
 	}
 
 	if (!gridImageParseResult.data.data) {
-		return failWith(errorMessages.parseFailure);
+		return failWith(errorMessages.parseFailure, 'contact-cp');
 	}
 	return { success: true, data: gridImageParseResult.data.data };
 };
@@ -86,7 +93,7 @@ const extractAsset = (crop: CropData): Result<CropAsset> => {
 		) ?? assetsSmallestFirst?.pop();
 
 	if (!assetToUse) {
-		return failWith(errorMessages.noAsset);
+		return failWith(errorMessages.noAsset, 'contact-cp');
 	}
 
 	return {
