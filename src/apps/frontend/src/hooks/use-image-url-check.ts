@@ -67,28 +67,28 @@ export const useImageUrlCheck = ({
 		}
 
 		setIsCheckingImage(true);
+		let imageUrlToUse = trimmedImageUrl;
 
 		// if the url was validated as a grid crop, fetch the image url from the grid api
 		if (validationResult.type === 'grid-url') {
 			const { cropId, imageId } = validationResult;
-			const result = await getGridImageUrl(gridApiUri, cropId, imageId);
-			setIsCheckingImage(false);
+			const gridFetchResult = await getGridImageUrl(
+				gridApiUri,
+				cropId,
+				imageId,
+			);
 
-			if (!result.success) {
-				setImageCheckError(result.errorMessage);
+			if (!gridFetchResult.success) {
+				setImageCheckError(gridFetchResult.errorMessage);
 				onUpdate('');
 				setIsCheckingImage(false);
 				return;
 			}
-
-			setImageCheckError(undefined);
-			onUpdate(result.data);
-			setImageUpdated(true);
-			return;
+			imageUrlToUse = gridFetchResult.data;
 		}
 
 		try {
-			const result = await checkImageUrl(trimmedImageUrl);
+			const result = await checkImageUrl(imageUrlToUse);
 			if (!result.exists) {
 				setImageCheckError(result.error ?? 'Image does not exist');
 				onUpdate('');
@@ -96,7 +96,7 @@ export const useImageUrlCheck = ({
 				return;
 			}
 
-			onUpdate(trimmedImageUrl);
+			onUpdate(imageUrlToUse);
 			setImageUpdated(true);
 		} finally {
 			setIsCheckingImage(false);
