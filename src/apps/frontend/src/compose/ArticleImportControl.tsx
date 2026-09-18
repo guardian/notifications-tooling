@@ -58,7 +58,7 @@ export const ArticleImportControl = ({
 }: ArticleImportControlProps) => {
 	const { composerState, updateComposerState, resolveArticleFromCapi } =
 		useContext(NotificationFormContext);
-	const hasFetchedInitialArticle = useRef(false);
+	const initialArticleFetchTriggered = useRef(false);
 	const {
 		clearErrors,
 		formState: { submitCount },
@@ -109,8 +109,8 @@ export const ArticleImportControl = ({
 	const fetchInitialArticle = useEffectEvent(handleFetchArticle);
 
 	useEffect(() => {
-		if (fetchArticleOnMount && !hasFetchedInitialArticle.current) {
-			hasFetchedInitialArticle.current = true;
+		if (fetchArticleOnMount && !initialArticleFetchTriggered.current) {
+			initialArticleFetchTriggered.current = true;
 			fetchInitialArticle();
 		}
 	}, [fetchArticleOnMount]);
