@@ -22,10 +22,11 @@ const meta = {
 	component: LatestPublishedContent,
 	args: {
 		appConfig: mockAppConfig,
+		articleUrl: articleFixture.webUrl,
 	},
-	render: ({ appConfig }: StoryArgs) => (
+	render: ({ appConfig, articleUrl }: StoryArgs) => (
 		<ConfigContext.Provider value={appConfig}>
-			<LatestPublishedContent />
+			<LatestPublishedContent articleUrl={articleUrl} />
 		</ConfigContext.Provider>
 	),
 } satisfies Meta<StoryArgs>;
