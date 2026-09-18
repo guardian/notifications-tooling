@@ -75,6 +75,9 @@ export const Default: Story = {
 			canvas.getByRole('heading', { name: 'Create app alert' }),
 		).toBeInTheDocument();
 		await expect(
+			canvas.queryByText('Review the content before sending'),
+		).not.toBeInTheDocument();
+		await expect(
 			canvas.queryByText('The preview for the app alert will be shown below.'),
 		).not.toBeInTheDocument();
 	},
@@ -97,6 +100,14 @@ export const ImportsArticleFromSearchParam: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 
+		await expect(
+			canvas.getByText('Review the content before sending'),
+		).toBeVisible();
+		await expect(
+			canvas.getByText(
+				/Character limits, audiences, and alert types \/ kicker differ between newsletter emails and app alerts/,
+			),
+		).toBeVisible();
 		await expect(await canvas.findByText('Article imported')).toBeVisible();
 		await expect(canvas.getByLabelText('article URL')).toHaveValue(
 			articleFixture.webUrl,
