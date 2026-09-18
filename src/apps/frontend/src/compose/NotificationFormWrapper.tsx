@@ -83,7 +83,7 @@ export const NotificationFormWrapper = ({
 						},
 					}}
 				>
-					<ReviewWarning />
+					{initialArticleUrl && <ReviewWarning />}
 					<NotificationFormSection id="article-section">
 						<ArticleImportControl
 							articleInputText={articleInputText}

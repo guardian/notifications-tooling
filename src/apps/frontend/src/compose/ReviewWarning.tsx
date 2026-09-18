@@ -12,7 +12,7 @@ export const ReviewWarning = () => {
 	return (
 		<section
 			css={css({
-				maxWidth: '450px',
+				maxWidth: '458px',
 				borderLeft: `${semanticSizing.border.md} solid transparent`,
 				paddingLeft: semanticSpacing.stackMd,
 			})}
