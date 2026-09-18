@@ -112,7 +112,7 @@ export const useImageUrlCheck = ({
 		handleImageUrlChange,
 		imageUpdated,
 		isCheckingImage,
-		isUpdateDisabled: validationResult.type === 'failure' || isCheckingImage,
+		isUpdateDisabled: !!validationResult.validationError || isCheckingImage,
 		displayedErrorMessage:
 			validationResult.validationError ?? imageCheckError ?? errorMessage,
 		imageCheckRemedy,

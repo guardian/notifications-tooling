@@ -84,7 +84,6 @@ export const AppAlertReplaceImageSection = ({
 			{displayedErrorMessage && (
 				<InlineMessage level="error">{displayedErrorMessage}</InlineMessage>
 			)}
-			<InlineMessage level="error">{'displayedErrorMessage'}</InlineMessage>
 
 			{imageCheckRemedy === 'authenticate' && gridUri && (
 				<LinkButton
@@ -99,7 +98,7 @@ export const AppAlertReplaceImageSection = ({
 				</LinkButton>
 			)}
 
-			{imageCheckRemedy !== 'contact-cp' && (
+			{imageCheckRemedy === 'contact-cp' && (
 				<Typography>
 					Please contact{' '}
 					<Link href='mailto:central.production@theguardian.com"'>
