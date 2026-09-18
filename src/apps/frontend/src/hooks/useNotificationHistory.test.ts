@@ -41,7 +41,7 @@ afterAll(() => {
 });
 
 describe('fetchNotificationHistory', () => {
-	it('serializes search and repeated audience query parameters', async () => {
+	it('serializes search and repeated filter query parameters', async () => {
 		let requestUrl: URL | undefined;
 		const fetchMock = mock((input: RequestInfo | URL) => {
 			const url =
@@ -69,6 +69,7 @@ describe('fetchNotificationHistory', () => {
 			since: 1_700_000_000,
 			search: 'climate',
 			audiences: ['uk', 'europe'],
+			statuses: ['sent', 'error'],
 		});
 
 		if (!requestUrl) {
@@ -83,6 +84,7 @@ describe('fetchNotificationHistory', () => {
 			'uk',
 			'europe',
 		]);
+		expect(requestUrl.searchParams.getAll('status')).toEqual(['sent', 'error']);
 	});
 });
 
@@ -128,6 +130,22 @@ describe('notification history query keys', () => {
 				limit: 20,
 				offset: 0,
 				audiences: ['us'],
+			}),
+		);
+	});
+
+	it('separates status filters in the cache', () => {
+		expect(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				statuses: ['sent'],
+			}),
+		).not.toEqual(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				statuses: ['error'],
 			}),
 		);
 	});

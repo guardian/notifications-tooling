@@ -7,6 +7,7 @@ import {
 	type NotificationListResponse,
 	notificationListResponseSchema,
 } from '../schemas';
+import type { HistoryStatusCategory } from '../utils/history-search-params';
 
 export interface NotificationHistoryQuery {
 	limit: number;
@@ -15,6 +16,7 @@ export interface NotificationHistoryQuery {
 	cacheScope?: string;
 	search?: string;
 	audiences?: AppAlertTopicEditionId[];
+	statuses?: HistoryStatusCategory[];
 }
 
 export const notificationHistoryQueryKey = [
@@ -29,6 +31,7 @@ export const getNotificationHistoryQueryKey = ({
 	cacheScope,
 	search,
 	audiences,
+	statuses,
 }: NotificationHistoryQuery) =>
 	[
 		...notificationHistoryQueryKey,
@@ -39,6 +42,7 @@ export const getNotificationHistoryQueryKey = ({
 					cacheScope,
 					...(search ? { search } : {}),
 					...(audiences?.length ? { audiences } : {}),
+					...(statuses?.length ? { statuses } : {}),
 				}
 			: {
 					limit,
@@ -46,6 +50,7 @@ export const getNotificationHistoryQueryKey = ({
 					since,
 					...(search ? { search } : {}),
 					...(audiences?.length ? { audiences } : {}),
+					...(statuses?.length ? { statuses } : {}),
 				},
 	] as const;
 
@@ -57,6 +62,7 @@ export const fetchNotificationHistory = ({
 	since,
 	search,
 	audiences,
+	statuses,
 }: NotificationHistoryQuery): Promise<NotificationListResponse> => {
 	const searchParams = new URLSearchParams({
 		limit: String(limit),
@@ -71,6 +77,9 @@ export const fetchNotificationHistory = ({
 	}
 	for (const audience of audiences ?? []) {
 		searchParams.append('audience', audience);
+	}
+	for (const status of statuses ?? []) {
+		searchParams.append('status', status);
 	}
 
 	return fetchJsonAndParse(
