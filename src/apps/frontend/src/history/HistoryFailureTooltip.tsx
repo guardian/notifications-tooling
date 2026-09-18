@@ -60,7 +60,7 @@ const FailureTooltipContent = ({
 	);
 
 	if (failedDispatches.length === 0) {
-		return <>Failure details could not be loaded.</>;
+		return <>No per-destination failure details are available.</>;
 	}
 
 	return (

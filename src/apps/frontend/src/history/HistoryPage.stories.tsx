@@ -230,9 +230,19 @@ const partialFailureDetail: NotificationResource = {
 	],
 };
 
+const noOutcomeFailureDetail: NotificationResource = {
+	...historyResponse.notifications[2]!,
+	dispatches: [],
+};
+
 const failureDetailHandler = http.get(
-	`${getApiBaseUrl()}/v1/notifications/${partialFailureDetail.id}`,
-	() => HttpResponse.json(partialFailureDetail),
+	`${getApiBaseUrl()}/v1/notifications/:notificationId`,
+	({ params }) =>
+		HttpResponse.json(
+			params.notificationId === noOutcomeFailureDetail.id
+				? noOutcomeFailureDetail
+				: partialFailureDetail,
+		),
 );
 
 const loadingHistoryHandler = http.get(
@@ -328,6 +338,24 @@ export const Loaded: Story = {
 			'Please contact Central Production for support.',
 		);
 		await expect(page.queryByRole('dialog')).not.toBeInTheDocument();
+	},
+};
+
+export const FailureWithoutDispatchOutcomes: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const failedNotification = await canvas.findByRole('button', {
+			name: 'Failed: Show failure details for Final score and match report',
+		});
+
+		await userEvent.click(failedNotification);
+		const tooltip = await within(document.body).findByRole('tooltip');
+		await expect(tooltip).toHaveTextContent(
+			'Failure: No per-destination failure details are available.',
+		);
+		await expect(tooltip).not.toHaveTextContent(
+			'Failure details could not be loaded.',
+		);
 	},
 };
 
