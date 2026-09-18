@@ -10,7 +10,7 @@ import { HistoryView } from './HistoryView';
 export const HistoryPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
-	const searchTerm = searchParams.get('search') ?? '';
+	const searchTerm = parsedHistoryQuery.search ?? '';
 	const debouncedSearch = useDebouncedValue(parsedHistoryQuery.search, 300);
 	const isSearchPending = parsedHistoryQuery.search !== debouncedSearch;
 	const historyQuery = { ...parsedHistoryQuery, search: debouncedSearch };

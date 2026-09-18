@@ -245,6 +245,19 @@ const failureDetailHandler = http.get(
 		),
 );
 
+const invalidSearchRequest = fn((requestUrl: URL) => requestUrl);
+const emptyHistoryHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications`,
+	({ request }) => {
+		invalidSearchRequest(new URL(request.url));
+		return HttpResponse.json({
+			...historyResponse,
+			total: 0,
+			notifications: [],
+		});
+	},
+);
+
 const loadingHistoryHandler = http.get(
 	`${getApiBaseUrl()}/v1/notifications`,
 	async () => {
@@ -382,6 +395,36 @@ export const Search: Story = {
 			await expect(requestUrl?.searchParams.get('search')).toBe('weather');
 			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
 		});
+	},
+};
+
+export const InvalidSearch: Story = {
+	loaders: [
+		() => {
+			invalidSearchRequest.mockClear();
+			window.history.replaceState(
+				{},
+				'',
+				`${window.location.pathname}?search=${'a'.repeat(201)}`,
+			);
+			return {};
+		},
+	],
+	parameters: {
+		msw: { handlers: [emptyHistoryHandler, channelAudiencesHandler] },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByRole('heading', { name: 'No alerts yet' }),
+		).toBeVisible();
+		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
+			'',
+		);
+		await expect(invalidSearchRequest).toHaveBeenCalledOnce();
+		const requestUrl = invalidSearchRequest.mock.calls[0]?.[0];
+		await expect(requestUrl?.searchParams.has('search')).toBe(false);
 	},
 };
 
