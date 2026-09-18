@@ -116,8 +116,8 @@ export const handleNotificationIdValidationError: ErrorRequestHandler = (
 };
 
 /**
- * express-zod-safe error hook for `GET /v1/notifications`. Malformed pagination
- * query params are always a structural `400`.
+ * express-zod-safe error hook for `GET /v1/notifications`. Malformed query
+ * params are always a structural `400`.
  */
 export const handleNotificationListValidationError: ErrorRequestHandler = (
 	errors,
@@ -136,7 +136,7 @@ export const handleNotificationListValidationError: ErrorRequestHandler = (
 		...buildErrorEnvelope(
 			req,
 			'bad_request',
-			'The pagination query parameters are invalid.',
+			'The notification list query parameters are invalid.',
 		),
 		details,
 	});

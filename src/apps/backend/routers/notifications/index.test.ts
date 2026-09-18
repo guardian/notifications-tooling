@@ -976,16 +976,27 @@ describe('GET /v1/notifications', () => {
 	});
 
 	describe('bad request', () => {
-		it('returns 400 when search exceeds 200 characters', async () => {
+		it.each([
+			['blank', '   '],
+			['over 200 characters', 'a'.repeat(201)],
+		])('returns 400 when search is %s', async (_description, search) => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
 
 			try {
 				const response = await fetch(
-					`${listServer.baseUrl}/v1/notifications?search=${'a'.repeat(201)}`,
+					`${listServer.baseUrl}/v1/notifications?search=${encodeURIComponent(search)}`,
 				);
 
 				expect(response.status).toBe(400);
+				const body = (await response.json()) as {
+					error: string;
+					message: string;
+				};
+				expect(body.error).toBe('bad_request');
+				expect(body.message).toBe(
+					'The notification list query parameters are invalid.',
+				);
 				expect(listNotifications).not.toHaveBeenCalled();
 			} finally {
 				await listServer.close();
@@ -1002,8 +1013,14 @@ describe('GET /v1/notifications', () => {
 				);
 
 				expect(response.status).toBe(400);
-				const body = (await response.json()) as { error: string };
+				const body = (await response.json()) as {
+					error: string;
+					message: string;
+				};
 				expect(body.error).toBe('bad_request');
+				expect(body.message).toBe(
+					'The notification list query parameters are invalid.',
+				);
 				expect(listNotifications).not.toHaveBeenCalled();
 			} finally {
 				await listServer.close();

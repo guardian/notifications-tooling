@@ -56,7 +56,7 @@ export const notificationsPath = {
 				},
 			},
 			'400': {
-				description: 'The pagination query parameters are invalid.',
+				description: 'The notification list query parameters are invalid.',
 				content: {
 					'application/json': {
 						schema: {
