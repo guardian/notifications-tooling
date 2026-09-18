@@ -205,7 +205,7 @@ export const articlePreviewCardTheme = {
 	}),
 	sectionLabel: (color: string) =>
 		css({
-			fontSize: '12px',
+			fontSize: '14px',
 			color,
 		}),
 	headline: css({
@@ -455,22 +455,46 @@ export const latestPublishedContentTheme = {
 		containerType: 'inline-size',
 		containerName: 'latest-content-table',
 		backgroundColor: semanticColors.bg.raisedLevel1,
-		'& [role="row"]': {
-			backgroundColor: semanticColors.bg.raisedLevel1,
-		},
 		[from.lg]: {
 			backgroundColor: 'transparent',
-			'& [role="row"]': {
-				backgroundColor: 'transparent',
-			},
 		},
 	}),
+	tableBody: (showAll: boolean) =>
+		css({
+			'& > [role="row"]': {
+				backgroundColor: semanticColors.bg.raisedLevel1,
+			},
+			...(!showAll && {
+				'& > [role="row"]:nth-of-type(n + 4)': {
+					display: 'none',
+				},
+			}),
+			[from.lg]: {
+				'& > [role="row"]': {
+					backgroundColor: 'transparent',
+				},
+				'& > [role="row"]:nth-of-type(n + 4)': {
+					display: 'grid',
+				},
+			},
+		}),
 	tableHeader: css({
+		backgroundColor: semanticColors.bg.raisedLevel2,
 		'& > tr > *': {
 			padding: '16px',
 		},
 		[from.lg]: {
 			display: 'none',
+		},
+	}),
+	tableHeaderContent: css({
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: semanticSpacing.stackSm,
+		'& button': {
+			height: 'auto',
+			padding: 0,
 		},
 	}),
 	card: css({
@@ -531,9 +555,16 @@ export const latestPublishedContentTheme = {
 			fontSize: '12px',
 			color,
 		}),
+	sectionName: css({
+		fontWeight: 700,
+	}),
 	published: css({
 		fontSize: '12px',
-		color: semanticColors.text.weak,
+		color: semanticColors.text.strong,
+	}),
+	publishedRelative: css({
+		fontWeight: 700,
+		color: semanticColors.text.strong,
 	}),
 	audience: css({
 		display: 'flex',
@@ -624,6 +655,10 @@ export const latestPublishedContentTheme = {
 		alignSelf: 'flex-start',
 		flexShrink: 0,
 		whiteSpace: 'nowrap',
+		background: semanticColors.bg.base,
+		'&[data-hovered], &:hover': {
+			background: semanticColors.bg.raisedLevel1,
+		},
 		[from.md]: {
 			alignSelf: 'center',
 		},

@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import {
+	baseSpacing,
 	semanticColors,
 	semanticRadius,
 	semanticSizing,
@@ -25,7 +26,7 @@ const pillStyle = css({
 	border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 	backgroundColor: semanticColors.fill.weak,
 	borderRadius: semanticRadius.cornerSm,
-	padding: '2px 6px',
+	padding: `${baseSpacing['2Px']} ${baseSpacing['4Px']}`,
 });
 
 const flagStyle = css({

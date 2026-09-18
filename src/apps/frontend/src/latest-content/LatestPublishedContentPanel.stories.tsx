@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { LatestPublishedContentPanel } from './LatestPublishedContentPanel';
 
 const meta = {
@@ -22,9 +22,24 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Latest published content')).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', { name: 'Latest published content' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('columnheader', {
+				name: 'Latest published content',
+				hidden: true,
+			}),
+		).toBeInTheDocument();
 		await expect(
 			canvas.getByText('Choose a recent article from below to create an alert'),
 		).toBeVisible();
+		await expect(
+			canvas.getAllByRole('button', { name: /create/i }),
+		).toHaveLength(3);
+		await userEvent.click(canvas.getByRole('button', { name: 'Show all' }));
+		await expect(
+			canvas.getAllByRole('button', { name: /create/i }),
+		).toHaveLength(6);
 	},
 };

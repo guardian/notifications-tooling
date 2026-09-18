@@ -5,8 +5,10 @@ import {
 	TableHeader,
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
+import { useState } from 'react';
 import { useLatestPublishedContent } from '../hooks/useLatestPublishedContent';
 import { latestPublishedContentTheme } from '../themes';
+import { TextLinkButton } from '../ui/TextLinkButton';
 import { LatestPublishedContentCard } from './LatestPublishedContentCard';
 
 const tableColumns = { sm: 'minmax(0, 1fr)' } as const;
@@ -14,6 +16,7 @@ const tableColumns = { sm: 'minmax(0, 1fr)' } as const;
 export const LatestPublishedContentPanel = () => {
 	const latestPublishedContent = useLatestPublishedContent();
 	const content = latestPublishedContent.data ?? [];
+	const [showAll, setShowAll] = useState(false);
 
 	return (
 		<div css={latestPublishedContentTheme.panel}>
@@ -34,10 +37,21 @@ export const LatestPublishedContentPanel = () => {
 			>
 				<TableHeader cssOverrides={latestPublishedContentTheme.tableHeader}>
 					<TableColumnHeader isRowHeader>
-						Latest published content
+						<div css={latestPublishedContentTheme.tableHeaderContent}>
+							<span>Latest published content</span>
+							{content.length > 3 && !showAll && (
+								<TextLinkButton
+									text="Show all"
+									textVariant="bodySm"
+									onClick={() => setShowAll(true)}
+								/>
+							)}
+						</div>
 					</TableColumnHeader>
 				</TableHeader>
-				<TableBody>
+				<TableBody
+					cssOverrides={latestPublishedContentTheme.tableBody(showAll)}
+				>
 					{content.map((item) => (
 						<LatestPublishedContentCard key={item.id} content={item} />
 					))}

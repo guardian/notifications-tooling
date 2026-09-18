@@ -36,19 +36,29 @@ export const LatestPublishedContentCard = ({
 				<div css={latestPublishedContentTheme.cardDetails}>
 					<div css={latestPublishedContentTheme.cardMeta}>
 						<Typography
-							variant="bodyBoldXs"
+							variant="bodyXs"
 							cssOverrides={latestPublishedContentTheme.sectionLabel(
 								pillarColor,
 							)}
 						>
-							{section} / {pillarName}
+							<span css={latestPublishedContentTheme.sectionName}>
+								{section}
+							</span>{' '}
+							/ {pillarName}
 						</Typography>
 						{publishedAt && (
 							<Typography
 								variant="bodyXs"
 								cssOverrides={latestPublishedContentTheme.published}
 							>
-								Published {publishedAt.label}
+								Published{' '}
+								<time
+									dateTime={publishedAt.iso8601}
+									title={publishedAt.formattedAbsoluteTime}
+									css={latestPublishedContentTheme.publishedRelative}
+								>
+									{publishedAt.label}
+								</time>
 							</Typography>
 						)}
 						<div css={latestPublishedContentTheme.audience}>
