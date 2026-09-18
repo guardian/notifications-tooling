@@ -22,6 +22,11 @@ export const HistoryAudienceFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const { audiences: selectedAudiences = [], limit } =
 		parseHistorySearchParams(searchParams);
+	const selectedAudienceLabel = AUDIENCE_OPTIONS.filter(({ id }) =>
+		selectedAudiences.includes(id),
+	)
+		.map(({ label }) => label)
+		.join(', ');
 
 	const handleAudienceChange = (audiences: AppAlertTopicEditionId[]) => {
 		setSearchParams(
@@ -73,10 +78,11 @@ export const HistoryAudienceFilter = () => {
 						aria-labelledby="history-audience-label history-audience-value"
 						cssOverrides={historyViewStyles.audienceTrigger}
 					>
-						<span id="history-audience-value">
-							{selectedAudiences.length === 0
-								? 'All'
-								: `${selectedAudiences.length} selected`}
+						<span
+							id="history-audience-value"
+							css={historyViewStyles.audienceTriggerValue}
+						>
+							{selectedAudiences.length === 0 ? 'All' : selectedAudienceLabel}
 						</span>
 						<Icon symbol="keyboard_arrow_down" size="lg" />
 					</Button>

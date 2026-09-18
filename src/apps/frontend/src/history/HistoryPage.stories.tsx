@@ -291,9 +291,7 @@ export const Loaded: Story = {
 		await expect(
 			await canvas.findByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
-		await expect(
-			canvas.getByRole('button', { name: 'Clear all', hidden: true }),
-		).not.toBeVisible();
+		await expect(canvas.getByText('Clear all')).not.toBeVisible();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
 		});
@@ -419,7 +417,7 @@ export const AudienceFilter: Story = {
 		await expect(unitedKingdom).toBeChecked();
 		await expect(
 			canvas.getByRole('button', {
-				name: 'Audience / Editions 1 selected',
+				name: 'Audience / Editions United Kingdom',
 			}),
 		).toBeInTheDocument();
 		await expect(
@@ -432,6 +430,30 @@ export const AudienceFilter: Story = {
 			await expect(historyRequest).toHaveBeenCalledOnce();
 			const requestUrl = historyRequest.mock.calls[0]?.[0];
 			await expect(requestUrl?.searchParams.getAll('audience')).toEqual(['uk']);
+			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
+		});
+
+		const unitedStates = page.getByRole('menuitemcheckbox', {
+			name: 'United States',
+		});
+		await userEvent.click(unitedStates);
+
+		await expect(unitedStates).toBeChecked();
+		await expect(
+			canvas.getByRole('button', {
+				name: 'Audience / Editions United Kingdom, United States',
+			}),
+		).toBeInTheDocument();
+		await expect(
+			new URLSearchParams(window.location.search).getAll('audience'),
+		).toEqual(['uk', 'us']);
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledTimes(2);
+			const requestUrl = historyRequest.mock.calls[1]?.[0];
+			await expect(requestUrl?.searchParams.getAll('audience')).toEqual([
+				'uk',
+				'us',
+			]);
 			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
 		});
 	},
@@ -456,7 +478,7 @@ export const ClearAllFilters: Story = {
 		);
 		await expect(
 			canvas.getByRole('button', {
-				name: 'Audience / Editions 1 selected',
+				name: 'Audience / Editions United Kingdom',
 			}),
 		).toBeInTheDocument();
 
@@ -468,9 +490,7 @@ export const ClearAllFilters: Story = {
 		await expect(
 			canvas.getByRole('button', { name: 'Audience / Editions All' }),
 		).toBeInTheDocument();
-		await expect(
-			canvas.getByRole('button', { name: 'Clear all', hidden: true }),
-		).not.toBeVisible();
+		await expect(canvas.getByText('Clear all')).not.toBeVisible();
 		await expect(window.location.search).toBe('');
 	},
 };
