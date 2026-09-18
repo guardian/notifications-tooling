@@ -1,7 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
+import { ConfigContext } from '../config/ConfigContext';
+import { mockAppConfig } from '../testing/app-config';
 import { articleFixture } from '../testing/capi-fixtures';
+import {
+	FIVE_FOUR_CROP_RESPONSE,
+	GRID_CROP_ID,
+	GRID_IMAGE_ID,
+} from '../testing/grid-fixtures';
 import {
 	completeAppAlertFormValues,
 	populatedAppAlertComposerState,
@@ -270,5 +277,150 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 		]) {
 			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
 		}
+	},
+};
+
+export const AcceptsGridCropReplacementThumbnail: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	decorators: [
+		(Story) => (
+			<ConfigContext.Provider value={mockAppConfig}>
+				<Story />
+			</ConfigContext.Provider>
+		),
+	],
+	parameters: {
+		msw: {
+			handlers: [
+				http.get(`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`, () =>
+					HttpResponse.json({
+						data: FIVE_FOUR_CROP_RESPONSE,
+					}),
+				),
+				http.get(
+					`https://media.guim.co.uk/${GRID_IMAGE_ID}/${GRID_CROP_ID}/1000.jpg`,
+					() =>
+						HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+							headers: { 'Content-Type': 'image/svg+xml' },
+						}),
+				),
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const gridCropUrl = `${mockAppConfig.gridUri}/images/${GRID_IMAGE_ID}?crop=${GRID_CROP_ID}`;
+		const resolvedThumbnailUrl = `https://media.guim.co.uk/${GRID_IMAGE_ID}/${GRID_CROP_ID}/1000.jpg`;
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.type(replacementInput, gridCropUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
+		await expect(replacementInput).toHaveValue(gridCropUrl);
+		for (const thumbnail of [
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', resolvedThumbnailUrl);
+		}
+	},
+};
+
+export const ShowsErrorWhenGridLookupFails: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	decorators: [
+		(Story) => (
+			<ConfigContext.Provider value={mockAppConfig}>
+				<Story />
+			</ConfigContext.Provider>
+		),
+	],
+	parameters: {
+		msw: {
+			handlers: [
+				http.get(
+					`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`,
+					() => new HttpResponse(null, { status: 501 }),
+				),
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const gridCropUrl = `${mockAppConfig.gridUri}/images/${GRID_IMAGE_ID}?crop=${GRID_CROP_ID}`;
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.type(replacementInput, gridCropUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(
+			await canvas.findByText(
+				'Failed to retrieve the image details from the grid. Please try again',
+			),
+		).toBeVisible();
+	},
+};
+
+export const ShowsErrorAndAuthButtonWhenGridApiReturnsForbidden: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	decorators: [
+		(Story) => (
+			<ConfigContext.Provider value={mockAppConfig}>
+				<Story />
+			</ConfigContext.Provider>
+		),
+	],
+	parameters: {
+		msw: {
+			handlers: [
+				http.get(
+					`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`,
+					() => new HttpResponse(null, { status: 401 }),
+				),
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const gridCropUrl = `${mockAppConfig.gridUri}/images/${GRID_IMAGE_ID}?crop=${GRID_CROP_ID}`;
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.type(replacementInput, gridCropUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(
+			await canvas.findByText(
+				'Your Authentication credentials for the grid have expired',
+			),
+		).toBeVisible();
+
+		await expect(
+			canvasElement.querySelector(`[href="${mockAppConfig.gridUri}"]`),
+		).toBeInTheDocument();
 	},
 };
