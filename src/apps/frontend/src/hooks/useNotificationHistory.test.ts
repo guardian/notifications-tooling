@@ -1,10 +1,90 @@
-import { describe, expect, it } from 'bun:test';
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	describe,
+	expect,
+	it,
+	mock,
+} from 'bun:test';
 import { QueryClient } from '@tanstack/react-query';
 import {
 	ALWAYS_FRESH,
+	fetchNotificationHistory,
 	getNotificationHistoryQueryKey,
 	notificationHistoryQueryKey,
 } from './useNotificationHistory';
+
+const originalFetch = globalThis.fetch;
+const originalLocation = Object.getOwnPropertyDescriptor(
+	globalThis,
+	'location',
+);
+
+beforeAll(() => {
+	Object.defineProperty(globalThis, 'location', {
+		configurable: true,
+		value: { origin: 'http://localhost:3000' },
+	});
+});
+
+afterEach(() => {
+	globalThis.fetch = originalFetch;
+});
+
+afterAll(() => {
+	if (originalLocation) {
+		Object.defineProperty(globalThis, 'location', originalLocation);
+	} else {
+		Reflect.deleteProperty(globalThis, 'location');
+	}
+});
+
+describe('fetchNotificationHistory', () => {
+	it('serializes search and repeated audience query parameters', async () => {
+		let requestUrl: URL | undefined;
+		const fetchMock = mock((input: RequestInfo | URL) => {
+			const url =
+				typeof input === 'string'
+					? input
+					: input instanceof URL
+						? input.href
+						: input.url;
+			requestUrl = new URL(url);
+
+			return Promise.resolve(
+				Response.json({
+					total: 0,
+					limit: 20,
+					offset: 0,
+					notifications: [],
+				}),
+			);
+		});
+		globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+		await fetchNotificationHistory({
+			limit: 20,
+			offset: 40,
+			since: 1_700_000_000,
+			search: 'climate',
+			audiences: ['uk', 'europe'],
+		});
+
+		if (!requestUrl) {
+			throw new Error('Expected notification history to be requested');
+		}
+		expect(requestUrl.pathname).toBe('/v1/notifications');
+		expect(requestUrl.searchParams.get('limit')).toBe('20');
+		expect(requestUrl.searchParams.get('offset')).toBe('40');
+		expect(requestUrl.searchParams.get('since')).toBe('1700000000');
+		expect(requestUrl.searchParams.get('search')).toBe('climate');
+		expect(requestUrl.searchParams.getAll('audience')).toEqual([
+			'uk',
+			'europe',
+		]);
+	});
+});
 
 describe('notification history query keys', () => {
 	it('separates pages and date windows in the cache', () => {
@@ -32,6 +112,22 @@ describe('notification history query keys', () => {
 				limit: 20,
 				offset: 0,
 				search: 'sport',
+			}),
+		);
+	});
+
+	it('separates audience filters in the cache', () => {
+		expect(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				audiences: ['uk'],
+			}),
+		).not.toEqual(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				audiences: ['us'],
 			}),
 		);
 	});
