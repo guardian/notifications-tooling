@@ -1,3 +1,4 @@
+import { semanticSizing, semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { TextInput } from '@guardian/stand/TextInput';
 import { useSearchParams } from 'react-router-dom';
@@ -38,7 +39,13 @@ export const HistorySearchFilter = () => {
 				value={search ?? ''}
 				onChange={handleSearchTermChange}
 				maxLength={MAXIMUM_SEARCH_LENGTH}
-				theme={{ shared: { padding: { left: '44px' } } }}
+				theme={{
+					shared: {
+						padding: {
+							left: `calc(${semanticSpacing.stackSm} * 2 + ${semanticSizing.icon.md})`,
+						},
+					},
+				}}
 				fluid
 			/>
 			<Icon
