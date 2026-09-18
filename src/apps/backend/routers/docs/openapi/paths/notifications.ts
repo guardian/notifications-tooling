@@ -9,7 +9,7 @@ export const notificationsPath = {
 	get: {
 		summary: 'List recent notifications',
 		description:
-			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive substring match to notification body and title fields. `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
+			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive substring match to notification body and title fields. Repeated `audience` values match any selected newsletter audience or app-push edition. `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{
@@ -43,6 +43,22 @@ export const notificationsPath = {
 				description:
 					'Case-insensitive substring matched against notification body and title fields.',
 				schema: { type: 'string', minLength: 1, maxLength: 200 },
+			},
+			{
+				name: 'audience',
+				in: 'query',
+				required: false,
+				description:
+					'Repeat to match any selected newsletter audience or app-push edition.',
+				schema: {
+					type: 'array',
+					items: {
+						type: 'string',
+						enum: ['uk', 'us', 'au', 'europe', 'international'],
+					},
+				},
+				style: 'form',
+				explode: true,
 			},
 		],
 		responses: {
