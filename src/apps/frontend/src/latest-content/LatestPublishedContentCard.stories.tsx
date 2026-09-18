@@ -7,6 +7,7 @@ import {
 } from '@guardian/stand/Table';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import { latestPublishedContentTheme } from '../themes';
 import { mockLatestPublishedContent } from './latest-published-content';
 import { LatestPublishedContentCard } from './LatestPublishedContentCard';
 
@@ -20,8 +21,12 @@ const CardStory = ({
 	args: Parameters<typeof LatestPublishedContentCard>[0];
 	width: string;
 }) => (
-	<div style={{ width }}>
-		<Table aria-label="Latest published content card" columns={tableColumns}>
+	<div style={{ width, minWidth: width, flexShrink: 0 }}>
+		<Table
+			aria-label="Latest published content card"
+			columns={tableColumns}
+			cssOverrides={latestPublishedContentTheme.list}
+		>
 			<TableHeader cssOverrides={hiddenHeader}>
 				<TableColumnHeader isRowHeader aria-label="Content" />
 			</TableHeader>
@@ -41,7 +46,7 @@ const meta = {
 	parameters: {
 		layout: 'centered',
 	},
-	render: (args) => <CardStory args={args} width="380px" />,
+	render: (args) => <CardStory args={args} width="612px" />,
 } satisfies Meta<typeof LatestPublishedContentCard>;
 
 export default meta;
@@ -73,8 +78,8 @@ export const Default: Story = {
 	},
 };
 
-export const WideRow: Story = {
-	render: (args) => <CardStory args={args} width="676px" />,
+export const Compact: Story = {
+	render: (args) => <CardStory args={args} width="380px" />,
 };
 
 export const NoImage: Story = {
@@ -84,11 +89,5 @@ export const NoImage: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('No image')).toBeVisible();
-	},
-};
-
-export const UnknownPillar: Story = {
-	args: {
-		content: mockLatestPublishedContent[5],
 	},
 };

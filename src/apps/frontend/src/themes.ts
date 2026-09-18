@@ -435,6 +435,11 @@ export const dispatchLandingTheme = {
 	}),
 };
 
+const compactLatestContentQuery =
+	'@container latest-content-table (max-width: 579.9px)';
+const expandedLatestContentQuery =
+	'@container latest-content-table (min-width: 580px)';
+
 export const latestPublishedContentTheme = {
 	panel: css({
 		display: 'flex',
@@ -503,7 +508,7 @@ export const latestPublishedContentTheme = {
 		gap: semanticSpacing.stackSm,
 		padding: semanticSpacing.stackMd,
 		backgroundColor: 'transparent',
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			display: 'grid',
 			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px max-content',
 			alignItems: 'center',
@@ -511,7 +516,7 @@ export const latestPublishedContentTheme = {
 			rowGap: semanticSpacing.stackXxs,
 			paddingBlock: semanticSpacing.stackSm,
 		},
-		'@container latest-content-table (max-width: 579.9px)': {
+		[compactLatestContentQuery]: {
 			display: 'grid',
 			gridTemplateColumns: 'minmax(0, 1fr) 104px',
 			gap: semanticSpacing.stackSm,
@@ -523,10 +528,10 @@ export const latestPublishedContentTheme = {
 		minWidth: 0,
 		flexDirection: 'column',
 		gap: semanticSpacing.stackSm,
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			display: 'contents',
 		},
-		'@container latest-content-table (max-width: 579.9px)': {
+		[compactLatestContentQuery]: {
 			display: 'flex',
 		},
 	}),
@@ -535,10 +540,10 @@ export const latestPublishedContentTheme = {
 		width: '104px',
 		flexDirection: 'column',
 		gap: semanticSpacing.stackSm,
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			display: 'contents',
 		},
-		'@container latest-content-table (max-width: 579.9px)': {
+		[compactLatestContentQuery]: {
 			display: 'flex',
 		},
 	}),
@@ -546,7 +551,7 @@ export const latestPublishedContentTheme = {
 		display: 'flex',
 		flexDirection: 'column',
 		gap: semanticSpacing.stackXxs,
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			minWidth: 0,
 		},
 	}),
@@ -573,7 +578,7 @@ export const latestPublishedContentTheme = {
 	cardHeadline: css({
 		display: 'flex',
 		alignItems: 'flex-start',
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			minWidth: 0,
 		},
 	}),
@@ -581,13 +586,13 @@ export const latestPublishedContentTheme = {
 		fontSize: '14px',
 		lineHeight: 1.4,
 		color: semanticColors.text.strong,
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			display: '-webkit-box',
 			overflow: 'hidden',
 			WebkitBoxOrient: 'vertical',
 			WebkitLineClamp: 2,
 		},
-		'@container latest-content-table (max-width: 579.9px)': {
+		[compactLatestContentQuery]: {
 			display: 'block',
 			overflow: 'visible',
 			WebkitLineClamp: 'unset',
@@ -599,13 +604,13 @@ export const latestPublishedContentTheme = {
 		aspectRatio: '5 / 4',
 		objectFit: 'cover',
 		borderRadius: semanticRadius.cornerXs,
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			width: '80px',
 			height: '64px',
 			maxWidth: 'none',
 			aspectRatio: 'auto',
 		},
-		'@container latest-content-table (max-width: 579.9px)': {
+		[compactLatestContentQuery]: {
 			width: '104px',
 			height: 'auto',
 			maxWidth: 'none',
@@ -624,13 +629,13 @@ export const latestPublishedContentTheme = {
 		color: semanticColors.text.weak,
 		backgroundColor: semanticColors.fill.neutralWeak,
 		borderRadius: semanticRadius.cornerXs,
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			width: '80px',
 			height: '64px',
 			maxWidth: 'none',
 			aspectRatio: 'auto',
 		},
-		'@container latest-content-table (max-width: 579.9px)': {
+		[compactLatestContentQuery]: {
 			width: '104px',
 			height: 'auto',
 			maxWidth: 'none',
@@ -640,12 +645,12 @@ export const latestPublishedContentTheme = {
 	createButtonSlot: css({
 		display: 'flex',
 		alignItems: 'center',
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			alignSelf: 'stretch',
 			paddingLeft: '12px',
 			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		},
-		'@container latest-content-table (max-width: 579.9px)': {
+		[compactLatestContentQuery]: {
 			alignSelf: 'auto',
 			paddingLeft: 0,
 			borderLeft: 0,
@@ -659,10 +664,10 @@ export const latestPublishedContentTheme = {
 		'&[data-hovered], &:hover': {
 			background: semanticColors.bg.raisedLevel1,
 		},
-		[from.md]: {
+		[expandedLatestContentQuery]: {
 			alignSelf: 'center',
 		},
-		'@container latest-content-table (max-width: 579.9px)': {
+		[compactLatestContentQuery]: {
 			alignSelf: 'flex-start',
 			width: '104px',
 		},
