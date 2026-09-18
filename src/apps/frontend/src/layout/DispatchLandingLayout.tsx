@@ -63,8 +63,7 @@ export const DispatchLandingLayout = () => {
 									},
 								})}
 							>
-								{/* TEMPORARY: Remove this URL when the latest article list supplies the selected article. */}
-								<LatestPublishedContent articleUrl="https://www.theguardian.com/environment/2026/sep/17/andy-burnham-uk-must-fully-commit-to-reaching-net-zero-by-2050" />
+								<LatestPublishedContent />
 							</Item>
 						)}
 					</>
