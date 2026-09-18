@@ -1,4 +1,5 @@
 import { Button } from '@guardian/stand/Button';
+import { Checkbox } from '@guardian/stand/Checkbox';
 import { Icon } from '@guardian/stand/Icon';
 import { Menu, MenuItem, MenuToggle } from '@guardian/stand/Menu';
 import { Typography } from '@guardian/stand/Typography';
@@ -80,9 +81,22 @@ export const HistoryAlertTypeFilter = () => {
 					<MenuItem
 						key={id}
 						id={id}
-						label={alertTypeLabels[id]}
+						aria-label={alertTypeLabels[id]}
+						textValue={alertTypeLabels[id]}
 						shouldCloseOnSelect={false}
 						cssOverrides={historyViewStyles.categoryMenuItem}
+						label={
+							<span aria-hidden="true" inert css={historyViewStyles.visualOnly}>
+								<Checkbox
+									size="md"
+									isSelected={alertTypes.includes(id)}
+									isReadOnly
+									cssOverrides={historyViewStyles.filterCheckbox}
+								>
+									{alertTypeLabels[id]}
+								</Checkbox>
+							</span>
+						}
 					/>
 				))}
 			</Menu>
