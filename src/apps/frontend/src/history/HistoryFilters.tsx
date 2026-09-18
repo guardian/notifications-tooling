@@ -2,6 +2,7 @@ import { historyViewStyles } from '../themes';
 import { ClearHistoryFiltersButton } from './ClearHistoryFiltersButton';
 import { HistoryAudienceFilter } from './HistoryAudienceFilter';
 import { HistorySearchFilter } from './HistorySearchFilter';
+import { HistoryStatusFilter } from './HistoryStatusFilter';
 
 export const HistoryFilters = () => (
 	<aside aria-label="Filters" css={historyViewStyles.filters}>
@@ -9,6 +10,7 @@ export const HistoryFilters = () => (
 		<div css={historyViewStyles.filterFields}>
 			<HistorySearchFilter />
 			<HistoryAudienceFilter />
+			<HistoryStatusFilter />
 		</div>
 	</aside>
 );

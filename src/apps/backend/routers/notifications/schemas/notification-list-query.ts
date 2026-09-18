@@ -4,6 +4,12 @@ import { z } from 'zod';
 const defaultLimit = 10;
 const defaultOffset = 0;
 const defaultSinceDays = 14;
+const notificationStatusCategory = z.enum(['sent', 'error']);
+
+const statusesByCategory = {
+	sent: ['accepted', 'delivered'],
+	error: ['partially_delivered', 'failed'],
+} as const;
 
 const daysAgo = (days: number) =>
 	new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -33,6 +39,13 @@ export const notificationListQuerySchema = z
 			.union([appAlertTopicEditionId, z.array(appAlertTopicEditionId).min(1)])
 			.transform((value) => (Array.isArray(value) ? value : [value]))
 			.optional(),
+		status: z
+			.union([
+				notificationStatusCategory,
+				z.array(notificationStatusCategory).min(1),
+			])
+			.transform((value) => (Array.isArray(value) ? value : [value]))
+			.optional(),
 	})
 	.refine(
 		(query) => (query.limit === undefined) === (query.offset === undefined),
@@ -47,6 +60,13 @@ export const notificationListQuerySchema = z
 		offset: query.offset ?? defaultOffset,
 		search: query.search,
 		audiences: query.audience ? [...new Set(query.audience)] : undefined,
+		statuses: query.status
+			? [
+					...new Set(
+						query.status.flatMap((status) => statusesByCategory[status]),
+					),
+				]
+			: undefined,
 	}));
 
 export type NotificationListQuery = z.infer<typeof notificationListQuerySchema>;

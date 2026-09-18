@@ -968,6 +968,27 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
+		it('expands and forwards status categories', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&status=sent&status=error`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+					statuses: ['accepted', 'delivered', 'partially_delivered', 'failed'],
+				});
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it('defaults to limit 10 / offset 0 when neither is supplied', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
