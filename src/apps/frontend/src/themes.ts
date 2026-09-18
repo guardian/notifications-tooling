@@ -434,17 +434,25 @@ export const historyViewStyles = {
 	}),
 	clearFilters: css({
 		alignSelf: 'flex-end',
+		height: 'auto',
 		padding: 0,
 		border: 0,
 		color: semanticColors.text.link,
 		background: 'transparent',
 		textDecoration: 'underline',
-		cursor: 'pointer',
 		font: 'inherit',
+		'&[data-hovered], &:hover, &[data-pressed], &:active': {
+			border: 0,
+			color: semanticColors.text.link,
+			background: 'transparent',
+		},
 		'&:focus-visible': {
 			outline: `2px solid ${semanticColors.border.focused}`,
 			outlineOffset: '2px',
 		},
+	}),
+	clearFiltersHidden: css({
+		visibility: 'hidden',
 	}),
 	searchField: css({
 		position: 'relative',
