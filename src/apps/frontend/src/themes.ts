@@ -362,6 +362,11 @@ export const dispatchLandingTheme = {
 		gridTemplateAreas: "'alertbanner' 'topbar' 'main' 'latest'",
 		gridTemplateColumns: 'minmax(0, 1fr)',
 		gridTemplateRows: 'min-content min-content auto auto',
+		[from.md]: {
+			gridTemplateAreas: "'alertbanner' 'topbar' 'main' 'latest'",
+			gridTemplateColumns: 'minmax(0, 1fr)',
+			gridTemplateRows: 'min-content min-content auto auto',
+		},
 		[from.lg]: {
 			gridTemplateAreas:
 				"'alertbanner alertbanner alertbanner' 'topbar topbar topbar' 'main gap latest'",
@@ -372,17 +377,38 @@ export const dispatchLandingTheme = {
 	primaryColumn: css({
 		gridArea: 'main',
 		minWidth: 0,
-		paddingTop: semanticSpacing.stackLg,
-		paddingInline: semanticSpacing.stackMd,
+		padding: '24px',
+		[from.sm]: {
+			paddingBottom: '24px',
+		},
 		[from.md]: {
-			paddingInline: semanticSpacing.stackLg,
+			paddingBottom: '24px',
+		},
+		[from.lg]: {
+			paddingBottom: '24px',
 		},
 	}),
 	latestContentRail: css({
 		gridArea: 'latest',
 		minWidth: 0,
-		padding: semanticSpacing.stackLg,
-		backgroundColor: semanticColors.bg.raisedLevel1,
+		paddingTop: 0,
+		paddingBottom: '39px',
+		paddingInline: '24px',
+		backgroundColor: semanticColors.bg.base,
+		'&::before': {
+			display: 'block',
+			marginBottom: '12px',
+			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			content: '""',
+		},
+		[from.lg]: {
+			paddingTop: '39px',
+			paddingInline: semanticSpacing.stackLg,
+			backgroundColor: semanticColors.bg.raisedLevel1,
+			'&::before': {
+				display: 'none',
+			},
+		},
 	}),
 	dispatchTableSection: css({
 		width: '100%',
@@ -426,34 +452,77 @@ export const latestPublishedContentTheme = {
 	}),
 	list: css({
 		width: '100%',
+		containerType: 'inline-size',
+		containerName: 'latest-content-table',
+		backgroundColor: semanticColors.bg.raisedLevel1,
+		'& [role="row"]': {
+			backgroundColor: semanticColors.bg.raisedLevel1,
+		},
+		[from.lg]: {
+			backgroundColor: 'transparent',
+			'& [role="row"]': {
+				backgroundColor: 'transparent',
+			},
+		},
 	}),
 	tableHeader: css({
 		'& > tr > *': {
 			padding: '16px',
 		},
+		[from.lg]: {
+			display: 'none',
+		},
 	}),
 	card: css({
-		display: 'flex',
-		flexDirection: 'column',
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr) 104px',
 		gap: semanticSpacing.stackSm,
 		padding: semanticSpacing.stackMd,
-		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		backgroundColor: semanticColors.bg.base,
-		[from.lg]: {
+		backgroundColor: 'transparent',
+		[from.md]: {
 			display: 'grid',
-			gridTemplateColumns:
-				'minmax(140px, 0.9fr) minmax(220px, 1.5fr) 96px auto',
+			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px max-content',
 			alignItems: 'center',
-			columnGap: semanticSpacing.stackSm,
+			columnGap: '12px',
 			rowGap: semanticSpacing.stackXxs,
 			paddingBlock: semanticSpacing.stackSm,
+		},
+		'@container latest-content-table (max-width: 579.9px)': {
+			display: 'grid',
+			gridTemplateColumns: 'minmax(0, 1fr) 104px',
+			gap: semanticSpacing.stackSm,
+			padding: semanticSpacing.stackMd,
+		},
+	}),
+	cardDetails: css({
+		display: 'flex',
+		minWidth: 0,
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+		[from.md]: {
+			display: 'contents',
+		},
+		'@container latest-content-table (max-width: 579.9px)': {
+			display: 'flex',
+		},
+	}),
+	cardActions: css({
+		display: 'flex',
+		width: '104px',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+		[from.md]: {
+			display: 'contents',
+		},
+		'@container latest-content-table (max-width: 579.9px)': {
+			display: 'flex',
 		},
 	}),
 	cardMeta: css({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: semanticSpacing.stackXxs,
-		[from.lg]: {
+		[from.md]: {
 			minWidth: 0,
 		},
 	}),
@@ -473,7 +542,7 @@ export const latestPublishedContentTheme = {
 	cardHeadline: css({
 		display: 'flex',
 		alignItems: 'flex-start',
-		[from.lg]: {
+		[from.md]: {
 			minWidth: 0,
 		},
 	}),
@@ -481,11 +550,16 @@ export const latestPublishedContentTheme = {
 		fontSize: '14px',
 		lineHeight: 1.4,
 		color: semanticColors.text.strong,
-		[from.lg]: {
+		[from.md]: {
 			display: '-webkit-box',
 			overflow: 'hidden',
 			WebkitBoxOrient: 'vertical',
 			WebkitLineClamp: 2,
+		},
+		'@container latest-content-table (max-width: 579.9px)': {
+			display: 'block',
+			overflow: 'visible',
+			WebkitLineClamp: 'unset',
 		},
 	}),
 	thumbnail: css({
@@ -494,11 +568,17 @@ export const latestPublishedContentTheme = {
 		aspectRatio: '5 / 4',
 		objectFit: 'cover',
 		borderRadius: semanticRadius.cornerXs,
-		[from.lg]: {
-			width: '96px',
+		[from.md]: {
+			width: '80px',
 			height: '64px',
 			maxWidth: 'none',
 			aspectRatio: 'auto',
+		},
+		'@container latest-content-table (max-width: 579.9px)': {
+			width: '104px',
+			height: 'auto',
+			maxWidth: 'none',
+			aspectRatio: '5 / 4',
 		},
 	}),
 	thumbnailFallback: css({
@@ -513,18 +593,43 @@ export const latestPublishedContentTheme = {
 		color: semanticColors.text.weak,
 		backgroundColor: semanticColors.fill.neutralWeak,
 		borderRadius: semanticRadius.cornerXs,
-		[from.lg]: {
-			width: '96px',
+		[from.md]: {
+			width: '80px',
 			height: '64px',
 			maxWidth: 'none',
 			aspectRatio: 'auto',
 		},
+		'@container latest-content-table (max-width: 579.9px)': {
+			width: '104px',
+			height: 'auto',
+			maxWidth: 'none',
+			aspectRatio: '5 / 4',
+		},
+	}),
+	createButtonSlot: css({
+		display: 'flex',
+		alignItems: 'center',
+		[from.md]: {
+			alignSelf: 'stretch',
+			paddingLeft: '12px',
+			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		},
+		'@container latest-content-table (max-width: 579.9px)': {
+			alignSelf: 'auto',
+			paddingLeft: 0,
+			borderLeft: 0,
+		},
 	}),
 	createButton: css({
 		alignSelf: 'flex-start',
-		[from.lg]: {
-			justifySelf: 'end',
+		flexShrink: 0,
+		whiteSpace: 'nowrap',
+		[from.md]: {
 			alignSelf: 'center',
+		},
+		'@container latest-content-table (max-width: 579.9px)': {
+			alignSelf: 'flex-start',
+			width: '104px',
 		},
 	}),
 } as const;
@@ -643,9 +748,21 @@ export const historyViewStyles = {
 		},
 	}),
 	table: css({
+		containerType: 'inline-size',
+		containerName: 'history-table',
 		'@media (min-width: 600px) and (max-width: 1055.9px)': {
 			'& [role="row"]': {
 				gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+			},
+		},
+		'@container history-table (max-width: 899.9px)': {
+			'& [role="row"]': {
+				gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+			},
+		},
+		'@container history-table (max-width: 599.9px)': {
+			'& [role="row"]': {
+				gridTemplateColumns: 'minmax(0, 1fr)',
 			},
 		},
 	}),
@@ -658,6 +775,9 @@ export const historyViewStyles = {
 			[from.lg]: {
 				display: 'block',
 			},
+			'@container history-table (max-width: 899.9px)': {
+				display: 'none',
+			},
 		},
 	}),
 	tableRow: css({
@@ -667,6 +787,10 @@ export const historyViewStyles = {
 			rowGap: 0,
 			paddingBlock: 0,
 		},
+		'@container history-table (max-width: 899.9px)': {
+			rowGap: semanticSpacing.stackXs,
+			paddingBlock: semanticSpacing.stackXs,
+		},
 	}),
 	notificationCell: css({
 		'@media (min-width: 600px) and (max-width: 1055.9px)': {
@@ -675,6 +799,14 @@ export const historyViewStyles = {
 		'@media (min-width: 600px) and (max-width: 829.9px)': {
 			gridColumn: '1',
 			gridRow: '1 / span 4',
+		},
+		'@container history-table (max-width: 899.9px)': {
+			gridColumn: '1',
+			gridRow: '1 / span 4',
+			alignSelf: 'start',
+		},
+		'@container history-table (max-width: 599.9px)': {
+			gridRow: 'auto',
 		},
 	}),
 	metadataCell: (row: number) =>
@@ -689,6 +821,17 @@ export const historyViewStyles = {
 				gridColumn: '2',
 				gridRow: String(row),
 			},
+			'@container history-table (max-width: 899.9px)': {
+				display: 'grid',
+				gridTemplateColumns: '80px minmax(0, 1fr)',
+				alignItems: 'center',
+				gridColumn: '2',
+				gridRow: String(row),
+			},
+			'@container history-table (max-width: 599.9px)': {
+				gridColumn: '1',
+				gridRow: 'auto',
+			},
 		}),
 	compactLabel: css({
 		color: semanticColors.text.weak,
@@ -697,6 +840,9 @@ export const historyViewStyles = {
 		},
 		[from.lg]: {
 			display: 'none',
+		},
+		'@container history-table (max-width: 899.9px)': {
+			display: 'inline',
 		},
 	}),
 	metadataValue: css({
@@ -718,6 +864,11 @@ export const historyViewStyles = {
 			paddingInline: '8px',
 			font: semanticTypography.headingSm.font,
 			letterSpacing: semanticTypography.headingSm.letterSpacing,
+		},
+		'@container history-table (max-width: 899.9px)': {
+			height: '18px',
+			paddingInline: '6px',
+			font: 'inherit',
 		},
 	}),
 	empty: css({

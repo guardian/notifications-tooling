@@ -32,9 +32,6 @@ const tileStyles = {
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		borderRadius: semanticRadius.cornerSm,
 		[from.md]: {
-			width: '300px',
-		},
-		[from.lg]: {
 			width: '100%',
 		},
 	}),

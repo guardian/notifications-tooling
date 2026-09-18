@@ -30,10 +30,11 @@ export const LatestPublishedContentPanel = () => {
 				aria-label="Latest published content"
 				cssOverrides={latestPublishedContentTheme.list}
 				columns={tableColumns}
+				headerVisibleFrom="sm"
 			>
 				<TableHeader cssOverrides={latestPublishedContentTheme.tableHeader}>
 					<TableColumnHeader isRowHeader>
-						Last published content
+						Latest published content
 					</TableColumnHeader>
 				</TableHeader>
 				<TableBody>

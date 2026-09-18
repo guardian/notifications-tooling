@@ -33,59 +33,67 @@ export const LatestPublishedContentCard = ({
 	return (
 		<TableRow id={id}>
 			<TableCell cssOverrides={latestPublishedContentTheme.card}>
-				<div css={latestPublishedContentTheme.cardMeta}>
-					<Typography
-						variant="bodyBoldXs"
-						cssOverrides={latestPublishedContentTheme.sectionLabel(pillarColor)}
-					>
-						{section} / {pillarName}
-					</Typography>
-					{publishedAt && (
+				<div css={latestPublishedContentTheme.cardDetails}>
+					<div css={latestPublishedContentTheme.cardMeta}>
 						<Typography
-							variant="bodyXs"
-							cssOverrides={latestPublishedContentTheme.published}
+							variant="bodyBoldXs"
+							cssOverrides={latestPublishedContentTheme.sectionLabel(
+								pillarColor,
+							)}
 						>
-							Published {publishedAt.label}
+							{section} / {pillarName}
 						</Typography>
+						{publishedAt && (
+							<Typography
+								variant="bodyXs"
+								cssOverrides={latestPublishedContentTheme.published}
+							>
+								Published {publishedAt.label}
+							</Typography>
+						)}
+						<div css={latestPublishedContentTheme.audience}>
+							<FlagPair from={homeEdition} to={targetAudience} />
+						</div>
+					</div>
+
+					<div css={latestPublishedContentTheme.cardHeadline}>
+						<ExternalLink href={url}>
+							<Typography
+								variant="bodySm"
+								element="span"
+								cssOverrides={latestPublishedContentTheme.headline}
+							>
+								{headline}
+							</Typography>
+						</ExternalLink>
+					</div>
+				</div>
+
+				<div css={latestPublishedContentTheme.cardActions}>
+					{imageUrl ? (
+						<img
+							src={imageUrl}
+							alt=""
+							css={latestPublishedContentTheme.thumbnail}
+						/>
+					) : (
+						<div css={latestPublishedContentTheme.thumbnailFallback}>
+							<Icon size="sm" symbol="image" />
+							<Typography variant="bodyXs">No image</Typography>
+						</div>
 					)}
-					<div css={latestPublishedContentTheme.audience}>
-						<FlagPair from={homeEdition} to={targetAudience} />
-					</div>
-				</div>
 
-				<div css={latestPublishedContentTheme.cardHeadline}>
-					<ExternalLink href={url}>
-						<Typography
-							variant="bodySm"
-							element="span"
-							cssOverrides={latestPublishedContentTheme.headline}
+					<div css={latestPublishedContentTheme.createButtonSlot}>
+						<Button
+							variant="tertiary"
+							size="sm"
+							cssOverrides={latestPublishedContentTheme.createButton}
 						>
-							{headline}
-						</Typography>
-					</ExternalLink>
-				</div>
-
-				{imageUrl ? (
-					<img
-						src={imageUrl}
-						alt=""
-						css={latestPublishedContentTheme.thumbnail}
-					/>
-				) : (
-					<div css={latestPublishedContentTheme.thumbnailFallback}>
-						<Icon size="sm" symbol="image" />
-						<Typography variant="bodyXs">No image</Typography>
+							<Icon size="sm" symbol="notifications" />
+							Create
+						</Button>
 					</div>
-				)}
-
-				<Button
-					variant="tertiary"
-					size="sm"
-					cssOverrides={latestPublishedContentTheme.createButton}
-				>
-					<Icon size="sm" symbol="notifications" />
-					Create
-				</Button>
+				</div>
 			</TableCell>
 		</TableRow>
 	);
