@@ -25,6 +25,21 @@ describe('parseHistorySearchParams', () => {
 		});
 	});
 
+	it('reads, validates, and deduplicates audience parameters', () => {
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams(
+					'audience=uk&audience=europe&audience=uk&audience=invalid',
+				),
+			),
+		).toEqual({
+			limit: 20,
+			offset: 0,
+			since: undefined,
+			audiences: ['uk', 'europe'],
+		});
+	});
+
 	it('sanitizes invalid values before they reach the endpoint', () => {
 		expect(
 			parseHistorySearchParams(

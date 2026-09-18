@@ -1,6 +1,7 @@
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { DisplayAppAlertTopicEditionId } from '@models';
+import type { AppAlertTopicEditionId } from '@models';
 import type { ReactNode } from 'react';
 import type { ChannelAudienceResponse } from '../schemas';
 import { historyViewStyles, layoutMainTheme } from '../themes';
@@ -38,9 +39,12 @@ interface HistoryViewProps {
 	error?: ReactNode;
 	lastUpdatedAt?: string;
 	searchTerm: string;
+	selectedAudiences?: AppAlertTopicEditionId[];
 	onPageChange: (page: number) => void;
 	onRefresh: () => void;
 	onSearchTermChange: (searchTerm: string) => void;
+	onAudienceChange?: (audiences: AppAlertTopicEditionId[]) => void;
+	onClearFilters?: () => void;
 }
 
 export const HistoryView = ({
@@ -53,17 +57,24 @@ export const HistoryView = ({
 	error,
 	lastUpdatedAt,
 	searchTerm,
+	selectedAudiences = [],
 	currentPage,
 	onPageChange,
 	onRefresh,
 	onSearchTermChange,
+	onAudienceChange = () => undefined,
+	onClearFilters = () => undefined,
 }: HistoryViewProps) => {
 	return (
 		<Layout.Main theme={layoutMainTheme}>
 			<div css={historyViewStyles.page}>
 				<HistoryFilters
+					audiences={audiences}
 					searchTerm={searchTerm}
+					selectedAudiences={selectedAudiences}
 					onSearchTermChange={onSearchTermChange}
+					onAudienceChange={onAudienceChange}
+					onClearFilters={onClearFilters}
 				/>
 				<section
 					aria-labelledby="history-heading"
@@ -101,7 +112,11 @@ export const HistoryView = ({
 						<HistoryTable notifications={notifications} audiences={audiences} />
 					)}
 					{!isLoading && !error && notifications.length === 0 && (
-						<HistoryEmptyState isSearchResult={searchTerm.trim().length > 0} />
+						<HistoryEmptyState
+							isSearchResult={
+								searchTerm.trim().length > 0 || selectedAudiences.length > 0
+							}
+						/>
 					)}
 				</section>
 			</div>

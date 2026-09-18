@@ -36,6 +36,22 @@ describe('notification history query keys', () => {
 		);
 	});
 
+	it('separates audience filters in the cache', () => {
+		expect(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				audiences: ['uk'],
+			}),
+		).not.toEqual(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				audiences: ['us'],
+			}),
+		);
+	});
+
 	it('uses a stable cache scope for a moving date window', () => {
 		const firstMountKey = getNotificationHistoryQueryKey({
 			limit: 20,

@@ -11,6 +11,7 @@ export const HistoryPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
 	const searchTerm = parsedHistoryQuery.search ?? '';
+	const selectedAudiences = parsedHistoryQuery.audiences ?? [];
 	const debouncedSearch = useDebouncedValue(parsedHistoryQuery.search, 300);
 	const isSearchPending = parsedHistoryQuery.search !== debouncedSearch;
 	const historyQuery = { ...parsedHistoryQuery, search: debouncedSearch };
@@ -48,6 +49,25 @@ export const HistoryPage = () => {
 			{ replace: true },
 		);
 	};
+	const handleAudienceChange = (audiences: typeof selectedAudiences) => {
+		setSearchParams(
+			(currentSearchParams) => {
+				const nextSearchParams = new URLSearchParams(currentSearchParams);
+				nextSearchParams.delete('audience');
+				for (const audience of audiences) {
+					nextSearchParams.append('audience', audience);
+				}
+				nextSearchParams.set('offset', '0');
+				nextSearchParams.set('limit', String(limit));
+
+				return nextSearchParams;
+			},
+			{ replace: true },
+		);
+	};
+	const handleClearFilters = () => {
+		setSearchParams(new URLSearchParams(), { replace: true });
+	};
 	const handleRefresh = () => void notificationHistory.refetch();
 
 	const notifications =
@@ -83,7 +103,10 @@ export const HistoryPage = () => {
 			}
 			currentPage={currentPage}
 			searchTerm={searchTerm}
+			selectedAudiences={selectedAudiences}
 			onSearchTermChange={handleSearchTermChange}
+			onAudienceChange={handleAudienceChange}
+			onClearFilters={handleClearFilters}
 		/>
 	);
 };

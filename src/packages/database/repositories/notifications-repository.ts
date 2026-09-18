@@ -19,6 +19,8 @@ export type ListRecentNotificationsOptions = {
 	offset?: number;
 	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
+	/** API edition ids matched against newsletter variants or app-push editions. */
+	audiences?: string[];
 };
 
 export type ListNotificationsInWindowOptions = {
@@ -135,9 +137,30 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 		search,
+		audiences,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
+		const audienceValues = audiences?.map((audience) => sql`${audience}`);
+		const audienceFilter = audienceValues?.length
+			? sql<boolean>`(
+				exists (
+					select 1
+					from jsonb_array_elements_text(
+						coalesce(${notifications.channels}->'newsletter'->'audience'->'items', '[]'::jsonb)
+						|| coalesce(${notifications.channels}->'newsletter'->'variants', '[]'::jsonb)
+					) as newsletter_variant
+					where lower(newsletter_variant.value) in (${sql.join(audienceValues, sql`, `)})
+				)
+				or exists (
+					select 1
+					from jsonb_array_elements(
+						coalesce(${notifications.channels}->'app-push'->'audience'->'items', '[]'::jsonb)
+					) as app_audience
+					where app_audience.value->>'name' in (${sql.join(audienceValues, sql`, `)})
+				)
+			)`
+			: undefined;
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
@@ -149,6 +172,7 @@ export const createNotificationsRepository = (db: Database) => ({
 							or content_item.value->>'title' ilike ${searchPattern}
 					)`
 				: undefined,
+			audienceFilter,
 		);
 
 		const [totals] = await db

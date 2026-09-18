@@ -422,6 +422,7 @@ export const historyViewStyles = {
 	filters: css({
 		display: 'flex',
 		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
 		padding: semanticSpacing.stackSm,
 		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		backgroundColor: semanticColors.fill.neutralWeak,
@@ -430,6 +431,84 @@ export const historyViewStyles = {
 			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 			borderBottom: 0,
 		},
+	}),
+	clearFilters: css({
+		alignSelf: 'flex-end',
+		padding: 0,
+		border: 0,
+		color: semanticColors.text.link,
+		background: 'transparent',
+		textDecoration: 'underline',
+		cursor: 'pointer',
+		font: 'inherit',
+		'&:focus-visible': {
+			outline: `2px solid ${semanticColors.border.focused}`,
+			outlineOffset: '2px',
+		},
+	}),
+	searchField: css({
+		position: 'relative',
+	}),
+	filterFields: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: '32px',
+	}),
+	searchIcon: css({
+		position: 'absolute',
+		left: semanticSpacing.stackSm,
+		bottom: '10px',
+		pointerEvents: 'none',
+	}),
+	audienceField: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXxs,
+	}),
+	audienceTrigger: css({
+		display: 'flex',
+		width: '100%',
+		height: semanticSizing.height.md,
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		paddingInline: semanticSpacing.stackSm,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		borderRadius: semanticRadius.cornerSm,
+		backgroundColor: semanticColors.bg.base,
+		color: semanticColors.text.strong,
+		cursor: 'pointer',
+		font: 'inherit',
+		'&[data-focus-visible]': {
+			outline: `2px solid ${semanticColors.border.focused}`,
+			outlineOffset: '2px',
+		},
+		'&[data-hovered], &:hover, &[data-pressed], &[aria-expanded="true"]': {
+			backgroundColor: semanticColors.bg.base,
+			color: semanticColors.text.strong,
+			border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		},
+		'&[aria-expanded="true"] svg': {
+			transform: 'rotate(180deg)',
+		},
+	}),
+	audiencePopover: css({
+		width: 'var(--trigger-width)',
+		maxWidth: 'var(--trigger-width)',
+	}),
+	audienceMenuItem: css({
+		gridTemplateColumns: 'minmax(0, 1fr)',
+		gridTemplateAreas: '"label"',
+		'& > .material-symbols': {
+			display: 'none',
+		},
+	}),
+	audienceCheckbox: css({
+		width: '100%',
+		pointerEvents: 'none',
+		cursor: 'inherit',
+	}),
+	visualOnly: css({
+		display: 'contents',
 	}),
 	container: css({
 		display: 'flex',

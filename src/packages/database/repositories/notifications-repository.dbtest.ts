@@ -254,6 +254,47 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		]);
 	});
 
+	it('filters newsletter variants and app-push editions by audience', async () => {
+		const appPush = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+			channels: {
+				'app-push': {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'europe' }],
+					},
+					compose: { use: 'lead-story' },
+				},
+			},
+		});
+		const newsletter = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(2),
+			channels: {
+				newsletter: {
+					audience: { type: 'segment', items: ['UK'] },
+					compose: { items: ['lead-story'], subject: 'Daily briefing' },
+				},
+			},
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(3),
+		});
+
+		const page = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['uk', 'europe'],
+		});
+
+		expect(page.total).toBe(2);
+		expect(page.notifications.map(({ id }) => id)).toEqual([
+			appPush.id,
+			newsletter.id,
+		]);
+	});
+
 	it('excludes test notifications from the page and the total', async () => {
 		const send = await notifications.create({
 			...buildNotification(),
