@@ -1,3 +1,4 @@
+import { canonicalHistoryAlertTypes, historyAlertTypeSchema } from '@models';
 import { z } from 'zod';
 
 const defaultLimit = 10;
@@ -28,6 +29,12 @@ export const notificationListQuerySchema = z
 		limit: z.coerce.number().int().min(1).max(50).optional(),
 		offset: z.coerce.number().int().min(0).optional(),
 		search: z.string().trim().min(1).max(200).optional(),
+		alertType: z
+			.union([historyAlertTypeSchema, z.array(historyAlertTypeSchema)])
+			.transform((value) =>
+				canonicalHistoryAlertTypes(Array.isArray(value) ? value : [value]),
+			)
+			.optional(),
 	})
 	.refine(
 		(query) => (query.limit === undefined) === (query.offset === undefined),
@@ -41,6 +48,7 @@ export const notificationListQuerySchema = z
 		limit: query.limit ?? defaultLimit,
 		offset: query.offset ?? defaultOffset,
 		search: query.search,
+		alertTypes: query.alertType,
 	}));
 
 export type NotificationListQuery = z.infer<typeof notificationListQuerySchema>;

@@ -36,6 +36,41 @@ describe('notification history query keys', () => {
 		);
 	});
 
+	it('canonicalizes categories while separating combined filters', () => {
+		const query = {
+			limit: 10,
+			offset: 20,
+			since: 1700000000,
+			search: 'election',
+		};
+		const key = getNotificationHistoryQueryKey({
+			...query,
+			alertTypes: ['sport', 'exclusive', 'sport'],
+		});
+		expect(key).toEqual(
+			getNotificationHistoryQueryKey({
+				...query,
+				alertTypes: ['exclusive', 'sport'],
+			}),
+		);
+		expect(key).not.toEqual(
+			getNotificationHistoryQueryKey({ ...query, alertTypes: ['sport'] }),
+		);
+		expect(key).not.toEqual(
+			getNotificationHistoryQueryKey({
+				...query,
+				search: 'weather',
+				alertTypes: ['sport', 'exclusive'],
+			}),
+		);
+		expect(
+			getNotificationHistoryQueryKey({ ...query, alertTypes: [] }),
+		).toEqual(getNotificationHistoryQueryKey(query));
+		expect(
+			getNotificationHistoryQueryKey({ ...query, alertTypes: [''] }),
+		).not.toEqual(getNotificationHistoryQueryKey(query));
+	});
+
 	it('uses a stable cache scope for a moving date window', () => {
 		const firstMountKey = getNotificationHistoryQueryKey({
 			limit: 20,

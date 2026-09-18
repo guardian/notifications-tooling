@@ -947,6 +947,35 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
+		it.each([
+			['alertType=exclusive', ['exclusive']],
+			[
+				'alertType=sport&alertType=breaking-news&alertType=sport',
+				['breaking-news', 'sport'],
+			],
+		])(
+			'forwards canonical categories alongside search: %s',
+			async (query, alertTypes) => {
+				const listNotifications = mock(() => Promise.resolve(storedListPage()));
+				const listServer = await startListServer(listNotifications);
+				try {
+					const response = await fetch(
+						`${listServer.baseUrl}/v1/notifications?since=1700000000&search=%20election%20&${query}`,
+					);
+					expect(response.status).toBe(200);
+					expect(listNotifications).toHaveBeenCalledWith({
+						since: new Date(1700000000 * 1000),
+						limit: 10,
+						offset: 0,
+						search: 'election',
+						alertTypes,
+					});
+				} finally {
+					await listServer.close();
+				}
+			},
+		);
+
 		it('defaults to limit 10 / offset 0 when neither is supplied', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
@@ -976,6 +1005,41 @@ describe('GET /v1/notifications', () => {
 	});
 
 	describe('bad request', () => {
+		it.each([
+			'alertType=unknown',
+			'alertType=no-kicker',
+			'alertType=sport&alertType=no-kicker',
+			'alertType=',
+			'alertType=breaking-news&alertType=unknown',
+			'alertType=exclusive&alertType=',
+			'alertType=Breaking%20news',
+		])('rejects invalid categories without listing: %s', async (query) => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?${query}`,
+				);
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as {
+					error: string;
+					message: string;
+					requestId: string;
+					details: Array<{ path: string }>;
+				};
+				expect(body).toMatchObject({
+					error: 'bad_request',
+					message: 'The notification list query parameters are invalid.',
+				});
+				expect(typeof body.requestId).toBe('string');
+				expect(body.details.some(({ path }) => path === '/alertType')).toBe(
+					true,
+				);
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
 		it.each([
 			['blank', '   '],
 			['over 200 characters', 'a'.repeat(201)],

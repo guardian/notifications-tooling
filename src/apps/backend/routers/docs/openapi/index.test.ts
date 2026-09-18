@@ -22,6 +22,31 @@ describe('email preview OpenAPI contract', () => {
 });
 
 describe('notification history OpenAPI contract', () => {
+	it('documents repeated categories using the validation enum', () => {
+		const parameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'alertType');
+		expect(parameter).toMatchObject({
+			in: 'query',
+			required: false,
+			style: 'form',
+			explode: true,
+			schema: { $ref: '#/components/schemas/HistoryAlertTypes' },
+		});
+		expect(openApiDocument.components.schemas.HistoryAlertTypes).toMatchObject({
+			type: 'array',
+			items: {
+				type: 'string',
+				enum: [
+					'breaking-news',
+					'exclusive',
+					'editors-picks',
+					'one-not-to-miss',
+					'sport',
+				],
+			},
+		});
+	});
 	it('documents the bounded search query parameter', () => {
 		const searchParameter = openApiDocument.paths[
 			'/v1/notifications'

@@ -1,4 +1,5 @@
-import { and, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import type { HistoryAlertType } from '@models';
+import { and, count, desc, eq, gte, lte, or, sql } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -19,6 +20,7 @@ export type ListRecentNotificationsOptions = {
 	offset?: number;
 	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
+	alertTypes?: HistoryAlertType[];
 };
 
 export type ListNotificationsInWindowOptions = {
@@ -135,9 +137,29 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 		search,
+		alertTypes,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
+		const newsletterSubject = sql`${notifications.channels}->'newsletter'->'compose'->>'subject'`;
+		const categoryPredicates = alertTypes?.map((alertType) => {
+			if (alertType === 'exclusive') {
+				return sql<boolean>`(${newsletterSubject}) ilike 'Exclusive:%'`;
+			}
+			const appAlertMatch = sql<boolean>`exists (
+				select 1
+				from jsonb_array_elements(coalesce(
+					${notifications.channels}->'app-push'->'audience'->'items', '[]'::jsonb
+				)) as topic
+				where topic->>'type' = ${alertType}
+			)`;
+			return alertType === 'breaking-news'
+				? or(
+						appAlertMatch,
+						sql<boolean>`(${newsletterSubject}) ilike 'Breaking news:%'`,
+					)
+				: appAlertMatch;
+		});
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
@@ -149,6 +171,7 @@ export const createNotificationsRepository = (db: Database) => ({
 							or content_item.value->>'title' ilike ${searchPattern}
 					)`
 				: undefined,
+			categoryPredicates?.length ? or(...categoryPredicates) : undefined,
 		);
 
 		const [totals] = await db

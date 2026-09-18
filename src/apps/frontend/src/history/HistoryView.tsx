@@ -38,6 +38,7 @@ interface HistoryViewProps {
 	error?: ReactNode;
 	lastUpdatedAt?: string;
 	searchTerm: string;
+	hasActiveFilters?: boolean;
 	onPageChange: (page: number) => void;
 	onRefresh: () => void;
 	onSearchTermChange: (searchTerm: string) => void;
@@ -53,6 +54,7 @@ export const HistoryView = ({
 	error,
 	lastUpdatedAt,
 	searchTerm,
+	hasActiveFilters = false,
 	currentPage,
 	onPageChange,
 	onRefresh,
@@ -100,9 +102,12 @@ export const HistoryView = ({
 					{!isLoading && !error && notifications.length > 0 && (
 						<HistoryTable notifications={notifications} audiences={audiences} />
 					)}
-					{!isLoading && !error && notifications.length === 0 && (
-						<HistoryEmptyState isSearchResult={searchTerm.trim().length > 0} />
-					)}
+					{!isLoading &&
+						!error &&
+						notifications.length === 0 &&
+						(!hasActiveFilters || totalItems === 0) && (
+							<HistoryEmptyState isFilteredResult={hasActiveFilters} />
+						)}
 				</section>
 			</div>
 		</Layout.Main>
