@@ -200,25 +200,24 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('link', { name: 'Create app alert' }),
 		).toHaveAttribute('href', '/app-alert/create');
-		await expect(
-			canvas.getByRole('button', { name: 'Open Latest Published Content' }),
-		).toBeInTheDocument();
-
-		const landingSection = canvas
+		const landingMain = canvas
 			.getByRole('heading', { name: 'Welcome to Dispatch' })
-			.closest('section');
-		const latestPublishedContentButton = canvas.getByRole('button', {
-			name: 'Open Latest Published Content',
-		});
-		if (!landingSection) {
-			throw new Error('Expected the Dispatch landing section to be rendered');
+			.closest('main');
+		const latestPublishedContentRail = canvas
+			.getByRole('heading', { name: 'Latest published content' })
+			.closest('aside');
+		if (!landingMain) {
+			throw new Error('Expected the Dispatch landing main to be rendered');
+		}
+		if (!latestPublishedContentRail) {
+			throw new Error('Expected latest published content rail to be rendered');
 		}
 		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
 			canvasElement.clientWidth,
 		);
 		await expect(
-			latestPublishedContentButton.getBoundingClientRect().left,
-		).toBeGreaterThanOrEqual(landingSection.getBoundingClientRect().right);
+			latestPublishedContentRail.getBoundingClientRect().left,
+		).toBeGreaterThanOrEqual(landingMain.getBoundingClientRect().right);
 	},
 };
 
