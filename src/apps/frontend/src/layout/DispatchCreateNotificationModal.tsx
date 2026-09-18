@@ -11,14 +11,23 @@ import { phoneIphoneIcon } from '../ui/flag-icons';
 interface DispatchCreateNotificationModalProps {
 	isOpen: boolean;
 	onOpenChange: (isOpen: boolean) => void;
+	articleUrl?: string;
 }
 
 export const DispatchCreateNotificationModal = ({
 	isOpen,
 	onOpenChange,
+	articleUrl,
 }: DispatchCreateNotificationModalProps) => {
 	const config = useContext(ConfigContext);
 	const routes = getAppRoutes(config);
+	const createAppAlertHref = routes.createAppAlert
+		? `${routes.createAppAlert}${
+				articleUrl
+					? `?${new URLSearchParams({ article: articleUrl }).toString()}`
+					: ''
+			}`
+		: undefined;
 	const tileStyles = css({
 		width: '100%',
 		[from.md]: {
@@ -60,10 +69,10 @@ export const DispatchCreateNotificationModal = ({
 							gap: semanticSpacing.stackSm,
 						})}
 					>
-						{routes.createAppAlert && (
+						{createAppAlertHref && (
 							<Tile
 								size="sm"
-								href={routes.createAppAlert}
+								href={createAppAlertHref}
 								icon={phoneIphoneIcon}
 								typography="headingMd"
 								cssOverrides={tileStyles}

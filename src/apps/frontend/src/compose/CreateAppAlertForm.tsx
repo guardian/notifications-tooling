@@ -16,7 +16,11 @@ import {
 } from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 
-export const CreateAppAlertForm = () => {
+export const CreateAppAlertForm = ({
+	initialArticleUrl,
+}: {
+	initialArticleUrl?: string;
+}) => {
 	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<AppAlertFormValues>();
 	const { composerState, updateComposerState } = useContext(
@@ -72,13 +76,17 @@ export const CreateAppAlertForm = () => {
 			title="Create app alert"
 			formLabel="Create app alert"
 			channel="app-push"
+			initialArticleUrl={initialArticleUrl}
 			sendButtonLabel="Send app alert"
 			onSubmit={handleSubmitForm}
 			onResetNotification={() =>
 				updateComposerState({ type: 'reset-app-alert' })
 			}
 			onArticleImported={(article) => {
-				setValue('headline', article.fields?.headline ?? article.webTitle);
+				setValue(
+					'headline',
+					(article.fields?.headline ?? article.webTitle).trim(),
+				);
 				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
 				setValue('articleThumbnailUrl', articleThumbnailUrl);

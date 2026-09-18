@@ -23,6 +23,7 @@ import { CreateAppAlertForm } from './CreateAppAlertForm';
 type StoryArgs = {
 	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
+	initialArticleUrl?: string;
 };
 type Story = StoryObj<StoryArgs>;
 
@@ -42,9 +43,9 @@ const meta: Meta<StoryArgs> = {
 		composerState: defaultAppAlertComposerState,
 	},
 	render: function Render(args) {
-		const { formValues, composerState } = args;
+		const { formValues, composerState, initialArticleUrl } = args;
 		return useNotificationFormStory(
-			<CreateAppAlertForm />,
+			<CreateAppAlertForm initialArticleUrl={initialArticleUrl} />,
 			composerState,
 			{},
 			'app-push',

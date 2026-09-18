@@ -5,7 +5,7 @@ import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import type { CapiBlock, ResolvedArticle } from '@models';
-import { useContext } from 'react';
+import { useContext, useEffect, useEffectEvent, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -42,6 +42,7 @@ export interface ArticleImportControlProps {
 	setArticleInputText: (articleInputText: string) => void;
 	lockArticleInputText: boolean;
 	setLockArticleInputText: (lockArticleInputText: boolean) => void;
+	fetchArticleOnMount?: boolean;
 	onArticleImported: (
 		article: ResolvedArticle,
 		requestedBlock?: CapiBlock,
@@ -52,10 +53,12 @@ export const ArticleImportControl = ({
 	setArticleInputText,
 	lockArticleInputText,
 	setLockArticleInputText,
+	fetchArticleOnMount = false,
 	onArticleImported,
 }: ArticleImportControlProps) => {
 	const { composerState, updateComposerState, resolveArticleFromCapi } =
 		useContext(NotificationFormContext);
+	const hasFetchedInitialArticle = useRef(false);
 	const {
 		clearErrors,
 		formState: { submitCount },
@@ -103,6 +106,14 @@ export const ArticleImportControl = ({
 			setLockArticleInputText(true);
 		});
 	};
+	const fetchInitialArticle = useEffectEvent(handleFetchArticle);
+
+	useEffect(() => {
+		if (fetchArticleOnMount && !hasFetchedInitialArticle.current) {
+			hasFetchedInitialArticle.current = true;
+			fetchInitialArticle();
+		}
+	}, [fetchArticleOnMount]);
 
 	const showImportedArticle =
 		!isFetchingArticle && !!fetchedArticleId && fetchedArticleId === articleId;

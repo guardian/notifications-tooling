@@ -3,10 +3,12 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ConfigContext } from '../config/ConfigContext';
 import { mockAppConfig } from '../testing/app-config';
+import { articleFixture } from '../testing/capi-fixtures';
 import { LatestPublishedContent } from './LatestPublishedContent';
 
 type StoryArgs = {
 	appConfig?: AppConfig;
+	articleUrl?: string;
 };
 
 const meta = {
@@ -14,10 +16,11 @@ const meta = {
 	component: LatestPublishedContent,
 	args: {
 		appConfig: mockAppConfig,
+		articleUrl: articleFixture.webUrl,
 	},
-	render: ({ appConfig }: StoryArgs) => (
+	render: ({ appConfig, articleUrl }: StoryArgs) => (
 		<ConfigContext.Provider value={appConfig}>
-			<LatestPublishedContent />
+			<LatestPublishedContent articleUrl={articleUrl} />
 		</ConfigContext.Provider>
 	),
 } satisfies Meta<StoryArgs>;
@@ -46,7 +49,12 @@ export const Default: Story = {
 		).toHaveAttribute('href', '/newsletter-email/create');
 		await expect(
 			screen.getByRole('link', { name: 'Create an app alert' }),
-		).toHaveAttribute('href', '/app-alert/create');
+		).toHaveAttribute(
+			'href',
+			`/app-alert/create?${new URLSearchParams({
+				article: articleFixture.webUrl,
+			}).toString()}`,
+		);
 
 		await userEvent.click(screen.getByRole('button', { name: 'Close Modal' }));
 		await waitFor(() =>
