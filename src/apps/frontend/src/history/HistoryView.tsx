@@ -95,12 +95,9 @@ export const HistoryView = ({
 					{!isLoading && !error && notifications.length > 0 && (
 						<HistoryTable notifications={notifications} audiences={audiences} />
 					)}
-					{!isLoading &&
-						!error &&
-						notifications.length === 0 &&
-						(!hasActiveFilters || totalItems === 0) && (
-							<HistoryEmptyState isFilteredResult={hasActiveFilters} />
-						)}
+					{!isLoading && !error && notifications.length === 0 && (
+						<HistoryEmptyState isFilteredResult={hasActiveFilters} />
+					)}
 				</section>
 			</div>
 		</Layout.Main>
