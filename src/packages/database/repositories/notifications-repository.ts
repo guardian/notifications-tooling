@@ -22,7 +22,7 @@ export type ListRecentNotificationsOptions = {
 	/** API edition ids matched against newsletter variants or app-push editions. */
 	audiences?: string[];
 	/** Rolled-up delivery statuses included in the result. */
-	statuses?: Notification['status'][];
+	statuses?: Array<Notification['status']>;
 };
 
 export type ListNotificationsInWindowOptions = {
