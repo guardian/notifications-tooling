@@ -1,8 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
-import { notificationRoutes, withArticleUrl } from '../routes';
+import { notificationRoutes } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
+import {
+	getWindowHistoryRecord,
+	getWindowHistoryState,
+} from '../testing/router-history';
 import {
 	completeAppAlertFormValues,
 	populatedAppAlertComposerState,
@@ -12,10 +16,13 @@ import type { NotificationComposerState } from '../types';
 import { defaultAppAlertComposerState } from '../utils/notification-composer-reducer';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { CreateAppAlertTab } from './CreateAppAlertTab';
+import { createNotificationPrefillState } from './notification-prefill';
+import type { NotificationFormContextProps } from './NotificationFormContext';
 
 type StoryArgs = {
 	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
+	resolveArticleFromCapi?: NotificationFormContextProps['resolveArticleFromCapi'];
 	containerMinWidth: string;
 };
 
@@ -43,7 +50,12 @@ const meta = {
 		},
 	},
 	render: function Render(args: StoryArgs) {
-		const { formValues, composerState, containerMinWidth } = args;
+		const {
+			formValues,
+			composerState,
+			resolveArticleFromCapi,
+			containerMinWidth,
+		} = args;
 		return (
 			<div
 				style={{
@@ -56,7 +68,7 @@ const meta = {
 				{useNotificationFormStory(
 					<CreateAppAlertTab />,
 					composerState,
-					{},
+					resolveArticleFromCapi ? { resolveArticleFromCapi } : {},
 					'app-push',
 					formValues,
 				)}
@@ -80,33 +92,65 @@ export const Default: Story = {
 	},
 };
 
-export const ImportsArticleFromSearchParam: Story = {
+export const ImportsArticleFromNavigationState: Story = {
+	args: {
+		resolveArticleFromCapi: async () => {
+			await delay(100);
+			return {
+				success: true,
+				data: {
+					article: {
+						...articleFixture,
+						fields: {
+							...articleFixture.fields,
+							headline: `  ${articleFixture.fields?.headline ?? articleFixture.webTitle}  `,
+						},
+					},
+				},
+			};
+		},
+	},
 	beforeEach: () => {
 		const originalUrl = window.location.href;
+		const originalState = getWindowHistoryState();
 		window.history.replaceState(
-			null,
+			{
+				...getWindowHistoryRecord(),
+				usr: createNotificationPrefillState('app-push', {
+					articleUrl: articleFixture.webUrl,
+					fields: {
+						headline: 'Override app alert headline',
+						includeThumbnail: false,
+					},
+				}),
+			},
 			'',
-			withArticleUrl(
-				notificationRoutes['app-push'].create,
-				articleFixture.webUrl,
-			),
+			notificationRoutes['app-push'].create,
 		);
 
-		return () => window.history.replaceState(null, '', originalUrl);
+		return () => window.history.replaceState(originalState, '', originalUrl);
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
+		const headlineInput = canvas.getByRole('textbox', { name: 'Headline' });
 
+		await expect(headlineInput).toHaveValue('Override app alert headline');
 		await expect(await canvas.findByText('Article imported')).toBeVisible();
 		await expect(canvas.getByLabelText('article URL')).toHaveValue(
 			articleFixture.webUrl,
 		);
-		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
-			articleFixture.fields?.headline,
-		);
+		await expect(headlineInput).toHaveValue('Override app alert headline');
 		await expect(
 			canvas.getByRole('button', { name: 'Show article thumbnail image' }),
-		).toHaveAttribute('aria-pressed', 'true');
+		).toHaveAttribute('aria-pressed', 'false');
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		await expect(canvas.getByLabelText('article URL')).toHaveValue('');
+		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+			'',
+		);
 	},
 };
 

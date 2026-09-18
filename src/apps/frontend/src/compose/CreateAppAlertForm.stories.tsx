@@ -25,6 +25,7 @@ import { CreateAppAlertForm } from './CreateAppAlertForm';
 type StoryArgs = ComponentProps<typeof CreateAppAlertForm> & {
 	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
+	initialArticleUrl?: string;
 };
 type Story = StoryObj<StoryArgs>;
 

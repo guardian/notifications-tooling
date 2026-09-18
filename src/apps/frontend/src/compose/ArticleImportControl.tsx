@@ -107,13 +107,13 @@ export const ArticleImportControl = ({
 	};
 	const autoFetchArticle = useEffectEvent(handleFetchArticle);
 
-	const hasAutoFetched = useRef(false);
+	const initialArticleFetchTriggered = useRef(false);
 	useEffect(() => {
-		if (!autoFetch || hasAutoFetched.current) {
+		if (!autoFetch || initialArticleFetchTriggered.current) {
 			return;
 		}
 
-		hasAutoFetched.current = true;
+		initialArticleFetchTriggered.current = true;
 		autoFetchArticle();
 	}, [autoFetch]);
 

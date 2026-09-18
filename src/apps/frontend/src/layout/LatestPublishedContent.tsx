@@ -2,7 +2,11 @@ import { Button } from '@guardian/stand/Button';
 import { useState } from 'react';
 import { DispatchCreateNotificationModal } from './DispatchCreateNotificationModal';
 
-export const LatestPublishedContent = () => {
+export const LatestPublishedContent = ({
+	articleUrl,
+}: {
+	articleUrl?: string;
+}) => {
 	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =
 		useState(false);
 
@@ -17,6 +21,7 @@ export const LatestPublishedContent = () => {
 			<DispatchCreateNotificationModal
 				isOpen={isCreateNotificationModalOpen}
 				onOpenChange={setIsCreateNotificationModalOpen}
+				articleUrl={articleUrl}
 			/>
 		</>
 	);
