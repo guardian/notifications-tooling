@@ -1,3 +1,5 @@
+import { validateGridCropPageUrl } from './grid-url-parsing';
+
 const DEFAULT_ORIGIN = 'https://www.theguardian.com';
 // the path to a guardian article is made up at least two segments, usually in the format
 // /section-name/YYYY/MMM/DD/article-headline-converted-to-kebab-case
@@ -88,79 +90,6 @@ export const validateGuardianEmail = (emailInput: string) => {
 	return undefined;
 };
 
-type ImageSourceUrlParseFail = {
-	success: false;
-	validationError?: string;
-	validatedUrl?: undefined;
-};
-
-const gridCropPathPattern = /\/images\/([0-9a-f]{40})/i;
-const gridCropParamPattern = /\d+_\d+_\d+_\d+/i;
-
-type GridCropUrlValidationResult =
-	| {
-			success: true;
-			validatedUrl: URL;
-			cropId: string;
-			imageId: string;
-			validationError?: undefined;
-	  }
-	| ImageSourceUrlParseFail;
-
-export const validateGridCropPageUrl = (
-	imageUrl: string,
-	gridOrigin: string | undefined,
-): GridCropUrlValidationResult => {
-	if (imageUrl.length === 0) {
-		return { success: false };
-	}
-
-	try {
-		const url = new URL(imageUrl);
-
-		if (!gridOrigin) {
-			return {
-				success: false,
-				validationError: 'No grid origin URL configured',
-			};
-		}
-
-		if (url.origin !== gridOrigin) {
-			return {
-				success: false,
-				validationError: `Please enter a grid crop page, starting with ${gridOrigin}`,
-			};
-		}
-
-		if (!gridCropPathPattern.test(url.pathname)) {
-			return {
-				success: false,
-				validationError: `Please enter a grid crop page - this is not an image page`,
-			};
-		}
-
-		const cropId = url.searchParams.get('crop') ?? '';
-		if (!gridCropParamPattern.test(cropId)) {
-			return {
-				success: false,
-				validationError: `Please enter a grid crop page - this needs the "crop" parameter`,
-			};
-		}
-
-		return {
-			success: true,
-			validatedUrl: url,
-			cropId,
-			imageId: url.pathname.split('/').pop() ?? '',
-		};
-	} catch {
-		return {
-			success: false,
-			validationError: `Please enter a grid crop page`,
-		};
-	}
-};
-
 const guardianImageUrlHosts = [
 	'media.guim.co.uk',
 	'i.guim.co.uk',
@@ -189,49 +118,52 @@ export const validateGuardianImageUrl = (imageUrl: string) => {
 	}
 };
 
-type GuardianImageUrlValidationResult =
+type ImageSourceValidation =
 	| {
-			success: true;
-			url: string;
+			type: 'failure';
+			validationError?: string;
 	  }
-	| ImageSourceUrlParseFail;
+	| {
+			type: 'image-url';
+			validationError?: undefined;
+	  }
+	| {
+			type: 'grid-url';
+			cropId: string;
+			imageId: string;
+			validationError?: undefined;
+	  };
 
 export const parseImageSourceUrl = (
 	url: string,
 	gridOrigin: string | undefined,
-): {
-	gridCropUrlValidationResult: GridCropUrlValidationResult;
-	guardianImageUrlValidationResult: GuardianImageUrlValidationResult;
-	relevantFailure?: string;
-} => {
-	const guardianUrlValidationError = validateGuardianImageUrl(url);
+): ImageSourceValidation => {
+	if (url === '') {
+		return {
+			type: 'failure',
+		};
+	}
 
-	const guardianImageUrlValidationResult: GuardianImageUrlValidationResult =
-		guardianUrlValidationError
-			? {
-					success: false,
-					validationError: guardianUrlValidationError,
-				}
-			: {
-					success: true,
-					url,
-				};
+	const guardianUrlValidationError = validateGuardianImageUrl(url);
+	if (!guardianUrlValidationError) {
+		return {
+			type: 'image-url',
+		};
+	}
 
 	const gridCropUrlValidationResult = validateGridCropPageUrl(url, gridOrigin);
 
-	const noSuccess =
-		!guardianImageUrlValidationResult.success &&
-		!gridCropUrlValidationResult.success;
+	if (gridCropUrlValidationResult.success) {
+		return gridCropUrlValidationResult.details;
+	}
 
-	const relevantFailure = noSuccess
-		? gridOrigin && url.startsWith(gridOrigin)
-			? guardianImageUrlValidationResult.validationError
-			: guardianImageUrlValidationResult.validationError
-		: undefined;
+	const relevantFailure =
+		gridOrigin && url.startsWith(gridOrigin)
+			? gridCropUrlValidationResult.validationError
+			: guardianUrlValidationError;
 
 	return {
-		guardianImageUrlValidationResult,
-		gridCropUrlValidationResult,
-		relevantFailure,
+		type: 'failure',
+		validationError: relevantFailure,
 	};
 };

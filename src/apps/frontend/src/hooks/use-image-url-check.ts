@@ -60,7 +60,7 @@ export const useImageUrlCheck = ({
 			return;
 		}
 
-		if (validationResult.relevantFailure) {
+		if (validationResult.type === 'failure') {
 			onUpdate('');
 			setImageUpdated(false);
 			return;
@@ -69,8 +69,8 @@ export const useImageUrlCheck = ({
 		setIsCheckingImage(true);
 
 		// if the url was validated as a grid crop, fetch the image url from the grid api
-		if (validationResult.gridCropUrlValidationResult.success) {
-			const { cropId, imageId } = validationResult.gridCropUrlValidationResult;
+		if (validationResult.type === 'grid-url') {
+			const { cropId, imageId } = validationResult;
 			const result = await getGridImageUrl(gridApiUri, cropId, imageId);
 			setIsCheckingImage(false);
 
@@ -81,6 +81,7 @@ export const useImageUrlCheck = ({
 				return;
 			}
 
+			setImageCheckError(undefined);
 			onUpdate(result.data);
 			setImageUpdated(true);
 			return;
@@ -107,9 +108,8 @@ export const useImageUrlCheck = ({
 		handleImageUrlChange,
 		imageUpdated,
 		isCheckingImage,
-		isUpdateDisabled:
-			Boolean(validationResult.relevantFailure) || isCheckingImage,
+		isUpdateDisabled: validationResult.type === 'failure' || isCheckingImage,
 		displayedErrorMessage:
-			validationResult.relevantFailure ?? imageCheckError ?? errorMessage,
+			validationResult.validationError ?? imageCheckError ?? errorMessage,
 	};
 };

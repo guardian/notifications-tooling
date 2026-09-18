@@ -39,7 +39,7 @@ const fetchImageData = async (
 		if (response?.status === 404) {
 			return failWith(errorMessages.notFound);
 		}
-		if (response?.status === 403) {
+		if (response?.status === 403 || response?.status === 401) {
 			return failWith(errorMessages.forbidden);
 		}
 
