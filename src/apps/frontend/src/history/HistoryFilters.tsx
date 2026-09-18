@@ -1,6 +1,7 @@
 import { TextInput } from '@guardian/stand/TextInput';
 import { historyViewStyles } from '../themes';
 import { MAXIMUM_SEARCH_LENGTH } from '../utils/history-search-params';
+import { HistoryAlertTypeFilter } from './HistoryAlertTypeFilter';
 
 interface HistoryFiltersProps {
 	searchTerm: string;
@@ -21,5 +22,6 @@ export const HistoryFilters = ({
 			maxLength={MAXIMUM_SEARCH_LENGTH}
 			fluid
 		/>
+		<HistoryAlertTypeFilter />
 	</aside>
 );

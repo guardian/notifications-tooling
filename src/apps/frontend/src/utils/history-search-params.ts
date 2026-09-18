@@ -1,3 +1,5 @@
+import { canonicalHistoryAlertTypes } from '@models';
+
 export const DEFAULT_LIMIT = 20;
 export const MAXIMUM_LIMIT = 50;
 export const DEFAULT_OFFSET = 0;
@@ -19,6 +21,9 @@ const parseBoundedInteger = (
 
 export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 	const search = searchParams.get('search')?.trim();
+	const alertTypes = canonicalHistoryAlertTypes(
+		searchParams.getAll('alertType'),
+	);
 
 	return {
 		limit: parseBoundedInteger(
@@ -37,5 +42,28 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 			return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined;
 		})(),
 		...(search && search.length <= MAXIMUM_SEARCH_LENGTH ? { search } : {}),
+		...(alertTypes.length ? { alertTypes } : {}),
 	};
+};
+
+export const updateHistoryFilters = (
+	searchParams: URLSearchParams,
+	updates: { search?: string; alertTypes?: string[] },
+) => {
+	const next = new URLSearchParams(searchParams);
+	if (updates.search !== undefined) {
+		if (updates.search.trim()) {
+			next.set('search', updates.search);
+		} else {
+			next.delete('search');
+		}
+	}
+	const alertTypes = updates.alertTypes ?? next.getAll('alertType');
+	next.delete('alertType');
+	for (const alertType of canonicalHistoryAlertTypes(alertTypes)) {
+		next.append('alertType', alertType);
+	}
+	next.set('offset', '0');
+	next.set('limit', String(parseHistorySearchParams(searchParams).limit));
+	return next;
 };

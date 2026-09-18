@@ -1,3 +1,4 @@
+import { canonicalHistoryAlertTypes } from '@models';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
@@ -13,6 +14,7 @@ export interface NotificationHistoryQuery {
 	since?: number;
 	cacheScope?: string;
 	search?: string;
+	alertTypes?: string[];
 }
 
 export const notificationHistoryQueryKey = [
@@ -26,12 +28,19 @@ export const getNotificationHistoryQueryKey = ({
 	since,
 	cacheScope,
 	search,
+	alertTypes = [],
 }: NotificationHistoryQuery) =>
 	[
 		...notificationHistoryQueryKey,
-		cacheScope !== undefined
-			? { limit, offset, cacheScope, ...(search ? { search } : {}) }
-			: { limit, offset, since, ...(search ? { search } : {}) },
+		{
+			limit,
+			offset,
+			...(cacheScope !== undefined ? { cacheScope } : { since }),
+			...(search ? { search } : {}),
+			...(alertTypes.length
+				? { alertTypes: canonicalHistoryAlertTypes(alertTypes) }
+				: {}),
+		},
 	] as const;
 
 export const ALWAYS_FRESH = Infinity;
@@ -41,6 +50,7 @@ export const fetchNotificationHistory = ({
 	offset,
 	since,
 	search,
+	alertTypes = [],
 }: NotificationHistoryQuery): Promise<NotificationListResponse> => {
 	const searchParams = new URLSearchParams({
 		limit: String(limit),
@@ -52,6 +62,9 @@ export const fetchNotificationHistory = ({
 	}
 	if (search !== undefined) {
 		searchParams.set('search', search);
+	}
+	for (const alertType of canonicalHistoryAlertTypes(alertTypes)) {
+		searchParams.append('alertType', alertType);
 	}
 
 	return fetchJsonAndParse(

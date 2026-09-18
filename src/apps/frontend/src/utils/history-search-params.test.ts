@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'bun:test';
-import { parseHistorySearchParams } from './history-search-params';
+import {
+	parseHistorySearchParams,
+	updateHistoryFilters,
+} from './history-search-params';
 
 describe('parseHistorySearchParams', () => {
 	it('uses history defaults when pagination is absent', () => {
@@ -42,5 +45,78 @@ describe('parseHistorySearchParams', () => {
 				new URLSearchParams({ search: 'a'.repeat(201) }),
 			),
 		).not.toHaveProperty('search');
+	});
+
+	it('canonicalizes repeated categories without dropping invalid IDs', () => {
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams(
+					'search=election&alertType=sport&alertType=exclusive&alertType=sport',
+				),
+			),
+		).toMatchObject({ search: 'election', alertTypes: ['exclusive', 'sport'] });
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams('alertType=sport&alertType=&alertType=unknown'),
+			),
+		).toMatchObject({ alertTypes: ['', 'sport', 'unknown'] });
+	});
+});
+
+describe('updateHistoryFilters', () => {
+	const original =
+		'search=election&alertType=sport&alertType=exclusive&offset=20&limit=10&since=1700000000&other=keep';
+
+	it('changes categories immediately, preserving search and other URL state', () => {
+		const current = new URLSearchParams(original);
+		const next = updateHistoryFilters(current, {
+			alertTypes: ['sport', 'breaking-news', 'sport'],
+		});
+		expect(next.getAll('alertType')).toEqual(['breaking-news', 'sport']);
+		expect(Object.fromEntries(next)).toMatchObject({
+			search: 'election',
+			offset: '0',
+			limit: '10',
+			since: '1700000000',
+			other: 'keep',
+		});
+		expect(current.get('offset')).toBe('20');
+	});
+
+	it('preserves categories while typing, including invalid values', () => {
+		const current = new URLSearchParams(`${original}&alertType=`);
+		const next = updateHistoryFilters(current, { search: 'latest' });
+		expect(next.getAll('alertType')).toEqual(['', 'exclusive', 'sport']);
+		expect(next.get('search')).toBe('latest');
+		expect(next.get('offset')).toBe('0');
+	});
+
+	it('removes categories without changing search or unrelated URL state', () => {
+		const next = updateHistoryFilters(
+			new URLSearchParams(`${original}&alertType=`),
+			{ alertTypes: [] },
+		);
+		expect(next.has('alertType')).toBe(false);
+		expect(Object.fromEntries(next)).toEqual({
+			search: 'election',
+			offset: '0',
+			limit: '10',
+			since: '1700000000',
+			other: 'keep',
+		});
+	});
+
+	it('removes search without changing categories or unrelated URL state', () => {
+		const next = updateHistoryFilters(new URLSearchParams(original), {
+			search: '',
+		});
+		expect(next.has('search')).toBe(false);
+		expect(next.getAll('alertType')).toEqual(['exclusive', 'sport']);
+		expect(Object.fromEntries(next)).toMatchObject({
+			offset: '0',
+			limit: '10',
+			since: '1700000000',
+			other: 'keep',
+		});
 	});
 });

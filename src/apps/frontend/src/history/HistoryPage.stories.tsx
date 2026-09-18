@@ -271,9 +271,20 @@ const failedHistoryHandler = http.get(
 	() => HttpResponse.json({ error: 'internal_error' }, { status: 500 }),
 );
 
+const initialHistoryUrl = (query: string) => () => {
+	historyRequest.mockClear();
+	window.history.replaceState(
+		{},
+		'',
+		`${window.location.pathname}${query ? `?${query}` : ''}`,
+	);
+	return {};
+};
+
 const meta = {
 	title: 'Dispatch/History/HistoryPage',
 	component: HistoryPage,
+	loaders: [initialHistoryUrl('')],
 	parameters: {
 		layout: 'fullscreen',
 		msw: {
@@ -425,6 +436,108 @@ export const InvalidSearch: Story = {
 		await expect(invalidSearchRequest).toHaveBeenCalledOnce();
 		const requestUrl = invalidSearchRequest.mock.calls[0]?.[0];
 		await expect(requestUrl?.searchParams.has('search')).toBe(false);
+	},
+};
+
+export const CategoryFilter: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const page = within(document.body);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		const trigger = canvas.getByRole('button', {
+			name: 'Kicker / Alert type All',
+		});
+		historyRequest.mockClear();
+
+		await userEvent.click(trigger);
+		await expect(
+			page.getAllByRole('menuitemcheckbox').map((option) => option.textContent),
+		).toEqual([
+			expect.stringContaining('Breaking news'),
+			expect.stringContaining('Exclusive'),
+			expect.stringContaining("Editors' picks"),
+			expect.stringContaining('One not to miss'),
+			expect.stringContaining('Sports'),
+		]);
+
+		await userEvent.click(
+			page.getByRole('menuitemcheckbox', { name: 'Sports' }),
+		);
+		await expect(
+			page.getByRole('menu', { name: 'Kicker / Alert type' }),
+		).toBeVisible();
+		await expect(
+			page.getByRole('menuitemcheckbox', { name: 'Sports' }),
+		).toHaveAttribute('aria-checked', 'true');
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(
+				historyRequest.mock.calls[0]![0].searchParams.getAll('alertType'),
+			).toEqual(['sport']);
+		});
+
+		for (const name of [
+			'Breaking news',
+			'Exclusive',
+			"Editors' picks",
+			'One not to miss',
+		]) {
+			await userEvent.click(page.getByRole('menuitemcheckbox', { name }));
+		}
+		await userEvent.keyboard('{Escape}');
+		await expect(trigger).toHaveFocus();
+
+		const summary =
+			"Breaking news, Exclusive, Editors' picks, One not to miss, Sports";
+		await expect(trigger).toHaveAccessibleName(
+			`Kicker / Alert type ${summary}`,
+		);
+		const label = within(trigger).getByText(summary);
+		await expect(getComputedStyle(label).textOverflow).toBe('ellipsis');
+		await expect(getComputedStyle(label).whiteSpace).toBe('nowrap');
+		await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
+		await expect(trigger.getBoundingClientRect().height).toBe(40);
+	},
+};
+
+export const InvalidCategoryFilter: Story = {
+	loaders: [
+		initialHistoryUrl(
+			'search=weather&alertType=sport&alertType=&alertType=unknown&offset=20&limit=10&since=1700000000&other=keep',
+		),
+	],
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByText('Invalid Kicker / Alert type filter.'),
+		).toBeVisible();
+		await expect(historyRequest).not.toHaveBeenCalled();
+		await expect(canvas.queryByRole('grid')).not.toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', {
+				name: 'Kicker / Alert type Invalid filter',
+			}),
+		).toBeDisabled();
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear Kicker / Alert type filter' }),
+		);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		await expect(
+			new URLSearchParams(window.location.search).has('alertType'),
+		).toBe(false);
+		await expect(
+			new URLSearchParams(window.location.search).get('search'),
+		).toBe('weather');
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(
+				historyRequest.mock.calls[0]![0].searchParams.has('alertType'),
+			).toBe(false);
+		});
+		await expect(
+			canvas.getByRole('button', { name: 'Kicker / Alert type All' }),
+		).toBeEnabled();
 	},
 };
 

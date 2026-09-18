@@ -52,6 +52,15 @@ item.
 An optional editorial label for a notification, such as Breaking News or Exclusive.
 For a newsletter email, it prefixes the subject text to form the subject line.
 
+**No kicker**:
+A newsletter email with no editorial label before its subject text. This is an
+explicit choice, distinct from leaving the kicker choice unselected.
+
+**App alert type**:
+The editorial audience category of an app alert, such as Breaking news, Sports
+or Editors' picks, distinct from the edition it targets.
+_Avoid_: kicker (when referring to an app audience category)
+
 **Subject text**:
 The editable wording of a newsletter email's subject, excluding any kicker.
 _Avoid_: headline (when referring to the edited subject text)
@@ -70,6 +79,22 @@ _Avoid_: proof, render, draft
 Optional editorial text included in a newsletter email, distinct from its subject
 line and from the rendered preview.
 _Avoid_: preview (when referring to the authored text)
+
+### History
+
+**Notification history**:
+The editorial record of notifications sent through Dispatch.
+
+**History text search**:
+A history selection based on wording in notification content-item titles or
+bodies, distinct from newsletter subject lines and editorial categories.
+_Avoid_: alert type search (category selection is a separate concept)
+
+**Kicker / Alert type filter**:
+A history selection spanning newsletter kickers and app alert types, with
+Breaking news shared across both channels. Selected choices are alternatives:
+a notification need only match one.
+_Avoid_: channel filter (channels and editorial categories are distinct)
 
 ### Delivery
 

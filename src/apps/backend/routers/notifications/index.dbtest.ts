@@ -505,6 +505,60 @@ describe('GET /v1/notifications (real Postgres)', () => {
 		notifications: Array<{ id: string; dispatches?: unknown }>;
 	};
 
+	it('filters repeated categories and search together before paging', async () => {
+		const content = {
+			items: {
+				lead: {
+					type: 'app-push',
+					title: 'ELECTION update',
+					body: 'Latest reporting',
+					link: 'https://www.theguardian.com/politics',
+				},
+			},
+		};
+		const first = await notifications.create({
+			...buildNotification(),
+			content,
+			createdAt: daysAgo(1),
+		});
+		const second = await notifications.create({
+			...buildNotification(),
+			content,
+			createdAt: daysAgo(2),
+			channels: {
+				newsletter: {
+					audience: { type: 'segment', items: ['UK'] },
+					compose: { items: ['lead'], subject: 'Exclusive: Update' },
+				},
+			},
+		});
+		await notifications.create({
+			...buildNotification(),
+			content,
+			createdAt: daysAgo(0),
+			channels: {
+				'app-push': {
+					audience: { type: 'topic', items: [{ type: 'sport', name: 'uk' }] },
+					compose: { use: 'lead' },
+				},
+			},
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(0),
+		});
+
+		for (const [offset, id] of [first.id, second.id].entries()) {
+			const response = await fetch(
+				`${baseUrl}/v1/notifications?since=${sinceParam}&limit=1&offset=${offset}&search=election&alertType=exclusive&alertType=breaking-news&alertType=exclusive`,
+			);
+			expect(response.status).toBe(200);
+			const body = (await response.json()) as ListResponse;
+			expect(body.total).toBe(2);
+			expect(body.notifications.map((row) => row.id)).toEqual([id]);
+		}
+	});
+
 	it('lists notifications at or after the since cut-off, newest first, without dispatches', async () => {
 		const recent = await notifications.create({
 			...buildNotification(),
