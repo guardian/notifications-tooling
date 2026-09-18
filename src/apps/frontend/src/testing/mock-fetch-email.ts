@@ -59,3 +59,14 @@ export const mockRequestEmailHtml: RequestEmailHtml = (request) => {
 		}, 500);
 	});
 };
+
+export const mockRequestEmailHtmlWithoutDelay: RequestEmailHtml = (request) =>
+	Promise.resolve({
+		success: true,
+		data: {
+			html: buildHtml(request.audience),
+			articleId:
+				'technology/2026/jul/28/apple-second-ever-5tn-company-as-investors-flee-ai-stocks',
+			newsletterId: 'some-newsletter',
+		},
+	});

@@ -1,27 +1,69 @@
 import type { AppConfig } from '@models';
 
 export const notificationRoutes = {
-	email: {
+	newsletter: {
 		create: '/newsletter-email/create',
 		report: '/newsletter-email/report',
 	},
-	push: {
+	'app-push': {
 		create: '/app-alert/create',
 		report: '/app-alert/report',
 	},
 } as const;
 
+export const articleUrlSearchParam = 'articleUrl';
+export const guardianMainUrl = 'https://www.theguardian.com';
+
+const isGuardianHostname = (hostname: string) =>
+	hostname === 'theguardian.com' || hostname.endsWith('.theguardian.com');
+
+export const withArticleUrl = (route: string, articleUrl: string): string => {
+	const trimmedArticleUrl = articleUrl.trim();
+	if (!trimmedArticleUrl) {
+		return route;
+	}
+
+	let parsedArticleUrl: URL;
+	try {
+		parsedArticleUrl = new URL(trimmedArticleUrl, guardianMainUrl);
+	} catch {
+		return route;
+	}
+	if (!isGuardianHostname(parsedArticleUrl.hostname)) {
+		return route;
+	}
+
+	const relativeArticleUrl = `${parsedArticleUrl.pathname}${parsedArticleUrl.search}${parsedArticleUrl.hash}`;
+	const searchParams = new URLSearchParams({
+		[articleUrlSearchParam]: relativeArticleUrl,
+	});
+	return `${route}?${searchParams.toString()}`;
+};
+
+export const toGuardianArticleUrl = (
+	relativeArticleUrl: string | null,
+): string | undefined => {
+	if (!relativeArticleUrl?.startsWith('/')) {
+		return undefined;
+	}
+
+	const articleUrl = new URL(relativeArticleUrl, guardianMainUrl);
+	return articleUrl.origin === guardianMainUrl
+		? articleUrl.toString()
+		: undefined;
+};
+
 export const getAppRoutes = (config: AppConfig | undefined) => {
 	return {
 		dispatchLanding: '/',
-		createNewsletterEmail: notificationRoutes.email.create,
-		newsletterEmailReport: notificationRoutes.email.report,
+		createNewsletterEmail: notificationRoutes.newsletter.create,
+		newsletterEmailReport: notificationRoutes.newsletter.report,
 		createAppAlert: config?.DISABLE_APP_SEND_TAB
 			? undefined
-			: notificationRoutes.push.create,
+			: notificationRoutes['app-push'].create,
 		appAlertReport: config?.DISABLE_APP_SEND_TAB
 			? undefined
-			: notificationRoutes.push.report,
+			: notificationRoutes['app-push'].report,
 		history: '/history',
 	};
 };

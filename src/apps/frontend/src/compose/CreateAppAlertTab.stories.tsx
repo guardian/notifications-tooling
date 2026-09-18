@@ -1,18 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
-	completePushParams,
-	populatedPushState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
+	completeAppAlertFormValues,
+	populatedAppAlertComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import { defaultAppAlertComposerState } from '../utils/notification-composer-reducer';
 import type { AppAlertFormValues } from '../utils/notification-forms';
-import { defaultAppAlertState } from '../utils/notification-reducer';
 import { CreateAppAlertTab } from './CreateAppAlertTab';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
 	containerMinWidth: string;
 };
@@ -21,7 +23,7 @@ const meta = {
 	title: 'Dispatch/Compose/CreateAppAlertTab',
 	component: CreateAppAlertTab,
 	args: {
-		notificationState: defaultAppAlertState,
+		composerState: defaultAppAlertComposerState,
 		containerMinWidth: '1600px',
 	},
 	argTypes: {
@@ -40,8 +42,8 @@ const meta = {
 			},
 		},
 	},
-	render: (args: StoryArgs) => {
-		const { formValues, notificationState, containerMinWidth } = args;
+	render: function Render(args: StoryArgs) {
+		const { formValues, composerState, containerMinWidth } = args;
 		return (
 			<div
 				style={{
@@ -51,11 +53,11 @@ const meta = {
 					boxSizing: 'border-box',
 				}}
 			>
-				{WithNotificationContext(
+				{useNotificationFormStory(
 					<CreateAppAlertTab />,
-					notificationState,
+					composerState,
 					{},
-					'push',
+					'app-push',
 					formValues,
 				)}
 			</div>
@@ -78,13 +80,43 @@ export const Default: Story = {
 	},
 };
 
+export const ImportsArticleFromSearchParam: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+		await expect(canvas.getByLabelText('article URL')).toHaveValue(
+			articleFixture.webUrl,
+		);
+		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+			articleFixture.fields?.headline,
+		);
+		await expect(
+			canvas.getByRole('button', { name: 'Show article thumbnail image' }),
+		).toHaveAttribute('aria-pressed', 'true');
+	},
+};
+
 export const ConfirmationStep: Story = {
 	args: {
-		notificationState: {
-			...populatedPushState,
-			confirmSendModalOpen: true,
+		composerState: {
+			...populatedAppAlertComposerState,
+			isSendConfirmationOpen: true,
 		},
-		formValues: completePushParams,
+		formValues: completeAppAlertFormValues,
 	},
 	play: async ({ canvasElement }) => {
 		const screen = within(canvasElement.ownerDocument.body);
@@ -104,8 +136,19 @@ export const ConfirmationStep: Story = {
 
 export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 	args: {
-		notificationState: populatedPushState,
-		formValues: completePushParams,
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	parameters: {
+		msw: {
+			handlers: [
+				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
+					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+						headers: { 'Content-Type': 'image/svg+xml' },
+					}),
+				),
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -133,6 +176,7 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 
 		await userEvent.type(replacementInput, replacementThumbnailUrl);
 		await userEvent.click(updateButton);
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
 
 		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
 		for (const thumbnail of [iPhoneThumbnail, androidThumbnail]) {
@@ -192,5 +236,70 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		await expect(
 			canvas.queryByRole('textbox', { name: 'replacement image URL' }),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	parameters: {
+		msw: {
+			handlers: [
+				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
+					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+						headers: { 'Content-Type': 'image/svg+xml' },
+					}),
+				),
+				http.get(
+					'https://media.guim.co.uk/broken-thumbnail.jpg',
+					() =>
+						new HttpResponse(null, {
+							status: 403,
+							statusText: 'Forbidden',
+						}),
+				),
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const brokenReplacementThumbnailUrl =
+			'https://media.guim.co.uk/broken-thumbnail.jpg';
+
+		await userEvent.click(
+			canvas.getByRole('button', {
+				name: 'Replace image',
+			}),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
+		for (const thumbnail of [
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', replacementThumbnailUrl);
+		}
+
+		await userEvent.clear(replacementInput);
+		await userEvent.type(replacementInput, brokenReplacementThumbnailUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+		await expect(await canvas.findByText('Unable to load image')).toBeVisible();
+		await expect(canvas.queryByText('Image updated')).not.toBeInTheDocument();
+
+		for (const thumbnail of [
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
+		}
 	},
 };

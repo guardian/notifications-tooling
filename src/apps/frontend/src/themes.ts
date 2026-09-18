@@ -16,6 +16,8 @@ import type { TopBarTheme } from '@guardian/stand/TopBar';
 import { from, until } from '@guardian/stand/utils';
 
 export const topBarHeight = '4rem';
+export const stickyHeaderHeightProperty = '--sticky-header-height';
+export const stickyHeaderHeight = `var(${stickyHeaderHeightProperty}, ${topBarHeight})`;
 
 export const layer = {
 	stickyContent: 1,
@@ -140,7 +142,7 @@ export const activePillTheme = {
 		width: '20px',
 		gap: '10px',
 	}),
-	isConfirmationStyle: css({
+	outlinedPill: css({
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
 		borderRadius: semanticRadius.cornerXs,
 		height: semanticSizing.height.sm,
@@ -281,7 +283,7 @@ export const previewPillStyles = {
 		height: '18px',
 		gap: `${baseSpacing['10Px']}`,
 	}),
-	confirmationPill: css({
+	mutedPill: css({
 		backgroundColor: semanticColors.fill.weak,
 		color: semanticColors.text.weak,
 		border: `${semanticSizing.border.default} solid ${semanticColors.border.weaker}`,
@@ -294,7 +296,7 @@ export const previewPillStyles = {
 	}),
 };
 
-export const ToggleSwitchTheme = {
+export const toggleSwitchTheme = {
 	baseStyle: (selected: boolean) =>
 		css({
 			display: 'flex',
@@ -689,6 +691,25 @@ const skeletonBase = {
 } as const;
 
 export const historyViewStyles = {
+	page: css({
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr)',
+		[from.md]: {
+			gridTemplateColumns: '18rem minmax(0, 1fr)',
+		},
+	}),
+	filters: css({
+		display: 'flex',
+		flexDirection: 'column',
+		padding: semanticSpacing.stackSm,
+		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		backgroundColor: semanticColors.fill.neutralWeak,
+		[from.md]: {
+			minHeight: `calc(100vh - ${stickyHeaderHeight})`,
+			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			borderBottom: 0,
+		},
+	}),
 	container: css({
 		display: 'flex',
 		flexDirection: 'column',

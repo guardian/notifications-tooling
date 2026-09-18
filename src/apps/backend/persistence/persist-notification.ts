@@ -37,6 +37,7 @@ export const rollUpStatus = (
 	if (anySuccess && anyFailure) {
 		return 'partially_delivered';
 	}
+
 	return anyFailure ? 'failed' : 'delivered';
 };
 

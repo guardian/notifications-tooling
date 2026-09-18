@@ -1,44 +1,54 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { notificationRoutes, withArticleUrl } from '../routes';
+import { articleFixture } from '../testing/capi-fixtures';
 import {
-	completeEmailParams,
-	completePushParams,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { ChannelOption, NotificationState } from '../types';
-import { defaultState } from '../utils/notification-reducer';
+	completeAppAlertFormValues,
+	completeNewsletterEmailFormValues,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { ChannelOption, NotificationComposerState } from '../types';
+import { defaultComposerState } from '../utils/notification-composer-reducer';
 import {
 	AppAlertDispatchDetails,
 	AppAlertDispatchReportTab,
 	DispatchReport,
-	NewsletterDispatchDetails,
-	NewsletterDispatchReportTab,
+	NewsletterEmailDispatchDetails,
+	NewsletterEmailDispatchReportTab,
 } from './DispatchReport';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
 	channel: ChannelOption;
 	onStartNew: () => void;
+	onCopyToAnotherChannel: () => void;
 };
 type Story = StoryObj<StoryArgs>;
 
 const DispatchReportStory = ({
-	notificationState,
+	composerState,
 	channel,
 	onStartNew,
+	onCopyToAnotherChannel,
 }: StoryArgs) =>
-	WithNotificationContext(
-		<DispatchReport channel={channel} onCreateNew={onStartNew}>
-			{channel === 'email' ? (
-				<NewsletterDispatchDetails />
+	useNotificationFormStory(
+		<DispatchReport
+			channel={channel}
+			onCreateNew={onStartNew}
+			onCopyToAnotherChannel={onCopyToAnotherChannel}
+		>
+			{channel === 'newsletter' ? (
+				<NewsletterEmailDispatchDetails />
 			) : (
 				<AppAlertDispatchDetails />
 			)}
 		</DispatchReport>,
-		notificationState,
+		composerState,
 		{},
 		channel,
-		channel === 'email' ? completeEmailParams : completePushParams,
+		channel === 'newsletter'
+			? completeNewsletterEmailFormValues
+			: completeAppAlertFormValues,
 	);
 
 const meta: Meta<StoryArgs> = {
@@ -53,15 +63,16 @@ const meta: Meta<StoryArgs> = {
 		},
 	},
 	args: {
-		channel: 'email',
+		channel: 'newsletter',
 		onStartNew: fn(),
-		notificationState: defaultState,
+		onCopyToAnotherChannel: fn(),
+		composerState: defaultComposerState,
 	},
 };
 
 export default meta;
 
-export const EmailSuccess: Story = {
+export const NewsletterEmailSuccess: Story = {
 	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
 
@@ -69,7 +80,9 @@ export const EmailSuccess: Story = {
 			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByText(`Exclusive: ${completeEmailParams.subject}`),
+			canvas.getByText(
+				`Exclusive: ${completeNewsletterEmailFormValues.subjectText}`,
+			),
 		).toBeVisible();
 		await expect(canvas.getByText('Newsletter email')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
@@ -77,7 +90,7 @@ export const EmailSuccess: Story = {
 		await expect(canvas.getByText('Immediate send')).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+			canvas.getByRole('button', { name: 'Create a new newsletter email' }),
 		);
 		await expect(args.onStartNew).toHaveBeenCalledOnce();
 	},
@@ -85,7 +98,7 @@ export const EmailSuccess: Story = {
 
 export const AppAlertSuccess: Story = {
 	args: {
-		channel: 'push',
+		channel: 'app-push',
 		onStartNew: fn(),
 	},
 	play: async ({ args, canvasElement }) => {
@@ -95,7 +108,7 @@ export const AppAlertSuccess: Story = {
 			canvas.getByRole('heading', { name: 'App alert sent' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByText(`Breaking news: ${completePushParams.headline}`),
+			canvas.getByText(`Breaking news: ${completeAppAlertFormValues.headline}`),
 		).toBeVisible();
 		await expect(canvas.getByText('App alert')).toBeVisible();
 		await expect(canvas.getByText('United Kingdom')).toBeVisible();
@@ -106,21 +119,25 @@ export const AppAlertSuccess: Story = {
 		).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new app alert' }),
+			canvas.getByRole('button', { name: 'Create a new app alert' }),
 		);
 		await expect(args.onStartNew).toHaveBeenCalledOnce();
 	},
 };
 
-export const NewsletterReportRoute: Story = {
-	render: () =>
-		WithNotificationContext(
-			<NewsletterDispatchReportTab />,
-			defaultState,
+export const NewsletterEmailReportRoute: Story = {
+	render: function Render() {
+		return useNotificationFormStory(
+			<NewsletterEmailDispatchReportTab />,
+			defaultComposerState,
 			{},
-			'email',
-			{ ...completeEmailParams, dispatchId: 'newsletter-dispatch-id' },
-		),
+			'newsletter',
+			{
+				...completeNewsletterEmailFormValues,
+				notificationId: 'newsletter-dispatch-id',
+			},
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -128,7 +145,7 @@ export const NewsletterReportRoute: Story = {
 		).toBeVisible();
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create new newsletter email' }),
+			canvas.getByRole('button', { name: 'Create a new newsletter email' }),
 		);
 		await waitFor(() =>
 			expect(
@@ -139,14 +156,18 @@ export const NewsletterReportRoute: Story = {
 };
 
 export const AppAlertReportRoute: Story = {
-	render: () =>
-		WithNotificationContext(
+	render: function Render() {
+		return useNotificationFormStory(
 			<AppAlertDispatchReportTab />,
-			defaultState,
+			defaultComposerState,
 			{},
-			'push',
-			{ ...completePushParams, dispatchId: 'app-alert-dispatch-id' },
-		),
+			'app-push',
+			{
+				...completeAppAlertFormValues,
+				notificationId: 'app-alert-dispatch-id',
+			},
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -155,15 +176,110 @@ export const AppAlertReportRoute: Story = {
 	},
 };
 
-export const ReportRouteRequiresSuccessfulDispatch: Story = {
-	render: () =>
-		WithNotificationContext(
-			<NewsletterDispatchReportTab />,
-			defaultState,
+export const NewsletterReportCopiesArticleToAppAlert: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes.newsletter.report,
+				articleFixture.webUrl,
+			),
+		);
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	render: function Render() {
+		return useNotificationFormStory(
+			<NewsletterEmailDispatchReportTab />,
+			defaultComposerState,
 			{},
-			'email',
-			completeEmailParams,
-		),
+			'newsletter',
+			{
+				...completeNewsletterEmailFormValues,
+				notificationId: 'newsletter-dispatch-id',
+			},
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const destination = new URL(
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+			window.location.origin,
+		);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Copy to app alert' }),
+		);
+		await waitFor(async () => {
+			await expect(
+				window.location.pathname.endsWith(destination.pathname),
+			).toBe(true);
+			await expect(window.location.search).toBe(destination.search);
+		});
+	},
+};
+
+export const AppAlertReportCopiesArticleToNewsletter: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].report,
+				articleFixture.webUrl,
+			),
+		);
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	render: function Render() {
+		return useNotificationFormStory(
+			<AppAlertDispatchReportTab />,
+			defaultComposerState,
+			{},
+			'app-push',
+			{
+				...completeAppAlertFormValues,
+				notificationId: 'app-alert-dispatch-id',
+			},
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const destination = new URL(
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
+			window.location.origin,
+		);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Copy to newsletter email' }),
+		);
+		await waitFor(async () => {
+			await expect(
+				window.location.pathname.endsWith(destination.pathname),
+			).toBe(true);
+			await expect(window.location.search).toBe(destination.search);
+		});
+	},
+};
+
+export const ReportRouteRequiresNotificationId: Story = {
+	render: function Render() {
+		return useNotificationFormStory(
+			<NewsletterEmailDispatchReportTab />,
+			defaultComposerState,
+			{},
+			'newsletter',
+			completeNewsletterEmailFormValues,
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(

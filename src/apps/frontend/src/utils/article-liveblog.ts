@@ -1,9 +1,9 @@
 import type { CapiBlock, ResolvedArticle } from '@models';
 
 export const getSelectedLiveblogBlock = (
-	content?: ResolvedArticle,
+	article?: ResolvedArticle,
 	requestedBlock?: CapiBlock,
 ): CapiBlock | undefined =>
-	content?.type === 'liveblog'
-		? (requestedBlock ?? content.blocks?.main)
+	article?.type === 'liveblog'
+		? (requestedBlock ?? article.blocks?.main)
 		: undefined;

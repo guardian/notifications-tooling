@@ -13,7 +13,7 @@ import { SideNavigationPanel } from '../layout/SideNavigationPanel';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
 import { NoSendPermissionWarning } from './NoSendPermissionWarning';
-import { NotificationFormContext } from './NotificationContext';
+import { NotificationFormContext } from './NotificationFormContext';
 
 interface NotificationTabLayoutProps {
 	channel: ChannelOption;
@@ -29,9 +29,9 @@ export const NotificationTabLayout = ({
 	previewSection,
 }: NotificationTabLayoutProps) => {
 	const {
-		notification: { content },
+		composerState: { article },
 	} = useContext(NotificationFormContext);
-	const hasPreview = Boolean(content);
+	const hasPreview = Boolean(article);
 
 	return (
 		<>

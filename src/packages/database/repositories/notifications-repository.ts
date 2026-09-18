@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte } from 'drizzle-orm';
+import { and, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -17,6 +17,15 @@ export type ListRecentNotificationsOptions = {
 	since: Date;
 	limit?: number;
 	offset?: number;
+	/** Case-insensitive substring matched against notification body and title fields. */
+	search?: string;
+};
+
+export type ListNotificationsInWindowOptions = {
+	from: Date;
+	to: Date;
+	/** Caps the notifications loaded so an unbounded range can't exhaust memory. */
+	limit: number;
 };
 
 export type NotificationListPage = {
@@ -125,10 +134,21 @@ export const createNotificationsRepository = (db: Database) => ({
 		since,
 		limit,
 		offset,
+		search,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
+		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
+		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
+			searchPattern
+				? sql<boolean>`exists (
+						select 1
+						from jsonb_each(coalesce(${notifications.content}->'items', '{}'::jsonb)) as content_item
+						where content_item.value->>'body' ilike ${searchPattern}
+							or content_item.value->>'title' ilike ${searchPattern}
+					)`
+				: undefined,
 		);
 
 		const [totals] = await db
@@ -151,6 +171,31 @@ export const createNotificationsRepository = (db: Database) => ({
 		}
 
 		return { notifications: await pageQuery, total: totals?.total ?? 0 };
+	},
+
+	/** Production sends in a time window with their dispatch outcomes, newest first. */
+	async listSendsWithDispatchesInWindow({
+		from,
+		to,
+		limit,
+	}: ListNotificationsInWindowOptions): Promise<NotificationWithDispatches[]> {
+		return db.query.notifications.findMany({
+			where: and(
+				gte(notifications.createdAt, from),
+				lte(notifications.createdAt, to),
+				eq(notifications.kind, 'send'),
+				eq(notifications.dryRun, false),
+			),
+			orderBy: (notification, { desc: orderDescending }) => [
+				orderDescending(notification.createdAt),
+			],
+			limit,
+			with: {
+				dispatches: {
+					orderBy: (dispatch, { asc }) => [asc(dispatch.createdAt)],
+				},
+			},
+		});
 	},
 
 	/** The notification plus its dispatch outcomes, oldest first, or null. */

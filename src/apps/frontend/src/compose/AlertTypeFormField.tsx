@@ -1,13 +1,13 @@
 import { Option, Select } from '@guardian/stand/Select';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useAppPushTopicTypes } from '../segment/useChannelAudiences';
+import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 
 const toOptionKey = (value: string) => `alertType//${value}`;
 
 export const AlertTypeFormField = () => {
 	const { control } = useFormContext<AppAlertFormValues>();
-	const topicTypes = useAppPushTopicTypes();
+	const topicTypes = useAppAlertTopicTypes();
 
 	return (
 		<Controller

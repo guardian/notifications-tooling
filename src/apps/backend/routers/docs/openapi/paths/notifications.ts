@@ -9,7 +9,7 @@ export const notificationsPath = {
 	get: {
 		summary: 'List recent notifications',
 		description:
-			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `total` reports the full count of sends at or after that cut-off regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
+			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive substring match to notification body and title fields. `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{
@@ -36,6 +36,14 @@ export const notificationsPath = {
 					'Number of notifications to skip before the page. Defaults to 0; must be sent together with `limit`. An offset past the end of the range returns an empty page.',
 				schema: { type: 'integer', minimum: 0, default: 0 },
 			},
+			{
+				name: 'search',
+				in: 'query',
+				required: false,
+				description:
+					'Case-insensitive substring matched against notification body and title fields.',
+				schema: { type: 'string', minLength: 1, maxLength: 200 },
+			},
 		],
 		responses: {
 			'200': {
@@ -48,7 +56,7 @@ export const notificationsPath = {
 				},
 			},
 			'400': {
-				description: 'The pagination query parameters are invalid.',
+				description: 'The notification list query parameters are invalid.',
 				content: {
 					'application/json': {
 						schema: {

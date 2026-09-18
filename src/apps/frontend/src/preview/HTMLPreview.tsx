@@ -1,54 +1,112 @@
 import { css } from '@emotion/react';
-import { HtmlPreview } from '@guardian/stand/HtmlPreviewLoader';
+import {
+	baseColors,
+	semanticColors,
+	semanticSizing,
+	semanticSpacing,
+} from '@guardian/stand';
+import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
-import { NotificationFormContext } from '../compose/NotificationContext';
-import type { NewsletterFormValues } from '../utils/notification-forms';
+import { NotificationFormContext } from '../compose/NotificationFormContext';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 
 // TO DO - this function will work with the current format of the notification emails
-// but we should modidify the template used in email-rendering to include attributes
+// but we should modify the template used in email-rendering to include attributes
 // to more robustly identify the elements to update
 const modifyContent = (
-	emailHtml: string,
-	parameters: Partial<NewsletterFormValues>,
-): string => {
-	const body = document.createElement('body');
-	body.innerHTML = emailHtml;
-
-	const { subject, preview, showPreview = true } = parameters;
-	const headlineElement = body.querySelector('h2');
+	body: HTMLElement,
+	parameters: Partial<NewsletterEmailFormValues>,
+) => {
+	const { subjectText, previewText, showPreview } = parameters;
+	const subjectTextElement = body.querySelector('h2');
 	const previewElement =
-		headlineElement?.parentElement?.querySelector<HTMLElement>('h2~div');
+		subjectTextElement?.parentElement?.querySelector<HTMLElement>('h2~div');
 
-	if (subject && headlineElement) {
-		headlineElement.innerText = subject;
+	if (subjectText && subjectTextElement) {
+		subjectTextElement.innerText = subjectText;
 	}
 	if (previewElement) {
-		previewElement.innerText = showPreview ? (preview ?? '') : '';
+		previewElement.innerText = showPreview && previewText ? previewText : '';
 	}
 	Array.from(body.querySelectorAll('a')).forEach((link) =>
 		link.removeAttribute('href'),
 	);
-
-	return body.innerHTML;
 };
 
-export const HTMLPreview = () => {
+type PreviewData = {
+	html?: string | undefined;
+	error?: string | undefined;
+	info?: string | undefined;
+};
+
+const styles = {
+	previewFrame: css({
+		maxWidth: 440,
+		borderWidth: semanticSizing.border.default,
+		borderColor: semanticColors.border.strong,
+		borderStyle: 'solid',
+		backgroundColor: baseColors.neutral[900],
+		position: 'relative',
+	}),
+	placeHolder: css({
+		minHeight: 300,
+		backgroundColor: baseColors.neutral[700],
+		color: baseColors.neutral[0],
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+	}),
+	spinnerContainer: css({
+		position: 'absolute',
+		inset: 0,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		backdropFilter: 'blur(2px)',
+	}),
+};
+
+export const NewsletterEmailPreview = () => {
 	const {
-		notification: { content, requestedUrl },
+		composerState: { article, requestedUrl },
 		requestEmailHtml,
 	} = useContext(NotificationFormContext);
-	const parameters = useWatch<NewsletterFormValues>();
-	const [emailHtml, setEmailHtml] = useState<string>();
-	const [errorMessage, setErrorMessage] = useState<string>();
-	const [isLoading, setIsLoading] = useState(false);
+	const webUrl = requestedUrl ?? article?.webUrl;
+	const parameters = useWatch<NewsletterEmailFormValues>();
 	const stringifiedAudience = (parameters.audienceSegments ?? []).join();
-	const webUrl = requestedUrl ?? content?.webUrl;
 
-	const fetchHtml = useCallback(async () => {
+	const [previewContainerElement, setPreviewContainerElement] =
+		useState<HTMLElement | null>(null);
+	const [preview, setPreview] = useState<PreviewData>();
+	const [isLoading, setIsLoading] = useState(false);
+
+	useEffect(() => {
+		const articleElement = previewContainerElement?.querySelector('article');
+		if (!articleElement) {
+			return;
+		}
+		articleElement.innerHTML = preview?.html ?? '';
+		if (preview?.html) {
+			modifyContent(articleElement, parameters);
+		}
+	}, [previewContainerElement, preview?.html, parameters]);
+
+	useEffect(() => {
+		const articleElement = previewContainerElement?.querySelector('article');
+		if (!articleElement) {
+			return;
+		}
+		modifyContent(articleElement, parameters);
+	}, [parameters, previewContainerElement]);
+
+	const getPreviewData = useCallback(async (): Promise<PreviewData> => {
 		if (!webUrl) {
-			return `<div>No article loaded</div>`;
+			return {
+				info: 'No article loaded',
+			};
 		}
 		const audience = stringifiedAudience
 			.split(',')
@@ -56,46 +114,63 @@ export const HTMLPreview = () => {
 			.filter((item) => item.length > 0);
 
 		if (audience.length === 0) {
-			return `<div>Choose an audience in order to preview the newsletter email</div>`;
+			return {
+				info: 'Choose an audience in order to preview the newsletter email',
+			};
 		}
 		const result = await requestEmailHtml({
 			article: webUrl,
 			audience: audience,
 		});
+
 		if (!result.success) {
-			throw result.failure;
+			return {
+				error: result.failure.message,
+			};
 		}
-		return result.data.html;
+		return {
+			html: result.data.html,
+		};
 	}, [webUrl, requestEmailHtml, stringifiedAudience]);
 
 	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect -- ok
 		setIsLoading(true);
-		setErrorMessage(undefined);
-		fetchHtml()
-			.then(setEmailHtml)
-			.catch((err) => {
-				console.error(err);
-				setErrorMessage('failed to load');
-			})
-			.finally(() => setIsLoading(false));
-	}, [fetchHtml]);
+		setPreview((preview) => ({
+			errorMessage: undefined,
+			info: undefined,
+			html: preview?.html,
+		}));
+		void getPreviewData().then((result) => {
+			setPreview(result);
+			setIsLoading(false);
+		});
+	}, [getPreviewData]);
 
 	return (
-		<HtmlPreview
-			html={
-				emailHtml
-					? modifyContent(emailHtml, parameters)
-					: `<div>no article html</div> `
-			}
-			errorMessage={errorMessage}
-			isLoading={isLoading}
-			title={
+		<figure>
+			<figcaption css={{ paddingBottom: semanticSpacing.stackSm }}>
 				<Typography variant="labelFormMd">Newsletter email preview</Typography>
-			}
-			widthOptions={[]}
-			defaultWidth={400}
-			cssOverrides={css({ width: '440px' })}
-		/>
+			</figcaption>
+
+			{preview?.error && (
+				<InlineMessage level="error">{preview.error}</InlineMessage>
+			)}
+			{preview?.info && (
+				<InlineMessage level="information">{preview.info}</InlineMessage>
+			)}
+
+			<div ref={setPreviewContainerElement} css={styles.previewFrame}>
+				<article></article>
+				{!preview?.html && (
+					<div css={styles.placeHolder}>Generated newsletter email preview</div>
+				)}
+				{isLoading && (
+					<div css={styles.spinnerContainer}>
+						<LoadingSpinner fontSize={100} />
+					</div>
+				)}
+			</div>
+		</figure>
 	);
 };

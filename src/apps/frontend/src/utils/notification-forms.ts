@@ -11,34 +11,37 @@ import {
  * broker caps nothing an editor can type. These schemas therefore check
  * presence and shape only.
  */
-export const newsletterFormSchema = z
+export const newsletterEmailFormSchema = z
 	.object({
-		dispatchId: z.string().optional(),
+		notificationId: z.string().optional(),
 		kicker: z
 			.union([kickerSchema, z.literal('')])
 			.refine((kicker): boolean => kicker !== '', 'Please select a kicker'),
-		subject: z.string().trim().min(1, 'Subject is required'),
-		preview: z.string().trim(),
+		subjectText: z.string().trim().min(1, 'Subject is required'),
+		previewText: z.string().trim(),
 		showPreview: z.boolean(),
 		audienceSegments: z
 			.array(newsletterSegmentId)
 			.min(1, 'Please select an audience segment'),
 		deliveryOption: z.literal('immediate'),
 	})
-	.superRefine(({ preview, showPreview }, context) => {
-		const previewError = validateNewsletterPreview(preview, showPreview);
+	.superRefine(({ previewText, showPreview }, context) => {
+		const previewTextError = validateNewsletterEmailPreviewText(
+			previewText,
+			showPreview,
+		);
 
-		if (previewError) {
+		if (previewTextError) {
 			context.addIssue({
 				code: 'custom',
-				message: previewError,
-				path: ['preview'],
+				message: previewTextError,
+				path: ['previewText'],
 			});
 		}
 	});
 
 export const appAlertFormSchema = z.object({
-	dispatchId: z.string().optional(),
+	notificationId: z.string().optional(),
 	// The selectable alert types are the topic types the backend exposes via
 	// `GET /v1/channels/audiences`, so this cannot be a fixed enum. The select
 	// constrains the value to that list, and the broker rejects unknown ids.
@@ -62,24 +65,26 @@ export const appAlertFormSchema = z.object({
 	deliveryOption: z.literal('appImmediate'),
 });
 
-export type NewsletterFormValues = z.infer<typeof newsletterFormSchema>;
+export type NewsletterEmailFormValues = z.infer<
+	typeof newsletterEmailFormSchema
+>;
 export type AppAlertFormValues = z.infer<typeof appAlertFormSchema>;
 
-export const validateNewsletterPreview = (
-	preview: NewsletterFormValues['preview'],
+export const validateNewsletterEmailPreviewText = (
+	previewText: NewsletterEmailFormValues['previewText'],
 	showPreview: boolean,
 ) => {
-	if (showPreview && preview.trim().length === 0) {
+	if (showPreview && previewText.trim().length === 0) {
 		return 'Preview text is required';
 	}
 
 	return undefined;
 };
 
-export const defaultNewsletterFormValues: NewsletterFormValues = {
+export const defaultNewsletterEmailFormValues: NewsletterEmailFormValues = {
 	kicker: '',
-	subject: '',
-	preview: '',
+	subjectText: '',
+	previewText: '',
 	showPreview: true,
 	audienceSegments: [],
 	deliveryOption: 'immediate',
