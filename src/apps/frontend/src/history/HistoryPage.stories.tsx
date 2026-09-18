@@ -223,7 +223,7 @@ const partialFailureDetail: NotificationResource = {
 			status: 'failure',
 			providerRef: null,
 			failureReason: 'timeout',
-			providerStatusCode: 504,
+			providerStatusCode: null,
 			createdAt: '2026-08-27T08:30:01.000Z',
 			updatedAt: '2026-08-27T08:30:04.000Z',
 		},
@@ -326,14 +326,15 @@ export const Loaded: Story = {
 		await userEvent.click(failedNotification);
 		const page = within(document.body);
 		const tooltip = await page.findByRole('tooltip');
-		const failures = within(tooltip).getAllByRole('listitem');
+		const failures = await within(tooltip).findAllByRole('listitem');
 		await expect(failures).toHaveLength(2);
 		await expect(failures[0]).toHaveTextContent(
-			'US via newsletter email. The downstream service rejected the request. Provider status: 500.',
+			'United States via newsletter email. The downstream service rejected the request. Provider status: 500.',
 		);
 		await expect(failures[1]).toHaveTextContent(
-			'UK via newsletter email. The downstream service did not respond in time. Provider status: 504.',
+			'United Kingdom via newsletter email. The downstream service did not respond in time.',
 		);
+		await expect(failures[1]).not.toHaveTextContent('Provider status:');
 		await expect(tooltip).toHaveTextContent(
 			'Please contact Central Production for support.',
 		);
@@ -350,8 +351,10 @@ export const FailureWithoutDispatchOutcomes: Story = {
 
 		await userEvent.click(failedNotification);
 		const tooltip = await within(document.body).findByRole('tooltip');
-		await expect(tooltip).toHaveTextContent(
-			'Failure: No per-destination failure details are available.',
+		await waitFor(async () =>
+			expect(tooltip).toHaveTextContent(
+				'Failure: No per-destination failure details are available.',
+			),
 		);
 		await expect(tooltip).not.toHaveTextContent(
 			'Failure details could not be loaded.',

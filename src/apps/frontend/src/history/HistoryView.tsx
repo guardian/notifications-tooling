@@ -2,6 +2,7 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { DisplayAppAlertTopicEditionId } from '@models';
 import type { ReactNode } from 'react';
+import type { ChannelAudienceResponse } from '../schemas';
 import { historyViewStyles, layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
 import { LastUpdated } from '../ui/LastUpdated';
@@ -27,6 +28,7 @@ export interface HistoryNotification {
 
 interface HistoryViewProps {
 	notifications?: HistoryNotification[];
+	audiences?: ChannelAudienceResponse;
 	totalItems?: number;
 	limit: number;
 	currentPage: number;
@@ -40,6 +42,7 @@ interface HistoryViewProps {
 
 export const HistoryView = ({
 	notifications = [],
+	audiences,
 	totalItems = 0,
 	isLoading = false,
 	isRefreshing = false,
@@ -85,7 +88,7 @@ export const HistoryView = ({
 				{isLoading && <HistoryTableSkeleton />}
 				{error}
 				{!isLoading && !error && notifications.length > 0 && (
-					<HistoryTable notifications={notifications} />
+					<HistoryTable notifications={notifications} audiences={audiences} />
 				)}
 				{!isLoading && !error && notifications.length === 0 && (
 					<HistoryEmptyState />

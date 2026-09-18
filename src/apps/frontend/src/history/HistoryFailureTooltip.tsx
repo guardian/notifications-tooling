@@ -3,9 +3,10 @@ import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Badge } from '@guardian/stand/Badge';
 import { useState } from 'react';
 import { useNotificationDetail } from '../hooks/useNotificationDetail';
-import type { NotificationResource } from '../schemas';
+import type { ChannelAudienceResponse, NotificationResource } from '../schemas';
 import { historyViewStyles } from '../themes';
 import { Tooltip } from '../ui/Tooltip';
+import { formatDispatchTarget } from '../utils/format-dispatch-target';
 import type { HistoryNotification } from './HistoryView';
 
 const channelNames = {
@@ -18,15 +19,8 @@ const failureReasonDescriptions: Record<string, string> = {
 	timeout: 'The downstream service did not respond in time.',
 	network_error: 'The downstream service could not be reached.',
 	invalid_response: 'The downstream service returned an unexpected response.',
-	unknown: 'The downstream service reported an unexpected problem.',
+	unknown: 'An unexpected problem occurred while sending.',
 };
-
-const destinationName = (
-	dispatch: NotificationResource['dispatches'][number],
-) =>
-	dispatch.requested.channel === 'app-push'
-		? `${dispatch.requested.topicType}: ${dispatch.requested.editions.join(', ')}`
-		: dispatch.requested.segment;
 
 const failureListStyles = css({
 	margin: `${semanticSpacing.stackXs} 0`,
@@ -41,10 +35,12 @@ const failureListStyles = css({
 
 const FailureTooltipContent = ({
 	notification,
+	audiences,
 	isLoading,
 	isError,
 }: {
 	notification?: NotificationResource;
+	audiences?: ChannelAudienceResponse;
 	isLoading: boolean;
 	isError: boolean;
 }) => {
@@ -74,8 +70,10 @@ const FailureTooltipContent = ({
 
 					return (
 						<li key={dispatch.id}>
-							<strong>{destinationName(dispatch)}</strong> via{' '}
-							{channelNames[dispatch.channel]}. {reason}
+							<strong>
+								{formatDispatchTarget(dispatch.requested, audiences)}
+							</strong>{' '}
+							via {channelNames[dispatch.channel]}. {reason}
 							{dispatch.providerStatusCode !== null
 								? ` Provider status: ${dispatch.providerStatusCode}.`
 								: ''}
@@ -90,8 +88,10 @@ const FailureTooltipContent = ({
 
 export const HistoryFailureTooltip = ({
 	notification,
+	audiences,
 }: {
 	notification: HistoryNotification;
+	audiences?: ChannelAudienceResponse;
 }) => {
 	const [hasOpened, setHasOpened] = useState(false);
 	const notificationDetail = useNotificationDetail(
@@ -126,6 +126,7 @@ export const HistoryFailureTooltip = ({
 			<strong>{isPartialFailure ? 'Partial failure: ' : 'Failure: '}</strong>
 			<FailureTooltipContent
 				notification={notificationDetail.data}
+				audiences={audiences}
 				isLoading={notificationDetail.isPending}
 				isError={notificationDetail.isError}
 			/>
