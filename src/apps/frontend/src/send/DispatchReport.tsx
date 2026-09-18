@@ -380,8 +380,6 @@ const DispatchReportTab = ({
 							void navigate(notificationRoutes[channel].create);
 						}}
 						onCopyToAnotherChannel={() => {
-							reset();
-							setValue('notificationId', undefined);
 							void navigate(
 								withArticleUrl(
 									notificationRoutes[getAlternateChannel(channel)].create,
