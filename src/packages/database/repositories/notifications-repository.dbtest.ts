@@ -281,6 +281,15 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(3),
+			channels: {
+				'app-push': {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'au' }],
+					},
+					compose: { use: 'lead-story' },
+				},
+			},
 		});
 
 		const page = await notifications.listRecent({
