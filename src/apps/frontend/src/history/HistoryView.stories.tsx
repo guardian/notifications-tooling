@@ -143,11 +143,13 @@ export const NoSearchResults: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
-			canvas.getByRole('heading', { name: 'No matching alerts' }),
+			canvas.getByRole('heading', {
+				name: 'No notifications match these filters',
+			}),
 		).toBeInTheDocument();
 		await expect(
-			canvas.getByText('Try a different search term.'),
-		).toBeInTheDocument();
+			canvas.queryByRole('button', { name: 'Clear filters' }),
+		).not.toBeInTheDocument();
 		await expect(
 			canvas.queryByRole('heading', { name: 'No alerts yet' }),
 		).not.toBeInTheDocument();

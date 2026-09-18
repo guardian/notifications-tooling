@@ -12,6 +12,7 @@ import {
 } from '@guardian/stand';
 import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { ButtonTheme } from '@guardian/stand/Button';
+import { componentCheckbox } from '@guardian/stand/Checkbox';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
 import type { ToggleSwitchTheme } from '@guardian/stand/ToggleSwitch';
@@ -712,6 +713,8 @@ export const emptyStateStyles = {
 	}),
 } as const;
 
+const checkboxIndicatorSize = componentCheckbox.input.sm.indicator.size;
+
 export const historyViewStyles = {
 	page: css({
 		display: 'grid',
@@ -827,6 +830,64 @@ export const historyViewStyles = {
 	}),
 	visualOnly: css({
 		display: 'contents',
+	}),
+	categoryFilter: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXs,
+		minWidth: 0,
+	}),
+	categoryButton: css({
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr) auto',
+		alignItems: 'center',
+		width: '100%',
+		height: '40px',
+		paddingLeft: semanticSpacing.stackSm,
+		paddingRight: semanticSpacing.stackXs,
+		textAlign: 'left',
+		font: semanticTypography.labelFormInlineMd.font,
+		letterSpacing: semanticTypography.labelFormInlineMd.letterSpacing,
+		fontVariationSettings: `"wdth" ${semanticTypography.labelFormInlineMd.fontWidth}`,
+		color: semanticColors.text.strong,
+		backgroundColor: semanticColors.bg.base,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.stronger}`,
+		borderRadius: semanticRadius.cornerSm,
+		'&[data-hovered]': {
+			backgroundColor: semanticColors.fill.weakHover,
+			color: semanticColors.text.strong,
+		},
+		'&[data-pressed]': {
+			backgroundColor: semanticColors.fill.weakHover,
+			color: semanticColors.text.strong,
+		},
+		'&[aria-expanded="true"] .material-symbols': {
+			transform: 'rotate(180deg)',
+		},
+	}),
+	categorySummary: css({
+		overflow: 'hidden',
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
+	}),
+	categoryPopover: css({
+		width: 'var(--trigger-width)',
+	}),
+	categoryMenuItem: css({
+		borderBottom: 'none',
+		'.material-symbols': {
+			alignSelf: 'center',
+			// The glyph is inset within its em box (18 of 24 units), so scale
+			// the font by 24/18 to paint a box of the indicator size
+			width: checkboxIndicatorSize,
+			height: checkboxIndicatorSize,
+			fontSize: `calc(${checkboxIndicatorSize} * 4 / 3)`,
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		'&[data-selected] .material-symbols': {
+			color: semanticColors.fill.selectedStrong,
+		},
 	}),
 	container: css({
 		display: 'flex',
