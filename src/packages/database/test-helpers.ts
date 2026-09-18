@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import type { Database } from './client';
+import { loadDatabaseEnvironment } from './database-environment';
 import type { NewNotificationDispatch } from './repositories/notification-dispatches-repository';
 import type { NewNotification } from './repositories/notifications-repository';
 import { getEnvConnectionString } from './runtime-connection-string';
@@ -58,6 +59,13 @@ export const buildDispatch = (
  * self-contained), and returns the db plus helpers to reset and close it.
  */
 export const setupTestDatabase = async () => {
+	const { DB_NAME } = loadDatabaseEnvironment();
+	if (!DB_NAME.endsWith('_test')) {
+		throw new Error(
+			`Refusing to run destructive database tests against '${DB_NAME}'. Test database names must end with _test.`,
+		);
+	}
+
 	const pool = new Pool({ connectionString: getEnvConnectionString() });
 	const db: Database = drizzle({ client: pool, schema });
 
