@@ -254,7 +254,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		]);
 	});
 
-	it('filters newsletter variants and app-push editions by audience', async () => {
+	it('filters newsletter audiences and app-push editions by audience', async () => {
 		const appPush = await notifications.create({
 			...buildNotification(),
 			createdAt: daysAgo(1),
@@ -292,13 +292,31 @@ describe('notifications repository listRecent (real Postgres)', () => {
 			},
 		});
 
-		const page = await notifications.listRecent({
+		const newsletterPage = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['uk'],
+		});
+
+		expect(newsletterPage.total).toBe(1);
+		expect(newsletterPage.notifications.map(({ id }) => id)).toEqual([
+			newsletter.id,
+		]);
+
+		const appPushPage = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['europe'],
+		});
+
+		expect(appPushPage.total).toBe(1);
+		expect(appPushPage.notifications.map(({ id }) => id)).toEqual([appPush.id]);
+
+		const combinedPage = await notifications.listRecent({
 			since: daysAgo(14),
 			audiences: ['uk', 'europe'],
 		});
 
-		expect(page.total).toBe(2);
-		expect(page.notifications.map(({ id }) => id)).toEqual([
+		expect(combinedPage.total).toBe(2);
+		expect(combinedPage.notifications.map(({ id }) => id)).toEqual([
 			appPush.id,
 			newsletter.id,
 		]);
