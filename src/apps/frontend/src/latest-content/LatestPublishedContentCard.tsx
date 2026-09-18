@@ -11,10 +11,12 @@ import type { LatestPublishedContentItem } from './latest-published-content';
 
 interface LatestPublishedContentCardProps {
 	content: LatestPublishedContentItem;
+	onCreate: () => void;
 }
 
 export const LatestPublishedContentCard = ({
 	content,
+	onCreate,
 }: LatestPublishedContentCardProps) => {
 	const {
 		id,
@@ -97,6 +99,7 @@ export const LatestPublishedContentCard = ({
 						<Button
 							variant="tertiary"
 							size="sm"
+							onPress={onCreate}
 							cssOverrides={latestPublishedContentTheme.createButton}
 						>
 							<Icon size="sm" symbol="notifications" />

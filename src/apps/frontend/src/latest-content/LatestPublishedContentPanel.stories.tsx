@@ -40,6 +40,18 @@ export const Default: Story = {
 		await expect(
 			canvas.getAllByRole('button', { name: /create/i }),
 		).toHaveLength(3);
+		await userEvent.click(
+			canvas.getAllByRole('button', { name: /create/i })[0]!,
+		);
+		const documentCanvas = within(canvasElement.ownerDocument.body);
+		await expect(
+			await documentCanvas.findByRole('dialog', {
+				name: 'Choose an alert type for this content',
+			}),
+		).toBeVisible();
+		await userEvent.click(
+			documentCanvas.getByRole('button', { name: 'Close Modal' }),
+		);
 		await userEvent.click(showAllButton);
 		await expect(showAllButton).not.toBeInTheDocument();
 		await expect(

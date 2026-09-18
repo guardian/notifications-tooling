@@ -6,7 +6,7 @@ import {
 	TableHeader,
 } from '@guardian/stand/Table';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 import { latestPublishedContentTheme } from '../themes';
 import { mockLatestPublishedContent } from './latest-published-content';
 import { LatestPublishedContentCard } from './LatestPublishedContentCard';
@@ -42,6 +42,7 @@ const meta = {
 	component: LatestPublishedContentCard,
 	args: {
 		content: mockLatestPublishedContent[0],
+		onCreate: fn(),
 	},
 	parameters: {
 		layout: 'centered',
