@@ -21,6 +21,38 @@ describe('email preview OpenAPI contract', () => {
 	});
 });
 
+describe('latest articles OpenAPI contract', () => {
+	it('registers the route with its generated response schema', () => {
+		const latestArticlesPath =
+			openApiDocument.paths['/v1/content/articles/latest'].get;
+
+		expect(
+			latestArticlesPath.responses['200'].content['application/json'].schema
+				.$ref,
+		).toBe('#/components/schemas/LatestArticlesResponse');
+		expect(
+			latestArticlesPath.responses['502'].content['application/json'].schema
+				.$ref,
+		).toBe('#/components/schemas/CapiUnavailableError');
+		expect(
+			openApiDocument.components.schemas.LatestArticlesResponse,
+		).toMatchObject({
+			properties: {
+				articles: {
+					items: { $ref: '#/components/schemas/LatestArticle' },
+				},
+			},
+		});
+		expect(openApiDocument.components.schemas.LatestArticle.required).toEqual([
+			'webUrl',
+			'publishedAt',
+			'headline',
+			'section',
+			'intendedAudience',
+		]);
+	});
+});
+
 describe('notification history OpenAPI contract', () => {
 	it('documents the bounded search query parameter', () => {
 		const searchParameter = openApiDocument.paths[
