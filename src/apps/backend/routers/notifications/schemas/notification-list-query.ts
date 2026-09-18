@@ -27,6 +27,7 @@ export const notificationListQuerySchema = z
 		since: epochSecondsToDate.optional(),
 		limit: z.coerce.number().int().min(1).max(50).optional(),
 		offset: z.coerce.number().int().min(0).optional(),
+		search: z.string().trim().min(1).max(200).optional(),
 	})
 	.refine(
 		(query) => (query.limit === undefined) === (query.offset === undefined),
@@ -39,6 +40,7 @@ export const notificationListQuerySchema = z
 		since: query.since ?? daysAgo(defaultSinceDays),
 		limit: query.limit ?? defaultLimit,
 		offset: query.offset ?? defaultOffset,
+		search: query.search,
 	}));
 
 export type NotificationListQuery = z.infer<typeof notificationListQuerySchema>;

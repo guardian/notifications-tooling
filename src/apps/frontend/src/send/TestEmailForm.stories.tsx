@@ -6,11 +6,11 @@ import {
 	mockRequestTestEmailSend,
 } from '../testing/mock-request-test-email-send';
 import {
-	completeEmailParams,
-	populatedEmailState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
+	completeNewsletterEmailFormValues,
+	populatedNewsletterEmailComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
 import type {
 	TestEmailRequestFunction,
 	TestEmailSendRequest,
@@ -18,7 +18,7 @@ import type {
 import { TestEmailForm } from './TestEmailForm';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
 	requestTestEmailSend?: TestEmailRequestFunction;
 };
 
@@ -28,16 +28,17 @@ const meta: Meta<StoryArgs> = {
 	title: 'Dispatch/Send/TestEmailForm',
 	component: TestEmailForm,
 	args: {
-		notificationState: populatedEmailState,
+		composerState: populatedNewsletterEmailComposerState,
 	},
-	render: ({ notificationState, requestTestEmailSend }) =>
-		WithNotificationContext(
+	render: function Render({ composerState, requestTestEmailSend }) {
+		return useNotificationFormStory(
 			<TestEmailForm />,
-			notificationState,
+			composerState,
 			{ requestTestEmailSend },
-			'email',
-			completeEmailParams,
-		),
+			'newsletter',
+			completeNewsletterEmailFormValues,
+		);
+	},
 };
 
 export default meta;
@@ -112,8 +113,8 @@ const requestBlockTestEmailSend: TestEmailRequestFunction = (request) => {
 
 export const RequestedLiveblogBlock: Story = {
 	args: {
-		notificationState: {
-			...populatedEmailState,
+		composerState: {
+			...populatedNewsletterEmailComposerState,
 			requestedUrl: requestedLiveblogUrl,
 		},
 		requestTestEmailSend: requestBlockTestEmailSend,
@@ -136,10 +137,10 @@ export const RequestedLiveblogBlock: Story = {
 };
 
 export const FailingTestEmail: Story = {
-	render: ({ notificationState }) =>
-		WithNotificationContext(
+	render: function Render({ composerState }) {
+		return useNotificationFormStory(
 			<TestEmailForm />,
-			notificationState,
+			composerState,
 			{
 				requestTestEmailSend: mockFailingRequestTestEmailSend(
 					new ApiError({
@@ -148,9 +149,10 @@ export const FailingTestEmail: Story = {
 					}),
 				),
 			},
-			'email',
-			completeEmailParams,
-		),
+			'newsletter',
+			completeNewsletterEmailFormValues,
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
@@ -167,11 +169,11 @@ export const FailingTestEmail: Story = {
 };
 
 export const RetryAfterFailure: Story = {
-	render: ({ notificationState }) => {
+	render: function Render({ composerState }) {
 		let sendAttempts = 0;
-		return WithNotificationContext(
+		return useNotificationFormStory(
 			<TestEmailForm />,
-			notificationState,
+			composerState,
 			{
 				requestTestEmailSend: (request) => {
 					sendAttempts += 1;
@@ -185,8 +187,8 @@ export const RetryAfterFailure: Story = {
 						: mockRequestTestEmailSend(request);
 				},
 			},
-			'email',
-			completeEmailParams,
+			'newsletter',
+			completeNewsletterEmailFormValues,
 		);
 	},
 	play: async ({ canvasElement }) => {

@@ -116,8 +116,8 @@ export const handleNotificationIdValidationError: ErrorRequestHandler = (
 };
 
 /**
- * express-zod-safe error hook for `GET /v1/notifications`. Malformed pagination
- * query params are always a structural `400`.
+ * express-zod-safe error hook for `GET /v1/notifications`. Malformed query
+ * params are always a structural `400`.
  */
 export const handleNotificationListValidationError: ErrorRequestHandler = (
 	errors,
@@ -136,7 +136,7 @@ export const handleNotificationListValidationError: ErrorRequestHandler = (
 		...buildErrorEnvelope(
 			req,
 			'bad_request',
-			'The pagination query parameters are invalid.',
+			'The notification list query parameters are invalid.',
 		),
 		details,
 	});
@@ -280,12 +280,13 @@ export const createNotificationsRouter = (
 		}) as unknown as RequestHandler,
 		async (req, res) => {
 			// express-zod-safe has coerced the query and applied the defaults.
-			const { since, limit, offset } =
+			const { since, limit, offset, search } =
 				req.query as unknown as NotificationListQuery;
 			const { notifications, total } = await listNotifications({
 				since,
 				limit,
 				offset,
+				search,
 			});
 
 			res.status(200).json({

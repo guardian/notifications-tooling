@@ -9,6 +9,12 @@ import { emailPreviewErrorSchema } from './email-preview-error';
 import { emailPreviewRequestJsonSchema } from './email-preview-request';
 import { emailPreviewResponseJsonSchema } from './email-preview-response';
 import { emailRenderingContentErrorSchema } from './email-rendering-content-error';
+import { grafanaMetricsSchema } from './grafana-metrics';
+import {
+	grafanaQueryErrorSchema,
+	grafanaQueryResponseSchema,
+} from './grafana-query';
+import { grafanaQueryRequestJsonSchema } from './grafana-query-request';
 import { healthStatusSchema } from './health-status';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { latestArticleJsonSchema } from './latest-article';
@@ -35,6 +41,10 @@ import { userResponseSchema, userSchema } from './user';
 /** Reusable schema objects referenced via `#/components/schemas/*`. */
 export const schemas = {
 	HealthStatus: healthStatusSchema,
+	GrafanaMetrics: grafanaMetricsSchema,
+	GrafanaQueryRequest: grafanaQueryRequestJsonSchema,
+	GrafanaQueryResponse: grafanaQueryResponseSchema,
+	GrafanaQueryError: grafanaQueryErrorSchema,
 	NotificationChannel: notificationChannelSchema,
 	Notification: notificationSchema,
 	NotificationSummary: notificationSummarySchema,

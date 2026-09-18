@@ -1,10 +1,10 @@
 import { type CapiBlock, type ResolvedArticle, toApiEditionId } from '@models';
 import type { SendNotificationRequest } from '../schemas';
 import { getArticleThumbnail } from './article-thumbnail';
-import { composeNewsletterSubject } from './newsletter-subject';
+import { composeNewsletterEmailSubjectLine } from './newsletter-email-subject';
 import type {
 	AppAlertFormValues,
-	NewsletterFormValues,
+	NewsletterEmailFormValues,
 } from './notification-forms';
 
 /** Identifier for the originating system, shared across every channel. */
@@ -12,22 +12,22 @@ export const senderId = 'dispatch-app';
 
 type BuildRequestArgs<Values> = {
 	values: Values;
-	content: ResolvedArticle;
+	article: ResolvedArticle;
 	idempotencyKey: string;
 	requestedUrl?: string;
 	requestedBlock?: CapiBlock;
 };
 
-export const buildNewsletterRequest = ({
+export const buildNewsletterEmailRequest = ({
 	values,
-	content,
+	article,
 	idempotencyKey,
 	requestedUrl,
-}: BuildRequestArgs<NewsletterFormValues>): SendNotificationRequest => {
-	const { subject: headline, preview, audienceSegments, kicker } = values;
-	const thumbnailUrl = getArticleThumbnail(content).src;
+}: BuildRequestArgs<NewsletterEmailFormValues>): SendNotificationRequest => {
+	const { subjectText, previewText, audienceSegments, kicker } = values;
+	const thumbnailUrl = getArticleThumbnail(article).src;
 
-	const emailSubjectLine = composeNewsletterSubject(headline, kicker);
+	const subjectLine = composeNewsletterEmailSubjectLine(subjectText, kicker);
 
 	return {
 		idempotencyKey,
@@ -35,9 +35,9 @@ export const buildNewsletterRequest = ({
 			items: {
 				'lead-story': {
 					type: 'newsletter',
-					title: headline,
-					body: preview,
-					link: requestedUrl ?? content.webUrl,
+					title: subjectText,
+					body: previewText,
+					link: requestedUrl ?? article.webUrl,
 					...(thumbnailUrl
 						? {
 								media: {
@@ -58,7 +58,7 @@ export const buildNewsletterRequest = ({
 				},
 				compose: {
 					items: ['lead-story'],
-					subject: emailSubjectLine,
+					subject: subjectLine,
 				},
 			},
 		},
@@ -73,7 +73,7 @@ export const buildNewsletterRequest = ({
 export const buildAppAlertRequest = ({
 	values,
 	alertTypeLabel,
-	content,
+	article,
 	idempotencyKey,
 	requestedUrl,
 }: BuildRequestArgs<AppAlertFormValues> & {
@@ -88,7 +88,7 @@ export const buildAppAlertRequest = ({
 	} = values;
 	let thumbnailUrl = articleThumbnailUrl;
 	if (thumbnailUrl === undefined || thumbnailUrl === '') {
-		thumbnailUrl = getArticleThumbnail(content).src;
+		thumbnailUrl = getArticleThumbnail(article).src;
 	}
 
 	return {
@@ -99,7 +99,7 @@ export const buildAppAlertRequest = ({
 					type: 'app-push',
 					title: alertTypeLabel,
 					body: headline,
-					link: requestedUrl ?? content.webUrl,
+					link: requestedUrl ?? article.webUrl,
 					...(includeThumbnail && thumbnailUrl
 						? {
 								media: {

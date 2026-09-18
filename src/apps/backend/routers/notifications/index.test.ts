@@ -926,6 +926,27 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
+		it('trims and forwards a search term', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&search=%20climate%20`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+					search: 'climate',
+				});
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it('defaults to limit 10 / offset 0 when neither is supplied', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
@@ -955,6 +976,33 @@ describe('GET /v1/notifications', () => {
 	});
 
 	describe('bad request', () => {
+		it.each([
+			['blank', '   '],
+			['over 200 characters', 'a'.repeat(201)],
+		])('returns 400 when search is %s', async (_description, search) => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?search=${encodeURIComponent(search)}`,
+				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as {
+					error: string;
+					message: string;
+				};
+				expect(body.error).toBe('bad_request');
+				expect(body.message).toBe(
+					'The notification list query parameters are invalid.',
+				);
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it('returns 400 when limit is out of the 1–50 range', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
@@ -965,8 +1013,14 @@ describe('GET /v1/notifications', () => {
 				);
 
 				expect(response.status).toBe(400);
-				const body = (await response.json()) as { error: string };
+				const body = (await response.json()) as {
+					error: string;
+					message: string;
+				};
 				expect(body.error).toBe('bad_request');
+				expect(body.message).toBe(
+					'The notification list query parameters are invalid.',
+				);
 				expect(listNotifications).not.toHaveBeenCalled();
 			} finally {
 				await listServer.close();

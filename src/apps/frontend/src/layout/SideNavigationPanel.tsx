@@ -11,9 +11,12 @@ import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveSectionHref } from '../hooks/useActiveSectionHref';
-import { layer, topBarHeight } from '../themes';
+import { layer, stickyHeaderHeight } from '../themes';
 import type { ChannelOption } from '../types';
-import { ACTIVE_SECTION_VIEWPORT_POSITION } from './constants';
+import {
+	ACTIVE_SECTION_VIEWPORT_POSITION,
+	FORM_SECTION_JUMP_EVENT,
+} from './constants';
 
 const getStep = (id: string, label: string): StepNavStep => ({
 	id,
@@ -22,7 +25,7 @@ const getStep = (id: string, label: string): StepNavStep => ({
 	canSkipTo: true,
 });
 
-const EMAIL_STEPS: StepNavStep[] = [
+const NEWSLETTER_EMAIL_STEPS: StepNavStep[] = [
 	getStep('#article-section', 'Article and channel'),
 	getStep('#content-section', 'Kicker, subject and preview'),
 	getStep('#audience-section', 'Audience'),
@@ -30,7 +33,7 @@ const EMAIL_STEPS: StepNavStep[] = [
 	getStep('#send-button-section', 'Send'),
 ];
 
-const PUSH_STEPS: StepNavStep[] = [
+const APP_ALERT_STEPS: StepNavStep[] = [
 	getStep('#article-section', 'Article and channel'),
 	getStep('#alert-section', 'Alert type and editions'),
 	getStep('#content-section', 'Headline'),
@@ -39,8 +42,8 @@ const PUSH_STEPS: StepNavStep[] = [
 ];
 
 const PANEL_ITEMS_BY_CHANNEL: Record<ChannelOption, StepNavStep[]> = {
-	email: EMAIL_STEPS,
-	push: PUSH_STEPS,
+	newsletter: NEWSLETTER_EMAIL_STEPS,
+	'app-push': APP_ALERT_STEPS,
 };
 
 const theme: SidebarStepperNavigationTheme = {
@@ -79,7 +82,7 @@ interface SideNavigationPanelProps {
 }
 
 export const SideNavigationPanel = ({
-	channel = 'email',
+	channel = 'newsletter',
 }: SideNavigationPanelProps) => {
 	const PANEL_ITEMS = PANEL_ITEMS_BY_CHANNEL[channel];
 
@@ -98,11 +101,22 @@ export const SideNavigationPanel = ({
 			return element ? [{ item, element }] : [];
 		});
 		let animationFrameId: number | undefined;
+		let formJumpUnlockTimeoutId: number | undefined;
+		const handleFormSectionJump = () => {
+			isClickLockedRef.current = true;
+			window.clearTimeout(formJumpUnlockTimeoutId);
+			formJumpUnlockTimeoutId = window.setTimeout(() => {
+				isClickLockedRef.current = false;
+			}, 100);
+		};
 
 		const selectItem = (item: (typeof PANEL_ITEMS)[number]) => {
 			if (locationHashRef.current !== item.id) {
 				locationHashRef.current = item.id;
-				void navigate({ hash: item.id }, { replace: true });
+				void navigate(
+					{ hash: item.id },
+					{ replace: true, preventScrollReset: true },
+				);
 			}
 		};
 		const updateActiveSection = () => {
@@ -130,7 +144,7 @@ export const SideNavigationPanel = ({
 			);
 			selectItem(activeSection?.item ?? sections[0]!.item);
 		};
-		const scheduleUpdate = () => {
+		const handleViewportChange = () => {
 			if (animationFrameId !== undefined) {
 				return;
 			}
@@ -146,12 +160,18 @@ export const SideNavigationPanel = ({
 		if (!hasValidLocationHash) {
 			updateActiveSection();
 		}
-		window.addEventListener('scroll', scheduleUpdate, { passive: true });
-		window.addEventListener('resize', scheduleUpdate);
+		window.addEventListener('scroll', handleViewportChange, { passive: true });
+		window.addEventListener('resize', handleViewportChange);
+		window.addEventListener(FORM_SECTION_JUMP_EVENT, handleFormSectionJump);
 
 		return () => {
-			window.removeEventListener('scroll', scheduleUpdate);
-			window.removeEventListener('resize', scheduleUpdate);
+			window.removeEventListener('scroll', handleViewportChange);
+			window.removeEventListener('resize', handleViewportChange);
+			window.removeEventListener(
+				FORM_SECTION_JUMP_EVENT,
+				handleFormSectionJump,
+			);
+			window.clearTimeout(formJumpUnlockTimeoutId);
 			if (animationFrameId !== undefined) {
 				window.cancelAnimationFrame(animationFrameId);
 			}
@@ -161,17 +181,17 @@ export const SideNavigationPanel = ({
 	const handleTileClick = (href: string) => {
 		if (locationHashRef.current !== href) {
 			locationHashRef.current = href;
-			void navigate({ hash: href });
+			void navigate({ hash: href }, { preventScrollReset: true });
 		}
 
 		isClickLockedRef.current = true;
-		const unlockScrollUpdates = () => {
+		const handleScrollEnd = () => {
 			isClickLockedRef.current = false;
 			window.clearTimeout(unlockTimeoutId);
-			window.removeEventListener('scrollend', unlockScrollUpdates);
+			window.removeEventListener('scrollend', handleScrollEnd);
 		};
-		window.addEventListener('scrollend', unlockScrollUpdates, { once: true });
-		const unlockTimeoutId = window.setTimeout(unlockScrollUpdates, 1_000);
+		window.addEventListener('scrollend', handleScrollEnd, { once: true });
+		const unlockTimeoutId = window.setTimeout(handleScrollEnd, 1_000);
 		const targetId = href.slice(1);
 		document.getElementById(targetId)?.scrollIntoView({
 			behavior: 'smooth',
@@ -183,7 +203,7 @@ export const SideNavigationPanel = ({
 		<div
 			css={css({
 				position: 'sticky',
-				top: topBarHeight,
+				top: stickyHeaderHeight,
 				zIndex: layer.stickyContent,
 			})}
 		>

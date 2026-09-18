@@ -2,29 +2,36 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { FALLBACK_TOPIC_TYPES } from '../segment/audience-fallbacks';
 import {
-	completeEmailParams,
-	completePushParams,
-	populatedPushState,
-	WithNotificationContext,
-} from '../testing/story-helpers';
-import type { NotificationState } from '../types';
-import { defaultState } from '../utils/notification-reducer';
-import { AppPreviewToggle, EmailPreviewToggle } from './PreviewToggle';
+	completeAppAlertFormValues,
+	completeNewsletterEmailFormValues,
+	populatedAppAlertComposerState,
+} from '../testing/story-fixtures';
+import { useNotificationFormStory } from '../testing/useNotificationFormStory';
+import type { NotificationComposerState } from '../types';
+import { defaultComposerState } from '../utils/notification-composer-reducer';
+import {
+	AppAlertPreviewToggle,
+	NewsletterEmailPreviewToggle,
+} from './PreviewToggle';
 
 type StoryArgs = {
-	notificationState: NotificationState;
+	composerState: NotificationComposerState;
 };
 
 type Story = StoryObj<StoryArgs>;
 
 const meta: Meta<StoryArgs> = {
 	title: 'Dispatch/Preview/PreviewToggle',
-	component: EmailPreviewToggle,
+	component: NewsletterEmailPreviewToggle,
 	args: {
-		notificationState: defaultState,
+		composerState: defaultComposerState,
 	},
-	render: ({ notificationState }) =>
-		WithNotificationContext(<EmailPreviewToggle />, notificationState),
+	render: function Render({ composerState }) {
+		return useNotificationFormStory(
+			<NewsletterEmailPreviewToggle />,
+			composerState,
+		);
+	},
 };
 
 export default meta;
@@ -40,18 +47,19 @@ export const Collapsed: Story = {
 
 export const Expanded: Story = {
 	args: {
-		notificationState: {
-			...defaultState,
+		composerState: {
+			...defaultComposerState,
 		},
 	},
-	render: ({ notificationState }) =>
-		WithNotificationContext(
-			<EmailPreviewToggle />,
-			notificationState,
+	render: function Render({ composerState }) {
+		return useNotificationFormStory(
+			<NewsletterEmailPreviewToggle />,
+			composerState,
 			{},
-			'email',
-			completeEmailParams,
-		),
+			'newsletter',
+			completeNewsletterEmailFormValues,
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const toggle = canvas.getByRole('button', { name: 'Preview' });
@@ -66,18 +74,19 @@ export const Expanded: Story = {
 	},
 };
 
-export const AppExpanded: Story = {
+export const AppAlertExpanded: Story = {
 	args: {
-		notificationState: populatedPushState,
+		composerState: populatedAppAlertComposerState,
 	},
-	render: ({ notificationState }) =>
-		WithNotificationContext(
-			<AppPreviewToggle topicTypes={FALLBACK_TOPIC_TYPES} />,
-			notificationState,
+	render: function Render({ composerState }) {
+		return useNotificationFormStory(
+			<AppAlertPreviewToggle topicTypes={FALLBACK_TOPIC_TYPES} />,
+			composerState,
 			{},
-			'push',
-			completePushParams,
-		),
+			'app-push',
+			completeAppAlertFormValues,
+		);
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const toggle = canvas.getByRole('button', { name: 'Preview' });
