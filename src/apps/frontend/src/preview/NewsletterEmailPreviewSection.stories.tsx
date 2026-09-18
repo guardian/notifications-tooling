@@ -62,10 +62,6 @@ export const Empty: Story = {
 	},
 };
 
-export const WithChannel: Story = {};
-
-export const WithDeliveryTiming: Story = {};
-
 export const WithSegments: Story = {
 	args: {
 		composerState: populatedNewsletterEmailComposerState,
@@ -137,11 +133,10 @@ export const PreviewTextToggleUpdatesHtmlAndTestEmail: Story = {
 		requestPreviewTextTestEmail.mockClear();
 		const canvas = within(canvasElement);
 		const toggle = canvas.getByRole('button', { name: 'Show preview text' });
-		const preview = canvas.getByTitle<HTMLIFrameElement>('preview');
+		const previewArticleElement = canvasElement.querySelector('figure article');
+
 		const previewBodyText = () =>
-			new DOMParser()
-				.parseFromString(preview.srcdoc, 'text/html')
-				.querySelector('h2 ~ div')?.textContent;
+			previewArticleElement?.querySelector('h2 ~ div')?.textContent;
 
 		await waitFor(() => expect(previewBodyText()).toBe('Saved preview text'));
 		await userEvent.type(
