@@ -291,6 +291,9 @@ export const Loaded: Story = {
 		await expect(
 			await canvas.findByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', { name: 'Clear all', hidden: true }),
+		).not.toBeVisible();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
 		});
@@ -422,6 +425,9 @@ export const AudienceFilter: Story = {
 		await expect(
 			new URLSearchParams(window.location.search).getAll('audience'),
 		).toEqual(['uk']);
+		await expect(
+			canvas.getByRole('button', { name: 'Clear all' }),
+		).toBeInTheDocument();
 		await waitFor(async () => {
 			await expect(historyRequest).toHaveBeenCalledOnce();
 			const requestUrl = historyRequest.mock.calls[0]?.[0];
@@ -454,9 +460,7 @@ export const ClearAllFilters: Story = {
 			}),
 		).toBeInTheDocument();
 
-		await userEvent.click(
-			canvas.getByRole('button', { name: 'Clear all fields' }),
-		);
+		await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }));
 
 		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
 			'',
@@ -464,6 +468,9 @@ export const ClearAllFilters: Story = {
 		await expect(
 			canvas.getByRole('button', { name: 'Audience / Editions All' }),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', { name: 'Clear all', hidden: true }),
+		).not.toBeVisible();
 		await expect(window.location.search).toBe('');
 	},
 };

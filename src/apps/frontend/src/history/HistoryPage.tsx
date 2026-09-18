@@ -10,8 +10,6 @@ import { HistoryView } from './HistoryView';
 export const HistoryPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
-	const searchTerm = parsedHistoryQuery.search ?? '';
-	const selectedAudiences = parsedHistoryQuery.audiences ?? [];
 	const debouncedSearch = useDebouncedValue(parsedHistoryQuery.search, 300);
 	const isSearchPending = parsedHistoryQuery.search !== debouncedSearch;
 	const historyQuery = { ...parsedHistoryQuery, search: debouncedSearch };
@@ -31,42 +29,6 @@ export const HistoryPage = () => {
 
 			return nextSearchParams;
 		});
-	};
-	const handleSearchTermChange = (nextSearchTerm: string) => {
-		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				if (nextSearchTerm.trim()) {
-					nextSearchParams.set('search', nextSearchTerm);
-				} else {
-					nextSearchParams.delete('search');
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
-			{ replace: true },
-		);
-	};
-	const handleAudienceChange = (audiences: typeof selectedAudiences) => {
-		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				nextSearchParams.delete('audience');
-				for (const audience of audiences) {
-					nextSearchParams.append('audience', audience);
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
-			{ replace: true },
-		);
-	};
-	const handleClearFilters = () => {
-		setSearchParams(new URLSearchParams(), { replace: true });
 	};
 	const handleRefresh = () => void notificationHistory.refetch();
 
@@ -102,11 +64,10 @@ export const HistoryPage = () => {
 					: undefined
 			}
 			currentPage={currentPage}
-			searchTerm={searchTerm}
-			selectedAudiences={selectedAudiences}
-			onSearchTermChange={handleSearchTermChange}
-			onAudienceChange={handleAudienceChange}
-			onClearFilters={handleClearFilters}
+			hasActiveFilters={
+				parsedHistoryQuery.search !== undefined ||
+				(parsedHistoryQuery.audiences?.length ?? 0) > 0
+			}
 		/>
 	);
 };
