@@ -441,7 +441,8 @@ export const latestPublishedContentTheme = {
 		backgroundColor: semanticColors.bg.base,
 		[from.lg]: {
 			display: 'grid',
-			gridTemplateColumns: 'minmax(140px, 0.9fr) minmax(220px, 1.5fr) 96px auto',
+			gridTemplateColumns:
+				'minmax(140px, 0.9fr) minmax(220px, 1.5fr) 96px auto',
 			alignItems: 'center',
 			columnGap: semanticSpacing.stackSm,
 			rowGap: semanticSpacing.stackXxs,

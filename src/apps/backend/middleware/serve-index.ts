@@ -39,18 +39,16 @@ export const serveIndex: RequestHandler = async (
 	req: Request,
 	res: Response,
 ) => {
-	const [DISABLE_APP_SEND_TAB] =
-		await Promise.all([
-			getSSMParameter('DISABLE_APP_SEND_TAB'),
-			// getSSMParameter('DISABLE_LATEST_PUBLISHED_CONTENT'),
-		]);
+	const [DISABLE_APP_SEND_TAB] = await Promise.all([
+		getSSMParameter('DISABLE_APP_SEND_TAB'),
+		// getSSMParameter('DISABLE_LATEST_PUBLISHED_CONTENT'),
+	]);
 	const permissions = await listUserPermissions(req.user!.email);
 	const config: AppConfig = {
 		user: req.user!,
 		permissions,
 		DISABLE_APP_SEND_TAB: DISABLE_APP_SEND_TAB.toLowerCase() === 'true',
-		DISABLE_LATEST_PUBLISHED_CONTENT:
-			false,
+		DISABLE_LATEST_PUBLISHED_CONTENT: false,
 		stage: env.STAGE,
 	};
 	const html = (await readIndexTemplate()).replace(

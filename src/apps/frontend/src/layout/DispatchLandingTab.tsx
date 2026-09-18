@@ -60,58 +60,58 @@ export const DispatchLandingTab = () => {
 	return (
 		<>
 			<Layout.Main css={dispatchLandingTheme.primaryColumn}>
-					<Typography variant="titleXl" element={'h1'}>
-						Welcome to Dispatch
-					</Typography>
-					<div
-						css={{
-							display: 'flex',
-							flexDirection: 'column',
-							gap: '12px',
-							width: '100%',
-							marginTop: semanticSpacing.stackMd,
-							marginBottom: semanticSpacing.stackLg,
-							paddingTop: semanticSpacing.stackMd,
-							[from.md]: {
-								flexDirection: 'row',
-								flexWrap: 'wrap',
-								justifyContent: 'flex-start',
-							},
-							[from.lg]: {
-								display: 'grid',
-								gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-							},
-						}}
-					>
-						{dispatchClickableTiles.map((tile) => (
-							<ClickableTile
-								key={tile.title}
-								title={tile.title}
-								icon={tile.icon}
-								href={tile.href}
-							/>
-						))}
-					</div>
-					<div css={dispatchLandingTheme.dispatchTableSection}>
-						<DispatchLandingHistoryView
-							notifications={notifications}
-							isLoading={notificationHistory.isPending}
-							isRefreshing={notificationHistory.isFetching}
-							lastUpdatedAt={
-								notificationHistory.dataUpdatedAt
-									? new Date(notificationHistory.dataUpdatedAt).toISOString()
-									: undefined
-							}
-							handleRefresh={() => void notificationHistory.refetch()}
-							error={
-								notificationHistory.isError ? (
-									<InlineMessage level="error">
-										Unable to load notification history. Try again.
-									</InlineMessage>
-								) : undefined
-							}
+				<Typography variant="titleXl" element={'h1'}>
+					Welcome to Dispatch
+				</Typography>
+				<div
+					css={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: '12px',
+						width: '100%',
+						marginTop: semanticSpacing.stackMd,
+						marginBottom: semanticSpacing.stackLg,
+						paddingTop: semanticSpacing.stackMd,
+						[from.md]: {
+							flexDirection: 'row',
+							flexWrap: 'wrap',
+							justifyContent: 'flex-start',
+						},
+						[from.lg]: {
+							display: 'grid',
+							gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+						},
+					}}
+				>
+					{dispatchClickableTiles.map((tile) => (
+						<ClickableTile
+							key={tile.title}
+							title={tile.title}
+							icon={tile.icon}
+							href={tile.href}
 						/>
-					</div>
+					))}
+				</div>
+				<div css={dispatchLandingTheme.dispatchTableSection}>
+					<DispatchLandingHistoryView
+						notifications={notifications}
+						isLoading={notificationHistory.isPending}
+						isRefreshing={notificationHistory.isFetching}
+						lastUpdatedAt={
+							notificationHistory.dataUpdatedAt
+								? new Date(notificationHistory.dataUpdatedAt).toISOString()
+								: undefined
+						}
+						handleRefresh={() => void notificationHistory.refetch()}
+						error={
+							notificationHistory.isError ? (
+								<InlineMessage level="error">
+									Unable to load notification history. Try again.
+								</InlineMessage>
+							) : undefined
+						}
+					/>
+				</div>
 			</Layout.Main>
 			{!config?.DISABLE_LATEST_PUBLISHED_CONTENT && (
 				<aside css={dispatchLandingTheme.latestContentRail}>
