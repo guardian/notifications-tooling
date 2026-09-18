@@ -498,6 +498,15 @@ export const historyViewStyles = {
 		'&[aria-expanded="true"] svg': {
 			transform: 'rotate(180deg)',
 		},
+		'& svg': {
+			flexShrink: 0,
+		},
+	}),
+	audienceTriggerValue: css({
+		overflow: 'hidden',
+		minWidth: 0,
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
 	}),
 	audiencePopover: css({
 		width: 'var(--trigger-width)',
