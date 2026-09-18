@@ -204,21 +204,21 @@ export const Default: Story = {
 			canvas.getByRole('button', { name: 'Open Latest Published Content' }),
 		).toBeInTheDocument();
 
-		const landingSection = canvas
+		const landingMain = canvas
 			.getByRole('heading', { name: 'Welcome to Dispatch' })
-			.closest('section');
+			.closest('main');
 		const latestPublishedContentButton = canvas.getByRole('button', {
 			name: 'Open Latest Published Content',
 		});
-		if (!landingSection) {
-			throw new Error('Expected the Dispatch landing section to be rendered');
+		if (!landingMain) {
+			throw new Error('Expected the Dispatch landing main to be rendered');
 		}
 		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
 			canvasElement.clientWidth,
 		);
 		await expect(
 			latestPublishedContentButton.getBoundingClientRect().left,
-		).toBeGreaterThanOrEqual(landingSection.getBoundingClientRect().right);
+		).toBeGreaterThanOrEqual(landingMain.getBoundingClientRect().right);
 	},
 };
 

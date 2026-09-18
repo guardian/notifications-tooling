@@ -21,7 +21,9 @@ export const LatestPublishedContentPanel = () => {
 	return (
 		<div css={latestPublishedContentTheme.panel}>
 			<div css={latestPublishedContentTheme.header}>
-				<Typography variant="headingXl">Latest published content</Typography>
+				<Typography variant="headingXl" element="h2">
+					Latest published content
+				</Typography>
 				<Typography
 					variant="bodySm"
 					cssOverrides={latestPublishedContentTheme.helpText}
@@ -35,7 +37,10 @@ export const LatestPublishedContentPanel = () => {
 				columns={tableColumns}
 				headerVisibleFrom="sm"
 			>
-				<TableHeader cssOverrides={latestPublishedContentTheme.tableHeader}>
+				<TableHeader
+					data-latest-content-table-header
+					cssOverrides={latestPublishedContentTheme.tableHeader}
+				>
 					<TableColumnHeader isRowHeader>
 						<div css={latestPublishedContentTheme.tableHeaderContent}>
 							<span>Latest published content</span>
@@ -50,6 +55,7 @@ export const LatestPublishedContentPanel = () => {
 					</TableColumnHeader>
 				</TableHeader>
 				<TableBody
+					data-latest-content-table-body
 					cssOverrides={latestPublishedContentTheme.tableBody(showAll)}
 				>
 					{content.map((item) => (

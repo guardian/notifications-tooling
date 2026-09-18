@@ -410,6 +410,12 @@ export const dispatchLandingTheme = {
 			'&::before': {
 				display: 'none',
 			},
+			'& [data-latest-content-table-header]': {
+				display: 'none',
+			},
+			'& [data-latest-content-table-body] > [role="row"]:nth-of-type(n + 4)': {
+				display: 'grid',
+			},
 		},
 	}),
 	dispatchTableSection: css({
@@ -480,18 +486,12 @@ export const latestPublishedContentTheme = {
 				'& > [role="row"]': {
 					backgroundColor: 'transparent',
 				},
-				'& > [role="row"]:nth-of-type(n + 4)': {
-					display: 'grid',
-				},
 			},
 		}),
 	tableHeader: css({
 		backgroundColor: semanticColors.bg.raisedLevel2,
 		'& > tr > *': {
 			padding: '16px',
-		},
-		[from.lg]: {
-			display: 'none',
 		},
 	}),
 	tableHeaderContent: css({

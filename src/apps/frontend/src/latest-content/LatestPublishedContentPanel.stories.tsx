@@ -34,12 +34,16 @@ export const Default: Story = {
 		await expect(
 			canvas.getByText('Choose a recent article from below to create an alert'),
 		).toBeVisible();
+		const showAllButton = await canvas.findByRole('button', {
+			name: 'Show all',
+		});
 		await expect(
 			canvas.getAllByRole('button', { name: /create/i }),
 		).toHaveLength(3);
-		await userEvent.click(canvas.getByRole('button', { name: 'Show all' }));
+		await userEvent.click(showAllButton);
+		await expect(showAllButton).not.toBeInTheDocument();
 		await expect(
-			canvas.getAllByRole('button', { name: /create/i }),
+			await canvas.findAllByRole('button', { name: /create/i }),
 		).toHaveLength(6);
 	},
 };
