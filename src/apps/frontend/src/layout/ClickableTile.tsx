@@ -34,6 +34,9 @@ const tileStyles = {
 		[from.md]: {
 			width: '300px',
 		},
+		[from.lg]: {
+			width: '100%',
+		},
 	}),
 	topRow: css({
 		display: 'flex',

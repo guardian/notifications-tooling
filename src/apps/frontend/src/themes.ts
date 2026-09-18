@@ -358,20 +358,34 @@ export const replaceThumbnailButtonTheme: ButtonTheme = {
 };
 
 export const dispatchLandingTheme = {
-	dispatchMainContainer: css({
-		flow: 'vertical',
+	layout: css({
+		gridTemplateAreas: "'alertbanner' 'topbar' 'main' 'latest'",
+		gridTemplateColumns: 'minmax(0, 1fr)',
+		gridTemplateRows: 'min-content min-content auto auto',
+		[from.lg]: {
+			gridTemplateAreas:
+				"'alertbanner alertbanner alertbanner' 'topbar topbar topbar' 'main gap latest'",
+			gridTemplateColumns: 'minmax(0, 983px) minmax(0, 1fr) minmax(0, 676px)',
+			gridTemplateRows: 'min-content min-content 1fr',
+		},
+	}),
+	primaryColumn: css({
+		gridArea: 'main',
+		minWidth: 0,
 		paddingTop: semanticSpacing.stackLg,
 		paddingInline: semanticSpacing.stackMd,
-		width: '100%',
-		maxWidth: '983px',
-		gap: semanticSpacing.stackLg,
 		[from.md]: {
 			paddingInline: semanticSpacing.stackLg,
 		},
 	}),
+	latestContentRail: css({
+		gridArea: 'latest',
+		minWidth: 0,
+		padding: semanticSpacing.stackLg,
+		backgroundColor: semanticColors.bg.raisedLevel1,
+	}),
 	dispatchTableSection: css({
 		width: '100%',
-		maxWidth: '983px',
 		marginTop: '16px',
 		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		paddingTop: '12px',
@@ -394,6 +408,125 @@ export const dispatchLandingTheme = {
 		gap: semanticSpacing.stackXs,
 	}),
 };
+
+export const latestPublishedContentTheme = {
+	panel: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackMd,
+		width: '100%',
+	}),
+	header: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXs,
+	}),
+	helpText: css({
+		color: semanticColors.text.weak,
+	}),
+	list: css({
+		width: '100%',
+	}),
+	tableHeader: css({
+		'& > tr > *': {
+			padding: '16px',
+		},
+	}),
+	card: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+		padding: semanticSpacing.stackMd,
+		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		backgroundColor: semanticColors.bg.base,
+		[from.lg]: {
+			display: 'grid',
+			gridTemplateColumns: 'minmax(140px, 0.9fr) minmax(220px, 1.5fr) 96px auto',
+			alignItems: 'center',
+			columnGap: semanticSpacing.stackSm,
+			rowGap: semanticSpacing.stackXxs,
+			paddingBlock: semanticSpacing.stackSm,
+		},
+	}),
+	cardMeta: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXxs,
+		[from.lg]: {
+			minWidth: 0,
+		},
+	}),
+	sectionLabel: (color: string) =>
+		css({
+			fontSize: '12px',
+			color,
+		}),
+	published: css({
+		fontSize: '12px',
+		color: semanticColors.text.weak,
+	}),
+	audience: css({
+		display: 'flex',
+		alignItems: 'center',
+	}),
+	cardHeadline: css({
+		display: 'flex',
+		alignItems: 'flex-start',
+		[from.lg]: {
+			minWidth: 0,
+		},
+	}),
+	headline: css({
+		fontSize: '14px',
+		lineHeight: 1.4,
+		color: semanticColors.text.strong,
+		[from.lg]: {
+			display: '-webkit-box',
+			overflow: 'hidden',
+			WebkitBoxOrient: 'vertical',
+			WebkitLineClamp: 2,
+		},
+	}),
+	thumbnail: css({
+		width: '100%',
+		maxWidth: '124px',
+		aspectRatio: '5 / 4',
+		objectFit: 'cover',
+		borderRadius: semanticRadius.cornerXs,
+		[from.lg]: {
+			width: '96px',
+			height: '64px',
+			maxWidth: 'none',
+			aspectRatio: 'auto',
+		},
+	}),
+	thumbnailFallback: css({
+		display: 'flex',
+		width: '100%',
+		maxWidth: '124px',
+		aspectRatio: '5 / 4',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: semanticSpacing.stackXxs,
+		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+		borderRadius: semanticRadius.cornerXs,
+		[from.lg]: {
+			width: '96px',
+			height: '64px',
+			maxWidth: 'none',
+			aspectRatio: 'auto',
+		},
+	}),
+	createButton: css({
+		alignSelf: 'flex-start',
+		[from.lg]: {
+			justifySelf: 'end',
+			alignSelf: 'center',
+		},
+	}),
+} as const;
 
 const skeletonPulse = keyframes({
 	'0%, 100%': { opacity: 0.45 },

@@ -17,7 +17,12 @@ import { type ReactNode, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes, getTopBarNavigationItems } from '../routes';
-import { faviconTheme, layer, topBarTheme } from '../themes';
+import {
+	dispatchLandingTheme,
+	faviconTheme,
+	layer,
+	topBarTheme,
+} from '../themes';
 
 interface Props {
 	children: ReactNode;
@@ -39,7 +44,13 @@ export const MainLayout = ({ children }: Props) => {
 	const shouldShowEnvBadge = stage !== undefined && stage !== 'PROD';
 
 	return (
-		<Layout>
+		<Layout
+			cssOverrides={
+				pathname === routes.dispatchLanding
+					? dispatchLandingTheme.layout
+					: undefined
+			}
+		>
 			<Layout.TopBar
 				cssOverrides={css({ position: 'sticky', top: 0, zIndex: layer.topBar })}
 			>
