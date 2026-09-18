@@ -148,9 +148,8 @@ export const createNotificationsRepository = (db: Database) => ({
 					select 1
 					from jsonb_array_elements_text(
 						coalesce(${notifications.channels}->'newsletter'->'audience'->'items', '[]'::jsonb)
-						|| coalesce(${notifications.channels}->'newsletter'->'variants', '[]'::jsonb)
-					) as newsletter_variant
-					where lower(newsletter_variant.value) in (${sql.join(audienceValues, sql`, `)})
+					) as newsletter_audience
+					where lower(newsletter_audience.value) in (${sql.join(audienceValues, sql`, `)})
 				)
 				or exists (
 					select 1
