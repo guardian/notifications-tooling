@@ -2,7 +2,7 @@ import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { TableCell, TableRow } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
-import { useRelativeTime } from '../hooks/use-relative-time';
+import { useRelativeTime } from '../hooks/useRelativeTime';
 import { latestPublishedContentTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
 import { FlagPair } from '../ui/FlagPair';

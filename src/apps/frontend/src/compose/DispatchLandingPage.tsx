@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import { semanticSpacing } from '@guardian/stand';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
+import { Layout } from '@guardian/stand/Layout';
 import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import { between, from } from '@guardian/stand/utils';
