@@ -6,7 +6,7 @@ import {
 	TableHeader,
 } from '@guardian/stand/Table';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { latestPublishedContentTheme } from '../themes';
 import { mockLatestPublishedContent } from './latest-published-content';
 import { LatestPublishedContentCard } from './LatestPublishedContentCard';
@@ -72,9 +72,11 @@ export const Default: Story = {
 			'rgb(255, 255, 255)',
 		);
 		await userEvent.hover(createButton);
-		await expect(getComputedStyle(createButton).backgroundColor).toBe(
-			'rgb(246, 246, 246)',
-		);
+		await waitFor(async () => {
+			await expect(getComputedStyle(createButton).backgroundColor).toBe(
+				'rgb(246, 246, 246)',
+			);
+		});
 	},
 };
 
