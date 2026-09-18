@@ -12,6 +12,7 @@ export interface NotificationHistoryQuery {
 	offset: number;
 	since?: number;
 	cacheScope?: string;
+	search?: string;
 }
 
 export const notificationHistoryQueryKey = [
@@ -24,12 +25,13 @@ export const getNotificationHistoryQueryKey = ({
 	offset,
 	since,
 	cacheScope,
+	search,
 }: NotificationHistoryQuery) =>
 	[
 		...notificationHistoryQueryKey,
 		cacheScope !== undefined
-			? { limit, offset, cacheScope }
-			: { limit, offset, since },
+			? { limit, offset, cacheScope, ...(search ? { search } : {}) }
+			: { limit, offset, since, ...(search ? { search } : {}) },
 	] as const;
 
 export const ALWAYS_FRESH = Infinity;
@@ -38,6 +40,7 @@ export const fetchNotificationHistory = ({
 	limit,
 	offset,
 	since,
+	search,
 }: NotificationHistoryQuery): Promise<NotificationListResponse> => {
 	const searchParams = new URLSearchParams({
 		limit: String(limit),
@@ -47,6 +50,9 @@ export const fetchNotificationHistory = ({
 	if (since !== undefined) {
 		searchParams.set('since', String(since));
 	}
+	if (search !== undefined) {
+		searchParams.set('search', search);
+	}
 
 	return fetchJsonAndParse(
 		notificationListResponseSchema,
@@ -54,9 +60,13 @@ export const fetchNotificationHistory = ({
 	);
 };
 
-export const useNotificationHistory = (query: NotificationHistoryQuery) =>
+export const useNotificationHistory = (
+	query: NotificationHistoryQuery,
+	{ enabled = true }: { enabled?: boolean } = {},
+) =>
 	useQuery({
 		queryKey: getNotificationHistoryQueryKey(query),
+		enabled,
 		queryFn: async () => {
 			try {
 				return await fetchNotificationHistory(query);

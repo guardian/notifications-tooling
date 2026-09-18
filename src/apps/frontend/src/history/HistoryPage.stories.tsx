@@ -166,11 +166,11 @@ const historyResponse: NotificationListResponse = {
 	],
 };
 
-const historyRequest = fn();
+const historyRequest = fn((requestUrl: URL) => requestUrl);
 const historyHandler = http.get(
 	`${getApiBaseUrl()}/v1/notifications`,
-	async () => {
-		historyRequest();
+	async ({ request }) => {
+		historyRequest(new URL(request.url));
 		await delay(300);
 		return HttpResponse.json(historyResponse);
 	},
@@ -243,6 +243,19 @@ const failureDetailHandler = http.get(
 				? noOutcomeFailureDetail
 				: partialFailureDetail,
 		),
+);
+
+const invalidSearchRequest = fn((requestUrl: URL) => requestUrl);
+const emptyHistoryHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications`,
+	({ request }) => {
+		invalidSearchRequest(new URL(request.url));
+		return HttpResponse.json({
+			...historyResponse,
+			total: 0,
+			notifications: [],
+		});
+	},
 );
 
 const loadingHistoryHandler = http.get(
@@ -359,6 +372,59 @@ export const FailureWithoutDispatchOutcomes: Story = {
 		await expect(tooltip).not.toHaveTextContent(
 			'Failure details could not be loaded.',
 		);
+	},
+};
+
+export const Search: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		historyRequest.mockClear();
+
+		const searchInput = canvas.getByRole('searchbox', { name: 'Search' });
+		await userEvent.type(searchInput, 'weather');
+
+		await expect(searchInput).toHaveValue('weather');
+		await expect(historyRequest).not.toHaveBeenCalled();
+		await expect(
+			new URLSearchParams(window.location.search).get('search'),
+		).toBe('weather');
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			const requestUrl = historyRequest.mock.calls[0]?.[0];
+			await expect(requestUrl?.searchParams.get('search')).toBe('weather');
+			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
+		});
+	},
+};
+
+export const InvalidSearch: Story = {
+	loaders: [
+		() => {
+			invalidSearchRequest.mockClear();
+			window.history.replaceState(
+				{},
+				'',
+				`${window.location.pathname}?search=${'a'.repeat(201)}`,
+			);
+			return {};
+		},
+	],
+	parameters: {
+		msw: { handlers: [emptyHistoryHandler, channelAudiencesHandler] },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByRole('heading', { name: 'No alerts yet' }),
+		).toBeVisible();
+		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
+			'',
+		);
+		await expect(invalidSearchRequest).toHaveBeenCalledOnce();
+		const requestUrl = invalidSearchRequest.mock.calls[0]?.[0];
+		await expect(requestUrl?.searchParams.has('search')).toBe(false);
 	},
 };
 
