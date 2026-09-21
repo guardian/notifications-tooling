@@ -1,16 +1,11 @@
-import type { AppAlertTopicEditionId } from '@models';
+import { appAlertTopicEditionId, type AppAlertTopicEditionId } from '@models';
 
 export const DEFAULT_LIMIT = 20;
 export const MAXIMUM_LIMIT = 50;
 export const DEFAULT_OFFSET = 0;
 export const MAXIMUM_SEARCH_LENGTH = 200;
-export const HISTORY_AUDIENCE_IDS: AppAlertTopicEditionId[] = [
-	'uk',
-	'us',
-	'au',
-	'europe',
-	'international',
-];
+export const HISTORY_AUDIENCE_IDS: AppAlertTopicEditionId[] =
+	appAlertTopicEditionId.options;
 
 const parseBoundedInteger = (
 	value: string | null,

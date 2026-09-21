@@ -1,4 +1,4 @@
-import { appAlertTopicEditionId } from '@models';
+import { appAlertTopicEditionId, newsletterSegmentId } from '@models';
 import { z } from 'zod';
 
 const defaultLimit = 10;
@@ -13,6 +13,10 @@ const epochSecondsToDate = z.codec(z.coerce.number().int().min(0), z.date(), {
 	decode: (seconds) => new Date(seconds * 1000),
 	encode: (date) => Math.floor(date.getTime() / 1000),
 });
+
+const audienceId = z
+	.union([appAlertTopicEditionId, newsletterSegmentId])
+	.transform((id) => id.toLowerCase());
 
 /**
  * Query for `GET /v1/notifications`. Values arrive as strings, so all params
@@ -30,7 +34,7 @@ export const notificationListQuerySchema = z
 		offset: z.coerce.number().int().min(0).optional(),
 		search: z.string().trim().min(1).max(200).optional(),
 		audience: z
-			.union([appAlertTopicEditionId, z.array(appAlertTopicEditionId).min(1)])
+			.union([audienceId, z.array(audienceId).min(1)])
 			.transform((value) => (Array.isArray(value) ? value : [value]))
 			.optional(),
 	})

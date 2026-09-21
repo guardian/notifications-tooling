@@ -947,13 +947,13 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
-		it('deduplicates and forwards audience filters', async () => {
+		it('normalizes and deduplicates app-push and newsletter audience filters', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
 
 			try {
 				const response = await fetch(
-					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&audience=uk&audience=europe&audience=uk`,
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&audience=uk&audience=UK&audience=europe&audience=uk`,
 				);
 
 				expect(response.status).toBe(200);
