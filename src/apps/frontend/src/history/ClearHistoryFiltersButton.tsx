@@ -5,8 +5,12 @@ import { parseHistorySearchParams } from '../utils/history-search-params';
 
 export const ClearHistoryFiltersButton = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { search, audiences } = parseHistorySearchParams(searchParams);
-	const hasActiveFilters = search !== undefined || (audiences?.length ?? 0) > 0;
+	const { search, audiences, statuses } =
+		parseHistorySearchParams(searchParams);
+	const hasActiveFilters =
+		search !== undefined ||
+		(audiences?.length ?? 0) > 0 ||
+		(statuses?.length ?? 0) > 0;
 
 	return (
 		<Button

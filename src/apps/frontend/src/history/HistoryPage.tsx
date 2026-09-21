@@ -66,7 +66,8 @@ export const HistoryPage = () => {
 			currentPage={currentPage}
 			hasActiveFilters={
 				parsedHistoryQuery.search !== undefined ||
-				(parsedHistoryQuery.audiences?.length ?? 0) > 0
+				(parsedHistoryQuery.audiences?.length ?? 0) > 0 ||
+				(parsedHistoryQuery.statuses?.length ?? 0) > 0
 			}
 		/>
 	);

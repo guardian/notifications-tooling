@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -23,6 +23,8 @@ export type ListRecentNotificationsOptions = {
 	createdByEmail?: string;
 	/** API edition ids matched against newsletter variants or app-push editions. */
 	audiences?: string[];
+	/** Rolled-up delivery statuses included in the result. */
+	statuses?: Array<Notification['status']>;
 };
 
 /** Cut-off for {@link NotificationsRepository.listDistinctSenders}. */
@@ -147,6 +149,7 @@ export const createNotificationsRepository = (db: Database) => ({
 		search,
 		createdByEmail,
 		audiences,
+		statuses,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
@@ -177,6 +180,7 @@ export const createNotificationsRepository = (db: Database) => ({
 			normalisedCreatedByEmail
 				? sql`lower(${notifications.createdByEmail}) = ${normalisedCreatedByEmail}`
 				: undefined,
+			statuses?.length ? inArray(notifications.status, statuses) : undefined,
 			searchPattern
 				? sql<boolean>`exists (
 						select 1
