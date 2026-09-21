@@ -23,11 +23,13 @@ export interface TooltipTheme {
 export interface TooltipProps {
 	children: ReactNode;
 	label: string;
+	trigger?: ReactNode;
 	symbol?: IconProps['symbol'];
 	iconSize?: IconProps['size'];
 	placement?: AriaTooltipProps['placement'];
 	theme?: Partial<TooltipTheme>;
 	cssOverrides?: SerializedStyles | SerializedStyles[];
+	onOpenChange?: (isOpen: boolean) => void;
 }
 
 const defaultTheme: TooltipTheme = {
@@ -98,28 +100,34 @@ const TooltipArrow = ({ theme }: { theme: TooltipTheme }) => (
 export const Tooltip = ({
 	children,
 	label,
+	trigger,
 	symbol = 'info',
 	iconSize = 'sm',
 	placement = 'top',
 	theme,
 	cssOverrides,
+	onOpenChange,
 }: TooltipProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const mergedTheme = { ...defaultTheme, ...theme };
+	const handleOpenChange = (nextIsOpen: boolean) => {
+		setIsOpen(nextIsOpen);
+		onOpenChange?.(nextIsOpen);
+	};
 
 	return (
 		<TooltipTrigger
 			delay={0}
 			closeDelay={0}
 			isOpen={isOpen}
-			onOpenChange={setIsOpen}
+			onOpenChange={handleOpenChange}
 		>
 			<Button
 				aria-label={label}
 				css={styles.trigger(mergedTheme)}
-				onPress={() => setIsOpen(true)}
+				onPress={() => handleOpenChange(true)}
 			>
-				<Icon size={iconSize} symbol={symbol} />
+				{trigger ?? <Icon size={iconSize} symbol={symbol} />}
 			</Button>
 			<AriaTooltip
 				placement={placement}

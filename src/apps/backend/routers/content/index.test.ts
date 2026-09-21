@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import type { LatestArticle } from '@models';
 import { UserPermissions } from '@models';
 import { CapiError } from '@models';
 import express from 'express';
@@ -29,7 +30,8 @@ const { startTestServer } = await import('../../utils/test-utils/server');
  * is made.
  */
 
-const ROUTE = '/v1/content/articles/resolve';
+const RESOLVE_ROUTE = '/v1/content/articles/resolve';
+const LATEST_ROUTE = '/v1/content/articles/latest';
 
 let server: TestServer;
 let baseUrl: string;
@@ -69,7 +71,7 @@ afterAll(async () => {
 });
 
 const resolveRequest = (body: unknown): Promise<Response> =>
-	fetch(`${baseUrl}${ROUTE}`, {
+	fetch(`${baseUrl}${RESOLVE_ROUTE}`, {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(body),
@@ -92,12 +94,95 @@ const withResolver = async (
 	}
 };
 
+const withLatestArticlesServer = async (
+	listLatestArticles: (
+		fromDate: Date,
+		toDate: Date,
+	) => Promise<LatestArticle[]>,
+	run: (baseUrl: string) => Promise<void>,
+): Promise<void> => {
+	const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
+	const now = () => new Date('2026-09-16T13:03:00.000Z');
+	const testServer = await startTestServer(
+		express().use(
+			'/v1/content',
+			createContentRouter(resolveArticle, listLatestArticles, now),
+		),
+	);
+	try {
+		await run(testServer.baseUrl);
+	} finally {
+		await testServer.close();
+	}
+};
+
+describe('GET /v1/content/articles/latest', () => {
+	describe('authentication', () => {
+		it('blocks unauthenticated requests', async () => {
+			await assertUnauthenticatedRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: LATEST_ROUTE,
+			});
+		});
+	});
+
+	describe('permissions', () => {
+		it('blocks requests without the dispatch permission', async () => {
+			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: LATEST_ROUTE,
+			});
+		});
+	});
+
+	it('returns articles published within the last 24 hours', async () => {
+		const articles: LatestArticle[] = [
+			{
+				webUrl: 'https://www.theguardian.com/world/2026/sep/16/latest',
+				publishedAt: '2026-09-16T12:00:00.000Z',
+				headline: 'Latest article',
+				section: 'World news',
+				thumbnail: 'https://media.guim.co.uk/latest/500.jpg',
+				productionOffice: 'uk',
+				intendedAudience: ['global'],
+			},
+		];
+		const listLatestArticles = mock(() => Promise.resolve(articles));
+
+		await withLatestArticlesServer(listLatestArticles, async (url) => {
+			const response = await fetch(`${url}${LATEST_ROUTE}`);
+
+			expect(response.status).toBe(200);
+			expect(await response.json()).toEqual({ articles });
+			expect(listLatestArticles).toHaveBeenCalledWith(
+				new Date('2026-09-15T13:03:00.000Z'),
+				new Date('2026-09-16T13:03:00.000Z'),
+			);
+		});
+	});
+
+	it('returns 502 when CAPI cannot be reached', async () => {
+		const listLatestArticles = mock(() =>
+			Promise.reject(new CapiError('unavailable')),
+		);
+
+		await withLatestArticlesServer(listLatestArticles, async (url) => {
+			const response = await fetch(`${url}${LATEST_ROUTE}`);
+
+			expect(response.status).toBe(502);
+			expect(await response.json()).toMatchObject({
+				error: 'capi_unavailable',
+			});
+		});
+	});
+});
+
 describe('POST /v1/content/articles/resolve', () => {
 	describe('authentication', () => {
 		it('blocks unauthenticated requests', async () => {
 			await assertUnauthenticatedRequestBlocked(baseUrl, {
 				method: 'POST',
-				path: ROUTE,
+				path: RESOLVE_ROUTE,
 			});
 		});
 	});
@@ -106,7 +191,7 @@ describe('POST /v1/content/articles/resolve', () => {
 		it('blocks requests without the dispatch permission', async () => {
 			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
 				method: 'POST',
-				path: ROUTE,
+				path: RESOLVE_ROUTE,
 				body: { article: validUrl },
 			});
 		});
@@ -117,7 +202,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}${ROUTE}`, {
+				const response = await fetch(`${url}${RESOLVE_ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ article: validUrl }),
@@ -135,7 +220,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}${ROUTE}`, {
+				const response = await fetch(`${url}${RESOLVE_ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
@@ -166,7 +251,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			const resolveArticle = mock(() => Promise.resolve(liveblog));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}${ROUTE}`, {
+				const response = await fetch(`${url}${RESOLVE_ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ article: requestedUrl }),
@@ -196,7 +281,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			const resolveArticle = mock(() => Promise.resolve(liveblog));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}${ROUTE}`, {
+				const response = await fetch(`${url}${RESOLVE_ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ article: liveblogUrl }),
@@ -221,7 +306,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			const resolveArticle = mock(() => Promise.resolve(liveblog));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}${ROUTE}`, {
+				const response = await fetch(`${url}${RESOLVE_ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ article: `${validUrl}#block-missing` }),
@@ -239,7 +324,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			const resolveArticle = mock(() => Promise.resolve(resolvedArticle));
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}${ROUTE}`, {
+				const response = await fetch(`${url}${RESOLVE_ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
@@ -274,7 +359,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			);
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}${ROUTE}`, {
+				const response = await fetch(`${url}${RESOLVE_ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ article: validUrl }),
@@ -295,7 +380,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			);
 
 			await withResolver(resolveArticle, async (url) => {
-				const response = await fetch(`${url}${ROUTE}`, {
+				const response = await fetch(`${url}${RESOLVE_ROUTE}`, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({ article: validUrl }),

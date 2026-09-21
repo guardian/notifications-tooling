@@ -25,7 +25,7 @@ const notifications: HistoryNotification[] = [
 		sentBy: 'jamie@example.com',
 		sentTo: ['US', 'UK', 'AU', 'INT', 'EU'],
 		sentAt: '2026-08-11T15:34:00Z',
-		status: 'Partially sent',
+		status: 'Failed',
 	},
 ];
 
@@ -60,8 +60,10 @@ export const Default: Story = {
 		totalItems: notifications.length,
 		currentPage: 1,
 		limit: 10,
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: fn(),
+		onSearchTermChange: fn(),
 		lastUpdatedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
 	},
 	play: async ({ args, canvasElement }) => {
@@ -70,12 +72,15 @@ export const Default: Story = {
 			canvas.getByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
 		await expect(
+			canvas.getByRole('complementary', { name: 'Filters' }),
+		).toBeInTheDocument();
+		await expect(
 			canvas.getByRole('link', {
 				name: /Prime minister announces cabinet reshuffle/,
 			}),
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Sent')).toBeInTheDocument();
-		await expect(canvas.getByText('Partially sent')).toBeInTheDocument();
+		await expect(canvas.getByText('Failed')).toBeInTheDocument();
 		await expect(canvas.getByText('No image')).toBeInTheDocument();
 		await expect(canvasElement.querySelectorAll('img')).toHaveLength(1);
 		const lastUpdated = canvas.getByText('Last updated:');
@@ -110,8 +115,10 @@ export const Empty: Story = {
 		totalItems: 0,
 		currentPage: 1,
 		limit: 10,
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -127,6 +134,31 @@ export const Empty: Story = {
 	},
 };
 
+export const NoSearchResults: Story = {
+	args: {
+		notifications: [],
+		totalItems: 0,
+		currentPage: 1,
+		limit: 10,
+		searchTerm: 'weather',
+		onPageChange: () => undefined,
+		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'No matching alerts' }),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByText('Try a different search term.'),
+		).toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('heading', { name: 'No alerts yet' }),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const Loading: Story = {
 	args: {
 		notifications: [],
@@ -134,8 +166,10 @@ export const Loading: Story = {
 		currentPage: 1,
 		limit: 10,
 		isLoading: true,
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -158,8 +192,10 @@ export const Error: Story = {
 		currentPage: 1,
 		limit: 10,
 		error: 'Unable to load notification history. Try again.',
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -181,8 +217,10 @@ export const WithPagination: Story = {
 		totalItems: paginatedNotifications.length,
 		limit: 10,
 		currentPage: 1,
+		searchTerm: '',
 		onPageChange: () => undefined,
 		onRefresh: () => undefined,
+		onSearchTermChange: () => undefined,
 		lastUpdatedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
 	},
 	play: async ({ canvasElement }) => {

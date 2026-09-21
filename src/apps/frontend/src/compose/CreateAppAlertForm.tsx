@@ -16,7 +16,13 @@ import {
 } from './NotificationFormSection';
 import { NotificationFormWrapper } from './NotificationFormWrapper';
 
-export const CreateAppAlertForm = () => {
+interface CreateAppAlertFormProps {
+	initialArticleUrl?: string;
+}
+
+export const CreateAppAlertForm = ({
+	initialArticleUrl,
+}: CreateAppAlertFormProps) => {
 	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<AppAlertFormValues>();
 	const { composerState, updateComposerState } = useContext(
@@ -72,6 +78,7 @@ export const CreateAppAlertForm = () => {
 			title="Create app alert"
 			formLabel="Create app alert"
 			channel="app-push"
+			initialArticleUrl={initialArticleUrl}
 			sendButtonLabel="Send app alert"
 			onSubmit={handleSubmitForm}
 			onResetNotification={() =>
