@@ -327,9 +327,7 @@ export const AcceptsGridCropReplacementThumbnail: Story = {
 		msw: {
 			handlers: [
 				http.get(`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`, () =>
-					HttpResponse.json({
-						data: FIVE_FOUR_CROP_RESPONSE,
-					}),
+					HttpResponse.json(FIVE_FOUR_CROP_RESPONSE),
 				),
 				http.get(
 					`https://media.guim.co.uk/${GRID_IMAGE_ID}/${GRID_CROP_ID}/1000.jpg`,
@@ -352,7 +350,8 @@ export const AcceptsGridCropReplacementThumbnail: Story = {
 		const replacementInput = canvas.getByRole('textbox', {
 			name: 'replacement image URL',
 		});
-		await userEvent.type(replacementInput, gridCropUrl);
+		await userEvent.click(replacementInput);
+		await userEvent.paste(gridCropUrl);
 		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
 
 		await expect(await canvas.findByText('Image updated')).toBeVisible();
@@ -398,7 +397,8 @@ export const ShowsErrorWhenGridLookupFails: Story = {
 		const replacementInput = canvas.getByRole('textbox', {
 			name: 'replacement image URL',
 		});
-		await userEvent.type(replacementInput, gridCropUrl);
+		await userEvent.click(replacementInput);
+		await userEvent.paste(gridCropUrl);
 		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
 
 		await expect(
@@ -441,7 +441,8 @@ export const ShowsErrorAndAuthButtonWhenGridApiReturnsForbidden: Story = {
 		const replacementInput = canvas.getByRole('textbox', {
 			name: 'replacement image URL',
 		});
-		await userEvent.type(replacementInput, gridCropUrl);
+		await userEvent.click(replacementInput);
+		await userEvent.paste(gridCropUrl);
 		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
 
 		await expect(

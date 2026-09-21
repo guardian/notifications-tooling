@@ -24,7 +24,7 @@ const errorMessages = {
 	fetchFailure:
 		'Failed to retrieve the image details from the grid. Please try again',
 	parseFailure: 'The response from the grid was not in the expected format',
-	cropMissing: 'The crop requested was could not found on the grid',
+	cropMissing: 'The crop requested could not be found on the grid',
 	noAsset: 'The crop requested did not include a suitable image asset',
 	wrongAspect: 'Please choose a 5:4 image crop',
 };
@@ -72,6 +72,8 @@ const fetchImageData = async (
 const findCrop = (imageData: ImageData, cropId: string): Result<CropData> => {
 	const crop = imageData.exports?.find((crop) => crop.id === cropId);
 	if (!crop) {
+		console.log({ cropId });
+		console.log(imageData);
 		return failWith(errorMessages.cropMissing);
 	}
 	return {
