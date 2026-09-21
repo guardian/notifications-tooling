@@ -7,7 +7,7 @@ export interface LatestPublishedContentItem {
 	pillarName: string;
 	pillarId?: string;
 	publishedAt: string;
-	tags: { path?: string }[];
+	tags: Array<{ path?: string }>;
 }
 
 // Every headline links here until a real "latest published content" API exists.
