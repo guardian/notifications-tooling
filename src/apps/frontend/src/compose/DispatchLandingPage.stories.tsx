@@ -4,7 +4,6 @@ import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import { ConfigContext } from '../config/ConfigContext';
-import { DispatchLandingLayout } from '../layout/DispatchLandingLayout';
 import { MainLayout } from '../layout/MainLayout';
 import type { NotificationListResponse } from '../schemas';
 import { mockAppConfig } from '../testing/app-config';
@@ -145,7 +144,7 @@ const meta = {
 	render: ({ appConfig }: StoryArgs) => (
 		<ConfigContext.Provider value={appConfig}>
 			<MainLayout>
-				<DispatchLandingLayout />
+				<DispatchLandingPage />
 			</MainLayout>
 		</ConfigContext.Provider>
 	),
