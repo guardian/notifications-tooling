@@ -72,8 +72,6 @@ const fetchImageData = async (
 const findCrop = (imageData: ImageData, cropId: string): Result<CropData> => {
 	const crop = imageData.exports?.find((crop) => crop.id === cropId);
 	if (!crop) {
-		console.log({ cropId });
-		console.log(imageData);
 		return failWith(errorMessages.cropMissing);
 	}
 	return {
