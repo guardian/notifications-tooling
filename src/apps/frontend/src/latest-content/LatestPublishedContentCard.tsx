@@ -1,11 +1,14 @@
 import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
+import {
+	IntendedAudienceSignifier,
+	mapTagsToSourceAndTarget,
+} from '@guardian/stand/IntendedAudienceSignifier';
 import { TableCell, TableRow } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
 import { useRelativeTime } from '../hooks/useRelativeTime';
 import { latestPublishedContentTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
-import { FlagPair } from '../ui/FlagPair';
 import { getPillarColor } from '../utils/pillar-colors';
 import type { LatestPublishedContentItem } from './latest-published-content';
 
@@ -26,11 +29,11 @@ export const LatestPublishedContentCard = ({
 		section,
 		pillarName,
 		pillarId,
-		homeEdition,
-		targetAudience,
+		tags,
 	} = content;
 	const pillarColor = getPillarColor(pillarId);
 	const publishedAt = useRelativeTime(content.publishedAt);
+	const intendedAudience = mapTagsToSourceAndTarget(tags);
 
 	return (
 		<TableRow id={id}>
@@ -63,9 +66,7 @@ export const LatestPublishedContentCard = ({
 								</time>
 							</Typography>
 						)}
-						<div css={latestPublishedContentTheme.audience}>
-							<FlagPair from={homeEdition} to={targetAudience} />
-						</div>
+						<IntendedAudienceSignifier {...intendedAudience} />
 					</div>
 
 					<div css={latestPublishedContentTheme.cardHeadline}>

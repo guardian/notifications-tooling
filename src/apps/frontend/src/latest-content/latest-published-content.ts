@@ -1,5 +1,3 @@
-import type { DisplayAppAlertTopicEditionId } from '@models';
-
 export interface LatestPublishedContentItem {
 	id: string;
 	headline: string;
@@ -9,8 +7,7 @@ export interface LatestPublishedContentItem {
 	pillarName: string;
 	pillarId?: string;
 	publishedAt: string;
-	homeEdition: DisplayAppAlertTopicEditionId;
-	targetAudience: DisplayAppAlertTopicEditionId;
+	tags: { path?: string }[];
 }
 
 // Every headline links here until a real "latest published content" API exists.
@@ -29,8 +26,10 @@ export const mockLatestPublishedContent: LatestPublishedContentItem[] = [
 		pillarName: 'News',
 		pillarId: 'pillar/sport',
 		publishedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-		homeEdition: 'UK',
-		targetAudience: 'AU',
+		tags: [
+			{ path: 'tracking/audience/uk' },
+			{ path: 'tracking/audience/global' },
+		],
 	},
 	{
 		id: 'mock-2',
@@ -42,8 +41,7 @@ export const mockLatestPublishedContent: LatestPublishedContentItem[] = [
 		pillarName: 'News',
 		pillarId: 'pillar/news',
 		publishedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-		homeEdition: 'US',
-		targetAudience: 'US',
+		tags: [{ path: 'tracking/audience/us' }],
 	},
 	{
 		id: 'mock-3',
@@ -56,8 +54,10 @@ export const mockLatestPublishedContent: LatestPublishedContentItem[] = [
 		pillarName: 'Live',
 		pillarId: 'pillar/news',
 		publishedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-		homeEdition: 'UK',
-		targetAudience: 'INT',
+		tags: [
+			{ path: 'tracking/audience/uk' },
+			{ path: 'tracking/audience/global' },
+		],
 	},
 	{
 		id: 'mock-4',
@@ -70,8 +70,10 @@ export const mockLatestPublishedContent: LatestPublishedContentItem[] = [
 		pillarName: 'News',
 		pillarId: 'pillar/news',
 		publishedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-		homeEdition: 'UK',
-		targetAudience: 'US',
+		tags: [
+			{ path: 'tracking/audience/uk' },
+			{ path: 'tracking/audience/global' },
+		],
 	},
 	{
 		id: 'mock-5',
@@ -84,8 +86,10 @@ export const mockLatestPublishedContent: LatestPublishedContentItem[] = [
 		pillarName: 'News',
 		pillarId: 'pillar/news',
 		publishedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-		homeEdition: 'UK',
-		targetAudience: 'EU',
+		tags: [
+			{ path: 'tracking/audience/uk' },
+			{ path: 'tracking/audience/global' },
+		],
 	},
 	{
 		id: 'mock-6',
@@ -99,7 +103,9 @@ export const mockLatestPublishedContent: LatestPublishedContentItem[] = [
 		// Deliberately unrecognised pillar id, to exercise the default colour fallback.
 		pillarId: 'pillar/unknown',
 		publishedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-		homeEdition: 'US',
-		targetAudience: 'AU',
+		tags: [
+			{ path: 'tracking/audience/us' },
+			{ path: 'tracking/audience/global' },
+		],
 	},
 ];

@@ -582,10 +582,6 @@ export const latestPublishedContentTheme = {
 		fontWeight: 700,
 		color: semanticColors.text.strong,
 	}),
-	audience: css({
-		display: 'flex',
-		alignItems: 'center',
-	}),
 	cardHeadline: css({
 		display: 'flex',
 		alignItems: 'flex-start',
@@ -697,6 +693,34 @@ const skeletonBase = {
 	'@media (prefers-reduced-motion: reduce)': {
 		animation: 'none',
 	},
+} as const;
+
+export const emptyStateStyles = {
+	empty: css({
+		display: 'flex',
+		minHeight: '280px',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: semanticSpacing.stackXs,
+		padding: semanticSpacing.stackLg,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		textAlign: 'center',
+	}),
+	emptyIcon: css({
+		display: 'grid',
+		width: '48px',
+		height: '48px',
+		placeItems: 'center',
+		marginBottom: semanticSpacing.stackXs,
+		borderRadius: '50%',
+		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+	}),
+	emptyCopy: css({
+		maxWidth: '420px',
+		color: semanticColors.text.weak,
+	}),
 } as const;
 
 export const historyViewStyles = {
@@ -940,31 +964,6 @@ export const historyViewStyles = {
 			paddingInline: baseSpacing['6Px'],
 			font: 'inherit',
 		},
-	}),
-	empty: css({
-		display: 'flex',
-		minHeight: '280px',
-		flexDirection: 'column',
-		alignItems: 'center',
-		justifyContent: 'center',
-		gap: semanticSpacing.stackXs,
-		padding: semanticSpacing.stackLg,
-		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		textAlign: 'center',
-	}),
-	emptyIcon: css({
-		display: 'grid',
-		width: '48px',
-		height: '48px',
-		placeItems: 'center',
-		marginBottom: semanticSpacing.stackXs,
-		borderRadius: '50%',
-		color: semanticColors.text.weak,
-		backgroundColor: semanticColors.fill.neutralWeak,
-	}),
-	emptyCopy: css({
-		maxWidth: '420px',
-		color: semanticColors.text.weak,
 	}),
 	skeletonThumbnail: css({
 		...skeletonBase,
