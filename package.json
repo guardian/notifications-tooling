@@ -24,7 +24,7 @@
 	"scripts": {
 		"prepare": "lefthook install",
 		"test": "bun test",
-		"test:db": "bash scripts/test-db.sh",
+		"test:db": "bun run --filter '*' test:db",
 		"lint": "bun --bun eslint .",
 		"lint:fix": "bun --bun eslint . --fix",
 		"check:pinned-deps": "bun run scripts/check-pinned-deps.ts",

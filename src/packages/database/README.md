@@ -31,10 +31,10 @@ Runtime and tooling load database configuration differently:
   compatible with Drizzle's config loader in local development and CI.
 
 Database-backed tests use a separate database named `${DB_NAME}_test` by
-default. Run them with `bun run test:db`; the script creates the test database
-when needed and refuses to run destructive setup against a database whose name
-does not end with `_test`. Set `DB_TEST_NAME` to override the name while keeping
-that suffix.
+default. Run them with `bun run test:db`; the shared test helper creates the test
+database when needed and refuses to run destructive setup against a database
+whose name does not end with `_test`. Set `DB_TEST_NAME` to override the name
+while keeping that suffix.
 
 ## Database migrations
 
