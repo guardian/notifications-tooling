@@ -11,12 +11,12 @@ import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useActiveSectionHref } from '../hooks/useActiveSectionHref';
-import { layer, stickyHeaderHeight } from '../themes';
-import type { ChannelOption } from '../types';
 import {
 	ACTIVE_SECTION_VIEWPORT_POSITION,
 	FORM_SECTION_JUMP_EVENT,
-} from './constants';
+} from '../layout/constants';
+import { layer, stickyHeaderHeight } from '../themes';
+import type { ChannelOption } from '../types';
 
 const getStep = (id: string, label: string): StepNavStep => ({
 	id,
