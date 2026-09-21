@@ -147,10 +147,14 @@ export const createNotificationsRepository = (db: Database) => ({
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
+		// Matched case-insensitively via the `lower(created_by_email)` index.
+		const normalisedSender = sender?.toLowerCase();
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
-			sender ? eq(notifications.createdByEmail, sender) : undefined,
+			normalisedSender
+				? sql`lower(${notifications.createdByEmail}) = ${normalisedSender}`
+				: undefined,
 			searchPattern
 				? sql<boolean>`exists (
 						select 1
@@ -184,15 +188,18 @@ export const createNotificationsRepository = (db: Database) => ({
 	},
 
 	/**
-	 * The distinct `createdByEmail` addresses that sent a production send
-	 * (`kind = 'send'`) at or after `since`, alphabetically ordered. Backs the
-	 * senders endpoint that populates the list endpoint's sender filter.
+	 * The distinct sender emails that sent a production send (`kind = 'send'`) at
+	 * or after `since`, lowercased and alphabetically ordered. Emails are
+	 * normalised so case variants collapse to one entry, matching the
+	 * case-insensitive `sender` filter on {@link listRecent}. Backs the senders
+	 * endpoint that populates that filter.
 	 */
 	async listDistinctSenders({
 		since,
 	}: ListDistinctSendersOptions): Promise<string[]> {
+		const senderExpression = sql<string>`lower(${notifications.createdByEmail})`;
 		const rows = await db
-			.selectDistinct({ sender: notifications.createdByEmail })
+			.selectDistinct({ sender: senderExpression })
 			.from(notifications)
 			.where(
 				and(
@@ -200,7 +207,7 @@ export const createNotificationsRepository = (db: Database) => ({
 					eq(notifications.kind, 'send'),
 				),
 			)
-			.orderBy(notifications.createdByEmail);
+			.orderBy(senderExpression);
 
 		return rows.map((row) => row.sender);
 	},

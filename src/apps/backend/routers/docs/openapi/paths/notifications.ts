@@ -49,7 +49,7 @@ export const notificationsPath = {
 				in: 'query',
 				required: false,
 				description:
-					'Restricts the page to notifications sent by this email (the `createdByEmail` of the user who sent them). Use `GET /v1/notifications/senders` to discover the available values.',
+					'Restricts the page to notifications sent by this email (the `createdByEmail` of the user who sent them). Matched case-insensitively. Use `GET /v1/notifications/senders` to discover the available values.',
 				schema: { type: 'string', minLength: 1, maxLength: 320 },
 			},
 		],
@@ -166,7 +166,7 @@ export const notificationSendersPath = {
 	get: {
 		summary: 'List distinct notification senders',
 		description:
-			'Returns the distinct sender emails (`createdByEmail`) of production send notifications created at or after the `since` cut-off, alphabetically ordered. Test notifications are excluded. `since` defaults to 14 days ago when omitted. Use the returned values with the `sender` filter on `GET /v1/notifications`.',
+			'Returns the distinct sender emails (`createdByEmail`) of production send notifications created at or after the `since` cut-off, normalised to lowercase and alphabetically ordered. Test notifications are excluded. `since` defaults to 14 days ago when omitted. Use the returned values with the case-insensitive `sender` filter on `GET /v1/notifications`.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{

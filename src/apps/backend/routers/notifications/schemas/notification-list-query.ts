@@ -21,7 +21,7 @@ const epochSecondsToDate = z.codec(z.coerce.number().int().min(0), z.date(), {
  * or neither. When omitted they default to limit 10 / offset 0. An `offset` past
  * the end of the range yields an empty page — `total` still reports the full
  * count at or after `since`. `sender` restricts the page to notifications sent
- * by a given email (`createdByEmail`).
+ * by a given email (`createdByEmail`), matched case-insensitively.
  */
 export const notificationListQuerySchema = z
 	.strictObject({

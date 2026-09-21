@@ -291,6 +291,27 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		expect(page.total).toBe(1);
 		expect(page.notifications.map((row) => row.id)).toEqual([mine.id]);
 	});
+
+	it('matches the sender filter case-insensitively', async () => {
+		const mine = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'Ada.Lovelace@Guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+
+		const page = await notifications.listRecent({
+			since: daysAgo(14),
+			sender: 'ada.lovelace@GUARDIAN.co.uk',
+		});
+
+		expect(page.total).toBe(1);
+		expect(page.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
 });
 
 describe('notifications repository listDistinctSenders (real Postgres)', () => {
@@ -333,5 +354,24 @@ describe('notifications repository listDistinctSenders (real Postgres)', () => {
 			'ada.lovelace@guardian.co.uk',
 			'grace.hopper@guardian.co.uk',
 		]);
+	});
+
+	it('normalises senders to lowercase so case variants collapse', async () => {
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'Ada.Lovelace@Guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+
+		const senders = await notifications.listDistinctSenders({
+			since: daysAgo(14),
+		});
+
+		expect(senders).toEqual(['ada.lovelace@guardian.co.uk']);
 	});
 });

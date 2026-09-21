@@ -10,7 +10,7 @@ export const notificationSendersSchema = {
 		senders: {
 			type: 'array',
 			description:
-				'The distinct sender emails of production sends created at or after the `since` cut-off, alphabetically ordered.',
+				'The distinct sender emails of production sends created at or after the `since` cut-off, normalised to lowercase and alphabetically ordered.',
 			items: { type: 'string', format: 'email' },
 		},
 	},

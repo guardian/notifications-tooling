@@ -1,5 +1,5 @@
 {
-  "id": "d7b35b7d-6785-47e1-9482-06595a1c1fa2",
+  "id": "10475c25-fa5b-4350-8065-d9c3bdda028e",
   "prevId": "b7d4e1a2-0005-4005-8005-000000000005",
   "version": "7",
   "dialect": "postgresql",
@@ -251,9 +251,9 @@
           "name": "notifications_send_sender_created_at_idx",
           "columns": [
             {
-              "expression": "created_by_email",
-              "isExpression": false,
+              "expression": "lower(\"created_by_email\")",
               "asc": true,
+              "isExpression": true,
               "nulls": "last"
             },
             {

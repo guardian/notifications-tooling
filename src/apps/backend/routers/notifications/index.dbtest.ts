@@ -647,6 +647,28 @@ describe('GET /v1/notifications (real Postgres)', () => {
 		expect(body.total).toBe(1);
 		expect(body.notifications.map((row) => row.id)).toEqual([mine.id]);
 	});
+
+	it('matches the sender filter case-insensitively', async () => {
+		const mine = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'Ada.Lovelace@Guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+
+		const body = (await (
+			await fetch(
+				`${baseUrl}/v1/notifications?since=${sinceParam}&sender=${encodeURIComponent('ada.lovelace@GUARDIAN.co.uk')}`,
+			)
+		).json()) as ListResponse;
+
+		expect(body.total).toBe(1);
+		expect(body.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
 });
 
 describe('GET /v1/notifications/senders (real Postgres)', () => {
