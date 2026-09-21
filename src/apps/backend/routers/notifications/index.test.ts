@@ -848,6 +848,7 @@ const startListServer = (
 		offset?: number;
 		search?: string;
 		createdByEmail?: string;
+		audiences?: string[];
 	}) => Promise<NotificationListPage>,
 ) => {
 	const testApp = express();
@@ -989,6 +990,27 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
+		it('normalizes and deduplicates app-push and newsletter audience filters', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&audience=uk&audience=UK&audience=europe&audience=uk`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+					audiences: ['uk', 'europe'],
+				});
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it('defaults to limit 10 / offset 0 when neither is supplied', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
@@ -1018,6 +1040,22 @@ describe('GET /v1/notifications', () => {
 	});
 
 	describe('bad request', () => {
+		it('returns 400 for an unknown audience', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?audience=unknown`,
+				);
+
+				expect(response.status).toBe(400);
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it.each([
 			['blank', '   '],
 			['over 200 characters', 'a'.repeat(201)],

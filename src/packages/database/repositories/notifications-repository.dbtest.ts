@@ -254,6 +254,74 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		]);
 	});
 
+	it('filters newsletter audiences and app-push editions by audience', async () => {
+		const appPush = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+			channels: {
+				'app-push': {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'europe' }],
+					},
+					compose: { use: 'lead-story' },
+				},
+			},
+		});
+		const newsletter = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(2),
+			channels: {
+				newsletter: {
+					audience: { type: 'segment', items: ['UK'] },
+					compose: { items: ['lead-story'], subject: 'Daily briefing' },
+				},
+			},
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(3),
+			channels: {
+				'app-push': {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'au' }],
+					},
+					compose: { use: 'lead-story' },
+				},
+			},
+		});
+
+		const newsletterPage = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['uk'],
+		});
+
+		expect(newsletterPage.total).toBe(1);
+		expect(newsletterPage.notifications.map(({ id }) => id)).toEqual([
+			newsletter.id,
+		]);
+
+		const appPushPage = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['europe'],
+		});
+
+		expect(appPushPage.total).toBe(1);
+		expect(appPushPage.notifications.map(({ id }) => id)).toEqual([appPush.id]);
+
+		const combinedPage = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['uk', 'europe'],
+		});
+
+		expect(combinedPage.total).toBe(2);
+		expect(combinedPage.notifications.map(({ id }) => id)).toEqual([
+			appPush.id,
+			newsletter.id,
+		]);
+	});
+
 	it('excludes test notifications from the page and the total', async () => {
 		const send = await notifications.create({
 			...buildNotification(),

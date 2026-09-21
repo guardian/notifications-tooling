@@ -63,6 +63,21 @@ export const appAlertTopicEditionId = z.enum([
 ]);
 
 export type AppAlertTopicEditionId = z.infer<typeof appAlertTopicEditionId>;
+
+const notificationAudienceFilterIdSet = new Set([
+	...appAlertTopicEditionId.options,
+	...newsletterSegmentId.options.map((id) => id.toLowerCase()),
+]);
+
+export const notificationAudienceFilterIds = [
+	...notificationAudienceFilterIdSet,
+];
+
+export const notificationAudienceFilterId = z
+	.string()
+	.transform((id) => id.toLowerCase())
+	.refine((id) => notificationAudienceFilterIdSet.has(id));
+
 const topicTypeEditionOptionSchema = z.object({
 	id: appAlertTopicEditionId,
 	label: z.string(),

@@ -1,3 +1,4 @@
+import { notificationAudienceFilterIds } from '@models';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
@@ -291,6 +292,7 @@ export const Loaded: Story = {
 		await expect(
 			await canvas.findByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
+		await expect(canvas.getByText('Clear all')).not.toBeVisible();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
 		});
@@ -395,6 +397,105 @@ export const Search: Story = {
 			await expect(requestUrl?.searchParams.get('search')).toBe('weather');
 			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
 		});
+	},
+};
+
+export const AudienceFilter: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		historyRequest.mockClear();
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Audience / Editions All' }),
+		);
+		const page = within(canvasElement.ownerDocument.body);
+		const unitedKingdom = await page.findByRole('menuitemcheckbox', {
+			name: 'United Kingdom',
+		});
+		await expect(page.getAllByRole('menuitemcheckbox')).toHaveLength(
+			notificationAudienceFilterIds.length,
+		);
+		await userEvent.click(unitedKingdom);
+
+		await expect(unitedKingdom).toBeChecked();
+		await expect(
+			canvas.getByRole('button', {
+				name: 'Audience / Editions United Kingdom',
+			}),
+		).toBeInTheDocument();
+		await expect(
+			new URLSearchParams(window.location.search).getAll('audience'),
+		).toEqual(['uk']);
+		await expect(
+			canvas.getByRole('button', { name: 'Clear all' }),
+		).toBeInTheDocument();
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			const requestUrl = historyRequest.mock.calls[0]?.[0];
+			await expect(requestUrl?.searchParams.getAll('audience')).toEqual(['uk']);
+			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
+		});
+
+		const unitedStates = page.getByRole('menuitemcheckbox', {
+			name: 'United States',
+		});
+		await userEvent.click(unitedStates);
+
+		await expect(unitedStates).toBeChecked();
+		await expect(
+			canvas.getByRole('button', {
+				name: 'Audience / Editions United Kingdom, United States',
+			}),
+		).toBeInTheDocument();
+		await expect(
+			new URLSearchParams(window.location.search).getAll('audience'),
+		).toEqual(['uk', 'us']);
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledTimes(2);
+			const requestUrl = historyRequest.mock.calls[1]?.[0];
+			await expect(requestUrl?.searchParams.getAll('audience')).toEqual([
+				'uk',
+				'us',
+			]);
+			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
+		});
+	},
+};
+
+export const ClearAllFilters: Story = {
+	loaders: [
+		() => {
+			window.history.replaceState(
+				{},
+				'',
+				`${window.location.pathname}?search=weather&audience=uk&offset=20&limit=10`,
+			);
+			return {};
+		},
+	],
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
+			'weather',
+		);
+		await expect(
+			canvas.getByRole('button', {
+				name: 'Audience / Editions United Kingdom',
+			}),
+		).toBeInTheDocument();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }));
+
+		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
+			'',
+		);
+		await expect(
+			canvas.getByRole('button', { name: 'Audience / Editions All' }),
+		).toBeInTheDocument();
+		await expect(canvas.getByText('Clear all')).not.toBeVisible();
+		await expect(window.location.search).toBe('');
 	},
 };
 
