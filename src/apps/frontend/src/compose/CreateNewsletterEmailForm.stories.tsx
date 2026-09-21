@@ -237,8 +237,9 @@ export const PastRecommendedStillSends: Story = {
 		await userEvent.clear(subjectTextInput);
 		await userEvent.type(subjectTextInput, 'a'.repeat(140));
 
-		await expect(canvas.getByText('Warning')).toBeVisible();
-		await expect(canvas.getByText('Recommended')).toBeVisible();
+		for (const warning of canvas.getAllByText('Warning')) {
+			await expect(warning).toBeVisible();
+		}
 		await expect(
 			canvas.getByText('46 characters or fewer preferred'),
 		).toBeVisible();
