@@ -13,6 +13,7 @@ export interface NotificationHistoryQuery {
 	since?: number;
 	cacheScope?: string;
 	search?: string;
+	audiences?: string[];
 }
 
 export const notificationHistoryQueryKey = [
@@ -26,12 +27,25 @@ export const getNotificationHistoryQueryKey = ({
 	since,
 	cacheScope,
 	search,
+	audiences,
 }: NotificationHistoryQuery) =>
 	[
 		...notificationHistoryQueryKey,
 		cacheScope !== undefined
-			? { limit, offset, cacheScope, ...(search ? { search } : {}) }
-			: { limit, offset, since, ...(search ? { search } : {}) },
+			? {
+					limit,
+					offset,
+					cacheScope,
+					...(search ? { search } : {}),
+					...(audiences?.length ? { audiences } : {}),
+				}
+			: {
+					limit,
+					offset,
+					since,
+					...(search ? { search } : {}),
+					...(audiences?.length ? { audiences } : {}),
+				},
 	] as const;
 
 export const ALWAYS_FRESH = Infinity;
@@ -41,6 +55,7 @@ export const fetchNotificationHistory = ({
 	offset,
 	since,
 	search,
+	audiences,
 }: NotificationHistoryQuery): Promise<NotificationListResponse> => {
 	const searchParams = new URLSearchParams({
 		limit: String(limit),
@@ -52,6 +67,9 @@ export const fetchNotificationHistory = ({
 	}
 	if (search !== undefined) {
 		searchParams.set('search', search);
+	}
+	for (const audience of audiences ?? []) {
+		searchParams.append('audience', audience);
 	}
 
 	return fetchJsonAndParse(
