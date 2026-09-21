@@ -9,7 +9,7 @@ export const notificationsPath = {
 	get: {
 		summary: 'List recent notifications',
 		description:
-			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive substring match to notification body and title fields. `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
+			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive substring match to notification body and title fields. `sender` restricts the page to notifications sent by a given email. `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{
@@ -43,6 +43,14 @@ export const notificationsPath = {
 				description:
 					'Case-insensitive substring matched against notification body and title fields.',
 				schema: { type: 'string', minLength: 1, maxLength: 200 },
+			},
+			{
+				name: 'sender',
+				in: 'query',
+				required: false,
+				description:
+					'Restricts the page to notifications sent by this email (the `createdByEmail` of the user who sent them). Use `GET /v1/notifications/senders` to discover the available values.',
+				schema: { type: 'string', minLength: 1, maxLength: 320 },
 			},
 		],
 		responses: {
@@ -143,6 +151,55 @@ export const notificationsPath = {
 					},
 				},
 			},
+		},
+	},
+} as const;
+
+/**
+ * The `/v1/notifications/senders` path item.
+ *
+ * `GET` returns the distinct sender emails (`createdByEmail`) of production
+ * sends within the `since` cut-off, to populate the list endpoint's `sender`
+ * filter.
+ */
+export const notificationSendersPath = {
+	get: {
+		summary: 'List distinct notification senders',
+		description:
+			'Returns the distinct sender emails (`createdByEmail`) of production send notifications created at or after the `since` cut-off, alphabetically ordered. Test notifications are excluded. `since` defaults to 14 days ago when omitted. Use the returned values with the `sender` filter on `GET /v1/notifications`.',
+		security: [{ pandaCookie: [] }],
+		parameters: [
+			{
+				name: 'since',
+				in: 'query',
+				required: false,
+				description:
+					'Cut-off as a Unix timestamp in seconds. Only senders of notifications created at or after this instant are returned. Defaults to 14 days ago when omitted.',
+				schema: { type: 'integer', minimum: 0 },
+			},
+		],
+		responses: {
+			'200': {
+				description:
+					'The distinct sender emails of production sends created at or after the `since` cut-off.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/NotificationSenders' },
+					},
+				},
+			},
+			'400': {
+				description: 'The notification senders query parameters are invalid.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/NotificationValidationError',
+						},
+					},
+				},
+			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
 		},
 	},
 } as const;

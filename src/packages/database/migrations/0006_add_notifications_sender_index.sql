@@ -1,0 +1,1 @@
+CREATE INDEX "notifications_send_sender_created_at_idx" ON "notifications" USING btree ("created_by_email","created_at" DESC NULLS LAST) WHERE "notifications"."kind" = 'send';

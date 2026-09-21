@@ -270,4 +270,68 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		expect(page.total).toBe(1);
 		expect(page.notifications.map((row) => row.id)).toEqual([send.id]);
 	});
+
+	it('filters the page and the total to a single sender', async () => {
+		const mine = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+
+		const page = await notifications.listRecent({
+			since: daysAgo(14),
+			sender: 'ada.lovelace@guardian.co.uk',
+		});
+
+		expect(page.total).toBe(1);
+		expect(page.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
+});
+
+describe('notifications repository listDistinctSenders (real Postgres)', () => {
+	it('returns the distinct senders within the cut-off, alphabetically', async () => {
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+		// A duplicate sender collapses to one entry.
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(3),
+		});
+		// A test notification is excluded.
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			createdByEmail: 'test.only@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		// Outside the cut-off, so excluded.
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'old.sender@guardian.co.uk',
+			createdAt: daysAgo(20),
+		});
+
+		const senders = await notifications.listDistinctSenders({
+			since: daysAgo(14),
+		});
+
+		expect(senders).toEqual([
+			'ada.lovelace@guardian.co.uk',
+			'grace.hopper@guardian.co.uk',
+		]);
+	});
 });
