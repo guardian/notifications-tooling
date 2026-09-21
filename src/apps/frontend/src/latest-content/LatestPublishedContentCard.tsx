@@ -21,16 +21,8 @@ export const LatestPublishedContentCard = ({
 	content,
 	onCreate,
 }: LatestPublishedContentCardProps) => {
-	const {
-		id,
-		headline,
-		url,
-		imageUrl,
-		section,
-		pillarName,
-		pillarId,
-		tags,
-	} = content;
+	const { id, headline, url, imageUrl, section, pillarName, pillarId, tags } =
+		content;
 	const pillarColor = getPillarColor(pillarId);
 	const publishedAt = useRelativeTime(content.publishedAt);
 	const intendedAudience = mapTagsToSourceAndTarget(tags);
