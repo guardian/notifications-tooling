@@ -9,7 +9,6 @@ import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
 import { HeadlineFormField } from './HeadlineFormField';
-import type { NotificationPrefillByChannel } from './notification-prefill';
 import { NotificationFormContext } from './NotificationFormContext';
 import {
 	jumpToFormSection,
@@ -19,12 +18,10 @@ import { NotificationFormWrapper } from './NotificationFormWrapper';
 
 interface CreateAppAlertFormProps {
 	initialArticleUrl?: string;
-	fieldOverrides?: NotificationPrefillByChannel['app-push']['fields'];
 }
 
 export const CreateAppAlertForm = ({
 	initialArticleUrl,
-	fieldOverrides,
 }: CreateAppAlertFormProps) => {
 	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<AppAlertFormValues>();
@@ -88,19 +85,13 @@ export const CreateAppAlertForm = ({
 				updateComposerState({ type: 'reset-app-alert' })
 			}
 			onArticleImported={(article) => {
+				setValue(
+					'headline',
+					(article.fields?.headline ?? article.webTitle).trim(),
+				);
 				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
-				const importedFields = {
-					headline:
-						fieldOverrides?.headline ??
-						(article.fields?.headline ?? article.webTitle).trim(),
-					includeThumbnail:
-						fieldOverrides?.includeThumbnail ?? Boolean(articleThumbnailUrl),
-					articleThumbnailUrl:
-						fieldOverrides?.articleThumbnailUrl ?? articleThumbnailUrl,
-				};
-				setValue('headline', importedFields.headline);
-				setValue('includeThumbnail', importedFields.includeThumbnail);
-				setValue('articleThumbnailUrl', importedFields.articleThumbnailUrl);
+				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
+				setValue('articleThumbnailUrl', articleThumbnailUrl);
 			}}
 		>
 			<NotificationFormSection id="alert-section">

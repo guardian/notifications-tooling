@@ -6,7 +6,6 @@ import { buildNewsletterEmailRequest } from '../utils/build-request-payloads';
 import { htmlToSingleLineText } from '../utils/html-helpers';
 import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { KickerFormField } from './KickerFormField';
-import type { NotificationPrefillByChannel } from './notification-prefill';
 import { NotificationFormContext } from './NotificationFormContext';
 import {
 	jumpToFormSection,
@@ -18,14 +17,12 @@ import { SubjectFormField } from './SubjectFormField';
 
 interface CreateNewsletterEmailFormProps {
 	initialArticleUrl?: string;
-	fieldOverrides?: NotificationPrefillByChannel['newsletter']['fields'];
 	showPreview: boolean;
 	onTogglePreview: (showPreview: boolean) => void;
 }
 
 export const CreateNewsletterEmailForm = ({
 	initialArticleUrl,
-	fieldOverrides,
 	showPreview,
 	onTogglePreview,
 }: CreateNewsletterEmailFormProps) => {
@@ -88,17 +85,16 @@ export const CreateNewsletterEmailForm = ({
 				updateComposerState({ type: 'reset-newsletter-email' });
 			}}
 			onArticleImported={(article) => {
+				onTogglePreview(true);
+
 				const { headline, standfirst } = article.fields ?? {};
-				const subjectText = fieldOverrides?.subjectText ?? headline;
-				if (subjectText !== undefined) {
-					setValue('subjectText', subjectText);
+				if (headline) {
+					setValue('subjectText', headline);
 				}
-				const previewText =
-					fieldOverrides?.previewText ?? htmlToSingleLineText(standfirst);
-				if (fieldOverrides?.previewText !== undefined || previewText) {
+				const previewText = htmlToSingleLineText(standfirst);
+				if (previewText) {
 					setValue('previewText', previewText);
 				}
-				onTogglePreview(fieldOverrides?.showPreview ?? true);
 			}}
 		>
 			<NotificationFormSection id="content-section">

@@ -4,10 +4,8 @@ import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
 import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createNotificationPrefillState } from '../compose/notification-prefill';
 import { ConfigContext } from '../config/ConfigContext';
-import { getAppRoutes } from '../routes';
+import { getAppRoutes, withArticleUrl } from '../routes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 
 interface DispatchCreateNotificationModalProps {
@@ -23,8 +21,9 @@ export const DispatchCreateNotificationModal = ({
 }: DispatchCreateNotificationModalProps) => {
 	const config = useContext(ConfigContext);
 	const routes = getAppRoutes(config);
-	const createAppAlertRoute = routes.createAppAlert;
-	const navigate = useNavigate();
+	const createAppAlertHref = routes.createAppAlert
+		? withArticleUrl(routes.createAppAlert, articleUrl ?? '')
+		: undefined;
 	const tileStyles = css({
 		width: '100%',
 		[from.md]: {
@@ -66,18 +65,10 @@ export const DispatchCreateNotificationModal = ({
 							gap: semanticSpacing.stackSm,
 						})}
 					>
-						{createAppAlertRoute && (
+						{createAppAlertHref && (
 							<Tile
 								size="sm"
-								href={createAppAlertRoute}
-								onClick={(event) => {
-									event.preventDefault();
-									void navigate(createAppAlertRoute, {
-										state: createNotificationPrefillState('app-push', {
-											articleUrl,
-										}),
-									});
-								}}
+								href={createAppAlertHref}
 								icon={phoneIphoneIcon}
 								typography="headingMd"
 								cssOverrides={tileStyles}
@@ -88,14 +79,6 @@ export const DispatchCreateNotificationModal = ({
 						<Tile
 							size="sm"
 							href={routes.createNewsletterEmail}
-							onClick={(event) => {
-								event.preventDefault();
-								void navigate(routes.createNewsletterEmail, {
-									state: createNotificationPrefillState('newsletter', {
-										articleUrl,
-									}),
-								});
-							}}
 							icon="mail"
 							typography="headingMd"
 							cssOverrides={tileStyles}

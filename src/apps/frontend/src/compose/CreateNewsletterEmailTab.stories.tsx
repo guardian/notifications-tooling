@@ -1,12 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
-import { notificationRoutes } from '../routes';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
-import {
-	getWindowHistoryRecord,
-	getWindowHistoryState,
-} from '../testing/router-history';
 import {
 	completeNewsletterEmailFormValues,
 	populatedNewsletterEmailComposerState,
@@ -16,7 +12,6 @@ import type { NotificationComposerState } from '../types';
 import { defaultComposerState } from '../utils/notification-composer-reducer';
 import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
-import { createNotificationPrefillState } from './notification-prefill';
 
 type StoryArgs = {
 	composerState: NotificationComposerState;
@@ -87,26 +82,19 @@ export const Default: Story = {
 	},
 };
 
-export const ImportsArticleFromNavigationState: Story = {
+export const ImportsArticleFromSearchParam: Story = {
 	beforeEach: () => {
 		const originalUrl = window.location.href;
-		const originalState = getWindowHistoryState();
 		window.history.replaceState(
-			{
-				...getWindowHistoryRecord(),
-				usr: createNotificationPrefillState('newsletter', {
-					articleUrl: articleFixture.webUrl,
-					fields: {
-						subjectText: 'Override newsletter subject',
-						previewText: 'Override newsletter preview',
-					},
-				}),
-			},
+			null,
 			'',
-			notificationRoutes.newsletter.create,
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
 		);
 
-		return () => window.history.replaceState(originalState, '', originalUrl);
+		return () => window.history.replaceState(null, '', originalUrl);
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -116,10 +104,10 @@ export const ImportsArticleFromNavigationState: Story = {
 			articleFixture.webUrl,
 		);
 		await expect(canvas.getByLabelText('Subject')).toHaveValue(
-			'Override newsletter subject',
+			articleFixture.fields?.headline,
 		);
 		await expect(canvas.getByLabelText('Preview text')).toHaveValue(
-			'Override newsletter preview',
+			completeNewsletterEmailFormValues.previewText,
 		);
 	},
 };
