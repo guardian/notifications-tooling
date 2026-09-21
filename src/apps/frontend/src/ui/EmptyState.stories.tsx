@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 import { EmptyState } from './EmptyState';
 
 const meta = {
-	title: 'Stand Frontend/UI/EmptyState',
+	title: 'Dispatch/UI/EmptyState',
 	component: EmptyState,
 	parameters: {
 		layout: 'centered',

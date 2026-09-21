@@ -77,7 +77,7 @@ const LoadingPanelStory = () => {
 };
 
 const meta = {
-	title: 'Stand Frontend/DispatchLanding/LatestPublishedContentPanel',
+	title: 'Dispatch/LatestContent/LatestPublishedContentPanel',
 	component: LatestPublishedContentPanel,
 	parameters: {
 		layout: 'centered',

@@ -38,7 +38,7 @@ const CardStory = ({
 );
 
 const meta = {
-	title: 'Stand Frontend/DispatchLanding/LatestPublishedContentCard',
+	title: 'Dispatch/LatestContent/LatestPublishedContentCard',
 	component: LatestPublishedContentCard,
 	args: {
 		content: mockLatestPublishedContent[0],
