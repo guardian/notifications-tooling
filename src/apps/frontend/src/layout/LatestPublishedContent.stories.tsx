@@ -47,7 +47,13 @@ export const Default: Story = {
 		).toBeVisible();
 		await expect(
 			screen.getByRole('link', { name: 'Create a newsletter email' }),
-		).toHaveAttribute('href', '/newsletter-email/create');
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
+		);
 		await expect(
 			screen.getByRole('link', { name: 'Create an app alert' }),
 		).toHaveAttribute(

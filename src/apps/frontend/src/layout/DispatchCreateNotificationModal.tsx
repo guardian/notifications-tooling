@@ -24,6 +24,10 @@ export const DispatchCreateNotificationModal = ({
 	const createAppAlertHref = routes.createAppAlert
 		? withArticleUrl(routes.createAppAlert, articleUrl ?? '')
 		: undefined;
+	const createNewsletterEmailHref = withArticleUrl(
+		routes.createNewsletterEmail,
+		articleUrl ?? '',
+	);
 	const tileStyles = css({
 		width: '100%',
 		[from.md]: {
@@ -78,7 +82,7 @@ export const DispatchCreateNotificationModal = ({
 						)}
 						<Tile
 							size="sm"
-							href={routes.createNewsletterEmail}
+							href={createNewsletterEmailHref}
 							icon="mail"
 							typography="headingMd"
 							cssOverrides={tileStyles}
