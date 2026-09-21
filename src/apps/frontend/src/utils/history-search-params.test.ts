@@ -52,6 +52,21 @@ describe('parseHistorySearchParams', () => {
 		);
 	});
 
+	it('reads, validates, and deduplicates status parameters', () => {
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams(
+					'status=error&status=sent&status=error&status=invalid',
+				),
+			),
+		).toEqual({
+			limit: 20,
+			offset: 0,
+			since: undefined,
+			statuses: ['sent', 'error'],
+		});
+	});
+
 	it('sanitizes invalid values before they reach the endpoint', () => {
 		expect(
 			parseHistorySearchParams(

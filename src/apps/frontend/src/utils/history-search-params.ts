@@ -8,6 +8,8 @@ export const MAXIMUM_LIMIT = 50;
 export const DEFAULT_OFFSET = 0;
 export const MAXIMUM_SEARCH_LENGTH = 200;
 export const HISTORY_AUDIENCE_IDS = notificationAudienceFilterIds;
+export const HISTORY_STATUS_CATEGORIES = ['sent', 'error'] as const;
+export type HistoryStatusCategory = (typeof HISTORY_STATUS_CATEGORIES)[number];
 
 const parseBoundedInteger = (
 	value: string | null,
@@ -33,6 +35,10 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 			}),
 		),
 	];
+	const requestedStatuses = new Set(searchParams.getAll('status'));
+	const statuses = HISTORY_STATUS_CATEGORIES.filter((status) =>
+		requestedStatuses.has(status),
+	);
 
 	return {
 		limit: parseBoundedInteger(
@@ -52,5 +58,6 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 		})(),
 		...(search && search.length <= MAXIMUM_SEARCH_LENGTH ? { search } : {}),
 		...(audiences.length > 0 ? { audiences } : {}),
+		...(statuses.length > 0 ? { statuses } : {}),
 	};
 };

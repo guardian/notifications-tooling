@@ -463,13 +463,70 @@ export const AudienceFilter: Story = {
 	},
 };
 
+export const StatusFilter: Story = {
+	loaders: [
+		() => {
+			window.history.replaceState({}, '', window.location.pathname);
+			return {};
+		},
+	],
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		historyRequest.mockClear();
+
+		const audienceFilter = canvas.getByRole('button', {
+			name: 'Audience / Editions All',
+		});
+		const statusFilter = canvas.getByRole('button', { name: 'Status All' });
+		await expect(statusFilter.getBoundingClientRect().top).toBeGreaterThan(
+			audienceFilter.getBoundingClientRect().bottom,
+		);
+
+		await userEvent.click(statusFilter);
+		const page = within(canvasElement.ownerDocument.body);
+		const sent = await page.findByRole('menuitemcheckbox', { name: 'Sent' });
+		await userEvent.click(sent);
+
+		await expect(sent).toBeChecked();
+		await expect(
+			canvas.getByRole('button', { name: 'Status Sent' }),
+		).toBeInTheDocument();
+		await expect(
+			new URLSearchParams(window.location.search).getAll('status'),
+		).toEqual(['sent']);
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			const requestUrl = historyRequest.mock.calls[0]?.[0];
+			await expect(requestUrl?.searchParams.getAll('status')).toEqual(['sent']);
+			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
+		});
+
+		const error = page.getByRole('menuitemcheckbox', { name: 'Error' });
+		await userEvent.click(error);
+
+		await expect(error).toBeChecked();
+		await expect(
+			canvas.getByRole('button', { name: 'Status Sent, Error' }),
+		).toBeInTheDocument();
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledTimes(2);
+			const requestUrl = historyRequest.mock.calls[1]?.[0];
+			await expect(requestUrl?.searchParams.getAll('status')).toEqual([
+				'sent',
+				'error',
+			]);
+		});
+	},
+};
+
 export const ClearAllFilters: Story = {
 	loaders: [
 		() => {
 			window.history.replaceState(
 				{},
 				'',
-				`${window.location.pathname}?search=weather&audience=uk&offset=20&limit=10`,
+				`${window.location.pathname}?search=weather&audience=uk&status=error&offset=20&limit=10`,
 			);
 			return {};
 		},
@@ -485,6 +542,9 @@ export const ClearAllFilters: Story = {
 				name: 'Audience / Editions United Kingdom',
 			}),
 		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', { name: 'Status Error' }),
+		).toBeInTheDocument();
 
 		await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }));
 
@@ -493,6 +553,9 @@ export const ClearAllFilters: Story = {
 		);
 		await expect(
 			canvas.getByRole('button', { name: 'Audience / Editions All' }),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', { name: 'Status All' }),
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Clear all')).not.toBeVisible();
 		await expect(window.location.search).toBe('');
