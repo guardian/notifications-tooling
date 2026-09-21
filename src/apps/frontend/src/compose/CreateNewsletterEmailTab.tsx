@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { NewsletterEmailPreviewSection } from '../preview/NewsletterEmailPreviewSection';
 import { NewsletterEmailPreviewToggle } from '../preview/PreviewToggle';
@@ -13,7 +13,8 @@ import { useNotificationPrefill } from './useNotificationPrefill';
 export const CreateNewsletterEmailTab = () => {
 	const { reset, setValue, watch } =
 		useFormContext<NewsletterEmailFormValues>();
-	const prefill = useNotificationPrefill('newsletter');
+	const routePrefill = useNotificationPrefill('newsletter');
+	const [prefill] = useState(routePrefill);
 	const showPreview = watch('showPreview');
 
 	useLayoutEffect(

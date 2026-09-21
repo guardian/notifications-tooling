@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { AppAlertPreviewSection } from '../preview/AppAlertPreviewSection';
 import { AppAlertPreviewToggle } from '../preview/PreviewToggle';
@@ -13,7 +13,8 @@ import { useNotificationPrefill } from './useNotificationPrefill';
 
 export const CreateAppAlertTab = () => {
 	const { reset } = useFormContext<AppAlertFormValues>();
-	const prefill = useNotificationPrefill('app-push');
+	const routePrefill = useNotificationPrefill('app-push');
+	const [prefill] = useState(routePrefill);
 	const topicTypes = useAppAlertTopicTypes();
 
 	useLayoutEffect(

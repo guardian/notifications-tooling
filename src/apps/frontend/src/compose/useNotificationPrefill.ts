@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { ChannelOption } from '../types';
 import { parseNotificationPrefill } from './notification-prefill';
@@ -8,7 +8,9 @@ export const useNotificationPrefill = <Channel extends ChannelOption>(
 ) => {
 	const location = useLocation();
 	const state: unknown = location.state;
-	const [prefill] = useState(() => parseNotificationPrefill(state, channel));
 
-	return prefill;
+	return useMemo(
+		() => parseNotificationPrefill(state, channel),
+		[channel, state],
+	);
 };
