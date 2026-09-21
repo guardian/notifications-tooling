@@ -8,6 +8,7 @@ type GridCropUrlValidationResult =
 				type: 'grid-url';
 				cropId: string;
 				imageId: string;
+				gridApiUri: string;
 			};
 	  }
 	| {
@@ -16,7 +17,7 @@ type GridCropUrlValidationResult =
 	  };
 
 const gridUrlValidationMessages = {
-	noConfig: 'No grid origin URL configured',
+	noConfig: 'Missing configuration: gridApiUri or gridOrigin',
 	notGridUrl: 'Please enter a valid Guardian image URL',
 	notImageCropPage: 'Please enter the URL for a 5:4 crop page',
 };
@@ -24,6 +25,7 @@ const gridUrlValidationMessages = {
 export const validateGridCropPageUrl = (
 	imageUrl: string,
 	gridOrigin: string | undefined,
+	gridApiUri: string | undefined,
 ): GridCropUrlValidationResult => {
 	if (imageUrl.length === 0) {
 		return { success: false };
@@ -32,7 +34,7 @@ export const validateGridCropPageUrl = (
 	try {
 		const url = new URL(imageUrl);
 
-		if (!gridOrigin) {
+		if (!gridOrigin || !gridApiUri) {
 			return {
 				success: false,
 				validationError: gridUrlValidationMessages.noConfig,
@@ -62,6 +64,7 @@ export const validateGridCropPageUrl = (
 			details: {
 				type: 'grid-url',
 				cropId,
+				gridApiUri,
 				imageId: url.pathname.split('/').pop() ?? '',
 			},
 		};

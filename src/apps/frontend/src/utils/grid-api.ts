@@ -33,7 +33,7 @@ const errorMessages = {
 const DESIRED_MINIMUM_ASSET_WIDTH = 200;
 
 const fetchImageData = async (
-	gridApiUri: string | undefined,
+	gridApiUri: string,
 	imageId: string,
 ): Promise<Result<ImageData>> => {
 	const response = await fetch(`${gridApiUri}/images/${imageId}`, {
@@ -117,7 +117,7 @@ const isFiveFourCrop = (crop: CropData): boolean | undefined => {
 };
 
 export const getGridImageUrl = async (
-	gridApiUri: string | undefined,
+	gridApiUri: string,
 	cropId: string,
 	imageId: string,
 ): Promise<Result<string>> => {

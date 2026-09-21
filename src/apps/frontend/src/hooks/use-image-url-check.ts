@@ -47,7 +47,11 @@ export const useImageUrlCheck = ({
 
 	const trimmedImageUrl = imageUrl.trim();
 
-	const validationResult = parseImageSourceUrl(trimmedImageUrl, gridUri);
+	const validationResult = parseImageSourceUrl(
+		trimmedImageUrl,
+		gridUri,
+		gridApiUri,
+	);
 
 	const handleImageUrlChange = (nextImageUrl: string) => {
 		onImageUrlChange(nextImageUrl);
@@ -74,7 +78,7 @@ export const useImageUrlCheck = ({
 
 		// if the url was validated as a grid crop, fetch the image url from the grid api
 		if (validationResult.type === 'grid-url') {
-			const { cropId, imageId } = validationResult;
+			const { cropId, imageId, gridApiUri } = validationResult;
 			const gridFetchResult = await getGridImageUrl(
 				gridApiUri,
 				cropId,

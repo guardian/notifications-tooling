@@ -95,11 +95,12 @@ describe('parseArticleUrlInputToArticleId', () => {
 
 describe('parseImageSourceUrl', () => {
 	const gridOrigin = 'https://grid.example.com';
+	const gridApiOrigin = 'https://api.grid.example.com';
 	const imageId = '0123456789abcdef0123456789abcdef01234567';
 	const cropId = '100_200_300_400';
 
 	it('returns a failure without an error for an empty URL', () => {
-		expect(parseImageSourceUrl('', gridOrigin)).toEqual({
+		expect(parseImageSourceUrl('', gridOrigin, gridApiOrigin)).toEqual({
 			type: 'failure',
 		});
 	});
@@ -109,6 +110,7 @@ describe('parseImageSourceUrl', () => {
 			parseImageSourceUrl(
 				'https://media.guim.co.uk/84c162b73eb3b9ba1f72ae00b888a692216e0f68/442_0_4404_3525/1000.jpg',
 				gridOrigin,
+				gridApiOrigin,
 			),
 		).toEqual({
 			type: 'image-url',
@@ -120,17 +122,23 @@ describe('parseImageSourceUrl', () => {
 			parseImageSourceUrl(
 				`${gridOrigin}/images/${imageId}?crop=${cropId}`,
 				gridOrigin,
+				gridApiOrigin,
 			),
 		).toEqual({
 			type: 'grid-url',
 			cropId,
 			imageId,
+			gridApiUri: gridApiOrigin,
 		});
 	});
 
 	it('uses the Guardian image error for an invalid non-grid URL', () => {
 		expect(
-			parseImageSourceUrl('https://example.com/image.jpg', gridOrigin),
+			parseImageSourceUrl(
+				'https://example.com/image.jpg',
+				gridOrigin,
+				gridApiOrigin,
+			),
 		).toEqual({
 			type: 'failure',
 			validationError: 'Please enter a valid Guardian image URL',
@@ -142,6 +150,7 @@ describe('parseImageSourceUrl', () => {
 			parseImageSourceUrl(
 				`${gridOrigin}/images/${imageId}?crop=100_200_300`,
 				gridOrigin,
+				gridApiOrigin,
 			),
 		).toEqual({
 			type: 'failure',
@@ -154,10 +163,24 @@ describe('parseImageSourceUrl', () => {
 			parseImageSourceUrl(
 				`${gridOrigin}/images/${imageId}?crop=${cropId}`,
 				undefined,
+				undefined,
 			),
 		).toEqual({
 			type: 'failure',
 			validationError: 'Please enter a valid Guardian image URL',
+		});
+	});
+
+	it('reports config error when a grid URL is provided with gridOrigin, but no gridApiOrigin is set', () => {
+		expect(
+			parseImageSourceUrl(
+				`${gridOrigin}/images/${imageId}?crop=${cropId}`,
+				gridOrigin,
+				undefined,
+			),
+		).toEqual({
+			type: 'failure',
+			validationError: 'Missing configuration: gridApiUri or gridOrigin',
 		});
 	});
 });

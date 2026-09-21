@@ -131,12 +131,14 @@ type ImageSourceValidation =
 			type: 'grid-url';
 			cropId: string;
 			imageId: string;
+			gridApiUri: string;
 			validationError?: undefined;
 	  };
 
 export const parseImageSourceUrl = (
 	url: string,
 	gridOrigin: string | undefined,
+	gridApiUri: string | undefined,
 ): ImageSourceValidation => {
 	if (url === '') {
 		return {
@@ -151,7 +153,11 @@ export const parseImageSourceUrl = (
 		};
 	}
 
-	const gridCropUrlValidationResult = validateGridCropPageUrl(url, gridOrigin);
+	const gridCropUrlValidationResult = validateGridCropPageUrl(
+		url,
+		gridOrigin,
+		gridApiUri,
+	);
 
 	if (gridCropUrlValidationResult.success) {
 		return gridCropUrlValidationResult.details;
