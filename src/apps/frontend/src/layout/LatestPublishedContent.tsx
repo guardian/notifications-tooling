@@ -2,8 +2,11 @@ import { Button } from '@guardian/stand/Button';
 import { useState } from 'react';
 import { DispatchCreateNotificationModal } from './DispatchCreateNotificationModal';
 
+const temporaryArticleUrl =
+	'https://www.theguardian.com/environment/2026/jul/19/a-rhyme-to-recall-rising-temperatures';
+
 export const LatestPublishedContent = ({
-	articleUrl,
+	articleUrl = temporaryArticleUrl,
 }: {
 	articleUrl?: string;
 }) => {
