@@ -463,6 +463,13 @@ export const latestPublishedContentTheme = {
 	helpText: css({
 		color: semanticColors.text.weak,
 	}),
+	loading: css({
+		display: 'grid',
+		minHeight: '280px',
+		placeItems: 'center',
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		color: semanticColors.text.weak,
+	}),
 	list: css({
 		width: '100%',
 		containerType: 'inline-size',

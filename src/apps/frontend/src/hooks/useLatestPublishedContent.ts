@@ -1,17 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { mockLatestPublishedContent } from '../latest-content/latest-published-content';
+import type { QueryKey } from '@tanstack/react-query';
+import type { LatestPublishedContentItem } from '../latest-content/latest-published-content';
 
 export const latestPublishedContentQueryKey = [
 	'content',
 	'latest-published',
 ] as const;
 
-/**
- * Static mock data behind a query today; shaped so a real endpoint can
- * replace the queryFn later without changing any consuming component.
- */
-export const useLatestPublishedContent = () =>
+export const useLatestPublishedContent = (
+	queryFn: () => Promise<LatestPublishedContentItem[]> = () =>
+		new Promise<LatestPublishedContentItem[]>(() => undefined),
+	queryKey: QueryKey = latestPublishedContentQueryKey,
+) =>
 	useQuery({
-		queryKey: latestPublishedContentQueryKey,
-		queryFn: () => Promise.resolve(mockLatestPublishedContent),
+		queryKey,
+		queryFn,
 	});

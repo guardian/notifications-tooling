@@ -1,6 +1,80 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { expect, userEvent, within } from 'storybook/test';
+import { latestPublishedContentQueryKey } from '../hooks/useLatestPublishedContent';
+import { mockLatestPublishedContent } from './latest-published-content';
 import { LatestPublishedContentPanel } from './LatestPublishedContentPanel';
+
+const emptyQueryKey = [...latestPublishedContentQueryKey, 'empty'] as const;
+const errorQueryKey = [...latestPublishedContentQueryKey, 'error'] as const;
+const loadingQueryKey = [...latestPublishedContentQueryKey, 'loading'] as const;
+
+const DefaultPanelStory = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: { retry: false, staleTime: Infinity },
+		},
+	});
+	queryClient.setQueryData(
+		latestPublishedContentQueryKey,
+		mockLatestPublishedContent,
+	);
+
+	return (
+		<QueryClientProvider client={queryClient}>
+			<div style={{ width: '380px' }}>
+				<LatestPublishedContentPanel />
+			</div>
+		</QueryClientProvider>
+	);
+};
+
+const EmptyPanelStory = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: { retry: false, staleTime: Infinity },
+		},
+	});
+	queryClient.setQueryData(emptyQueryKey, []);
+
+	return (
+		<QueryClientProvider client={queryClient}>
+			<div style={{ width: '380px' }}>
+				<LatestPublishedContentPanel queryKey={emptyQueryKey} />
+			</div>
+		</QueryClientProvider>
+	);
+};
+
+const ErrorPanelStory = () => (
+	<div style={{ width: '380px' }}>
+		<LatestPublishedContentPanel
+			queryKey={errorQueryKey}
+			queryFn={() =>
+				Promise.reject(new globalThis.Error('content unavailable'))
+			}
+		/>
+	</div>
+);
+
+const LoadingPanelStory = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: { retry: false },
+		},
+	});
+
+	return (
+		<QueryClientProvider client={queryClient}>
+			<div style={{ width: '380px' }}>
+				<LatestPublishedContentPanel
+					queryKey={loadingQueryKey}
+					queryFn={() => new Promise(() => undefined)}
+				/>
+			</div>
+		</QueryClientProvider>
+	);
+};
 
 const meta = {
 	title: 'Stand Frontend/DispatchLanding/LatestPublishedContentPanel',
@@ -8,11 +82,7 @@ const meta = {
 	parameters: {
 		layout: 'centered',
 	},
-	render: () => (
-		<div style={{ width: '380px' }}>
-			<LatestPublishedContentPanel />
-		</div>
-	),
+	render: () => <DefaultPanelStory />,
 } satisfies Meta<typeof LatestPublishedContentPanel>;
 
 export default meta;
@@ -25,12 +95,6 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Latest published content' }),
 		).toBeVisible();
-		await expect(
-			canvas.getByRole('columnheader', {
-				name: 'Latest published content',
-				hidden: true,
-			}),
-		).toBeInTheDocument();
 		await expect(
 			canvas.getByText('Choose a recent article from below to create an alert'),
 		).toBeVisible();
@@ -57,5 +121,60 @@ export const Default: Story = {
 		await expect(
 			await canvas.findAllByRole('button', { name: /create/i }),
 		).toHaveLength(6);
+	},
+};
+
+export const Empty: Story = {
+	render: () => <EmptyPanelStory />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'Latest published content' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', { name: 'No published content yet' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByText('Published articles will appear here.'),
+		).toBeVisible();
+		await expect(
+			canvas.queryByRole('grid', { name: 'Latest published content' }),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const Error: Story = {
+	render: () => <ErrorPanelStory />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'Latest published content' }),
+		).toBeVisible();
+		await expect(
+			await canvas.findByText(
+				'Unable to load latest published content. Try again.',
+			),
+		).toBeVisible();
+		await expect(
+			canvas.queryByRole('heading', { name: 'No published content yet' }),
+		).not.toBeInTheDocument();
+		await expect(
+			canvas.queryByRole('grid', { name: 'Latest published content' }),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const Loading: Story = {
+	render: () => <LoadingPanelStory />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('status', {
+				name: 'Loading latest published content',
+			}),
+		).toHaveAttribute('aria-busy', 'true');
+		await expect(
+			canvas.queryByRole('grid', { name: 'Latest published content' }),
+		).not.toBeInTheDocument();
 	},
 };
