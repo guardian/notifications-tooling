@@ -285,14 +285,14 @@ describe('notifications repository listRecent (real Postgres)', () => {
 
 		const page = await notifications.listRecent({
 			since: daysAgo(14),
-			sender: 'ada.lovelace@guardian.co.uk',
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
 		});
 
 		expect(page.total).toBe(1);
 		expect(page.notifications.map((row) => row.id)).toEqual([mine.id]);
 	});
 
-	it('matches the sender filter case-insensitively', async () => {
+	it('matches the createdByEmail filter case-insensitively', async () => {
 		const mine = await notifications.create({
 			...buildNotification(),
 			createdByEmail: 'Ada.Lovelace@Guardian.co.uk',
@@ -306,7 +306,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 
 		const page = await notifications.listRecent({
 			since: daysAgo(14),
-			sender: 'ada.lovelace@GUARDIAN.co.uk',
+			createdByEmail: 'ada.lovelace@GUARDIAN.co.uk',
 		});
 
 		expect(page.total).toBe(1);

@@ -20,8 +20,8 @@ const epochSecondsToDate = z.codec(z.coerce.number().int().min(0), z.date(), {
  * defaults to 14 days ago. `limit` and `offset` are all-or-nothing: supply both
  * or neither. When omitted they default to limit 10 / offset 0. An `offset` past
  * the end of the range yields an empty page — `total` still reports the full
- * count at or after `since`. `sender` restricts the page to notifications sent
- * by a given email (`createdByEmail`), matched case-insensitively.
+ * count at or after `since`. `createdByEmail` restricts the page to
+ * notifications sent by a given user (their email), matched case-insensitively.
  */
 export const notificationListQuerySchema = z
 	.strictObject({
@@ -29,7 +29,7 @@ export const notificationListQuerySchema = z
 		limit: z.coerce.number().int().min(1).max(50).optional(),
 		offset: z.coerce.number().int().min(0).optional(),
 		search: z.string().trim().min(1).max(200).optional(),
-		sender: z.string().trim().min(1).max(320).optional(),
+		createdByEmail: z.string().trim().min(1).max(320).optional(),
 	})
 	.refine(
 		(query) => (query.limit === undefined) === (query.offset === undefined),
@@ -43,7 +43,7 @@ export const notificationListQuerySchema = z
 		limit: query.limit ?? defaultLimit,
 		offset: query.offset ?? defaultOffset,
 		search: query.search,
-		sender: query.sender,
+		createdByEmail: query.createdByEmail,
 	}));
 
 export type NotificationListQuery = z.infer<typeof notificationListQuerySchema>;

@@ -19,8 +19,8 @@ export type ListRecentNotificationsOptions = {
 	offset?: number;
 	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
-	/** Restricts the page to notifications sent by this `createdByEmail`. */
-	sender?: string;
+	/** Restricts the page to notifications sent by this `createdByEmail`, matched case-insensitively. */
+	createdByEmail?: string;
 };
 
 /** Cut-off for {@link NotificationsRepository.listDistinctSenders}. */
@@ -143,17 +143,17 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 		search,
-		sender,
+		createdByEmail,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
 		// Matched case-insensitively via the `lower(created_by_email)` index.
-		const normalisedSender = sender?.toLowerCase();
+		const normalisedCreatedByEmail = createdByEmail?.toLowerCase();
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
-			normalisedSender
-				? sql`lower(${notifications.createdByEmail}) = ${normalisedSender}`
+			normalisedCreatedByEmail
+				? sql`lower(${notifications.createdByEmail}) = ${normalisedCreatedByEmail}`
 				: undefined,
 			searchPattern
 				? sql<boolean>`exists (

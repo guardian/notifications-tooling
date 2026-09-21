@@ -640,7 +640,7 @@ describe('GET /v1/notifications (real Postgres)', () => {
 
 		const body = (await (
 			await fetch(
-				`${baseUrl}/v1/notifications?since=${sinceParam}&sender=ada.lovelace@guardian.co.uk`,
+				`${baseUrl}/v1/notifications?since=${sinceParam}&createdByEmail=ada.lovelace@guardian.co.uk`,
 			)
 		).json()) as ListResponse;
 
@@ -662,7 +662,7 @@ describe('GET /v1/notifications (real Postgres)', () => {
 
 		const body = (await (
 			await fetch(
-				`${baseUrl}/v1/notifications?since=${sinceParam}&sender=${encodeURIComponent('ada.lovelace@GUARDIAN.co.uk')}`,
+				`${baseUrl}/v1/notifications?since=${sinceParam}&createdByEmail=${encodeURIComponent('ada.lovelace@GUARDIAN.co.uk')}`,
 			)
 		).json()) as ListResponse;
 
