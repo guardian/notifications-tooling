@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import type { QueryKey } from '@tanstack/react-query';
-import type { LatestPublishedContentItem } from '../latest-content/latest-published-content';
+import {
+	type LatestPublishedContentItem,
+	mockLatestPublishedContent,
+} from '../latest-content/latest-published-content';
 
 export const latestPublishedContentQueryKey = [
 	'content',
@@ -9,7 +12,7 @@ export const latestPublishedContentQueryKey = [
 
 export const useLatestPublishedContent = (
 	queryFn: () => Promise<LatestPublishedContentItem[]> = () =>
-		new Promise<LatestPublishedContentItem[]>(() => undefined),
+		Promise.resolve(mockLatestPublishedContent),
 	queryKey: QueryKey = latestPublishedContentQueryKey,
 ) =>
 	useQuery({

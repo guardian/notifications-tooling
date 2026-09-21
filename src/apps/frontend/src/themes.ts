@@ -1,7 +1,9 @@
 import { css, keyframes } from '@emotion/react';
 import {
 	baseColors,
+	baseSizing,
 	baseSpacing,
+	baseTypography,
 	semanticColors,
 	semanticRadius,
 	semanticSizing,
@@ -379,15 +381,15 @@ export const dispatchLandingTheme = {
 	primaryColumn: css({
 		gridArea: 'main',
 		minWidth: 0,
-		padding: '24px',
+		padding: baseSpacing['24Px'],
 		[from.sm]: {
-			paddingBottom: '24px',
+			paddingBottom: baseSpacing['24Px'],
 		},
 		[from.md]: {
-			paddingBottom: '24px',
+			paddingBottom: baseSpacing['24Px'],
 		},
 		[from.lg]: {
-			paddingBottom: '24px',
+			paddingBottom: baseSpacing['24Px'],
 		},
 	}),
 	latestContentRail: css({
@@ -395,11 +397,11 @@ export const dispatchLandingTheme = {
 		minWidth: 0,
 		paddingTop: 0,
 		paddingBottom: '39px',
-		paddingInline: '24px',
+		paddingInline: baseSpacing['24Px'],
 		backgroundColor: semanticColors.bg.base,
 		'&::before': {
 			display: 'block',
-			marginBottom: '12px',
+			marginBottom: semanticSpacing.stackSm,
 			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 			content: '""',
 		},
@@ -420,9 +422,9 @@ export const dispatchLandingTheme = {
 	}),
 	dispatchTableSection: css({
 		width: '100%',
-		marginTop: '16px',
+		marginTop: semanticSpacing.stackMd,
 		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		paddingTop: '12px',
+		paddingTop: semanticSpacing.stackSm,
 		gap: semanticSpacing.stackMd,
 	}),
 	activityHeading: css({
@@ -444,7 +446,7 @@ export const dispatchLandingTheme = {
 };
 
 const compactLatestContentQuery =
-	'@container latest-content-table (max-width: 579.9px)';
+	'@container latest-content-table (max-width: 580px)';
 const expandedLatestContentQuery =
 	'@container latest-content-table (min-width: 580px)';
 
@@ -498,7 +500,7 @@ export const latestPublishedContentTheme = {
 	tableHeader: css({
 		backgroundColor: semanticColors.bg.raisedLevel2,
 		'& > tr > *': {
-			padding: '16px',
+			padding: semanticSpacing.stackMd,
 		},
 	}),
 	tableHeaderContent: css({
@@ -521,7 +523,7 @@ export const latestPublishedContentTheme = {
 			display: 'grid',
 			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px max-content',
 			alignItems: 'center',
-			columnGap: '12px',
+			columnGap: semanticSpacing.stackSm,
 			rowGap: semanticSpacing.stackXxs,
 			paddingBlock: semanticSpacing.stackSm,
 		},
@@ -566,14 +568,14 @@ export const latestPublishedContentTheme = {
 	}),
 	sectionLabel: (color: string) =>
 		css({
-			fontSize: '12px',
+			fontSize: baseTypography.size['12Px'],
 			color,
 		}),
 	sectionName: css({
 		fontWeight: 700,
 	}),
 	published: css({
-		fontSize: '12px',
+		fontSize: baseTypography.size['12Px'],
 		color: semanticColors.text.strong,
 	}),
 	publishedRelative: css({
@@ -592,7 +594,7 @@ export const latestPublishedContentTheme = {
 		},
 	}),
 	headline: css({
-		fontSize: '14px',
+		fontSize: baseTypography.size['14Px'],
 		lineHeight: 1.4,
 		color: semanticColors.text.strong,
 		[expandedLatestContentQuery]: {
@@ -614,8 +616,8 @@ export const latestPublishedContentTheme = {
 		objectFit: 'cover',
 		borderRadius: semanticRadius.cornerXs,
 		[expandedLatestContentQuery]: {
-			width: '80px',
-			height: '64px',
+			width: baseSpacing['80Px'],
+			height: baseSpacing['64Px'],
 			maxWidth: 'none',
 			aspectRatio: 'auto',
 		},
@@ -639,8 +641,8 @@ export const latestPublishedContentTheme = {
 		backgroundColor: semanticColors.fill.neutralWeak,
 		borderRadius: semanticRadius.cornerXs,
 		[expandedLatestContentQuery]: {
-			width: '80px',
-			height: '64px',
+			width: baseSpacing['80Px'],
+			height: baseSpacing['64Px'],
 			maxWidth: 'none',
 			aspectRatio: 'auto',
 		},
@@ -656,7 +658,7 @@ export const latestPublishedContentTheme = {
 		alignItems: 'center',
 		[expandedLatestContentQuery]: {
 			alignSelf: 'stretch',
-			paddingLeft: '12px',
+			paddingLeft: semanticSpacing.stackSm,
 			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		},
 		[compactLatestContentQuery]: {
@@ -934,8 +936,8 @@ export const historyViewStyles = {
 			letterSpacing: semanticTypography.headingSm.letterSpacing,
 		},
 		'@container history-table (max-width: 899.9px)': {
-			height: '18px',
-			paddingInline: '6px',
+			height: baseSizing.size18Px,
+			paddingInline: baseSpacing['6Px'],
 			font: 'inherit',
 		},
 	}),

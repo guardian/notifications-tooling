@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import {
+	baseSizing,
 	baseSpacing,
 	semanticColors,
 	semanticRadius,
@@ -32,8 +33,8 @@ const pillStyle = css({
 const flagStyle = css({
 	display: 'flex',
 	'& svg': {
-		width: '14px',
-		height: '14px',
+		width: baseSizing.size14Px,
+		height: baseSizing.size14Px,
 	},
 });
 

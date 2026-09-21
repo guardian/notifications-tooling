@@ -1,3 +1,4 @@
+import { baseSizing } from '@guardian/stand';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import {
 	Table,
@@ -56,7 +57,7 @@ export const LatestPublishedContentPanel = ({
 						aria-busy="true"
 						css={latestPublishedContentTheme.loading}
 					>
-						<LoadingSpinner fontSize="48px" />
+						<LoadingSpinner fontSize={baseSizing.size48Px} />
 					</div>
 				) : latestPublishedContent.isError ? (
 					<InlineMessage level="error">
