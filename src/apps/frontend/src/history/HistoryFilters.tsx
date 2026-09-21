@@ -10,9 +10,9 @@ export const HistoryFilters = () => (
 		<ClearHistoryFiltersButton />
 		<div css={historyViewStyles.filterFields}>
 			<HistorySearchFilter />
+			<HistoryAlertTypeFilter />
 			<HistoryAudienceFilter />
 			<HistoryStatusFilter />
-			<HistoryAlertTypeFilter />
 		</div>
 	</aside>
 );
