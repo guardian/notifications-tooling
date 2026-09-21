@@ -63,6 +63,7 @@ export const DispatchLandingLayout = () => {
 									},
 								})}
 							>
+								{/* TODO: Pass the selected article URL when the latest-content list is integrated. */}
 								<LatestPublishedContent />
 							</Item>
 						)}
