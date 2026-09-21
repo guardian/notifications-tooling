@@ -3,32 +3,37 @@ import { Checkbox } from '@guardian/stand/Checkbox';
 import { Icon } from '@guardian/stand/Icon';
 import { Menu, MenuItem, MenuToggle } from '@guardian/stand/Menu';
 import { Typography } from '@guardian/stand/Typography';
-import { appAlertTopicEditionId, type AppAlertTopicEditionId } from '@models';
+import { notificationAudienceFilterId } from '@models';
 import { useSearchParams } from 'react-router-dom';
 import { historyViewStyles } from '../themes';
-import { parseHistorySearchParams } from '../utils/history-search-params';
+import {
+	HISTORY_AUDIENCE_IDS,
+	parseHistorySearchParams,
+} from '../utils/history-search-params';
 
-const AUDIENCE_OPTIONS = [
-	{ id: 'uk', label: 'United Kingdom' },
-	{ id: 'us', label: 'United States' },
-	{ id: 'au', label: 'Australia' },
-	{ id: 'europe', label: 'Europe' },
-	{ id: 'international', label: 'International' },
-] satisfies Array<{ id: AppAlertTopicEditionId; label: string }>;
+const audienceLabels: Record<string, string> = {
+	uk: 'United Kingdom',
+	us: 'United States',
+	au: 'Australia',
+	europe: 'Europe',
+	international: 'International',
+};
 
-const audienceIds = AUDIENCE_OPTIONS.map(({ id }) => id);
+const audienceOptions = HISTORY_AUDIENCE_IDS.map((id) => ({
+	id,
+	label: audienceLabels[id] ?? id.toUpperCase(),
+}));
 
 export const HistoryAudienceFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const { audiences: selectedAudiences = [], limit } =
 		parseHistorySearchParams(searchParams);
-	const selectedAudienceLabel = AUDIENCE_OPTIONS.filter(({ id }) =>
-		selectedAudiences.includes(id),
-	)
+	const selectedAudienceLabel = audienceOptions
+		.filter(({ id }) => selectedAudiences.includes(id))
 		.map(({ label }) => label)
 		.join(', ');
 
-	const handleAudienceChange = (audiences: AppAlertTopicEditionId[]) => {
+	const handleAudienceChange = (audiences: string[]) => {
 		setSearchParams(
 			(currentSearchParams) => {
 				const nextSearchParams = new URLSearchParams(currentSearchParams);
@@ -62,9 +67,9 @@ export const HistoryAudienceFilter = () => {
 				onSelectionChange={(selection) => {
 					const keys =
 						selection === 'all'
-							? audienceIds
+							? HISTORY_AUDIENCE_IDS
 							: [...selection].flatMap((key) => {
-									const parsed = appAlertTopicEditionId.safeParse(key);
+									const parsed = notificationAudienceFilterId.safeParse(key);
 									return parsed.success ? [parsed.data] : [];
 								});
 					handleAudienceChange(keys);
@@ -87,7 +92,7 @@ export const HistoryAudienceFilter = () => {
 						<Icon symbol="keyboard_arrow_down" size="lg" />
 					</Button>
 				</MenuToggle>
-				{AUDIENCE_OPTIONS.map(({ id, label }) => (
+				{audienceOptions.map(({ id, label }) => (
 					<MenuItem
 						key={id}
 						id={id}

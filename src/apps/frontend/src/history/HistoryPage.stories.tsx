@@ -1,3 +1,4 @@
+import { notificationAudienceFilterIds } from '@models';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
@@ -412,6 +413,9 @@ export const AudienceFilter: Story = {
 		const unitedKingdom = await page.findByRole('menuitemcheckbox', {
 			name: 'United Kingdom',
 		});
+		await expect(page.getAllByRole('menuitemcheckbox')).toHaveLength(
+			notificationAudienceFilterIds.length,
+		);
 		await userEvent.click(unitedKingdom);
 
 		await expect(unitedKingdom).toBeChecked();

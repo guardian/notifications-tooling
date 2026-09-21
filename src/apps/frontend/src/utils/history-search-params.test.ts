@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { newsletterSegmentId } from '@models';
 import { parseHistorySearchParams } from './history-search-params';
 
 describe('parseHistorySearchParams', () => {
@@ -29,7 +30,7 @@ describe('parseHistorySearchParams', () => {
 		expect(
 			parseHistorySearchParams(
 				new URLSearchParams(
-					'audience=uk&audience=europe&audience=uk&audience=invalid',
+					'audience=uk&audience=UK&audience=europe&audience=invalid',
 				),
 			),
 		).toEqual({
@@ -38,6 +39,17 @@ describe('parseHistorySearchParams', () => {
 			since: undefined,
 			audiences: ['uk', 'europe'],
 		});
+	});
+
+	it('accepts every newsletter segment as a canonical lowercase filter', () => {
+		const searchParams = new URLSearchParams();
+		for (const segment of newsletterSegmentId.options) {
+			searchParams.append('audience', segment.toLowerCase());
+		}
+
+		expect(parseHistorySearchParams(searchParams).audiences).toEqual(
+			newsletterSegmentId.options.map((segment) => segment.toLowerCase()),
+		);
 	});
 
 	it('sanitizes invalid values before they reach the endpoint', () => {

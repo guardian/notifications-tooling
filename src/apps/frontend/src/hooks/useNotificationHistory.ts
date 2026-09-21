@@ -1,4 +1,3 @@
-import type { AppAlertTopicEditionId } from '@models';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
@@ -14,7 +13,7 @@ export interface NotificationHistoryQuery {
 	since?: number;
 	cacheScope?: string;
 	search?: string;
-	audiences?: AppAlertTopicEditionId[];
+	audiences?: string[];
 }
 
 export const notificationHistoryQueryKey = [

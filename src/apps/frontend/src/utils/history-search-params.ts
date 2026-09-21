@@ -1,11 +1,13 @@
-import { appAlertTopicEditionId, type AppAlertTopicEditionId } from '@models';
+import {
+	notificationAudienceFilterId,
+	notificationAudienceFilterIds,
+} from '@models';
 
 export const DEFAULT_LIMIT = 20;
 export const MAXIMUM_LIMIT = 50;
 export const DEFAULT_OFFSET = 0;
 export const MAXIMUM_SEARCH_LENGTH = 200;
-export const HISTORY_AUDIENCE_IDS: AppAlertTopicEditionId[] =
-	appAlertTopicEditionId.options;
+export const HISTORY_AUDIENCE_IDS = notificationAudienceFilterIds;
 
 const parseBoundedInteger = (
 	value: string | null,
@@ -23,10 +25,14 @@ const parseBoundedInteger = (
 
 export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 	const search = searchParams.get('search')?.trim();
-	const requestedAudiences = new Set(searchParams.getAll('audience'));
-	const audiences = HISTORY_AUDIENCE_IDS.filter((audience) =>
-		requestedAudiences.has(audience),
-	);
+	const audiences = [
+		...new Set(
+			searchParams.getAll('audience').flatMap((audience) => {
+				const parsed = notificationAudienceFilterId.safeParse(audience);
+				return parsed.success ? [parsed.data] : [];
+			}),
+		),
+	];
 
 	return {
 		limit: parseBoundedInteger(
