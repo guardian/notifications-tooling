@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
-import { notificationRoutes, withArticleUrl } from '../routes';
+import {
+	articleUrlSearchParam,
+	notificationRoutes,
+	withArticleUrl,
+} from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeAppAlertFormValues,
@@ -118,6 +122,17 @@ export const ImportsArticleFromSearchParam: Story = {
 		await expect(
 			canvas.getByRole('button', { name: 'Show article thumbnail image' }),
 		).toHaveAttribute('aria-pressed', 'true');
+		await expect(
+			new URL(window.location.href).searchParams.get(articleUrlSearchParam),
+		).toBe(new URL(articleFixture.webUrl).pathname);
+
+		await userEvent.click(canvas.getByRole('button', { name: /Headline/ }));
+		await expect(
+			new URL(window.location.href).searchParams.get(articleUrlSearchParam),
+		).toBe(new URL(articleFixture.webUrl).pathname);
+		await expect(
+			canvas.getByText('Review the content before sending'),
+		).toBeVisible();
 	},
 };
 
