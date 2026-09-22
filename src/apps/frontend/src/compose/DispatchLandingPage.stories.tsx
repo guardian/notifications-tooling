@@ -4,7 +4,9 @@ import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import { ConfigContext } from '../config/ConfigContext';
+import { mockLatestPublishedContent } from '../latest-content/latest-published-content';
 import { MainLayout } from '../layout/MainLayout';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import type { NotificationListResponse } from '../schemas';
 import { mockAppConfig } from '../testing/app-config';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
@@ -217,6 +219,32 @@ export const Default: Story = {
 		await expect(
 			latestPublishedContentRail.getBoundingClientRect().left,
 		).toBeGreaterThanOrEqual(landingMain.getBoundingClientRect().right);
+
+		await userEvent.click(
+			canvas.getAllByRole('button', { name: 'Create' })[0]!,
+		);
+		const dialog = await within(canvasElement.ownerDocument.body).findByRole(
+			'dialog',
+			{ name: 'Choose an alert type for this content' },
+		);
+		await expect(
+			within(dialog).getByRole('link', { name: 'Create a newsletter email' }),
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				mockLatestPublishedContent[0]!.url,
+			),
+		);
+		await expect(
+			within(dialog).getByRole('link', { name: 'Create an app alert' }),
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				mockLatestPublishedContent[0]!.url,
+			),
+		);
 	},
 };
 
@@ -229,11 +257,6 @@ export const Production: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Welcome to Dispatch' }),
 		).toBeInTheDocument();
-		await expect(
-			canvas.queryByRole('button', {
-				name: 'Open Latest Published Content',
-			}),
-		).not.toBeInTheDocument();
 		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
 			canvasElement.clientWidth,
 		);
