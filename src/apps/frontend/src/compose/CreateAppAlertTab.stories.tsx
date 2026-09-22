@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
-import { notificationRoutes, withArticleUrl } from '../routes';
+import {
+	articleUrlSearchParam,
+	notificationRoutes,
+	withArticleUrl,
+} from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeAppAlertFormValues,
@@ -75,6 +79,9 @@ export const Default: Story = {
 			canvas.getByRole('heading', { name: 'Create app alert' }),
 		).toBeInTheDocument();
 		await expect(
+			canvas.queryByText('Review the content before sending'),
+		).not.toBeInTheDocument();
+		await expect(
 			canvas.queryByText('The preview for the app alert will be shown below.'),
 		).not.toBeInTheDocument();
 	},
@@ -97,6 +104,14 @@ export const ImportsArticleFromSearchParam: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 
+		await expect(
+			canvas.getByText('Review the content before sending'),
+		).toBeVisible();
+		await expect(
+			canvas.getByText(
+				/Character limits, audiences, and alert types \/ kicker differ between newsletter emails and app alerts/,
+			),
+		).toBeVisible();
 		await expect(await canvas.findByText('Article imported')).toBeVisible();
 		await expect(canvas.getByLabelText('article URL')).toHaveValue(
 			articleFixture.webUrl,
@@ -107,6 +122,17 @@ export const ImportsArticleFromSearchParam: Story = {
 		await expect(
 			canvas.getByRole('button', { name: 'Show article thumbnail image' }),
 		).toHaveAttribute('aria-pressed', 'true');
+		await expect(
+			new URL(window.location.href).searchParams.get(articleUrlSearchParam),
+		).toBe(new URL(articleFixture.webUrl).pathname);
+
+		await userEvent.click(canvas.getByRole('button', { name: /Headline/ }));
+		await expect(
+			new URL(window.location.href).searchParams.get(articleUrlSearchParam),
+		).toBe(new URL(articleFixture.webUrl).pathname);
+		await expect(
+			canvas.getByText('Review the content before sending'),
+		).toBeVisible();
 	},
 };
 

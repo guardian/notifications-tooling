@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { newsletterSegmentId } from '@models';
 import { parseHistorySearchParams } from './history-search-params';
 
 describe('parseHistorySearchParams', () => {
@@ -22,6 +23,47 @@ describe('parseHistorySearchParams', () => {
 			offset: 20,
 			since: 1_700_000_000,
 			search: 'climate',
+		});
+	});
+
+	it('reads, validates, and deduplicates audience parameters', () => {
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams(
+					'audience=uk&audience=UK&audience=europe&audience=invalid',
+				),
+			),
+		).toEqual({
+			limit: 20,
+			offset: 0,
+			since: undefined,
+			audiences: ['uk', 'europe'],
+		});
+	});
+
+	it('accepts every newsletter segment as a canonical lowercase filter', () => {
+		const searchParams = new URLSearchParams();
+		for (const segment of newsletterSegmentId.options) {
+			searchParams.append('audience', segment.toLowerCase());
+		}
+
+		expect(parseHistorySearchParams(searchParams).audiences).toEqual(
+			newsletterSegmentId.options.map((segment) => segment.toLowerCase()),
+		);
+	});
+
+	it('reads, validates, and deduplicates status parameters', () => {
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams(
+					'status=error&status=sent&status=error&status=invalid',
+				),
+			),
+		).toEqual({
+			limit: 20,
+			offset: 0,
+			since: undefined,
+			statuses: ['sent', 'error'],
 		});
 	});
 

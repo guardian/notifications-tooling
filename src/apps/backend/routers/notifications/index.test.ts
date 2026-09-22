@@ -846,6 +846,9 @@ const startListServer = (
 		since?: Date;
 		limit?: number;
 		offset?: number;
+		search?: string;
+		createdByEmail?: string;
+		audiences?: string[];
 	}) => Promise<NotificationListPage>,
 ) => {
 	const testApp = express();
@@ -858,6 +861,25 @@ const startListServer = (
 			mockNotificationStore(),
 			mock(() => Promise.resolve(null)),
 			listNotifications,
+		),
+	);
+	return startTestServer(testApp);
+};
+
+const startSendersServer = (
+	listSenders: (options: { since?: Date }) => Promise<string[]>,
+) => {
+	const testApp = express();
+	testApp.use(httpLogger);
+	testApp.use(express.json());
+	testApp.use(
+		'/v1/notifications',
+		createNotificationsRouter(
+			mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+			mockNotificationStore(),
+			mock(() => Promise.resolve(null)),
+			mock(() => Promise.resolve(storedListPage())),
+			listSenders,
 		),
 	);
 	return startTestServer(testApp);
@@ -947,6 +969,69 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
+		it('trims and forwards a createdByEmail filter', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&createdByEmail=%20editor%40guardian.co.uk%20`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+					createdByEmail: 'editor@guardian.co.uk',
+				});
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('normalizes and deduplicates app-push and newsletter audience filters', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&audience=uk&audience=UK&audience=europe&audience=uk`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+					audiences: ['uk', 'europe'],
+				});
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('expands and forwards status categories', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&status=sent&status=error`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+					statuses: ['accepted', 'delivered', 'partially_delivered', 'failed'],
+				});
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it('defaults to limit 10 / offset 0 when neither is supplied', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
@@ -976,6 +1061,22 @@ describe('GET /v1/notifications', () => {
 	});
 
 	describe('bad request', () => {
+		it('returns 400 for an unknown audience', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?audience=unknown`,
+				);
+
+				expect(response.status).toBe(400);
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it.each([
 			['blank', '   '],
 			['over 200 characters', 'a'.repeat(201)],
@@ -1075,6 +1176,107 @@ describe('GET /v1/notifications', () => {
 				expect(since!.getTime()).toBeLessThanOrEqual(after - fourteenDaysMs);
 			} finally {
 				await listServer.close();
+			}
+		});
+	});
+});
+
+describe('GET /v1/notifications/senders', () => {
+	describe('authentication', () => {
+		it('blocks unauthenticated GET /v1/notifications/senders', async () => {
+			await assertUnauthenticatedRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: '/v1/notifications/senders',
+			});
+		});
+	});
+
+	describe('permissions', () => {
+		it('blocks GET /v1/notifications/senders without the dispatch permission', async () => {
+			await assertInsufficientPermissionsRequestBlocked(baseUrl, {
+				method: 'GET',
+				path: '/v1/notifications/senders',
+			});
+		});
+	});
+
+	describe('happy path', () => {
+		it('returns the distinct senders for the given cut-off', async () => {
+			const listSenders = mock(() =>
+				Promise.resolve([
+					'ada.lovelace@guardian.co.uk',
+					'editor@guardian.co.uk',
+				]),
+			);
+			const sendersServer = await startSendersServer(listSenders);
+
+			try {
+				const response = await fetch(
+					`${sendersServer.baseUrl}/v1/notifications/senders?since=1700000000`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listSenders).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+				});
+
+				const body = (await response.json()) as { senders: string[] };
+				expect(body.senders).toEqual([
+					'ada.lovelace@guardian.co.uk',
+					'editor@guardian.co.uk',
+				]);
+			} finally {
+				await sendersServer.close();
+			}
+		});
+
+		it('defaults since to 14 days ago when it is missing', async () => {
+			let calledWith: { since?: Date } | undefined;
+			const listSenders = mock((options: { since?: Date }) => {
+				calledWith = options;
+				return Promise.resolve<string[]>([]);
+			});
+			const sendersServer = await startSendersServer(listSenders);
+
+			try {
+				const before = Date.now();
+				const response = await fetch(
+					`${sendersServer.baseUrl}/v1/notifications/senders`,
+				);
+				const after = Date.now();
+
+				expect(response.status).toBe(200);
+				expect(listSenders).toHaveBeenCalledTimes(1);
+
+				const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+				const since = calledWith?.since;
+				expect(since).toBeInstanceOf(Date);
+				expect(since!.getTime()).toBeGreaterThanOrEqual(
+					before - fourteenDaysMs,
+				);
+				expect(since!.getTime()).toBeLessThanOrEqual(after - fourteenDaysMs);
+			} finally {
+				await sendersServer.close();
+			}
+		});
+	});
+
+	describe('bad request', () => {
+		it('returns 400 when since is not a valid timestamp', async () => {
+			const listSenders = mock(() => Promise.resolve<string[]>([]));
+			const sendersServer = await startSendersServer(listSenders);
+
+			try {
+				const response = await fetch(
+					`${sendersServer.baseUrl}/v1/notifications/senders?since=nope`,
+				);
+
+				expect(response.status).toBe(400);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe('bad_request');
+				expect(listSenders).not.toHaveBeenCalled();
+			} finally {
+				await sendersServer.close();
 			}
 		});
 	});

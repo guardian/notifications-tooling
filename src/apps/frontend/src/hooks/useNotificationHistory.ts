@@ -6,6 +6,7 @@ import {
 	type NotificationListResponse,
 	notificationListResponseSchema,
 } from '../schemas';
+import type { HistoryStatusCategory } from '../utils/history-search-params';
 
 export interface NotificationHistoryQuery {
 	limit: number;
@@ -13,6 +14,8 @@ export interface NotificationHistoryQuery {
 	since?: number;
 	cacheScope?: string;
 	search?: string;
+	audiences?: string[];
+	statuses?: HistoryStatusCategory[];
 }
 
 export const notificationHistoryQueryKey = [
@@ -26,12 +29,28 @@ export const getNotificationHistoryQueryKey = ({
 	since,
 	cacheScope,
 	search,
+	audiences,
+	statuses,
 }: NotificationHistoryQuery) =>
 	[
 		...notificationHistoryQueryKey,
 		cacheScope !== undefined
-			? { limit, offset, cacheScope, ...(search ? { search } : {}) }
-			: { limit, offset, since, ...(search ? { search } : {}) },
+			? {
+					limit,
+					offset,
+					cacheScope,
+					...(search ? { search } : {}),
+					...(audiences?.length ? { audiences } : {}),
+					...(statuses?.length ? { statuses } : {}),
+				}
+			: {
+					limit,
+					offset,
+					since,
+					...(search ? { search } : {}),
+					...(audiences?.length ? { audiences } : {}),
+					...(statuses?.length ? { statuses } : {}),
+				},
 	] as const;
 
 export const ALWAYS_FRESH = Infinity;
@@ -41,6 +60,8 @@ export const fetchNotificationHistory = ({
 	offset,
 	since,
 	search,
+	audiences,
+	statuses,
 }: NotificationHistoryQuery): Promise<NotificationListResponse> => {
 	const searchParams = new URLSearchParams({
 		limit: String(limit),
@@ -52,6 +73,12 @@ export const fetchNotificationHistory = ({
 	}
 	if (search !== undefined) {
 		searchParams.set('search', search);
+	}
+	for (const audience of audiences ?? []) {
+		searchParams.append('audience', audience);
+	}
+	for (const status of statuses ?? []) {
+		searchParams.append('status', status);
 	}
 
 	return fetchJsonAndParse(

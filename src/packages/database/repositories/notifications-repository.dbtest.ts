@@ -254,6 +254,118 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		]);
 	});
 
+	it('filters newsletter audiences and app-push editions by audience', async () => {
+		const appPush = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+			channels: {
+				'app-push': {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'europe' }],
+					},
+					compose: { use: 'lead-story' },
+				},
+			},
+		});
+		const newsletter = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(2),
+			channels: {
+				newsletter: {
+					audience: { type: 'segment', items: ['UK'] },
+					compose: { items: ['lead-story'], subject: 'Daily briefing' },
+				},
+			},
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(3),
+			channels: {
+				'app-push': {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'au' }],
+					},
+					compose: { use: 'lead-story' },
+				},
+			},
+		});
+
+		const newsletterPage = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['uk'],
+		});
+
+		expect(newsletterPage.total).toBe(1);
+		expect(newsletterPage.notifications.map(({ id }) => id)).toEqual([
+			newsletter.id,
+		]);
+
+		const appPushPage = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['europe'],
+		});
+
+		expect(appPushPage.total).toBe(1);
+		expect(appPushPage.notifications.map(({ id }) => id)).toEqual([appPush.id]);
+
+		const combinedPage = await notifications.listRecent({
+			since: daysAgo(14),
+			audiences: ['uk', 'europe'],
+		});
+
+		expect(combinedPage.total).toBe(2);
+		expect(combinedPage.notifications.map(({ id }) => id)).toEqual([
+			appPush.id,
+			newsletter.id,
+		]);
+	});
+
+	it('filters rolled-up statuses while reporting the filtered total', async () => {
+		const accepted = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+		});
+		const delivered = await notifications.create({
+			...buildNotification(),
+			status: 'delivered',
+			createdAt: daysAgo(2),
+		});
+		const partial = await notifications.create({
+			...buildNotification(),
+			status: 'partially_delivered',
+			createdAt: daysAgo(3),
+		});
+		const failed = await notifications.create({
+			...buildNotification(),
+			status: 'failed',
+			createdAt: daysAgo(4),
+		});
+
+		const sentPage = await notifications.listRecent({
+			since: daysAgo(14),
+			statuses: ['accepted', 'delivered'],
+		});
+
+		expect(sentPage.total).toBe(2);
+		expect(sentPage.notifications.map(({ id }) => id)).toEqual([
+			accepted.id,
+			delivered.id,
+		]);
+
+		const errorPage = await notifications.listRecent({
+			since: daysAgo(14),
+			statuses: ['partially_delivered', 'failed'],
+		});
+
+		expect(errorPage.total).toBe(2);
+		expect(errorPage.notifications.map(({ id }) => id)).toEqual([
+			partial.id,
+			failed.id,
+		]);
+	});
+
 	it('excludes test notifications from the page and the total', async () => {
 		const send = await notifications.create({
 			...buildNotification(),
@@ -269,5 +381,109 @@ describe('notifications repository listRecent (real Postgres)', () => {
 
 		expect(page.total).toBe(1);
 		expect(page.notifications.map((row) => row.id)).toEqual([send.id]);
+	});
+
+	it('filters the page and the total to a single sender', async () => {
+		const mine = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+
+		const page = await notifications.listRecent({
+			since: daysAgo(14),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+		});
+
+		expect(page.total).toBe(1);
+		expect(page.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
+
+	it('matches the createdByEmail filter case-insensitively', async () => {
+		const mine = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'Ada.Lovelace@Guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+
+		const page = await notifications.listRecent({
+			since: daysAgo(14),
+			createdByEmail: 'ada.lovelace@GUARDIAN.co.uk',
+		});
+
+		expect(page.total).toBe(1);
+		expect(page.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
+});
+
+describe('notifications repository listDistinctSenders (real Postgres)', () => {
+	it('returns the distinct senders within the cut-off, alphabetically', async () => {
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+		// A duplicate sender collapses to one entry.
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(3),
+		});
+		// A test notification is excluded.
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			createdByEmail: 'test.only@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		// Outside the cut-off, so excluded.
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'old.sender@guardian.co.uk',
+			createdAt: daysAgo(20),
+		});
+
+		const senders = await notifications.listDistinctSenders({
+			since: daysAgo(14),
+		});
+
+		expect(senders).toEqual([
+			'ada.lovelace@guardian.co.uk',
+			'grace.hopper@guardian.co.uk',
+		]);
+	});
+
+	it('normalises senders to lowercase so case variants collapse', async () => {
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'Ada.Lovelace@Guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+
+		const senders = await notifications.listDistinctSenders({
+			since: daysAgo(14),
+		});
+
+		expect(senders).toEqual(['ada.lovelace@guardian.co.uk']);
 	});
 });
