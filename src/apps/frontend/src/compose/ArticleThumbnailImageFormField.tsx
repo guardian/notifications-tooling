@@ -2,14 +2,15 @@ import { css } from '@emotion/react';
 import { semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
+import { ToggleSwitch } from '@guardian/stand/ToggleSwitch';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext, useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { replaceThumbnailButtonTheme } from '../themes';
+import { toggleSwitchTheme } from '../themes';
 import { getArticleThumbnail } from '../utils/article-thumbnail';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertReplaceImageSection } from './AppAlertReplaceImageSection';
-import { AppAlertThumbnailSwitch } from './AppAlertThumbnailSwitch';
 import { NotificationFormContext } from './NotificationFormContext';
 
 export const ArticleThumbnailImageFormField = () => {
@@ -47,8 +48,8 @@ export const ArticleThumbnailImageFormField = () => {
 				name="includeThumbnail"
 				render={({ field }) => (
 					<>
-						<AppAlertThumbnailSwitch
-							isDisabled={!hasThumbnail}
+						<ToggleSwitch
+							size="sm"
 							isSelected={hasThumbnail && field.value}
 							onChange={(isSelected) => {
 								field.onChange(isSelected);
@@ -56,7 +57,11 @@ export const ArticleThumbnailImageFormField = () => {
 									setOpenReplaceSection(false);
 								}
 							}}
-						/>
+							aria-label="Show article thumbnail image"
+							theme={toggleSwitchTheme}
+						>
+							Show article thumbnail image
+						</ToggleSwitch>
 						{hasThumbnail && field.value && (
 							<div
 								css={{
