@@ -1,13 +1,14 @@
 import { css } from '@emotion/react';
 import { baseSizing, semanticColors, semanticSpacing } from '@guardian/stand';
 import { TextArea } from '@guardian/stand/TextArea';
+import { ToggleSwitch } from '@guardian/stand/ToggleSwitch';
 import { Typography } from '@guardian/stand/Typography';
 import { Controller, useFormContext } from 'react-hook-form';
 import { NEWSLETTER_EMAIL_LIMIT_FALLBACKS } from '../hooks/useChannelConstraints';
 import type { ChannelConstraintsResponse } from '../schemas';
+import { toggleSwitchTheme } from '../themes';
 import { type NewsletterEmailFormValues } from '../utils/notification-forms';
 import { CharacterCount } from './CharacterCount';
-import { PreviewTextToggle } from './PreviewTextToggle';
 
 interface PreviewTextFormFieldProps {
 	constraints?: ChannelConstraintsResponse;
@@ -44,7 +45,8 @@ export const PreviewTextFormField = ({
 					<Typography variant="helpTextFormMd" css={styles.description}>
 						Choose the preview text for the email newsletter
 					</Typography>
-					<PreviewTextToggle
+					<ToggleSwitch
+						size="sm"
 						isSelected={showPreview}
 						onChange={(isSelected) => {
 							onTogglePreview(isSelected);
@@ -52,7 +54,11 @@ export const PreviewTextFormField = ({
 								clearErrors('previewText');
 							}
 						}}
-					/>
+						aria-label="Show preview text"
+						theme={toggleSwitchTheme}
+					>
+						Show preview text
+					</ToggleSwitch>
 					{showPreview && (
 						<div>
 							<TextArea

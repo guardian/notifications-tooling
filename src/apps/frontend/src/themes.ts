@@ -14,6 +14,7 @@ import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { ButtonTheme } from '@guardian/stand/Button';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
+import type { ToggleSwitchTheme } from '@guardian/stand/ToggleSwitch';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 import { from, until } from '@guardian/stand/utils';
 
@@ -298,29 +299,17 @@ export const previewPillStyles = {
 	}),
 };
 
-export const toggleSwitchTheme = {
-	baseStyle: (selected: boolean) =>
-		css({
-			display: 'flex',
-			alignItems: 'center',
-			width: '44px',
-			height: '24px',
-			borderRadius: '100px',
-			padding: '3px',
-			gap: '10px',
-			backgroundColor: selected
-				? baseColors.magenta[200]
-				: semanticColors.bg.raisedLevel3Inverse,
-			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		}),
-	thumb: (selected: boolean) =>
-		css({
-			width: '18px',
-			height: '18px',
-			paddingLeft: selected ? '16px' : '0px',
-			alignItems: 'center',
-			color: semanticColors.bg.base,
-		}),
+export const toggleSwitchTheme: ToggleSwitchTheme = {
+	shared: {
+		track: {
+			selected: {
+				backgroundColor: baseColors.magenta[200],
+			},
+		},
+		thumb: {
+			color: baseColors.magenta[200],
+		},
+	},
 };
 
 export const alertBannerCss = css({
