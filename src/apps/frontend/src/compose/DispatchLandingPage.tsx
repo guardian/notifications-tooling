@@ -1,12 +1,15 @@
 import { css } from '@emotion/react';
 import { semanticSpacing } from '@guardian/stand';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
+import { Layout } from '@guardian/stand/Layout';
 import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import { between, from } from '@guardian/stand/utils';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { ConfigContext } from '../config/ConfigContext';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
+import { LatestPublishedContentPanel } from '../latest-content/LatestPublishedContentPanel';
 import { DispatchLandingHistoryView } from '../layout/DispatchLandingHistoryView';
 import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
@@ -27,6 +30,7 @@ const landingTileStyles = css({
 });
 
 export const DispatchLandingPage = () => {
+	const config = useContext(ConfigContext);
 	const [searchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
 	const [last24HoursSince] = useState(() =>
@@ -50,12 +54,8 @@ export const DispatchLandingPage = () => {
 		}) ?? [];
 
 	return (
-		<section css={dispatchLandingTheme.dispatchMainContainer}>
-			<div
-				css={{
-					width: '100%',
-				}}
-			>
+		<>
+			<Layout.Main css={dispatchLandingTheme.primaryColumn}>
 				<Typography variant="titleXl" element={'h1'}>
 					Welcome to Dispatch
 				</Typography>
@@ -69,10 +69,8 @@ export const DispatchLandingPage = () => {
 						marginBottom: semanticSpacing.stackLg,
 						paddingTop: semanticSpacing.stackMd,
 						[from.md]: {
-							flexDirection: 'row',
-						},
-						[from.lg]: {
-							justifyContent: 'space-between',
+							display: 'grid',
+							gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
 						},
 					}}
 				>
@@ -124,7 +122,12 @@ export const DispatchLandingPage = () => {
 						}
 					/>
 				</div>
-			</div>
-		</section>
+			</Layout.Main>
+			{!config?.DISABLE_LATEST_PUBLISHED_CONTENT && (
+				<aside css={dispatchLandingTheme.latestContentRail}>
+					<LatestPublishedContentPanel />
+				</aside>
+			)}
+		</>
 	);
 };

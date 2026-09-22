@@ -10,7 +10,6 @@ import { HistoryView } from './HistoryView';
 export const HistoryPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
-	const searchTerm = parsedHistoryQuery.search ?? '';
 	const debouncedSearch = useDebouncedValue(parsedHistoryQuery.search, 300);
 	const isSearchPending = parsedHistoryQuery.search !== debouncedSearch;
 	const historyQuery = { ...parsedHistoryQuery, search: debouncedSearch };
@@ -30,23 +29,6 @@ export const HistoryPage = () => {
 
 			return nextSearchParams;
 		});
-	};
-	const handleSearchTermChange = (nextSearchTerm: string) => {
-		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				if (nextSearchTerm.trim()) {
-					nextSearchParams.set('search', nextSearchTerm);
-				} else {
-					nextSearchParams.delete('search');
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
-			{ replace: true },
-		);
 	};
 	const handleRefresh = () => void notificationHistory.refetch();
 
@@ -82,8 +64,11 @@ export const HistoryPage = () => {
 					: undefined
 			}
 			currentPage={currentPage}
-			searchTerm={searchTerm}
-			onSearchTermChange={handleSearchTermChange}
+			hasActiveFilters={
+				parsedHistoryQuery.search !== undefined ||
+				(parsedHistoryQuery.audiences?.length ?? 0) > 0 ||
+				(parsedHistoryQuery.statuses?.length ?? 0) > 0
+			}
 		/>
 	);
 };

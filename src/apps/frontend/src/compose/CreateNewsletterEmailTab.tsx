@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import { NewsletterEmailPreviewSection } from '../preview/NewsletterEmailPreviewSection';
@@ -12,8 +12,8 @@ export const CreateNewsletterEmailTab = () => {
 	const { reset, setValue, watch } =
 		useFormContext<NewsletterEmailFormValues>();
 	const [searchParams] = useSearchParams();
-	const initialArticleUrl = toGuardianArticleUrl(
-		searchParams.get(articleUrlSearchParam),
+	const [initialArticleUrl] = useState(() =>
+		toGuardianArticleUrl(searchParams.get(articleUrlSearchParam)),
 	);
 	const showPreview = watch('showPreview');
 

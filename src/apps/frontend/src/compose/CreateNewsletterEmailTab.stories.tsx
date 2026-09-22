@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
-import { notificationRoutes, withArticleUrl } from '../routes';
+import {
+	articleUrlSearchParam,
+	notificationRoutes,
+	withArticleUrl,
+} from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeNewsletterEmailFormValues,
@@ -75,6 +79,9 @@ export const Default: Story = {
 			canvas.getByText('Create newsletter email'),
 		).toBeInTheDocument();
 		await expect(
+			canvas.queryByText('Review the content before sending'),
+		).not.toBeInTheDocument();
+		await expect(
 			canvas.queryByText(
 				'The preview for the newsletter email will be shown below.',
 			),
@@ -99,6 +106,14 @@ export const ImportsArticleFromSearchParam: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 
+		await expect(
+			canvas.getByText('Review the content before sending'),
+		).toBeVisible();
+		await expect(
+			canvas.getByText(
+				/Character limits, audiences, and alert types \/ kicker differ between newsletter emails and app alerts/,
+			),
+		).toBeVisible();
 		await expect(await canvas.findByText('Article imported')).toBeVisible();
 		await expect(canvas.getByLabelText('article URL')).toHaveValue(
 			articleFixture.webUrl,
@@ -109,6 +124,21 @@ export const ImportsArticleFromSearchParam: Story = {
 		await expect(canvas.getByLabelText('Preview text')).toHaveValue(
 			completeNewsletterEmailFormValues.previewText,
 		);
+		await expect(
+			new URL(window.location.href).searchParams.get(articleUrlSearchParam),
+		).toBe(new URL(articleFixture.webUrl).pathname);
+
+		await userEvent.click(
+			canvas.getByRole('button', {
+				name: /Kicker, subject and preview/,
+			}),
+		);
+		await expect(
+			new URL(window.location.href).searchParams.get(articleUrlSearchParam),
+		).toBe(new URL(articleFixture.webUrl).pathname);
+		await expect(
+			canvas.getByText('Review the content before sending'),
+		).toBeVisible();
 	},
 };
 

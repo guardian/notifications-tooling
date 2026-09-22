@@ -17,6 +17,7 @@ import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes, getTopBarNavigationItems } from '../routes';
 import {
+	dispatchLandingTheme,
 	faviconTheme,
 	layer,
 	stickyHeaderHeightProperty,
@@ -52,9 +53,14 @@ export const MainLayout = ({ children }: Props) => {
 
 	return (
 		<Layout
-			cssOverrides={css({
-				[stickyHeaderHeightProperty]: stickyHeaderHeight,
-			})}
+			cssOverrides={[
+				css({
+					[stickyHeaderHeightProperty]: stickyHeaderHeight,
+				}),
+				...(pathname === routes.dispatchLanding
+					? [dispatchLandingTheme.layout]
+					: []),
+			]}
 		>
 			<Layout.TopBar
 				cssOverrides={css({ position: 'sticky', top: 0, zIndex: layer.topBar })}

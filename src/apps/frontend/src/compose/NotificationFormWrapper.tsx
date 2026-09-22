@@ -17,6 +17,7 @@ import { CreateFormTitle } from './CreateFormTitle';
 import { DeliveryOptionFormField } from './DeliveryOptionFormField';
 import { NotificationFormContext } from './NotificationFormContext';
 import { NotificationFormSection } from './NotificationFormSection';
+import { ReviewWarning } from './ReviewWarning';
 
 interface NotificationFormWrapperProps {
 	title: string;
@@ -82,6 +83,7 @@ export const NotificationFormWrapper = ({
 						},
 					}}
 				>
+					{initialArticleUrl && <ReviewWarning />}
 					<NotificationFormSection id="article-section">
 						<ArticleImportControl
 							articleInputText={articleInputText}

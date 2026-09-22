@@ -1,8 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { Pool } from 'pg';
+import { Client, Pool } from 'pg';
 import type { Database } from './client';
+import { loadDatabaseEnvironment } from './database-environment';
 import type { NewNotificationDispatch } from './repositories/notification-dispatches-repository';
 import type { NewNotification } from './repositories/notifications-repository';
 import { getEnvConnectionString } from './runtime-connection-string';
@@ -53,11 +54,63 @@ export const buildDispatch = (
 	...overrides,
 });
 
+const useTestDatabase = async (): Promise<void> => {
+	const databaseEnvironment = loadDatabaseEnvironment();
+	const testDatabaseName =
+		process.env.DB_TEST_NAME ??
+		(databaseEnvironment.DB_NAME.endsWith('_test')
+			? databaseEnvironment.DB_NAME
+			: `${databaseEnvironment.DB_NAME}_test`);
+
+	if (!testDatabaseName.endsWith('_test')) {
+		throw new Error('DB_TEST_NAME must end with _test.');
+	}
+
+	const client = new Client({
+		host: databaseEnvironment.DB_HOST,
+		port: databaseEnvironment.DB_PORT,
+		database: databaseEnvironment.DB_NAME,
+		user: databaseEnvironment.DB_USERNAME,
+		password: databaseEnvironment.DB_PASSWORD,
+	});
+
+	await client.connect();
+
+	try {
+		await client.query('select pg_advisory_lock(hashtext($1))', [
+			`create-database:${testDatabaseName}`,
+		]);
+
+		const existingDatabase = await client.query(
+			'select 1 from pg_database where datname = $1',
+			[testDatabaseName],
+		);
+
+		if (existingDatabase.rowCount === 0) {
+			const escapedDatabaseName = testDatabaseName.replaceAll('"', '""');
+			await client.query(`create database "${escapedDatabaseName}"`);
+		}
+	} finally {
+		await client.end();
+	}
+
+	process.env.DB_NAME = testDatabaseName;
+};
+
 /**
  * Connects a pool, brings the schema up idempotently (so the suite is
  * self-contained), and returns the db plus helpers to reset and close it.
  */
 export const setupTestDatabase = async () => {
+	await useTestDatabase();
+
+	const { DB_NAME } = loadDatabaseEnvironment();
+	if (!DB_NAME.endsWith('_test')) {
+		throw new Error(
+			`Refusing to run destructive database tests against '${DB_NAME}'. Test database names must end with _test.`,
+		);
+	}
+
 	const pool = new Pool({ connectionString: getEnvConnectionString() });
 	const db: Database = drizzle({ client: pool, schema });
 
