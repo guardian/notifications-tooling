@@ -617,6 +617,7 @@ export const CategoryFilter: Story = {
 		await expect(
 			page.getAllByRole('menuitemcheckbox').map((option) => option.textContent),
 		).toEqual([
+			expect.stringContaining('None'),
 			expect.stringContaining('Breaking news'),
 			expect.stringContaining('Exclusive'),
 			expect.stringContaining("Editors' picks"),
@@ -641,6 +642,7 @@ export const CategoryFilter: Story = {
 		});
 
 		for (const name of [
+			'None',
 			'Breaking news',
 			'Exclusive',
 			"Editors' picks",
@@ -652,7 +654,7 @@ export const CategoryFilter: Story = {
 		await expect(trigger).toHaveFocus();
 
 		const summary =
-			"Breaking news, Exclusive, Editors' picks, One not to miss, Sports";
+			"None, Breaking news, Exclusive, Editors' picks, One not to miss, Sports";
 		await expect(trigger).toHaveAccessibleName(
 			`Kicker / Alert type ${summary}`,
 		);

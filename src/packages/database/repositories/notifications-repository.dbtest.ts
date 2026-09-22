@@ -182,7 +182,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 			},
 		});
 
-	it('matches all five categories, case-insensitive prefixes, and only start-of-subject kickers', async () => {
+	it('matches all five kicker categories, the no-kicker option, case-insensitive prefixes, and only start-of-subject kickers', async () => {
 		const appBreaking = await createHistoryNotification({
 			appAlertType: 'breaking-news',
 		});
@@ -212,6 +212,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 			'editors-picks': [editorsPicks.id],
 			'one-not-to-miss': [oneNotToMiss.id],
 			sport: [sport.id],
+			none: [unprefixed.id, embedded.id, leadingSpace.id],
 		};
 		for (const alertType of historyAlertTypeSchema.options) {
 			const page = await notifications.listRecent({
@@ -233,6 +234,38 @@ describe('notifications repository listRecent (real Postgres)', () => {
 				notification.id,
 			);
 		}
+	});
+
+	it('matches notifications with no recognised kicker, and ORs none with other categories', async () => {
+		const unprefixed = await createHistoryNotification({ subject: 'Update' });
+		const unknownAppType = await createHistoryNotification({
+			appAlertType: 'not-a-kicker',
+		});
+		const sport = await createHistoryNotification({ appAlertType: 'sport' });
+		const breaking = await createHistoryNotification({
+			subject: 'Breaking news: Update',
+		});
+
+		const none = await notifications.listRecent({
+			since: daysAgo(14),
+			alertTypes: ['none'],
+		});
+		expect(none.total).toBe(2);
+		expect(none.notifications.map(({ id }) => id).sort()).toEqual(
+			[unprefixed.id, unknownAppType.id].sort(),
+		);
+
+		const noneOrSport = await notifications.listRecent({
+			since: daysAgo(14),
+			alertTypes: ['none', 'sport'],
+		});
+		expect(noneOrSport.total).toBe(3);
+		expect(noneOrSport.notifications.map(({ id }) => id).sort()).toEqual(
+			[unprefixed.id, unknownAppType.id, sport.id].sort(),
+		);
+		expect(noneOrSport.notifications.map(({ id }) => id)).not.toContain(
+			breaking.id,
+		);
 	});
 
 	it('combines category OR with search AND before pagination, counting combined plans once', async () => {

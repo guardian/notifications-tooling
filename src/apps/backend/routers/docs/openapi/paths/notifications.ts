@@ -75,7 +75,7 @@ export const notificationsPath = {
 				style: 'form',
 				explode: true,
 				description:
-					'Repeat for OR matching across categories, e.g. alertType=breaking-news&alertType=exclusive. Breaking news matches app alerts or a newsletter subject starting with Breaking news:. Exclusive matches newsletter subjects starting with Exclusive:. Newsletter prefixes are case-insensitive. Other IDs match app audience types. Omission includes all notifications, including newsletters without a recognised prefix; duplicates have no extra effect. Empty or unknown values, including alongside valid IDs, return 400.',
+					'Repeat for OR matching across categories, e.g. alertType=breaking-news&alertType=exclusive. `none` matches notifications carrying no recognised kicker, and is the negation of every other category. Breaking news matches app alerts or a newsletter subject starting with Breaking news:. Exclusive matches newsletter subjects starting with Exclusive:. Newsletter prefixes are case-insensitive. Other IDs match app audience types. Omission includes all notifications, including newsletters without a recognised prefix; duplicates have no extra effect. Empty or unknown values, including alongside valid IDs, return 400.',
 				schema: { $ref: '#/components/schemas/HistoryAlertTypes' },
 				example: ['breaking-news', 'exclusive'],
 			},

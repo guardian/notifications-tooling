@@ -70,6 +70,7 @@ describe('notification history OpenAPI contract', () => {
 			items: {
 				type: 'string',
 				enum: [
+					'none',
 					'breaking-news',
 					'exclusive',
 					'editors-picks',

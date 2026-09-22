@@ -1038,6 +1038,8 @@ describe('GET /v1/notifications', () => {
 				'alertType=sport&alertType=breaking-news&alertType=sport',
 				['breaking-news', 'sport'],
 			],
+			['alertType=none', ['none']],
+			['alertType=none&alertType=sport', ['none', 'sport']],
 		])(
 			'forwards canonical categories alongside search: %s',
 			async (query, alertTypes) => {

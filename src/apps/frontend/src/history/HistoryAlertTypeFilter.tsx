@@ -13,6 +13,7 @@ import {
 } from '../utils/history-search-params';
 
 const alertTypeLabels: Record<HistoryAlertType, string> = {
+	none: 'None',
 	'breaking-news': 'Breaking news',
 	exclusive: 'Exclusive',
 	'editors-picks': "Editors' picks",

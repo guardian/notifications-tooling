@@ -1,5 +1,17 @@
-import type { HistoryAlertType } from '@models';
-import { and, count, desc, eq, gte, inArray, lte, or, sql } from 'drizzle-orm';
+import type { HistoryAlertType, KickerHistoryAlertType } from '@models';
+import { kickerHistoryAlertTypes } from '@models';
+import {
+	and,
+	count,
+	desc,
+	eq,
+	gte,
+	inArray,
+	lte,
+	not,
+	or,
+	sql,
+} from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -177,8 +189,8 @@ export const createNotificationsRepository = (db: Database) => ({
 				)
 			)`
 			: undefined;
-		const newsletterSubject = sql`${notifications.channels}->'newsletter'->'compose'->>'subject'`;
-		const categoryPredicates = alertTypes?.map((alertType) => {
+		const newsletterSubject = sql`coalesce(${notifications.channels}->'newsletter'->'compose'->>'subject', '')`;
+		const kickerPredicate = (alertType: KickerHistoryAlertType) => {
 			if (alertType === 'exclusive') {
 				return sql<boolean>`(${newsletterSubject}) ilike 'Exclusive:%'`;
 			}
@@ -195,7 +207,14 @@ export const createNotificationsRepository = (db: Database) => ({
 						sql<boolean>`(${newsletterSubject}) ilike 'Breaking news:%'`,
 					)
 				: appAlertMatch;
-		});
+		};
+		const anyKicker = sql<boolean>`(${sql.join(
+			kickerHistoryAlertTypes.map(kickerPredicate),
+			sql` or `,
+		)})`;
+		const categoryPredicates = alertTypes?.map((alertType) =>
+			alertType === 'none' ? not(anyKicker) : kickerPredicate(alertType),
+		);
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
