@@ -1,8 +1,15 @@
+import { notificationAudienceFilterId } from '@models';
 import { z } from 'zod';
 
 const defaultLimit = 10;
 const defaultOffset = 0;
 const defaultSinceDays = 14;
+const notificationStatusCategory = z.enum(['sent', 'error']);
+
+const statusesByCategory = {
+	sent: ['accepted', 'delivered'],
+	error: ['partially_delivered', 'failed'],
+} as const;
 
 const daysAgo = (days: number) =>
 	new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -20,7 +27,8 @@ const epochSecondsToDate = z.codec(z.coerce.number().int().min(0), z.date(), {
  * defaults to 14 days ago. `limit` and `offset` are all-or-nothing: supply both
  * or neither. When omitted they default to limit 10 / offset 0. An `offset` past
  * the end of the range yields an empty page — `total` still reports the full
- * count at or after `since`.
+ * count at or after `since`. `createdByEmail` restricts the page to
+ * notifications sent by a given user (their email), matched case-insensitively.
  */
 export const notificationListQuerySchema = z
 	.strictObject({
@@ -28,6 +36,21 @@ export const notificationListQuerySchema = z
 		limit: z.coerce.number().int().min(1).max(50).optional(),
 		offset: z.coerce.number().int().min(0).optional(),
 		search: z.string().trim().min(1).max(200).optional(),
+		createdByEmail: z.string().trim().min(1).max(320).optional(),
+		audience: z
+			.union([
+				notificationAudienceFilterId,
+				z.array(notificationAudienceFilterId).min(1),
+			])
+			.transform((value) => (Array.isArray(value) ? value : [value]))
+			.optional(),
+		status: z
+			.union([
+				notificationStatusCategory,
+				z.array(notificationStatusCategory).min(1),
+			])
+			.transform((value) => (Array.isArray(value) ? value : [value]))
+			.optional(),
 	})
 	.refine(
 		(query) => (query.limit === undefined) === (query.offset === undefined),
@@ -41,6 +64,33 @@ export const notificationListQuerySchema = z
 		limit: query.limit ?? defaultLimit,
 		offset: query.offset ?? defaultOffset,
 		search: query.search,
+		createdByEmail: query.createdByEmail,
+		audiences: query.audience ? [...new Set(query.audience)] : undefined,
+		statuses: query.status
+			? [
+					...new Set(
+						query.status.flatMap((status) => statusesByCategory[status]),
+					),
+				]
+			: undefined,
 	}));
 
 export type NotificationListQuery = z.infer<typeof notificationListQuerySchema>;
+
+/**
+ * Query for `GET /v1/notifications/senders`. `since` is the same optional Unix
+ * timestamp (seconds) cut-off as the list endpoint — only senders of
+ * notifications created at or after it are returned. When omitted it defaults to
+ * 14 days ago.
+ */
+export const notificationSendersQuerySchema = z
+	.strictObject({
+		since: epochSecondsToDate.optional(),
+	})
+	.transform((query) => ({
+		since: query.since ?? daysAgo(defaultSinceDays),
+	}));
+
+export type NotificationSendersQuery = z.infer<
+	typeof notificationSendersQuerySchema
+>;

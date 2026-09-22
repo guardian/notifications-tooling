@@ -62,11 +62,11 @@ const NewsletterEmailArticleImport = (props: ArticleImportProps) => {
 		<ArticleImportControl
 			{...props}
 			onArticleImported={(article) => {
-				const { headline, standfirst } = article.fields ?? {};
+				const { headline, trailText } = article.fields ?? {};
 				if (headline) {
 					setValue('subjectText', headline);
 				}
-				const previewText = htmlToSingleLineText(standfirst);
+				const previewText = htmlToSingleLineText(trailText);
 				if (previewText) {
 					setValue('previewText', previewText);
 				}

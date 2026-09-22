@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import { AppAlertPreviewSection } from '../preview/AppAlertPreviewSection';
@@ -12,8 +12,8 @@ import { NotificationTabLayout } from './NotificationTabLayout';
 export const CreateAppAlertTab = () => {
 	const { reset } = useFormContext<AppAlertFormValues>();
 	const [searchParams] = useSearchParams();
-	const initialArticleUrl = toGuardianArticleUrl(
-		searchParams.get(articleUrlSearchParam),
+	const [initialArticleUrl] = useState(() =>
+		toGuardianArticleUrl(searchParams.get(articleUrlSearchParam)),
 	);
 	const topicTypes = useAppAlertTopicTypes();
 

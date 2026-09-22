@@ -1,5 +1,5 @@
 import type { NotificationComposerState } from '../types';
-import { parseHtml } from '../utils/html-helpers';
+import { htmlToSingleLineText } from '../utils/html-helpers';
 import {
 	defaultAppAlertComposerState,
 	defaultComposerState,
@@ -13,7 +13,7 @@ import { articleFixture } from './capi-fixtures';
 export const completeNewsletterEmailFormValues: NewsletterEmailFormValues = {
 	kicker: 'exclusive',
 	subjectText: articleFixture.fields?.headline ?? '',
-	previewText: parseHtml(articleFixture.fields?.standfirst).textContent,
+	previewText: htmlToSingleLineText(articleFixture.fields?.trailText),
 	showPreview: true,
 	deliveryOption: 'immediate',
 	audienceSegments: ['AU', 'UK'],

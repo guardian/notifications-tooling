@@ -6,6 +6,7 @@ import type { AppConfig } from '../../../packages/models';
 import { AccessControlledLayout } from './AccessControlledLayout';
 import { CreateAppAlertTab } from './compose/CreateAppAlertTab';
 import { CreateNewsletterEmailTab } from './compose/CreateNewsletterEmailTab';
+import { DispatchLandingPage } from './compose/DispatchLandingPage';
 import {
 	AppAlertNotificationFormProvider,
 	NewsletterEmailNotificationFormProvider,
@@ -13,7 +14,6 @@ import {
 import { ConfigContext } from './config/ConfigContext';
 import { getAppConfig } from './config/get-config';
 import { HistoryPage } from './history/HistoryPage';
-import { DispatchLandingLayout } from './layout/DispatchLandingLayout';
 import { NotFoundTab } from './layout/NotFoundTab';
 import { getAppRoutes } from './routes';
 import {
@@ -29,7 +29,7 @@ export function App() {
 		<ConfigContext.Provider value={config}>
 			<Routes>
 				<Route element={<AccessControlledLayout />}>
-					<Route index element={<DispatchLandingLayout />} />
+					<Route index element={<DispatchLandingPage />} />
 					<Route
 						path="newsletter-email"
 						element={

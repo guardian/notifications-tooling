@@ -625,4 +625,131 @@ describe('GET /v1/notifications (real Postgres)', () => {
 		const body = (await response.json()) as { error: string };
 		expect(body.error).toBe('bad_request');
 	});
+
+	it('filters the list to a single sender', async () => {
+		const mine = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+
+		const body = (await (
+			await fetch(
+				`${baseUrl}/v1/notifications?since=${sinceParam}&createdByEmail=ada.lovelace@guardian.co.uk`,
+			)
+		).json()) as ListResponse;
+
+		expect(body.total).toBe(1);
+		expect(body.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
+
+	it('matches the sender filter case-insensitively', async () => {
+		const mine = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'Ada.Lovelace@Guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+
+		const body = (await (
+			await fetch(
+				`${baseUrl}/v1/notifications?since=${sinceParam}&createdByEmail=${encodeURIComponent('ada.lovelace@GUARDIAN.co.uk')}`,
+			)
+		).json()) as ListResponse;
+
+		expect(body.total).toBe(1);
+		expect(body.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
+});
+
+describe('GET /v1/notifications/senders (real Postgres)', () => {
+	it('returns the distinct senders within the cut-off, alphabetically', async () => {
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+		// A duplicate sender collapses to one entry.
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(3),
+		});
+		// A test notification is excluded.
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			createdByEmail: 'test.only@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		// Outside the cut-off, so excluded.
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'old.sender@guardian.co.uk',
+			createdAt: daysAgo(20),
+		});
+
+		const response = await fetch(
+			`${baseUrl}/v1/notifications/senders?since=${sinceParam}`,
+		);
+
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as { senders: string[] };
+		expect(body.senders).toEqual([
+			'ada.lovelace@guardian.co.uk',
+			'grace.hopper@guardian.co.uk',
+		]);
+	});
+
+	it('rejects an invalid since with a 400', async () => {
+		const response = await fetch(
+			`${baseUrl}/v1/notifications/senders?since=nope`,
+		);
+
+		expect(response.status).toBe(400);
+		const body = (await response.json()) as { error: string };
+		expect(body.error).toBe('bad_request');
+	});
+
+	it('defaults to the 14-day window when since is omitted', async () => {
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(13),
+		});
+		// Older than the default 14-day cut-off, so excluded.
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'old.sender@guardian.co.uk',
+			createdAt: daysAgo(20),
+		});
+
+		const response = await fetch(`${baseUrl}/v1/notifications/senders`);
+
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as { senders: string[] };
+		expect(body.senders).toEqual([
+			'ada.lovelace@guardian.co.uk',
+			'grace.hopper@guardian.co.uk',
+		]);
+	});
 });
