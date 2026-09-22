@@ -53,7 +53,8 @@ export const getNotificationHistoryQueryKey = ({
 				},
 	] as const;
 
-export const ALWAYS_FRESH = Infinity;
+const ALWAYS_FRESH = Infinity;
+const NOTIFICATION_HISTORY_POLL_INTERVAL_MS = 30_000;
 
 export const fetchNotificationHistory = ({
 	limit,
@@ -110,4 +111,5 @@ export const useNotificationHistory = (
 		},
 		placeholderData: keepPreviousData,
 		staleTime: ALWAYS_FRESH,
+		refetchInterval: NOTIFICATION_HISTORY_POLL_INTERVAL_MS,
 	});

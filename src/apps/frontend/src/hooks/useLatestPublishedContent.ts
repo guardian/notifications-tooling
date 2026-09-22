@@ -22,6 +22,9 @@ const fetchLatestPublishedContent = async (): Promise<
 	return articles.map(mapLatestArticleToContentItem);
 };
 
+const ALWAYS_FRESH = Infinity;
+const LATEST_PUBLISHED_CONTENT_POLL_INTERVAL_MS = 30_000;
+
 export const useLatestPublishedContent = (
 	queryFn: () => Promise<
 		LatestPublishedContentItem[]
@@ -31,4 +34,6 @@ export const useLatestPublishedContent = (
 	useQuery({
 		queryKey,
 		queryFn,
+		staleTime: ALWAYS_FRESH,
+		refetchInterval: LATEST_PUBLISHED_CONTENT_POLL_INTERVAL_MS,
 	});
