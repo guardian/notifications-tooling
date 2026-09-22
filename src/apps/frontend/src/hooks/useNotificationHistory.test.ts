@@ -7,12 +7,17 @@ import {
 	it,
 	mock,
 } from 'bun:test';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, waitFor } from '@testing-library/react';
+import { createElement } from 'react';
+import '../../happydom-setup';
 import {
 	ALWAYS_FRESH,
 	fetchNotificationHistory,
 	getNotificationHistoryQueryKey,
+	NOTIFICATION_HISTORY_POLL_INTERVAL_MS,
 	notificationHistoryQueryKey,
+	useNotificationHistory,
 } from './useNotificationHistory';
 
 const originalFetch = globalThis.fetch;
@@ -222,5 +227,49 @@ describe('notification history query keys', () => {
 		});
 
 		expect(requestCount).toBe(2);
+	});
+
+	it('configures notification history polling', async () => {
+		let requestCount = 0;
+		globalThis.fetch = mock(() => {
+			requestCount += 1;
+			return Promise.resolve(
+				Response.json({
+					total: 0,
+					limit: 20,
+					offset: 0,
+					notifications: [],
+				}),
+			);
+		}) as unknown as typeof fetch;
+
+		const queryClient = new QueryClient({
+			defaultOptions: { queries: { retry: false } },
+		});
+		const wrapper = ({ children }: { children: React.ReactNode }) =>
+			createElement(QueryClientProvider, { client: queryClient }, children);
+		renderHook(
+			() =>
+				useNotificationHistory(
+					{
+						limit: 20,
+						offset: 0,
+					},
+					{
+						refetchInterval: 10,
+					},
+				),
+			{ wrapper },
+		);
+
+		await waitFor(() => expect(requestCount).toBe(1));
+		const query = queryClient.getQueryCache().find({
+			queryKey: getNotificationHistoryQueryKey({ limit: 20, offset: 0 }),
+		});
+
+		expect(
+			(query?.options as { refetchInterval?: number }).refetchInterval,
+		).toBe(10);
+		expect(NOTIFICATION_HISTORY_POLL_INTERVAL_MS).toBe(30_000);
 	});
 });
