@@ -17,7 +17,6 @@ const failWith = (errorMessage: string, remedy?: GridErrorRemedy): Failure => ({
 	remedy,
 });
 
-// TO DO - user friendly messages or use an enum
 const errorMessages = {
 	notFound: 'The image requested was not found on the grid',
 	forbidden: 'Your Authentication credentials for the grid have expired',
@@ -29,7 +28,6 @@ const errorMessages = {
 	wrongAspect: 'Please choose a 5:4 image crop',
 };
 
-// TO DO - what is our desired size?
 const DESIRED_MINIMUM_ASSET_WIDTH = 200;
 
 const fetchImageData = async (

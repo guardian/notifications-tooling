@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import type { GridErrorRemedy } from '../grid-client/grid-api';
+import { getGridImageUrl } from '../grid-client/grid-api';
 import { parseImageSourceUrl } from '../utils/form-validation';
-import type { GridErrorRemedy } from '../utils/grid-api';
-import { getGridImageUrl } from '../utils/grid-api';
 
 export type ImageUrlCheckResult = { exists: boolean; error?: string };
 

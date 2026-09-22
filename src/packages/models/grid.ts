@@ -67,27 +67,6 @@ const gridImage = z.object({
 });
 type GridImage = z.infer<typeof gridImage>;
 
-/**
- * TO DO export this model to composer.
- *
- * The same responses are modelled in composer, but with both
- * image and crop being optional. See:
- * composer/src/js/model/grid.ts
- *
- * However, this seems wrong - media-converter function
- * (eg createImageElementFromMediaData)
- * consumes the response but should fail if these properties are
- * undefined.
- *
- * see composer/src/js/services/embed/media-converter.ts
- *
- * Unsure if it would be safe to model more strictly - are there cases in
- * where the grid emits a message without images or without crops?
- * Does composer need to consume those incomplete messages somewhere?
- *
- * Have added .strict() to avoid messages from browser extensions being
- * interpreted as from the grid
- */
 const gridImageResponse = z
 	.object({
 		image: gridImage.optional(),

@@ -1,4 +1,4 @@
-import { validateGridCropPageUrl } from './grid-url-parsing';
+import { validateGridCropPageUrl } from '../grid-client/grid-url-parsing';
 
 const DEFAULT_ORIGIN = 'https://www.theguardian.com';
 // the path to a guardian article is made up at least two segments, usually in the format
