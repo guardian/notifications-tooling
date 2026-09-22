@@ -32,6 +32,7 @@ export const SendConfirmationModal = () => {
 			theme={{
 				overlay: {
 					position: 'fixed',
+					overflow: 'auto',
 				},
 			}}
 		>

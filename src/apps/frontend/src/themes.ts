@@ -820,13 +820,63 @@ export const historyViewStyles = {
 			display: 'none',
 		},
 	}),
-	audienceCheckbox: css({
+	filterCheckbox: css({
 		width: '100%',
 		pointerEvents: 'none',
 		cursor: 'inherit',
 	}),
 	visualOnly: css({
 		display: 'contents',
+	}),
+	categoryFilter: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXs,
+		minWidth: 0,
+	}),
+	categoryButton: css({
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr) auto',
+		alignItems: 'center',
+		width: '100%',
+		height: '40px',
+		paddingLeft: semanticSpacing.stackSm,
+		paddingRight: semanticSpacing.stackXs,
+		textAlign: 'left',
+		font: semanticTypography.labelFormInlineMd.font,
+		letterSpacing: semanticTypography.labelFormInlineMd.letterSpacing,
+		fontVariationSettings: `"wdth" ${semanticTypography.labelFormInlineMd.fontWidth}`,
+		color: semanticColors.text.strong,
+		backgroundColor: semanticColors.bg.base,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.stronger}`,
+		borderRadius: semanticRadius.cornerSm,
+		'&[data-hovered]': {
+			backgroundColor: semanticColors.fill.weakHover,
+			color: semanticColors.text.strong,
+		},
+		'&[data-pressed]': {
+			backgroundColor: semanticColors.fill.weakHover,
+			color: semanticColors.text.strong,
+		},
+		'&[aria-expanded="true"] .material-symbols': {
+			transform: 'rotate(180deg)',
+		},
+	}),
+	categorySummary: css({
+		overflow: 'hidden',
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
+	}),
+	categoryPopover: css({
+		width: 'var(--trigger-width)',
+	}),
+	categoryMenuItem: css({
+		gridTemplateColumns: 'minmax(0, 1fr)',
+		gridTemplateAreas: '"label"',
+		borderBottom: 'none',
+		'& > .material-symbols': {
+			display: 'none',
+		},
 	}),
 	container: css({
 		display: 'flex',
