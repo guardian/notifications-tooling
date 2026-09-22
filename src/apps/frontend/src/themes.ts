@@ -1,7 +1,9 @@
 import { css, keyframes } from '@emotion/react';
 import {
 	baseColors,
+	baseSizing,
 	baseSpacing,
+	baseTypography,
 	semanticColors,
 	semanticRadius,
 	semanticSizing,
@@ -207,7 +209,7 @@ export const articlePreviewCardTheme = {
 	}),
 	sectionLabel: (color: string) =>
 		css({
-			fontSize: '12px',
+			fontSize: '14px',
 			color,
 		}),
 	headline: css({
@@ -360,23 +362,69 @@ export const replaceThumbnailButtonTheme: ButtonTheme = {
 };
 
 export const dispatchLandingTheme = {
-	dispatchMainContainer: css({
-		flow: 'vertical',
-		paddingTop: semanticSpacing.stackLg,
-		paddingInline: semanticSpacing.stackMd,
-		width: '100%',
-		maxWidth: '983px',
-		gap: semanticSpacing.stackLg,
+	layout: css({
+		gridTemplateAreas: "'alertbanner' 'topbar' 'main' 'latest'",
+		gridTemplateColumns: 'minmax(0, 1fr)',
+		gridTemplateRows: 'min-content min-content auto auto',
 		[from.md]: {
+			gridTemplateAreas: "'alertbanner' 'topbar' 'main' 'latest'",
+			gridTemplateColumns: 'minmax(0, 1fr)',
+			gridTemplateRows: 'min-content min-content auto auto',
+		},
+		[from.lg]: {
+			gridTemplateAreas:
+				"'alertbanner alertbanner alertbanner' 'topbar topbar topbar' 'main gap latest'",
+			gridTemplateColumns: 'minmax(0, 983px) minmax(0, 1fr) minmax(0, 676px)',
+			gridTemplateRows: 'min-content min-content 1fr',
+		},
+	}),
+	primaryColumn: css({
+		gridArea: 'main',
+		minWidth: 0,
+		padding: baseSpacing['24Px'],
+		[from.sm]: {
+			paddingBottom: baseSpacing['24Px'],
+		},
+		[from.md]: {
+			paddingBottom: baseSpacing['24Px'],
+		},
+		[from.lg]: {
+			paddingBottom: baseSpacing['24Px'],
+		},
+	}),
+	latestContentRail: css({
+		gridArea: 'latest',
+		minWidth: 0,
+		paddingTop: 0,
+		paddingBottom: '39px',
+		paddingInline: baseSpacing['24Px'],
+		backgroundColor: semanticColors.bg.base,
+		'&::before': {
+			display: 'block',
+			marginBottom: semanticSpacing.stackSm,
+			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			content: '""',
+		},
+		[from.lg]: {
+			paddingTop: '39px',
 			paddingInline: semanticSpacing.stackLg,
+			backgroundColor: semanticColors.bg.raisedLevel1,
+			'&::before': {
+				display: 'none',
+			},
+			'& [data-latest-content-table-header]': {
+				display: 'none',
+			},
+			'& [data-latest-content-table-body] > [role="row"]:nth-of-type(n + 4)': {
+				display: 'grid',
+			},
 		},
 	}),
 	dispatchTableSection: css({
 		width: '100%',
-		maxWidth: '983px',
-		marginTop: '16px',
+		marginTop: semanticSpacing.stackMd,
 		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		paddingTop: '12px',
+		paddingTop: semanticSpacing.stackSm,
 		gap: semanticSpacing.stackMd,
 	}),
 	activityHeading: css({
@@ -397,6 +445,242 @@ export const dispatchLandingTheme = {
 	}),
 };
 
+const compactLatestContentQuery =
+	'@container latest-content-table (max-width: 580px)';
+const expandedLatestContentQuery =
+	'@container latest-content-table (min-width: 580px)';
+
+export const latestPublishedContentTheme = {
+	panel: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackMd,
+		width: '100%',
+	}),
+	header: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXs,
+	}),
+	helpText: css({
+		color: semanticColors.text.weak,
+	}),
+	loading: css({
+		display: 'grid',
+		minHeight: '280px',
+		placeItems: 'center',
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		color: semanticColors.text.weak,
+	}),
+	list: css({
+		width: '100%',
+		containerType: 'inline-size',
+		containerName: 'latest-content-table',
+		backgroundColor: semanticColors.bg.raisedLevel1,
+		[from.lg]: {
+			backgroundColor: 'transparent',
+		},
+	}),
+	tableBody: (showAll: boolean) =>
+		css({
+			'& > [role="row"]': {
+				backgroundColor: semanticColors.bg.raisedLevel1,
+			},
+			...(!showAll && {
+				'& > [role="row"]:nth-of-type(n + 4)': {
+					display: 'none',
+				},
+			}),
+			[from.lg]: {
+				'& > [role="row"]': {
+					backgroundColor: 'transparent',
+				},
+			},
+		}),
+	tableHeader: css({
+		backgroundColor: semanticColors.bg.raisedLevel2,
+		'& > tr > *': {
+			padding: semanticSpacing.stackMd,
+		},
+	}),
+	tableHeaderContent: css({
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: semanticSpacing.stackSm,
+		'& button': {
+			height: 'auto',
+			padding: 0,
+		},
+	}),
+	card: css({
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr) 104px',
+		gap: semanticSpacing.stackSm,
+		padding: semanticSpacing.stackMd,
+		backgroundColor: 'transparent',
+		[expandedLatestContentQuery]: {
+			display: 'grid',
+			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px max-content',
+			alignItems: 'center',
+			columnGap: semanticSpacing.stackSm,
+			rowGap: semanticSpacing.stackXxs,
+			paddingBlock: semanticSpacing.stackSm,
+		},
+		[compactLatestContentQuery]: {
+			display: 'grid',
+			gridTemplateColumns: 'minmax(0, 1fr) 104px',
+			gap: semanticSpacing.stackSm,
+			padding: semanticSpacing.stackMd,
+		},
+	}),
+	cardDetails: css({
+		display: 'flex',
+		minWidth: 0,
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+		[expandedLatestContentQuery]: {
+			display: 'contents',
+		},
+		[compactLatestContentQuery]: {
+			display: 'flex',
+		},
+	}),
+	cardActions: css({
+		display: 'flex',
+		width: '104px',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+		[expandedLatestContentQuery]: {
+			display: 'contents',
+		},
+		[compactLatestContentQuery]: {
+			display: 'flex',
+		},
+	}),
+	cardMeta: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXxs,
+		[expandedLatestContentQuery]: {
+			minWidth: 0,
+		},
+	}),
+	sectionLabel: (color: string) =>
+		css({
+			fontSize: baseTypography.size['12Px'],
+			color,
+		}),
+	sectionName: css({
+		fontWeight: 700,
+	}),
+	published: css({
+		fontSize: baseTypography.size['12Px'],
+		color: semanticColors.text.strong,
+	}),
+	publishedRelative: css({
+		fontWeight: 700,
+		color: semanticColors.text.strong,
+	}),
+	cardHeadline: css({
+		display: 'flex',
+		alignItems: 'flex-start',
+		[expandedLatestContentQuery]: {
+			minWidth: 0,
+		},
+	}),
+	headline: css({
+		fontSize: baseTypography.size['14Px'],
+		lineHeight: 1.4,
+		color: semanticColors.text.strong,
+		[expandedLatestContentQuery]: {
+			display: '-webkit-box',
+			overflow: 'hidden',
+			WebkitBoxOrient: 'vertical',
+			WebkitLineClamp: 2,
+		},
+		[compactLatestContentQuery]: {
+			display: 'block',
+			overflow: 'visible',
+			WebkitLineClamp: 'unset',
+		},
+	}),
+	thumbnail: css({
+		width: '100%',
+		maxWidth: '124px',
+		aspectRatio: '5 / 4',
+		objectFit: 'cover',
+		borderRadius: semanticRadius.cornerXs,
+		[expandedLatestContentQuery]: {
+			width: baseSpacing['80Px'],
+			height: baseSpacing['64Px'],
+			maxWidth: 'none',
+			aspectRatio: 'auto',
+		},
+		[compactLatestContentQuery]: {
+			width: '104px',
+			height: 'auto',
+			maxWidth: 'none',
+			aspectRatio: '5 / 4',
+		},
+	}),
+	thumbnailFallback: css({
+		display: 'flex',
+		width: '100%',
+		maxWidth: '124px',
+		aspectRatio: '5 / 4',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: semanticSpacing.stackXxs,
+		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+		borderRadius: semanticRadius.cornerXs,
+		[expandedLatestContentQuery]: {
+			width: baseSpacing['80Px'],
+			height: baseSpacing['64Px'],
+			maxWidth: 'none',
+			aspectRatio: 'auto',
+		},
+		[compactLatestContentQuery]: {
+			width: '104px',
+			height: 'auto',
+			maxWidth: 'none',
+			aspectRatio: '5 / 4',
+		},
+	}),
+	createButtonSlot: css({
+		display: 'flex',
+		alignItems: 'center',
+		[expandedLatestContentQuery]: {
+			alignSelf: 'stretch',
+			paddingLeft: semanticSpacing.stackSm,
+			borderLeft: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		},
+		[compactLatestContentQuery]: {
+			alignSelf: 'auto',
+			paddingLeft: 0,
+			borderLeft: 0,
+		},
+	}),
+	createButton: css({
+		alignSelf: 'flex-start',
+		flexShrink: 0,
+		whiteSpace: 'nowrap',
+		background: semanticColors.bg.base,
+		'&[data-hovered], &:hover': {
+			background: semanticColors.bg.raisedLevel1,
+		},
+		[expandedLatestContentQuery]: {
+			alignSelf: 'center',
+		},
+		[compactLatestContentQuery]: {
+			alignSelf: 'flex-start',
+			width: '104px',
+		},
+	}),
+} as const;
+
 const skeletonPulse = keyframes({
 	'0%, 100%': { opacity: 0.45 },
 	'50%': { opacity: 1 },
@@ -409,6 +693,34 @@ const skeletonBase = {
 	'@media (prefers-reduced-motion: reduce)': {
 		animation: 'none',
 	},
+} as const;
+
+export const emptyStateStyles = {
+	empty: css({
+		display: 'flex',
+		minHeight: '280px',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: semanticSpacing.stackXs,
+		padding: semanticSpacing.stackLg,
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+		textAlign: 'center',
+	}),
+	emptyIcon: css({
+		display: 'grid',
+		width: '48px',
+		height: '48px',
+		placeItems: 'center',
+		marginBottom: semanticSpacing.stackXs,
+		borderRadius: '50%',
+		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+	}),
+	emptyCopy: css({
+		maxWidth: '420px',
+		color: semanticColors.text.weak,
+	}),
 } as const;
 
 export const historyViewStyles = {
@@ -626,9 +938,21 @@ export const historyViewStyles = {
 		},
 	}),
 	table: css({
+		containerType: 'inline-size',
+		containerName: 'history-table',
 		'@media (min-width: 600px) and (max-width: 1055.9px)': {
 			'& [role="row"]': {
 				gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+			},
+		},
+		'@container history-table (max-width: 899.9px)': {
+			'& [role="row"]': {
+				gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+			},
+		},
+		'@container history-table (max-width: 599.9px)': {
+			'& [role="row"]': {
+				gridTemplateColumns: 'minmax(0, 1fr)',
 			},
 		},
 	}),
@@ -641,6 +965,9 @@ export const historyViewStyles = {
 			[from.lg]: {
 				display: 'block',
 			},
+			'@container history-table (max-width: 899.9px)': {
+				display: 'none',
+			},
 		},
 	}),
 	tableRow: css({
@@ -650,6 +977,10 @@ export const historyViewStyles = {
 			rowGap: 0,
 			paddingBlock: 0,
 		},
+		'@container history-table (max-width: 899.9px)': {
+			rowGap: semanticSpacing.stackXs,
+			paddingBlock: semanticSpacing.stackXs,
+		},
 	}),
 	notificationCell: css({
 		'@media (min-width: 600px) and (max-width: 1055.9px)': {
@@ -658,6 +989,14 @@ export const historyViewStyles = {
 		'@media (min-width: 600px) and (max-width: 829.9px)': {
 			gridColumn: '1',
 			gridRow: '1 / span 4',
+		},
+		'@container history-table (max-width: 899.9px)': {
+			gridColumn: '1',
+			gridRow: '1 / span 4',
+			alignSelf: 'start',
+		},
+		'@container history-table (max-width: 599.9px)': {
+			gridRow: 'auto',
 		},
 	}),
 	metadataCell: (row: number) =>
@@ -672,6 +1011,17 @@ export const historyViewStyles = {
 				gridColumn: '2',
 				gridRow: String(row),
 			},
+			'@container history-table (max-width: 899.9px)': {
+				display: 'grid',
+				gridTemplateColumns: '80px minmax(0, 1fr)',
+				alignItems: 'center',
+				gridColumn: '2',
+				gridRow: String(row),
+			},
+			'@container history-table (max-width: 599.9px)': {
+				gridColumn: '1',
+				gridRow: 'auto',
+			},
 		}),
 	compactLabel: css({
 		color: semanticColors.text.weak,
@@ -680,6 +1030,9 @@ export const historyViewStyles = {
 		},
 		[from.lg]: {
 			display: 'none',
+		},
+		'@container history-table (max-width: 899.9px)': {
+			display: 'inline',
 		},
 	}),
 	metadataValue: css({
@@ -702,31 +1055,11 @@ export const historyViewStyles = {
 			font: semanticTypography.headingSm.font,
 			letterSpacing: semanticTypography.headingSm.letterSpacing,
 		},
-	}),
-	empty: css({
-		display: 'flex',
-		minHeight: '280px',
-		flexDirection: 'column',
-		alignItems: 'center',
-		justifyContent: 'center',
-		gap: semanticSpacing.stackXs,
-		padding: semanticSpacing.stackLg,
-		border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		textAlign: 'center',
-	}),
-	emptyIcon: css({
-		display: 'grid',
-		width: '48px',
-		height: '48px',
-		placeItems: 'center',
-		marginBottom: semanticSpacing.stackXs,
-		borderRadius: '50%',
-		color: semanticColors.text.weak,
-		backgroundColor: semanticColors.fill.neutralWeak,
-	}),
-	emptyCopy: css({
-		maxWidth: '420px',
-		color: semanticColors.text.weak,
+		'@container history-table (max-width: 899.9px)': {
+			height: baseSizing.size18Px,
+			paddingInline: baseSpacing['6Px'],
+			font: 'inherit',
+		},
 	}),
 	skeletonThumbnail: css({
 		...skeletonBase,

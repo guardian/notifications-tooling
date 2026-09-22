@@ -9,7 +9,7 @@ import { SidebarStepperNavigation } from '@guardian/stand/SidebarStepperNavigati
 import type { SidebarStepperNavigationTheme } from '@guardian/stand/SidebarStepperNavigation';
 import type { StepNavStep } from '@guardian/stand/SidebarStepperNavigation';
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useActiveSectionHref } from '../hooks/useActiveSectionHref';
 import { layer, stickyHeaderHeight } from '../themes';
 import type { ChannelOption } from '../types';
@@ -87,6 +87,7 @@ export const SideNavigationPanel = ({
 	const PANEL_ITEMS = PANEL_ITEMS_BY_CHANNEL[channel];
 
 	const activeSectionHref = useActiveSectionHref();
+	const { pathname, search } = useLocation();
 	const navigate = useNavigate();
 	const locationHashRef = useRef(activeSectionHref);
 	const isClickLockedRef = useRef(false);
@@ -114,7 +115,7 @@ export const SideNavigationPanel = ({
 			if (locationHashRef.current !== item.id) {
 				locationHashRef.current = item.id;
 				void navigate(
-					{ hash: item.id },
+					{ pathname, search, hash: item.id },
 					{ replace: true, preventScrollReset: true },
 				);
 			}
@@ -176,12 +177,15 @@ export const SideNavigationPanel = ({
 				window.cancelAnimationFrame(animationFrameId);
 			}
 		};
-	}, [navigate, PANEL_ITEMS]);
+	}, [navigate, PANEL_ITEMS, pathname, search]);
 
 	const handleTileClick = (href: string) => {
 		if (locationHashRef.current !== href) {
 			locationHashRef.current = href;
-			void navigate({ hash: href }, { preventScrollReset: true });
+			void navigate(
+				{ pathname, search, hash: href },
+				{ preventScrollReset: true },
+			);
 		}
 
 		isClickLockedRef.current = true;

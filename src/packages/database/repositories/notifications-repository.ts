@@ -19,10 +19,18 @@ export type ListRecentNotificationsOptions = {
 	offset?: number;
 	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
+	/** Restricts the page to notifications sent by this `createdByEmail`, matched case-insensitively. */
+	createdByEmail?: string;
 	/** API edition ids matched against newsletter variants or app-push editions. */
 	audiences?: string[];
 	/** Rolled-up delivery statuses included in the result. */
 	statuses?: Array<Notification['status']>;
+};
+
+/** Cut-off for {@link NotificationsRepository.listDistinctSenders}. */
+export type ListDistinctSendersOptions = {
+	/** Only senders of notifications created at or after this instant are returned. */
+	since: Date;
 };
 
 export type ListNotificationsInWindowOptions = {
@@ -139,11 +147,14 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 		search,
+		createdByEmail,
 		audiences,
 		statuses,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
+		// Matched case-insensitively via the `lower(created_by_email)` index.
+		const normalisedCreatedByEmail = createdByEmail?.toLowerCase();
 		const audienceValues = audiences?.map((audience) => sql`${audience}`);
 		const audienceFilter = audienceValues?.length
 			? sql<boolean>`(
@@ -166,6 +177,9 @@ export const createNotificationsRepository = (db: Database) => ({
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
+			normalisedCreatedByEmail
+				? sql`lower(${notifications.createdByEmail}) = ${normalisedCreatedByEmail}`
+				: undefined,
 			statuses?.length ? inArray(notifications.status, statuses) : undefined,
 			searchPattern
 				? sql<boolean>`exists (
@@ -198,6 +212,31 @@ export const createNotificationsRepository = (db: Database) => ({
 		}
 
 		return { notifications: await pageQuery, total: totals?.total ?? 0 };
+	},
+
+	/**
+	 * The distinct sender emails that sent a production send (`kind = 'send'`) at
+	 * or after `since`, lowercased and alphabetically ordered. Emails are
+	 * normalised so case variants collapse to one entry, matching the
+	 * case-insensitive `sender` filter on {@link listRecent}. Backs the senders
+	 * endpoint that populates that filter.
+	 */
+	async listDistinctSenders({
+		since,
+	}: ListDistinctSendersOptions): Promise<string[]> {
+		const senderExpression = sql<string>`lower(${notifications.createdByEmail})`;
+		const rows = await db
+			.selectDistinct({ sender: senderExpression })
+			.from(notifications)
+			.where(
+				and(
+					gte(notifications.createdAt, since),
+					eq(notifications.kind, 'send'),
+				),
+			)
+			.orderBy(senderExpression);
+
+		return rows.map((row) => row.sender);
 	},
 
 	/** Production sends in a time window with their dispatch outcomes, newest first. */
