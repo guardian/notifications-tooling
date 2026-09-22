@@ -34,6 +34,7 @@ export const LatestPublishedContentPanel = ({
 	const [showAll, setShowAll] = useState(false);
 	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =
 		useState(false);
+	const [selectedArticleUrl, setSelectedArticleUrl] = useState<string>();
 	const isEmpty = !latestPublishedContent.isPending && content.length === 0;
 
 	return (
@@ -101,7 +102,10 @@ export const LatestPublishedContentPanel = ({
 								<LatestPublishedContentCard
 									key={item.id}
 									content={item}
-									onCreate={() => setIsCreateNotificationModalOpen(true)}
+									onCreate={() => {
+										setSelectedArticleUrl(item.url);
+										setIsCreateNotificationModalOpen(true);
+									}}
 								/>
 							))}
 						</TableBody>
@@ -111,6 +115,7 @@ export const LatestPublishedContentPanel = ({
 			<DispatchCreateNotificationModal
 				isOpen={isCreateNotificationModalOpen}
 				onOpenChange={setIsCreateNotificationModalOpen}
+				articleUrl={selectedArticleUrl}
 			/>
 		</>
 	);

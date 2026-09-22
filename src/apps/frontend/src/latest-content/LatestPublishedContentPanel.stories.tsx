@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { expect, userEvent, within } from 'storybook/test';
 import { latestPublishedContentQueryKey } from '../hooks/useLatestPublishedContent';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import { mockLatestPublishedContent } from './latest-published-content';
 import { LatestPublishedContentPanel } from './LatestPublishedContentPanel';
 
@@ -113,6 +114,24 @@ export const Default: Story = {
 				name: 'Choose an alert type for this content',
 			}),
 		).toBeVisible();
+		await expect(
+			documentCanvas.getByRole('link', { name: 'Create a newsletter email' }),
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				mockLatestPublishedContent[0]!.url,
+			),
+		);
+		await expect(
+			documentCanvas.getByRole('link', { name: 'Create an app alert' }),
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				mockLatestPublishedContent[0]!.url,
+			),
+		);
 		await userEvent.click(
 			documentCanvas.getByRole('button', { name: 'Close Modal' }),
 		);
