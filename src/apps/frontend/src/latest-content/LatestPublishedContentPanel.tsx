@@ -72,7 +72,7 @@ export const LatestPublishedContentPanel = ({
 					/>
 				) : (
 					<>
-						{latestPublishedContent.isError && (
+						{latestPublishedContent.isRefetchError && (
 							<InlineMessage level="error">
 								Unable to refresh latest published content. Showing cached
 								results.

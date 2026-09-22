@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 import { latestPublishedContentQueryKey } from '../hooks/useLatestPublishedContent';
 import { mockLatestPublishedContent } from './latest-published-content';
@@ -62,10 +63,17 @@ const ErrorPanelStory = () => (
 );
 
 const CachedErrorPanelStory = () => {
-	const queryClient = new QueryClient({
-		defaultOptions: { queries: { retry: false } },
-	});
+	const queryClient = useMemo(
+		() =>
+			new QueryClient({
+				defaultOptions: { queries: { retry: false } },
+			}),
+		[],
+	);
 	queryClient.setQueryData(cachedErrorQueryKey, mockLatestPublishedContent);
+	useEffect(() => {
+		void queryClient.refetchQueries({ queryKey: cachedErrorQueryKey });
+	}, [queryClient]);
 
 	return (
 		<QueryClientProvider client={queryClient}>
