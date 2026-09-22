@@ -74,7 +74,8 @@ export const LatestPublishedContentPanel = ({
 					<>
 						{latestPublishedContent.isError && (
 							<InlineMessage level="error">
-								Unable to refresh latest published content. Showing cached results.
+								Unable to refresh latest published content. Showing cached
+								results.
 							</InlineMessage>
 						)}
 						<Table

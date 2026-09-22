@@ -38,8 +38,7 @@ export const DispatchLandingPage = () => {
 		cacheScope: 'last-24-hours',
 	};
 	const notificationHistory = useNotificationHistory(historyQuery, {
-		getSince: () =>
-			Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000),
+		getSince: () => Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000),
 	});
 	const channelAudiences = useChannelAudiences();
 	const handleRefresh = () => void notificationHistory.refetch();

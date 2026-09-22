@@ -94,14 +94,21 @@ export const useNotificationHistory = (
 		enabled = true,
 		refetchInterval = NOTIFICATION_HISTORY_POLL_INTERVAL_MS,
 		getSince,
-	}: { enabled?: boolean; refetchInterval?: number; getSince?: () => number | undefined } = {},
+	}: {
+		enabled?: boolean;
+		refetchInterval?: number;
+		getSince?: () => number | undefined;
+	} = {},
 ) =>
 	useQuery({
 		queryKey: getNotificationHistoryQueryKey(query),
 		enabled,
 		queryFn: async () => {
 			try {
-				return await fetchNotificationHistory({ ...query, since: getSince?.() ?? query.since });
+				return await fetchNotificationHistory({
+					...query,
+					since: getSince?.() ?? query.since,
+				});
 			} catch (error) {
 				if (
 					error instanceof ApiError &&
