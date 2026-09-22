@@ -52,14 +52,9 @@ item.
 An optional editorial label for a notification, such as Breaking News or Exclusive.
 For a newsletter email, it prefixes the subject text to form the subject line.
 
-**No kicker**:
+**None**:
 A newsletter email with no editorial label before its subject text. This is an
 explicit choice, distinct from leaving the kicker choice unselected.
-
-**None (Kicker / Alert type filter choice)**:
-The filter choice matching notifications that carry no recognised kicker or app
-alert type. It is the negation of every other choice, so it never overlaps them.
-_Avoid_: no kicker (that names the newsletter compose choice, which is narrower)
 
 **App alert type**:
 The editorial audience category of an app alert, such as Breaking news, Sports
