@@ -8,15 +8,18 @@ export const notificationSendersQueryKey = [
 	'senders',
 ] as const;
 
-export const fetchNotificationSenders = () =>
+export const getNotificationSendersQueryKey = (since?: number) =>
+	[...notificationSendersQueryKey, { since }] as const;
+
+export const fetchNotificationSenders = (since?: number) =>
 	fetchJsonAndParse(
 		notificationSendersResponseSchema,
-		'/v1/notifications/senders',
+		`/v1/notifications/senders${since === undefined ? '' : `?since=${since}`}`,
 	);
 
-export const useNotificationSenders = () =>
+export const useNotificationSenders = (since?: number) =>
 	useQuery({
-		queryKey: notificationSendersQueryKey,
-		queryFn: fetchNotificationSenders,
+		queryKey: getNotificationSendersQueryKey(since),
+		queryFn: () => fetchNotificationSenders(since),
 		staleTime: ALWAYS_FRESH,
 	});

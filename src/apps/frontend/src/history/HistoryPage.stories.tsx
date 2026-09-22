@@ -189,6 +189,18 @@ const historyHandler = http.get(
 	},
 );
 
+const senderCutoff = 1_700_000_000;
+const cutoffNotificationSendersHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications/senders`,
+	({ request }) =>
+		HttpResponse.json({
+			senders:
+				new URL(request.url).searchParams.get('since') === String(senderCutoff)
+					? ['historic.sender@example.com']
+					: ['recent.sender@example.com'],
+		}),
+);
+
 const partialFailureDetail: NotificationResource = {
 	...historyResponse.notifications[1]!,
 	dispatches: [
@@ -548,6 +560,42 @@ export const SenderFilter: Story = {
 				}),
 			).toBeVisible();
 		});
+	},
+};
+
+export const SenderFilterCutoff: Story = {
+	loaders: [
+		() => {
+			window.history.replaceState(
+				{},
+				'',
+				`${window.location.pathname}?since=${senderCutoff}`,
+			);
+			return {};
+		},
+	],
+	parameters: {
+		msw: {
+			handlers: [
+				cutoffNotificationSendersHandler,
+				historyHandler,
+				failureDetailHandler,
+				channelAudiencesHandler,
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Sender All' }));
+		const page = within(canvasElement.ownerDocument.body);
+		await expect(
+			await page.findByRole('menuitemcheckbox', { name: 'Historic Sender' }),
+		).toBeVisible();
+		await expect(
+			page.queryByRole('menuitemcheckbox', { name: 'Recent Sender' }),
+		).not.toBeInTheDocument();
 	},
 };
 

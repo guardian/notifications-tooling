@@ -11,9 +11,12 @@ import { getSenderDisplayName } from '../utils/notification-history-mapper';
 
 export const HistorySenderFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { senders: selectedSenders = [], limit } =
-		parseHistorySearchParams(searchParams);
-	const notificationSenders = useNotificationSenders();
+	const {
+		senders: selectedSenders = [],
+		limit,
+		since,
+	} = parseHistorySearchParams(searchParams);
+	const notificationSenders = useNotificationSenders(since);
 	const senderOptions = notificationSenders.data?.senders ?? [];
 	const selectedSenderLabel = selectedSenders
 		.map(getSenderDisplayName)
