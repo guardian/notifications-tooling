@@ -1,9 +1,14 @@
 import { expect, it } from 'bun:test';
+import { renderHook } from '@testing-library/react';
+import { useContext } from 'react';
 import { ApiError } from '../api-client/errors';
-import { defaultNotificationFormContext } from './NotificationFormContext';
+import { NotificationFormContext } from './NotificationFormContext';
 
 it('reports a missing article resolver when no provider is present', async () => {
-	const result = await defaultNotificationFormContext.resolveArticleFromCapi({
+	const { result: context } = renderHook(() =>
+		useContext(NotificationFormContext),
+	);
+	const result = await context.current.resolveArticleFromCapi({
 		article: 'https://www.theguardian.com/world/2026/sep/16/example',
 	});
 	if (result.success) {

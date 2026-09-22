@@ -9,7 +9,10 @@ import type {
 } from '../schemas';
 import { articleFixture } from '../testing/capi-fixtures';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
-import { notificationSendersHandler } from '../testing/handlers/notifications';
+import {
+	notificationSenders,
+	notificationSendersHandler,
+} from '../testing/handlers/notifications';
 import { HistoryPage } from './HistoryPage';
 
 const historyResponse: NotificationListResponse = {
@@ -189,6 +192,15 @@ const historyHandler = http.get(
 	},
 );
 
+const senderRequest = fn();
+const refreshNotificationSendersHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications/senders`,
+	() => {
+		senderRequest();
+		return HttpResponse.json({ senders: notificationSenders });
+	},
+);
+
 const senderCutoff = 1_700_000_000;
 const cutoffNotificationSendersHandler = http.get(
 	`${getApiBaseUrl()}/v1/notifications/senders`,
@@ -327,6 +339,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Loaded: Story = {
+	parameters: {
+		msw: {
+			handlers: [
+				refreshNotificationSendersHandler,
+				historyHandler,
+				failureDetailHandler,
+				channelAudiencesHandler,
+			],
+		},
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -337,9 +359,11 @@ export const Loaded: Story = {
 			name: 'Refresh activity',
 		});
 		historyRequest.mockClear();
+		senderRequest.mockClear();
 		await userEvent.click(refreshButton);
 		await waitFor(async () => {
 			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(senderRequest).toHaveBeenCalledOnce();
 			await expect(refreshButton).toBeDisabled();
 		});
 		await waitFor(async () => {
