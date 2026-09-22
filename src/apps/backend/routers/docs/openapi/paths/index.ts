@@ -7,7 +7,11 @@ import { grafanaMetricsPath, grafanaQueryPath } from './grafana';
 import { healthPath } from './health';
 import { latestArticlesPath } from './latest-articles';
 import { notificationTestsPath } from './notification-tests';
-import { notificationByIdPath, notificationsPath } from './notifications';
+import {
+	notificationByIdPath,
+	notificationSendersPath,
+	notificationsPath,
+} from './notifications';
 import { emailPreviewPath } from './preview';
 import { resolveArticlePath } from './resolve-article';
 import { userPath } from './user';
@@ -24,6 +28,7 @@ export const paths = {
 	'/v1/content/articles/resolve': resolveArticlePath,
 	'/v1/notification-tests': notificationTestsPath,
 	'/v1/notifications': notificationsPath,
+	'/v1/notifications/senders': notificationSendersPath,
 	'/v1/notifications/{id}': notificationByIdPath,
 	'/v1/preview/email': emailPreviewPath,
 	'/v1/user': userPath,

@@ -93,5 +93,14 @@ export const notifications = pgTable(
 		index('notifications_send_created_at_idx')
 			.on(table.createdAt.desc())
 			.where(sql`${table.kind} = 'send'`),
+		// Serves the distinct-senders endpoint and the sender-filtered list. Keyed
+		// on `lower(created_by_email)` so both match senders case-insensitively:
+		// the prefix answers the equality filter and lets the distinct scan group
+		// by normalised sender, while the trailing `created_at` covers the cut-off
+		// range and newest-first order. Partial on `kind = 'send'` for the same
+		// reason as above.
+		index('notifications_send_sender_created_at_idx')
+			.on(sql`lower(${table.createdByEmail})`, table.createdAt.desc())
+			.where(sql`${table.kind} = 'send'`),
 	],
 );

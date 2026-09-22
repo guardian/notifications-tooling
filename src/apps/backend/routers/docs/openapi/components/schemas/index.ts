@@ -27,6 +27,7 @@ import { notificationDispatchSchema } from './notification-dispatch';
 import { notificationListSchema } from './notification-list';
 import { notificationNotFoundSchema } from './notification-not-found';
 import { notificationSendRequestJsonSchema } from './notification-send-request';
+import { notificationSendersSchema } from './notification-senders';
 import { notificationSummarySchema } from './notification-summary';
 import { notificationTestSendRequestJsonSchema } from './notification-test-send-request';
 import { notificationUnprocessableErrorSchema } from './notification-unprocessable-error';
@@ -49,6 +50,7 @@ export const schemas = {
 	Notification: notificationSchema,
 	NotificationSummary: notificationSummarySchema,
 	NotificationList: notificationListSchema,
+	NotificationSenders: notificationSendersSchema,
 	NotificationDispatch: notificationDispatchSchema,
 	NotificationNotFound: notificationNotFoundSchema,
 	NotificationConflictError: notificationConflictErrorSchema,
