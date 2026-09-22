@@ -969,13 +969,13 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
-		it('trims and forwards a createdByEmail filter', async () => {
+		it('normalizes, deduplicates and forwards createdByEmail filters', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
 
 			try {
 				const response = await fetch(
-					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&createdByEmail=%20editor%40guardian.co.uk%20`,
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&createdByEmail=%20Editor%40Guardian.co.uk%20&createdByEmail=second%40guardian.co.uk&createdByEmail=editor%40guardian.co.uk`,
 				);
 
 				expect(response.status).toBe(200);
@@ -983,7 +983,7 @@ describe('GET /v1/notifications', () => {
 					since: new Date(1700000000 * 1000),
 					limit: 10,
 					offset: 0,
-					createdByEmail: 'editor@guardian.co.uk',
+					createdByEmails: ['editor@guardian.co.uk', 'second@guardian.co.uk'],
 				});
 			} finally {
 				await listServer.close();

@@ -9,6 +9,7 @@ import type {
 } from '../schemas';
 import { articleFixture } from '../testing/capi-fixtures';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
+import { notificationSendersHandler } from '../testing/handlers/notifications';
 import { HistoryPage } from './HistoryPage';
 
 const historyResponse: NotificationListResponse = {
@@ -171,9 +172,20 @@ const historyRequest = fn((requestUrl: URL) => requestUrl);
 const historyHandler = http.get(
 	`${getApiBaseUrl()}/v1/notifications`,
 	async ({ request }) => {
-		historyRequest(new URL(request.url));
+		const requestUrl = new URL(request.url);
+		historyRequest(requestUrl);
 		await delay(300);
-		return HttpResponse.json(historyResponse);
+		const selectedSenders = requestUrl.searchParams.getAll('createdByEmail');
+		const notifications = selectedSenders.length
+			? historyResponse.notifications.filter(({ createdByEmail }) =>
+					selectedSenders.includes(createdByEmail.toLowerCase()),
+				)
+			: historyResponse.notifications;
+		return HttpResponse.json({
+			...historyResponse,
+			total: notifications.length,
+			notifications,
+		});
 	},
 );
 
@@ -289,7 +301,12 @@ const meta = {
 	parameters: {
 		layout: 'fullscreen',
 		msw: {
-			handlers: [historyHandler, failureDetailHandler, channelAudiencesHandler],
+			handlers: [
+				notificationSendersHandler,
+				historyHandler,
+				failureDetailHandler,
+				channelAudiencesHandler,
+			],
 		},
 	},
 } satisfies Meta<typeof HistoryPage>;
@@ -474,6 +491,66 @@ export const AudienceFilter: Story = {
 	},
 };
 
+export const SenderFilter: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		historyRequest.mockClear();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Sender All' }));
+		const page = within(canvasElement.ownerDocument.body);
+		const senderMenu = await page.findByRole('menu');
+		await expect(senderMenu.scrollWidth).toBeLessThanOrEqual(
+			senderMenu.clientWidth,
+		);
+		await expect(
+			page.getByRole('menuitemcheckbox', {
+				name: 'Very Long Editorial Sender Address',
+			}),
+		).toBeVisible();
+		const alex = await page.findByRole('menuitemcheckbox', { name: 'Alex' });
+		await userEvent.click(alex);
+
+		await expect(alex).toBeChecked();
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(
+				canvas.getByRole('link', {
+					name: /Prime minister announces cabinet reshuffle/,
+				}),
+			).toBeVisible();
+			await expect(
+				canvas.queryByRole('link', {
+					name: /Extreme weather disrupts travel across Europe/,
+				}),
+			).not.toBeInTheDocument();
+		});
+
+		const jamie = page.getByRole('menuitemcheckbox', { name: 'Jamie' });
+		await userEvent.click(jamie);
+
+		await expect(jamie).toBeChecked();
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledTimes(2);
+			const requestUrl = historyRequest.mock.calls[1]?.[0];
+			await expect(requestUrl?.searchParams.getAll('createdByEmail')).toEqual([
+				'alex@example.com',
+				'jamie@example.com',
+			]);
+			await expect(
+				canvas.getByRole('link', {
+					name: /Prime minister announces cabinet reshuffle/,
+				}),
+			).toBeVisible();
+			await expect(
+				canvas.getByRole('link', {
+					name: /Extreme weather disrupts travel across Europe/,
+				}),
+			).toBeVisible();
+		});
+	},
+};
+
 export const StatusFilter: Story = {
 	loaders: [
 		() => {
@@ -537,7 +614,7 @@ export const ClearAllFilters: Story = {
 			window.history.replaceState(
 				{},
 				'',
-				`${window.location.pathname}?search=weather&audience=uk&status=error&offset=20&limit=10`,
+				`${window.location.pathname}?search=weather&createdByEmail=alex%40example.com&audience=uk&status=error&offset=20&limit=10`,
 			);
 			return {};
 		},
@@ -548,6 +625,9 @@ export const ClearAllFilters: Story = {
 		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
 			'weather',
 		);
+		await expect(
+			canvas.getByRole('button', { name: 'Sender Alex' }),
+		).toBeInTheDocument();
 		await expect(
 			canvas.getByRole('button', {
 				name: 'Audience / Editions United Kingdom',
@@ -562,6 +642,9 @@ export const ClearAllFilters: Story = {
 		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
 			'',
 		);
+		await expect(
+			canvas.getByRole('button', { name: 'Sender All' }),
+		).toBeInTheDocument();
 		await expect(
 			canvas.getByRole('button', { name: 'Audience / Editions All' }),
 		).toBeInTheDocument();
@@ -586,7 +669,13 @@ export const InvalidSearch: Story = {
 		},
 	],
 	parameters: {
-		msw: { handlers: [emptyHistoryHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				notificationSendersHandler,
+				emptyHistoryHandler,
+				channelAudiencesHandler,
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -709,7 +798,13 @@ export const InvalidCategoryFilter: Story = {
 
 export const Loading: Story = {
 	parameters: {
-		msw: { handlers: [loadingHistoryHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				notificationSendersHandler,
+				loadingHistoryHandler,
+				channelAudiencesHandler,
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -724,7 +819,13 @@ export const Loading: Story = {
 
 export const Error: Story = {
 	parameters: {
-		msw: { handlers: [failedHistoryHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				notificationSendersHandler,
+				failedHistoryHandler,
+				channelAudiencesHandler,
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
