@@ -312,17 +312,17 @@ export const PreviewTextToggleHidesField: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const toggle = canvas.getByRole('button', { name: 'Show preview text' });
+		const toggle = canvas.getByRole('switch', { name: 'Show preview text' });
 		const previewTextInput = canvas.getByLabelText('Preview text');
 
 		await expect(previewTextInput).toBeVisible();
 		await userEvent.clear(previewTextInput);
 		await userEvent.type(previewTextInput, 'Saved preview text');
 		await userEvent.click(toggle);
-		await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(toggle).not.toBeChecked();
 		await expect(canvas.queryByLabelText('Preview text')).toBeNull();
 		await userEvent.click(toggle);
-		await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(toggle).toBeChecked();
 		await expect(canvas.getByLabelText('Preview text')).toHaveValue(
 			'Saved preview text',
 		);
@@ -350,7 +350,7 @@ export const PreviewTextExcludedFromSend: Story = {
 			'Saved preview text',
 		);
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Show preview text' }),
+			canvas.getByRole('switch', { name: 'Show preview text' }),
 		);
 		await expect(
 			canvas.queryByLabelText('Preview text'),

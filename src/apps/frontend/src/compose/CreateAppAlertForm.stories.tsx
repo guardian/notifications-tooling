@@ -278,11 +278,11 @@ export const WithThumbnail: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const thumbnailToggle = canvas.getByRole('button', {
+		const thumbnailToggle = canvas.getByRole('switch', {
 			name: 'Show article thumbnail image',
 		});
 		await expect(thumbnailToggle).toBeEnabled();
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(thumbnailToggle).toBeChecked();
 		await expect(
 			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
@@ -395,12 +395,12 @@ export const RequestedLiveblogBlockUsesMainPresentation: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const thumbnailToggle = canvas.getByRole('button', {
+		const thumbnailToggle = canvas.getByRole('switch', {
 			name: 'Show article thumbnail image',
 		});
 
 		await expect(thumbnailToggle).toBeEnabled();
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(thumbnailToggle).toBeChecked();
 		await expect(canvas.getByLabelText('Headline')).toHaveValue(
 			'Latest developments',
 		);
@@ -418,12 +418,12 @@ export const WithThumbnailTurnedOff: Story = {
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const thumbnailToggle = canvas.getByRole('button', {
+		const thumbnailToggle = canvas.getByRole('switch', {
 			name: 'Show article thumbnail image',
 		});
 
 		await expect(thumbnailToggle).toBeEnabled();
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(thumbnailToggle).not.toBeChecked();
 		await expect(
 			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
@@ -432,7 +432,7 @@ export const WithThumbnailTurnedOff: Story = {
 
 		await userEvent.click(thumbnailToggle);
 
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(thumbnailToggle).toBeChecked();
 		await expect(
 			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',
