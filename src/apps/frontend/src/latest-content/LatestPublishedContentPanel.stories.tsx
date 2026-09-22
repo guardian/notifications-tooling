@@ -7,6 +7,10 @@ import { LatestPublishedContentPanel } from './LatestPublishedContentPanel';
 
 const emptyQueryKey = [...latestPublishedContentQueryKey, 'empty'] as const;
 const errorQueryKey = [...latestPublishedContentQueryKey, 'error'] as const;
+const cachedErrorQueryKey = [
+	...latestPublishedContentQueryKey,
+	'cached-error',
+] as const;
 const loadingQueryKey = [...latestPublishedContentQueryKey, 'loading'] as const;
 
 const DefaultPanelStory = () => {
@@ -56,6 +60,24 @@ const ErrorPanelStory = () => (
 		/>
 	</div>
 );
+
+const CachedErrorPanelStory = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: { queries: { retry: false } },
+	});
+	queryClient.setQueryData(cachedErrorQueryKey, mockLatestPublishedContent);
+
+	return (
+		<QueryClientProvider client={queryClient}>
+			<div style={{ width: '380px' }}>
+				<LatestPublishedContentPanel
+					queryKey={cachedErrorQueryKey}
+					queryFn={() => Promise.reject(new globalThis.Error('refresh failed'))}
+				/>
+			</div>
+		</QueryClientProvider>
+	);
+};
 
 const LoadingPanelStory = () => {
 	const queryClient = new QueryClient({
@@ -161,6 +183,21 @@ export const Error: Story = {
 		await expect(
 			canvas.queryByRole('grid', { name: 'Latest published content' }),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const CachedDataWithRefreshError: Story = {
+	render: () => <CachedErrorPanelStory />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByText(
+				'Unable to refresh latest published content. Showing cached results.',
+			),
+		).toBeVisible();
+		await expect(
+			canvas.getByText(mockLatestPublishedContent[0]!.headline),
+		).toBeVisible();
 	},
 };
 
