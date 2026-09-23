@@ -77,6 +77,7 @@ export const buildPersistedNotification = (
 		createdByEmail: 'ada.lovelace@guardian.co.uk',
 		dryRun: false,
 		scheduledFor: null,
+		articleId: null,
 		content: {},
 		channels: {},
 		failedTargets: { topics: [], segments: [] },

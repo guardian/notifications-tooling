@@ -661,6 +661,7 @@ const storedNotification = (): NotificationWithDispatches => ({
 	createdByEmail: 'editor@theguardian.com',
 	dryRun: false,
 	scheduledFor: null,
+	articleId: 'world/2026/jul/08/ukraine-summit',
 	content: { items: { lead: { type: 'app-push', title: 'Ukraine summit' } } },
 	channels: { 'app-push': { compose: { use: 'lead' } } },
 	failedTargets: { topics: [], segments: [] },
@@ -830,6 +831,7 @@ const storedListPage = (): NotificationListPage => ({
 			createdByEmail: 'editor@theguardian.com',
 			dryRun: false,
 			scheduledFor: null,
+			articleId: 'world/2026/jul/08/ukraine-summit',
 			content: { items: { lead: { type: 'app-push' } } },
 			channels: { 'app-push': { compose: { use: 'lead' } } },
 			failedTargets: {
