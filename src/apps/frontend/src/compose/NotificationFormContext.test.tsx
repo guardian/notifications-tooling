@@ -2,6 +2,7 @@ import { expect, it } from 'bun:test';
 import type { ResolveArticleResponse } from '@models';
 import { act, createElement, useContext, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
+import '../../happydom-setup';
 import type { Result } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from './NotificationFormContext';
