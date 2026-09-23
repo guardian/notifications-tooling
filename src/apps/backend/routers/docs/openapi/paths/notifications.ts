@@ -241,7 +241,7 @@ export const notificationArticleHistoryPath = {
 	get: {
 		summary: 'Find previous sends for an article',
 		description:
-			'Returns production sends referencing the supplied CAPI article ID, newest first, across all retained notification history. Test sends are excluded. Query parameters and fragments on stored article links do not affect matching.',
+			'Returns production sends referencing the supplied CAPI article ID or Guardian article URL, newest first, across all retained notification history. Test sends are excluded. URLs are normalised to their CAPI ID, so hosts, query parameters and fragments do not affect matching. Send timestamps are returned in UTC.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{
@@ -249,8 +249,8 @@ export const notificationArticleHistoryPath = {
 				in: 'path',
 				required: true,
 				description:
-					'The URL-encoded CAPI article ID, for example `science%2F2026%2Fsep%2F23%2Fnorthern-lights`.',
-				schema: { type: 'string', maxLength: 500 },
+					'The URL-encoded CAPI article ID or Guardian article URL. For example, `science%2F2026%2Fsep%2F23%2Fnorthern-lights`.',
+				schema: { type: 'string', maxLength: 2048 },
 			},
 			{
 				name: 'limit',
@@ -293,7 +293,11 @@ export const notificationArticleHistoryPath = {
 										properties: {
 											notificationId: { type: 'string', format: 'uuid' },
 											sentBy: { type: 'string', format: 'email' },
-											sentAt: { type: 'string', format: 'date-time' },
+											sentAt: {
+												type: 'string',
+												format: 'date-time',
+												description: 'The send timestamp in UTC.',
+											},
 											channels: {
 												type: 'array',
 												items: {
