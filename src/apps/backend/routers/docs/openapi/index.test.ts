@@ -83,7 +83,7 @@ describe('notification history OpenAPI contract', () => {
 		expect(articleIdParameter).toMatchObject({
 			in: 'path',
 			required: true,
-			schema: { type: 'string', maxLength: 500 },
+			schema: { type: 'string', maxLength: 2048 },
 		});
 		expect(responseSchema.required).toEqual([
 			'articleId',

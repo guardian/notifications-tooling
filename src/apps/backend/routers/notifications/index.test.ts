@@ -1310,62 +1310,70 @@ describe('GET /v1/notifications', () => {
 });
 
 describe('GET /v1/notifications/article/{articleId}', () => {
-	it('returns compact previous-send details for an article ID', async () => {
-		const listArticleHistory = mock(() =>
-			Promise.resolve<ArticleHistoryPage>({
-				total: 2,
-				sends: [
-					{
-						id: notificationId,
-						createdByEmail: 'editor@theguardian.com',
-						createdAt: new Date('2026-09-23T10:15:00.000Z'),
-						channels: {
-							newsletter: { compose: { items: ['lead'] } },
-							'app-push': { compose: { use: 'lead' } },
+	it.each([
+		['a CAPI article ID', 'science/2026/sep/23/northern-lights'],
+		[
+			'a Guardian article URL',
+			'https://www.theguardian.com/science/2026/sep/23/northern-lights?CMP=share_btn_url#comments',
+		],
+	])(
+		'returns compact previous-send details for %s',
+		async (_description, articleReference) => {
+			const listArticleHistory = mock(() =>
+				Promise.resolve<ArticleHistoryPage>({
+					total: 2,
+					sends: [
+						{
+							id: notificationId,
+							createdByEmail: 'editor@theguardian.com',
+							createdAt: new Date('2026-09-23T10:15:00.000Z'),
+							channels: {
+								newsletter: { compose: { items: ['lead'] } },
+								'app-push': { compose: { use: 'lead' } },
+							},
 						},
-					},
-				],
-			}),
-		);
-		const articleHistoryServer =
-			await startArticleHistoryServer(listArticleHistory);
-		const articleId = 'science/2026/sep/23/northern-lights';
-
-		try {
-			const response = await fetch(
-				`${articleHistoryServer.baseUrl}/v1/notifications/article/${encodeURIComponent(articleId)}?limit=10&offset=1`,
+					],
+				}),
 			);
+			const articleHistoryServer =
+				await startArticleHistoryServer(listArticleHistory);
 
-			expect(response.status).toBe(200);
-			expect(listArticleHistory).toHaveBeenCalledWith({
-				articleId: 'science/2026/sep/23/northern-lights',
-				limit: 10,
-				offset: 1,
-			});
-			expect(await response.json()).toEqual({
-				articleId: 'science/2026/sep/23/northern-lights',
-				total: 2,
-				limit: 10,
-				offset: 1,
-				sends: [
-					{
-						notificationId,
-						sentBy: 'editor@theguardian.com',
-						sentAt: '2026-09-23T10:15:00.000Z',
-						channels: ['newsletter', 'app-push'],
-					},
-				],
-			});
-		} finally {
-			await articleHistoryServer.close();
-		}
-	});
+			try {
+				const response = await fetch(
+					`${articleHistoryServer.baseUrl}/v1/notifications/article/${encodeURIComponent(articleReference)}?limit=10&offset=1`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listArticleHistory).toHaveBeenCalledWith({
+					articleId: 'science/2026/sep/23/northern-lights',
+					limit: 10,
+					offset: 1,
+				});
+				expect(await response.json()).toEqual({
+					articleId: 'science/2026/sep/23/northern-lights',
+					total: 2,
+					limit: 10,
+					offset: 1,
+					sends: [
+						{
+							notificationId,
+							sentBy: 'editor@theguardian.com',
+							sentAt: '2026-09-23T10:15:00.000Z',
+							channels: ['newsletter', 'app-push'],
+						},
+					],
+				});
+			} finally {
+				await articleHistoryServer.close();
+			}
+		},
+	);
 
 	it.each([
 		['an invalid article ID', 'not-an-article-id'],
 		[
-			'a full URL instead of an article ID',
-			'https://www.theguardian.com/science/2026/sep/23/northern-lights',
+			'a non-Guardian URL',
+			'https://example.com/science/2026/sep/23/northern-lights',
 		],
 	])('returns 400 for %s', async (_description, articleId) => {
 		const listArticleHistory = mock(() =>
