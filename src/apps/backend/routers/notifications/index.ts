@@ -28,8 +28,6 @@ import {
 	toNotificationSummary,
 } from '../../persistence/persist-notification';
 import {
-	type NotificationArticleHistoryParams,
-	notificationArticleHistoryParamsSchema,
 	type NotificationArticleHistoryQuery,
 	notificationArticleHistoryQuerySchema,
 } from './schemas/notification-article-history-query';
@@ -185,7 +183,7 @@ export const handleNotificationSendersValidationError: ErrorRequestHandler = (
 	});
 };
 
-/** Validation errors for `GET /v1/notifications/article/{articleId}`. */
+/** Validation errors for `GET /v1/notifications/article`. */
 export const handleNotificationArticleHistoryValidationError: ErrorRequestHandler =
 	(errors, req, res) => {
 		const details = errors.flatMap((item) =>
@@ -417,18 +415,15 @@ export const createNotificationsRouter = (
 	);
 
 	notificationsRouter.get(
-		'/article/:articleId',
+		'/article',
 		authMiddleware,
 		requirePermissions([UserPermissions.DispatchAccess]),
 		validate({
-			params: notificationArticleHistoryParamsSchema,
 			query: notificationArticleHistoryQuerySchema,
 			handler: handleNotificationArticleHistoryValidationError,
 		}) as unknown as RequestHandler,
 		async (req, res) => {
-			const { articleId } =
-				req.params as unknown as NotificationArticleHistoryParams;
-			const { limit, offset } =
+			const { articleId, limit, offset } =
 				req.query as unknown as NotificationArticleHistoryQuery;
 			const { sends, total } = await listArticleHistory({
 				articleId,
