@@ -87,7 +87,7 @@ export const UpdatesFormFields: Story = {
 		const alertType = canvas.getByRole('button', {
 			name: 'Choose an alert type Alert type',
 		});
-		const unitedKingdom = canvas.getByRole('checkbox', {
+		const unitedKingdom = canvas.getByRole('button', {
 			name: 'Select United Kingdom',
 		});
 		const headline = canvas.getByLabelText('Headline');
@@ -102,7 +102,7 @@ export const UpdatesFormFields: Story = {
 		await expect(
 			canvas.getByRole('button', { name: 'Sports news Alert type' }),
 		).toBeVisible();
-		await expect(unitedKingdom).toBeChecked();
+		await expect(unitedKingdom).toHaveAttribute('aria-pressed', 'true');
 		await expect(headline).toHaveValue('A developing story');
 		await expect(
 			canvas.getByLabelText('Headline character count'),

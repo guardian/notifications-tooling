@@ -14,6 +14,7 @@ import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { ButtonTheme } from '@guardian/stand/Button';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
+import type { TileTheme } from '@guardian/stand/Tile';
 import type { ToggleSwitchTheme } from '@guardian/stand/ToggleSwitch';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 import { from, until } from '@guardian/stand/utils';
@@ -245,28 +246,33 @@ export const articlePreviewCardTheme = {
 		}),
 };
 
-export const audienceSegmentStyles = {
-	audienceSegmentCheckBoxTile: (isSelected: boolean) =>
-		css({
-			backgroundColor: isSelected
-				? baseColors.magenta[900]
-				: semanticColors.fill.weak,
-			color: semanticColors.text.strong,
-			'&:hover': {
-				backgroundColor: isSelected
-					? baseColors.magenta[900]
-					: semanticColors.fill.weakPressed,
+export const audienceSegmentTileTheme: TileTheme = {
+	shared: {
+		borderColor: semanticColors.border.weak,
+		color: semanticColors.text.strong,
+		descriptionColor: semanticColors.text.strong,
+		selectableTile: {
+			shared: {
+				backgroundColor: semanticColors.fill.weak,
+				selected: {
+					backgroundColor: baseColors.magenta[900],
+					hover: {
+						backgroundColor: baseColors.magenta[900],
+					},
+					pressed: {
+						backgroundColor: baseColors.magenta[900],
+					},
+					focusVisible: {
+						backgroundColor: baseColors.magenta[900],
+					},
+				},
 			},
-			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-			padding: `${baseSpacing['6Px']} ${baseSpacing['6Px']}`,
-			borderRadius: semanticRadius.cornerSm,
-			display: 'flex',
-			flexDirection: 'column',
-			alignItems: 'flex-start',
-			gap: `${baseSpacing['8Px']}`,
-			height: '56px',
-			width: '100%',
-		}),
+		},
+	},
+	xs: {
+		width: '100%',
+		minHeight: '56px',
+	},
 };
 
 export const previewPillStyles = {

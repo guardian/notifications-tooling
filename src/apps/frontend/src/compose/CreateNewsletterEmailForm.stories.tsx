@@ -104,13 +104,13 @@ export const Default: Story = {
 export const UpdatesFormFields: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const unitedKingdom = canvas.getByRole('checkbox', {
+		const unitedKingdom = canvas.getByRole('button', {
 			name: 'Select United Kingdom',
 		});
 
 		await userEvent.click(unitedKingdom);
 
-		await expect(unitedKingdom).toBeChecked();
+		await expect(unitedKingdom).toHaveAttribute('aria-pressed', 'true');
 	},
 };
 
