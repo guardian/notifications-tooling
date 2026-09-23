@@ -22,9 +22,12 @@ export const fetchPreviousNotifications = async (articleId: string) => {
 	}
 };
 
-export const usePreviousNotifications = (articleId?: string) =>
-	useQuery({
+export const usePreviousNotifications = (articleId?: string) => {
+	const query = useQuery({
 		queryKey: ['notifications', 'article', articleId],
 		queryFn: () => fetchPreviousNotifications(articleId!),
 		enabled: articleId !== undefined,
 	});
+
+	return { ...query, articleId };
+};

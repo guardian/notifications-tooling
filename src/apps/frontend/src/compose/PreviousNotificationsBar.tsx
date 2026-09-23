@@ -1,11 +1,13 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Avatar } from '@guardian/stand/Avatar';
+import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 
 interface Props {
 	articleId?: string;
+	showImportedArticle: boolean;
 }
 
 const emailToIntials = (sentBy: string): string => {
@@ -29,13 +31,30 @@ const style = {
 	}),
 };
 
-export const PreviousNotificationsBar = ({ articleId }: Props) => {
-	const { data: previousSends, error } = usePreviousNotifications(articleId);
-	if (previousSends || error) {
-		console.log({ previousSends, error });
+export const PreviousNotificationsBar = ({
+	articleId,
+	showImportedArticle,
+}: Props) => {
+	const {
+		data: previousSends,
+		error,
+		articleId: requestedDataArticleId,
+	} = usePreviousNotifications(articleId);
+
+	if (error) {
+		return (
+			<InlineMessage level="error">
+				Failed to check for previous sends: {error.message}
+			</InlineMessage>
+		);
 	}
 
-	if (!previousSends) {
+	if (
+		!showImportedArticle ||
+		!articleId ||
+		!previousSends ||
+		requestedDataArticleId !== articleId
+	) {
 		return null;
 	}
 

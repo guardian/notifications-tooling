@@ -224,7 +224,10 @@ export const ArticleImportControl = ({
 				)}
 			</div>
 
-			<PreviousNotificationsBar articleId={article?.id} />
+			<PreviousNotificationsBar
+				articleId={article?.id}
+				showImportedArticle={showImportedArticle}
+			/>
 
 			{showImportedArticle && article && (
 				<ArticlePreviewCard
