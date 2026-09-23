@@ -1,4 +1,5 @@
 import {
+	canonicalHistoryAlertTypes,
 	notificationAudienceFilterId,
 	notificationAudienceFilterIds,
 } from '@models';
@@ -39,6 +40,9 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 	const statuses = HISTORY_STATUS_CATEGORIES.filter((status) =>
 		requestedStatuses.has(status),
 	);
+	const alertTypes = canonicalHistoryAlertTypes(
+		searchParams.getAll('alertType'),
+	);
 
 	return {
 		limit: parseBoundedInteger(
@@ -59,5 +63,28 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 		...(search && search.length <= MAXIMUM_SEARCH_LENGTH ? { search } : {}),
 		...(audiences.length > 0 ? { audiences } : {}),
 		...(statuses.length > 0 ? { statuses } : {}),
+		...(alertTypes.length > 0 ? { alertTypes } : {}),
 	};
+};
+
+export const updateHistoryFilters = (
+	searchParams: URLSearchParams,
+	updates: { search?: string; alertTypes?: string[] },
+) => {
+	const next = new URLSearchParams(searchParams);
+	if (updates.search !== undefined) {
+		if (updates.search.trim()) {
+			next.set('search', updates.search);
+		} else {
+			next.delete('search');
+		}
+	}
+	const alertTypes = updates.alertTypes ?? next.getAll('alertType');
+	next.delete('alertType');
+	for (const alertType of canonicalHistoryAlertTypes(alertTypes)) {
+		next.append('alertType', alertType);
+	}
+	next.set('offset', '0');
+	next.set('limit', String(parseHistorySearchParams(searchParams).limit));
+	return next;
 };

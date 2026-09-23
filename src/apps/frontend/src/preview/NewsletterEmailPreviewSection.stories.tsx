@@ -132,7 +132,7 @@ export const PreviewTextToggleUpdatesHtmlAndTestEmail: Story = {
 	play: async ({ canvasElement }) => {
 		requestPreviewTextTestEmail.mockClear();
 		const canvas = within(canvasElement);
-		const toggle = canvas.getByRole('button', { name: 'Show preview text' });
+		const toggle = canvas.getByRole('switch', { name: 'Show preview text' });
 		const previewArticleElement = canvasElement.querySelector('figure article');
 
 		const previewBodyText = () =>

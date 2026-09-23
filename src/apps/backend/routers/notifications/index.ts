@@ -332,6 +332,7 @@ export const createNotificationsRouter = (
 				createdByEmail,
 				audiences,
 				statuses,
+				alertTypes,
 			} = req.query as unknown as NotificationListQuery;
 			const { notifications, total } = await listNotifications({
 				since,
@@ -341,6 +342,7 @@ export const createNotificationsRouter = (
 				createdByEmail,
 				audiences,
 				statuses,
+				alertTypes,
 			});
 
 			res.status(200).json({

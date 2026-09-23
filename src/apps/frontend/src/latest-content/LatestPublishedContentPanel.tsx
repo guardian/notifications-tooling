@@ -9,8 +9,8 @@ import {
 import { Typography } from '@guardian/stand/Typography';
 import type { QueryKey } from '@tanstack/react-query';
 import { useState } from 'react';
+import { DispatchCreateNotificationModal } from '../compose/DispatchCreateNotificationModal';
 import { useLatestPublishedContent } from '../hooks/useLatestPublishedContent';
-import { DispatchCreateNotificationModal } from '../layout/DispatchCreateNotificationModal';
 import { latestPublishedContentTheme } from '../themes';
 import { EmptyState } from '../ui/EmptyState';
 import { LoadingSpinner } from '../ui/LoadingSpinner';

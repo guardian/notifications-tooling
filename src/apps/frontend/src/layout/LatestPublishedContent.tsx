@@ -1,6 +1,6 @@
 import { Button } from '@guardian/stand/Button';
 import { useState } from 'react';
-import { DispatchCreateNotificationModal } from './DispatchCreateNotificationModal';
+import { DispatchCreateNotificationModal } from '../compose/DispatchCreateNotificationModal';
 
 export const LatestPublishedContent = () => {
 	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =

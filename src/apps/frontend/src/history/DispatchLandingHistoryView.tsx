@@ -1,9 +1,6 @@
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
-import { HistoryEmptyState } from '../history/HistoryEmptyState';
-import { HistoryTable, HistoryTableSkeleton } from '../history/HistoryTable';
-import type { HistoryNotification } from '../history/HistoryView';
 import {
 	activePillTheme,
 	dispatchLandingTheme,
@@ -12,6 +9,9 @@ import {
 import { phoneIphoneIcon } from '../ui/flag-icons';
 import { LastUpdated } from '../ui/LastUpdated';
 import { RefreshButton } from '../ui/RefreshButton';
+import { HistoryEmptyState } from './HistoryEmptyState';
+import { HistoryTable, HistoryTableSkeleton } from './HistoryTable';
+import type { HistoryNotification } from './HistoryView';
 
 interface DispatchLandingHistoryViewProps {
 	notifications?: HistoryNotification[];

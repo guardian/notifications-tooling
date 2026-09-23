@@ -101,7 +101,7 @@ export const HistoryStatusFilter = () => {
 									size="md"
 									isSelected={selectedStatuses.includes(id)}
 									isReadOnly
-									cssOverrides={historyViewStyles.audienceCheckbox}
+									cssOverrides={historyViewStyles.filterCheckbox}
 								>
 									{label}
 								</Checkbox>
