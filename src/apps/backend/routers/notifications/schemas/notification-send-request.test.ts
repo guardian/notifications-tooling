@@ -10,6 +10,7 @@ import {
 	notificationChannelContentLimits,
 } from '@config';
 import {
+	determineComposedArticleId,
 	notificationSendRequestSchema,
 	notificationTestSendRequestSchema,
 } from './notification-send-request';
@@ -916,6 +917,50 @@ describe('notificationSendRequestSchema', () => {
 			expect(issues.some((issue) => issue.message.includes('has type'))).toBe(
 				true,
 			);
+		});
+
+		it('rejects channels that compose different articles', () => {
+			const issues = issuesOf(
+				combinedRequest({
+					content: {
+						items: {
+							pushLead: pushItem(),
+							newsLead: newsletterItem({
+								link: 'https://www.theguardian.com/world/2026/jul/09/different-story',
+							}),
+						},
+					},
+				}),
+			);
+
+			expect(issues.map((issue) => issue.path.join('/'))).toContain(
+				'content/items',
+			);
+			expect(
+				issues.some((issue) => issue.message.includes('same article')),
+			).toBe(true);
+		});
+
+		it('derives the article from composed items, not object order', () => {
+			const result = notificationSendRequestSchema.safeParse(
+				pushRequest({
+					content: {
+						items: {
+							unused: newsletterItem({
+								link: 'https://www.theguardian.com/world/2026/jul/09/unused-story',
+							}),
+							lead: pushItem(),
+						},
+					},
+				}),
+			);
+
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(determineComposedArticleId(result.data)).toBe(
+					'world/2026/jul/08/ukraine-summit',
+				);
+			}
 		});
 	});
 

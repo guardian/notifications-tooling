@@ -7,13 +7,13 @@ import {
 	type Notification,
 	type NotificationDispatch,
 } from '@database';
-import { determineArticleId } from '@utils';
 import type { DispatchOutcomes } from '../notification-channels/dispatch-notification';
 import type { TestDispatchOutcomes } from '../notification-channels/dispatch-notification-test';
 import type { DispatchOutcome } from '../notification-channels/dispatch-outcome';
-import type {
-	NotificationSendRequest,
-	NotificationTestSendRequest,
+import {
+	determineComposedArticleId,
+	type NotificationSendRequest,
+	type NotificationTestSendRequest,
 } from '../routers/notifications/schemas/notification-send-request';
 
 type NotificationStatus = Notification['status'];
@@ -244,7 +244,6 @@ export type TestNotificationStore = NotificationStore<
 
 export const sendNotificationStore: SendNotificationStore = {
 	create: (request, createdByEmail) => {
-		const contentItem = Object.values(request.content.items)[0]!;
 		return insertNotification({
 			kind: 'send',
 			idempotencyKey: request.idempotencyKey,
@@ -254,7 +253,7 @@ export const sendNotificationStore: SendNotificationStore = {
 			scheduledFor: request.options.scheduledFor
 				? new Date(request.options.scheduledFor)
 				: null,
-			articleId: determineArticleId(contentItem.link) ?? null,
+			articleId: determineComposedArticleId(request) ?? null,
 			content: request.content,
 			channels: request.channels,
 		});
@@ -269,7 +268,6 @@ export const sendNotificationStore: SendNotificationStore = {
 
 export const testNotificationStore: TestNotificationStore = {
 	create: (request, createdByEmail) => {
-		const contentItem = Object.values(request.content.items)[0]!;
 		return insertNotification({
 			kind: 'test',
 			idempotencyKey: request.idempotencyKey,
@@ -277,7 +275,7 @@ export const testNotificationStore: TestNotificationStore = {
 			createdByEmail,
 			dryRun: request.options.dryRun,
 			scheduledFor: null,
-			articleId: determineArticleId(contentItem.link) ?? null,
+			articleId: determineComposedArticleId(request) ?? null,
 			content: request.content,
 			channels: request.channels,
 		});
