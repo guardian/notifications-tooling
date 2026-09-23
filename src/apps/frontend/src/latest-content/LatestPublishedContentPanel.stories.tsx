@@ -126,7 +126,9 @@ export const Default: Story = {
 			canvas.getByRole('heading', { name: 'Latest published content' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByText('Choose a recent article from below to create an alert'),
+			canvas.getByText(
+				'Choose a recent article from below to begin creating an alert',
+			),
 		).toBeVisible();
 		const showAllButton = await canvas.findByRole('button', {
 			name: 'Show all',
