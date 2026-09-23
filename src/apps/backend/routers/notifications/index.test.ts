@@ -1341,6 +1341,7 @@ describe('GET /v1/notifications/article', () => {
 
 	it.each([
 		['an invalid article ID', 'not-an-article-id'],
+		['a Guardian URL without an article ID', 'https://www.theguardian.com/uk'],
 		[
 			'a non-Guardian URL',
 			'https://example.com/science/2026/sep/23/northern-lights',

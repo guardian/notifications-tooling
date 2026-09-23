@@ -69,16 +69,20 @@ describe('notification history OpenAPI contract', () => {
 			required: true,
 			schema: { type: 'string', maxLength: 2048 },
 		});
-		expect(responseSchema.required).toEqual([
-			'articleId',
-			'total',
-			'limit',
-			'offset',
-			'sends',
-		]);
+		expect(responseSchema).toEqual({
+			$ref: '#/components/schemas/NotificationArticleHistory',
+		});
 		expect(
-			responseSchema.properties.sends.items.properties.channels.items.enum,
-		).toEqual(['newsletter', 'app-push']);
+			openApiDocument.components.schemas.NotificationArticleHistory.required,
+		).toEqual(['articleId', 'total', 'limit', 'offset', 'sends']);
+		expect(
+			openApiDocument.components.schemas.NotificationArticleHistory.properties
+				.sends.items.$ref,
+		).toBe('#/components/schemas/NotificationArticleHistorySend');
+		expect(
+			openApiDocument.components.schemas.NotificationArticleHistorySend
+				.properties.channels.items.$ref,
+		).toBe('#/components/schemas/NotificationChannel');
 	});
 
 	it('documents repeated categories using the validation enum', () => {
