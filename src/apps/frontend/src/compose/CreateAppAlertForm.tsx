@@ -1,4 +1,4 @@
-import { type FormEvent, useContext } from 'react';
+import { type FormEvent, useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
@@ -28,7 +28,8 @@ export const CreateAppAlertForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
-
+	const [replacementImageUrl, setReplacementImageUrl] = useState('');
+	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	const { data: constraints } = useChannelConstraints();
 	const topicTypes = useAppAlertTopicTypes();
 	const prepareSend = (values: AppAlertFormValues) => {
@@ -81,10 +82,14 @@ export const CreateAppAlertForm = ({
 			initialArticleUrl={initialArticleUrl}
 			sendButtonLabel="Send app alert"
 			onSubmit={handleSubmitForm}
-			onResetNotification={() =>
-				updateComposerState({ type: 'reset-app-alert' })
-			}
+			onResetNotification={() => {
+				updateComposerState({ type: 'reset-app-alert' });
+				setReplacementImageUrl('');
+				setOpenReplaceSection(false);
+			}}
 			onArticleImported={(article) => {
+				setReplacementImageUrl('');
+				setOpenReplaceSection(false);
 				setValue('headline', article.fields?.headline ?? article.webTitle);
 				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
@@ -97,7 +102,12 @@ export const CreateAppAlertForm = ({
 			</NotificationFormSection>
 			<NotificationFormSection id="content-section">
 				<HeadlineFormField constraints={constraints} />
-				<ArticleThumbnailImageFormField />
+				<ArticleThumbnailImageFormField
+					replacementImageUrl={replacementImageUrl}
+					setReplacementImageUrl={setReplacementImageUrl}
+					openReplaceSection={openReplaceSection}
+					setOpenReplaceSection={setOpenReplaceSection}
+				/>
 			</NotificationFormSection>
 		</NotificationFormWrapper>
 	);

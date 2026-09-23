@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { ToggleSwitch } from '@guardian/stand/ToggleSwitch';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { replaceThumbnailButtonTheme } from '../themes';
 import { toggleSwitchTheme } from '../themes';
@@ -13,7 +13,19 @@ import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertReplaceImageSection } from './AppAlertReplaceImageSection';
 import { NotificationFormContext } from './NotificationFormContext';
 
-export const ArticleThumbnailImageFormField = () => {
+interface ArticleThumbnailImageFormFieldProps {
+	replacementImageUrl: string;
+	setReplacementImageUrl: (replacementImageUrl: string) => void;
+	openReplaceSection: boolean;
+	setOpenReplaceSection: (isOpen: boolean) => void;
+}
+
+export const ArticleThumbnailImageFormField = ({
+	replacementImageUrl,
+	setReplacementImageUrl,
+	openReplaceSection,
+	setOpenReplaceSection,
+}: ArticleThumbnailImageFormFieldProps) => {
 	const {
 		clearErrors,
 		control,
@@ -32,8 +44,7 @@ export const ArticleThumbnailImageFormField = () => {
 	const hasThumbnail = Boolean(
 		articleThumbnailUrl || originalArticleThumbnailUrl,
 	);
-	const [replacementImageUrl, setReplacementImageUrl] = useState('');
-	const [openReplaceSection, setOpenReplaceSection] = useState(false);
+
 	return (
 		<div
 			css={{
