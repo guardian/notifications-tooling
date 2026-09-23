@@ -20,6 +20,7 @@ interface DispatchLandingHistoryViewProps {
 	lastUpdatedAt?: string;
 	onRefresh: () => void;
 	error?: ReactNode;
+	refreshError?: ReactNode;
 }
 
 export const DispatchLandingHistoryView = ({
@@ -29,6 +30,7 @@ export const DispatchLandingHistoryView = ({
 	lastUpdatedAt,
 	onRefresh,
 	error,
+	refreshError,
 }: DispatchLandingHistoryViewProps) => {
 	const newsletterEmailCount = notifications.filter(
 		(n) => n.channel === 'newsletter',
@@ -86,6 +88,7 @@ export const DispatchLandingHistoryView = ({
 			</div>
 			{isLoading && <HistoryTableSkeleton />}
 			{error}
+			{refreshError}
 			{!isLoading && !error && notifications.length > 0 && (
 				<HistoryTable notifications={notifications} showUserName />
 			)}

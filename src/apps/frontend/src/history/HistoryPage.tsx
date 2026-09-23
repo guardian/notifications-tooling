@@ -48,9 +48,17 @@ export const HistoryPage = () => {
 			totalItems={notificationHistory.data?.total ?? 0}
 			isLoading={notificationHistory.isPending}
 			error={
-				notificationHistory.isError ? (
+				notificationHistory.isError &&
+				notificationHistory.data === undefined ? (
 					<InlineMessage level="error">
 						Unable to load notification history. Try again.
+					</InlineMessage>
+				) : undefined
+			}
+			refreshError={
+				notificationHistory.isRefetchError ? (
+					<InlineMessage level="error">
+						Unable to refresh notification history. Showing cached results.
 					</InlineMessage>
 				) : undefined
 			}
