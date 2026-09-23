@@ -11,8 +11,13 @@ export const notificationArticleHistoryQuerySchema = z
 		offset: z.coerce.number().int().min(0).optional(),
 	})
 	.refine(
-		({ articleId }) =>
-			isGuardianUrl(articleId) || determineArticleId(articleId) === articleId,
+		({ articleId }) => {
+			const resolvedArticleId = determineArticleId(articleId);
+			return (
+				resolvedArticleId !== undefined &&
+				(isGuardianUrl(articleId) || resolvedArticleId === articleId)
+			);
+		},
 		{
 			message:
 				'The articleId must be a valid CAPI article ID or Guardian article URL.',
