@@ -229,7 +229,6 @@ export class DispatchStack extends GuStack {
 			resourceRecord: domain.domainNameAliasDomainName,
 		});
 
-
 		guApiLambda.addToRolePolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,
