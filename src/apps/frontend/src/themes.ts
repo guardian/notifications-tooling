@@ -351,6 +351,13 @@ export const replaceThumbnailButtonTheme: ButtonTheme = {
 };
 
 export const dispatchLandingTheme = {
+	global: css({
+		[from.lg]: {
+			'html, body': {
+				overflow: 'hidden',
+			},
+		},
+	}),
 	layout: css({
 		gridTemplateAreas: "'alertbanner' 'topbar' 'main' 'latest'",
 		gridTemplateColumns: 'minmax(0, 1fr)',
