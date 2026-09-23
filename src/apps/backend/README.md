@@ -2,15 +2,15 @@
 
 See the [root README](../../../README.md#run-locally) for how to run this app
 locally, including the login tool and permissions setup required for authorised
-endpoints.
+endpoints and the required Janus credentials.
 
-## Notification channel configuration
+## Environment variables
 
-Locally, notification channel configuration is read from the CODE SSM namespace
-using the `composer` AWS profile. Fetch fresh Composer credentials through Janus
-before starting the backend. Ignored `.env` or `.env.local` files in this
-package may define any of the variables in `.env.example` when a local override
-is needed.
+Locally, aplication environment variables are read from the CODE SSM namespace
+using the `composer` AWS profile, but the gitignored `.env` or `.env.local` files
+in this package may define a local override for any of the variables in `.env.example` when needed.
+
+### Newsletter channel configuration
 
 - `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send`, `users.track`, and
   `messages.send` permissions.
@@ -24,8 +24,27 @@ is needed.
 
 UK, US, and AU newsletter labels, email-rendering newsletter IDs, and Braze
 campaign IDs are configured in `src/packages/config/audiences.ts`. The public
-segment key, display label, and downstream IDs are independent values. Campaign
-IDs point to Braze dev environment test campaigns.
+segment key, display label, and downstream IDs are independent values.
+
+The audience configuration and environment variables for the CODE and PROD
+stages use two separate Braze "Workspaces":
+
+| Stage | Braze workspace |
+| ----- | --------------- |
+| CODE  | "B2C - Dev"     |
+| PROD  | "B2C - Live"    |
+
+Campaign IDs in `audiences.ts` point to campaigns defined with the associated
+workspace and the `BRAZE_API_KEY` and `BRAZE_APP_ID` are tied to the workspace
+for the stages.
+In effect, it should not be possible to send out messages to a
+campaign in workspace the Stage is not intended for, just by referencing the
+campaign id.
+
+### App alert channel configuration
+
+The definitions defining the topics available to be sent as App Alerts for CODE
+and PROD are defined in `src/packages/config/audiences.ts`
 
 The mobile-n10n client receives the translated topic and content request and
 posts it to mobile-n10n's `POST /push/topic`.
