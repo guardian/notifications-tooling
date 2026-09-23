@@ -248,6 +248,95 @@ export const notificationSendersPath = {
 	},
 } as const;
 
+/** The `/v1/notifications/article/{articleId}` path item. */
+export const notificationArticleHistoryPath = {
+	get: {
+		summary: 'Find previous sends for an article',
+		description:
+			'Returns production sends referencing the supplied CAPI article ID, newest first, across all retained notification history. Test sends are excluded. Query parameters and fragments on stored article links do not affect matching.',
+		security: [{ pandaCookie: [] }],
+		parameters: [
+			{
+				name: 'articleId',
+				in: 'path',
+				required: true,
+				description:
+					'The URL-encoded CAPI article ID, for example `science%2F2026%2Fsep%2F23%2Fnorthern-lights`.',
+				schema: { type: 'string', maxLength: 500 },
+			},
+			{
+				name: 'limit',
+				in: 'query',
+				required: false,
+				description: 'Maximum sends to return. Defaults to 50.',
+				schema: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
+			},
+			{
+				name: 'offset',
+				in: 'query',
+				required: false,
+				description: 'Number of matching sends to skip. Defaults to 0.',
+				schema: { type: 'integer', minimum: 0, default: 0 },
+			},
+		],
+		responses: {
+			'200': {
+				description: 'Previous production sends for the article.',
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							required: ['articleId', 'total', 'limit', 'offset', 'sends'],
+							properties: {
+								articleId: { type: 'string' },
+								total: { type: 'integer', minimum: 0 },
+								limit: { type: 'integer', minimum: 1 },
+								offset: { type: 'integer', minimum: 0 },
+								sends: {
+									type: 'array',
+									items: {
+										type: 'object',
+										required: [
+											'notificationId',
+											'sentBy',
+											'sentAt',
+											'channels',
+										],
+										properties: {
+											notificationId: { type: 'string', format: 'uuid' },
+											sentBy: { type: 'string', format: 'email' },
+											sentAt: { type: 'string', format: 'date-time' },
+											channels: {
+												type: 'array',
+												items: {
+													type: 'string',
+													enum: ['newsletter', 'app-push'],
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			'400': {
+				description: 'The article lookup parameters are invalid.',
+				content: {
+					'application/json': {
+						schema: {
+							$ref: '#/components/schemas/NotificationValidationError',
+						},
+					},
+				},
+			},
+			'401': { $ref: '#/components/responses/Unauthenticated' },
+			'403': { $ref: '#/components/responses/InsufficientPermissions' },
+		},
+	},
+} as const;
+
 /**
  * The `/v1/notifications/{id}` path item.
  *
