@@ -9,6 +9,7 @@ import { historyViewStyles } from '../themes';
 import {
 	HISTORY_AUDIENCE_IDS,
 	parseHistorySearchParams,
+	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
 const audienceLabels: Record<string, string> = {
@@ -26,7 +27,7 @@ const audienceOptions = HISTORY_AUDIENCE_IDS.map((id) => ({
 
 export const HistoryAudienceFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { audiences: selectedAudiences = [], limit } =
+	const { audiences: selectedAudiences = [] } =
 		parseHistorySearchParams(searchParams);
 	const selectedAudienceLabel = audienceOptions
 		.filter(({ id }) => selectedAudiences.includes(id))
@@ -35,17 +36,12 @@ export const HistoryAudienceFilter = () => {
 
 	const handleAudienceChange = (audiences: string[]) => {
 		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				nextSearchParams.delete('audience');
-				for (const audience of audiences) {
-					nextSearchParams.append('audience', audience);
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
+			(currentSearchParams) =>
+				updateHistoryMultiSelectFilter(
+					currentSearchParams,
+					'audience',
+					audiences,
+				),
 			{ replace: true },
 		);
 	};

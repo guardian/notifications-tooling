@@ -15,6 +15,8 @@ export type HistoryChannel = (typeof HISTORY_CHANNELS)[number];
 export const HISTORY_STATUS_CATEGORIES = ['sent', 'error'] as const;
 export type HistoryStatusCategory = (typeof HISTORY_STATUS_CATEGORIES)[number];
 
+export type HistoryMultiSelectFilter = 'audience' | 'channel' | 'status';
+
 const parseBoundedInteger = (
 	value: string | null,
 	fallback: number,
@@ -85,6 +87,21 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 		...(statuses.length > 0 ? { statuses } : {}),
 		...(alertTypes.length > 0 ? { alertTypes } : {}),
 	};
+};
+
+export const updateHistoryMultiSelectFilter = (
+	searchParams: URLSearchParams,
+	filter: HistoryMultiSelectFilter,
+	values: readonly string[],
+) => {
+	const next = new URLSearchParams(searchParams);
+	next.delete(filter);
+	for (const value of values) {
+		next.append(filter, value);
+	}
+	next.set('offset', '0');
+	next.set('limit', String(parseHistorySearchParams(searchParams).limit));
+	return next;
 };
 
 export const updateHistoryFilters = (

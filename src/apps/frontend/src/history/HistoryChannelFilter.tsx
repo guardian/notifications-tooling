@@ -9,6 +9,7 @@ import {
 	HISTORY_CHANNELS,
 	type HistoryChannel,
 	parseHistorySearchParams,
+	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
 const channelOptions = [
@@ -18,7 +19,7 @@ const channelOptions = [
 
 export const HistoryChannelFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { channels: selectedChannels = [], limit } =
+	const { channels: selectedChannels = [] } =
 		parseHistorySearchParams(searchParams);
 	const selectedChannelLabel = channelOptions
 		.filter(({ id }) => selectedChannels.includes(id))
@@ -27,17 +28,12 @@ export const HistoryChannelFilter = () => {
 
 	const handleChannelChange = (channels: HistoryChannel[]) => {
 		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				nextSearchParams.delete('channel');
-				for (const channel of channels) {
-					nextSearchParams.append('channel', channel);
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
+			(currentSearchParams) =>
+				updateHistoryMultiSelectFilter(
+					currentSearchParams,
+					'channel',
+					channels,
+				),
 			{ replace: true },
 		);
 	};

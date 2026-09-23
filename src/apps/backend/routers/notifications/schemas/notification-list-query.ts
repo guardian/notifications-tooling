@@ -1,3 +1,4 @@
+import { NotificationChannel } from '@config';
 import {
 	canonicalHistoryAlertTypes,
 	historyAlertTypeSchema,
@@ -8,7 +9,7 @@ import { z } from 'zod';
 const defaultLimit = 10;
 const defaultOffset = 0;
 const defaultSinceDays = 14;
-const notificationChannel = z.enum(['newsletter', 'app-push']);
+const notificationChannel = z.enum(NotificationChannel);
 const notificationStatusCategory = z.enum(['sent', 'error']);
 
 const statusesByCategory = {

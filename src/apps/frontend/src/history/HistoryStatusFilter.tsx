@@ -9,6 +9,7 @@ import {
 	HISTORY_STATUS_CATEGORIES,
 	type HistoryStatusCategory,
 	parseHistorySearchParams,
+	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
 const STATUS_OPTIONS = [
@@ -18,7 +19,7 @@ const STATUS_OPTIONS = [
 
 export const HistoryStatusFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { limit, statuses: selectedStatuses = [] } =
+	const { statuses: selectedStatuses = [] } =
 		parseHistorySearchParams(searchParams);
 	const selectedStatusLabel = STATUS_OPTIONS.filter(({ id }) =>
 		selectedStatuses.includes(id),
@@ -28,17 +29,8 @@ export const HistoryStatusFilter = () => {
 
 	const handleStatusChange = (statuses: HistoryStatusCategory[]) => {
 		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				nextSearchParams.delete('status');
-				for (const status of statuses) {
-					nextSearchParams.append('status', status);
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
+			(currentSearchParams) =>
+				updateHistoryMultiSelectFilter(currentSearchParams, 'status', statuses),
 			{ replace: true },
 		);
 	};

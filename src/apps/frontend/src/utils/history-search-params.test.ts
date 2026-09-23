@@ -3,6 +3,7 @@ import { newsletterSegmentId } from '@models';
 import {
 	parseHistorySearchParams,
 	updateHistoryFilters,
+	updateHistoryMultiSelectFilter,
 } from './history-search-params';
 
 describe('parseHistorySearchParams', () => {
@@ -190,5 +191,37 @@ describe('updateHistoryFilters', () => {
 			since: '1700000000',
 			other: 'keep',
 		});
+	});
+});
+
+describe('updateHistoryMultiSelectFilter', () => {
+	it('replaces one repeated filter and resets pagination', () => {
+		const current = new URLSearchParams(
+			'channel=newsletter&audience=uk&offset=20&limit=10&other=keep',
+		);
+		const next = updateHistoryMultiSelectFilter(current, 'channel', [
+			'app-push',
+		]);
+
+		expect(next.getAll('channel')).toEqual(['app-push']);
+		expect(Object.fromEntries(next)).toMatchObject({
+			audience: 'uk',
+			offset: '0',
+			limit: '10',
+			other: 'keep',
+		});
+		expect(current.getAll('channel')).toEqual(['newsletter']);
+	});
+
+	it('removes a filter when its selection is empty', () => {
+		const next = updateHistoryMultiSelectFilter(
+			new URLSearchParams('status=sent&status=error'),
+			'status',
+			[],
+		);
+
+		expect(next.has('status')).toBe(false);
+		expect(next.get('offset')).toBe('0');
+		expect(next.get('limit')).toBe('20');
 	});
 });
