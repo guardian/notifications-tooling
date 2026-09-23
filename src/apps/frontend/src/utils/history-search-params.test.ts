@@ -85,6 +85,21 @@ describe('parseHistorySearchParams', () => {
 		});
 	});
 
+	it('reads, validates, and deduplicates channel parameters', () => {
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams(
+					'channel=app-push&channel=newsletter&channel=app-push&channel=invalid',
+				),
+			),
+		).toEqual({
+			limit: 20,
+			offset: 0,
+			since: undefined,
+			channels: ['newsletter', 'app-push'],
+		});
+	});
+
 	it('sanitizes invalid values before they reach the endpoint', () => {
 		expect(
 			parseHistorySearchParams(

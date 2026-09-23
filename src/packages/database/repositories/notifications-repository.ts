@@ -24,6 +24,8 @@ export type NotificationWithDispatches = Notification & {
 	dispatches: NotificationDispatch[];
 };
 
+export type NotificationChannel = 'newsletter' | 'app-push';
+
 /** Pagination plus the caller-supplied cut-off for {@link NotificationsRepository.listRecent}. */
 export type ListRecentNotificationsOptions = {
 	/** Only notifications created at or after this instant are returned. */
@@ -34,6 +36,8 @@ export type ListRecentNotificationsOptions = {
 	search?: string;
 	/** Restricts the page to notifications sent by any of these emails, matched case-insensitively. */
 	createdByEmails?: string[];
+	/** Channels included in the result. */
+	channels?: NotificationChannel[];
 	/** API edition ids matched against newsletter variants or app-push editions. */
 	audiences?: string[];
 	/** Rolled-up delivery statuses included in the result. */
@@ -162,6 +166,7 @@ export const createNotificationsRepository = (db: Database) => ({
 		offset,
 		search,
 		createdByEmails,
+		channels,
 		audiences,
 		statuses,
 		alertTypes,
@@ -224,6 +229,14 @@ export const createNotificationsRepository = (db: Database) => ({
 				? inArray(
 						sql`lower(${notifications.createdByEmail})`,
 						normalisedCreatedByEmails,
+					)
+				: undefined,
+			channels?.length
+				? or(
+						...channels.map(
+							(channel) =>
+								sql<boolean>`jsonb_exists(${notifications.channels}, ${channel})`,
+						),
 					)
 				: undefined,
 			statuses?.length ? inArray(notifications.status, statuses) : undefined,

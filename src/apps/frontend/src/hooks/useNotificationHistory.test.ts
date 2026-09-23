@@ -69,6 +69,7 @@ describe('fetchNotificationHistory', () => {
 			since: 1_700_000_000,
 			search: 'climate',
 			senders: ['alex@example.com', 'jamie@example.com'],
+			channels: ['newsletter', 'app-push'],
 			audiences: ['uk', 'europe'],
 			statuses: ['sent', 'error'],
 		});
@@ -84,6 +85,10 @@ describe('fetchNotificationHistory', () => {
 		expect(requestUrl.searchParams.getAll('createdByEmail')).toEqual([
 			'alex@example.com',
 			'jamie@example.com',
+		]);
+		expect(requestUrl.searchParams.getAll('channel')).toEqual([
+			'newsletter',
+			'app-push',
 		]);
 		expect(requestUrl.searchParams.getAll('audience')).toEqual([
 			'uk',
@@ -151,6 +156,22 @@ describe('notification history query keys', () => {
 				limit: 20,
 				offset: 0,
 				senders: ['jamie@example.com'],
+			}),
+		);
+	});
+
+	it('separates channel filters in the cache', () => {
+		expect(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				channels: ['newsletter'],
+			}),
+		).not.toEqual(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				channels: ['app-push'],
 			}),
 		);
 	});

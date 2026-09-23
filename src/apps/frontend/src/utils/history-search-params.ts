@@ -10,6 +10,8 @@ export const DEFAULT_OFFSET = 0;
 export const MAXIMUM_SEARCH_LENGTH = 200;
 export const MAXIMUM_SENDER_LENGTH = 320;
 export const HISTORY_AUDIENCE_IDS = notificationAudienceFilterIds;
+export const HISTORY_CHANNELS = ['newsletter', 'app-push'] as const;
+export type HistoryChannel = (typeof HISTORY_CHANNELS)[number];
 export const HISTORY_STATUS_CATEGORIES = ['sent', 'error'] as const;
 export type HistoryStatusCategory = (typeof HISTORY_STATUS_CATEGORIES)[number];
 
@@ -37,6 +39,10 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 			}),
 		),
 	];
+	const requestedChannels = new Set(searchParams.getAll('channel'));
+	const channels = HISTORY_CHANNELS.filter((channel) =>
+		requestedChannels.has(channel),
+	);
 	const requestedStatuses = new Set(searchParams.getAll('status'));
 	const statuses = HISTORY_STATUS_CATEGORIES.filter((status) =>
 		requestedStatuses.has(status),
@@ -74,6 +80,7 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 		})(),
 		...(search && search.length <= MAXIMUM_SEARCH_LENGTH ? { search } : {}),
 		...(senders.length > 0 ? { senders } : {}),
+		...(channels.length > 0 ? { channels } : {}),
 		...(audiences.length > 0 ? { audiences } : {}),
 		...(statuses.length > 0 ? { statuses } : {}),
 		...(alertTypes.length > 0 ? { alertTypes } : {}),
