@@ -170,7 +170,7 @@ export const Default: Story = {
 		).toHaveAttribute('data-scrollbar', 'visible');
 		await expect(
 			canvas.getByRole('region', { name: 'Latest published content list' }),
-		).toHaveAttribute('data-scrollbar', 'visible');
+		).toHaveAttribute('data-scrollbar', 'hidden');
 		await expect(canvas.getByText('Last updated:')).toBeInTheDocument();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
