@@ -149,17 +149,30 @@ export const fetchLatestArticles = async ({
 
 	return results
 		.flatMap(
-			({ webUrl, webPublicationDate, webTitle, sectionName, fields, tags }) => {
+			({
+				id,
+				webUrl,
+				webPublicationDate,
+				webTitle,
+				sectionName,
+				pillarId,
+				pillarName,
+				fields,
+				tags,
+			}) => {
 				if (!sectionName || !webPublicationDate) {
 					return [];
 				}
 
 				return [
 					{
+						id,
 						webUrl,
 						publishedAt: webPublicationDate,
 						headline: fields?.headline ?? webTitle,
 						section: sectionName,
+						...(pillarId ? { pillarId } : {}),
+						...(pillarName ? { pillarName } : {}),
 						...(fields?.thumbnail ? { thumbnail: fields.thumbnail } : {}),
 						...(fields?.productionOffice
 							? {

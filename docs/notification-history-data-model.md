@@ -217,3 +217,12 @@ tables for data the UI only ever displays as-is.
   promoting just that attribute to a column — without unpicking the whole model.
 - If richer per-call analytics are needed, `notification_dispatches` is the
   natural place to add columns, since each row is already one provider call.
+
+---
+
+## Related runbooks
+
+- **Legal / compliance erasure of a single notification:**
+  [`docs/runbooks/deleting-a-notification.md`](./runbooks/deleting-a-notification.md)
+  walks through locating a notification and permanently deleting it (and its
+  cascading `notification_dispatches` rows) via SQL on RDS.

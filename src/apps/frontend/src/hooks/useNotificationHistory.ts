@@ -1,3 +1,4 @@
+import { canonicalHistoryAlertTypes } from '@models';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
@@ -14,8 +15,10 @@ export interface NotificationHistoryQuery {
 	since?: number;
 	cacheScope?: string;
 	search?: string;
+	senders?: string[];
 	audiences?: string[];
 	statuses?: HistoryStatusCategory[];
+	alertTypes?: string[];
 }
 
 export const notificationHistoryQueryKey = [
@@ -29,39 +32,39 @@ export const getNotificationHistoryQueryKey = ({
 	since,
 	cacheScope,
 	search,
+	senders,
 	audiences,
 	statuses,
+	alertTypes = [],
 }: NotificationHistoryQuery) =>
 	[
 		...notificationHistoryQueryKey,
-		cacheScope !== undefined
-			? {
-					limit,
-					offset,
-					cacheScope,
-					...(search ? { search } : {}),
-					...(audiences?.length ? { audiences } : {}),
-					...(statuses?.length ? { statuses } : {}),
-				}
-			: {
-					limit,
-					offset,
-					since,
-					...(search ? { search } : {}),
-					...(audiences?.length ? { audiences } : {}),
-					...(statuses?.length ? { statuses } : {}),
-				},
+		{
+			limit,
+			offset,
+			...(cacheScope !== undefined ? { cacheScope } : { since }),
+			...(search ? { search } : {}),
+			...(senders?.length ? { senders } : {}),
+			...(audiences?.length ? { audiences } : {}),
+			...(statuses?.length ? { statuses } : {}),
+			...(alertTypes.length
+				? { alertTypes: canonicalHistoryAlertTypes(alertTypes) }
+				: {}),
+		},
 	] as const;
 
 export const ALWAYS_FRESH = Infinity;
+export const NOTIFICATION_HISTORY_POLL_INTERVAL_MS = 30_000;
 
 export const fetchNotificationHistory = ({
 	limit,
 	offset,
 	since,
 	search,
+	senders,
 	audiences,
 	statuses,
+	alertTypes = [],
 }: NotificationHistoryQuery): Promise<NotificationListResponse> => {
 	const searchParams = new URLSearchParams({
 		limit: String(limit),
@@ -74,11 +77,17 @@ export const fetchNotificationHistory = ({
 	if (search !== undefined) {
 		searchParams.set('search', search);
 	}
+	for (const sender of senders ?? []) {
+		searchParams.append('createdByEmail', sender);
+	}
 	for (const audience of audiences ?? []) {
 		searchParams.append('audience', audience);
 	}
 	for (const status of statuses ?? []) {
 		searchParams.append('status', status);
+	}
+	for (const alertType of canonicalHistoryAlertTypes(alertTypes)) {
+		searchParams.append('alertType', alertType);
 	}
 
 	return fetchJsonAndParse(
@@ -89,14 +98,25 @@ export const fetchNotificationHistory = ({
 
 export const useNotificationHistory = (
 	query: NotificationHistoryQuery,
-	{ enabled = true }: { enabled?: boolean } = {},
+	{
+		enabled = true,
+		refetchInterval = NOTIFICATION_HISTORY_POLL_INTERVAL_MS,
+		getSince,
+	}: {
+		enabled?: boolean;
+		refetchInterval?: number;
+		getSince?: () => number | undefined;
+	} = {},
 ) =>
 	useQuery({
 		queryKey: getNotificationHistoryQueryKey(query),
 		enabled,
 		queryFn: async () => {
 			try {
-				return await fetchNotificationHistory(query);
+				return await fetchNotificationHistory({
+					...query,
+					since: getSince?.() ?? query.since,
+				});
 			} catch (error) {
 				if (
 					error instanceof ApiError &&
@@ -110,4 +130,5 @@ export const useNotificationHistory = (
 		},
 		placeholderData: keepPreviousData,
 		staleTime: ALWAYS_FRESH,
+		refetchInterval,
 	});

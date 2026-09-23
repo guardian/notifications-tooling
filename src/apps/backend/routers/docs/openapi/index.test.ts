@@ -44,6 +44,7 @@ describe('latest articles OpenAPI contract', () => {
 			},
 		});
 		expect(openApiDocument.components.schemas.LatestArticle.required).toEqual([
+			'id',
 			'webUrl',
 			'publishedAt',
 			'headline',
@@ -54,6 +55,32 @@ describe('latest articles OpenAPI contract', () => {
 });
 
 describe('notification history OpenAPI contract', () => {
+	it('documents repeated categories using the validation enum', () => {
+		const parameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'alertType');
+		expect(parameter).toMatchObject({
+			in: 'query',
+			required: false,
+			style: 'form',
+			explode: true,
+			schema: { $ref: '#/components/schemas/HistoryAlertTypes' },
+		});
+		expect(openApiDocument.components.schemas.HistoryAlertTypes).toMatchObject({
+			type: 'array',
+			items: {
+				type: 'string',
+				enum: [
+					'none',
+					'breaking-news',
+					'exclusive',
+					'editors-picks',
+					'one-not-to-miss',
+					'sport',
+				],
+			},
+		});
+	});
 	it('documents the bounded search query parameter', () => {
 		const searchParameter = openApiDocument.paths[
 			'/v1/notifications'

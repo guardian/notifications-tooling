@@ -33,6 +33,26 @@ const historyHandler = http.get(
 	},
 );
 
+const latestPublishedContentHandler = http.get(
+	`${getApiBaseUrl()}/v1/content/articles/latest`,
+	() =>
+		HttpResponse.json({
+			articles: mockLatestPublishedContent.map((item) => ({
+				id: item.id,
+				webUrl: item.url,
+				publishedAt: item.publishedAt,
+				headline: item.headline,
+				section: item.section,
+				pillarId: item.pillarId,
+				pillarName: item.pillarName,
+				thumbnail: item.imageUrl,
+				intendedAudience: item.tags.flatMap(({ path }) =>
+					path ? [path.replace('tracking/audience/', '')] : [],
+				),
+			})),
+		}),
+);
+
 const now = Date.now();
 const mixedHistoryResponse: NotificationListResponse = {
 	total: 2,
@@ -132,7 +152,13 @@ const meta = {
 	component: DispatchLandingPage,
 	parameters: {
 		layout: 'fullscreen',
-		msw: { handlers: [historyHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				historyHandler,
+				channelAudiencesHandler,
+				latestPublishedContentHandler,
+			],
+		},
 		docs: {
 			description: {
 				component:
@@ -265,7 +291,13 @@ export const Production: Story = {
 
 export const RecentOnly: Story = {
 	parameters: {
-		msw: { handlers: [sinceAwareHistoryHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				sinceAwareHistoryHandler,
+				channelAudiencesHandler,
+				latestPublishedContentHandler,
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

@@ -7,7 +7,7 @@ type EmptyStateIcon = ComponentProps<typeof Icon>['symbol'];
 
 interface EmptyStateProps {
 	title: string;
-	description: string;
+	description?: string;
 	icon?: EmptyStateIcon;
 }
 
@@ -23,8 +23,10 @@ export const EmptyState = ({
 		<Typography element="h2" variant="headingSm">
 			{title}
 		</Typography>
-		<Typography variant="bodyMd" cssOverrides={emptyStateStyles.emptyCopy}>
-			{description}
-		</Typography>
+		{description && (
+			<Typography variant="bodyMd" cssOverrides={emptyStateStyles.emptyCopy}>
+				{description}
+			</Typography>
+		)}
 	</div>
 );

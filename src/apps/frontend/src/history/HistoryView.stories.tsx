@@ -143,11 +143,13 @@ export const NoSearchResults: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
-			canvas.getByRole('heading', { name: 'No matching alerts' }),
+			canvas.getByRole('heading', {
+				name: 'No notifications match these filters',
+			}),
 		).toBeInTheDocument();
 		await expect(
-			canvas.getByText('Try a different search term.'),
-		).toBeInTheDocument();
+			canvas.queryByRole('button', { name: 'Clear filters' }),
+		).not.toBeInTheDocument();
 		await expect(
 			canvas.queryByRole('heading', { name: 'No alerts yet' }),
 		).not.toBeInTheDocument();
@@ -199,6 +201,31 @@ export const Error: Story = {
 		await expect(
 			canvas.queryByRole('navigation', { name: 'Pagination' }),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const CachedDataWithRefreshError: Story = {
+	args: {
+		notifications,
+		totalItems: notifications.length,
+		currentPage: 1,
+		limit: 10,
+		error: undefined,
+		refreshError:
+			'Unable to refresh notification history. Showing cached results.',
+		onPageChange: () => undefined,
+		onRefresh: () => undefined,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText(
+				'Unable to refresh notification history. Showing cached results.',
+			),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('grid', { name: 'Sent alerts' }),
+		).toBeInTheDocument();
 	},
 };
 

@@ -6,6 +6,7 @@ import {
 	failedNewsletterSendResponse,
 } from '../testing/api-fixtures';
 import { getNotificationHistoryQueryKey } from './useNotificationHistory';
+import { notificationSendersQueryKey } from './useNotificationSenders';
 import { invalidateNotificationHistoryAfterSend } from './useSendNotification';
 
 const historyQueryKey = getNotificationHistoryQueryKey({
@@ -23,6 +24,7 @@ const createPopulatedQueryClient = async () => {
 	const queryClient = new QueryClient();
 	let historyRequestCount = 0;
 	let latest24HoursRequestCount = 0;
+	let sendersRequestCount = 0;
 	await queryClient.fetchQuery({
 		queryKey: historyQueryKey,
 		queryFn: () => Promise.resolve(++historyRequestCount),
@@ -31,9 +33,17 @@ const createPopulatedQueryClient = async () => {
 		queryKey: latest24HoursQueryKey,
 		queryFn: () => Promise.resolve(++latest24HoursRequestCount),
 	});
+	await queryClient.fetchQuery({
+		queryKey: notificationSendersQueryKey,
+		queryFn: () => Promise.resolve(++sendersRequestCount),
+	});
 	return {
 		queryClient,
-		requestCounts: () => ({ historyRequestCount, latest24HoursRequestCount }),
+		requestCounts: () => ({
+			historyRequestCount,
+			latest24HoursRequestCount,
+			sendersRequestCount,
+		}),
 	};
 };
 
@@ -66,6 +76,7 @@ describe('invalidateNotificationHistoryAfterSend', () => {
 			expect(requestCounts()).toEqual({
 				historyRequestCount: 2,
 				latest24HoursRequestCount: 2,
+				sendersRequestCount: 2,
 			});
 		},
 	);
@@ -84,6 +95,7 @@ describe('invalidateNotificationHistoryAfterSend', () => {
 		expect(requestCounts()).toEqual({
 			historyRequestCount: 1,
 			latest24HoursRequestCount: 1,
+			sendersRequestCount: 1,
 		});
 	});
 });

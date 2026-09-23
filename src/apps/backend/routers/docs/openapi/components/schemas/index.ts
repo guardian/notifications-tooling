@@ -16,6 +16,7 @@ import {
 } from './grafana-query';
 import { grafanaQueryRequestJsonSchema } from './grafana-query-request';
 import { healthStatusSchema } from './health-status';
+import { historyAlertTypesJsonSchema } from './history-alert-types';
 import { insufficientPermissionsSchema } from './insufficient-permissions';
 import { latestArticleJsonSchema } from './latest-article';
 import { latestArticlesResponseJsonSchema } from './latest-articles-response';
@@ -51,6 +52,7 @@ export const schemas = {
 	NotificationSummary: notificationSummarySchema,
 	NotificationList: notificationListSchema,
 	NotificationSenders: notificationSendersSchema,
+	HistoryAlertTypes: historyAlertTypesJsonSchema,
 	NotificationDispatch: notificationDispatchSchema,
 	NotificationNotFound: notificationNotFoundSchema,
 	NotificationConflictError: notificationConflictErrorSchema,

@@ -142,8 +142,8 @@ export const ImportsArticleFromSearchParam: Story = {
 			articleFixture.fields?.headline,
 		);
 		await expect(
-			canvas.getByRole('button', { name: 'Show article thumbnail image' }),
-		).toHaveAttribute('aria-pressed', 'true');
+			canvas.getByRole('switch', { name: 'Show article thumbnail image' }),
+		).toBeChecked();
 		await expect(
 			new URL(window.location.href).searchParams.get(articleUrlSearchParam),
 		).toBe(new URL(articleFixture.webUrl).pathname);
@@ -203,7 +203,7 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		const originalThumbnailUrl = articleFixture.fields?.thumbnail ?? '';
 		const replacementThumbnailUrl =
 			'https://media.guim.co.uk/replacement-thumbnail.jpg';
-		const thumbnailToggle = canvas.getByRole('button', {
+		const thumbnailToggle = canvas.getByRole('switch', {
 			name: 'Show article thumbnail image',
 		});
 		const articleThumbnail = canvas.getByAltText(
@@ -232,7 +232,7 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		}
 
 		await userEvent.click(thumbnailToggle);
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(thumbnailToggle).not.toBeChecked();
 		await expect(articleThumbnail).toHaveAttribute('src', originalThumbnailUrl);
 		await expect(
 			canvas.queryByAltText('Article thumbnail'),
@@ -241,7 +241,7 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 			canvas.queryByAltText('Android article thumbnail'),
 		).not.toBeInTheDocument();
 		await userEvent.click(thumbnailToggle);
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(thumbnailToggle).toBeChecked();
 		await expect(
 			canvas.getByRole('button', { name: 'Replace image' }),
 		).toHaveAttribute('aria-expanded', 'true');
@@ -265,7 +265,7 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 		await userEvent.clear(retainedReplacementInput);
 		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
 
-		await expect(thumbnailToggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(thumbnailToggle).toBeChecked();
 		for (const thumbnail of [
 			canvas.getByAltText(
 				'Thumbnail for A rhyme to recall rising temperatures',

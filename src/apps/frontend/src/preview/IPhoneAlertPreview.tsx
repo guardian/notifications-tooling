@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import { semanticColors } from '@guardian/stand';
 import { Typography } from '@guardian/stand/Typography';
-import { GuardianLogo } from '../layout/GuardianLogo';
+import { GuardianLogo } from '../ui/GuardianLogo';
 import {
 	type AlertPreviewProps,
 	DEFAULT_ALERT_TYPE,

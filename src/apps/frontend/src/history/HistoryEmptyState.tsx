@@ -1,17 +1,21 @@
 import { EmptyState } from '../ui/EmptyState';
 
 interface HistoryEmptyStateProps {
-	isSearchResult?: boolean;
+	isFilteredResult?: boolean;
 }
 
 export const HistoryEmptyState = ({
-	isSearchResult = false,
+	isFilteredResult = false,
 }: HistoryEmptyStateProps) => (
 	<EmptyState
-		title={isSearchResult ? 'No matching alerts' : 'No alerts yet'}
+		title={
+			isFilteredResult
+				? 'No notifications match these filters'
+				: 'No alerts yet'
+		}
 		description={
-			isSearchResult
-				? 'Try a different search term.'
+			isFilteredResult
+				? undefined
 				: 'Alerts will appear here after they have been sent.'
 		}
 	/>
