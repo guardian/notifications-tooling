@@ -1,3 +1,5 @@
+import { validateGridCropPageUrl } from '../grid-client/grid-url-parsing';
+
 const DEFAULT_ORIGIN = 'https://www.theguardian.com';
 // the path to a guardian article is made up at least two segments, usually in the format
 // /section-name/YYYY/MMM/DD/article-headline-converted-to-kebab-case
@@ -88,7 +90,11 @@ export const validateGuardianEmail = (emailInput: string) => {
 	return undefined;
 };
 
-const guardianImageUrlHosts = ['media.guim.co.uk', 'i.guim.co.uk'];
+const guardianImageUrlHosts = [
+	'media.guim.co.uk',
+	'i.guim.co.uk',
+	'media.guimcode.co.uk',
+];
 export const guardianImageUrlValidationMessage =
 	'Please enter a valid Guardian image URL';
 
@@ -110,4 +116,60 @@ export const validateGuardianImageUrl = (imageUrl: string) => {
 	} catch {
 		return guardianImageUrlValidationMessage;
 	}
+};
+
+type ImageSourceValidation =
+	| {
+			type: 'failure';
+			validationError?: string;
+	  }
+	| {
+			type: 'image-url';
+			validationError?: undefined;
+	  }
+	| {
+			type: 'grid-url';
+			cropId: string;
+			imageId: string;
+			gridApiUri: string;
+			validationError?: undefined;
+	  };
+
+export const parseImageSourceUrl = (
+	url: string,
+	gridOrigin: string | undefined,
+	gridApiUri: string | undefined,
+): ImageSourceValidation => {
+	if (url === '') {
+		return {
+			type: 'failure',
+		};
+	}
+
+	const guardianUrlValidationError = validateGuardianImageUrl(url);
+	if (!guardianUrlValidationError) {
+		return {
+			type: 'image-url',
+		};
+	}
+
+	const gridCropUrlValidationResult = validateGridCropPageUrl(
+		url,
+		gridOrigin,
+		gridApiUri,
+	);
+
+	if (gridCropUrlValidationResult.success) {
+		return gridCropUrlValidationResult.details;
+	}
+
+	const relevantFailure =
+		gridOrigin && url.startsWith(gridOrigin)
+			? gridCropUrlValidationResult.validationError
+			: guardianUrlValidationError;
+
+	return {
+		type: 'failure',
+		validationError: relevantFailure,
+	};
 };
