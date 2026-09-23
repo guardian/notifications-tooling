@@ -645,6 +645,56 @@ describe('POST /v1/notifications', () => {
 			const body = (await response.json()) as { error: string };
 			expect(body.error).toBe('validation_failed');
 		});
+
+		it('rejects mixed composed articles before persistence', async () => {
+			const store = mockNotificationStore();
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(
+					mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+					store,
+				),
+			);
+			const testServer = await startTestServer(testApp);
+			const request = validPushRequest();
+			const body = {
+				...request,
+				content: {
+					items: {
+						...request.content.items,
+						newsletter: {
+							type: 'newsletter',
+							title: 'Different article',
+							body: 'Newsletter body',
+							link: 'https://www.theguardian.com/world/2026/jul/09/different-story',
+						},
+					},
+				},
+				channels: {
+					...request.channels,
+					newsletter: {
+						audience: { type: 'segment', items: ['UK'] },
+						compose: { items: ['newsletter'], subject: 'Briefing' },
+					},
+				},
+			};
+
+			try {
+				const response = await fetch(`${testServer.baseUrl}/v1/notifications`, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(body),
+				});
+
+				expect(response.status).toBe(422);
+				expect(store.create).not.toHaveBeenCalled();
+			} finally {
+				await testServer.close();
+			}
+		});
 	});
 });
 

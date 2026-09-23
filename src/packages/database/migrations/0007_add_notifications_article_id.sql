@@ -1,7 +1,7 @@
 ALTER TABLE "notifications" ADD COLUMN "article_id" text;--> statement-breakpoint
 UPDATE "notifications"
 SET "article_id" = (
-	SELECT trim(leading '/' from regexp_replace(
+	SELECT trim(both '/' from regexp_replace(
 		split_part(split_part(content_item.value->>'link', '#', 1), '?', 1),
 		'^https?://[^/]+/?',
 		''
