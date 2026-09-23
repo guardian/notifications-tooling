@@ -54,6 +54,7 @@ export const getNotificationHistoryQueryKey = ({
 	] as const;
 
 export const ALWAYS_FRESH = Infinity;
+export const NOTIFICATION_HISTORY_POLL_INTERVAL_MS = 30_000;
 
 export const fetchNotificationHistory = ({
 	limit,
@@ -97,14 +98,25 @@ export const fetchNotificationHistory = ({
 
 export const useNotificationHistory = (
 	query: NotificationHistoryQuery,
-	{ enabled = true }: { enabled?: boolean } = {},
+	{
+		enabled = true,
+		refetchInterval = NOTIFICATION_HISTORY_POLL_INTERVAL_MS,
+		getSince,
+	}: {
+		enabled?: boolean;
+		refetchInterval?: number;
+		getSince?: () => number | undefined;
+	} = {},
 ) =>
 	useQuery({
 		queryKey: getNotificationHistoryQueryKey(query),
 		enabled,
 		queryFn: async () => {
 			try {
-				return await fetchNotificationHistory(query);
+				return await fetchNotificationHistory({
+					...query,
+					since: getSince?.() ?? query.since,
+				});
 			} catch (error) {
 				if (
 					error instanceof ApiError &&
@@ -118,4 +130,5 @@ export const useNotificationHistory = (
 		},
 		placeholderData: keepPreviousData,
 		staleTime: ALWAYS_FRESH,
+		refetchInterval,
 	});

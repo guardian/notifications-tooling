@@ -34,6 +34,7 @@ export const LatestPublishedContentPanel = ({
 	const [showAll, setShowAll] = useState(false);
 	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =
 		useState(false);
+	const hasCachedData = latestPublishedContent.data !== undefined;
 	const isEmpty = !latestPublishedContent.isPending && content.length === 0;
 
 	return (
@@ -50,7 +51,7 @@ export const LatestPublishedContentPanel = ({
 						Choose a recent article from below to create an alert
 					</Typography>
 				</div>
-				{latestPublishedContent.isPending ? (
+				{latestPublishedContent.isPending && !hasCachedData ? (
 					<div
 						role="status"
 						aria-label="Loading latest published content"
@@ -59,7 +60,7 @@ export const LatestPublishedContentPanel = ({
 					>
 						<LoadingSpinner fontSize={baseSizing.size48Px} />
 					</div>
-				) : latestPublishedContent.isError ? (
+				) : latestPublishedContent.isError && !hasCachedData ? (
 					<InlineMessage level="error">
 						Unable to load latest published content. Try again.
 					</InlineMessage>
@@ -70,42 +71,50 @@ export const LatestPublishedContentPanel = ({
 						icon="article"
 					/>
 				) : (
-					<Table
-						aria-label="Latest published content"
-						cssOverrides={latestPublishedContentTheme.list}
-						columns={tableColumns}
-						headerVisibleFrom="sm"
-					>
-						<TableHeader
-							data-latest-content-table-header
-							cssOverrides={latestPublishedContentTheme.tableHeader}
+					<>
+						{latestPublishedContent.isRefetchError && (
+							<InlineMessage level="error">
+								Unable to refresh latest published content. Showing cached
+								results.
+							</InlineMessage>
+						)}
+						<Table
+							aria-label="Latest published content"
+							cssOverrides={latestPublishedContentTheme.list}
+							columns={tableColumns}
+							headerVisibleFrom="sm"
 						>
-							<TableColumnHeader isRowHeader>
-								<div css={latestPublishedContentTheme.tableHeaderContent}>
-									<span>Latest published content</span>
-									{content.length > 3 && !showAll && (
-										<TextLinkButton
-											text="Show all"
-											textVariant="bodySm"
-											onClick={() => setShowAll(true)}
-										/>
-									)}
-								</div>
-							</TableColumnHeader>
-						</TableHeader>
-						<TableBody
-							data-latest-content-table-body
-							cssOverrides={latestPublishedContentTheme.tableBody(showAll)}
-						>
-							{content.map((item) => (
-								<LatestPublishedContentCard
-									key={item.id}
-									content={item}
-									onCreate={() => setIsCreateNotificationModalOpen(true)}
-								/>
-							))}
-						</TableBody>
-					</Table>
+							<TableHeader
+								data-latest-content-table-header
+								cssOverrides={latestPublishedContentTheme.tableHeader}
+							>
+								<TableColumnHeader isRowHeader>
+									<div css={latestPublishedContentTheme.tableHeaderContent}>
+										<span>Latest published content</span>
+										{content.length > 3 && !showAll && (
+											<TextLinkButton
+												text="Show all"
+												textVariant="bodySm"
+												onClick={() => setShowAll(true)}
+											/>
+										)}
+									</div>
+								</TableColumnHeader>
+							</TableHeader>
+							<TableBody
+								data-latest-content-table-body
+								cssOverrides={latestPublishedContentTheme.tableBody(showAll)}
+							>
+								{content.map((item) => (
+									<LatestPublishedContentCard
+										key={item.id}
+										content={item}
+										onCreate={() => setIsCreateNotificationModalOpen(true)}
+									/>
+								))}
+							</TableBody>
+						</Table>
+					</>
 				)}
 			</div>
 			<DispatchCreateNotificationModal

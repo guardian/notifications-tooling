@@ -36,6 +36,7 @@ interface HistoryViewProps {
 	isLoading?: boolean;
 	isRefreshing?: boolean;
 	error?: ReactNode;
+	refreshError?: ReactNode;
 	lastUpdatedAt?: string;
 	hasActiveFilters?: boolean;
 	onPageChange: (page: number) => void;
@@ -50,6 +51,7 @@ export const HistoryView = ({
 	isRefreshing = false,
 	limit,
 	error,
+	refreshError,
 	lastUpdatedAt,
 	hasActiveFilters = false,
 	currentPage,
@@ -92,6 +94,7 @@ export const HistoryView = ({
 					</div>
 					{isLoading && <HistoryTableSkeleton />}
 					{error}
+					{refreshError}
 					{!isLoading && !error && notifications.length > 0 && (
 						<HistoryTable notifications={notifications} audiences={audiences} />
 					)}

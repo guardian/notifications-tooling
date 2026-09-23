@@ -44,6 +44,7 @@ describe('latest articles OpenAPI contract', () => {
 			},
 		});
 		expect(openApiDocument.components.schemas.LatestArticle.required).toEqual([
+			'id',
 			'webUrl',
 			'publishedAt',
 			'headline',

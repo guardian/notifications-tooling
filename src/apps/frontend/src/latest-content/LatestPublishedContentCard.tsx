@@ -40,8 +40,8 @@ export const LatestPublishedContentCard = ({
 						>
 							<span css={latestPublishedContentTheme.sectionName}>
 								{section}
-							</span>{' '}
-							/ {pillarName}
+							</span>
+							{pillarName ? ` / ${pillarName}` : null}
 						</Typography>
 						{publishedAt && (
 							<Typography

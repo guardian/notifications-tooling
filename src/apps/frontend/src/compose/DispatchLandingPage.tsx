@@ -5,7 +5,7 @@ import { Layout } from '@guardian/stand/Layout';
 import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import { between, from } from '@guardian/stand/utils';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
 import { DispatchLandingHistoryView } from '../history/DispatchLandingHistoryView';
@@ -33,15 +33,13 @@ export const DispatchLandingPage = () => {
 	const config = useContext(ConfigContext);
 	const [searchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
-	const [last24HoursSince] = useState(() =>
-		Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000),
-	);
 	const historyQuery = {
 		...parsedHistoryQuery,
-		since: last24HoursSince,
 		cacheScope: 'last-24-hours',
 	};
-	const notificationHistory = useNotificationHistory(historyQuery);
+	const notificationHistory = useNotificationHistory(historyQuery, {
+		getSince: () => Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000),
+	});
 	const channelAudiences = useChannelAudiences();
 	const handleRefresh = () => void notificationHistory.refetch();
 	const notifications =
@@ -114,9 +112,18 @@ export const DispatchLandingPage = () => {
 						}
 						onRefresh={handleRefresh}
 						error={
-							notificationHistory.isError ? (
+							notificationHistory.isError &&
+							notificationHistory.data === undefined ? (
 								<InlineMessage level="error">
 									Unable to load notification history. Try again.
+								</InlineMessage>
+							) : undefined
+						}
+						refreshError={
+							notificationHistory.isRefetchError ? (
+								<InlineMessage level="error">
+									Unable to refresh notification history. Showing cached
+									results.
 								</InlineMessage>
 							) : undefined
 						}
