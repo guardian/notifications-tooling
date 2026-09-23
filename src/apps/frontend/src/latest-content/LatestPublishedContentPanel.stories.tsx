@@ -1,9 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { latestPublishedContentQueryKey } from '../hooks/useLatestPublishedContent';
-import { mockLatestPublishedContent } from './latest-published-content';
+import {
+	type LatestPublishedContentItem,
+	mockLatestPublishedContent,
+} from './latest-published-content';
 import { LatestPublishedContentPanel } from './LatestPublishedContentPanel';
 
 const emptyQueryKey = [...latestPublishedContentQueryKey, 'empty'] as const;
@@ -13,6 +16,41 @@ const cachedErrorQueryKey = [
 	'cached-error',
 ] as const;
 const loadingQueryKey = [...latestPublishedContentQueryKey, 'loading'] as const;
+const refreshQueryKey = [...latestPublishedContentQueryKey, 'refresh'] as const;
+
+const [firstArticle, secondArticle] = mockLatestPublishedContent;
+let hasLoadedOnce = false;
+let releaseRefresh: (() => void) | undefined;
+
+// The first load resolves immediately; the refresh stays in flight until the
+// play function releases it, so the fetching state can be asserted.
+const refreshQueryFn = () => {
+	if (!hasLoadedOnce) {
+		hasLoadedOnce = true;
+		return Promise.resolve([firstArticle!]);
+	}
+	return new Promise<LatestPublishedContentItem[]>((resolve) => {
+		releaseRefresh = () => resolve([firstArticle!, secondArticle!]);
+	});
+};
+
+const RefreshPanelStory = () => {
+	const queryClient = useMemo(
+		() => new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+		[],
+	);
+
+	return (
+		<QueryClientProvider client={queryClient}>
+			<div style={{ width: '380px' }}>
+				<LatestPublishedContentPanel
+					queryKey={refreshQueryKey}
+					queryFn={refreshQueryFn}
+				/>
+			</div>
+		</QueryClientProvider>
+	);
+};
 
 const DefaultPanelStory = () => {
 	const queryClient = new QueryClient({
@@ -126,7 +164,9 @@ export const Default: Story = {
 			canvas.getByRole('heading', { name: 'Latest published content' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByText('Choose a recent article from below to create an alert'),
+			canvas.getByText(
+				'Choose a recent article from below to begin creating an alert',
+			),
 		).toBeVisible();
 		const showAllButton = await canvas.findByRole('button', {
 			name: 'Show all',
@@ -221,5 +261,27 @@ export const Loading: Story = {
 		await expect(
 			canvas.queryByRole('grid', { name: 'Latest published content' }),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const Refresh: Story = {
+	render: () => <RefreshPanelStory />,
+	beforeEach: () => {
+		hasLoadedOnce = false;
+		releaseRefresh = undefined;
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(await canvas.findByText(firstArticle!.headline)).toBeVisible();
+
+		const refreshButton = canvas.getByRole('button', { name: /refresh/i });
+		await userEvent.click(refreshButton);
+		await waitFor(() => expect(refreshButton).toBeDisabled());
+
+		releaseRefresh?.();
+		await expect(
+			await canvas.findByText(secondArticle!.headline),
+		).toBeVisible();
+		await waitFor(() => expect(refreshButton).toBeEnabled());
 	},
 };
