@@ -11,9 +11,7 @@ export {
 	type NotificationDispatchesRepository,
 } from './repositories/notification-dispatches-repository';
 export {
-	type ArticleHistoryPage,
 	createNotificationsRepository,
-	type ListArticleHistoryOptions,
 	type ListDistinctSendersOptions,
 	type ListNotificationsInWindowOptions,
 	DuplicateIdempotencyKeyError,

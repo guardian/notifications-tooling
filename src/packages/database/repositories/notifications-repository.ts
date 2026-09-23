@@ -32,6 +32,8 @@ export type ListRecentNotificationsOptions = {
 	offset?: number;
 	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
+	/** Exact normalized CAPI article id. */
+	articleId?: string;
 	/** Restricts the page to notifications sent by any of these emails, matched case-insensitively. */
 	createdByEmails?: string[];
 	/** API edition ids matched against newsletter variants or app-push editions. */
@@ -58,19 +60,6 @@ export type NotificationListPage = {
 	notifications: Notification[];
 	/** Rows created at or after `since`, independent of any limit/offset page. */
 	total: number;
-};
-
-export type ListArticleHistoryOptions = {
-	articleId: string;
-	limit: number;
-	offset: number;
-};
-
-export type ArticleHistoryPage = {
-	total: number;
-	sends: Array<
-		Pick<Notification, 'id' | 'createdByEmail' | 'createdAt' | 'channels'>
-	>;
 };
 
 /** Thrown when a create hits the `idempotency_key` unique index. */
@@ -163,36 +152,6 @@ export const createNotificationsRepository = (db: Database) => ({
 		return row ?? null;
 	},
 
-	/** Production sends that reference an exact CAPI article id, newest first. */
-	async listArticleHistory({
-		articleId,
-		limit,
-		offset,
-	}: ListArticleHistoryOptions): Promise<ArticleHistoryPage> {
-		const predicate = and(
-			eq(notifications.kind, 'send'),
-			eq(notifications.articleId, articleId),
-		);
-		const [totals] = await db
-			.select({ total: count() })
-			.from(notifications)
-			.where(predicate);
-		const sends = await db
-			.select({
-				id: notifications.id,
-				createdByEmail: notifications.createdByEmail,
-				createdAt: notifications.createdAt,
-				channels: notifications.channels,
-			})
-			.from(notifications)
-			.where(predicate)
-			.orderBy(desc(notifications.createdAt))
-			.limit(limit)
-			.offset(offset);
-
-		return { total: totals?.total ?? 0, sends };
-	},
-
 	/**
 	 * The production sends (`kind = 'send'`) created at or after `since`, newest
 	 * first. Test notifications are excluded. `total` counts every matching row
@@ -204,6 +163,7 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 		search,
+		articleId,
 		createdByEmails,
 		audiences,
 		statuses,
@@ -270,6 +230,7 @@ export const createNotificationsRepository = (db: Database) => ({
 					)
 				: undefined,
 			statuses?.length ? inArray(notifications.status, statuses) : undefined,
+			articleId ? eq(notifications.articleId, articleId) : undefined,
 			searchPattern
 				? sql<boolean>`exists (
 						select 1
