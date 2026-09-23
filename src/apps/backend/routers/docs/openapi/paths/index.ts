@@ -29,7 +29,7 @@ export const paths = {
 	'/v1/content/articles/resolve': resolveArticlePath,
 	'/v1/notification-tests': notificationTestsPath,
 	'/v1/notifications': notificationsPath,
-	'/v1/notifications/article/{articleId}': notificationArticleHistoryPath,
+	'/v1/notifications/article': notificationArticleHistoryPath,
 	'/v1/notifications/senders': notificationSendersPath,
 	'/v1/notifications/{id}': notificationByIdPath,
 	'/v1/preview/email': emailPreviewPath,

@@ -260,6 +260,24 @@ export type NotificationSendersResponse = z.infer<
 	typeof notificationSendersResponseSchema
 >;
 
+export const articleHistoryResponseSchema = z.strictObject({
+	articleId: z.string(),
+	total: z.number().int().nonnegative(),
+	limit: z.number().int().positive(),
+	offset: z.number().int().nonnegative(),
+	sends: z.array(
+		z.strictObject({
+			notificationId: z.string(),
+			sentBy: z.string(),
+			sentAt: z.string(),
+			channels: z.array(z.enum(['newsletter', 'app-push'])),
+		}),
+	),
+});
+export type ArticleHistoryResponse = z.infer<
+	typeof articleHistoryResponseSchema
+>;
+
 export const sendNotificationResponseSchema = notificationResourceSchema;
 export type SendNotificationResponse = z.infer<
 	typeof sendNotificationResponseSchema
