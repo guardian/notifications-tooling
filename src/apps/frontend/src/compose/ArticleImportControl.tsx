@@ -15,6 +15,7 @@ import {
 } from '../utils/form-validation';
 import { ArticlePreviewCard } from './ArticlePreviewCard';
 import { NotificationFormContext } from './NotificationFormContext';
+import { PreviousNotificationsBar } from './PreviousNotificationsBar';
 
 // TO DO - more helpful error UI
 // can we capture when article was taken down?
@@ -222,6 +223,8 @@ export const ArticleImportControl = ({
 					<InlineMessage level="error">{articleError}</InlineMessage>
 				)}
 			</div>
+
+			<PreviousNotificationsBar articleId={article?.id} />
 
 			{showImportedArticle && article && (
 				<ArticlePreviewCard
