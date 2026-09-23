@@ -10,7 +10,10 @@ import {
 	TableRow,
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
-import type { DisplayAppAlertTopicEditionId } from '@models';
+import {
+	type DisplayAppAlertTopicEditionId,
+	notificationChannelNames,
+} from '@models';
 import { useRelativeTime } from '../hooks/useRelativeTime';
 import type { ChannelAudienceResponse } from '../schemas';
 import { historyViewStyles } from '../themes';
@@ -34,9 +37,6 @@ const tableColumns = {
 	md: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
 	lg: 'minmax(280px, 2.4fr) minmax(180px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1fr) 132px',
 } as const;
-
-const getChannelName = (channel: HistoryNotification['channel']) =>
-	channel === 'app-push' ? 'App alert' : 'Newsletter email';
 
 const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
 	UK: 'United Kingdom',
@@ -165,7 +165,7 @@ export const HistoryTable = ({
 												<Icon size="sm" symbol="mail" />
 											)}
 											<span>
-												{getChannelName(notification.channel)}
+												{notificationChannelNames[notification.channel]}
 												<span css={historyViewStyles.notificationType}>
 													{' | '}
 													{notification.alertType}
