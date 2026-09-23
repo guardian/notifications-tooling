@@ -528,25 +528,29 @@ describe('notifications repository listRecent (real Postgres)', () => {
 			},
 		});
 
-		const firstPage = await notifications.listArticleHistory({
+		const firstPage = await notifications.listRecent({
 			articleId,
+			since: new Date(0),
 			limit: 1,
 			offset: 0,
 		});
 		expect(firstPage.total).toBe(2);
-		expect(firstPage.sends).toHaveLength(1);
-		expect(firstPage.sends[0]?.id).toBe(newerSend.id);
-		expect(firstPage.sends[0]?.createdByEmail).toBe(
+		expect(firstPage.notifications).toHaveLength(1);
+		expect(firstPage.notifications[0]?.id).toBe(newerSend.id);
+		expect(firstPage.notifications[0]?.createdByEmail).toBe(
 			'newer.sender@guardian.co.uk',
 		);
 
-		const secondPage = await notifications.listArticleHistory({
+		const secondPage = await notifications.listRecent({
 			articleId,
+			since: new Date(0),
 			limit: 1,
 			offset: 1,
 		});
 		expect(secondPage.total).toBe(2);
-		expect(secondPage.sends.map(({ id }) => id)).toEqual([olderSend.id]);
+		expect(secondPage.notifications.map(({ id }) => id)).toEqual([
+			olderSend.id,
+		]);
 	});
 
 	it('filters newsletter audiences and app-push editions by audience', async () => {

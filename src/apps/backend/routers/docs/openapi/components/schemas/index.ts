@@ -22,8 +22,6 @@ import { latestArticleJsonSchema } from './latest-article';
 import { latestArticlesResponseJsonSchema } from './latest-articles-response';
 import { liveblogBlockSchema } from './liveblog-block';
 import { notificationSchema } from './notification';
-import { notificationArticleHistorySchema } from './notification-article-history';
-import { notificationArticleHistorySendSchema } from './notification-article-history-send';
 import { notificationChannelSchema } from './notification-channel';
 import { notificationConflictErrorSchema } from './notification-conflict-error';
 import { notificationDispatchSchema } from './notification-dispatch';
@@ -51,8 +49,6 @@ export const schemas = {
 	GrafanaQueryError: grafanaQueryErrorSchema,
 	NotificationChannel: notificationChannelSchema,
 	Notification: notificationSchema,
-	NotificationArticleHistory: notificationArticleHistorySchema,
-	NotificationArticleHistorySend: notificationArticleHistorySendSchema,
 	NotificationSummary: notificationSummarySchema,
 	NotificationList: notificationListSchema,
 	NotificationSenders: notificationSendersSchema,
