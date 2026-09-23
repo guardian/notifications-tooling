@@ -193,7 +193,6 @@ export const Default: Story = {
 		await expect(
 			canvas.queryByRole('grid', { name: 'Sent alerts' }),
 		).not.toBeInTheDocument();
-		await expect(canvas.getByText('Last updated:')).toBeInTheDocument();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
 		});
@@ -239,6 +238,9 @@ export const Default: Story = {
 		if (!latestPublishedContentRail) {
 			throw new Error('Expected latest published content rail to be rendered');
 		}
+		await expect(
+			within(latestPublishedContentRail).getByText('Last updated:'),
+		).toBeInTheDocument();
 		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
 			canvasElement.clientWidth,
 		);
