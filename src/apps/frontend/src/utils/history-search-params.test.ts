@@ -245,4 +245,20 @@ describe('updateHistoryMultiSelectFilter', () => {
 		expect(next.get('offset')).toBe('0');
 		expect(next.get('limit')).toBe('20');
 	});
+
+	it('updates sender and alert-type filters using their API parameter names', () => {
+		const withSender = updateHistoryMultiSelectFilter(
+			new URLSearchParams('createdByEmail=old%40example.com&alertType=sport'),
+			'createdByEmail',
+			['new@example.com'],
+		);
+		const withAlertType = updateHistoryMultiSelectFilter(
+			withSender,
+			'alertType',
+			['exclusive'],
+		);
+
+		expect(withAlertType.getAll('createdByEmail')).toEqual(['new@example.com']);
+		expect(withAlertType.getAll('alertType')).toEqual(['exclusive']);
+	});
 });

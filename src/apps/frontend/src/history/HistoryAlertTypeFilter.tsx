@@ -10,7 +10,7 @@ import { historyViewStyles } from '../themes';
 import {
 	parseHistorySearchParams,
 	resolveHistoryFilterSelection,
-	updateHistoryFilters,
+	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
 const alertTypeLabels: Record<HistoryAlertType, string> = {
@@ -39,8 +39,14 @@ export const HistoryAlertTypeFilter = () => {
 				.join(', ') || 'All';
 
 	const handleAlertTypesChange = (nextAlertTypes: string[]) => {
-		setSearchParams((currentSearchParams) =>
-			updateHistoryFilters(currentSearchParams, { alertTypes: nextAlertTypes }),
+		setSearchParams(
+			(currentSearchParams) =>
+				updateHistoryMultiSelectFilter(
+					currentSearchParams,
+					'alertType',
+					nextAlertTypes,
+				),
+			{ replace: true },
 		);
 	};
 

@@ -15,7 +15,8 @@ export type HistoryChannel = (typeof HISTORY_CHANNELS)[number];
 export const HISTORY_STATUS_CATEGORIES = ['sent', 'error'] as const;
 export type HistoryStatusCategory = (typeof HISTORY_STATUS_CATEGORIES)[number];
 
-export type HistoryMultiSelectFilter = 'audience' | 'channel' | 'status';
+export type HistoryMultiSelectFilter =
+	'alertType' | 'audience' | 'channel' | 'createdByEmail' | 'status';
 
 export const resolveHistoryFilterSelection = <Value extends string>(
 	selection: 'all' | Iterable<unknown>,
