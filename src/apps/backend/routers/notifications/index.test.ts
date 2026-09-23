@@ -1274,7 +1274,7 @@ describe('GET /v1/notifications', () => {
 	});
 });
 
-describe('GET /v1/notifications/article/{articleId}', () => {
+describe('GET /v1/notifications/article', () => {
 	it.each([
 		['a CAPI article ID', 'science/2026/sep/23/northern-lights'],
 		[
@@ -1304,8 +1304,13 @@ describe('GET /v1/notifications/article/{articleId}', () => {
 				await startArticleHistoryServer(listArticleHistory);
 
 			try {
+				const query = new URLSearchParams({
+					articleId: articleReference,
+					limit: '10',
+					offset: '1',
+				});
 				const response = await fetch(
-					`${articleHistoryServer.baseUrl}/v1/notifications/article/${encodeURIComponent(articleReference)}?limit=10&offset=1`,
+					`${articleHistoryServer.baseUrl}/v1/notifications/article?${query}`,
 				);
 
 				expect(response.status).toBe(200);
@@ -1348,8 +1353,9 @@ describe('GET /v1/notifications/article/{articleId}', () => {
 			await startArticleHistoryServer(listArticleHistory);
 
 		try {
+			const query = new URLSearchParams({ articleId });
 			const response = await fetch(
-				`${articleHistoryServer.baseUrl}/v1/notifications/article/${encodeURIComponent(articleId)}`,
+				`${articleHistoryServer.baseUrl}/v1/notifications/article?${query}`,
 			);
 			expect(response.status).toBe(400);
 			expect(listArticleHistory).not.toHaveBeenCalled();
