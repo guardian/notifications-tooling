@@ -1,4 +1,4 @@
-import { determineArticleId } from '@utils';
+import { determineArticleId, isGuardianUrl } from '@utils';
 import { z } from 'zod';
 
 const defaultLimit = 50;
@@ -6,12 +6,20 @@ const defaultOffset = 0;
 
 export const notificationArticleHistoryParamsSchema = z
 	.strictObject({
-		articleId: z.string().trim().min(1).max(500),
+		articleId: z.string().trim().min(1).max(2048),
 	})
-	.refine(({ articleId }) => determineArticleId(articleId) === articleId, {
-		message: 'The articleId must be a valid CAPI article ID.',
-		path: ['articleId'],
-	});
+	.refine(
+		({ articleId }) =>
+			isGuardianUrl(articleId) || determineArticleId(articleId) === articleId,
+		{
+			message:
+				'The articleId must be a valid CAPI article ID or Guardian article URL.',
+			path: ['articleId'],
+		},
+	)
+	.transform(({ articleId }) => ({
+		articleId: determineArticleId(articleId)!,
+	}));
 
 export const notificationArticleHistoryQuerySchema = z
 	.strictObject({
