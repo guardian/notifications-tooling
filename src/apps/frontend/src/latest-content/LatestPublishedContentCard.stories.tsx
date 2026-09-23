@@ -85,3 +85,16 @@ export const NoImage: Story = {
 		await expect(canvas.getByText('No image')).toBeVisible();
 	},
 };
+
+export const NoIntendedAudience: Story = {
+	args: {
+		content: { ...mockLatestPublishedContent[0]!, tags: [] },
+	},
+	play: async ({ canvasElement, args }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('link', { name: new RegExp(args.content.headline) }),
+		).toBeVisible();
+		await expect(canvas.getByRole('button', { name: /create/i })).toBeVisible();
+	},
+};
