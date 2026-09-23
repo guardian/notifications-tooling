@@ -81,7 +81,7 @@ export const HistoryPage = () => {
 						</Button>
 					</InlineMessage>
 				) : notificationHistory.isError &&
-				notificationHistory.data === undefined ? (
+				  notificationHistory.data === undefined ? (
 					<InlineMessage level="error">
 						Unable to load notification history. Try again.
 					</InlineMessage>
