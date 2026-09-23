@@ -57,7 +57,7 @@ describe('latest articles OpenAPI contract', () => {
 describe('notification history OpenAPI contract', () => {
 	it('documents article history lookup and its compact send response', () => {
 		const articleHistory =
-			openApiDocument.paths['/v1/notifications/article/{articleId}'].get;
+			openApiDocument.paths['/v1/notifications/article'].get;
 		const articleIdParameter = articleHistory.parameters.find(
 			({ name }) => name === 'articleId',
 		);
@@ -65,7 +65,7 @@ describe('notification history OpenAPI contract', () => {
 			articleHistory.responses['200'].content['application/json'].schema;
 
 		expect(articleIdParameter).toMatchObject({
-			in: 'path',
+			in: 'query',
 			required: true,
 			schema: { type: 'string', maxLength: 2048 },
 		});

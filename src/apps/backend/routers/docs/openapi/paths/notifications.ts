@@ -236,7 +236,7 @@ export const notificationSendersPath = {
 	},
 } as const;
 
-/** The `/v1/notifications/article/{articleId}` path item. */
+/** The `/v1/notifications/article` path item. */
 export const notificationArticleHistoryPath = {
 	get: {
 		summary: 'Find previous sends for an article',
@@ -246,10 +246,10 @@ export const notificationArticleHistoryPath = {
 		parameters: [
 			{
 				name: 'articleId',
-				in: 'path',
+				in: 'query',
 				required: true,
 				description:
-					'The URL-encoded CAPI article ID or Guardian article URL. For example, `science%2F2026%2Fsep%2F23%2Fnorthern-lights`.',
+					'The CAPI article ID or Guardian article URL. For example, `science/2026/sep/23/northern-lights`.',
 				schema: { type: 'string', maxLength: 2048 },
 			},
 			{
