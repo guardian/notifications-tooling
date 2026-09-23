@@ -9,7 +9,7 @@ export const notificationsPath = {
 	get: {
 		summary: 'List recent notifications',
 		description:
-			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive literal substring match to stored content-item body and title fields only. Repeated `createdByEmail` values match notifications sent by any selected user. Repeated `audience` values match any selected newsletter audience or app-push edition. `alertType` matches any selected category. Filters combine using AND and precede pagination; `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
+			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `articleId` performs an exact match after normalising a CAPI ID or Guardian URL. `search` applies a case-insensitive literal substring match to stored content-item body and title fields only. Repeated `createdByEmail` values match notifications sent by any selected user. Repeated `audience` values match any selected newsletter audience or app-push edition. `alertType` matches any selected category. Filters combine using AND and precede pagination; `total` reports the full count of matching sends regardless of pagination. `since` defaults to the start of retained history when `articleId` is supplied, otherwise 14 days ago. `limit` and `offset` are all-or-nothing: supply both or neither.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{
@@ -43,6 +43,14 @@ export const notificationsPath = {
 				description:
 					'Case-insensitive literal substring matched against stored content-item body and title fields only, not newsletter subjects or category metadata. Trimmed; blank or overlong values are invalid.',
 				schema: { type: 'string', minLength: 1, maxLength: 200 },
+			},
+			{
+				name: 'articleId',
+				in: 'query',
+				required: false,
+				description:
+					'Exact CAPI article ID or Guardian article URL. URLs are normalised so hosts, query parameters and fragments do not affect matching. When supplied without `since`, all retained history is searched.',
+				schema: { type: 'string', minLength: 1, maxLength: 2048 },
 			},
 			{
 				name: 'createdByEmail',
@@ -222,64 +230,6 @@ export const notificationSendersPath = {
 			},
 			'400': {
 				description: 'The notification senders query parameters are invalid.',
-				content: {
-					'application/json': {
-						schema: {
-							$ref: '#/components/schemas/NotificationValidationError',
-						},
-					},
-				},
-			},
-			'401': { $ref: '#/components/responses/Unauthenticated' },
-			'403': { $ref: '#/components/responses/InsufficientPermissions' },
-		},
-	},
-} as const;
-
-/** The `/v1/notifications/article` path item. */
-export const notificationArticleHistoryPath = {
-	get: {
-		summary: 'Find previous sends for an article',
-		description:
-			'Returns production sends referencing the supplied CAPI article ID or Guardian article URL, newest first, across all retained notification history. Test sends are excluded. URLs are normalised to their CAPI ID, so hosts, query parameters and fragments do not affect matching. Send timestamps are returned in UTC.',
-		security: [{ pandaCookie: [] }],
-		parameters: [
-			{
-				name: 'articleId',
-				in: 'query',
-				required: true,
-				description:
-					'The CAPI article ID or Guardian article URL. For example, `science/2026/sep/23/northern-lights`.',
-				schema: { type: 'string', maxLength: 2048 },
-			},
-			{
-				name: 'limit',
-				in: 'query',
-				required: false,
-				description: 'Maximum sends to return. Defaults to 50.',
-				schema: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
-			},
-			{
-				name: 'offset',
-				in: 'query',
-				required: false,
-				description: 'Number of matching sends to skip. Defaults to 0.',
-				schema: { type: 'integer', minimum: 0, default: 0 },
-			},
-		],
-		responses: {
-			'200': {
-				description: 'Previous production sends for the article.',
-				content: {
-					'application/json': {
-						schema: {
-							$ref: '#/components/schemas/NotificationArticleHistory',
-						},
-					},
-				},
-			},
-			'400': {
-				description: 'The article lookup parameters are invalid.',
 				content: {
 					'application/json': {
 						schema: {
