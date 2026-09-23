@@ -177,16 +177,10 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 	}: ListArticleHistoryOptions): Promise<ArticleHistoryPage> {
-		const articleMatch = sql<boolean>`exists (
-			select 1
-			from jsonb_each(coalesce(${notifications.content}->'items', '{}'::jsonb)) as content_item
-			where trim(leading '/' from regexp_replace(
-				split_part(split_part(content_item.value->>'link', '#', 1), '?', 1),
-				'^https?://[^/]+/?',
-				''
-			)) = ${articleId}
-		)`;
-		const predicate = and(eq(notifications.kind, 'send'), articleMatch);
+		const predicate = and(
+			eq(notifications.kind, 'send'),
+			eq(notifications.articleId, articleId),
+		);
 		const [totals] = await db
 			.select({ total: count() })
 			.from(notifications)

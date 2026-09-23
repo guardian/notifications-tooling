@@ -455,6 +455,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 			...buildNotification(),
 			createdAt: daysAgo(10),
 			createdByEmail: 'older.sender@guardian.co.uk',
+			articleId,
 			content: {
 				items: {
 					lead: {
@@ -476,6 +477,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 			...buildNotification(),
 			createdAt: daysAgo(1),
 			createdByEmail: 'newer.sender@guardian.co.uk',
+			articleId,
 			content: {
 				items: {
 					lead: {
@@ -499,6 +501,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		await notifications.create({
 			...buildNotification(),
 			kind: 'test',
+			articleId,
 			content: {
 				items: {
 					lead: {
@@ -512,6 +515,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		});
 		await notifications.create({
 			...buildNotification(),
+			articleId: `${articleId}-analysis`,
 			content: {
 				items: {
 					lead: {
