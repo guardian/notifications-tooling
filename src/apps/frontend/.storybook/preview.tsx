@@ -8,6 +8,7 @@ import { mswLoader } from 'msw-storybook-addon/csf3';
 import { BrowserRouter } from 'react-router-dom';
 import '../src/index.css';
 import { channelHandlers } from '../src/testing/handlers/channels';
+import { notificationSendersHandler } from '../src/testing/handlers/notifications';
 
 const preview: Preview = {
 	parameters: {
@@ -17,7 +18,7 @@ const preview: Preview = {
 				date: /Date$/i,
 			},
 		},
-		msw: { handlers: channelHandlers },
+		msw: { handlers: [...channelHandlers, notificationSendersHandler] },
 	},
 	loaders: [mswLoader()],
 	decorators: [
