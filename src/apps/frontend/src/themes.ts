@@ -813,9 +813,15 @@ export const historyViewStyles = {
 		width: 'var(--trigger-width)',
 		maxWidth: 'var(--trigger-width)',
 	}),
+	senderPopover: css({
+		width: 'var(--trigger-width)',
+		maxWidth: 'var(--trigger-width)',
+		overflowX: 'hidden',
+	}),
 	audienceMenuItem: css({
 		gridTemplateColumns: 'minmax(0, 1fr)',
 		gridTemplateAreas: '"label"',
+		overflow: 'hidden',
 		'& > .material-symbols': {
 			display: 'none',
 		},
@@ -824,6 +830,25 @@ export const historyViewStyles = {
 		width: '100%',
 		pointerEvents: 'none',
 		cursor: 'inherit',
+	}),
+	senderCheckbox: css({
+		width: '100%',
+		overflow: 'hidden',
+		minWidth: 0,
+		pointerEvents: 'none',
+		cursor: 'inherit',
+		'& > *': {
+			overflow: 'hidden',
+			minWidth: 0,
+		},
+	}),
+	senderOptionValue: css({
+		display: 'block',
+		overflow: 'hidden',
+		minWidth: 0,
+		maxWidth: '100%',
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
 	}),
 	visualOnly: css({
 		display: 'contents',

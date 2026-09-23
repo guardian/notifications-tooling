@@ -592,7 +592,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 
 		const page = await notifications.listRecent({
 			since: daysAgo(14),
-			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdByEmails: ['ada.lovelace@guardian.co.uk'],
 		});
 
 		expect(page.total).toBe(1);
@@ -613,11 +613,43 @@ describe('notifications repository listRecent (real Postgres)', () => {
 
 		const page = await notifications.listRecent({
 			since: daysAgo(14),
-			createdByEmail: 'ada.lovelace@GUARDIAN.co.uk',
+			createdByEmails: ['ada.lovelace@GUARDIAN.co.uk'],
 		});
 
 		expect(page.total).toBe(1);
 		expect(page.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
+
+	it('matches any selected sender', async () => {
+		const newest = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		const oldest = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'other@guardian.co.uk',
+			createdAt: daysAgo(3),
+		});
+
+		const page = await notifications.listRecent({
+			since: daysAgo(14),
+			createdByEmails: [
+				'ada.lovelace@guardian.co.uk',
+				'grace.hopper@guardian.co.uk',
+			],
+		});
+
+		expect(page.total).toBe(2);
+		expect(page.notifications.map((row) => row.id)).toEqual([
+			newest.id,
+			oldest.id,
+		]);
 	});
 });
 

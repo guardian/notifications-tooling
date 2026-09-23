@@ -58,7 +58,9 @@ export const LatestPublishedContentCard = ({
 								</time>
 							</Typography>
 						)}
-						<IntendedAudienceSignifier {...intendedAudience} />
+						{intendedAudience && (
+							<IntendedAudienceSignifier {...intendedAudience} />
+						)}
 					</div>
 
 					<div css={latestPublishedContentTheme.cardHeadline}>

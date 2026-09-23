@@ -8,6 +8,7 @@ export const DEFAULT_LIMIT = 20;
 export const MAXIMUM_LIMIT = 50;
 export const DEFAULT_OFFSET = 0;
 export const MAXIMUM_SEARCH_LENGTH = 200;
+export const MAXIMUM_SENDER_LENGTH = 320;
 export const HISTORY_AUDIENCE_IDS = notificationAudienceFilterIds;
 export const HISTORY_STATUS_CATEGORIES = ['sent', 'error'] as const;
 export type HistoryStatusCategory = (typeof HISTORY_STATUS_CATEGORIES)[number];
@@ -43,6 +44,17 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 	const alertTypes = canonicalHistoryAlertTypes(
 		searchParams.getAll('alertType'),
 	);
+	const senders = [
+		...new Set(
+			searchParams
+				.getAll('createdByEmail')
+				.map((sender) => sender.trim().toLowerCase())
+				.filter(
+					(sender) =>
+						sender.length > 0 && sender.length <= MAXIMUM_SENDER_LENGTH,
+				),
+		),
+	];
 
 	return {
 		limit: parseBoundedInteger(
@@ -61,6 +73,7 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 			return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined;
 		})(),
 		...(search && search.length <= MAXIMUM_SEARCH_LENGTH ? { search } : {}),
+		...(senders.length > 0 ? { senders } : {}),
 		...(audiences.length > 0 ? { audiences } : {}),
 		...(statuses.length > 0 ? { statuses } : {}),
 		...(alertTypes.length > 0 ? { alertTypes } : {}),

@@ -15,6 +15,7 @@ export interface NotificationHistoryQuery {
 	since?: number;
 	cacheScope?: string;
 	search?: string;
+	senders?: string[];
 	audiences?: string[];
 	statuses?: HistoryStatusCategory[];
 	alertTypes?: string[];
@@ -31,6 +32,7 @@ export const getNotificationHistoryQueryKey = ({
 	since,
 	cacheScope,
 	search,
+	senders,
 	audiences,
 	statuses,
 	alertTypes = [],
@@ -42,6 +44,7 @@ export const getNotificationHistoryQueryKey = ({
 			offset,
 			...(cacheScope !== undefined ? { cacheScope } : { since }),
 			...(search ? { search } : {}),
+			...(senders?.length ? { senders } : {}),
 			...(audiences?.length ? { audiences } : {}),
 			...(statuses?.length ? { statuses } : {}),
 			...(alertTypes.length
@@ -58,6 +61,7 @@ export const fetchNotificationHistory = ({
 	offset,
 	since,
 	search,
+	senders,
 	audiences,
 	statuses,
 	alertTypes = [],
@@ -72,6 +76,9 @@ export const fetchNotificationHistory = ({
 	}
 	if (search !== undefined) {
 		searchParams.set('search', search);
+	}
+	for (const sender of senders ?? []) {
+		searchParams.append('createdByEmail', sender);
 	}
 	for (const audience of audiences ?? []) {
 		searchParams.append('audience', audience);

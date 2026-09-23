@@ -73,6 +73,7 @@ describe('fetchNotificationHistory', () => {
 			offset: 40,
 			since: 1_700_000_000,
 			search: 'climate',
+			senders: ['alex@example.com', 'jamie@example.com'],
 			audiences: ['uk', 'europe'],
 			statuses: ['sent', 'error'],
 		});
@@ -85,6 +86,10 @@ describe('fetchNotificationHistory', () => {
 		expect(requestUrl.searchParams.get('offset')).toBe('40');
 		expect(requestUrl.searchParams.get('since')).toBe('1700000000');
 		expect(requestUrl.searchParams.get('search')).toBe('climate');
+		expect(requestUrl.searchParams.getAll('createdByEmail')).toEqual([
+			'alex@example.com',
+			'jamie@example.com',
+		]);
 		expect(requestUrl.searchParams.getAll('audience')).toEqual([
 			'uk',
 			'europe',
@@ -135,6 +140,22 @@ describe('notification history query keys', () => {
 				limit: 20,
 				offset: 0,
 				audiences: ['us'],
+			}),
+		);
+	});
+
+	it('separates sender filters in the cache', () => {
+		expect(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				senders: ['alex@example.com'],
+			}),
+		).not.toEqual(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				senders: ['jamie@example.com'],
 			}),
 		);
 	});
