@@ -5,18 +5,18 @@ import { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from './NotificationFormContext';
 
 it('reports a missing article resolver when no provider is present', async () => {
-	const { result } = renderHook(() => useContext(NotificationFormContext));
-
-	const outcome = await result.current.resolveArticleFromCapi({
+	const { result: context } = renderHook(() =>
+		useContext(NotificationFormContext),
+	);
+	const result = await context.current.resolveArticleFromCapi({
 		article: 'https://www.theguardian.com/world/2026/sep/16/example',
 	});
-
-	if (outcome.success) {
+	if (result.success) {
 		throw new Error('Expected the missing resolver to return a failure');
 	}
-	expect(outcome.failure).toBeInstanceOf(ApiError);
-	expect(outcome.failure.message).toBe(
+	expect(result.failure).toBeInstanceOf(ApiError);
+	expect(result.failure.message).toBe(
 		'no resolveArticleFromCapi implementation provided',
 	);
-	expect(outcome.failure.failure).toBe('fetch-fail');
+	expect(result.failure.failure).toBe('fetch-fail');
 });

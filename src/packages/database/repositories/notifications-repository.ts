@@ -1,4 +1,17 @@
-import { and, count, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
+import type { HistoryAlertType, KickerHistoryAlertType } from '@models';
+import { kickerHistoryAlertTypes } from '@models';
+import {
+	and,
+	count,
+	desc,
+	eq,
+	gte,
+	inArray,
+	lte,
+	not,
+	or,
+	sql,
+} from 'drizzle-orm';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';
@@ -19,12 +32,13 @@ export type ListRecentNotificationsOptions = {
 	offset?: number;
 	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
-	/** Restricts the page to notifications sent by this `createdByEmail`, matched case-insensitively. */
-	createdByEmail?: string;
+	/** Restricts the page to notifications sent by any of these emails, matched case-insensitively. */
+	createdByEmails?: string[];
 	/** API edition ids matched against newsletter variants or app-push editions. */
 	audiences?: string[];
 	/** Rolled-up delivery statuses included in the result. */
 	statuses?: Array<Notification['status']>;
+	alertTypes?: HistoryAlertType[];
 };
 
 /** Cut-off for {@link NotificationsRepository.listDistinctSenders}. */
@@ -147,14 +161,17 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 		search,
-		createdByEmail,
+		createdByEmails,
 		audiences,
 		statuses,
+		alertTypes,
 	}: ListRecentNotificationsOptions): Promise<NotificationListPage> {
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
 		// Matched case-insensitively via the `lower(created_by_email)` index.
-		const normalisedCreatedByEmail = createdByEmail?.toLowerCase();
+		const normalisedCreatedByEmails = createdByEmails?.map((email) =>
+			email.toLowerCase(),
+		);
 		const audienceValues = audiences?.map((audience) => sql`${audience}`);
 		const audienceFilter = audienceValues?.length
 			? sql<boolean>`(
@@ -174,11 +191,40 @@ export const createNotificationsRepository = (db: Database) => ({
 				)
 			)`
 			: undefined;
+		const newsletterSubject = sql`coalesce(${notifications.channels}->'newsletter'->'compose'->>'subject', '')`;
+		const kickerPredicate = (alertType: KickerHistoryAlertType) => {
+			if (alertType === 'exclusive') {
+				return sql<boolean>`(${newsletterSubject}) ilike 'Exclusive:%'`;
+			}
+			const appAlertMatch = sql<boolean>`exists (
+				select 1
+				from jsonb_array_elements(coalesce(
+					${notifications.channels}->'app-push'->'audience'->'items', '[]'::jsonb
+				)) as topic
+				where topic->>'type' = ${alertType}
+			)`;
+			return alertType === 'breaking-news'
+				? or(
+						appAlertMatch,
+						sql<boolean>`(${newsletterSubject}) ilike 'Breaking news:%'`,
+					)
+				: appAlertMatch;
+		};
+		const anyKicker = sql<boolean>`(${sql.join(
+			kickerHistoryAlertTypes.map(kickerPredicate),
+			sql` or `,
+		)})`;
+		const categoryPredicates = alertTypes?.map((alertType) =>
+			alertType === 'none' ? not(anyKicker) : kickerPredicate(alertType),
+		);
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
-			normalisedCreatedByEmail
-				? sql`lower(${notifications.createdByEmail}) = ${normalisedCreatedByEmail}`
+			normalisedCreatedByEmails?.length
+				? inArray(
+						sql`lower(${notifications.createdByEmail})`,
+						normalisedCreatedByEmails,
+					)
 				: undefined,
 			statuses?.length ? inArray(notifications.status, statuses) : undefined,
 			searchPattern
@@ -190,6 +236,7 @@ export const createNotificationsRepository = (db: Database) => ({
 					)`
 				: undefined,
 			audienceFilter,
+			categoryPredicates?.length ? or(...categoryPredicates) : undefined,
 		);
 
 		const [totals] = await db

@@ -329,18 +329,20 @@ export const createNotificationsRouter = (
 				limit,
 				offset,
 				search,
-				createdByEmail,
+				createdByEmails,
 				audiences,
 				statuses,
+				alertTypes,
 			} = req.query as unknown as NotificationListQuery;
 			const { notifications, total } = await listNotifications({
 				since,
 				limit,
 				offset,
 				search,
-				createdByEmail,
+				createdByEmails,
 				audiences,
 				statuses,
+				alertTypes,
 			});
 
 			res.status(200).json({

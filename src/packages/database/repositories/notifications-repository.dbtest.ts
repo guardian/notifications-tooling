@@ -6,6 +6,7 @@ import {
 	expect,
 	it,
 } from 'bun:test';
+import { historyAlertTypeSchema } from '@models';
 import {
 	buildDispatch,
 	buildNotification,
@@ -128,6 +129,200 @@ const daysAgo = (days: number): Date =>
 	new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
 describe('notifications repository listRecent (real Postgres)', () => {
+	const createHistoryNotification = ({
+		appAlertType,
+		subject,
+		title = 'An election update',
+		createdAt = daysAgo(1),
+		kind = 'send',
+	}: {
+		appAlertType?: string;
+		subject?: string;
+		title?: string;
+		createdAt?: Date;
+		kind?: 'send' | 'test';
+	}) =>
+		notifications.create({
+			...buildNotification(),
+			createdAt,
+			kind,
+			content: {
+				items: {
+					lead: {
+						type: appAlertType ? 'app-push' : 'newsletter',
+						title,
+						body: 'Latest reporting',
+						link: 'https://www.theguardian.com/politics',
+					},
+				},
+			},
+			channels: {
+				...(appAlertType
+					? {
+							'app-push': {
+								audience: {
+									type: 'topic',
+									items: [
+										{ type: appAlertType, name: 'uk' },
+										{ type: appAlertType, name: 'us' },
+									],
+								},
+								compose: { use: 'lead' },
+							},
+						}
+					: {}),
+				...(subject !== undefined
+					? {
+							newsletter: {
+								audience: { type: 'segment', items: ['UK'] },
+								compose: { items: ['lead'], subject },
+							},
+						}
+					: {}),
+			},
+		});
+
+	it('matches all five kicker categories, the no-kicker option, case-insensitive prefixes, and only start-of-subject kickers', async () => {
+		const appBreaking = await createHistoryNotification({
+			appAlertType: 'breaking-news',
+		});
+		const emailBreaking = await createHistoryNotification({
+			subject: 'bReAkInG NeWs: Update',
+		});
+		const exclusive = await createHistoryNotification({
+			subject: 'EXCLUSIVE: Update',
+		});
+		const editorsPicks = await createHistoryNotification({
+			appAlertType: 'editors-picks',
+		});
+		const oneNotToMiss = await createHistoryNotification({
+			appAlertType: 'one-not-to-miss',
+		});
+		const sport = await createHistoryNotification({ appAlertType: 'sport' });
+		const unprefixed = await createHistoryNotification({ subject: 'Update' });
+		const embedded = await createHistoryNotification({
+			subject: 'Today: Exclusive: Breaking news: Update',
+		});
+		const leadingSpace = await createHistoryNotification({
+			subject: ' Breaking news: Update',
+		});
+		const expected = {
+			'breaking-news': [appBreaking.id, emailBreaking.id],
+			exclusive: [exclusive.id],
+			'editors-picks': [editorsPicks.id],
+			'one-not-to-miss': [oneNotToMiss.id],
+			sport: [sport.id],
+			none: [unprefixed.id, embedded.id, leadingSpace.id],
+		};
+		for (const alertType of historyAlertTypeSchema.options) {
+			const page = await notifications.listRecent({
+				since: daysAgo(14),
+				alertTypes: [alertType],
+			});
+			expect(page.total).toBe(expected[alertType].length);
+			expect(page.notifications.map(({ id }) => id).sort()).toEqual(
+				expected[alertType].sort(),
+			);
+		}
+		const unfiltered = await notifications.listRecent({
+			since: daysAgo(14),
+			alertTypes: [],
+		});
+		expect(unfiltered.total).toBe(9);
+		for (const notification of [unprefixed, embedded, leadingSpace]) {
+			expect(unfiltered.notifications.map(({ id }) => id)).toContain(
+				notification.id,
+			);
+		}
+	});
+
+	it('matches notifications with no recognised kicker, and ORs none with other categories', async () => {
+		const unprefixed = await createHistoryNotification({ subject: 'Update' });
+		const unknownAppType = await createHistoryNotification({
+			appAlertType: 'not-a-kicker',
+		});
+		const sport = await createHistoryNotification({ appAlertType: 'sport' });
+		const breaking = await createHistoryNotification({
+			subject: 'Breaking news: Update',
+		});
+
+		const none = await notifications.listRecent({
+			since: daysAgo(14),
+			alertTypes: ['none'],
+		});
+		expect(none.total).toBe(2);
+		expect(none.notifications.map(({ id }) => id).sort()).toEqual(
+			[unprefixed.id, unknownAppType.id].sort(),
+		);
+
+		const noneOrSport = await notifications.listRecent({
+			since: daysAgo(14),
+			alertTypes: ['none', 'sport'],
+		});
+		expect(noneOrSport.total).toBe(3);
+		expect(noneOrSport.notifications.map(({ id }) => id).sort()).toEqual(
+			[unprefixed.id, unknownAppType.id, sport.id].sort(),
+		);
+		expect(noneOrSport.notifications.map(({ id }) => id)).not.toContain(
+			breaking.id,
+		);
+	});
+
+	it('combines category OR with search AND before pagination, counting combined plans once', async () => {
+		await createHistoryNotification({
+			appAlertType: 'sport',
+			createdAt: daysAgo(0),
+		});
+		await createHistoryNotification({
+			appAlertType: 'breaking-news',
+			title: 'Unrelated wording',
+			createdAt: daysAgo(0),
+		});
+		const first = await createHistoryNotification({
+			appAlertType: 'breaking-news',
+			subject: 'Exclusive: Update',
+			createdAt: daysAgo(1),
+		});
+		const second = await createHistoryNotification({
+			subject: 'Breaking news: Update',
+			createdAt: daysAgo(2),
+		});
+		const third = await createHistoryNotification({
+			subject: 'Exclusive: Update',
+			createdAt: daysAgo(3),
+		});
+		await createHistoryNotification({
+			subject: 'Exclusive: election',
+			title: 'Subject-only match',
+		});
+		await createHistoryNotification({
+			appAlertType: 'breaking-news',
+			createdAt: daysAgo(20),
+		});
+		await createHistoryNotification({
+			appAlertType: 'breaking-news',
+			kind: 'test',
+		});
+		const criteria = {
+			since: daysAgo(14),
+			search: 'ELECTION',
+			alertTypes: historyAlertTypeSchema
+				.array()
+				.parse(['exclusive', 'breaking-news', 'exclusive']),
+			limit: 1,
+		};
+		for (const [offset, id] of [first.id, second.id, third.id].entries()) {
+			const page = await notifications.listRecent({ ...criteria, offset });
+			expect(page.total).toBe(3);
+			expect(page.notifications.map((row) => row.id)).toEqual([id]);
+		}
+		const emptyPage = await notifications.listRecent({
+			...criteria,
+			offset: 3,
+		});
+		expect(emptyPage).toEqual({ total: 3, notifications: [] });
+	});
+
 	it('returns only notifications created at or after the cut-off, newest first', async () => {
 		const recent = await notifications.create({
 			...buildNotification(),
@@ -397,7 +592,7 @@ describe('notifications repository listRecent (real Postgres)', () => {
 
 		const page = await notifications.listRecent({
 			since: daysAgo(14),
-			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdByEmails: ['ada.lovelace@guardian.co.uk'],
 		});
 
 		expect(page.total).toBe(1);
@@ -418,11 +613,43 @@ describe('notifications repository listRecent (real Postgres)', () => {
 
 		const page = await notifications.listRecent({
 			since: daysAgo(14),
-			createdByEmail: 'ada.lovelace@GUARDIAN.co.uk',
+			createdByEmails: ['ada.lovelace@GUARDIAN.co.uk'],
 		});
 
 		expect(page.total).toBe(1);
 		expect(page.notifications.map((row) => row.id)).toEqual([mine.id]);
+	});
+
+	it('matches any selected sender', async () => {
+		const newest = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'grace.hopper@guardian.co.uk',
+			createdAt: daysAgo(1),
+		});
+		const oldest = await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'ada.lovelace@guardian.co.uk',
+			createdAt: daysAgo(2),
+		});
+		await notifications.create({
+			...buildNotification(),
+			createdByEmail: 'other@guardian.co.uk',
+			createdAt: daysAgo(3),
+		});
+
+		const page = await notifications.listRecent({
+			since: daysAgo(14),
+			createdByEmails: [
+				'ada.lovelace@guardian.co.uk',
+				'grace.hopper@guardian.co.uk',
+			],
+		});
+
+		expect(page.total).toBe(2);
+		expect(page.notifications.map((row) => row.id)).toEqual([
+			newest.id,
+			oldest.id,
+		]);
 	});
 });
 

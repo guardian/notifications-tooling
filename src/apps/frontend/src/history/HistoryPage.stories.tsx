@@ -9,6 +9,10 @@ import type {
 } from '../schemas';
 import { articleFixture } from '../testing/capi-fixtures';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
+import {
+	notificationSenders,
+	notificationSendersHandler,
+} from '../testing/handlers/notifications';
 import { HistoryPage } from './HistoryPage';
 
 const historyResponse: NotificationListResponse = {
@@ -171,10 +175,42 @@ const historyRequest = fn((requestUrl: URL) => requestUrl);
 const historyHandler = http.get(
 	`${getApiBaseUrl()}/v1/notifications`,
 	async ({ request }) => {
-		historyRequest(new URL(request.url));
+		const requestUrl = new URL(request.url);
+		historyRequest(requestUrl);
 		await delay(300);
-		return HttpResponse.json(historyResponse);
+		const selectedSenders = requestUrl.searchParams.getAll('createdByEmail');
+		const notifications = selectedSenders.length
+			? historyResponse.notifications.filter(({ createdByEmail }) =>
+					selectedSenders.includes(createdByEmail.toLowerCase()),
+				)
+			: historyResponse.notifications;
+		return HttpResponse.json({
+			...historyResponse,
+			total: notifications.length,
+			notifications,
+		});
 	},
+);
+
+const senderRequest = fn();
+const refreshNotificationSendersHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications/senders`,
+	() => {
+		senderRequest();
+		return HttpResponse.json({ senders: notificationSenders });
+	},
+);
+
+const senderCutoff = 1_700_000_000;
+const cutoffNotificationSendersHandler = http.get(
+	`${getApiBaseUrl()}/v1/notifications/senders`,
+	({ request }) =>
+		HttpResponse.json({
+			senders:
+				new URL(request.url).searchParams.get('since') === String(senderCutoff)
+					? ['historic.sender@example.com']
+					: ['recent.sender@example.com'],
+		}),
 );
 
 const partialFailureDetail: NotificationResource = {
@@ -272,13 +308,29 @@ const failedHistoryHandler = http.get(
 	() => HttpResponse.json({ error: 'internal_error' }, { status: 500 }),
 );
 
+const initialHistoryUrl = (query: string) => () => {
+	historyRequest.mockClear();
+	window.history.replaceState(
+		{},
+		'',
+		`${window.location.pathname}${query ? `?${query}` : ''}`,
+	);
+	return {};
+};
+
 const meta = {
 	title: 'Dispatch/History/HistoryPage',
 	component: HistoryPage,
+	loaders: [initialHistoryUrl('')],
 	parameters: {
 		layout: 'fullscreen',
 		msw: {
-			handlers: [historyHandler, failureDetailHandler, channelAudiencesHandler],
+			handlers: [
+				notificationSendersHandler,
+				historyHandler,
+				failureDetailHandler,
+				channelAudiencesHandler,
+			],
 		},
 	},
 } satisfies Meta<typeof HistoryPage>;
@@ -287,6 +339,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Loaded: Story = {
+	parameters: {
+		msw: {
+			handlers: [
+				refreshNotificationSendersHandler,
+				historyHandler,
+				failureDetailHandler,
+				channelAudiencesHandler,
+			],
+		},
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(
@@ -297,9 +359,11 @@ export const Loaded: Story = {
 			name: 'Refresh activity',
 		});
 		historyRequest.mockClear();
+		senderRequest.mockClear();
 		await userEvent.click(refreshButton);
 		await waitFor(async () => {
 			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(senderRequest).toHaveBeenCalledOnce();
 			await expect(refreshButton).toBeDisabled();
 		});
 		await waitFor(async () => {
@@ -463,6 +527,102 @@ export const AudienceFilter: Story = {
 	},
 };
 
+export const SenderFilter: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		historyRequest.mockClear();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Sender All' }));
+		const page = within(canvasElement.ownerDocument.body);
+		const senderMenu = await page.findByRole('menu');
+		await expect(senderMenu.scrollWidth).toBeLessThanOrEqual(
+			senderMenu.clientWidth,
+		);
+		await expect(
+			page.getByRole('menuitemcheckbox', {
+				name: 'Very Long Editorial Sender Address',
+			}),
+		).toBeVisible();
+		const alex = await page.findByRole('menuitemcheckbox', { name: 'Alex' });
+		await userEvent.click(alex);
+
+		await expect(alex).toBeChecked();
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(
+				canvas.getByRole('link', {
+					name: /Prime minister announces cabinet reshuffle/,
+				}),
+			).toBeVisible();
+			await expect(
+				canvas.queryByRole('link', {
+					name: /Extreme weather disrupts travel across Europe/,
+				}),
+			).not.toBeInTheDocument();
+		});
+
+		const jamie = page.getByRole('menuitemcheckbox', { name: 'Jamie' });
+		await userEvent.click(jamie);
+
+		await expect(jamie).toBeChecked();
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledTimes(2);
+			const requestUrl = historyRequest.mock.calls[1]?.[0];
+			await expect(requestUrl?.searchParams.getAll('createdByEmail')).toEqual([
+				'alex@example.com',
+				'jamie@example.com',
+			]);
+			await expect(
+				canvas.getByRole('link', {
+					name: /Prime minister announces cabinet reshuffle/,
+				}),
+			).toBeVisible();
+			await expect(
+				canvas.getByRole('link', {
+					name: /Extreme weather disrupts travel across Europe/,
+				}),
+			).toBeVisible();
+		});
+	},
+};
+
+export const SenderFilterCutoff: Story = {
+	loaders: [
+		() => {
+			window.history.replaceState(
+				{},
+				'',
+				`${window.location.pathname}?since=${senderCutoff}`,
+			);
+			return {};
+		},
+	],
+	parameters: {
+		msw: {
+			handlers: [
+				cutoffNotificationSendersHandler,
+				historyHandler,
+				failureDetailHandler,
+				channelAudiencesHandler,
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Sender All' }));
+		const page = within(canvasElement.ownerDocument.body);
+		await expect(
+			await page.findByRole('menuitemcheckbox', { name: 'Historic Sender' }),
+		).toBeVisible();
+		await expect(
+			page.queryByRole('menuitemcheckbox', { name: 'Recent Sender' }),
+		).not.toBeInTheDocument();
+	},
+};
+
 export const StatusFilter: Story = {
 	loaders: [
 		() => {
@@ -526,7 +686,7 @@ export const ClearAllFilters: Story = {
 			window.history.replaceState(
 				{},
 				'',
-				`${window.location.pathname}?search=weather&audience=uk&status=error&offset=20&limit=10`,
+				`${window.location.pathname}?search=weather&createdByEmail=alex%40example.com&audience=uk&status=error&offset=20&limit=10`,
 			);
 			return {};
 		},
@@ -537,6 +697,9 @@ export const ClearAllFilters: Story = {
 		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
 			'weather',
 		);
+		await expect(
+			canvas.getByRole('button', { name: 'Sender Alex' }),
+		).toBeInTheDocument();
 		await expect(
 			canvas.getByRole('button', {
 				name: 'Audience / Editions United Kingdom',
@@ -551,6 +714,9 @@ export const ClearAllFilters: Story = {
 		await expect(canvas.getByRole('searchbox', { name: 'Search' })).toHaveValue(
 			'',
 		);
+		await expect(
+			canvas.getByRole('button', { name: 'Sender All' }),
+		).toBeInTheDocument();
 		await expect(
 			canvas.getByRole('button', { name: 'Audience / Editions All' }),
 		).toBeInTheDocument();
@@ -575,7 +741,13 @@ export const InvalidSearch: Story = {
 		},
 	],
 	parameters: {
-		msw: { handlers: [emptyHistoryHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				notificationSendersHandler,
+				emptyHistoryHandler,
+				channelAudiencesHandler,
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -592,9 +764,119 @@ export const InvalidSearch: Story = {
 	},
 };
 
+export const CategoryFilter: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const page = within(document.body);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		const trigger = canvas.getByRole('button', {
+			name: 'Kicker / Alert type All',
+		});
+		historyRequest.mockClear();
+
+		await userEvent.click(trigger);
+		await expect(
+			page.getAllByRole('menuitemcheckbox').map((option) => option.textContent),
+		).toEqual([
+			expect.stringContaining('None'),
+			expect.stringContaining('Breaking news'),
+			expect.stringContaining('Exclusive'),
+			expect.stringContaining("Editors' picks"),
+			expect.stringContaining('One not to miss'),
+			expect.stringContaining('Sports'),
+		]);
+
+		await userEvent.click(
+			page.getByRole('menuitemcheckbox', { name: 'Sports' }),
+		);
+		await expect(
+			page.getByRole('menu', { name: 'Kicker / Alert type' }),
+		).toBeVisible();
+		await expect(
+			page.getByRole('menuitemcheckbox', { name: 'Sports' }),
+		).toHaveAttribute('aria-checked', 'true');
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(
+				historyRequest.mock.calls[0]![0].searchParams.getAll('alertType'),
+			).toEqual(['sport']);
+		});
+
+		for (const name of [
+			'None',
+			'Breaking news',
+			'Exclusive',
+			"Editors' picks",
+			'One not to miss',
+		]) {
+			await userEvent.click(page.getByRole('menuitemcheckbox', { name }));
+		}
+		await userEvent.keyboard('{Escape}');
+		await expect(trigger).toHaveFocus();
+
+		const summary =
+			"None, Breaking news, Exclusive, Editors' picks, One not to miss, Sports";
+		await expect(trigger).toHaveAccessibleName(
+			`Kicker / Alert type ${summary}`,
+		);
+		const label = within(trigger).getByText(summary);
+		await expect(getComputedStyle(label).textOverflow).toBe('ellipsis');
+		await expect(getComputedStyle(label).whiteSpace).toBe('nowrap');
+		await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
+		await expect(trigger.getBoundingClientRect().height).toBe(40);
+	},
+};
+
+export const InvalidCategoryFilter: Story = {
+	loaders: [
+		initialHistoryUrl(
+			'search=weather&alertType=sport&alertType=&alertType=unknown&offset=20&limit=10&since=1700000000&other=keep',
+		),
+	],
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByText('Invalid Kicker / Alert type filter.'),
+		).toBeVisible();
+		await expect(historyRequest).not.toHaveBeenCalled();
+		await expect(canvas.queryByRole('grid')).not.toBeInTheDocument();
+		await expect(
+			canvas.getByRole('button', {
+				name: 'Kicker / Alert type Invalid filter',
+			}),
+		).toBeDisabled();
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear Kicker / Alert type filter' }),
+		);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		await expect(
+			new URLSearchParams(window.location.search).has('alertType'),
+		).toBe(false);
+		await expect(
+			new URLSearchParams(window.location.search).get('search'),
+		).toBe('weather');
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			await expect(
+				historyRequest.mock.calls[0]![0].searchParams.has('alertType'),
+			).toBe(false);
+		});
+		await expect(
+			canvas.getByRole('button', { name: 'Kicker / Alert type All' }),
+		).toBeEnabled();
+	},
+};
+
 export const Loading: Story = {
 	parameters: {
-		msw: { handlers: [loadingHistoryHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				notificationSendersHandler,
+				loadingHistoryHandler,
+				channelAudiencesHandler,
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -609,7 +891,13 @@ export const Loading: Story = {
 
 export const Error: Story = {
 	parameters: {
-		msw: { handlers: [failedHistoryHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				notificationSendersHandler,
+				failedHistoryHandler,
+				channelAudiencesHandler,
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

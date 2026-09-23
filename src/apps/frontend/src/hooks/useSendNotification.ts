@@ -7,6 +7,7 @@ import { notificationRoutes, withArticleUrl } from '../routes';
 import type { SendNotificationRequest } from '../schemas';
 import type { SendNotificationResult } from '../utils/send-notification';
 import { notificationHistoryQueryKey } from './useNotificationHistory';
+import { notificationSendersQueryKey } from './useNotificationSenders';
 
 export const invalidateNotificationHistoryAfterSend = (
 	queryClient: QueryClient,
@@ -16,10 +17,16 @@ export const invalidateNotificationHistoryAfterSend = (
 		return Promise.resolve();
 	}
 
-	return queryClient.invalidateQueries({
-		queryKey: notificationHistoryQueryKey,
-		refetchType: 'all',
-	});
+	return Promise.all([
+		queryClient.invalidateQueries({
+			queryKey: notificationHistoryQueryKey,
+			refetchType: 'all',
+		}),
+		queryClient.invalidateQueries({
+			queryKey: notificationSendersQueryKey,
+			refetchType: 'all',
+		}),
+	]);
 };
 
 export const useSendNotification = () => {
