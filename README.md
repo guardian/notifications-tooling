@@ -35,11 +35,11 @@ Email delivery currently integrates with [Braze](https://www.braze.com/docs/deve
   brew install bun
   ```
 - [dev-nginx](https://github.com/guardian/dev-nginx)
-- Docker (optional; required for local Postgres if needed)
+- Docker (required for local Postgres)
 
 ### First-time setup
 
-Install `dev-nginx` before `./scripts/setup.sh` can be run:
+Install `dev-nginx`:
 
 ```bash
 brew tap guardian/homebrew-devtools
@@ -61,9 +61,11 @@ different purposes:
   local database tooling such as `bun run db:start` and migrations.
   `./scripts/setup.sh` creates it automatically from
   `src/packages/database/.env.example` if it is missing.
-- `src/apps/backend/.env` or `src/apps/backend/.env.local` can be used for
-  values that the backend process must see when it starts locally. Use
-  `src/apps/backend/.env.example` as the reference for supported overrides.
+- `src/apps/backend/.env` or `src/apps/backend/.env.local` can be used to
+  override config values used on the backend when running locally. The local
+  backend will fetch the config values used on the CODE stage unless an override
+  is specified. Use `src/apps/backend/.env.example` as the reference for
+  supported overrides.
 
 ### Run locally
 
@@ -78,21 +80,26 @@ than `401`/`403`:
    locally to sign in and issue it.
 2. **Authorisation** — your user must hold the `dispatch_access` permission. The
    permissions store is read from the CODE bucket using the `composer` AWS
-   profile. Grant yourself the permission via the CODE permissions admin UI at
-   [permissions.code.dev-gutools.co.uk/admin](https://permissions.code.dev-gutools.co.uk/admin):
-   find your user and enable `dispatch_access`.
+   profile.
 
-Both the login tool and Dispatch read from the same **Composer** AWS account, so
-a single set of Janus credentials under the `composer` profile satisfies cookie
-issuance and the permissions lookup at once.
+#### 1. Set your Permissions
 
-#### 1. Get Composer credentials
+Grant yourself the permission via the CODE permissions admin UI at
+[permissions.code.dev-gutools.co.uk/admin](https://permissions.code.dev-gutools.co.uk/admin):
+find your user and enable:
+
+- `dispatch_access`: general access to the UI and API
+- `dispatch_send_notification`: permission to send messages from the tool
+
+#### 2. Get Composer credentials
 
 Fetch fresh [Janus](https://janus.gutools.co.uk/) credentials for the Composer
-account into the `composer` profile (Janus -> Composer -> Run dispatch locally). Both the login tool and Dispatch expect
-this profile to be present, so grab them before starting either service.
+account into the `composer` profile (Janus -> Composer -> Run dispatch locally).
 
-#### 2. Start the login tool
+Both the login tool and Dispatch expect this profile to be present, so grab them
+before starting either service.
+
+#### 3. Start the login tool
 
 Clone and start the [login](https://github.com/guardian/login.gutools) tool in a
 separate checkout so it is available alongside Dispatch:
@@ -105,7 +112,7 @@ separate checkout so it is available alongside Dispatch:
 This serves `https://login.local.dev-gutools.co.uk`, which Dispatch redirects to
 when you are unauthenticated.
 
-#### 3. Start Dispatch
+#### 4. Start Dispatch
 
 ```bash
 ./scripts/start.sh
@@ -115,7 +122,17 @@ Local URL:
 
 - `https://dispatch.local.dev-gutools.co.uk`
 
-#### 4. Sign in
+As an alternative to the start script, you can run apps separately if needed:
+
+```bash
+cd src/apps/frontend
+bun run dev
+
+cd src/apps/backend
+bun run dev
+```
+
+#### 5. Sign in
 
 Open `https://dispatch.local.dev-gutools.co.uk`. When unauthenticated you are
 redirected to `login.local.dev-gutools.co.uk`; sign in there to mint the
@@ -130,29 +147,12 @@ present, authorised endpoints resolve successfully.
 > Dispatch use the same Composer AWS profile, so only one policy context can be
 > active at a time.
 
-Run apps separately if needed:
-
-```bash
-cd src/apps/frontend
-bun run dev
-
-cd src/apps/backend
-bun run dev
-```
-
 ### Local Postgres DB
 
-Spin a new docker container running Postgres with
+A local database will be started in docker as a stage of `./scripts/setup.sh`.
 
-```bash
-bun run db:start
-```
-
-And stop it with
-
-```sh
-bun run db:stop
-```
+See the [README for the database package](/src/packages/database/README.md) for detail on managing
+your local DB.
 
 ### Tests, linting, formatting, and type checks
 
@@ -175,6 +175,23 @@ bun --filter frontend typecheck
 ```
 
 Git hooks are managed with `lefthook` and installed automatically via `bun install` (`prepare` script).
+
+### Frontend Storybook testing
+
+Much of the test coverage for the frontend is done within the `play` functions of component story files. These
+tests are run as part of CI, but not as part of the the pre-push hook.
+
+to run all the test from the repo root:
+
+```bash
+bun run test-storybook
+```
+
+You can also observe the test scenarios running from the storybook UI, launched with:
+
+```bash
+bun run storybook
+```
 
 ## 3. How It Works
 
