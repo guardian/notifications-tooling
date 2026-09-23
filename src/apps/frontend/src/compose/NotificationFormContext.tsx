@@ -30,45 +30,48 @@ export interface NotificationFormContextProps {
 	requestTestEmailSend: TestEmailRequestFunction;
 }
 
-export const NotificationFormContext =
-	createContext<NotificationFormContextProps>({
-		channel: 'newsletter',
-		composerState: {
-			isFetchingArticle: false,
-			isWaitingForSend: false,
-			isSendConfirmationOpen: false,
-		},
-		updateComposerState: () => {},
-		resolveArticleFromCapi: () =>
-			Promise.resolve({
-				success: false,
-				failure: new ApiError({
-					message: 'no resolveArticleFromCapi implementation provided',
-					failure: 'fetch-fail',
-				}),
+export const defaultNotificationFormContext: NotificationFormContextProps = {
+	channel: 'newsletter',
+	composerState: {
+		isFetchingArticle: false,
+		isWaitingForSend: false,
+		isSendConfirmationOpen: false,
+	},
+	updateComposerState: () => {},
+	resolveArticleFromCapi: () =>
+		Promise.resolve({
+			success: false,
+			failure: new ApiError({
+				message: 'no resolveArticleFromCapi implementation provided',
+				failure: 'fetch-fail',
 			}),
-		sendNotification: () =>
-			Promise.resolve({
-				success: false,
-				failure: new ApiError({
-					message: 'no sendNotification implementation provided',
-					failure: 'fetch-fail',
-				}),
+		}),
+	sendNotification: () =>
+		Promise.resolve({
+			success: false,
+			failure: new ApiError({
+				message: 'no sendNotification implementation provided',
+				failure: 'fetch-fail',
 			}),
-		requestEmailHtml: () =>
-			Promise.resolve({
-				success: false,
-				failure: new ApiError({
-					message: 'no requestEmailHtml implementation provided',
-					failure: 'fetch-fail',
-				}),
+		}),
+	requestEmailHtml: () =>
+		Promise.resolve({
+			success: false,
+			failure: new ApiError({
+				message: 'no requestEmailHtml implementation provided',
+				failure: 'fetch-fail',
 			}),
-		requestTestEmailSend: () =>
-			Promise.resolve({
-				success: false,
-				failure: new ApiError({
-					message: 'no requestTestEmailSend implementation provided',
-					failure: 'fetch-fail',
-				}),
+		}),
+	requestTestEmailSend: () =>
+		Promise.resolve({
+			success: false,
+			failure: new ApiError({
+				message: 'no requestTestEmailSend implementation provided',
+				failure: 'fetch-fail',
 			}),
-	});
+		}),
+};
+
+export const NotificationFormContext = createContext(
+	defaultNotificationFormContext,
+);

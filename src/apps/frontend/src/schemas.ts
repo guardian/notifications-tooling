@@ -253,6 +253,13 @@ export type NotificationListResponse = z.infer<
 	typeof notificationListResponseSchema
 >;
 
+export const notificationSendersResponseSchema = z.strictObject({
+	senders: z.array(z.string()),
+});
+export type NotificationSendersResponse = z.infer<
+	typeof notificationSendersResponseSchema
+>;
+
 export const sendNotificationResponseSchema = notificationResourceSchema;
 export type SendNotificationResponse = z.infer<
 	typeof sendNotificationResponseSchema

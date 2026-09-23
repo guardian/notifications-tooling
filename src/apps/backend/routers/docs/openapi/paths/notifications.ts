@@ -9,7 +9,7 @@ export const notificationsPath = {
 	get: {
 		summary: 'List recent notifications',
 		description:
-			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive literal substring match to stored content-item body and title fields only. `createdByEmail` restricts the page to notifications sent by a given user email. Repeated `audience` values match any selected newsletter audience or app-push edition. `alertType` matches any selected category. Filters combine using AND and precede pagination; `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
+			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive literal substring match to stored content-item body and title fields only. Repeated `createdByEmail` values match notifications sent by any selected user. Repeated `audience` values match any selected newsletter audience or app-push edition. `alertType` matches any selected category. Filters combine using AND and precede pagination; `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{
@@ -49,8 +49,13 @@ export const notificationsPath = {
 				in: 'query',
 				required: false,
 				description:
-					'Restricts the page to notifications sent by this user email (the `createdByEmail` of the notification). Matched case-insensitively. Use `GET /v1/notifications/senders` to discover the available values.',
-				schema: { type: 'string', minLength: 1, maxLength: 320 },
+					'Repeat to match notifications sent by any selected user email (the `createdByEmail` of the notification). Matched case-insensitively. Use `GET /v1/notifications/senders` to discover the available values.',
+				schema: {
+					type: 'array',
+					items: { type: 'string', minLength: 1, maxLength: 320 },
+				},
+				style: 'form',
+				explode: true,
 			},
 			{
 				name: 'audience',

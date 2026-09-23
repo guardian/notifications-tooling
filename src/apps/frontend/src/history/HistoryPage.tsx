@@ -1,8 +1,10 @@
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
+import { notificationSendersQueryKey } from '../hooks/useNotificationSenders';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import {
 	parseHistorySearchParams,
@@ -14,6 +16,7 @@ import { HistoryView } from './HistoryView';
 
 export const HistoryPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
+	const queryClient = useQueryClient();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
 	const debouncedSearch = useDebouncedValue(parsedHistoryQuery.search, 300);
 	const isSearchPending = parsedHistoryQuery.search !== debouncedSearch;
@@ -44,7 +47,13 @@ export const HistoryPage = () => {
 	};
 	const handleRefresh = () => {
 		if (!isSearchPending && !hasInvalidFilters) {
-			void notificationHistory.refetch();
+			void Promise.all([
+				notificationHistory.refetch(),
+				queryClient.refetchQueries({
+					queryKey: notificationSendersQueryKey,
+					type: 'active',
+				}),
+			]);
 		}
 	};
 
@@ -80,9 +89,17 @@ export const HistoryPage = () => {
 							Clear Kicker / Alert type filter
 						</Button>
 					</InlineMessage>
-				) : notificationHistory.isError ? (
+				) : notificationHistory.isError &&
+				  notificationHistory.data === undefined ? (
 					<InlineMessage level="error">
 						Unable to load notification history. Try again.
+					</InlineMessage>
+				) : undefined
+			}
+			refreshError={
+				notificationHistory.isRefetchError ? (
+					<InlineMessage level="error">
+						Unable to refresh notification history. Showing cached results.
 					</InlineMessage>
 				) : undefined
 			}
@@ -98,6 +115,7 @@ export const HistoryPage = () => {
 			currentPage={currentPage}
 			hasActiveFilters={
 				parsedHistoryQuery.search !== undefined ||
+				(parsedHistoryQuery.senders?.length ?? 0) > 0 ||
 				(parsedHistoryQuery.audiences?.length ?? 0) > 0 ||
 				(parsedHistoryQuery.statuses?.length ?? 0) > 0 ||
 				alertTypes.length > 0

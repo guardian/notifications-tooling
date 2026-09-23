@@ -70,6 +70,21 @@ describe('parseHistorySearchParams', () => {
 		});
 	});
 
+	it('normalizes and deduplicates sender parameters', () => {
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams(
+					'createdByEmail=%20Alex%40Example.com%20&createdByEmail=alex%40example.com&createdByEmail=jamie%40example.com',
+				),
+			),
+		).toEqual({
+			limit: 20,
+			offset: 0,
+			since: undefined,
+			senders: ['alex@example.com', 'jamie@example.com'],
+		});
+	});
+
 	it('sanitizes invalid values before they reach the endpoint', () => {
 		expect(
 			parseHistorySearchParams(
