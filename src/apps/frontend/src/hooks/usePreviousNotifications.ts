@@ -1,14 +1,14 @@
-import { articlePreviousSendsResponseSchema } from '@models';
 import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
 import { redirectToLogin } from '../api-client/redirect-to-login';
+import { notificationListResponseSchema } from '../schemas';
 
 export const fetchPreviousNotifications = async (articleId: string) => {
 	try {
 		return await fetchJsonAndParse(
-			articlePreviousSendsResponseSchema,
-			`/v1/notifications/article/${encodeURIComponent(articleId)}`,
+			notificationListResponseSchema,
+			`/v1/notifications?articleId=${articleId}`,
 		);
 	} catch (error) {
 		if (

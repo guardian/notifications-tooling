@@ -2,40 +2,11 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Avatar } from '@guardian/stand/Avatar';
 import { Typography } from '@guardian/stand/Typography';
-import { useEffect, useState } from 'react';
-import type { ArticlePreviousSendsResponse } from '../../../../packages/models';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 
 interface Props {
 	articleId?: string;
 }
-
-const getPreviousSends = async (
-	articleId?: string,
-): Promise<ArticlePreviousSendsResponse | undefined> => {
-	if (!articleId) {
-		return undefined;
-	}
-	await Promise.resolve();
-	return {
-		articleId,
-		total: 1,
-		sends: [
-			{
-				notificationId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-				sentBy: 'user.test@example.com',
-				sentAt: '2026-09-23T13:35:50.185Z',
-				channels: ['newsletter'],
-			},
-			{
-				notificationId: '5717-4562-b3fc-2c963f66afa6-3fa85f64',
-				sentBy: 'john.doe@example.com',
-				sentAt: '2026-05-23T13:35:50.185Z',
-				channels: ['app-alert'],
-			},
-		],
-	};
-};
 
 const emailToIntials = (sentBy: string): string => {
 	const names = sentBy.split('@').at(0)?.split('.') ?? [];
@@ -59,36 +30,29 @@ const style = {
 };
 
 export const PreviousNotificationsBar = ({ articleId }: Props) => {
-	const [previousSends, setPreviousSends] =
-		useState<ArticlePreviousSendsResponse>();
-
-	useEffect(() => {
-		getPreviousSends(articleId)
-			.then(setPreviousSends)
-			.catch((err) => console.error(err));
-	}, [articleId]);
-
-	const { data, error } = usePreviousNotifications(articleId);
-	if (data || error) {
-		console.log({ data, error });
+	const { data: previousSends, error } = usePreviousNotifications(articleId);
+	if (previousSends || error) {
+		console.log({ previousSends, error });
 	}
 
-	if (!previousSends || previousSends.articleId !== articleId) {
+	if (!previousSends) {
 		return null;
 	}
 
 	return (
 		<div css={style.bar}>
-			{previousSends.sends.map((send, index) => (
+			{previousSends.notifications.map((send, index) => (
 				<Avatar
-					initials={emailToIntials(send.sentBy)}
+					initials={emailToIntials(send.createdByEmail)}
 					key={index}
-					alt={send.sentBy}
+					alt={send.createdByEmail}
 				/>
 			))}
 			<Typography>Sent an app alert with this URL</Typography>
-			{previousSends.sends.length === 1 ? (
-				<Typography>[{previousSends.sends.at(0)?.sentAt}]</Typography>
+			{previousSends.notifications.length === 1 ? (
+				<Typography>
+					[{previousSends.notifications.at(0)?.createdAt}]
+				</Typography>
 			) : (
 				<Typography>Timestamp</Typography>
 			)}

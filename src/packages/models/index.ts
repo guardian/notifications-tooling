@@ -1,4 +1,3 @@
-export * from './api-contract/article-history';
 export * from './api-contract/audience';
 export * from './api-contract/history-alert-type';
 export * from './api-contract/preview';
