@@ -6,6 +6,7 @@ const meta = {
 	component: PreviousNotificationsBar,
 	args: {
 		articleId: 'global/2016/march/01/some-article',
+		showImportedArticle: true,
 	},
 } satisfies Meta<typeof PreviousNotificationsBar>;
 
