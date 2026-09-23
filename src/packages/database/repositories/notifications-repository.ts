@@ -60,6 +60,19 @@ export type NotificationListPage = {
 	total: number;
 };
 
+export type ListArticleHistoryOptions = {
+	articleId: string;
+	limit: number;
+	offset: number;
+};
+
+export type ArticleHistoryPage = {
+	total: number;
+	sends: Array<
+		Pick<Notification, 'id' | 'createdByEmail' | 'createdAt' | 'channels'>
+	>;
+};
+
 /** Thrown when a create hits the `idempotency_key` unique index. */
 export class DuplicateIdempotencyKeyError extends Error {
 	constructor(public readonly idempotencyKey: string) {
@@ -148,6 +161,42 @@ export const createNotificationsRepository = (db: Database) => ({
 			.limit(1);
 
 		return row ?? null;
+	},
+
+	/** Production sends that reference an exact CAPI article id, newest first. */
+	async listArticleHistory({
+		articleId,
+		limit,
+		offset,
+	}: ListArticleHistoryOptions): Promise<ArticleHistoryPage> {
+		const articleMatch = sql<boolean>`exists (
+			select 1
+			from jsonb_each(coalesce(${notifications.content}->'items', '{}'::jsonb)) as content_item
+			where trim(leading '/' from regexp_replace(
+				split_part(split_part(content_item.value->>'link', '#', 1), '?', 1),
+				'^https?://[^/]+/?',
+				''
+			)) = ${articleId}
+		)`;
+		const predicate = and(eq(notifications.kind, 'send'), articleMatch);
+		const [totals] = await db
+			.select({ total: count() })
+			.from(notifications)
+			.where(predicate);
+		const sends = await db
+			.select({
+				id: notifications.id,
+				createdByEmail: notifications.createdByEmail,
+				createdAt: notifications.createdAt,
+				channels: notifications.channels,
+			})
+			.from(notifications)
+			.where(predicate)
+			.orderBy(desc(notifications.createdAt))
+			.limit(limit)
+			.offset(offset);
+
+		return { total: totals?.total ?? 0, sends };
 	},
 
 	/**
