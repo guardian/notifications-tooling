@@ -273,42 +273,7 @@ export const notificationArticleHistoryPath = {
 				content: {
 					'application/json': {
 						schema: {
-							type: 'object',
-							required: ['articleId', 'total', 'limit', 'offset', 'sends'],
-							properties: {
-								articleId: { type: 'string' },
-								total: { type: 'integer', minimum: 0 },
-								limit: { type: 'integer', minimum: 1 },
-								offset: { type: 'integer', minimum: 0 },
-								sends: {
-									type: 'array',
-									items: {
-										type: 'object',
-										required: [
-											'notificationId',
-											'sentBy',
-											'sentAt',
-											'channels',
-										],
-										properties: {
-											notificationId: { type: 'string', format: 'uuid' },
-											sentBy: { type: 'string', format: 'email' },
-											sentAt: {
-												type: 'string',
-												format: 'date-time',
-												description: 'The send timestamp in UTC.',
-											},
-											channels: {
-												type: 'array',
-												items: {
-													type: 'string',
-													enum: ['newsletter', 'app-push'],
-												},
-											},
-										},
-									},
-								},
-							},
+							$ref: '#/components/schemas/NotificationArticleHistory',
 						},
 					},
 				},
