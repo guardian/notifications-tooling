@@ -13,7 +13,9 @@ import { DispatchCreateNotificationModal } from '../compose/DispatchCreateNotifi
 import { useLatestPublishedContent } from '../hooks/useLatestPublishedContent';
 import { latestPublishedContentTheme } from '../themes';
 import { EmptyState } from '../ui/EmptyState';
+import { LastUpdated } from '../ui/LastUpdated';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { RefreshButton } from '../ui/RefreshButton';
 import { TextLinkButton } from '../ui/TextLinkButton';
 import type { LatestPublishedContentItem } from './latest-published-content';
 import { LatestPublishedContentCard } from './LatestPublishedContentCard';
@@ -37,19 +39,32 @@ export const LatestPublishedContentPanel = ({
 	const [selectedArticleUrl, setSelectedArticleUrl] = useState<string>();
 	const hasCachedData = latestPublishedContent.data !== undefined;
 	const isEmpty = !latestPublishedContent.isPending && content.length === 0;
+	const lastUpdatedAt = latestPublishedContent.dataUpdatedAt
+		? new Date(latestPublishedContent.dataUpdatedAt).toISOString()
+		: undefined;
 
 	return (
 		<>
 			<div css={latestPublishedContentTheme.panel}>
 				<div css={latestPublishedContentTheme.header}>
-					<Typography variant="headingXl" element="h2">
-						Latest published content
-					</Typography>
+					<div css={latestPublishedContentTheme.titleRow}>
+						<Typography variant="headingXl" element="h2">
+							Latest published content
+						</Typography>
+						<div css={latestPublishedContentTheme.refreshControls}>
+							{lastUpdatedAt && <LastUpdated updatedAt={lastUpdatedAt} />}
+							<RefreshButton
+								label="Refresh"
+								isRefreshing={latestPublishedContent.isFetching}
+								onRefresh={() => void latestPublishedContent.refetch()}
+							/>
+						</div>
+					</div>
 					<Typography
 						variant="bodySm"
 						cssOverrides={latestPublishedContentTheme.helpText}
 					>
-						Choose a recent article from below to create an alert
+						Choose a recent article from below to begin creating an alert
 					</Typography>
 				</div>
 				{latestPublishedContent.isPending && !hasCachedData ? (

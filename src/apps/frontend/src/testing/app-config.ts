@@ -14,4 +14,6 @@ export const mockAppConfig: AppConfig = {
 		UserPermissions.DispatchAccess,
 		UserPermissions.SendNotification,
 	],
+	gridUri: 'https://api.media.mock.dev-gutools.co.uk',
+	gridApiUri: 'https://media.mock.dev-gutools.co.uk',
 };

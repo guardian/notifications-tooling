@@ -1,6 +1,7 @@
 import { expect, it } from 'bun:test';
 import { renderHook } from '@testing-library/react';
 import { useContext } from 'react';
+import '../../happydom-setup';
 import { ApiError } from '../api-client/errors';
 import { NotificationFormContext } from './NotificationFormContext';
 

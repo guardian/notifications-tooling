@@ -34,11 +34,13 @@ const refreshButtonTheme: ButtonTheme = {
 interface RefreshButtonProps {
 	onRefresh: () => void;
 	isRefreshing?: boolean;
+	label?: string;
 }
 
 export const RefreshButton = ({
 	onRefresh,
 	isRefreshing = false,
+	label = 'Refresh activity',
 }: RefreshButtonProps) => (
 	<Button
 		type="button"
@@ -49,6 +51,6 @@ export const RefreshButton = ({
 		isDisabled={isRefreshing}
 		onClick={onRefresh}
 	>
-		Refresh activity
+		{label}
 	</Button>
 );
