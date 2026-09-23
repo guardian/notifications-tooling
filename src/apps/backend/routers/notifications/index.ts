@@ -1,9 +1,6 @@
-import { NotificationChannel } from '@config';
 import {
-	type ArticleHistoryPage,
 	createNotificationsRepository,
 	getDb,
-	type ListArticleHistoryOptions,
 	type ListDistinctSendersOptions,
 	type ListRecentNotificationsOptions,
 	type NotificationListPage,
@@ -27,10 +24,6 @@ import {
 	toNotificationResponse,
 	toNotificationSummary,
 } from '../../persistence/persist-notification';
-import {
-	type NotificationArticleHistoryQuery,
-	notificationArticleHistoryQuerySchema,
-} from './schemas/notification-article-history-query';
 import {
 	notificationListQuerySchema,
 	notificationSendersQuerySchema,
@@ -183,27 +176,6 @@ export const handleNotificationSendersValidationError: ErrorRequestHandler = (
 	});
 };
 
-/** Validation errors for `GET /v1/notifications/article`. */
-export const handleNotificationArticleHistoryValidationError: ErrorRequestHandler =
-	(errors, req, res) => {
-		const details = errors.flatMap((item) =>
-			item.errors.issues.map((issue) => ({
-				code: issue.code,
-				path: toJsonPointer(issue.path),
-				message: issue.message,
-			})),
-		);
-
-		res.status(400).json({
-			...buildErrorEnvelope(
-				req,
-				'bad_request',
-				'The notification article lookup parameters are invalid.',
-			),
-			details,
-		});
-	};
-
 type FindNotificationById = (
 	id: string,
 ) => Promise<NotificationWithDispatches | null>;
@@ -231,15 +203,6 @@ const listDistinctSenders: ListDistinctSenders = async (options) => {
 	return createNotificationsRepository(db).listDistinctSenders(options);
 };
 
-type ListArticleHistory = (
-	options: ListArticleHistoryOptions,
-) => Promise<ArticleHistoryPage>;
-
-const listNotificationArticleHistory: ListArticleHistory = async (options) => {
-	const db = await getDb();
-	return createNotificationsRepository(db).listArticleHistory(options);
-};
-
 type DispatchValidatedNotification = (
 	request: NotificationSendRequest,
 	notificationId: string,
@@ -252,7 +215,6 @@ export const createNotificationsRouter = (
 	findNotification: FindNotificationById = findNotificationByIdWithDispatches,
 	listNotifications: ListRecentNotifications = listRecentNotifications,
 	listSenders: ListDistinctSenders = listDistinctSenders,
-	listArticleHistory: ListArticleHistory = listNotificationArticleHistory,
 ) => {
 	const notificationsRouter = Router();
 
@@ -367,6 +329,7 @@ export const createNotificationsRouter = (
 				limit,
 				offset,
 				search,
+				articleId,
 				createdByEmails,
 				channels,
 				audiences,
@@ -378,6 +341,7 @@ export const createNotificationsRouter = (
 				limit,
 				offset,
 				search,
+				articleId,
 				createdByEmails,
 				channels,
 				audiences,
@@ -411,41 +375,6 @@ export const createNotificationsRouter = (
 			const senders = await listSenders({ since });
 
 			res.status(200).json({ senders });
-		},
-	);
-
-	notificationsRouter.get(
-		'/article',
-		authMiddleware,
-		requirePermissions([UserPermissions.DispatchAccess]),
-		validate({
-			query: notificationArticleHistoryQuerySchema,
-			handler: handleNotificationArticleHistoryValidationError,
-		}) as unknown as RequestHandler,
-		async (req, res) => {
-			const { articleId, limit, offset } =
-				req.query as unknown as NotificationArticleHistoryQuery;
-			const { sends, total } = await listArticleHistory({
-				articleId,
-				limit,
-				offset,
-			});
-			const supportedChannels = Object.values(NotificationChannel);
-
-			res.status(200).json({
-				articleId,
-				total,
-				limit,
-				offset,
-				sends: sends.map((send) => ({
-					notificationId: send.id,
-					sentBy: send.createdByEmail,
-					sentAt: send.createdAt,
-					channels: supportedChannels.filter(
-						(channel) => channel in send.channels,
-					),
-				})),
-			});
 		},
 	);
 

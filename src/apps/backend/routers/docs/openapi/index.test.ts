@@ -71,34 +71,21 @@ describe('notification history OpenAPI contract', () => {
 		});
 	});
 
-	it('documents article history lookup and its compact send response', () => {
-		const articleHistory =
-			openApiDocument.paths['/v1/notifications/article'].get;
-		const articleIdParameter = articleHistory.parameters.find(
-			({ name }) => name === 'articleId',
-		);
-		const responseSchema =
-			articleHistory.responses['200'].content['application/json'].schema;
+	it('documents exact article filtering on the notification collection', () => {
+		const articleIdParameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'articleId');
 
 		expect(articleIdParameter).toMatchObject({
 			in: 'query',
-			required: true,
-			schema: { type: 'string', maxLength: 2048 },
-		});
-		expect(responseSchema).toEqual({
-			$ref: '#/components/schemas/NotificationArticleHistory',
+			required: false,
+			schema: { type: 'string', minLength: 1, maxLength: 2048 },
 		});
 		expect(
-			openApiDocument.components.schemas.NotificationArticleHistory.required,
-		).toEqual(['articleId', 'total', 'limit', 'offset', 'sends']);
-		expect(
-			openApiDocument.components.schemas.NotificationArticleHistory.properties
-				.sends.items.$ref,
-		).toBe('#/components/schemas/NotificationArticleHistorySend');
-		expect(
-			openApiDocument.components.schemas.NotificationArticleHistorySend
-				.properties.channels.items.$ref,
-		).toBe('#/components/schemas/NotificationChannel');
+			openApiDocument.paths['/v1/notifications'].get.responses['200'].content[
+				'application/json'
+			].schema,
+		).toEqual({ $ref: '#/components/schemas/NotificationList' });
 	});
 
 	it('documents repeated categories using the validation enum', () => {

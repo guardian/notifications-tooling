@@ -4,6 +4,7 @@ import {
 	historyAlertTypeSchema,
 	notificationAudienceFilterId,
 } from '@models';
+import { determineArticleId, isGuardianUrl } from '@utils';
 import { z } from 'zod';
 
 const defaultLimit = 10;
@@ -19,6 +20,20 @@ const statusesByCategory = {
 
 const daysAgo = (days: number) =>
 	new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+const articleIdSchema = z
+	.string()
+	.trim()
+	.min(1)
+	.max(2048)
+	.refine((articleReference) => {
+		const articleId = determineArticleId(articleReference);
+		return (
+			articleId !== undefined &&
+			(isGuardianUrl(articleReference) || articleId === articleReference)
+		);
+	}, 'The articleId must be a valid CAPI article ID or Guardian article URL.')
+	.transform((articleReference) => determineArticleId(articleReference)!);
 
 /** Validates a Unix timestamp (seconds) and decodes it to a `Date`. */
 const epochSecondsToDate = z.codec(z.coerce.number().int().min(0), z.date(), {
@@ -42,6 +57,7 @@ export const notificationListQuerySchema = z
 		limit: z.coerce.number().int().min(1).max(50).optional(),
 		offset: z.coerce.number().int().min(0).optional(),
 		search: z.string().trim().min(1).max(200).optional(),
+		articleId: articleIdSchema.optional(),
 		createdByEmail: z
 			.union([
 				z.string().trim().min(1).max(320),
@@ -82,10 +98,13 @@ export const notificationListQuerySchema = z
 		},
 	)
 	.transform((query) => ({
-		since: query.since ?? daysAgo(defaultSinceDays),
+		since:
+			query.since ??
+			(query.articleId === undefined ? daysAgo(defaultSinceDays) : new Date(0)),
 		limit: query.limit ?? defaultLimit,
 		offset: query.offset ?? defaultOffset,
 		search: query.search,
+		articleId: query.articleId,
 		createdByEmails: query.createdByEmail
 			? [...new Set(query.createdByEmail.map((email) => email.toLowerCase()))]
 			: undefined,
