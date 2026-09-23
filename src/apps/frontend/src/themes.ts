@@ -364,7 +364,9 @@ export const dispatchLandingTheme = {
 			gridTemplateAreas:
 				"'alertbanner alertbanner alertbanner' 'topbar topbar topbar' 'main gap latest'",
 			gridTemplateColumns: 'minmax(0, 983px) minmax(0, 1fr) minmax(0, 676px)',
-			gridTemplateRows: 'min-content min-content 1fr',
+			gridTemplateRows: 'min-content min-content minmax(0, 1fr)',
+			height: '100svh',
+			overflow: 'hidden',
 		},
 	}),
 	primaryColumn: css({
@@ -378,7 +380,11 @@ export const dispatchLandingTheme = {
 			paddingBottom: baseSpacing['24Px'],
 		},
 		[from.lg]: {
+			display: 'flex',
+			minHeight: 0,
+			flexDirection: 'column',
 			paddingBottom: baseSpacing['24Px'],
+			overflow: 'hidden',
 		},
 	}),
 	latestContentRail: css({
@@ -395,9 +401,12 @@ export const dispatchLandingTheme = {
 			content: '""',
 		},
 		[from.lg]: {
+			display: 'flex',
+			minHeight: 0,
 			paddingTop: '39px',
 			paddingInline: semanticSpacing.stackLg,
 			backgroundColor: semanticColors.bg.raisedLevel1,
+			overflow: 'hidden',
 			'&::before': {
 				display: 'none',
 			},
@@ -415,6 +424,13 @@ export const dispatchLandingTheme = {
 		borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 		paddingTop: semanticSpacing.stackSm,
 		gap: semanticSpacing.stackMd,
+		[from.lg]: {
+			display: 'flex',
+			minHeight: 0,
+			flex: 1,
+			flexDirection: 'column',
+			overflow: 'hidden',
+		},
 	}),
 	activityHeading: css({
 		marginBottom: semanticSpacing.stackSm,
@@ -445,6 +461,11 @@ export const latestPublishedContentTheme = {
 		flexDirection: 'column',
 		gap: semanticSpacing.stackMd,
 		width: '100%',
+		[from.lg]: {
+			minHeight: 0,
+			flex: 1,
+			overflow: 'hidden',
+		},
 	}),
 	header: css({
 		display: 'flex',

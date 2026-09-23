@@ -1,4 +1,4 @@
-import { baseColors } from '@guardian/stand';
+import { semanticColors } from '@guardian/stand';
 import { Badge } from '@guardian/stand/Badge';
 import { Icon } from '@guardian/stand/Icon';
 import {
@@ -92,8 +92,9 @@ const SentByUserDetails = ({
 				<Tooltip
 					label="Sender email"
 					theme={{
-						backgroundColor: baseColors.magenta[800],
-						triggerColor: baseColors.magenta[800],
+						backgroundColor: semanticColors.fill.strong,
+						triggerColor: semanticColors.fill.strong,
+						color: semanticColors.text.strongerInverse,
 					}}
 				>
 					{sentByUser}

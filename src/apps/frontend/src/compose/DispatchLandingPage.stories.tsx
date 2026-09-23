@@ -165,6 +165,12 @@ export const Default: Story = {
 		await expect(
 			canvas.queryByRole('grid', { name: 'Sent alerts' }),
 		).not.toBeInTheDocument();
+		await expect(
+			canvas.getByRole('region', { name: 'Last 24-hour activity table' }),
+		).toHaveAttribute('data-scrollbar', 'visible');
+		await expect(
+			canvas.getByRole('region', { name: 'Latest published content list' }),
+		).toHaveAttribute('data-scrollbar', 'visible');
 		await expect(canvas.getByText('Last updated:')).toBeInTheDocument();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
