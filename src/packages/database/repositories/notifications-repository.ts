@@ -1,4 +1,8 @@
-import type { HistoryAlertType, KickerHistoryAlertType } from '@models';
+import type {
+	HistoryAlertType,
+	KickerHistoryAlertType,
+	NotificationChannelId,
+} from '@models';
 import { kickerHistoryAlertTypes } from '@models';
 import {
 	and,
@@ -24,7 +28,7 @@ export type NotificationWithDispatches = Notification & {
 	dispatches: NotificationDispatch[];
 };
 
-export type NotificationChannel = 'newsletter' | 'app-push';
+export type NotificationChannel = NotificationChannelId;
 
 /** Pagination plus the caller-supplied cut-off for {@link NotificationsRepository.listRecent}. */
 export type ListRecentNotificationsOptions = {
