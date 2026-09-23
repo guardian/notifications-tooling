@@ -9,6 +9,7 @@ import {
 	HISTORY_STATUS_CATEGORIES,
 	type HistoryStatusCategory,
 	parseHistorySearchParams,
+	resolveHistoryFilterSelection,
 	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
@@ -49,19 +50,11 @@ export const HistoryStatusFilter = () => {
 				popoverProps={{ cssOverrides: historyViewStyles.audiencePopover }}
 				selectionMode="multiple"
 				selectedKeys={new Set(selectedStatuses)}
-				onSelectionChange={(selection) => {
-					const keys =
-						selection === 'all'
-							? [...HISTORY_STATUS_CATEGORIES]
-							: [...selection].flatMap((key) =>
-									HISTORY_STATUS_CATEGORIES.includes(
-										key as HistoryStatusCategory,
-									)
-										? [key as HistoryStatusCategory]
-										: [],
-								);
-					handleStatusChange(keys);
-				}}
+				onSelectionChange={(selection) =>
+					handleStatusChange(
+						resolveHistoryFilterSelection(selection, HISTORY_STATUS_CATEGORIES),
+					)
+				}
 				shouldCloseOnSelect={false}
 			>
 				<MenuToggle>

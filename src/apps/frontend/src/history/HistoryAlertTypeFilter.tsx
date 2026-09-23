@@ -9,6 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 import { historyViewStyles } from '../themes';
 import {
 	parseHistorySearchParams,
+	resolveHistoryFilterSelection,
 	updateHistoryFilters,
 } from '../utils/history-search-params';
 
@@ -54,9 +55,10 @@ export const HistoryAlertTypeFilter = () => {
 				selectedKeys={alertTypes}
 				onSelectionChange={(selection) =>
 					handleAlertTypesChange(
-						selection === 'all'
-							? historyAlertTypeSchema.options
-							: [...selection].map(String),
+						resolveHistoryFilterSelection(
+							selection,
+							historyAlertTypeSchema.options,
+						),
 					)
 				}
 				popoverProps={{ cssOverrides: historyViewStyles.categoryPopover }}

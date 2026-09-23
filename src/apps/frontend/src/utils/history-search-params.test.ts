@@ -2,9 +2,30 @@ import { describe, expect, it } from 'bun:test';
 import { newsletterSegmentId } from '@models';
 import {
 	parseHistorySearchParams,
+	resolveHistoryFilterSelection,
 	updateHistoryFilters,
 	updateHistoryMultiSelectFilter,
 } from './history-search-params';
+
+describe('resolveHistoryFilterSelection', () => {
+	const allowedValues = ['newsletter', 'app-push'] as const;
+
+	it('returns every allowed value for the all selection', () => {
+		expect(resolveHistoryFilterSelection('all', allowedValues)).toEqual([
+			'newsletter',
+			'app-push',
+		]);
+	});
+
+	it('preserves selected allowed values and drops unknown keys', () => {
+		expect(
+			resolveHistoryFilterSelection(
+				new Set(['app-push', 'unknown']),
+				allowedValues,
+			),
+		).toEqual(['app-push']);
+	});
+});
 
 describe('parseHistorySearchParams', () => {
 	it('uses history defaults when pagination is absent', () => {

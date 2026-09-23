@@ -9,6 +9,7 @@ import {
 	HISTORY_CHANNELS,
 	type HistoryChannel,
 	parseHistorySearchParams,
+	resolveHistoryFilterSelection,
 	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
@@ -52,17 +53,11 @@ export const HistoryChannelFilter = () => {
 				popoverProps={{ cssOverrides: historyViewStyles.audiencePopover }}
 				selectionMode="multiple"
 				selectedKeys={new Set(selectedChannels)}
-				onSelectionChange={(selection) => {
-					const keys =
-						selection === 'all'
-							? [...HISTORY_CHANNELS]
-							: [...selection].flatMap((key) =>
-									HISTORY_CHANNELS.includes(key as HistoryChannel)
-										? [key as HistoryChannel]
-										: [],
-								);
-					handleChannelChange(keys);
-				}}
+				onSelectionChange={(selection) =>
+					handleChannelChange(
+						resolveHistoryFilterSelection(selection, HISTORY_CHANNELS),
+					)
+				}
 				shouldCloseOnSelect={false}
 			>
 				<MenuToggle>

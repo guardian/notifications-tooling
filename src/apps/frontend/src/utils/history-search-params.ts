@@ -17,6 +17,20 @@ export type HistoryStatusCategory = (typeof HISTORY_STATUS_CATEGORIES)[number];
 
 export type HistoryMultiSelectFilter = 'audience' | 'channel' | 'status';
 
+export const resolveHistoryFilterSelection = <Value extends string>(
+	selection: 'all' | Iterable<unknown>,
+	allowedValues: readonly Value[],
+): Value[] => {
+	if (selection === 'all') {
+		return [...allowedValues];
+	}
+
+	const isAllowedValue = (value: string): value is Value =>
+		allowedValues.some((allowedValue) => allowedValue === value);
+
+	return [...selection].map(String).filter(isAllowedValue);
+};
+
 const parseBoundedInteger = (
 	value: string | null,
 	fallback: number,
