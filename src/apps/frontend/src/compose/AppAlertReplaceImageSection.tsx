@@ -2,8 +2,12 @@ import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
+import { Link } from '@guardian/stand/Link';
+import { LinkButton } from '@guardian/stand/LinkButton';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
+import { useContext } from 'react';
+import { ConfigContext } from '../config/ConfigContext';
 import { useImageUrlCheck } from '../hooks/use-image-url-check';
 
 interface AppAlertReplaceImageSectionProps {
@@ -19,6 +23,8 @@ export const AppAlertReplaceImageSection = ({
 	onUpdate,
 	errorMessage,
 }: AppAlertReplaceImageSectionProps) => {
+	const { gridApiUri, gridUri } = useContext(ConfigContext) ?? {};
+
 	const {
 		checkAndUpdateImage,
 		handleImageUrlChange,
@@ -26,11 +32,14 @@ export const AppAlertReplaceImageSection = ({
 		isCheckingImage,
 		isUpdateDisabled,
 		displayedErrorMessage,
+		imageCheckRemedy,
 	} = useImageUrlCheck({
 		imageUrl: replacementImageUrl,
 		onImageUrlChange: onReplacementImageUrlChange,
 		onUpdate,
 		errorMessage,
+		gridUri,
+		gridApiUri,
 	});
 
 	return (
@@ -65,8 +74,8 @@ export const AppAlertReplaceImageSection = ({
 					icon="refresh"
 					size="md"
 					variant="secondary"
-					isDisabled={isUpdateDisabled}
 					onClick={() => void checkAndUpdateImage()}
+					isDisabled={isUpdateDisabled}
 				>
 					{isCheckingImage ? 'Checking...' : 'Update'}
 				</Button>
@@ -74,6 +83,29 @@ export const AppAlertReplaceImageSection = ({
 
 			{displayedErrorMessage && (
 				<InlineMessage level="error">{displayedErrorMessage}</InlineMessage>
+			)}
+
+			{imageCheckRemedy === 'authenticate' && gridUri && (
+				<LinkButton
+					icon="open_in_new"
+					target="_blank"
+					rel="noopener noreferrer"
+					size="sm"
+					variant="secondary"
+					href={gridUri}
+				>
+					Open Grid to refresh credentials
+				</LinkButton>
+			)}
+
+			{imageCheckRemedy === 'contact-cp' && (
+				<Typography>
+					Please contact{' '}
+					<Link href='mailto:central.production@theguardian.com"'>
+						Central Production
+					</Link>{' '}
+					if the problem persists
+				</Typography>
 			)}
 
 			{imageUpdated && replacementImageUrl && (

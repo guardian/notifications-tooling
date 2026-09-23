@@ -1,14 +1,33 @@
+import type { LatestArticle } from '@models';
+
 export interface LatestPublishedContentItem {
 	id: string;
 	headline: string;
 	url: string;
 	imageUrl?: string;
 	section: string;
-	pillarName: string;
+	pillarName?: string;
 	pillarId?: string;
 	publishedAt: string;
 	tags: Array<{ path?: string }>;
 }
+
+/** Maps a backend `LatestArticle` onto the shape the panel/card render. */
+export const mapLatestArticleToContentItem = (
+	article: LatestArticle,
+): LatestPublishedContentItem => ({
+	id: article.id,
+	headline: article.headline,
+	url: article.webUrl,
+	imageUrl: article.thumbnail,
+	section: article.section,
+	pillarName: article.pillarName,
+	pillarId: article.pillarId,
+	publishedAt: article.publishedAt,
+	tags: article.intendedAudience.map((region) => ({
+		path: `tracking/audience/${region}`,
+	})),
+});
 
 // Every headline links here until a real "latest published content" API exists.
 const ARTICLE_URL =

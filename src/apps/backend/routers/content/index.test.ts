@@ -138,10 +138,13 @@ describe('GET /v1/content/articles/latest', () => {
 	it('returns articles published within the last 24 hours', async () => {
 		const articles: LatestArticle[] = [
 			{
+				id: 'world/2026/sep/16/latest',
 				webUrl: 'https://www.theguardian.com/world/2026/sep/16/latest',
 				publishedAt: '2026-09-16T12:00:00.000Z',
 				headline: 'Latest article',
 				section: 'World news',
+				pillarId: 'pillar/news',
+				pillarName: 'News',
 				thumbnail: 'https://media.guim.co.uk/latest/500.jpg',
 				productionOffice: 'uk',
 				intendedAudience: ['global'],

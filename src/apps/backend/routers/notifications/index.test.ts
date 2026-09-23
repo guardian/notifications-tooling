@@ -661,6 +661,7 @@ const storedNotification = (): NotificationWithDispatches => ({
 	createdByEmail: 'editor@theguardian.com',
 	dryRun: false,
 	scheduledFor: null,
+	articleId: 'world/2026/jul/08/ukraine-summit',
 	content: { items: { lead: { type: 'app-push', title: 'Ukraine summit' } } },
 	channels: { 'app-push': { compose: { use: 'lead' } } },
 	failedTargets: { topics: [], segments: [] },
@@ -830,6 +831,7 @@ const storedListPage = (): NotificationListPage => ({
 			createdByEmail: 'editor@theguardian.com',
 			dryRun: false,
 			scheduledFor: null,
+			articleId: 'world/2026/jul/08/ukraine-summit',
 			content: { items: { lead: { type: 'app-push' } } },
 			channels: { 'app-push': { compose: { use: 'lead' } } },
 			failedTargets: {
@@ -848,7 +850,8 @@ const startListServer = (
 		limit?: number;
 		offset?: number;
 		search?: string;
-		createdByEmail?: string;
+		articleId?: string;
+		createdByEmails?: string[];
 		audiences?: string[];
 	}) => Promise<NotificationListPage>,
 ) => {
@@ -993,6 +996,41 @@ describe('GET /v1/notifications', () => {
 				await listServer.close();
 			}
 		});
+
+		it.each([
+			['a CAPI article ID', 'science/2026/sep/23/northern-lights'],
+			[
+				'a Guardian article URL',
+				'https://www.theguardian.com/science/2026/sep/23/northern-lights?CMP=share_btn_url#comments',
+			],
+		])(
+			'normalizes and forwards articleId for %s',
+			async (_description, articleReference) => {
+				const listNotifications = mock(() => Promise.resolve(storedListPage()));
+				const listServer = await startListServer(listNotifications);
+
+				try {
+					const query = new URLSearchParams({ articleId: articleReference });
+					const response = await fetch(
+						`${listServer.baseUrl}/v1/notifications?${query}`,
+					);
+
+					expect(response.status).toBe(200);
+					expect(listNotifications).toHaveBeenCalledWith({
+						since: new Date(0),
+						limit: 10,
+						offset: 0,
+						articleId: 'science/2026/sep/23/northern-lights',
+					});
+					expect(await response.json()).toMatchObject({
+						total: 3,
+						notifications: [{ id: notificationId }],
+					});
+				} finally {
+					await listServer.close();
+				}
+			},
+		);
 
 		it('normalizes, deduplicates and forwards createdByEmail filters', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
@@ -1189,6 +1227,32 @@ describe('GET /v1/notifications', () => {
 				expect(body.message).toBe(
 					'The notification list query parameters are invalid.',
 				);
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it.each([
+			['an invalid article ID', 'not-an-article-id'],
+			[
+				'a Guardian URL without an article ID',
+				'https://www.theguardian.com/uk',
+			],
+			[
+				'a non-Guardian URL',
+				'https://example.com/science/2026/sep/23/northern-lights',
+			],
+		])('returns 400 for %s', async (_description, articleId) => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const query = new URLSearchParams({ articleId });
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?${query}`,
+				);
+				expect(response.status).toBe(400);
 				expect(listNotifications).not.toHaveBeenCalled();
 			} finally {
 				await listServer.close();

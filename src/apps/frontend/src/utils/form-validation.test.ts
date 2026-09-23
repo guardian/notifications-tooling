@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'bun:test';
-import { parseArticleUrlInputToArticleId } from './form-validation';
+import {
+	parseArticleUrlInputToArticleId,
+	parseImageSourceUrl,
+} from './form-validation';
 
 describe('parseArticleUrlInputToArticleId', () => {
 	it('parses the id from a valid Guardian article link', () => {
@@ -86,6 +89,98 @@ describe('parseArticleUrlInputToArticleId', () => {
 		).toEqual({
 			articleId: 'global/2025/jan/02/my-headline',
 			webUrl: 'https://www.theguardian.com/global/2025/jan/02/my-headline',
+		});
+	});
+});
+
+describe('parseImageSourceUrl', () => {
+	const gridOrigin = 'https://grid.example.com';
+	const gridApiOrigin = 'https://api.grid.example.com';
+	const imageId = '0123456789abcdef0123456789abcdef01234567';
+	const cropId = '100_200_300_400';
+
+	it('returns a failure without an error for an empty URL', () => {
+		expect(parseImageSourceUrl('', gridOrigin, gridApiOrigin)).toEqual({
+			type: 'failure',
+		});
+	});
+
+	it('accepts a valid Guardian image URL', () => {
+		expect(
+			parseImageSourceUrl(
+				'https://media.guim.co.uk/84c162b73eb3b9ba1f72ae00b888a692216e0f68/442_0_4404_3525/1000.jpg',
+				gridOrigin,
+				gridApiOrigin,
+			),
+		).toEqual({
+			type: 'image-url',
+		});
+	});
+
+	it('accepts a valid grid crop page URL and returns its details', () => {
+		expect(
+			parseImageSourceUrl(
+				`${gridOrigin}/images/${imageId}?crop=${cropId}`,
+				gridOrigin,
+				gridApiOrigin,
+			),
+		).toEqual({
+			type: 'grid-url',
+			cropId,
+			imageId,
+			gridApiUri: gridApiOrigin,
+		});
+	});
+
+	it('uses the Guardian image error for an invalid non-grid URL', () => {
+		expect(
+			parseImageSourceUrl(
+				'https://example.com/image.jpg',
+				gridOrigin,
+				gridApiOrigin,
+			),
+		).toEqual({
+			type: 'failure',
+			validationError: 'Please enter a valid Guardian image URL',
+		});
+	});
+
+	it('uses the grid validation error for a URL from the configured grid origin', () => {
+		expect(
+			parseImageSourceUrl(
+				`${gridOrigin}/images/${imageId}?crop=100_200_300`,
+				gridOrigin,
+				gridApiOrigin,
+			),
+		).toEqual({
+			type: 'failure',
+			validationError: 'Please enter the URL for a 5:4 crop page',
+		});
+	});
+
+	it('reports when a grid URL is provided without grid configuration', () => {
+		expect(
+			parseImageSourceUrl(
+				`${gridOrigin}/images/${imageId}?crop=${cropId}`,
+				undefined,
+				undefined,
+			),
+		).toEqual({
+			type: 'failure',
+			validationError: 'Please enter a valid Guardian image URL',
+		});
+	});
+
+	it('reports config error when a grid URL is provided with gridOrigin, but no gridApiOrigin is set', () => {
+		expect(
+			parseImageSourceUrl(
+				`${gridOrigin}/images/${imageId}?crop=${cropId}`,
+				gridOrigin,
+				undefined,
+			),
+		).toEqual({
+			type: 'failure',
+			validationError: 'Missing configuration: gridApiUri or gridOrigin',
 		});
 	});
 });

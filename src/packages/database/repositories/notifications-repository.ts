@@ -32,6 +32,8 @@ export type ListRecentNotificationsOptions = {
 	offset?: number;
 	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
+	/** Exact normalized CAPI article id. */
+	articleId?: string;
 	/** Restricts the page to notifications sent by any of these emails, matched case-insensitively. */
 	createdByEmails?: string[];
 	/** API edition ids matched against newsletter variants or app-push editions. */
@@ -210,6 +212,7 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 		search,
+		articleId,
 		createdByEmails,
 		audiences,
 		statuses,
@@ -276,6 +279,7 @@ export const createNotificationsRepository = (db: Database) => ({
 					)
 				: undefined,
 			statuses?.length ? inArray(notifications.status, statuses) : undefined,
+			articleId ? eq(notifications.articleId, articleId) : undefined,
 			searchPattern
 				? sql<boolean>`exists (
 						select 1

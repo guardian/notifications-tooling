@@ -210,6 +210,8 @@ describe('fetchLatestArticles', () => {
 							id: 'uk-news/2026/sep/16/newer',
 							type: 'liveblog',
 							sectionName: 'UK news',
+							pillarId: 'pillar/news',
+							pillarName: 'News',
 							webPublicationDate: '2026-09-16T12:00:00.000Z',
 							webTitle: 'Newer article',
 							webUrl: 'https://www.theguardian.com/uk-news/2026/sep/16/newer',
@@ -238,15 +240,19 @@ describe('fetchLatestArticles', () => {
 
 		expect(articles).toEqual([
 			{
+				id: 'uk-news/2026/sep/16/newer',
 				webUrl: 'https://www.theguardian.com/uk-news/2026/sep/16/newer',
 				publishedAt: '2026-09-16T12:00:00.000Z',
 				headline: 'Newer article',
 				section: 'UK news',
+				pillarId: 'pillar/news',
+				pillarName: 'News',
 				thumbnail: 'https://media.guim.co.uk/newer/500.jpg',
 				productionOffice: 'uk',
 				intendedAudience: ['uk', 'global'],
 			},
 			{
+				id: 'world/2026/sep/15/older',
 				webUrl: 'https://www.theguardian.com/world/2026/sep/15/older',
 				publishedAt: '2026-09-15T15:00:00.000Z',
 				headline: 'Older article',

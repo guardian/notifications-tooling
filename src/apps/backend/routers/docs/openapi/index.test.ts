@@ -44,6 +44,7 @@ describe('latest articles OpenAPI contract', () => {
 			},
 		});
 		expect(openApiDocument.components.schemas.LatestArticle.required).toEqual([
+			'id',
 			'webUrl',
 			'publishedAt',
 			'headline',
@@ -54,30 +55,21 @@ describe('latest articles OpenAPI contract', () => {
 });
 
 describe('notification history OpenAPI contract', () => {
-	it('documents article history lookup and its compact send response', () => {
-		const articleHistory =
-			openApiDocument.paths['/v1/notifications/article/{articleId}'].get;
-		const articleIdParameter = articleHistory.parameters.find(
-			({ name }) => name === 'articleId',
-		);
-		const responseSchema =
-			articleHistory.responses['200'].content['application/json'].schema;
+	it('documents exact article filtering on the notification collection', () => {
+		const articleIdParameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'articleId');
 
 		expect(articleIdParameter).toMatchObject({
-			in: 'path',
-			required: true,
-			schema: { type: 'string', maxLength: 2048 },
+			in: 'query',
+			required: false,
+			schema: { type: 'string', minLength: 1, maxLength: 2048 },
 		});
-		expect(responseSchema.required).toEqual([
-			'articleId',
-			'total',
-			'limit',
-			'offset',
-			'sends',
-		]);
 		expect(
-			responseSchema.properties.sends.items.properties.channels.items.enum,
-		).toEqual(['newsletter', 'app-push']);
+			openApiDocument.paths['/v1/notifications'].get.responses['200'].content[
+				'application/json'
+			].schema,
+		).toEqual({ $ref: '#/components/schemas/NotificationList' });
 	});
 
 	it('documents repeated categories using the validation enum', () => {
