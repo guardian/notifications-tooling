@@ -1,20 +1,13 @@
+import { articlePreviousSendsResponseSchema } from '@models';
 import { useQuery } from '@tanstack/react-query';
-import z from 'zod';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
 import { redirectToLogin } from '../api-client/redirect-to-login';
 
-export type PreviousSend = {
-	notificationId: string;
-	sentBy: string;
-	sentAt: string;
-	channels: Array<'app-push' | 'newsletter'>;
-};
-
 export const fetchPreviousNotifications = async (articleId: string) => {
 	try {
 		return await fetchJsonAndParse(
-			z.unknown(), // TO DO - get the schema for the endpoint
+			articlePreviousSendsResponseSchema,
 			`/v1/notifications/article/${encodeURIComponent(articleId)}`,
 		);
 	} catch (error) {
