@@ -248,32 +248,39 @@ export const articlePreviewCardTheme = {
 
 export const audienceSegmentTileTheme: TileTheme = {
 	shared: {
-		borderColor: semanticColors.border.weak,
-		color: semanticColors.text.strong,
 		descriptionColor: semanticColors.text.strong,
 		selectableTile: {
 			shared: {
-				backgroundColor: semanticColors.fill.weak,
+				backgroundColor: semanticColors.bg.base,
+				hover: { backgroundColor: semanticColors.fill.weakPressed },
+				pressed: { backgroundColor: semanticColors.fill.weakPressed },
+				focusVisible: { backgroundColor: semanticColors.bg.base },
 				selected: {
 					backgroundColor: baseColors.magenta[900],
-					hover: {
-						backgroundColor: baseColors.magenta[900],
-					},
-					pressed: {
-						backgroundColor: baseColors.magenta[900],
-					},
-					focusVisible: {
-						backgroundColor: baseColors.magenta[900],
-					},
+					hover: { backgroundColor: baseColors.magenta[900] },
+					pressed: { backgroundColor: baseColors.magenta[900] },
+					focusVisible: { backgroundColor: baseColors.magenta[900] },
 				},
 			},
 		},
 	},
-	xs: {
-		width: '100%',
-		minHeight: '56px',
-	},
 };
+
+export const audienceSegmentTileCss = css({
+	width: '100%',
+	minHeight: '56px',
+	padding: baseSpacing['6Px'],
+	gap: baseSpacing['8Px'],
+	'&:not([data-selected]):not([data-disabled]) > div:first-of-type > span.material-symbols':
+		{
+			color: semanticColors.border.strong,
+			borderRadius: semanticRadius.cornerSm,
+		},
+	'&[data-selected]:not([data-disabled]) > div:first-of-type > span.material-symbols':
+		{
+			color: baseColors.magenta[200],
+		},
+});
 
 export const previewPillStyles = {
 	pill: css({

@@ -8,7 +8,7 @@ import type {
 	DisplayAppAlertTopicEditionId,
 	NewsletterSegmentId,
 } from '@models';
-import { audienceSegmentTileTheme } from '../themes';
+import { audienceSegmentTileCss, audienceSegmentTileTheme } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 
 export interface SegmentOption<
@@ -78,7 +78,7 @@ export const SegmentPicker = <
 					return (
 						<Item size={4} key={option.code}>
 							<Tile
-								size="xs"
+								size="md"
 								icon={<FlagAtom segmentCode={option.code} />}
 								value={option.code}
 								interactionMode="multi-select"
@@ -88,7 +88,8 @@ export const SegmentPicker = <
 								description={option.label}
 								descriptionTypography="headingXs"
 								theme={audienceSegmentTileTheme}
-							></Tile>
+								cssOverrides={audienceSegmentTileCss}
+							/>
 						</Item>
 					);
 				})}
