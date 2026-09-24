@@ -3,6 +3,7 @@ import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Avatar } from '@guardian/stand/Avatar';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
+import { type NotificationChannelId, notificationChannelNames } from '@models';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';
 import { Tooltip } from '../ui/Tooltip';
@@ -45,12 +46,15 @@ const style = {
 		paddingLeft: 10,
 	}),
 	avatarWrapper: css({
-		maxWidth: 22,
+		maxWidth: 18,
 	}),
-	avatarBorder: css({
+	avatarOverrides: css({
 		borderWidth: 1,
 		borderStyle: 'solid',
 		borderColor: semanticColors.border.strongInverse,
+		width: '1.5rem',
+		height: '1.5rem',
+		fontSize: '8px',
 	}),
 };
 
@@ -61,7 +65,7 @@ const SenderAvatar = ({ send }: { send: NotificationSummary }) => {
 				label={emailToName(send.createdByEmail)}
 				trigger={
 					<Avatar
-						cssOverrides={style.avatarBorder}
+						cssOverrides={style.avatarOverrides}
 						size="sm"
 						initials={emailToIntials(send.createdByEmail)}
 					/>
@@ -90,7 +94,7 @@ const CombinedAvatar = ({ sends }: { sends: NotificationSummary[] }) => {
 						size="sm"
 						initials={'…'}
 						cssOverrides={[
-							style.avatarBorder,
+							style.avatarOverrides,
 							css({
 								backgroundColor: semanticColors.fill.neutralWeak,
 								alignItems: 'start',
@@ -117,15 +121,43 @@ const CombinedAvatar = ({ sends }: { sends: NotificationSummary[] }) => {
 	);
 };
 
+const getChannel = (send: NotificationSummary): NotificationChannelId => {
+	const keys = Object.keys(send.channels);
+
+	if (keys.includes('app-push')) {
+		return 'app-push';
+	}
+	if (keys.includes('newsletter')) {
+		return 'newsletter';
+	}
+	return 'app-push';
+};
+
+const getChannelDescriptionForSet = (sends: NotificationSummary[]): string => {
+	const channels = sends.map(getChannel);
+	if (channels.every((channel) => channel === 'app-push')) {
+		return `an ${notificationChannelNames['app-push']}`;
+	}
+	if (channels.every((channel) => channel === 'newsletter')) {
+		return `a ${notificationChannelNames['newsletter']}`;
+	}
+	return 'notifications';
+};
+
 export const PreviousNotificationsBar = ({
 	articleId,
 	showImportedArticle,
 }: Props) => {
 	const {
-		data: previousSends,
+		data,
 		error,
 		articleId: requestedDataArticleId,
 	} = usePreviousNotifications(articleId);
+
+	const sentNotifications =
+		data?.notifications.filter(
+			(send) => !send.dryRun && send.status !== 'failed',
+		) ?? [];
 
 	if (error) {
 		return (
@@ -138,14 +170,16 @@ export const PreviousNotificationsBar = ({
 	if (
 		!showImportedArticle ||
 		!articleId ||
-		!previousSends ||
+		sentNotifications.length === 0 ||
 		requestedDataArticleId !== articleId
 	) {
 		return null;
 	}
 
-	const firstThreeSends = previousSends.notifications.slice(0, 3);
-	const sendsPastThree = previousSends.notifications.slice(3);
+	const description = getChannelDescriptionForSet(sentNotifications);
+
+	const firstThreeSends = sentNotifications.slice(0, 3);
+	const sendsPastThree = sentNotifications.slice(3);
 
 	return (
 		<div css={style.bar}>
@@ -160,11 +194,9 @@ export const PreviousNotificationsBar = ({
 					))}
 				{sendsPastThree.length > 1 && <CombinedAvatar sends={sendsPastThree} />}
 			</div>
-			<Typography>Sent an app alert with this URL</Typography>
-			{previousSends.notifications.length === 1 ? (
-				<Typography>
-					[{previousSends.notifications.at(0)?.createdAt}]
-				</Typography>
+			<Typography>Sent {description} with this URL</Typography>
+			{sentNotifications.length === 1 ? (
+				<Typography>[{sentNotifications.at(0)?.createdAt}]</Typography>
 			) : (
 				<Typography>Timestamp</Typography>
 			)}
