@@ -146,6 +146,11 @@ export const SmallScreenFilters: Story = {
 		await expect(filters.getBoundingClientRect().bottom).toBeLessThanOrEqual(
 			historySection.getBoundingClientRect().top,
 		);
+		const page = filters.parentElement?.parentElement;
+		if (!page) {
+			throw new globalThis.Error('History page not found');
+		}
+		await expect(page.scrollHeight).toBeGreaterThan(page.clientHeight);
 	},
 };
 

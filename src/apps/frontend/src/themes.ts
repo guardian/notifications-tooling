@@ -738,7 +738,12 @@ export const historyViewStyles = {
 		overflow: 'hidden',
 		gridTemplateColumns: 'minmax(0, 1fr)',
 		gridTemplateRows: 'auto minmax(0, 1fr)',
+		'&:has(button[aria-controls="history-filters"][aria-expanded="true"])': {
+			overflowY: 'auto',
+			gridTemplateRows: `max-content calc(100vh - ${stickyHeaderHeight})`,
+		},
 		[from.lg]: {
+			overflow: 'hidden',
 			gridTemplateColumns: '18rem minmax(0, 1fr)',
 			gridTemplateRows: 'minmax(0, 1fr)',
 		},
