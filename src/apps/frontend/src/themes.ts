@@ -742,7 +742,7 @@ const skeletonBase = {
 export const emptyStateStyles = {
 	empty: css({
 		display: 'flex',
-		minHeight: '270px',
+		minHeight: '240px',
 		flexDirection: 'column',
 		alignItems: 'center',
 		justifyContent: 'center',
