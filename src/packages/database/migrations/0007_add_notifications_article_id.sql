@@ -10,7 +10,8 @@ SET "article_id" = (
 		SELECT trim(both '/' from regexp_replace(
 			split_part(split_part(composed_link.link, '#', 1), '?', 1),
 			'^https?://[^/]+/?',
-			''
+			'',
+			'i'
 		)) AS article_id
 		FROM (
 			SELECT "notifications"."content"->'items'->("notifications"."channels"->'app-push'->'compose'->>'use')->>'link' AS link
