@@ -4,7 +4,9 @@ import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import { ConfigContext } from '../config/ConfigContext';
+import { mockLatestPublishedContent } from '../latest-content/latest-published-content';
 import { MainLayout } from '../layout/MainLayout';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import type { NotificationListResponse } from '../schemas';
 import { mockAppConfig } from '../testing/app-config';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
@@ -29,6 +31,26 @@ const historyHandler = http.get(
 		await delay(300);
 		return HttpResponse.json(historyResponse);
 	},
+);
+
+const latestPublishedContentHandler = http.get(
+	`${getApiBaseUrl()}/v1/content/articles/latest`,
+	() =>
+		HttpResponse.json({
+			articles: mockLatestPublishedContent.map((item) => ({
+				id: item.id,
+				webUrl: item.url,
+				publishedAt: item.publishedAt,
+				headline: item.headline,
+				section: item.section,
+				pillarId: item.pillarId,
+				pillarName: item.pillarName,
+				thumbnail: item.imageUrl,
+				intendedAudience: item.tags.flatMap(({ path }) =>
+					path ? [path.replace('tracking/audience/', '')] : [],
+				),
+			})),
+		}),
 );
 
 const now = Date.now();
@@ -130,7 +152,13 @@ const meta = {
 	component: DispatchLandingPage,
 	parameters: {
 		layout: 'fullscreen',
-		msw: { handlers: [historyHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				historyHandler,
+				channelAudiencesHandler,
+				latestPublishedContentHandler,
+			],
+		},
 		docs: {
 			description: {
 				component:
@@ -221,12 +249,41 @@ export const Default: Story = {
 		if (!latestPublishedContentRail) {
 			throw new Error('Expected latest published content rail to be rendered');
 		}
+		await expect(
+			within(latestPublishedContentRail).getByText('Last updated:'),
+		).toBeInTheDocument();
 		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
 			canvasElement.clientWidth,
 		);
 		await expect(
 			latestPublishedContentRail.getBoundingClientRect().left,
 		).toBeGreaterThanOrEqual(landingMain.getBoundingClientRect().right);
+
+		await userEvent.click(
+			canvas.getAllByRole('button', { name: 'Create' })[0]!,
+		);
+		const dialog = await within(canvasElement.ownerDocument.body).findByRole(
+			'dialog',
+			{ name: 'Choose an alert type for this content' },
+		);
+		await expect(
+			within(dialog).getByRole('link', { name: 'Create a newsletter email' }),
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				mockLatestPublishedContent[0]!.url,
+			),
+		);
+		await expect(
+			within(dialog).getByRole('link', { name: 'Create an app alert' }),
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				mockLatestPublishedContent[0]!.url,
+			),
+		);
 	},
 };
 
@@ -239,11 +296,6 @@ export const Production: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Welcome to Dispatch' }),
 		).toBeInTheDocument();
-		await expect(
-			canvas.queryByRole('button', {
-				name: 'Open Latest Published Content',
-			}),
-		).not.toBeInTheDocument();
 		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
 			canvasElement.clientWidth,
 		);
@@ -252,7 +304,13 @@ export const Production: Story = {
 
 export const RecentOnly: Story = {
 	parameters: {
-		msw: { handlers: [sinceAwareHistoryHandler, channelAudiencesHandler] },
+		msw: {
+			handlers: [
+				sinceAwareHistoryHandler,
+				channelAudiencesHandler,
+				latestPublishedContentHandler,
+			],
+		},
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

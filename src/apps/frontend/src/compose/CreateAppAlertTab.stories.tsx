@@ -5,6 +5,7 @@ import { ConfigContext } from '../config/ConfigContext';
 import {
 	articleUrlSearchParam,
 	notificationRoutes,
+	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { mockAppConfig } from '../testing/app-config';
@@ -23,10 +24,12 @@ import type { NotificationComposerState } from '../types';
 import { defaultAppAlertComposerState } from '../utils/notification-composer-reducer';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { CreateAppAlertTab } from './CreateAppAlertTab';
+import type { NotificationFormContextProps } from './NotificationFormContext';
 
 type StoryArgs = {
 	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
+	resolveArticleFromCapi?: NotificationFormContextProps['resolveArticleFromCapi'];
 	containerMinWidth: string;
 };
 
@@ -54,7 +57,12 @@ const meta = {
 		},
 	},
 	render: function Render(args: StoryArgs) {
-		const { formValues, composerState, containerMinWidth } = args;
+		const {
+			formValues,
+			composerState,
+			resolveArticleFromCapi,
+			containerMinWidth,
+		} = args;
 		return (
 			<div
 				style={{
@@ -67,7 +75,7 @@ const meta = {
 				{useNotificationFormStory(
 					<CreateAppAlertTab />,
 					composerState,
-					{},
+					resolveArticleFromCapi ? { resolveArticleFromCapi } : {},
 					'app-push',
 					formValues,
 				)}
@@ -94,11 +102,33 @@ export const Default: Story = {
 	},
 };
 
-export const ImportsArticleFromSearchParam: Story = {
+export const PopulatesArticleCopiedFromAnotherChannel: Story = {
+	args: {
+		resolveArticleFromCapi: () =>
+			Promise.resolve({
+				success: true,
+				data: {
+					article: {
+						...articleFixture,
+						fields: {
+							...articleFixture.fields,
+							headline: `  ${articleFixture.fields?.headline ?? articleFixture.webTitle}  `,
+						},
+					},
+				},
+			}),
+	},
 	beforeEach: () => {
 		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
 		window.history.replaceState(
-			null,
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: reviewWarningNavigationState,
+			},
 			'',
 			withArticleUrl(
 				notificationRoutes['app-push'].create,
@@ -106,7 +136,7 @@ export const ImportsArticleFromSearchParam: Story = {
 			),
 		);
 
-		return () => window.history.replaceState(null, '', originalUrl);
+		return () => window.history.replaceState(originalState, '', originalUrl);
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -140,6 +170,37 @@ export const ImportsArticleFromSearchParam: Story = {
 		await expect(
 			canvas.getByText('Review the content before sending'),
 		).toBeVisible();
+	},
+};
+
+export const PopulatesArticleFromLatestList: Story = {
+	args: PopulatesArticleCopiedFromAnotherChannel.args,
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			canvas.queryByText('Review the content before sending'),
+		).not.toBeInTheDocument();
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+		await expect(canvas.getByLabelText('article URL')).toHaveValue(
+			articleFixture.webUrl,
+		);
+		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+			articleFixture.fields?.headline,
+		);
 	},
 };
 

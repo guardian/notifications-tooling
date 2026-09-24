@@ -14,6 +14,7 @@ import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { ButtonTheme } from '@guardian/stand/Button';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
+import type { TileTheme } from '@guardian/stand/Tile';
 import type { ToggleSwitchTheme } from '@guardian/stand/ToggleSwitch';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
 import { from, until } from '@guardian/stand/utils';
@@ -245,29 +246,41 @@ export const articlePreviewCardTheme = {
 		}),
 };
 
-export const audienceSegmentStyles = {
-	audienceSegmentCheckBoxTile: (isSelected: boolean) =>
-		css({
-			backgroundColor: isSelected
-				? baseColors.magenta[900]
-				: semanticColors.fill.weak,
-			color: semanticColors.text.strong,
-			'&:hover': {
-				backgroundColor: isSelected
-					? baseColors.magenta[900]
-					: semanticColors.fill.weakPressed,
+export const audienceSegmentTileTheme: TileTheme = {
+	shared: {
+		descriptionColor: semanticColors.text.strong,
+		selectableTile: {
+			shared: {
+				backgroundColor: semanticColors.bg.base,
+				hover: { backgroundColor: semanticColors.fill.weakPressed },
+				pressed: { backgroundColor: semanticColors.fill.weakPressed },
+				focusVisible: { backgroundColor: semanticColors.bg.base },
+				selected: {
+					backgroundColor: baseColors.magenta[900],
+					hover: { backgroundColor: baseColors.magenta[900] },
+					pressed: { backgroundColor: baseColors.magenta[900] },
+					focusVisible: { backgroundColor: baseColors.magenta[900] },
+				},
 			},
-			border: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-			padding: `${baseSpacing['6Px']} ${baseSpacing['6Px']}`,
-			borderRadius: semanticRadius.cornerSm,
-			display: 'flex',
-			flexDirection: 'column',
-			alignItems: 'flex-start',
-			gap: `${baseSpacing['8Px']}`,
-			height: '56px',
-			width: '100%',
-		}),
+		},
+	},
 };
+
+export const audienceSegmentTileCss = css({
+	width: '100%',
+	minHeight: '56px',
+	padding: baseSpacing['6Px'],
+	gap: baseSpacing['8Px'],
+	'&:not([data-selected]):not([data-disabled]) > div:first-of-type > span.material-symbols':
+		{
+			color: semanticColors.border.strong,
+			borderRadius: semanticRadius.cornerSm,
+		},
+	'&[data-selected]:not([data-disabled]) > div:first-of-type > span.material-symbols':
+		{
+			color: baseColors.magenta[200],
+		},
+});
 
 export const previewPillStyles = {
 	pill: css({

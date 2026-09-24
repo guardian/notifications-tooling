@@ -2,8 +2,30 @@ import { describe, expect, it } from 'bun:test';
 import { newsletterSegmentId } from '@models';
 import {
 	parseHistorySearchParams,
+	resolveHistoryFilterSelection,
 	updateHistoryFilters,
+	updateHistoryMultiSelectFilter,
 } from './history-search-params';
+
+describe('resolveHistoryFilterSelection', () => {
+	const allowedValues = ['newsletter', 'app-push'] as const;
+
+	it('returns every allowed value for the all selection', () => {
+		expect(resolveHistoryFilterSelection('all', allowedValues)).toEqual([
+			'newsletter',
+			'app-push',
+		]);
+	});
+
+	it('preserves selected allowed values and drops unknown keys', () => {
+		expect(
+			resolveHistoryFilterSelection(
+				new Set(['app-push', 'unknown']),
+				allowedValues,
+			),
+		).toEqual(['app-push']);
+	});
+});
 
 describe('parseHistorySearchParams', () => {
 	it('uses history defaults when pagination is absent', () => {
@@ -82,6 +104,21 @@ describe('parseHistorySearchParams', () => {
 			offset: 0,
 			since: undefined,
 			senders: ['alex@example.com', 'jamie@example.com'],
+		});
+	});
+
+	it('reads, validates, and deduplicates channel parameters', () => {
+		expect(
+			parseHistorySearchParams(
+				new URLSearchParams(
+					'channel=app-push&channel=newsletter&channel=app-push&channel=invalid',
+				),
+			),
+		).toEqual({
+			limit: 20,
+			offset: 0,
+			since: undefined,
+			channels: ['newsletter', 'app-push'],
 		});
 	});
 
@@ -175,5 +212,53 @@ describe('updateHistoryFilters', () => {
 			since: '1700000000',
 			other: 'keep',
 		});
+	});
+});
+
+describe('updateHistoryMultiSelectFilter', () => {
+	it('replaces one repeated filter and resets pagination', () => {
+		const current = new URLSearchParams(
+			'channel=newsletter&audience=uk&offset=20&limit=10&other=keep',
+		);
+		const next = updateHistoryMultiSelectFilter(current, 'channel', [
+			'app-push',
+		]);
+
+		expect(next.getAll('channel')).toEqual(['app-push']);
+		expect(Object.fromEntries(next)).toMatchObject({
+			audience: 'uk',
+			offset: '0',
+			limit: '10',
+			other: 'keep',
+		});
+		expect(current.getAll('channel')).toEqual(['newsletter']);
+	});
+
+	it('removes a filter when its selection is empty', () => {
+		const next = updateHistoryMultiSelectFilter(
+			new URLSearchParams('status=sent&status=error'),
+			'status',
+			[],
+		);
+
+		expect(next.has('status')).toBe(false);
+		expect(next.get('offset')).toBe('0');
+		expect(next.get('limit')).toBe('20');
+	});
+
+	it('updates sender and alert-type filters using their API parameter names', () => {
+		const withSender = updateHistoryMultiSelectFilter(
+			new URLSearchParams('createdByEmail=old%40example.com&alertType=sport'),
+			'createdByEmail',
+			['new@example.com'],
+		);
+		const withAlertType = updateHistoryMultiSelectFilter(
+			withSender,
+			'alertType',
+			['exclusive'],
+		);
+
+		expect(withAlertType.getAll('createdByEmail')).toEqual(['new@example.com']);
+		expect(withAlertType.getAll('alertType')).toEqual(['exclusive']);
 	});
 });

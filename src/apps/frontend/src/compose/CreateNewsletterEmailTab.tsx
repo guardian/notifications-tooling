@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { NewsletterEmailPreviewSection } from '../preview/NewsletterEmailPreviewSection';
 import { NewsletterEmailPreviewToggle } from '../preview/PreviewToggle';
-import { articleUrlSearchParam, toGuardianArticleUrl } from '../routes';
+import {
+	articleUrlSearchParam,
+	hasReviewWarningNavigationState,
+	toGuardianArticleUrl,
+} from '../routes';
 import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { CreateNewsletterEmailForm } from './CreateNewsletterEmailForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
@@ -12,8 +16,14 @@ export const CreateNewsletterEmailTab = () => {
 	const { reset, setValue, watch } =
 		useFormContext<NewsletterEmailFormValues>();
 	const [searchParams] = useSearchParams();
+	const location = useLocation();
 	const [initialArticleUrl] = useState(() =>
 		toGuardianArticleUrl(searchParams.get(articleUrlSearchParam)),
+	);
+	const [showReviewWarning] = useState(
+		() =>
+			initialArticleUrl !== undefined &&
+			hasReviewWarningNavigationState(location.state),
 	);
 	const showPreview = watch('showPreview');
 
@@ -26,6 +36,7 @@ export const CreateNewsletterEmailTab = () => {
 			form={
 				<CreateNewsletterEmailForm
 					initialArticleUrl={initialArticleUrl}
+					showReviewWarning={showReviewWarning}
 					showPreview={showPreview}
 					onTogglePreview={(isSelected) => {
 						setValue('showPreview', isSelected, {
