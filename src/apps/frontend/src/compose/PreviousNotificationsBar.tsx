@@ -50,6 +50,22 @@ const style = {
 		height: '1.5rem',
 		fontSize: '8px',
 	}),
+	detailTable: css({
+		thead: {
+			visibility: 'collapse',
+		},
+		td: {
+			paddingLeft: semanticSpacing.stackXxs,
+			paddingRight: semanticSpacing.stackXxs,
+			paddingBottom: 2,
+		},
+		'td:first-child': {
+			paddingLeft: 0,
+		},
+		'td:last-child': {
+			paddingRight: 0,
+		},
+	}),
 };
 
 const emailToIntials = (sentBy: string): string => {
@@ -156,7 +172,7 @@ const formatTime = (
 	);
 };
 
-const TimingInformation = ({ sends }: { sends: NotificationSummary[] }) => {
+const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
 	return (
 		<>
 			{sends.length === 1 ? (
@@ -187,18 +203,28 @@ const TimingInformation = ({ sends }: { sends: NotificationSummary[] }) => {
 						theme={darkTooltipTheme}
 						label="send times"
 						cssOverrides={css({
-							maxWidth: 300,
+							maxWidth: 'unset',
 							color: semanticColors.text.weak,
 						})}
 					>
-						<ul css={{ listStyle: 'none' }}>
-							{sends.map((send, index) => (
-								<li key={index}>
-									{emailToName(send.createdByEmail)} -{' '}
-									{formatTime(send.createdAt)}
-								</li>
-							))}
-						</ul>
+						<table css={style.detailTable}>
+							<thead>
+								<tr>
+									<th>sender</th>
+									<th>channel</th>
+									<th>send time</th>
+								</tr>
+							</thead>
+							<tbody>
+								{sends.map((send, index) => (
+									<tr key={index}>
+										<td>{emailToName(send.createdByEmail)}</td>
+										<td>{notificationChannelNames[getChannel(send)]}</td>
+										<td>{formatTime(send.createdAt)}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
 					</Tooltip>
 				</div>
 			)}
@@ -261,7 +287,7 @@ export const PreviousNotificationsBar = ({
 				{sendsPastThree.length > 1 && <CombinedAvatar sends={sendsPastThree} />}
 			</div>
 			<Typography variant="bodySm">Sent {description} with this URL</Typography>
-			<TimingInformation sends={sentNotifications} />
+			<SendingDetails sends={sentNotifications} />
 			<IconButton
 				onClick={() => setDismissedFor(articleId)}
 				ariaLabel="dismiss"
