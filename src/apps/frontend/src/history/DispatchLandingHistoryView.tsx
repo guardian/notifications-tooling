@@ -1,5 +1,6 @@
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import { notificationChannelNames } from '@models';
 import type { ReactNode } from 'react';
 import {
 	activePillTheme,
@@ -20,6 +21,7 @@ interface DispatchLandingHistoryViewProps {
 	lastUpdatedAt?: string;
 	onRefresh: () => void;
 	error?: ReactNode;
+	refreshError?: ReactNode;
 }
 
 export const DispatchLandingHistoryView = ({
@@ -29,6 +31,7 @@ export const DispatchLandingHistoryView = ({
 	lastUpdatedAt,
 	onRefresh,
 	error,
+	refreshError,
 }: DispatchLandingHistoryViewProps) => {
 	const newsletterEmailCount = notifications.filter(
 		(n) => n.channel === 'newsletter',
@@ -39,12 +42,12 @@ export const DispatchLandingHistoryView = ({
 
 	const selectedPills = [
 		{
-			label: 'Newsletter email',
+			label: notificationChannelNames.newsletter,
 			icon: 'mail',
 			count: newsletterEmailCount,
 		},
 		{
-			label: 'App alert',
+			label: notificationChannelNames['app-push'],
 			icon: phoneIphoneIcon,
 			count: appAlertCount,
 		},
@@ -86,6 +89,7 @@ export const DispatchLandingHistoryView = ({
 			</div>
 			{isLoading && <HistoryTableSkeleton />}
 			{error}
+			{refreshError}
 			{!isLoading && !error && notifications.length > 0 && (
 				<HistoryTable notifications={notifications} showUserName />
 			)}

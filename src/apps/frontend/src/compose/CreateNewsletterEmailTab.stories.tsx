@@ -4,6 +4,7 @@ import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
 import {
 	articleUrlSearchParam,
 	notificationRoutes,
+	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
@@ -89,11 +90,18 @@ export const Default: Story = {
 	},
 };
 
-export const ImportsArticleFromSearchParam: Story = {
+export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 	beforeEach: () => {
 		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
 		window.history.replaceState(
-			null,
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: reviewWarningNavigationState,
+			},
 			'',
 			withArticleUrl(
 				notificationRoutes.newsletter.create,
@@ -101,7 +109,7 @@ export const ImportsArticleFromSearchParam: Story = {
 			),
 		);
 
-		return () => window.history.replaceState(null, '', originalUrl);
+		return () => window.history.replaceState(originalState, '', originalUrl);
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -139,6 +147,36 @@ export const ImportsArticleFromSearchParam: Story = {
 		await expect(
 			canvas.getByText('Review the content before sending'),
 		).toBeVisible();
+	},
+};
+
+export const PopulatesArticleFromLatestList: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			canvas.queryByText('Review the content before sending'),
+		).not.toBeInTheDocument();
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+		await expect(canvas.getByLabelText('article URL')).toHaveValue(
+			articleFixture.webUrl,
+		);
+		await expect(canvas.getByLabelText('Subject')).toHaveValue(
+			articleFixture.fields?.headline,
+		);
 	},
 };
 

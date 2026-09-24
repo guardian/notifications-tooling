@@ -204,6 +204,31 @@ export const Error: Story = {
 	},
 };
 
+export const CachedDataWithRefreshError: Story = {
+	args: {
+		notifications,
+		totalItems: notifications.length,
+		currentPage: 1,
+		limit: 10,
+		error: undefined,
+		refreshError:
+			'Unable to refresh notification history. Showing cached results.',
+		onPageChange: () => undefined,
+		onRefresh: () => undefined,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByText(
+				'Unable to refresh notification history. Showing cached results.',
+			),
+		).toBeInTheDocument();
+		await expect(
+			canvas.getByRole('grid', { name: 'Sent alerts' }),
+		).toBeInTheDocument();
+	},
+};
+
 export const WithPagination: Story = {
 	args: {
 		notifications: paginatedNotifications.slice(0, 10),

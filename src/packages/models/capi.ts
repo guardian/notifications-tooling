@@ -111,6 +111,8 @@ export type CapiResponse = z.infer<typeof capiResponseSchema>;
 const capiSearchResultSchema = z.looseObject({
 	id: z.string(),
 	sectionName: z.string().optional(),
+	pillarId: z.string().optional(),
+	pillarName: z.string().optional(),
 	webPublicationDate: z.iso.datetime().optional(),
 	webTitle: z.string(),
 	webUrl: z.url(),
@@ -148,10 +150,13 @@ export const intendedAudienceSchema = z.array(audienceRegionSchema);
 export type IntendedAudience = z.infer<typeof intendedAudienceSchema>;
 
 export const latestArticleSchema = z.object({
+	id: z.string(),
 	webUrl: z.url(),
 	publishedAt: z.iso.datetime(),
 	headline: z.string(),
 	section: z.string(),
+	pillarId: z.string().optional(),
+	pillarName: z.string().optional(),
 	thumbnail: z.url().optional(),
 	productionOffice: productionOfficeSchema.optional(),
 	intendedAudience: intendedAudienceSchema,

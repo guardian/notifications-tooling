@@ -1,4 +1,8 @@
-import type { HistoryAlertType, KickerHistoryAlertType } from '@models';
+import type {
+	HistoryAlertType,
+	KickerHistoryAlertType,
+	NotificationChannelId,
+} from '@models';
 import { kickerHistoryAlertTypes } from '@models';
 import {
 	and,
@@ -24,6 +28,8 @@ export type NotificationWithDispatches = Notification & {
 	dispatches: NotificationDispatch[];
 };
 
+export type NotificationChannel = NotificationChannelId;
+
 /** Pagination plus the caller-supplied cut-off for {@link NotificationsRepository.listRecent}. */
 export type ListRecentNotificationsOptions = {
 	/** Only notifications created at or after this instant are returned. */
@@ -32,8 +38,10 @@ export type ListRecentNotificationsOptions = {
 	offset?: number;
 	/** Case-insensitive substring matched against notification body and title fields. */
 	search?: string;
-	/** Restricts the page to notifications sent by this `createdByEmail`, matched case-insensitively. */
-	createdByEmail?: string;
+	/** Restricts the page to notifications sent by any of these emails, matched case-insensitively. */
+	createdByEmails?: string[];
+	/** Channels included in the result. */
+	channels?: NotificationChannel[];
 	/** API edition ids matched against newsletter variants or app-push editions. */
 	audiences?: string[];
 	/** Rolled-up delivery statuses included in the result. */
@@ -161,7 +169,8 @@ export const createNotificationsRepository = (db: Database) => ({
 		limit,
 		offset,
 		search,
-		createdByEmail,
+		createdByEmails,
+		channels,
 		audiences,
 		statuses,
 		alertTypes,
@@ -169,7 +178,9 @@ export const createNotificationsRepository = (db: Database) => ({
 		const escapedSearch = search?.replace(/[\\%_]/g, '\\$&');
 		const searchPattern = escapedSearch ? `%${escapedSearch}%` : undefined;
 		// Matched case-insensitively via the `lower(created_by_email)` index.
-		const normalisedCreatedByEmail = createdByEmail?.toLowerCase();
+		const normalisedCreatedByEmails = createdByEmails?.map((email) =>
+			email.toLowerCase(),
+		);
 		const audienceValues = audiences?.map((audience) => sql`${audience}`);
 		const audienceFilter = audienceValues?.length
 			? sql<boolean>`(
@@ -218,8 +229,19 @@ export const createNotificationsRepository = (db: Database) => ({
 		const withinWindow = and(
 			gte(notifications.createdAt, since),
 			eq(notifications.kind, 'send'),
-			normalisedCreatedByEmail
-				? sql`lower(${notifications.createdByEmail}) = ${normalisedCreatedByEmail}`
+			normalisedCreatedByEmails?.length
+				? inArray(
+						sql`lower(${notifications.createdByEmail})`,
+						normalisedCreatedByEmails,
+					)
+				: undefined,
+			channels?.length
+				? or(
+						...channels.map(
+							(channel) =>
+								sql<boolean>`jsonb_exists(${notifications.channels}, ${channel})`,
+						),
+					)
 				: undefined,
 			statuses?.length ? inArray(notifications.status, statuses) : undefined,
 			searchPattern

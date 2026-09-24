@@ -9,6 +9,8 @@ import {
 	HISTORY_STATUS_CATEGORIES,
 	type HistoryStatusCategory,
 	parseHistorySearchParams,
+	resolveHistoryFilterSelection,
+	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
 const STATUS_OPTIONS = [
@@ -18,7 +20,7 @@ const STATUS_OPTIONS = [
 
 export const HistoryStatusFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { limit, statuses: selectedStatuses = [] } =
+	const { statuses: selectedStatuses = [] } =
 		parseHistorySearchParams(searchParams);
 	const selectedStatusLabel = STATUS_OPTIONS.filter(({ id }) =>
 		selectedStatuses.includes(id),
@@ -28,17 +30,8 @@ export const HistoryStatusFilter = () => {
 
 	const handleStatusChange = (statuses: HistoryStatusCategory[]) => {
 		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				nextSearchParams.delete('status');
-				for (const status of statuses) {
-					nextSearchParams.append('status', status);
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
+			(currentSearchParams) =>
+				updateHistoryMultiSelectFilter(currentSearchParams, 'status', statuses),
 			{ replace: true },
 		);
 	};
@@ -57,19 +50,11 @@ export const HistoryStatusFilter = () => {
 				popoverProps={{ cssOverrides: historyViewStyles.audiencePopover }}
 				selectionMode="multiple"
 				selectedKeys={new Set(selectedStatuses)}
-				onSelectionChange={(selection) => {
-					const keys =
-						selection === 'all'
-							? [...HISTORY_STATUS_CATEGORIES]
-							: [...selection].flatMap((key) =>
-									HISTORY_STATUS_CATEGORIES.includes(
-										key as HistoryStatusCategory,
-									)
-										? [key as HistoryStatusCategory]
-										: [],
-								);
-					handleStatusChange(keys);
-				}}
+				onSelectionChange={(selection) =>
+					handleStatusChange(
+						resolveHistoryFilterSelection(selection, HISTORY_STATUS_CATEGORIES),
+					)
+				}
 				shouldCloseOnSelect={false}
 			>
 				<MenuToggle>

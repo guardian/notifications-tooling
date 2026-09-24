@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { AppAlertPreviewSection } from '../preview/AppAlertPreviewSection';
 import { AppAlertPreviewToggle } from '../preview/PreviewToggle';
-import { articleUrlSearchParam, toGuardianArticleUrl } from '../routes';
+import {
+	articleUrlSearchParam,
+	hasReviewWarningNavigationState,
+	toGuardianArticleUrl,
+} from '../routes';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
@@ -12,8 +16,14 @@ import { NotificationTabLayout } from './NotificationTabLayout';
 export const CreateAppAlertTab = () => {
 	const { reset } = useFormContext<AppAlertFormValues>();
 	const [searchParams] = useSearchParams();
+	const location = useLocation();
 	const [initialArticleUrl] = useState(() =>
 		toGuardianArticleUrl(searchParams.get(articleUrlSearchParam)),
+	);
+	const [showReviewWarning] = useState(
+		() =>
+			initialArticleUrl !== undefined &&
+			hasReviewWarningNavigationState(location.state),
 	);
 	const topicTypes = useAppAlertTopicTypes();
 
@@ -23,7 +33,12 @@ export const CreateAppAlertTab = () => {
 		<NotificationTabLayout
 			channel="app-push"
 			previewToggle={<AppAlertPreviewToggle topicTypes={topicTypes} />}
-			form={<CreateAppAlertForm initialArticleUrl={initialArticleUrl} />}
+			form={
+				<CreateAppAlertForm
+					initialArticleUrl={initialArticleUrl}
+					showReviewWarning={showReviewWarning}
+				/>
+			}
 			previewSection={<AppAlertPreviewSection topicTypes={topicTypes} />}
 		/>
 	);

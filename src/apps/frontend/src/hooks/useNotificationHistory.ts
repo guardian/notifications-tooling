@@ -7,7 +7,10 @@ import {
 	type NotificationListResponse,
 	notificationListResponseSchema,
 } from '../schemas';
-import type { HistoryStatusCategory } from '../utils/history-search-params';
+import type {
+	HistoryChannel,
+	HistoryStatusCategory,
+} from '../utils/history-search-params';
 
 export interface NotificationHistoryQuery {
 	limit: number;
@@ -15,6 +18,8 @@ export interface NotificationHistoryQuery {
 	since?: number;
 	cacheScope?: string;
 	search?: string;
+	senders?: string[];
+	channels?: HistoryChannel[];
 	audiences?: string[];
 	statuses?: HistoryStatusCategory[];
 	alertTypes?: string[];
@@ -31,6 +36,8 @@ export const getNotificationHistoryQueryKey = ({
 	since,
 	cacheScope,
 	search,
+	senders,
+	channels,
 	audiences,
 	statuses,
 	alertTypes = [],
@@ -42,6 +49,8 @@ export const getNotificationHistoryQueryKey = ({
 			offset,
 			...(cacheScope !== undefined ? { cacheScope } : { since }),
 			...(search ? { search } : {}),
+			...(senders?.length ? { senders } : {}),
+			...(channels?.length ? { channels } : {}),
 			...(audiences?.length ? { audiences } : {}),
 			...(statuses?.length ? { statuses } : {}),
 			...(alertTypes.length
@@ -51,12 +60,15 @@ export const getNotificationHistoryQueryKey = ({
 	] as const;
 
 export const ALWAYS_FRESH = Infinity;
+export const NOTIFICATION_HISTORY_POLL_INTERVAL_MS = 30_000;
 
 export const fetchNotificationHistory = ({
 	limit,
 	offset,
 	since,
 	search,
+	senders,
+	channels,
 	audiences,
 	statuses,
 	alertTypes = [],
@@ -71,6 +83,12 @@ export const fetchNotificationHistory = ({
 	}
 	if (search !== undefined) {
 		searchParams.set('search', search);
+	}
+	for (const sender of senders ?? []) {
+		searchParams.append('createdByEmail', sender);
+	}
+	for (const channel of channels ?? []) {
+		searchParams.append('channel', channel);
 	}
 	for (const audience of audiences ?? []) {
 		searchParams.append('audience', audience);
@@ -90,14 +108,25 @@ export const fetchNotificationHistory = ({
 
 export const useNotificationHistory = (
 	query: NotificationHistoryQuery,
-	{ enabled = true }: { enabled?: boolean } = {},
+	{
+		enabled = true,
+		refetchInterval = NOTIFICATION_HISTORY_POLL_INTERVAL_MS,
+		getSince,
+	}: {
+		enabled?: boolean;
+		refetchInterval?: number;
+		getSince?: () => number | undefined;
+	} = {},
 ) =>
 	useQuery({
 		queryKey: getNotificationHistoryQueryKey(query),
 		enabled,
 		queryFn: async () => {
 			try {
-				return await fetchNotificationHistory(query);
+				return await fetchNotificationHistory({
+					...query,
+					since: getSince?.() ?? query.since,
+				});
 			} catch (error) {
 				if (
 					error instanceof ApiError &&
@@ -111,4 +140,5 @@ export const useNotificationHistory = (
 		},
 		placeholderData: keepPreviousData,
 		staleTime: ALWAYS_FRESH,
+		refetchInterval,
 	});

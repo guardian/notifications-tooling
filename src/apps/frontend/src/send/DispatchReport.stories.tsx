@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { notificationRoutes, withArticleUrl } from '../routes';
+import {
+	notificationRoutes,
+	reviewWarningNavigationState,
+	withArticleUrl,
+} from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeAppAlertFormValues,
@@ -24,6 +28,15 @@ type StoryArgs = {
 	onCopyToAnotherChannel: () => void;
 };
 type Story = StoryObj<StoryArgs>;
+
+const getHistoryUserState = (): unknown => {
+	const historyState: unknown = window.history.state;
+	return typeof historyState === 'object' &&
+		historyState !== null &&
+		'usr' in historyState
+		? historyState.usr
+		: undefined;
+};
 
 const DispatchReportStory = ({
 	composerState,
@@ -219,6 +232,7 @@ export const NewsletterReportCopiesArticleToAppAlert: Story = {
 				window.location.pathname.endsWith(destination.pathname),
 			).toBe(true);
 			await expect(window.location.search).toBe(destination.search);
+			await expect(getHistoryUserState()).toEqual(reviewWarningNavigationState);
 		});
 	},
 };
@@ -266,6 +280,7 @@ export const AppAlertReportCopiesArticleToNewsletter: Story = {
 				window.location.pathname.endsWith(destination.pathname),
 			).toBe(true);
 			await expect(window.location.search).toBe(destination.search);
+			await expect(getHistoryUserState()).toEqual(reviewWarningNavigationState);
 		});
 	},
 };

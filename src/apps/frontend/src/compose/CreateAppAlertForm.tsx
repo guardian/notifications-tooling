@@ -18,10 +18,12 @@ import { NotificationFormWrapper } from './NotificationFormWrapper';
 
 interface CreateAppAlertFormProps {
 	initialArticleUrl?: string;
+	showReviewWarning?: boolean;
 }
 
 export const CreateAppAlertForm = ({
 	initialArticleUrl,
+	showReviewWarning,
 }: CreateAppAlertFormProps) => {
 	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<AppAlertFormValues>();
@@ -80,6 +82,7 @@ export const CreateAppAlertForm = ({
 			formLabel="Create app alert"
 			channel="app-push"
 			initialArticleUrl={initialArticleUrl}
+			showReviewWarning={showReviewWarning}
 			sendButtonLabel="Send app alert"
 			onSubmit={handleSubmitForm}
 			onResetNotification={() => {
@@ -90,7 +93,10 @@ export const CreateAppAlertForm = ({
 			onArticleImported={(article) => {
 				setReplacementImageUrl('');
 				setOpenReplaceSection(false);
-				setValue('headline', article.fields?.headline ?? article.webTitle);
+				setValue(
+					'headline',
+					(article.fields?.headline ?? article.webTitle).trim(),
+				);
 				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
 				setValue('articleThumbnailUrl', articleThumbnailUrl);

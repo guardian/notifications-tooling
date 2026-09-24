@@ -1,11 +1,6 @@
-/**
- * The delivery channels the broker supports. `newsletter` is delivered via
- * Braze email; `app-push` via FCM (Android) and APNS (iOS).
- */
-export enum NotificationChannel {
-	Newsletter = 'newsletter',
-	AppPushNotification = 'app-push',
-}
+import { NotificationChannel } from '@models';
+
+export { NotificationChannel } from '@models';
 
 /**
  * The limits that apply to one piece of notification text. They are distinct

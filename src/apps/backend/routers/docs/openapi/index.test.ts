@@ -44,6 +44,7 @@ describe('latest articles OpenAPI contract', () => {
 			},
 		});
 		expect(openApiDocument.components.schemas.LatestArticle.required).toEqual([
+			'id',
 			'webUrl',
 			'publishedAt',
 			'headline',
@@ -54,6 +55,22 @@ describe('latest articles OpenAPI contract', () => {
 });
 
 describe('notification history OpenAPI contract', () => {
+	it('documents repeated channel filters', () => {
+		const parameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'channel');
+		expect(parameter).toMatchObject({
+			in: 'query',
+			required: false,
+			style: 'form',
+			explode: true,
+			schema: {
+				type: 'array',
+				items: { type: 'string', enum: ['newsletter', 'app-push'] },
+			},
+		});
+	});
+
 	it('documents repeated categories using the validation enum', () => {
 		const parameter = openApiDocument.paths[
 			'/v1/notifications'

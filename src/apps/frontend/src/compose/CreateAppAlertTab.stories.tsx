@@ -1,12 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 import { expect, userEvent, within } from 'storybook/test';
+import { ConfigContext } from '../config/ConfigContext';
 import {
 	articleUrlSearchParam,
 	notificationRoutes,
+	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
+import { mockAppConfig } from '../testing/app-config';
 import { articleFixture } from '../testing/capi-fixtures';
+import {
+	FIVE_FOUR_CROP_RESPONSE,
+	GRID_CROP_ID,
+	GRID_IMAGE_ID,
+} from '../testing/grid-fixtures';
 import {
 	completeAppAlertFormValues,
 	populatedAppAlertComposerState,
@@ -16,10 +24,12 @@ import type { NotificationComposerState } from '../types';
 import { defaultAppAlertComposerState } from '../utils/notification-composer-reducer';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { CreateAppAlertTab } from './CreateAppAlertTab';
+import type { NotificationFormContextProps } from './NotificationFormContext';
 
 type StoryArgs = {
 	composerState: NotificationComposerState;
 	formValues?: Partial<AppAlertFormValues>;
+	resolveArticleFromCapi?: NotificationFormContextProps['resolveArticleFromCapi'];
 	containerMinWidth: string;
 };
 
@@ -47,7 +57,12 @@ const meta = {
 		},
 	},
 	render: function Render(args: StoryArgs) {
-		const { formValues, composerState, containerMinWidth } = args;
+		const {
+			formValues,
+			composerState,
+			resolveArticleFromCapi,
+			containerMinWidth,
+		} = args;
 		return (
 			<div
 				style={{
@@ -60,7 +75,7 @@ const meta = {
 				{useNotificationFormStory(
 					<CreateAppAlertTab />,
 					composerState,
-					{},
+					resolveArticleFromCapi ? { resolveArticleFromCapi } : {},
 					'app-push',
 					formValues,
 				)}
@@ -87,11 +102,33 @@ export const Default: Story = {
 	},
 };
 
-export const ImportsArticleFromSearchParam: Story = {
+export const PopulatesArticleCopiedFromAnotherChannel: Story = {
+	args: {
+		resolveArticleFromCapi: () =>
+			Promise.resolve({
+				success: true,
+				data: {
+					article: {
+						...articleFixture,
+						fields: {
+							...articleFixture.fields,
+							headline: `  ${articleFixture.fields?.headline ?? articleFixture.webTitle}  `,
+						},
+					},
+				},
+			}),
+	},
 	beforeEach: () => {
 		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
 		window.history.replaceState(
-			null,
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: reviewWarningNavigationState,
+			},
 			'',
 			withArticleUrl(
 				notificationRoutes['app-push'].create,
@@ -99,7 +136,7 @@ export const ImportsArticleFromSearchParam: Story = {
 			),
 		);
 
-		return () => window.history.replaceState(null, '', originalUrl);
+		return () => window.history.replaceState(originalState, '', originalUrl);
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -133,6 +170,37 @@ export const ImportsArticleFromSearchParam: Story = {
 		await expect(
 			canvas.getByText('Review the content before sending'),
 		).toBeVisible();
+	},
+};
+
+export const PopulatesArticleFromLatestList: Story = {
+	args: PopulatesArticleCopiedFromAnotherChannel.args,
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			null,
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(null, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			canvas.queryByText('Review the content before sending'),
+		).not.toBeInTheDocument();
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+		await expect(canvas.getByLabelText('article URL')).toHaveValue(
+			articleFixture.webUrl,
+		);
+		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+			articleFixture.fields?.headline,
+		);
 	},
 };
 
@@ -327,5 +395,151 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 		]) {
 			await expect(thumbnail).toHaveAttribute('src', originalThumbnailUrl);
 		}
+	},
+};
+
+export const AcceptsGridCropReplacementThumbnail: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	decorators: [
+		(Story) => (
+			<ConfigContext.Provider value={mockAppConfig}>
+				<Story />
+			</ConfigContext.Provider>
+		),
+	],
+	parameters: {
+		msw: {
+			handlers: [
+				http.get(`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`, () =>
+					HttpResponse.json(FIVE_FOUR_CROP_RESPONSE),
+				),
+				http.get(
+					`https://media.guim.co.uk/${GRID_IMAGE_ID}/${GRID_CROP_ID}/1000.jpg`,
+					() =>
+						HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
+							headers: { 'Content-Type': 'image/svg+xml' },
+						}),
+				),
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const gridCropUrl = `${mockAppConfig.gridUri}/images/${GRID_IMAGE_ID}?crop=${GRID_CROP_ID}`;
+		const resolvedThumbnailUrl = `https://media.guim.co.uk/${GRID_IMAGE_ID}/${GRID_CROP_ID}/1000.jpg`;
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.click(replacementInput);
+		await userEvent.paste(gridCropUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(await canvas.findByText('Image updated')).toBeVisible();
+		await expect(replacementInput).toHaveValue(gridCropUrl);
+		for (const thumbnail of [
+			canvas.getByAltText('Article thumbnail'),
+			canvas.getByAltText('Android article thumbnail'),
+		]) {
+			await expect(thumbnail).toHaveAttribute('src', resolvedThumbnailUrl);
+		}
+	},
+};
+
+export const ShowsErrorWhenGridLookupFails: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	decorators: [
+		(Story) => (
+			<ConfigContext.Provider value={mockAppConfig}>
+				<Story />
+			</ConfigContext.Provider>
+		),
+	],
+	parameters: {
+		msw: {
+			handlers: [
+				http.get(
+					`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`,
+					() => new HttpResponse(null, { status: 501 }),
+				),
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const gridCropUrl = `${mockAppConfig.gridUri}/images/${GRID_IMAGE_ID}?crop=${GRID_CROP_ID}`;
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.click(replacementInput);
+		await userEvent.paste(gridCropUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(
+			await canvas.findByText(
+				'Failed to retrieve the image details from the grid. Please try again',
+			),
+		).toBeVisible();
+	},
+};
+
+export const ShowsErrorAndAuthButtonWhenGridApiReturnsForbidden: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	decorators: [
+		(Story) => (
+			<ConfigContext.Provider value={mockAppConfig}>
+				<Story />
+			</ConfigContext.Provider>
+		),
+	],
+	parameters: {
+		msw: {
+			handlers: [
+				http.get(
+					`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`,
+					() => new HttpResponse(null, { status: 401 }),
+				),
+			],
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const gridCropUrl = `${mockAppConfig.gridUri}/images/${GRID_IMAGE_ID}?crop=${GRID_CROP_ID}`;
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.click(replacementInput);
+		await userEvent.paste(gridCropUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Update' }));
+
+		await expect(
+			await canvas.findByText(
+				'Your Authentication credentials for the grid have expired',
+			),
+		).toBeVisible();
+
+		await expect(
+			canvasElement.querySelector(`[href="${mockAppConfig.gridUri}"]`),
+		).toBeInTheDocument();
 	},
 };
