@@ -210,13 +210,15 @@ export const PreviousNotificationsBar = ({
 	articleId,
 	showImportedArticle,
 }: Props) => {
+	const [dismissedFor, setDismissedFor] = useState<string>();
+
 	const {
 		data,
 		error,
 		articleId: requestedDataArticleId,
-	} = usePreviousNotifications(articleId);
-
-	const [dismissedFor, setDismissedFor] = useState<string>();
+	} = usePreviousNotifications(
+		dismissedFor !== articleId ? articleId : undefined,
+	);
 
 	const sentNotifications =
 		data?.notifications.filter(
