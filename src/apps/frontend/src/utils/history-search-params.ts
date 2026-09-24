@@ -10,8 +10,27 @@ export const DEFAULT_OFFSET = 0;
 export const MAXIMUM_SEARCH_LENGTH = 200;
 export const MAXIMUM_SENDER_LENGTH = 320;
 export const HISTORY_AUDIENCE_IDS = notificationAudienceFilterIds;
+export const HISTORY_CHANNELS = ['newsletter', 'app-push'] as const;
+export type HistoryChannel = (typeof HISTORY_CHANNELS)[number];
 export const HISTORY_STATUS_CATEGORIES = ['sent', 'error'] as const;
 export type HistoryStatusCategory = (typeof HISTORY_STATUS_CATEGORIES)[number];
+
+export type HistoryMultiSelectFilter =
+	'alertType' | 'audience' | 'channel' | 'createdByEmail' | 'status';
+
+export const resolveHistoryFilterSelection = <Value extends string>(
+	selection: 'all' | Iterable<unknown>,
+	allowedValues: readonly Value[],
+): Value[] => {
+	if (selection === 'all') {
+		return [...allowedValues];
+	}
+
+	const isAllowedValue = (value: string): value is Value =>
+		allowedValues.some((allowedValue) => allowedValue === value);
+
+	return [...selection].map(String).filter(isAllowedValue);
+};
 
 const parseBoundedInteger = (
 	value: string | null,
@@ -37,6 +56,10 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 			}),
 		),
 	];
+	const requestedChannels = new Set(searchParams.getAll('channel'));
+	const channels = HISTORY_CHANNELS.filter((channel) =>
+		requestedChannels.has(channel),
+	);
 	const requestedStatuses = new Set(searchParams.getAll('status'));
 	const statuses = HISTORY_STATUS_CATEGORIES.filter((status) =>
 		requestedStatuses.has(status),
@@ -74,10 +97,26 @@ export const parseHistorySearchParams = (searchParams: URLSearchParams) => {
 		})(),
 		...(search && search.length <= MAXIMUM_SEARCH_LENGTH ? { search } : {}),
 		...(senders.length > 0 ? { senders } : {}),
+		...(channels.length > 0 ? { channels } : {}),
 		...(audiences.length > 0 ? { audiences } : {}),
 		...(statuses.length > 0 ? { statuses } : {}),
 		...(alertTypes.length > 0 ? { alertTypes } : {}),
 	};
+};
+
+export const updateHistoryMultiSelectFilter = (
+	searchParams: URLSearchParams,
+	filter: HistoryMultiSelectFilter,
+	values: readonly string[],
+) => {
+	const next = new URLSearchParams(searchParams);
+	next.delete(filter);
+	for (const value of values) {
+		next.append(filter, value);
+	}
+	next.set('offset', '0');
+	next.set('limit', String(parseHistorySearchParams(searchParams).limit));
+	return next;
 };
 
 export const updateHistoryFilters = (

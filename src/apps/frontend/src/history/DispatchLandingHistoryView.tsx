@@ -1,6 +1,8 @@
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import { notificationChannelNames } from '@models';
 import type { ReactNode } from 'react';
+import { ScrollWrapper } from '../compose/ScrollWrapper';
 import {
 	activePillTheme,
 	dispatchLandingTheme,
@@ -41,12 +43,12 @@ export const DispatchLandingHistoryView = ({
 
 	const selectedPills = [
 		{
-			label: 'Newsletter email',
+			label: notificationChannelNames.newsletter,
 			icon: 'mail',
 			count: newsletterEmailCount,
 		},
 		{
-			label: 'App alert',
+			label: notificationChannelNames['app-push'],
 			icon: phoneIphoneIcon,
 			count: appAlertCount,
 		},
@@ -86,15 +88,21 @@ export const DispatchLandingHistoryView = ({
 					</div>
 				)}
 			</div>
-			{isLoading && <HistoryTableSkeleton />}
-			{error}
-			{refreshError}
-			{!isLoading && !error && notifications.length > 0 && (
-				<HistoryTable notifications={notifications} showUserName />
-			)}
-			{!isLoading && !error && notifications.length === 0 && (
-				<HistoryEmptyState />
-			)}
+			<ScrollWrapper
+				role="region"
+				aria-label="Last 24-hour activity table"
+				tabIndex={0}
+			>
+				{isLoading && <HistoryTableSkeleton />}
+				{error}
+				{refreshError}
+				{!isLoading && !error && notifications.length > 0 && (
+					<HistoryTable notifications={notifications} showUserName />
+				)}
+				{!isLoading && !error && notifications.length === 0 && (
+					<HistoryEmptyState />
+				)}
+			</ScrollWrapper>
 		</>
 	);
 };

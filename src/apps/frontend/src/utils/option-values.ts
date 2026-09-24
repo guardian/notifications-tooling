@@ -1,4 +1,5 @@
 import type { Icon } from '@guardian/stand/Icon';
+import { notificationChannelNames } from '@models';
 import type { ComponentProps, ReactNode } from 'react';
 import type { Kicker } from '../schemas';
 import type { ChannelOption, DeliveryOption } from '../types';
@@ -15,12 +16,12 @@ type OptionDisplayInfo = {
 
 export const channelOptionNameMap: Record<ChannelOption, OptionDisplayInfo> = {
 	newsletter: {
-		name: 'Newsletter email',
+		name: notificationChannelNames.newsletter,
 		description: 'Sends via the braze breaking-news campaign',
 		symbol: 'mail',
 	},
 	'app-push': {
-		name: 'App alert',
+		name: notificationChannelNames['app-push'],
 		description: 'Push notification to Guardian app users',
 		customIcon: phoneIphoneIcon,
 	},

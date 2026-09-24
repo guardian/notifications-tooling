@@ -9,7 +9,8 @@ import { useSearchParams } from 'react-router-dom';
 import { historyViewStyles } from '../themes';
 import {
 	parseHistorySearchParams,
-	updateHistoryFilters,
+	resolveHistoryFilterSelection,
+	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
 const alertTypeLabels: Record<HistoryAlertType, string> = {
@@ -38,8 +39,14 @@ export const HistoryAlertTypeFilter = () => {
 				.join(', ') || 'All';
 
 	const handleAlertTypesChange = (nextAlertTypes: string[]) => {
-		setSearchParams((currentSearchParams) =>
-			updateHistoryFilters(currentSearchParams, { alertTypes: nextAlertTypes }),
+		setSearchParams(
+			(currentSearchParams) =>
+				updateHistoryMultiSelectFilter(
+					currentSearchParams,
+					'alertType',
+					nextAlertTypes,
+				),
+			{ replace: true },
 		);
 	};
 
@@ -54,9 +61,10 @@ export const HistoryAlertTypeFilter = () => {
 				selectedKeys={alertTypes}
 				onSelectionChange={(selection) =>
 					handleAlertTypesChange(
-						selection === 'all'
-							? historyAlertTypeSchema.options
-							: [...selection].map(String),
+						resolveHistoryFilterSelection(
+							selection,
+							historyAlertTypeSchema.options,
+						),
 					)
 				}
 				popoverProps={{ cssOverrides: historyViewStyles.categoryPopover }}

@@ -10,6 +10,7 @@ import { Typography } from '@guardian/stand/Typography';
 import type { QueryKey } from '@tanstack/react-query';
 import { useState } from 'react';
 import { DispatchCreateNotificationModal } from '../compose/DispatchCreateNotificationModal';
+import { ScrollWrapper } from '../compose/ScrollWrapper';
 import { useLatestPublishedContent } from '../hooks/useLatestPublishedContent';
 import { latestPublishedContentTheme } from '../themes';
 import { EmptyState } from '../ui/EmptyState';
@@ -36,6 +37,7 @@ export const LatestPublishedContentPanel = ({
 	const [showAll, setShowAll] = useState(false);
 	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =
 		useState(false);
+	const [selectedArticleUrl, setSelectedArticleUrl] = useState<string>();
 	const hasCachedData = latestPublishedContent.data !== undefined;
 	const isEmpty = !latestPublishedContent.isPending && content.length === 0;
 	const lastUpdatedAt = latestPublishedContent.dataUpdatedAt
@@ -66,75 +68,85 @@ export const LatestPublishedContentPanel = ({
 						Choose a recent article from below to begin creating an alert
 					</Typography>
 				</div>
-				{latestPublishedContent.isPending && !hasCachedData ? (
-					<div
-						role="status"
-						aria-label="Loading latest published content"
-						aria-busy="true"
-						css={latestPublishedContentTheme.loading}
-					>
-						<LoadingSpinner fontSize={baseSizing.size48Px} />
-					</div>
-				) : latestPublishedContent.isError && !hasCachedData ? (
-					<InlineMessage level="error">
-						Unable to load latest published content. Try again.
-					</InlineMessage>
-				) : isEmpty ? (
-					<EmptyState
-						title="No published content yet"
-						description="Published articles will appear here."
-						icon="article"
-					/>
-				) : (
-					<>
-						{latestPublishedContent.isRefetchError && (
-							<InlineMessage level="error">
-								Unable to refresh latest published content. Showing cached
-								results.
-							</InlineMessage>
-						)}
-						<Table
-							aria-label="Latest published content"
-							cssOverrides={latestPublishedContentTheme.list}
-							columns={tableColumns}
-							headerVisibleFrom="sm"
+				<ScrollWrapper
+					role="region"
+					aria-label="Latest published content list"
+					tabIndex={0}
+				>
+					{latestPublishedContent.isPending && !hasCachedData ? (
+						<div
+							role="status"
+							aria-label="Loading latest published content"
+							aria-busy="true"
+							css={latestPublishedContentTheme.loading}
 						>
-							<TableHeader
-								data-latest-content-table-header
-								cssOverrides={latestPublishedContentTheme.tableHeader}
+							<LoadingSpinner fontSize={baseSizing.size48Px} />
+						</div>
+					) : latestPublishedContent.isError && !hasCachedData ? (
+						<InlineMessage level="error">
+							Unable to load latest published content. Try again.
+						</InlineMessage>
+					) : isEmpty ? (
+						<EmptyState
+							title="No published content yet"
+							description="Published articles will appear here."
+							icon="article"
+						/>
+					) : (
+						<>
+							{latestPublishedContent.isRefetchError && (
+								<InlineMessage level="error">
+									Unable to refresh latest published content. Showing cached
+									results.
+								</InlineMessage>
+							)}
+							<Table
+								aria-label="Latest published content"
+								cssOverrides={latestPublishedContentTheme.list}
+								columns={tableColumns}
+								headerVisibleFrom="sm"
 							>
-								<TableColumnHeader isRowHeader>
-									<div css={latestPublishedContentTheme.tableHeaderContent}>
-										<span>Latest published content</span>
-										{content.length > 3 && !showAll && (
-											<TextLinkButton
-												text="Show all"
-												textVariant="bodySm"
-												onClick={() => setShowAll(true)}
-											/>
-										)}
-									</div>
-								</TableColumnHeader>
-							</TableHeader>
-							<TableBody
-								data-latest-content-table-body
-								cssOverrides={latestPublishedContentTheme.tableBody(showAll)}
-							>
-								{content.map((item) => (
-									<LatestPublishedContentCard
-										key={item.id}
-										content={item}
-										onCreate={() => setIsCreateNotificationModalOpen(true)}
-									/>
-								))}
-							</TableBody>
-						</Table>
-					</>
-				)}
+								<TableHeader
+									data-latest-content-table-header
+									cssOverrides={latestPublishedContentTheme.tableHeader}
+								>
+									<TableColumnHeader isRowHeader>
+										<div css={latestPublishedContentTheme.tableHeaderContent}>
+											<span>Latest published content</span>
+											{content.length > 3 && !showAll && (
+												<TextLinkButton
+													text="Show all"
+													textVariant="bodySm"
+													onClick={() => setShowAll(true)}
+												/>
+											)}
+										</div>
+									</TableColumnHeader>
+								</TableHeader>
+								<TableBody
+									data-latest-content-table-body
+									cssOverrides={latestPublishedContentTheme.tableBody(showAll)}
+								>
+									{content.map((item) => (
+										<LatestPublishedContentCard
+											key={item.id}
+											content={item}
+											onCreate={() => {
+												setSelectedArticleUrl(item.url);
+												setIsCreateNotificationModalOpen(true);
+											}}
+										/>
+									))}
+								</TableBody>
+							</Table>
+						</>
+					)}
+				</ScrollWrapper>
 			</div>
 			<DispatchCreateNotificationModal
 				isOpen={isCreateNotificationModalOpen}
 				onOpenChange={setIsCreateNotificationModalOpen}
+				articleUrl={selectedArticleUrl}
 			/>
 		</>
 	);

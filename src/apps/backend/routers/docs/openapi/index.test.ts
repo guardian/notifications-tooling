@@ -55,6 +55,39 @@ describe('latest articles OpenAPI contract', () => {
 });
 
 describe('notification history OpenAPI contract', () => {
+	it('documents repeated channel filters', () => {
+		const parameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'channel');
+		expect(parameter).toMatchObject({
+			in: 'query',
+			required: false,
+			style: 'form',
+			explode: true,
+			schema: {
+				type: 'array',
+				items: { type: 'string', enum: ['newsletter', 'app-push'] },
+			},
+		});
+	});
+
+	it('documents exact article filtering on the notification collection', () => {
+		const articleIdParameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'articleId');
+
+		expect(articleIdParameter).toMatchObject({
+			in: 'query',
+			required: false,
+			schema: { type: 'string', minLength: 1, maxLength: 2048 },
+		});
+		expect(
+			openApiDocument.paths['/v1/notifications'].get.responses['200'].content[
+				'application/json'
+			].schema,
+		).toEqual({ $ref: '#/components/schemas/NotificationList' });
+	});
+
 	it('documents repeated categories using the validation enum', () => {
 		const parameter = openApiDocument.paths[
 			'/v1/notifications'

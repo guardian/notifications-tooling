@@ -10,7 +10,7 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from '@config';
-import { isGuardianUrl } from '@utils';
+import { determineArticleId, isGuardianUrl } from '@utils';
 import { z } from 'zod';
 
 const pushLimits =
@@ -344,6 +344,40 @@ type ComposeReference = {
 	path: PropertyKey[];
 };
 
+type ComposableRequest = {
+	content: z.infer<typeof contentSchema>;
+	channels: {
+		[NotificationChannel.Newsletter]?: {
+			compose: z.infer<typeof newsletterCompose>;
+		};
+		[NotificationChannel.AppPushNotification]?: {
+			compose: z.infer<typeof appPushCompose>;
+		};
+	};
+};
+
+const composedItemKeys = ({ channels }: ComposableRequest): string[] => [
+	...(channels[NotificationChannel.AppPushNotification]
+		? [channels[NotificationChannel.AppPushNotification].compose.use]
+		: []),
+	...(channels[NotificationChannel.Newsletter]?.compose.items ?? []),
+];
+
+const composedArticleIds = (request: ComposableRequest) =>
+	composedItemKeys(request).flatMap((key) => {
+		const link = request.content.items[key]?.link;
+		const articleId = link ? determineArticleId(link) : undefined;
+		return articleId ? [articleId] : [];
+	});
+
+/** Returns the single article referenced by every composed content item. */
+export const determineComposedArticleId = (
+	request: ComposableRequest,
+): string | undefined => {
+	const articleIds = new Set(composedArticleIds(request));
+	return articleIds.size === 1 ? articleIds.values().next().value : undefined;
+};
+
 const composeReferenceIssues = (
 	items: z.infer<typeof contentSchema>['items'],
 	references: ComposeReference[],
@@ -429,6 +463,14 @@ export const notificationSendRequestSchema = z
 		for (const issue of composeReferenceIssues(items, composeRefs)) {
 			ctx.addIssue(issue);
 		}
+
+		if (new Set(composedArticleIds(value)).size > 1) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['content', 'items'],
+				message: 'All composed content items must link to the same article.',
+			});
+		}
 	})
 	.meta({
 		// Request-body examples live in the OpenAPI `examples` map
@@ -483,6 +525,14 @@ export const notificationTestSendRequestSchema = z
 			composeRefs,
 		)) {
 			ctx.addIssue(issue);
+		}
+
+		if (new Set(composedArticleIds(value)).size > 1) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['content', 'items'],
+				message: 'All composed content items must link to the same article.',
+			});
 		}
 	})
 	.meta({

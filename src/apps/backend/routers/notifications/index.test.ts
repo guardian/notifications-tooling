@@ -645,6 +645,56 @@ describe('POST /v1/notifications', () => {
 			const body = (await response.json()) as { error: string };
 			expect(body.error).toBe('validation_failed');
 		});
+
+		it('rejects mixed composed articles before persistence', async () => {
+			const store = mockNotificationStore();
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(
+					mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+					store,
+				),
+			);
+			const testServer = await startTestServer(testApp);
+			const request = validPushRequest();
+			const body = {
+				...request,
+				content: {
+					items: {
+						...request.content.items,
+						newsletter: {
+							type: 'newsletter',
+							title: 'Different article',
+							body: 'Newsletter body',
+							link: 'https://www.theguardian.com/world/2026/jul/09/different-story',
+						},
+					},
+				},
+				channels: {
+					...request.channels,
+					newsletter: {
+						audience: { type: 'segment', items: ['UK'] },
+						compose: { items: ['newsletter'], subject: 'Briefing' },
+					},
+				},
+			};
+
+			try {
+				const response = await fetch(`${testServer.baseUrl}/v1/notifications`, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(body),
+				});
+
+				expect(response.status).toBe(422);
+				expect(store.create).not.toHaveBeenCalled();
+			} finally {
+				await testServer.close();
+			}
+		});
 	});
 });
 
@@ -660,6 +710,7 @@ const storedNotification = (): NotificationWithDispatches => ({
 	createdByEmail: 'editor@theguardian.com',
 	dryRun: false,
 	scheduledFor: null,
+	articleId: 'world/2026/jul/08/ukraine-summit',
 	content: { items: { lead: { type: 'app-push', title: 'Ukraine summit' } } },
 	channels: { 'app-push': { compose: { use: 'lead' } } },
 	failedTargets: { topics: [], segments: [] },
@@ -829,6 +880,7 @@ const storedListPage = (): NotificationListPage => ({
 			createdByEmail: 'editor@theguardian.com',
 			dryRun: false,
 			scheduledFor: null,
+			articleId: 'world/2026/jul/08/ukraine-summit',
 			content: { items: { lead: { type: 'app-push' } } },
 			channels: { 'app-push': { compose: { use: 'lead' } } },
 			failedTargets: {
@@ -847,7 +899,8 @@ const startListServer = (
 		limit?: number;
 		offset?: number;
 		search?: string;
-		createdByEmail?: string;
+		articleId?: string;
+		createdByEmails?: string[];
 		audiences?: string[];
 	}) => Promise<NotificationListPage>,
 ) => {
@@ -969,6 +1022,41 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
+		it.each([
+			['a CAPI article ID', 'science/2026/sep/23/northern-lights'],
+			[
+				'a Guardian article URL',
+				'https://www.theguardian.com/science/2026/sep/23/northern-lights?CMP=share_btn_url#comments',
+			],
+		])(
+			'normalizes and forwards articleId for %s',
+			async (_description, articleReference) => {
+				const listNotifications = mock(() => Promise.resolve(storedListPage()));
+				const listServer = await startListServer(listNotifications);
+
+				try {
+					const query = new URLSearchParams({ articleId: articleReference });
+					const response = await fetch(
+						`${listServer.baseUrl}/v1/notifications?${query}`,
+					);
+
+					expect(response.status).toBe(200);
+					expect(listNotifications).toHaveBeenCalledWith({
+						since: new Date(0),
+						limit: 10,
+						offset: 0,
+						articleId: 'science/2026/sep/23/northern-lights',
+					});
+					expect(await response.json()).toMatchObject({
+						total: 3,
+						notifications: [{ id: notificationId }],
+					});
+				} finally {
+					await listServer.close();
+				}
+			},
+		);
+
 		it('normalizes, deduplicates and forwards createdByEmail filters', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
@@ -1005,6 +1093,27 @@ describe('GET /v1/notifications', () => {
 					limit: 10,
 					offset: 0,
 					audiences: ['uk', 'europe'],
+				});
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it('normalizes and deduplicates channel filters', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&channel=app-push&channel=newsletter&channel=app-push`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+					channels: ['app-push', 'newsletter'],
 				});
 			} finally {
 				await listServer.close();
@@ -1092,6 +1201,22 @@ describe('GET /v1/notifications', () => {
 	});
 
 	describe('bad request', () => {
+		it('returns 400 for an unknown channel', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?channel=push`,
+				);
+
+				expect(response.status).toBe(400);
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it('returns 400 for an unknown audience', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
@@ -1164,6 +1289,32 @@ describe('GET /v1/notifications', () => {
 				expect(body.message).toBe(
 					'The notification list query parameters are invalid.',
 				);
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
+		it.each([
+			['an invalid article ID', 'not-an-article-id'],
+			[
+				'a Guardian URL without an article ID',
+				'https://www.theguardian.com/uk',
+			],
+			[
+				'a non-Guardian URL',
+				'https://example.com/science/2026/sep/23/northern-lights',
+			],
+		])('returns 400 for %s', async (_description, articleId) => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const query = new URLSearchParams({ articleId });
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?${query}`,
+				);
+				expect(response.status).toBe(400);
 				expect(listNotifications).not.toHaveBeenCalled();
 			} finally {
 				await listServer.close();

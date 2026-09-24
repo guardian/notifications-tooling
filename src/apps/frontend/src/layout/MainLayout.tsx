@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { semanticColors, semanticSizing } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Avatar } from '@guardian/stand/Avatar';
@@ -51,17 +51,18 @@ export const MainLayout = ({ children }: Props) => {
 		window.scrollTo(0, 0);
 	}, [pathname]);
 
+	const isDispatchLanding = pathname === routes.dispatchLanding;
+
 	return (
 		<Layout
 			cssOverrides={[
 				css({
 					[stickyHeaderHeightProperty]: stickyHeaderHeight,
 				}),
-				...(pathname === routes.dispatchLanding
-					? [dispatchLandingTheme.layout]
-					: []),
+				...(isDispatchLanding ? [dispatchLandingTheme.layout] : []),
 			]}
 		>
+			{isDispatchLanding && <Global styles={dispatchLandingTheme.global} />}
 			<Layout.TopBar
 				cssOverrides={css({ position: 'sticky', top: 0, zIndex: layer.topBar })}
 			>
