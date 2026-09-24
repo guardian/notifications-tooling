@@ -124,7 +124,8 @@ export const SmallScreenFilters: Story = {
 		const toggle = canvas.getByRole('button', {
 			name: 'Search and filter the history',
 		});
-		const filters = canvasElement.querySelector<HTMLElement>('#history-filters');
+		const filters =
+			canvasElement.querySelector<HTMLElement>('#history-filters');
 		if (!filters) {
 			throw new Error('Filters panel not found');
 		}
