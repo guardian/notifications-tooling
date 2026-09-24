@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { latestPublishedContentQueryKey } from '../hooks/useLatestPublishedContent';
+import { notificationRoutes, withArticleUrl } from '../routes';
 import {
 	type LatestPublishedContentItem,
 	mockLatestPublishedContent,
@@ -183,6 +184,24 @@ export const Default: Story = {
 				name: 'Choose an alert type for this content',
 			}),
 		).toBeVisible();
+		await expect(
+			documentCanvas.getByRole('link', { name: 'Create a newsletter email' }),
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				mockLatestPublishedContent[0]!.url,
+			),
+		);
+		await expect(
+			documentCanvas.getByRole('link', { name: 'Create an app alert' }),
+		).toHaveAttribute(
+			'href',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				mockLatestPublishedContent[0]!.url,
+			),
+		);
 		await userEvent.click(
 			documentCanvas.getByRole('button', { name: 'Close Modal' }),
 		);

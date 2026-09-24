@@ -5,20 +5,29 @@ import { Tile } from '@guardian/stand/Tile';
 import { from } from '@guardian/stand/utils';
 import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
-import { getAppRoutes } from '../routes';
+import { getAppRoutes, withArticleUrl } from '../routes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 
 interface DispatchCreateNotificationModalProps {
 	isOpen: boolean;
 	onOpenChange: (isOpen: boolean) => void;
+	articleUrl?: string;
 }
 
 export const DispatchCreateNotificationModal = ({
 	isOpen,
 	onOpenChange,
+	articleUrl,
 }: DispatchCreateNotificationModalProps) => {
 	const config = useContext(ConfigContext);
 	const routes = getAppRoutes(config);
+	const createAppAlertHref = routes.createAppAlert
+		? withArticleUrl(routes.createAppAlert, articleUrl ?? '')
+		: undefined;
+	const createNewsletterEmailHref = withArticleUrl(
+		routes.createNewsletterEmail,
+		articleUrl ?? '',
+	);
 	const tileStyles = css({
 		width: '100%',
 		[from.md]: {
@@ -60,10 +69,10 @@ export const DispatchCreateNotificationModal = ({
 							gap: semanticSpacing.stackSm,
 						})}
 					>
-						{routes.createAppAlert && (
+						{createAppAlertHref && (
 							<Tile
 								size="sm"
-								href={routes.createAppAlert}
+								href={createAppAlertHref}
 								icon={phoneIphoneIcon}
 								typography="headingMd"
 								cssOverrides={tileStyles}
@@ -73,7 +82,7 @@ export const DispatchCreateNotificationModal = ({
 						)}
 						<Tile
 							size="sm"
-							href={routes.createNewsletterEmail}
+							href={createNewsletterEmailHref}
 							icon="mail"
 							typography="headingMd"
 							cssOverrides={tileStyles}

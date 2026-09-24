@@ -14,6 +14,18 @@ export const notificationRoutes = {
 export const articleUrlSearchParam = 'articleUrl';
 export const guardianMainUrl = 'https://www.theguardian.com';
 
+export const reviewWarningNavigationState = {
+	showReviewWarning: true,
+} as const;
+
+export const hasReviewWarningNavigationState = (
+	state: unknown,
+): state is typeof reviewWarningNavigationState =>
+	typeof state === 'object' &&
+	state !== null &&
+	'showReviewWarning' in state &&
+	state.showReviewWarning === true;
+
 const isGuardianHostname = (hostname: string) =>
 	hostname === 'theguardian.com' || hostname.endsWith('.theguardian.com');
 
