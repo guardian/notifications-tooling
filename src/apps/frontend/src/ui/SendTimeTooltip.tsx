@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { baseColors, semanticSpacing } from '@guardian/stand';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { formatLocalSendTimes } from '../utils/history-send-time';
 import { Tooltip } from './Tooltip';
 
@@ -29,8 +29,10 @@ export const SendTimeTooltip = ({ sentAt }: { sentAt: string }) => {
 		<Tooltip
 			label="Local send times"
 			theme={{
-				backgroundColor: baseColors.magenta[800],
-				triggerColor: baseColors.magenta[800],
+				color: semanticColors.text.strongerInverse,
+				backgroundColor: semanticColors.text.weak,
+				triggerColor: semanticColors.text.weak,
+				triggerHoverColor: semanticColors.fill.strongHover,
 			}}
 		>
 			<ul css={styles.list}>

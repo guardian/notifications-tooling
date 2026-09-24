@@ -81,17 +81,19 @@ export const HistoryView = ({
 										isRefreshing={isRefreshing}
 									/>
 								</div>
-								{totalItems > limit && (
-									<HistoryPagination
-										currentPage={currentPage}
-										totalItems={totalItems}
-										onPageChange={onPageChange}
-										limit={limit}
-									/>
-								)}
 							</div>
 						)}
 					</div>
+					{!isLoading && !error && totalItems > limit && (
+						<div css={historyViewStyles.paginationRow}>
+							<HistoryPagination
+								currentPage={currentPage}
+								totalItems={totalItems}
+								onPageChange={onPageChange}
+								limit={limit}
+							/>
+						</div>
+					)}
 					{isLoading && <HistoryTableSkeleton />}
 					{error}
 					{refreshError}

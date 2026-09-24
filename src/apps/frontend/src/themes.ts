@@ -925,12 +925,12 @@ export const historyViewStyles = {
 	}),
 	header: css({
 		display: 'flex',
-		flexDirection: 'column',
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		alignItems: 'center',
 		gap: semanticSpacing.stackLg,
-		[from.md]: {
-			flexDirection: 'row',
-			alignItems: 'center',
-		},
+		paddingBottom: semanticSpacing.stackSm,
+		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 	}),
 	headerActions: css({
 		display: 'flex',
@@ -938,9 +938,11 @@ export const historyViewStyles = {
 		alignItems: 'center',
 		gap: semanticSpacing.stackSm,
 		minWidth: 0,
-		[from.md]: {
-			marginLeft: 'auto',
-		},
+		marginLeft: 'auto',
+	}),
+	paginationRow: css({
+		display: 'flex',
+		justifyContent: 'flex-end',
 	}),
 	refreshControls: css({
 		display: 'flex',

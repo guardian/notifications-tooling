@@ -18,6 +18,7 @@ export interface TooltipTheme {
 	color: string;
 	backgroundColor: string;
 	triggerColor: string;
+	triggerHoverColor: string;
 }
 
 export interface TooltipProps {
@@ -36,6 +37,7 @@ const defaultTheme: TooltipTheme = {
 	color: componentTooltip.shared.color,
 	backgroundColor: componentTooltip.shared.backgroundColor,
 	triggerColor: 'inherit',
+	triggerHoverColor: 'inherit',
 };
 
 const styles = {
@@ -50,6 +52,9 @@ const styles = {
 			background: 'none',
 			color: theme.triggerColor,
 			cursor: 'pointer',
+			'&[data-hovered], &:hover': {
+				color: theme.triggerHoverColor,
+			},
 		}),
 	tooltip: (theme: TooltipTheme) =>
 		css({
