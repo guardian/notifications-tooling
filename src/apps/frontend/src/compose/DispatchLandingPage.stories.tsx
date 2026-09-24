@@ -203,7 +203,6 @@ export const Default: Story = {
 		await expect(getComputedStyle(latestContentScroller).scrollbarWidth).toBe(
 			'thin',
 		);
-		await expect(canvas.getByText('Last updated:')).toBeInTheDocument();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',
 		});

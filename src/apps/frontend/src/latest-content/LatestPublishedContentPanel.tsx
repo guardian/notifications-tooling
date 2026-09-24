@@ -132,9 +132,9 @@ export const LatestPublishedContentPanel = ({
 											key={item.id}
 											content={item}
 											onCreate={() => {
-											setSelectedArticleUrl(item.url);
-											setIsCreateNotificationModalOpen(true);
-										}}
+												setSelectedArticleUrl(item.url);
+												setIsCreateNotificationModalOpen(true);
+											}}
 										/>
 									))}
 								</TableBody>
