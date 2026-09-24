@@ -66,9 +66,9 @@ export const Expanded: Story = {
 
 		await userEvent.click(toggle);
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-		const contentId = toggle.getAttribute('aria-controls');
-		await expect(contentId).toBeTruthy();
-		await expect(canvasElement.querySelector(`#${contentId}`)).toBeVisible();
+		await expect(
+			canvasElement.ownerDocument.getElementById(contentId ?? ''),
+		).toBeVisible();
 		await expect(
 			canvas.getByText(
 				'The preview for the newsletter email will be shown below.',
