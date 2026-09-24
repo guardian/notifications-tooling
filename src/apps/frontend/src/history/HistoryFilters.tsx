@@ -40,7 +40,7 @@ export const HistoryFilters = () => {
 				<div css={historyViewStyles.filterFields}>
 					<HistorySearchFilter />
 					<HistoryChannelFilter />
-			<HistoryAlertTypeFilter />
+					<HistoryAlertTypeFilter />
 					<HistorySenderFilter />
 					<HistoryAudienceFilter />
 					<HistoryStatusFilter />
