@@ -1099,6 +1099,27 @@ describe('GET /v1/notifications', () => {
 			}
 		});
 
+		it('normalizes and deduplicates channel filters', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?limit=10&offset=0&since=1700000000&channel=app-push&channel=newsletter&channel=app-push`,
+				);
+
+				expect(response.status).toBe(200);
+				expect(listNotifications).toHaveBeenCalledWith({
+					since: new Date(1700000000 * 1000),
+					limit: 10,
+					offset: 0,
+					channels: ['app-push', 'newsletter'],
+				});
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it('expands and forwards status categories', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);
@@ -1180,6 +1201,22 @@ describe('GET /v1/notifications', () => {
 	});
 
 	describe('bad request', () => {
+		it('returns 400 for an unknown channel', async () => {
+			const listNotifications = mock(() => Promise.resolve(storedListPage()));
+			const listServer = await startListServer(listNotifications);
+
+			try {
+				const response = await fetch(
+					`${listServer.baseUrl}/v1/notifications?channel=push`,
+				);
+
+				expect(response.status).toBe(400);
+				expect(listNotifications).not.toHaveBeenCalled();
+			} finally {
+				await listServer.close();
+			}
+		});
+
 		it('returns 400 for an unknown audience', async () => {
 			const listNotifications = mock(() => Promise.resolve(storedListPage()));
 			const listServer = await startListServer(listNotifications);

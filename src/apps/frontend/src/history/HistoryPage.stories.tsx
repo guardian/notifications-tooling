@@ -464,6 +464,47 @@ export const Search: Story = {
 	},
 };
 
+export const ChannelFilter: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole('grid', { name: 'Sent alerts' });
+		historyRequest.mockClear();
+
+		const searchInput = canvas.getByRole('searchbox', { name: 'Search' });
+		const channelFilter = canvas.getByRole('button', { name: 'Channel All' });
+		await expect(channelFilter.getBoundingClientRect().top).toBeGreaterThan(
+			searchInput.getBoundingClientRect().bottom,
+		);
+
+		await userEvent.click(channelFilter);
+		const page = within(canvasElement.ownerDocument.body);
+		const newsletter = await page.findByRole('menuitemcheckbox', {
+			name: 'Newsletter email',
+		});
+		await expect(page.getAllByRole('menuitemcheckbox')).toHaveLength(2);
+		await expect(
+			page.getByRole('menuitemcheckbox', { name: 'App alert' }),
+		).toBeInTheDocument();
+		await userEvent.click(newsletter);
+
+		await expect(newsletter).toBeChecked();
+		await expect(
+			canvas.getByRole('button', { name: 'Channel Newsletter email' }),
+		).toBeInTheDocument();
+		await expect(
+			new URLSearchParams(window.location.search).getAll('channel'),
+		).toEqual(['newsletter']);
+		await waitFor(async () => {
+			await expect(historyRequest).toHaveBeenCalledOnce();
+			const requestUrl = historyRequest.mock.calls[0]?.[0];
+			await expect(requestUrl?.searchParams.getAll('channel')).toEqual([
+				'newsletter',
+			]);
+			await expect(requestUrl?.searchParams.get('offset')).toBe('0');
+		});
+	},
+};
+
 export const AudienceFilter: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

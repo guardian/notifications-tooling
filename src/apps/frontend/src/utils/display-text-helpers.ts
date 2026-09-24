@@ -1,18 +1,16 @@
+import { NotificationChannel, notificationChannelNames } from '@models';
 import type { ChannelOption } from '../types';
 
-const channelDescriptions = {
-	newsletter: 'newsletter email',
-	'app-push': 'app alert',
-};
-
 export const getChannelDescription = (channel?: ChannelOption) =>
-	channel ? channelDescriptions[channel] : 'notification';
+	channel ? notificationChannelNames[channel].toLowerCase() : 'notification';
 
 export const capitalise = (text: string) =>
 	`${text.substring(0, 1).toUpperCase()}${text.substring(1).toLowerCase()}`;
 
 export const getAlternateChannel = (channel?: ChannelOption) =>
-	channel === 'newsletter' ? 'app-push' : 'newsletter';
+	channel === NotificationChannel.Newsletter
+		? NotificationChannel.AppPushNotification
+		: NotificationChannel.Newsletter;
 
 export const getAlternateChannelDescription = (channel?: ChannelOption) =>
-	channelDescriptions[getAlternateChannel(channel)];
+	notificationChannelNames[getAlternateChannel(channel)].toLowerCase();

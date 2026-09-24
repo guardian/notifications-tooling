@@ -3,35 +3,35 @@ import { Checkbox } from '@guardian/stand/Checkbox';
 import { Icon } from '@guardian/stand/Icon';
 import { Menu, MenuItem, MenuToggle } from '@guardian/stand/Menu';
 import { Typography } from '@guardian/stand/Typography';
+import { notificationChannelOptions } from '@models';
 import { useSearchParams } from 'react-router-dom';
 import { historyViewStyles } from '../themes';
 import {
-	HISTORY_STATUS_CATEGORIES,
-	type HistoryStatusCategory,
+	type HistoryChannel,
 	parseHistorySearchParams,
 	resolveHistoryFilterSelection,
 	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
-const STATUS_OPTIONS = [
-	{ id: 'sent', label: 'Sent' },
-	{ id: 'error', label: 'Error' },
-] satisfies Array<{ id: HistoryStatusCategory; label: string }>;
+const historyChannels = notificationChannelOptions.map(({ id }) => id);
 
-export const HistoryStatusFilter = () => {
+export const HistoryChannelFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { statuses: selectedStatuses = [] } =
+	const { channels: selectedChannels = [] } =
 		parseHistorySearchParams(searchParams);
-	const selectedStatusLabel = STATUS_OPTIONS.filter(({ id }) =>
-		selectedStatuses.includes(id),
-	)
+	const selectedChannelLabel = notificationChannelOptions
+		.filter(({ id }) => selectedChannels.includes(id))
 		.map(({ label }) => label)
 		.join(', ');
 
-	const handleStatusChange = (statuses: HistoryStatusCategory[]) => {
+	const handleChannelChange = (channels: HistoryChannel[]) => {
 		setSearchParams(
 			(currentSearchParams) =>
-				updateHistoryMultiSelectFilter(currentSearchParams, 'status', statuses),
+				updateHistoryMultiSelectFilter(
+					currentSearchParams,
+					'channel',
+					channels,
+				),
 			{ replace: true },
 		);
 	};
@@ -39,20 +39,20 @@ export const HistoryStatusFilter = () => {
 	return (
 		<div css={historyViewStyles.audienceField}>
 			<Typography
-				id="history-status-label"
+				id="history-channel-label"
 				element="span"
 				variant="labelFormMd"
 			>
-				Status
+				Channel
 			</Typography>
 			<Menu
-				aria-labelledby="history-status-label"
+				aria-labelledby="history-channel-label"
 				popoverProps={{ cssOverrides: historyViewStyles.audiencePopover }}
 				selectionMode="multiple"
-				selectedKeys={new Set(selectedStatuses)}
+				selectedKeys={new Set(selectedChannels)}
 				onSelectionChange={(selection) =>
-					handleStatusChange(
-						resolveHistoryFilterSelection(selection, HISTORY_STATUS_CATEGORIES),
+					handleChannelChange(
+						resolveHistoryFilterSelection(selection, historyChannels),
 					)
 				}
 				shouldCloseOnSelect={false}
@@ -61,19 +61,19 @@ export const HistoryStatusFilter = () => {
 					<Button
 						type="button"
 						variant="secondary"
-						aria-labelledby="history-status-label history-status-value"
+						aria-labelledby="history-channel-label history-channel-value"
 						cssOverrides={historyViewStyles.audienceTrigger}
 					>
 						<span
-							id="history-status-value"
+							id="history-channel-value"
 							css={historyViewStyles.audienceTriggerValue}
 						>
-							{selectedStatuses.length === 0 ? 'All' : selectedStatusLabel}
+							{selectedChannels.length === 0 ? 'All' : selectedChannelLabel}
 						</span>
 						<Icon symbol="keyboard_arrow_down" size="lg" />
 					</Button>
 				</MenuToggle>
-				{STATUS_OPTIONS.map(({ id, label }) => (
+				{notificationChannelOptions.map(({ id, label }) => (
 					<MenuItem
 						key={id}
 						id={id}
@@ -84,7 +84,7 @@ export const HistoryStatusFilter = () => {
 							<span aria-hidden="true" inert css={historyViewStyles.visualOnly}>
 								<Checkbox
 									size="md"
-									isSelected={selectedStatuses.includes(id)}
+									isSelected={selectedChannels.includes(id)}
 									isReadOnly
 									cssOverrides={historyViewStyles.filterCheckbox}
 								>

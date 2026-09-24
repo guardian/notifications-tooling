@@ -1,6 +1,7 @@
 import { semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import { notificationChannelNames } from '@models';
 import { activePillTheme } from '../themes';
 import type { ChannelOption, DeliveryOption } from '../types';
 import { phoneIphoneIcon } from '../ui/flag-icons';
@@ -19,9 +20,9 @@ const getLabel = (value: ChannelOption | DeliveryOption) => {
 		case 'appImmediate':
 			return 'Immediate send';
 		case 'newsletter':
-			return 'Newsletter email';
+			return notificationChannelNames.newsletter;
 		case 'app-push':
-			return 'App alert';
+			return notificationChannelNames['app-push'];
 		default:
 			return value;
 	}

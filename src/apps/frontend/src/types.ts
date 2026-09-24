@@ -2,13 +2,14 @@ import type {
 	CapiBlock,
 	EmailPreviewRequest,
 	EmailPreviewResponse,
+	NotificationChannelId,
 	ResolvedArticle,
 } from '@models';
 import type { Result } from './api-client/client';
 import type { SendNotificationRequest } from './schemas';
 import type { SendNotificationFailure } from './utils/send-notification';
 
-export type ChannelOption = 'newsletter' | 'app-push';
+export type ChannelOption = NotificationChannelId;
 export type DeliveryOption = 'immediate' | 'appImmediate';
 
 export type NotificationComposerState = {

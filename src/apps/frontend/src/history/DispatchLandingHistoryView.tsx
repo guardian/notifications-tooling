@@ -1,5 +1,6 @@
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
+import { notificationChannelNames } from '@models';
 import type { ReactNode } from 'react';
 import {
 	activePillTheme,
@@ -41,12 +42,12 @@ export const DispatchLandingHistoryView = ({
 
 	const selectedPills = [
 		{
-			label: 'Newsletter email',
+			label: notificationChannelNames.newsletter,
 			icon: 'mail',
 			count: newsletterEmailCount,
 		},
 		{
-			label: 'App alert',
+			label: notificationChannelNames['app-push'],
 			icon: phoneIphoneIcon,
 			count: appAlertCount,
 		},

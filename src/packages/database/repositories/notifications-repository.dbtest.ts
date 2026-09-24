@@ -621,6 +621,46 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		]);
 	});
 
+	it('filters by the channels included in a send', async () => {
+		const appPush = await createHistoryNotification({
+			appAlertType: 'breaking-news',
+			createdAt: daysAgo(1),
+		});
+		const newsletter = await createHistoryNotification({
+			subject: 'Daily briefing',
+			createdAt: daysAgo(2),
+		});
+		const both = await createHistoryNotification({
+			appAlertType: 'sport',
+			subject: 'Sports briefing',
+			createdAt: daysAgo(3),
+		});
+
+		const newsletterPage = await notifications.listRecent({
+			since: daysAgo(14),
+			channels: ['newsletter'],
+		});
+		expect(newsletterPage.notifications.map(({ id }) => id)).toEqual([
+			newsletter.id,
+			both.id,
+		]);
+
+		const appPushPage = await notifications.listRecent({
+			since: daysAgo(14),
+			channels: ['app-push'],
+		});
+		expect(appPushPage.notifications.map(({ id }) => id)).toEqual([
+			appPush.id,
+			both.id,
+		]);
+
+		const combinedPage = await notifications.listRecent({
+			since: daysAgo(14),
+			channels: ['newsletter', 'app-push'],
+		});
+		expect(combinedPage.total).toBe(3);
+	});
+
 	it('filters rolled-up statuses while reporting the filtered total', async () => {
 		const accepted = await notifications.create({
 			...buildNotification(),
