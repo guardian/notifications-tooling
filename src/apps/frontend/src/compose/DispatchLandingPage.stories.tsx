@@ -165,12 +165,16 @@ export const Default: Story = {
 		await expect(
 			canvas.queryByRole('grid', { name: 'Sent alerts' }),
 		).not.toBeInTheDocument();
-		await expect(
-			canvas.getByRole('region', { name: 'Last 24-hour activity table' }),
-		).toHaveAttribute('data-scrollbar', 'visible');
-		await expect(
-			canvas.getByRole('region', { name: 'Latest published content list' }),
-		).toHaveAttribute('data-scrollbar', 'hidden');
+		const historyScroller = canvas.getByRole('region', {
+			name: 'Last 24-hour activity table',
+		});
+		const latestContentScroller = canvas.getByRole('region', {
+			name: 'Latest published content list',
+		});
+		await expect(getComputedStyle(historyScroller).scrollbarWidth).toBe('thin');
+		await expect(getComputedStyle(latestContentScroller).scrollbarWidth).toBe(
+			'thin',
+		);
 		await expect(canvas.getByText('Last updated:')).toBeInTheDocument();
 		const refreshButton = canvas.getByRole('button', {
 			name: 'Refresh activity',

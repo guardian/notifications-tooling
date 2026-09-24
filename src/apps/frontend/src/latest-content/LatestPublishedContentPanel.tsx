@@ -68,7 +68,6 @@ export const LatestPublishedContentPanel = ({
 					</Typography>
 				</div>
 				<ScrollWrapper
-					scrollbar="hidden"
 					role="region"
 					aria-label="Latest published content list"
 					tabIndex={0}
