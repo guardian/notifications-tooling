@@ -24,6 +24,7 @@ interface NotificationFormWrapperProps {
 	formLabel: string;
 	channel: ChannelOption;
 	initialArticleUrl?: string;
+	showReviewWarning?: boolean;
 	sendButtonLabel: string;
 	onSubmit: FormEventHandler<HTMLFormElement>;
 	onResetNotification: () => void;
@@ -38,6 +39,7 @@ export const NotificationFormWrapper = ({
 	formLabel,
 	channel,
 	initialArticleUrl,
+	showReviewWarning = false,
 	sendButtonLabel,
 	onSubmit,
 	onResetNotification,
@@ -83,7 +85,7 @@ export const NotificationFormWrapper = ({
 						},
 					}}
 				>
-					{initialArticleUrl && <ReviewWarning />}
+					{showReviewWarning && <ReviewWarning />}
 					<NotificationFormSection id="article-section">
 						<ArticleImportControl
 							articleInputText={articleInputText}
