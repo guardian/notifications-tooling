@@ -1,9 +1,11 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Avatar } from '@guardian/stand/Avatar';
+import { IconButton } from '@guardian/stand/IconButton';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
 import { type NotificationChannelId, notificationChannelNames } from '@models';
+import { useState } from 'react';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';
 import { darkTooltipTheme, Tooltip } from '../ui/Tooltip';
@@ -20,6 +22,7 @@ const style = {
 	bar: css({
 		backgroundColor: semanticColors.fill.informationWeak,
 		display: 'flex',
+		justifyContent: 'space-between',
 		alignItems: 'center',
 		gap: semanticSpacing.stackXs,
 		paddingLeft: semanticSpacing.stackXs,
@@ -159,7 +162,11 @@ const TimingInformation = ({ sends }: { sends: NotificationSummary[] }) => {
 			{sends.length === 1 ? (
 				<>
 					{sends.map((send, index) => (
-						<Typography key={index} color={semanticColors.text.weak}>
+						<Typography
+							key={index}
+							variant="bodySm"
+							color={semanticColors.text.weak}
+						>
 							[{send.createdAt}]
 						</Typography>
 					))}
@@ -173,7 +180,9 @@ const TimingInformation = ({ sends }: { sends: NotificationSummary[] }) => {
 						gap: semanticSpacing.stackXxs,
 					}}
 				>
-					<Typography color={semanticColors.text.weak}>Timestamp</Typography>
+					<Typography variant="bodySm" color={semanticColors.text.weak}>
+						Timestamp
+					</Typography>
 					<Tooltip
 						theme={darkTooltipTheme}
 						label="send times"
@@ -207,6 +216,8 @@ export const PreviousNotificationsBar = ({
 		articleId: requestedDataArticleId,
 	} = usePreviousNotifications(articleId);
 
+	const [dismissedFor, setDismissedFor] = useState<string>();
+
 	const sentNotifications =
 		data?.notifications.filter(
 			(send) => !send.dryRun && send.status !== 'failed',
@@ -224,7 +235,8 @@ export const PreviousNotificationsBar = ({
 		!showImportedArticle ||
 		!articleId ||
 		sentNotifications.length === 0 ||
-		requestedDataArticleId !== articleId
+		requestedDataArticleId !== articleId ||
+		dismissedFor === articleId
 	) {
 		return null;
 	}
@@ -246,8 +258,25 @@ export const PreviousNotificationsBar = ({
 					))}
 				{sendsPastThree.length > 1 && <CombinedAvatar sends={sendsPastThree} />}
 			</div>
-			<Typography>Sent {description} with this URL</Typography>
+			<Typography variant="bodySm">Sent {description} with this URL</Typography>
 			<TimingInformation sends={sentNotifications} />
+			<IconButton
+				onClick={() => setDismissedFor(articleId)}
+				ariaLabel="dismiss"
+				size="xs"
+				symbol="close"
+				variant="tertiary"
+				theme={{
+					tertiary: {
+						shared: {
+							border: 'none',
+							hover: {
+								border: 'none',
+							},
+						},
+					},
+				}}
+			/>
 		</div>
 	);
 };
