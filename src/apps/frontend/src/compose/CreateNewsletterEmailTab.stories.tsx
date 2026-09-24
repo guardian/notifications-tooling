@@ -3,8 +3,8 @@ import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
 import {
 	articleUrlSearchParam,
+	createCopiedNotificationState,
 	notificationRoutes,
-	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
@@ -73,6 +73,8 @@ const meta: Meta<StoryArgs> = {
 export default meta;
 type Story = StoryObj<StoryArgs>;
 
+const copiedAppAlertHeadline = 'Edited app alert headline';
+
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -100,7 +102,7 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 				...(typeof currentState === 'object' && currentState !== null
 					? currentState
 					: {}),
-				usr: reviewWarningNavigationState,
+				usr: createCopiedNotificationState(copiedAppAlertHeadline),
 			},
 			'',
 			withArticleUrl(
@@ -127,7 +129,7 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 			articleFixture.webUrl,
 		);
 		await expect(canvas.getByLabelText('Subject')).toHaveValue(
-			articleFixture.fields?.headline,
+			copiedAppAlertHeadline,
 		);
 		await expect(canvas.getByLabelText('Preview text')).toHaveValue(
 			completeNewsletterEmailFormValues.previewText,

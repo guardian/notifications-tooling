@@ -17,6 +17,7 @@ import { SubjectFormField } from './SubjectFormField';
 
 interface CreateNewsletterEmailFormProps {
 	initialArticleUrl?: string;
+	initialSubjectText?: string;
 	showReviewWarning?: boolean;
 	showPreview: boolean;
 	onTogglePreview: (showPreview: boolean) => void;
@@ -24,6 +25,7 @@ interface CreateNewsletterEmailFormProps {
 
 export const CreateNewsletterEmailForm = ({
 	initialArticleUrl,
+	initialSubjectText,
 	showReviewWarning,
 	showPreview,
 	onTogglePreview,
@@ -91,8 +93,9 @@ export const CreateNewsletterEmailForm = ({
 				onTogglePreview(true);
 
 				const { headline, trailText } = article.fields ?? {};
-				if (headline) {
-					setValue('subjectText', headline);
+				const subjectText = initialSubjectText ?? headline;
+				if (subjectText !== undefined) {
+					setValue('subjectText', subjectText);
 				}
 				const previewText = htmlToSingleLineText(trailText);
 				if (previewText) {

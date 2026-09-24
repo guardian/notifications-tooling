@@ -5,11 +5,14 @@ import { AppAlertPreviewSection } from '../preview/AppAlertPreviewSection';
 import { AppAlertPreviewToggle } from '../preview/PreviewToggle';
 import {
 	articleUrlSearchParam,
-	hasReviewWarningNavigationState,
+	parseCopiedNotificationState,
 	toGuardianArticleUrl,
 } from '../routes';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
-import type { AppAlertFormValues } from '../utils/notification-forms';
+import {
+	type AppAlertFormValues,
+	defaultAppAlertFormValues,
+} from '../utils/notification-forms';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
 
@@ -20,14 +23,23 @@ export const CreateAppAlertTab = () => {
 	const [initialArticleUrl] = useState(() =>
 		toGuardianArticleUrl(searchParams.get(articleUrlSearchParam)),
 	);
-	const [showReviewWarning] = useState(
-		() =>
-			initialArticleUrl !== undefined &&
-			hasReviewWarningNavigationState(location.state),
+	const [copyNavigationState] = useState(() =>
+		initialArticleUrl === undefined
+			? undefined
+			: parseCopiedNotificationState(location.state),
 	);
 	const topicTypes = useAppAlertTopicTypes();
 
-	useEffect(() => reset(), [reset]);
+	useEffect(
+		() =>
+			reset({
+				...defaultAppAlertFormValues,
+				headline:
+					copyNavigationState?.contentTitle ??
+					defaultAppAlertFormValues.headline,
+			}),
+		[copyNavigationState, reset],
+	);
 
 	return (
 		<NotificationTabLayout
@@ -36,7 +48,8 @@ export const CreateAppAlertTab = () => {
 			form={
 				<CreateAppAlertForm
 					initialArticleUrl={initialArticleUrl}
-					showReviewWarning={showReviewWarning}
+					initialHeadline={copyNavigationState?.contentTitle}
+					showReviewWarning={copyNavigationState !== undefined}
 				/>
 			}
 			previewSection={<AppAlertPreviewSection topicTypes={topicTypes} />}

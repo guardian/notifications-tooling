@@ -4,8 +4,8 @@ import { expect, userEvent, within } from 'storybook/test';
 import { ConfigContext } from '../config/ConfigContext';
 import {
 	articleUrlSearchParam,
+	createCopiedNotificationState,
 	notificationRoutes,
-	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { mockAppConfig } from '../testing/app-config';
@@ -87,6 +87,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const copiedNewsletterSubject = 'Edited newsletter subject';
+
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -127,7 +129,7 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 				...(typeof currentState === 'object' && currentState !== null
 					? currentState
 					: {}),
-				usr: reviewWarningNavigationState,
+				usr: createCopiedNotificationState(copiedNewsletterSubject),
 			},
 			'',
 			withArticleUrl(
@@ -154,7 +156,7 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 			articleFixture.webUrl,
 		);
 		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
-			articleFixture.fields?.headline,
+			copiedNewsletterSubject,
 		);
 		await expect(
 			canvas.getByRole('switch', { name: 'Show article thumbnail image' }),

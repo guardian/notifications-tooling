@@ -18,11 +18,13 @@ import { NotificationFormWrapper } from './NotificationFormWrapper';
 
 interface CreateAppAlertFormProps {
 	initialArticleUrl?: string;
+	initialHeadline?: string;
 	showReviewWarning?: boolean;
 }
 
 export const CreateAppAlertForm = ({
 	initialArticleUrl,
+	initialHeadline,
 	showReviewWarning,
 }: CreateAppAlertFormProps) => {
 	const { clearErrors, handleSubmit, setValue } =
@@ -90,7 +92,8 @@ export const CreateAppAlertForm = ({
 			onArticleImported={(article) => {
 				setValue(
 					'headline',
-					(article.fields?.headline ?? article.webTitle).trim(),
+					initialHeadline ??
+						(article.fields?.headline ?? article.webTitle).trim(),
 				);
 				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));

@@ -5,10 +5,13 @@ import { NewsletterEmailPreviewSection } from '../preview/NewsletterEmailPreview
 import { NewsletterEmailPreviewToggle } from '../preview/PreviewToggle';
 import {
 	articleUrlSearchParam,
-	hasReviewWarningNavigationState,
+	parseCopiedNotificationState,
 	toGuardianArticleUrl,
 } from '../routes';
-import type { NewsletterEmailFormValues } from '../utils/notification-forms';
+import {
+	defaultNewsletterEmailFormValues,
+	type NewsletterEmailFormValues,
+} from '../utils/notification-forms';
 import { CreateNewsletterEmailForm } from './CreateNewsletterEmailForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
 
@@ -20,14 +23,23 @@ export const CreateNewsletterEmailTab = () => {
 	const [initialArticleUrl] = useState(() =>
 		toGuardianArticleUrl(searchParams.get(articleUrlSearchParam)),
 	);
-	const [showReviewWarning] = useState(
-		() =>
-			initialArticleUrl !== undefined &&
-			hasReviewWarningNavigationState(location.state),
+	const [copyNavigationState] = useState(() =>
+		initialArticleUrl === undefined
+			? undefined
+			: parseCopiedNotificationState(location.state),
 	);
 	const showPreview = watch('showPreview');
 
-	useEffect(() => reset(), [reset]);
+	useEffect(
+		() =>
+			reset({
+				...defaultNewsletterEmailFormValues,
+				subjectText:
+					copyNavigationState?.contentTitle ??
+					defaultNewsletterEmailFormValues.subjectText,
+			}),
+		[copyNavigationState, reset],
+	);
 
 	return (
 		<NotificationTabLayout
@@ -36,7 +48,8 @@ export const CreateNewsletterEmailTab = () => {
 			form={
 				<CreateNewsletterEmailForm
 					initialArticleUrl={initialArticleUrl}
-					showReviewWarning={showReviewWarning}
+					initialSubjectText={copyNavigationState?.contentTitle}
+					showReviewWarning={copyNavigationState !== undefined}
 					showPreview={showPreview}
 					onTogglePreview={(isSelected) => {
 						setValue('showPreview', isSelected, {
