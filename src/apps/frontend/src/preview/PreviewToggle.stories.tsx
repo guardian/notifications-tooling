@@ -66,8 +66,12 @@ export const Expanded: Story = {
 
 		await userEvent.click(toggle);
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+		const contentId = toggle.getAttribute('aria-controls');
+		if (!contentId) {
+			throw new globalThis.Error('Preview content ID not found');
+		}
 		await expect(
-			canvasElement.ownerDocument.getElementById(contentId ?? ''),
+			canvasElement.ownerDocument.getElementById(contentId),
 		).toBeVisible();
 		await expect(
 			canvas.getByText(

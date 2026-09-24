@@ -52,7 +52,7 @@ const styles = {
 			background: 'none',
 			color: theme.triggerColor,
 			cursor: 'pointer',
-'&[data-hovered], &:hover': {
+			'&[data-hovered], &:hover': {
 				color:
 					theme.triggerHoverColor === 'inherit'
 						? theme.triggerColor
