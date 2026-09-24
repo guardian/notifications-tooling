@@ -1,20 +1,14 @@
 import { css } from '@emotion/react';
-import {
-	baseColors,
-	semanticColors,
-	semanticSizing,
-	semanticSpacing,
-} from '@guardian/stand';
-import type { CheckboxTheme } from '@guardian/stand/Checkbox';
-import { Checkbox } from '@guardian/stand/Checkbox';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Grid, Item } from '@guardian/stand/Grid';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
+import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import type {
 	DisplayAppAlertTopicEditionId,
 	NewsletterSegmentId,
 } from '@models';
-import { audienceSegmentStyles, previewPillStyles } from '../themes';
+import { audienceSegmentTileCss, audienceSegmentTileTheme } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 
 export interface SegmentOption<
@@ -34,23 +28,6 @@ interface SegmentPickerProps<
 	onChange: (selected: Code[]) => void;
 	error?: string;
 }
-
-const customTheme: CheckboxTheme = {
-	input: {
-		shared: {
-			indicator: {
-				selected: {
-					backgroundColor: baseColors.magenta[200],
-					border: `${semanticSizing.border.default} solid ${baseColors.magenta[200]}`,
-				},
-				check: {
-					height: '18px',
-					width: '24px',
-				},
-			},
-		},
-	},
-};
 
 export const SegmentPicker = <
 	Code extends NewsletterSegmentId | DisplayAppAlertTopicEditionId,
@@ -91,56 +68,28 @@ export const SegmentPicker = <
 					maxWidth: '450px',
 				})}
 				theme={{
-					sm: { gap: '12px', padding: `0px 0px 0px 0px` },
-					md: { gap: '12px', padding: `0px 0px 0px 0px` },
-					lg: { gap: '12px', padding: `0px 0px 0px 0px` },
+					sm: { gap: '12px', padding: '0px' },
+					md: { gap: '12px', padding: '0px' },
+					lg: { gap: '12px', padding: '0px' },
 				}}
 			>
 				{options.map((option) => {
 					const isSelected = selected.includes(option.code);
 					return (
 						<Item size={4} key={option.code}>
-							<div
-								css={audienceSegmentStyles.audienceSegmentCheckBoxTile(
-									isSelected,
-								)}
-							>
-								<Checkbox
-									theme={customTheme}
-									size="sm"
-									isSelected={isSelected}
-									onChange={() => handleToggle(option.code)}
-									aria-label={`Select ${option.label}`}
-									cssOverrides={css({
-										width: '100%',
-										flexDirection: 'row-reverse',
-										justifyContent: 'space-between',
-										alignItems: 'flex-start',
-									})}
-								>
-									<div
-										css={css({
-											display: 'flex',
-											flexDirection: 'column',
-											gap: semanticSpacing.stackXs,
-										})}
-									>
-										<div css={previewPillStyles.icon}>
-											<FlagAtom segmentCode={option.code} />
-										</div>
-										<Typography
-											variant="headingXs"
-											cssOverrides={css({
-												color: semanticColors.text.strong,
-												marginBottom: '0px',
-												height: '24px',
-											})}
-										>
-											{option.label}
-										</Typography>
-									</div>
-								</Checkbox>
-							</div>
+							<Tile
+								size="md"
+								icon={<FlagAtom segmentCode={option.code} />}
+								value={option.code}
+								interactionMode="multi-select"
+								isSelected={isSelected}
+								onSelectionChange={() => handleToggle(option.code)}
+								aria-label={`Select ${option.label}`}
+								description={option.label}
+								descriptionTypography="headingXs"
+								theme={audienceSegmentTileTheme}
+								cssOverrides={audienceSegmentTileCss}
+							/>
 						</Item>
 					);
 				})}
