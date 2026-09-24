@@ -17,6 +17,7 @@ import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import {
 	articleUrlSearchParam,
 	notificationRoutes,
+	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { EDITION_OPTIONS } from '../segment/edition-options';
@@ -385,6 +386,7 @@ const DispatchReportTab = ({
 									notificationRoutes[getAlternateChannel(channel)].create,
 									searchParams.get(articleUrlSearchParam) ?? '',
 								),
+								{ state: reviewWarningNavigationState },
 							);
 						}}
 					>
