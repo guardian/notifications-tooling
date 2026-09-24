@@ -65,10 +65,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64",
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
     },
-    "SsmParameterValueinfosecwafservicesprimarywafarnC96584B6F00A464EAD1953AFF4B05118Parameter": {
-      "Default": "/infosec/waf/services/primarywaf-arn",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
     "VpcId": {
       "Default": "/account/vpc/primary/id",
       "Description": "Virtual Private Cloud to run EC2 instances within. Should NOT be the account default VPC.",
@@ -86,6 +82,38 @@ exports[`The Notifications stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "ApiGatewayWafArn6C84FC50": {
+      "Properties": {
+        "Name": "/infosec/waf/services/CODE/dispatch-api-gateway-arn",
+        "Tags": {
+          "Stack": "notifications",
+          "Stage": "TEST",
+          "gu:cdk:version": "64.6.0",
+          "gu:repo": "guardian/notifications-tooling",
+        },
+        "Type": "String",
+        "Value": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":apigateway:eu-west-1::/restapis/",
+              {
+                "Ref": "dispatchlambdadispatchapiEEAA8616",
+              },
+              "/stages/",
+              {
+                "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
+              },
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
     "CertificateDispatchB98021E7": {
       "DeletionPolicy": "Retain",
       "Properties": {
@@ -229,33 +257,6 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::RDS::DBSubnetGroup",
-    },
-    "DispatchApiWebAclAssociation": {
-      "Properties": {
-        "ResourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":apigateway:eu-west-1::/restapis/",
-              {
-                "Ref": "dispatchlambdadispatchapiEEAA8616",
-              },
-              "/stages/",
-              {
-                "Ref": "dispatchlambdadispatchapiDeploymentStageprod8A227FBD",
-              },
-            ],
-          ],
-        },
-        "WebACLArn": {
-          "Ref": "SsmParameterValueinfosecwafservicesprimarywafarnC96584B6F00A464EAD1953AFF4B05118Parameter",
-        },
-      },
-      "Type": "AWS::WAFv2::WebACLAssociation",
     },
     "DispatchAppDNS": {
       "Properties": {
