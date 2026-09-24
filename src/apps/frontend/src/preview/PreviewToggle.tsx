@@ -4,7 +4,7 @@ import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
 import type { AppAlertTopicOption } from '@models';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { AppAlertPreviewSection } from './AppAlertPreviewSection';
 import { NewsletterEmailPreviewSection } from './NewsletterEmailPreviewSection';
 
@@ -14,6 +14,7 @@ interface PreviewToggleProps {
 
 const PreviewToggle = ({ children }: PreviewToggleProps) => {
 	const [isExpanded, setIsExpanded] = useState(false);
+	const contentId = useId();
 
 	return (
 		<div
@@ -28,6 +29,7 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 		>
 			<button
 				type="button"
+				aria-controls={contentId}
 				aria-expanded={isExpanded}
 				onClick={() => setIsExpanded((expanded) => !expanded)}
 				css={css({
@@ -48,7 +50,7 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 				/>
 			</button>
 
-			{isExpanded && children}
+			{isExpanded && <div id={contentId}>{children}</div>}
 		</div>
 	);
 };

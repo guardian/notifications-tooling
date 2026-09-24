@@ -130,6 +130,7 @@ export const SmallScreenFilters: Story = {
 			throw new globalThis.Error('Filters panel not found');
 		}
 
+		await expect(toggle).toHaveAttribute('aria-controls', filters.id);
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 		await expect(filters).not.toBeVisible();
 

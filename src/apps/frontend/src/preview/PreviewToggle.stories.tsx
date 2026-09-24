@@ -39,9 +39,9 @@ export default meta;
 export const Collapsed: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByRole('button', { name: 'Preview' }),
-		).toHaveAttribute('aria-expanded', 'false');
+		const toggle = canvas.getByRole('button', { name: 'Preview' });
+		await expect(toggle).toHaveAttribute('aria-controls');
+		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 	},
 };
 
@@ -66,6 +66,9 @@ export const Expanded: Story = {
 
 		await userEvent.click(toggle);
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+		const contentId = toggle.getAttribute('aria-controls');
+		await expect(contentId).toBeTruthy();
+		await expect(canvasElement.querySelector(`#${contentId}`)).toBeVisible();
 		await expect(
 			canvas.getByText(
 				'The preview for the newsletter email will be shown below.',

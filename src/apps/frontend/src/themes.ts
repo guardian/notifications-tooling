@@ -738,7 +738,7 @@ export const historyViewStyles = {
 		overflow: 'hidden',
 		gridTemplateColumns: 'minmax(0, 1fr)',
 		gridTemplateRows: 'auto minmax(0, 1fr)',
-		'@media (min-width: 1056px)': {
+		[from.lg]: {
 			gridTemplateColumns: '18rem minmax(0, 1fr)',
 			gridTemplateRows: 'minmax(0, 1fr)',
 		},
@@ -752,7 +752,7 @@ export const historyViewStyles = {
 				? `${semanticSizing.border.default} solid ${semanticColors.border.weak}`
 				: 0,
 			boxShadow: isExpanded ? semanticShadow.raised : 'none',
-			'@media (min-width: 1056px)': {
+			[from.lg]: {
 				borderBottom: 0,
 				boxShadow: 'none',
 			},
@@ -769,7 +769,7 @@ export const historyViewStyles = {
 			backgroundColor: semanticColors.bg.raisedLevel1,
 			cursor: 'pointer',
 			display: 'flex',
-			'@media (min-width: 1056px)': {
+			[from.lg]: {
 				display: 'none',
 			},
 		}),
@@ -778,13 +778,14 @@ export const historyViewStyles = {
 			display: isExpanded ? 'flex' : 'none',
 			minHeight: 0,
 			flexDirection: 'column',
-			gap: semanticSpacing.stackSm,
+			gap: 0,
 			padding: `0 ${semanticSpacing.stackSm} calc(${semanticSpacing.stackSm} * 2)`,
 			backgroundColor: semanticColors.bg.raisedLevel1,
 			overflowY: 'auto',
-			'@media (min-width: 1056px)': {
+			[from.lg]: {
 				display: 'flex',
 				flex: 1,
+				gap: semanticSpacing.stackSm,
 				padding: semanticSpacing.stackSm,
 				borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
 			},
@@ -792,6 +793,7 @@ export const historyViewStyles = {
 	clearFilters: css({
 		alignSelf: 'flex-end',
 		height: 'auto',
+		marginTop: semanticSpacing.stackMd,
 		padding: 0,
 		border: 0,
 		color: semanticColors.text.link,
@@ -806,6 +808,9 @@ export const historyViewStyles = {
 		'&:focus-visible': {
 			outline: `${semanticSizing.border.md} solid ${semanticColors.border.focused}`,
 			outlineOffset: semanticSizing.border.md,
+		},
+		[from.lg]: {
+			marginTop: 0,
 		},
 	}),
 	clearFiltersHidden: css({
