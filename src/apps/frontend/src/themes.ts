@@ -6,6 +6,7 @@ import {
 	baseTypography,
 	semanticColors,
 	semanticRadius,
+	semanticShadow,
 	semanticSizing,
 	semanticSpacing,
 	semanticTypography,
@@ -728,25 +729,66 @@ export const emptyStateStyles = {
 
 export const historyViewStyles = {
 	page: css({
+		position: 'fixed',
+		top: stickyHeaderHeight,
+		right: 0,
+		bottom: 0,
+		left: 0,
 		display: 'grid',
+		overflow: 'hidden',
 		gridTemplateColumns: 'minmax(0, 1fr)',
-		[from.md]: {
+		gridTemplateRows: 'auto minmax(0, 1fr)',
+		'@media (min-width: 1056px)': {
 			gridTemplateColumns: '18rem minmax(0, 1fr)',
+			gridTemplateRows: 'minmax(0, 1fr)',
 		},
 	}),
-	filters: css({
-		display: 'flex',
-		flexDirection: 'column',
-		gap: semanticSpacing.stackSm,
-		padding: semanticSpacing.stackSm,
-		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		backgroundColor: semanticColors.fill.neutralWeak,
-		[from.md]: {
-			minHeight: `calc(100vh - ${stickyHeaderHeight})`,
-			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-			borderBottom: 0,
-		},
-	}),
+	filtersPanel: (isExpanded: boolean) =>
+		css({
+			display: 'flex',
+			minHeight: 0,
+			flexDirection: 'column',
+			borderBottom: isExpanded
+				? `${semanticSizing.border.default} solid ${semanticColors.border.weak}`
+				: 0,
+			boxShadow: isExpanded ? semanticShadow.raised : 'none',
+			'@media (min-width: 1056px)': {
+				borderBottom: 0,
+				boxShadow: 'none',
+			},
+		}),
+	filtersToggle: (isExpanded: boolean) =>
+		css({
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			width: '100%',
+			padding: semanticSpacing.stackSm,
+			border: 0,
+			borderBottom: `${isExpanded ? semanticSizing.border.md : semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			color: semanticColors.text.strong,
+			backgroundColor: semanticColors.bg.raisedLevel1,
+			cursor: 'pointer',
+			display: 'flex',
+			'@media (min-width: 1056px)': {
+				display: 'none',
+			},
+		}),
+	filters: (isExpanded: boolean) =>
+		css({
+			display: isExpanded ? 'flex' : 'none',
+			minHeight: 0,
+			flexDirection: 'column',
+			gap: semanticSpacing.stackSm,
+			padding: `0 ${semanticSpacing.stackSm} calc(${semanticSpacing.stackSm} * 2)`,
+			backgroundColor: semanticColors.bg.raisedLevel1,
+			overflowY: 'auto',
+			'@media (min-width: 1056px)': {
+				display: 'flex',
+				flex: 1,
+				padding: semanticSpacing.stackSm,
+				borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			},
+		}),
 	clearFilters: css({
 		alignSelf: 'flex-end',
 		height: 'auto',
@@ -774,6 +816,8 @@ export const historyViewStyles = {
 	}),
 	filterFields: css({
 		display: 'flex',
+		width: '100%',
+		maxWidth: '364px',
 		flexDirection: 'column',
 		gap: semanticSpacing.stackLg,
 	}),
@@ -878,7 +922,7 @@ export const historyViewStyles = {
 		gridTemplateColumns: 'minmax(0, 1fr) auto',
 		alignItems: 'center',
 		width: '100%',
-		height: '40px',
+		height: semanticSizing.height.md,
 		paddingLeft: semanticSpacing.stackSm,
 		paddingRight: semanticSpacing.stackXs,
 		textAlign: 'left',
@@ -918,20 +962,28 @@ export const historyViewStyles = {
 		},
 	}),
 	container: css({
-		display: 'flex',
-		flexDirection: 'column',
+		display: 'grid',
+		gridTemplateRows: 'auto auto minmax(0, 1fr)',
+		minHeight: 0,
 		gap: semanticSpacing.stackMd,
 		padding: semanticSpacing.stackLg,
 	}),
-	header: css({
-		display: 'flex',
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		alignItems: 'center',
-		gap: semanticSpacing.stackLg,
-		paddingBottom: semanticSpacing.stackSm,
-		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+	results: css({
+		overflow: 'hidden',
+		minHeight: 0,
 	}),
+	header: (hasPagination: boolean) =>
+		css({
+			display: 'flex',
+			flexDirection: 'row',
+			flexWrap: 'wrap',
+			alignItems: 'center',
+			gap: semanticSpacing.stackLg,
+			paddingBottom: semanticSpacing.stackSm,
+			borderBottom: hasPagination
+				? `${semanticSizing.border.default} solid ${semanticColors.border.weak}`
+				: 0,
+		}),
 	headerActions: css({
 		display: 'flex',
 		flexWrap: 'wrap',
@@ -1018,6 +1070,10 @@ export const historyViewStyles = {
 		},
 	}),
 	table: css({
+		display: 'grid',
+		gridTemplateRows: 'auto minmax(0, 1fr)',
+		height: '100%',
+		overflow: 'hidden',
 		containerType: 'inline-size',
 		containerName: 'history-table',
 		'@media (min-width: 600px) and (max-width: 1055.9px)': {
@@ -1049,6 +1105,10 @@ export const historyViewStyles = {
 				display: 'none',
 			},
 		},
+	}),
+	tableBody: css({
+		overflowY: 'auto',
+		minHeight: 0,
 	}),
 	tableRow: css({
 		rowGap: semanticSpacing.stackXs,

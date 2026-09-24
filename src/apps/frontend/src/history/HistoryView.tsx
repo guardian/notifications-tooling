@@ -58,6 +58,8 @@ export const HistoryView = ({
 	onPageChange,
 	onRefresh,
 }: HistoryViewProps) => {
+	const hasPagination = !isLoading && !error && totalItems > limit;
+
 	return (
 		<Layout.Main theme={layoutMainTheme}>
 			<div css={historyViewStyles.page}>
@@ -66,7 +68,7 @@ export const HistoryView = ({
 					aria-labelledby="history-heading"
 					css={historyViewStyles.container}
 				>
-					<div css={historyViewStyles.header}>
+					<div css={historyViewStyles.header(hasPagination)}>
 						<div css={historyViewStyles.titleBlock}>
 							<Typography id="history-heading" element="h1" variant="headingLg">
 								History
@@ -84,7 +86,7 @@ export const HistoryView = ({
 							</div>
 						)}
 					</div>
-					{!isLoading && !error && totalItems > limit && (
+					{hasPagination && (
 						<div css={historyViewStyles.paginationRow}>
 							<HistoryPagination
 								currentPage={currentPage}
@@ -94,15 +96,20 @@ export const HistoryView = ({
 							/>
 						</div>
 					)}
-					{isLoading && <HistoryTableSkeleton />}
-					{error}
-					{refreshError}
-					{!isLoading && !error && notifications.length > 0 && (
-						<HistoryTable notifications={notifications} audiences={audiences} />
-					)}
-					{!isLoading && !error && notifications.length === 0 && (
-						<HistoryEmptyState isFilteredResult={hasActiveFilters} />
-					)}
+					<div css={historyViewStyles.results}>
+						{isLoading && <HistoryTableSkeleton />}
+						{error}
+						{refreshError}
+						{!isLoading && !error && notifications.length > 0 && (
+							<HistoryTable
+								notifications={notifications}
+								audiences={audiences}
+							/>
+						)}
+						{!isLoading && !error && notifications.length === 0 && (
+							<HistoryEmptyState isFilteredResult={hasActiveFilters} />
+						)}
+					</div>
 				</section>
 			</div>
 		</Layout.Main>
