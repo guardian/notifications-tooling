@@ -46,3 +46,37 @@ export const formatLocalSendTimes = (iso8601: string): LocalSendTime[] => {
 		time: formatter.format(sentAt),
 	}));
 };
+
+const localDateTimeFormatters = localSendTimeZones.map(
+	({ region, locale, timeZone }) => ({
+		region,
+		formatter: new Intl.DateTimeFormat(locale, {
+			hour: '2-digit',
+			minute: '2-digit',
+			day: '2-digit',
+			month: '2-digit',
+			year: '2-digit',
+			hour12: true,
+			timeZoneName: 'short',
+			timeZone,
+		}),
+	}),
+);
+
+/**
+ * Converts a send time into the local time and date of each edition's region, so an
+ * editor can see when an alert landed for its audience. Returns an empty array
+ * for a missing or unparseable timestamp, so callers can hide the detail.
+ */
+export const formatLocalSendDateTimes = (iso8601: string): LocalSendTime[] => {
+	const sentAt = new Date(iso8601);
+
+	if (Number.isNaN(sentAt.getTime())) {
+		return [];
+	}
+
+	return localDateTimeFormatters.map(({ region, formatter }) => ({
+		region,
+		time: formatter.format(sentAt),
+	}));
+};
