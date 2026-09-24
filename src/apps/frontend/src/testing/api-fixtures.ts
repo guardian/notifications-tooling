@@ -200,7 +200,7 @@ export const appPushSendBeyondBradford: NotificationSummary = {
 	kind: 'send',
 	status: 'delivered',
 	sender: 'dispatch-app',
-	createdByEmail: 'david.blatcher@guardian.co.uk',
+	createdByEmail: 'ann.nonymous@guardian.co.uk',
 	dryRun: false,
 	scheduledFor: null,
 	content: {
@@ -258,7 +258,7 @@ export const newsletterSendBeyondBradford: NotificationSummary = {
 	kind: 'send',
 	status: 'delivered',
 	sender: 'dispatch-app',
-	createdByEmail: 'david.blatcher@guardian.co.uk',
+	createdByEmail: 'john.doe@guardian.co.uk',
 	dryRun: false,
 	scheduledFor: null,
 	content: {

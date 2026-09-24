@@ -56,6 +56,19 @@ export const TwoPreviousSends: Story = {
 	},
 };
 
+export const FourPreviousSends: Story = {
+	args: {},
+	parameters: {
+		msw: [
+			respondWith([
+				newsletterSendBeyondBradford,
+				appPushSendBeyondBradford,
+				newsletterSendBeyondBradford,
+				appPushSendBeyondBradford,
+			]),
+		],
+	},
+};
 export const FivePreviousSends: Story = {
 	args: {},
 	parameters: {
