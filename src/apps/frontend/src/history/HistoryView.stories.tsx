@@ -127,7 +127,7 @@ export const SmallScreenFilters: Story = {
 		const filters =
 			canvasElement.querySelector<HTMLElement>('#history-filters');
 		if (!filters) {
-			throw new Error('Filters panel not found');
+			throw new globalThis.Error('Filters panel not found');
 		}
 
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -140,7 +140,7 @@ export const SmallScreenFilters: Story = {
 			.getByRole('heading', { name: 'History' })
 			.closest('section');
 		if (!historySection) {
-			throw new Error('History section not found');
+			throw new globalThis.Error('History section not found');
 		}
 		await expect(filters.getBoundingClientRect().bottom).toBeLessThanOrEqual(
 			historySection.getBoundingClientRect().top,
