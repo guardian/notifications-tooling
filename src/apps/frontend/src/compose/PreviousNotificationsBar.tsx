@@ -6,24 +6,15 @@ import { Typography } from '@guardian/stand/Typography';
 import { type NotificationChannelId, notificationChannelNames } from '@models';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';
-import { Tooltip } from '../ui/Tooltip';
+import { darkTooltipTheme, Tooltip } from '../ui/Tooltip';
 import { capitalise } from '../utils/display-text-helpers';
+import type { LocalSendTimeRegion } from '../utils/history-send-time';
+import { formatLocalSendDateTimes } from '../utils/history-send-time';
 
 interface Props {
 	articleId?: string;
 	showImportedArticle: boolean;
 }
-
-const emailToIntials = (sentBy: string): string => {
-	const names = sentBy.split('@').at(0)?.split('.') ?? [];
-	const [firstName, lastName] = names;
-	return `${firstName?.at(0) ?? ''}${lastName?.at(0) ?? ''}`;
-};
-
-const emailToName = (sentBy: string): string => {
-	const names = sentBy.split('@').at(0)?.split('.') ?? [];
-	return names.map(capitalise).join(' ');
-};
 
 const style = {
 	bar: css({
@@ -58,67 +49,15 @@ const style = {
 	}),
 };
 
-const SenderAvatar = ({ send }: { send: NotificationSummary }) => {
-	return (
-		<div css={style.avatarWrapper}>
-			<Tooltip
-				label={emailToName(send.createdByEmail)}
-				trigger={
-					<Avatar
-						cssOverrides={style.avatarOverrides}
-						size="sm"
-						initials={emailToIntials(send.createdByEmail)}
-					/>
-				}
-				theme={{
-					color: semanticColors.text.strongerInverse,
-					backgroundColor: semanticColors.fill.strong,
-				}}
-				cssOverrides={css({
-					padding: semanticSpacing.stackSm,
-				})}
-			>
-				{emailToName(send.createdByEmail)}
-			</Tooltip>
-		</div>
-	);
+const emailToIntials = (sentBy: string): string => {
+	const names = sentBy.split('@').at(0)?.split('.') ?? [];
+	const [firstName, lastName] = names;
+	return `${firstName?.at(0) ?? ''}${lastName?.at(0) ?? ''}`;
 };
 
-const CombinedAvatar = ({ sends }: { sends: NotificationSummary[] }) => {
-	return (
-		<div css={style.avatarWrapper}>
-			<Tooltip
-				label={sends.map((send) => send.createdByEmail).join(', ')}
-				trigger={
-					<Avatar
-						size="sm"
-						initials={'…'}
-						cssOverrides={[
-							style.avatarOverrides,
-							css({
-								backgroundColor: semanticColors.fill.neutralWeak,
-								alignItems: 'start',
-								fontSize: 'large',
-							}),
-						]}
-					/>
-				}
-				theme={{
-					color: semanticColors.text.strongerInverse,
-					backgroundColor: semanticColors.fill.strong,
-				}}
-				cssOverrides={css({
-					padding: semanticSpacing.stackSm,
-				})}
-			>
-				<ul css={{ listStyle: 'none' }}>
-					{sends.map((send, index) => (
-						<li key={index}>{emailToName(send.createdByEmail)}</li>
-					))}
-				</ul>
-			</Tooltip>
-		</div>
-	);
+const emailToName = (sentBy: string): string => {
+	const names = sentBy.split('@').at(0)?.split('.') ?? [];
+	return names.map(capitalise).join(' ');
 };
 
 const getChannel = (send: NotificationSummary): NotificationChannelId => {
@@ -142,6 +81,120 @@ const getChannelDescriptionForSet = (sends: NotificationSummary[]): string => {
 		return `a ${notificationChannelNames['newsletter']}`;
 	}
 	return 'notifications';
+};
+
+const SenderAvatar = ({ send }: { send: NotificationSummary }) => {
+	return (
+		<div css={style.avatarWrapper}>
+			<Tooltip
+				label={emailToName(send.createdByEmail)}
+				trigger={
+					<Avatar
+						cssOverrides={style.avatarOverrides}
+						size="sm"
+						initials={emailToIntials(send.createdByEmail)}
+					/>
+				}
+				theme={darkTooltipTheme}
+				cssOverrides={css({
+					padding: semanticSpacing.stackSm,
+				})}
+			>
+				{emailToName(send.createdByEmail)}
+			</Tooltip>
+		</div>
+	);
+};
+
+const CombinedAvatar = ({ sends }: { sends: NotificationSummary[] }) => {
+	return (
+		<div css={style.avatarWrapper}>
+			<Tooltip
+				label={'other senders'}
+				trigger={
+					<Avatar
+						size="sm"
+						initials={'…'}
+						cssOverrides={[
+							style.avatarOverrides,
+							css({
+								backgroundColor: semanticColors.fill.neutralWeak,
+								alignItems: 'start',
+								fontSize: 'large',
+							}),
+						]}
+					/>
+				}
+				theme={darkTooltipTheme}
+				cssOverrides={css({
+					padding: semanticSpacing.stackSm,
+				})}
+			>
+				<ul css={{ listStyle: 'none' }}>
+					{sends.map((send, index) => (
+						<li key={index}>{emailToName(send.createdByEmail)}</li>
+					))}
+				</ul>
+			</Tooltip>
+		</div>
+	);
+};
+
+const formatTime = (
+	input: string,
+	preferredRegion: LocalSendTimeRegion = 'UK',
+): string => {
+	return (
+		formatLocalSendDateTimes(input)
+			.find((time) => time.region === preferredRegion)
+			?.time.split(', ')
+			.toReversed()
+			.join(' ') ?? input
+	);
+};
+
+const TimingInformation = ({ sends }: { sends: NotificationSummary[] }) => {
+	return (
+		<>
+			{sends.length === 1 ? (
+				<>
+					{sends.map((send, index) => (
+						<Typography key={index} color={semanticColors.text.weak}>
+							[{send.createdAt}]
+						</Typography>
+					))}
+				</>
+			) : (
+				<div
+					css={{
+						marginLeft: 'auto',
+						display: 'flex',
+						alignItems: 'center',
+						gap: semanticSpacing.stackXxs,
+					}}
+				>
+					<Typography color={semanticColors.text.weak}>Timestamp</Typography>
+					<Tooltip
+						theme={darkTooltipTheme}
+						label="send times"
+						cssOverrides={css({
+							maxWidth: 300,
+							color: semanticColors.text.weak,
+						})}
+					>
+						<ul css={{ listStyle: 'none' }}>
+							{sends.map((send, index) => (
+								<li key={index}>
+									{emailToName(send.createdByEmail)} -{' '}
+									{formatTime(send.createdAt)}
+								</li>
+							))}
+						</ul>
+					</Tooltip>
+				</div>
+			)}
+		</>
+	);
 };
 
 export const PreviousNotificationsBar = ({
@@ -177,7 +230,6 @@ export const PreviousNotificationsBar = ({
 	}
 
 	const description = getChannelDescriptionForSet(sentNotifications);
-
 	const firstThreeSends = sentNotifications.slice(0, 3);
 	const sendsPastThree = sentNotifications.slice(3);
 
@@ -195,11 +247,7 @@ export const PreviousNotificationsBar = ({
 				{sendsPastThree.length > 1 && <CombinedAvatar sends={sendsPastThree} />}
 			</div>
 			<Typography>Sent {description} with this URL</Typography>
-			{sentNotifications.length === 1 ? (
-				<Typography>[{sentNotifications.at(0)?.createdAt}]</Typography>
-			) : (
-				<Typography>Timestamp</Typography>
-			)}
+			<TimingInformation sends={sentNotifications} />
 		</div>
 	);
 };

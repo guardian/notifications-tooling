@@ -1,6 +1,6 @@
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
-import { componentTooltip } from '@guardian/stand';
+import { componentTooltip, semanticColors } from '@guardian/stand';
 import type { IconProps } from '@guardian/stand/Icon';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
@@ -140,4 +140,9 @@ export const Tooltip = ({
 			</AriaTooltip>
 		</TooltipTrigger>
 	);
+};
+
+export const darkTooltipTheme: Partial<TooltipTheme> = {
+	color: semanticColors.text.strongerInverse,
+	backgroundColor: semanticColors.fill.strong,
 };

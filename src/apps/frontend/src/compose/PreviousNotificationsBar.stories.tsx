@@ -28,6 +28,15 @@ const meta = {
 		articleId,
 		showImportedArticle: true,
 	},
+	decorators: [
+		(Story) => {
+			return (
+				<section css={{ maxWidth: 500, paddingLeft: '1rem' }}>
+					<Story />
+				</section>
+			);
+		},
+	],
 } satisfies Meta<typeof PreviousNotificationsBar>;
 
 export default meta;
