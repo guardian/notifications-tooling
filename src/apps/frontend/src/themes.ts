@@ -451,6 +451,20 @@ export const latestPublishedContentTheme = {
 		flexDirection: 'column',
 		gap: semanticSpacing.stackXs,
 	}),
+	titleRow: css({
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: semanticSpacing.stackSm,
+		minWidth: 0,
+	}),
+	refreshControls: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		whiteSpace: 'nowrap',
+		marginLeft: 'auto',
+	}),
 	helpText: css({
 		color: semanticColors.text.weak,
 	}),

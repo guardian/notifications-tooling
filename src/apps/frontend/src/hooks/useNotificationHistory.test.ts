@@ -304,7 +304,7 @@ describe('notification history query keys', () => {
 		});
 		const wrapper = ({ children }: { children: React.ReactNode }) =>
 			createElement(QueryClientProvider, { client: queryClient }, children);
-		renderHook(
+		const { unmount } = renderHook(
 			() =>
 				useNotificationHistory(
 					{
@@ -318,14 +318,20 @@ describe('notification history query keys', () => {
 			{ wrapper },
 		);
 
-		await waitFor(() => expect(requestCount).toBe(1));
-		const query = queryClient.getQueryCache().find({
-			queryKey: getNotificationHistoryQueryKey({ limit: 20, offset: 0 }),
-		});
+		try {
+			await waitFor(() => expect(requestCount).toBe(1));
+			const query = queryClient.getQueryCache().find({
+				queryKey: getNotificationHistoryQueryKey({ limit: 20, offset: 0 }),
+			});
 
-		expect(
-			(query?.options as { refetchInterval?: number }).refetchInterval,
-		).toBe(10);
-		expect(NOTIFICATION_HISTORY_POLL_INTERVAL_MS).toBe(30_000);
+			expect(
+				(query?.options as { refetchInterval?: number }).refetchInterval,
+			).toBe(10);
+			expect(NOTIFICATION_HISTORY_POLL_INTERVAL_MS).toBe(30_000);
+		} finally {
+			unmount();
+			queryClient.clear();
+			queryClient.unmount();
+		}
 	});
 });
