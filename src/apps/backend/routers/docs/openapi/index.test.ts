@@ -71,6 +71,23 @@ describe('notification history OpenAPI contract', () => {
 		});
 	});
 
+	it('documents exact article filtering on the notification collection', () => {
+		const articleIdParameter = openApiDocument.paths[
+			'/v1/notifications'
+		].get.parameters.find(({ name }) => name === 'articleId');
+
+		expect(articleIdParameter).toMatchObject({
+			in: 'query',
+			required: false,
+			schema: { type: 'string', minLength: 1, maxLength: 2048 },
+		});
+		expect(
+			openApiDocument.paths['/v1/notifications'].get.responses['200'].content[
+				'application/json'
+			].schema,
+		).toEqual({ $ref: '#/components/schemas/NotificationList' });
+	});
+
 	it('documents repeated categories using the validation enum', () => {
 		const parameter = openApiDocument.paths[
 			'/v1/notifications'

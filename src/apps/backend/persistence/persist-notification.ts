@@ -10,9 +10,10 @@ import {
 import type { DispatchOutcomes } from '../notification-channels/dispatch-notification';
 import type { TestDispatchOutcomes } from '../notification-channels/dispatch-notification-test';
 import type { DispatchOutcome } from '../notification-channels/dispatch-outcome';
-import type {
-	NotificationSendRequest,
-	NotificationTestSendRequest,
+import {
+	determineComposedArticleId,
+	type NotificationSendRequest,
+	type NotificationTestSendRequest,
 } from '../routers/notifications/schemas/notification-send-request';
 
 type NotificationStatus = Notification['status'];
@@ -171,6 +172,7 @@ type NotificationEnvelope = {
 	createdByEmail: string;
 	dryRun: boolean;
 	scheduledFor: Date | null;
+	articleId: string | null;
 	content: Record<string, unknown>;
 	channels: Record<string, unknown>;
 };
@@ -241,8 +243,8 @@ export type TestNotificationStore = NotificationStore<
 >;
 
 export const sendNotificationStore: SendNotificationStore = {
-	create: (request, createdByEmail) =>
-		insertNotification({
+	create: (request, createdByEmail) => {
+		return insertNotification({
 			kind: 'send',
 			idempotencyKey: request.idempotencyKey,
 			sender: request.sender,
@@ -251,9 +253,11 @@ export const sendNotificationStore: SendNotificationStore = {
 			scheduledFor: request.options.scheduledFor
 				? new Date(request.options.scheduledFor)
 				: null,
+			articleId: determineComposedArticleId(request) ?? null,
 			content: request.content,
 			channels: request.channels,
-		}),
+		});
+	},
 	recordOutcomes: (notification, outcomes) =>
 		recordDispatches(
 			notification,
@@ -263,17 +267,19 @@ export const sendNotificationStore: SendNotificationStore = {
 };
 
 export const testNotificationStore: TestNotificationStore = {
-	create: (request, createdByEmail) =>
-		insertNotification({
+	create: (request, createdByEmail) => {
+		return insertNotification({
 			kind: 'test',
 			idempotencyKey: request.idempotencyKey,
 			sender: request.sender,
 			createdByEmail,
 			dryRun: request.options.dryRun,
 			scheduledFor: null,
+			articleId: determineComposedArticleId(request) ?? null,
 			content: request.content,
 			channels: request.channels,
-		}),
+		});
+	},
 	recordOutcomes: (notification, outcomes) =>
 		recordDispatches(
 			notification,

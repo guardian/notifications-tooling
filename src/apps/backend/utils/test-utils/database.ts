@@ -22,10 +22,12 @@ export const listSendsWithDispatchesInWindowMock = mock(() =>
 	Promise.resolve([] as unknown[]),
 );
 
+export const createNotificationMock = mock(() =>
+	Promise.resolve(buildPersistedNotification().notification),
+);
+
 const createNotificationsRepository = () => ({
-	create: mock(() =>
-		Promise.resolve(buildPersistedNotification().notification),
-	),
+	create: createNotificationMock,
 	updateStatus: mock((id: string, status: string) =>
 		Promise.resolve({
 			...buildPersistedNotification().notification,
@@ -77,6 +79,7 @@ export const buildPersistedNotification = (
 		createdByEmail: 'ada.lovelace@guardian.co.uk',
 		dryRun: false,
 		scheduledFor: null,
+		articleId: null,
 		content: {},
 		channels: {},
 		failedTargets: { topics: [], segments: [] },
