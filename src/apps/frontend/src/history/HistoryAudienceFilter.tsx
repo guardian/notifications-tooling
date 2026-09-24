@@ -3,12 +3,13 @@ import { Checkbox } from '@guardian/stand/Checkbox';
 import { Icon } from '@guardian/stand/Icon';
 import { Menu, MenuItem, MenuToggle } from '@guardian/stand/Menu';
 import { Typography } from '@guardian/stand/Typography';
-import { notificationAudienceFilterId } from '@models';
 import { useSearchParams } from 'react-router-dom';
 import { historyViewStyles } from '../themes';
 import {
 	HISTORY_AUDIENCE_IDS,
 	parseHistorySearchParams,
+	resolveHistoryFilterSelection,
+	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
 const audienceLabels: Record<string, string> = {
@@ -26,7 +27,7 @@ const audienceOptions = HISTORY_AUDIENCE_IDS.map((id) => ({
 
 export const HistoryAudienceFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { audiences: selectedAudiences = [], limit } =
+	const { audiences: selectedAudiences = [] } =
 		parseHistorySearchParams(searchParams);
 	const selectedAudienceLabel = audienceOptions
 		.filter(({ id }) => selectedAudiences.includes(id))
@@ -35,17 +36,12 @@ export const HistoryAudienceFilter = () => {
 
 	const handleAudienceChange = (audiences: string[]) => {
 		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				nextSearchParams.delete('audience');
-				for (const audience of audiences) {
-					nextSearchParams.append('audience', audience);
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
+			(currentSearchParams) =>
+				updateHistoryMultiSelectFilter(
+					currentSearchParams,
+					'audience',
+					audiences,
+				),
 			{ replace: true },
 		);
 	};
@@ -64,16 +60,11 @@ export const HistoryAudienceFilter = () => {
 				popoverProps={{ cssOverrides: historyViewStyles.audiencePopover }}
 				selectionMode="multiple"
 				selectedKeys={new Set(selectedAudiences)}
-				onSelectionChange={(selection) => {
-					const keys =
-						selection === 'all'
-							? HISTORY_AUDIENCE_IDS
-							: [...selection].flatMap((key) => {
-									const parsed = notificationAudienceFilterId.safeParse(key);
-									return parsed.success ? [parsed.data] : [];
-								});
-					handleAudienceChange(keys);
-				}}
+				onSelectionChange={(selection) =>
+					handleAudienceChange(
+						resolveHistoryFilterSelection(selection, HISTORY_AUDIENCE_IDS),
+					)
+				}
 				shouldCloseOnSelect={false}
 			>
 				<MenuToggle>

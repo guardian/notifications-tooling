@@ -7,7 +7,10 @@ import {
 	type NotificationListResponse,
 	notificationListResponseSchema,
 } from '../schemas';
-import type { HistoryStatusCategory } from '../utils/history-search-params';
+import type {
+	HistoryChannel,
+	HistoryStatusCategory,
+} from '../utils/history-search-params';
 
 export interface NotificationHistoryQuery {
 	limit: number;
@@ -16,6 +19,7 @@ export interface NotificationHistoryQuery {
 	cacheScope?: string;
 	search?: string;
 	senders?: string[];
+	channels?: HistoryChannel[];
 	audiences?: string[];
 	statuses?: HistoryStatusCategory[];
 	alertTypes?: string[];
@@ -33,6 +37,7 @@ export const getNotificationHistoryQueryKey = ({
 	cacheScope,
 	search,
 	senders,
+	channels,
 	audiences,
 	statuses,
 	alertTypes = [],
@@ -45,6 +50,7 @@ export const getNotificationHistoryQueryKey = ({
 			...(cacheScope !== undefined ? { cacheScope } : { since }),
 			...(search ? { search } : {}),
 			...(senders?.length ? { senders } : {}),
+			...(channels?.length ? { channels } : {}),
 			...(audiences?.length ? { audiences } : {}),
 			...(statuses?.length ? { statuses } : {}),
 			...(alertTypes.length
@@ -62,6 +68,7 @@ export const fetchNotificationHistory = ({
 	since,
 	search,
 	senders,
+	channels,
 	audiences,
 	statuses,
 	alertTypes = [],
@@ -79,6 +86,9 @@ export const fetchNotificationHistory = ({
 	}
 	for (const sender of senders ?? []) {
 		searchParams.append('createdByEmail', sender);
+	}
+	for (const channel of channels ?? []) {
+		searchParams.append('channel', channel);
 	}
 	for (const audience of audiences ?? []) {
 		searchParams.append('audience', audience);

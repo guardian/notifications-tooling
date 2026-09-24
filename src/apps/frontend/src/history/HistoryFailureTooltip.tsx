@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Badge } from '@guardian/stand/Badge';
+import { notificationChannelNames } from '@models';
 import { useState } from 'react';
 import { useNotificationDetail } from '../hooks/useNotificationDetail';
 import type { ChannelAudienceResponse, NotificationResource } from '../schemas';
@@ -8,11 +9,6 @@ import { historyViewStyles } from '../themes';
 import { Tooltip } from '../ui/Tooltip';
 import { formatDispatchTarget } from '../utils/format-dispatch-target';
 import type { HistoryNotification } from './HistoryView';
-
-const channelNames = {
-	'app-push': 'app alert',
-	newsletter: 'newsletter email',
-} as const;
 
 const failureReasonDescriptions: Record<string, string> = {
 	http_error: 'The downstream service rejected the request.',
@@ -73,7 +69,8 @@ const FailureTooltipContent = ({
 							<strong>
 								{formatDispatchTarget(dispatch.requested, audiences)}
 							</strong>{' '}
-							via {channelNames[dispatch.channel]}. {reason}
+							via {notificationChannelNames[dispatch.channel].toLowerCase()}.{' '}
+							{reason}
 							{dispatch.providerStatusCode !== null
 								? ` Provider status: ${dispatch.providerStatusCode}.`
 								: ''}

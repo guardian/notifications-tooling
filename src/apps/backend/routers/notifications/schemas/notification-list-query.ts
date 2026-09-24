@@ -1,3 +1,4 @@
+import { NotificationChannel } from '@config';
 import {
 	canonicalHistoryAlertTypes,
 	historyAlertTypeSchema,
@@ -8,6 +9,7 @@ import { z } from 'zod';
 const defaultLimit = 10;
 const defaultOffset = 0;
 const defaultSinceDays = 14;
+const notificationChannel = z.enum(NotificationChannel);
 const notificationStatusCategory = z.enum(['sent', 'error']);
 
 const statusesByCategory = {
@@ -47,6 +49,10 @@ export const notificationListQuerySchema = z
 			])
 			.transform((value) => (Array.isArray(value) ? value : [value]))
 			.optional(),
+		channel: z
+			.union([notificationChannel, z.array(notificationChannel).min(1)])
+			.transform((value) => (Array.isArray(value) ? value : [value]))
+			.optional(),
 		audience: z
 			.union([
 				notificationAudienceFilterId,
@@ -83,6 +89,7 @@ export const notificationListQuerySchema = z
 		createdByEmails: query.createdByEmail
 			? [...new Set(query.createdByEmail.map((email) => email.toLowerCase()))]
 			: undefined,
+		channels: query.channel ? [...new Set(query.channel)] : undefined,
 		audiences: query.audience ? [...new Set(query.audience)] : undefined,
 		statuses: query.status
 			? [

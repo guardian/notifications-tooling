@@ -116,6 +116,7 @@ export const HistoryPage = () => {
 			hasActiveFilters={
 				parsedHistoryQuery.search !== undefined ||
 				(parsedHistoryQuery.senders?.length ?? 0) > 0 ||
+				(parsedHistoryQuery.channels?.length ?? 0) > 0 ||
 				(parsedHistoryQuery.audiences?.length ?? 0) > 0 ||
 				(parsedHistoryQuery.statuses?.length ?? 0) > 0 ||
 				alertTypes.length > 0

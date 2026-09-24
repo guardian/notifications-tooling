@@ -2,6 +2,7 @@ import { historyViewStyles } from '../themes';
 import { ClearHistoryFiltersButton } from './ClearHistoryFiltersButton';
 import { HistoryAlertTypeFilter } from './HistoryAlertTypeFilter';
 import { HistoryAudienceFilter } from './HistoryAudienceFilter';
+import { HistoryChannelFilter } from './HistoryChannelFilter';
 import { HistorySearchFilter } from './HistorySearchFilter';
 import { HistorySenderFilter } from './HistorySenderFilter';
 import { HistoryStatusFilter } from './HistoryStatusFilter';
@@ -11,6 +12,7 @@ export const HistoryFilters = () => (
 		<ClearHistoryFiltersButton />
 		<div css={historyViewStyles.filterFields}>
 			<HistorySearchFilter />
+			<HistoryChannelFilter />
 			<HistoryAlertTypeFilter />
 			<HistorySenderFilter />
 			<HistoryAudienceFilter />

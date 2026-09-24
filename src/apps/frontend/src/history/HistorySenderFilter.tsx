@@ -6,16 +6,17 @@ import { Typography } from '@guardian/stand/Typography';
 import { useSearchParams } from 'react-router-dom';
 import { useNotificationSenders } from '../hooks/useNotificationSenders';
 import { historyViewStyles } from '../themes';
-import { parseHistorySearchParams } from '../utils/history-search-params';
+import {
+	parseHistorySearchParams,
+	resolveHistoryFilterSelection,
+	updateHistoryMultiSelectFilter,
+} from '../utils/history-search-params';
 import { getSenderDisplayName } from '../utils/notification-history-mapper';
 
 export const HistorySenderFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const {
-		senders: selectedSenders = [],
-		limit,
-		since,
-	} = parseHistorySearchParams(searchParams);
+	const { senders: selectedSenders = [], since } =
+		parseHistorySearchParams(searchParams);
 	const notificationSenders = useNotificationSenders(since);
 	const senderOptions = notificationSenders.data?.senders ?? [];
 	const selectedSenderLabel = selectedSenders
@@ -24,17 +25,12 @@ export const HistorySenderFilter = () => {
 
 	const handleSenderChange = (senders: string[]) => {
 		setSearchParams(
-			(currentSearchParams) => {
-				const nextSearchParams = new URLSearchParams(currentSearchParams);
-				nextSearchParams.delete('createdByEmail');
-				for (const sender of senders) {
-					nextSearchParams.append('createdByEmail', sender);
-				}
-				nextSearchParams.set('offset', '0');
-				nextSearchParams.set('limit', String(limit));
-
-				return nextSearchParams;
-			},
+			(currentSearchParams) =>
+				updateHistoryMultiSelectFilter(
+					currentSearchParams,
+					'createdByEmail',
+					senders,
+				),
 			{ replace: true },
 		);
 	};
@@ -55,9 +51,7 @@ export const HistorySenderFilter = () => {
 				selectedKeys={new Set(selectedSenders)}
 				onSelectionChange={(selection) =>
 					handleSenderChange(
-						selection === 'all'
-							? senderOptions
-							: [...selection].map((key) => String(key)),
+						resolveHistoryFilterSelection(selection, senderOptions),
 					)
 				}
 				shouldCloseOnSelect={false}
