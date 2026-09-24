@@ -52,8 +52,11 @@ const styles = {
 			background: 'none',
 			color: theme.triggerColor,
 			cursor: 'pointer',
-			'&[data-hovered], &:hover': {
-				color: theme.triggerHoverColor,
+'&[data-hovered], &:hover': {
+				color:
+					theme.triggerHoverColor === 'inherit'
+						? theme.triggerColor
+						: theme.triggerHoverColor,
 			},
 		}),
 	tooltip: (theme: TooltipTheme) =>
