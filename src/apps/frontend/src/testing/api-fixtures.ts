@@ -1,5 +1,5 @@
 import { ApiError } from '../api-client/errors';
-import type { SendNotificationResponse } from '../schemas';
+import type { NotificationSummary, SendNotificationResponse } from '../schemas';
 
 export const badRequestError = new ApiError({
 	status: 400,
@@ -192,4 +192,110 @@ export const partiallyDeliveredAppPushSendResponse: SendNotificationResponse = {
 			},
 		},
 	],
+};
+
+export const appPushSendBeyondBradford: NotificationSummary = {
+	id: 'e5108867-a956-415a-adb6-fd4c2f73ae55',
+	idempotencyKey: '1fc587dc-f4f2-4202-998f-f2c753674cc4',
+	kind: 'send',
+	status: 'delivered',
+	sender: 'dispatch-app',
+	createdByEmail: 'david.blatcher@guardian.co.uk',
+	dryRun: false,
+	scheduledFor: null,
+	content: {
+		items: {
+			'lead-story': {
+				body: 'Beyond Bradford and the Brontës – new walking trail shows West Yorkshire’s natural beauty',
+				link: 'https://www.theguardian.com/travel/2026/sep/17/bradford-pennine-gateway-walking-trail-west-yorkshire',
+				type: 'app-push',
+				media: {
+					type: 'image',
+					imageUrl:
+						'https://media.guim.co.uk/47d94c17d58abd74d461b0eb2be411aa2fe4ee04/208_0_4860_3888/500.jpg',
+					thumbnailUrl:
+						'https://media.guim.co.uk/47d94c17d58abd74d461b0eb2be411aa2fe4ee04/208_0_4860_3888/500.jpg',
+				},
+				title: 'Sports news',
+			},
+		},
+	},
+	channels: {
+		'app-push': {
+			compose: {
+				use: 'lead-story',
+			},
+			audience: {
+				type: 'topic',
+				items: [
+					{
+						name: 'us',
+						type: 'sport',
+					},
+					{
+						name: 'international',
+						type: 'sport',
+					},
+					{
+						name: 'europe',
+						type: 'sport',
+					},
+				],
+			},
+		},
+	},
+	failedTargets: {
+		topics: [],
+		segments: [],
+	},
+	createdAt: '2026-09-21T08:41:43.779Z',
+	updatedAt: '2026-09-21T08:41:44.369Z',
+};
+
+export const newsletterSendBeyondBradford: NotificationSummary = {
+	id: '965856e4-bd60-414b-a41c-b1d78a32a972',
+	idempotencyKey: '6f458574-9144-48fa-aa2e-17473dceda8d',
+	kind: 'send',
+	status: 'delivered',
+	sender: 'dispatch-app',
+	createdByEmail: 'david.blatcher@guardian.co.uk',
+	dryRun: false,
+	scheduledFor: null,
+	content: {
+		items: {
+			'lead-story': {
+				body: '',
+				link: 'https://www.theguardian.com/travel/2026/sep/17/bradford-pennine-gateway-walking-trail-west-yorkshire',
+				type: 'newsletter',
+				media: {
+					type: 'image',
+					imageUrl:
+						'https://media.guim.co.uk/47d94c17d58abd74d461b0eb2be411aa2fe4ee04/208_0_4860_3888/500.jpg',
+					thumbnailUrl:
+						'https://media.guim.co.uk/47d94c17d58abd74d461b0eb2be411aa2fe4ee04/208_0_4860_3888/500.jpg',
+				},
+				title:
+					'Beyond Bradford and the Brontës – new walking trail shows West Yorkshire’s natural beauty',
+			},
+		},
+	},
+	channels: {
+		newsletter: {
+			compose: {
+				items: ['lead-story'],
+				subject:
+					'Exclusive: Beyond Bradford and the Brontës – new walking trail shows West Yorkshire’s natural beauty',
+			},
+			audience: {
+				type: 'segment',
+				items: ['UK'],
+			},
+		},
+	},
+	failedTargets: {
+		topics: [],
+		segments: [],
+	},
+	createdAt: '2026-09-18T10:23:37.594Z',
+	updatedAt: '2026-09-18T10:23:38.578Z',
 };
