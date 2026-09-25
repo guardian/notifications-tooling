@@ -449,6 +449,110 @@ describe('notifications repository listRecent (real Postgres)', () => {
 		]);
 	});
 
+	it('lists production sends for an exact article id newest first', async () => {
+		const articleId = 'science/2026/sep/23/northern-lights';
+		const olderSend = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(10),
+			createdByEmail: 'older.sender@guardian.co.uk',
+			articleId,
+			content: {
+				items: {
+					lead: {
+						type: 'newsletter',
+						title: 'Northern lights',
+						body: 'Earlier coverage',
+						link: `https://www.theguardian.com/${articleId}?CMP=share_btn_url#comments`,
+					},
+				},
+			},
+			channels: {
+				newsletter: {
+					audience: { type: 'segment', items: ['UK'] },
+					compose: { items: ['lead'], subject: 'Northern lights' },
+				},
+			},
+		});
+		const newerSend = await notifications.create({
+			...buildNotification(),
+			createdAt: daysAgo(1),
+			createdByEmail: 'newer.sender@guardian.co.uk',
+			articleId,
+			content: {
+				items: {
+					lead: {
+						type: 'app-push',
+						title: 'Northern lights',
+						body: 'Latest coverage',
+						link: `https://amp.theguardian.com/${articleId}`,
+					},
+				},
+			},
+			channels: {
+				'app-push': {
+					audience: {
+						type: 'topic',
+						items: [{ type: 'breaking-news', name: 'uk' }],
+					},
+					compose: { use: 'lead' },
+				},
+			},
+		});
+		await notifications.create({
+			...buildNotification(),
+			kind: 'test',
+			articleId,
+			content: {
+				items: {
+					lead: {
+						type: 'app-push',
+						title: 'Test',
+						body: 'Test',
+						link: `https://www.theguardian.com/${articleId}`,
+					},
+				},
+			},
+		});
+		await notifications.create({
+			...buildNotification(),
+			articleId: `${articleId}-analysis`,
+			content: {
+				items: {
+					lead: {
+						type: 'app-push',
+						title: 'Different article',
+						body: 'Different article',
+						link: `https://www.theguardian.com/${articleId}-analysis`,
+					},
+				},
+			},
+		});
+
+		const firstPage = await notifications.listRecent({
+			articleId,
+			since: new Date(0),
+			limit: 1,
+			offset: 0,
+		});
+		expect(firstPage.total).toBe(2);
+		expect(firstPage.notifications).toHaveLength(1);
+		expect(firstPage.notifications[0]?.id).toBe(newerSend.id);
+		expect(firstPage.notifications[0]?.createdByEmail).toBe(
+			'newer.sender@guardian.co.uk',
+		);
+
+		const secondPage = await notifications.listRecent({
+			articleId,
+			since: new Date(0),
+			limit: 1,
+			offset: 1,
+		});
+		expect(secondPage.total).toBe(2);
+		expect(secondPage.notifications.map(({ id }) => id)).toEqual([
+			olderSend.id,
+		]);
+	});
+
 	it('filters newsletter audiences and app-push editions by audience', async () => {
 		const appPush = await notifications.create({
 			...buildNotification(),

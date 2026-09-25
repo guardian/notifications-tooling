@@ -1,4 +1,4 @@
-import { type FormEvent, useContext, useRef } from 'react';
+import { type FormEvent, useContext, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
@@ -42,7 +42,7 @@ export const CreateAppAlertForm = ({
 				}
 			: undefined,
 	);
-
+	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	const { data: constraints } = useChannelConstraints();
 	const topicTypes = useAppAlertTopicTypes();
 	const prepareSend = (values: AppAlertFormValues) => {
@@ -99,8 +99,11 @@ export const CreateAppAlertForm = ({
 			onResetNotification={() => {
 				copiedHeadline.current = undefined;
 				updateComposerState({ type: 'reset-app-alert' });
+				setOpenReplaceSection(false);
 			}}
 			onArticleImported={(article) => {
+				setValue('replacementImageUrl', '');
+				setOpenReplaceSection(false);
 				const pendingCopiedHeadline = copiedHeadline.current;
 				copiedHeadline.current = undefined;
 				const headline =
@@ -119,7 +122,10 @@ export const CreateAppAlertForm = ({
 			</NotificationFormSection>
 			<NotificationFormSection id="content-section">
 				<HeadlineFormField constraints={constraints} />
-				<ArticleThumbnailImageFormField />
+				<ArticleThumbnailImageFormField
+					openReplaceSection={openReplaceSection}
+					setOpenReplaceSection={setOpenReplaceSection}
+				/>
 			</NotificationFormSection>
 		</NotificationFormWrapper>
 	);

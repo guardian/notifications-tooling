@@ -31,6 +31,7 @@ export const completeAppAlertFormValues: AppAlertFormValues = {
 	deliveryOption: 'appImmediate',
 	editions: ['UK', 'INT'],
 	includeThumbnail: true,
+	replacementImageUrl: '',
 	articleThumbnailUrl: articleFixture.fields?.thumbnail ?? '',
 };
 

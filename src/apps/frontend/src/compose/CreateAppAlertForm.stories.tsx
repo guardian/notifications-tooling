@@ -348,6 +348,51 @@ export const WithReplacementThumbnail: Story = {
 	},
 };
 
+export const ClearAllFieldsResetsReplacementThumbnail: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await expect(replacementInput).toHaveValue(replacementThumbnailUrl);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		await expect(
+			canvas.queryByRole('textbox', { name: 'replacement image URL' }),
+		).not.toBeInTheDocument();
+
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			articleFixture.webUrl,
+		);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+
+		await expect(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		).toHaveAttribute('aria-expanded', 'false');
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		await expect(
+			canvas.getByRole('textbox', { name: 'replacement image URL' }),
+		).toHaveValue('');
+	},
+};
+
 export const RejectsNonGuardianReplacementThumbnail: Story = {
 	args: {
 		composerState: populatedAppAlertComposerState,

@@ -9,7 +9,7 @@ export const notificationsPath = {
 	get: {
 		summary: 'List recent notifications',
 		description:
-			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `search` applies a case-insensitive literal substring match to stored content-item body and title fields only. Repeated `createdByEmail` values match notifications sent by any selected user. Repeated `channel` values match any selected send channel. Repeated `audience` values match any selected newsletter audience or app-push edition. `alertType` matches any selected category. Filters combine using AND and precede pagination; `total` reports the full count of matching sends regardless of pagination. `since` defaults to 14 days ago when omitted. `limit` and `offset` are all-or-nothing: supply both or neither.',
+			'Returns production send notifications created at or after the `since` cut-off (a Unix timestamp in seconds), newest first, without their dispatch outcomes. Test notifications are excluded. `articleId` performs an exact match after normalising a CAPI ID or Guardian URL. `search` applies a case-insensitive literal substring match to stored content-item body and title fields only. Repeated `createdByEmail` values match notifications sent by any selected user. Repeated `channel` values match any selected send channel. Repeated `audience` values match any selected newsletter audience or app-push edition. `alertType` matches any selected category. Filters combine using AND and precede pagination; `total` reports the full count of matching sends regardless of pagination. `since` defaults to the start of retained history when `articleId` is supplied, otherwise 14 days ago. `limit` and `offset` are all-or-nothing: supply both or neither.',
 		security: [{ pandaCookie: [] }],
 		parameters: [
 			{
@@ -43,6 +43,14 @@ export const notificationsPath = {
 				description:
 					'Case-insensitive literal substring matched against stored content-item body and title fields only, not newsletter subjects or category metadata. Trimmed; blank or overlong values are invalid.',
 				schema: { type: 'string', minLength: 1, maxLength: 200 },
+			},
+			{
+				name: 'articleId',
+				in: 'query',
+				required: false,
+				description:
+					'Exact CAPI article ID or Guardian article URL. URLs are normalised so hosts, query parameters and fragments do not affect matching. When supplied without `since`, all retained history is searched.',
+				schema: { type: 'string', minLength: 1, maxLength: 2048 },
 			},
 			{
 				name: 'createdByEmail',

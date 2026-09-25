@@ -9,6 +9,7 @@ import {
 	buildAppAlertRequest,
 	buildNewsletterEmailRequest,
 } from './build-request-payloads';
+import type { AppAlertFormValues } from './notification-forms';
 
 describe('notification request builders', () => {
 	it.each([
@@ -146,15 +147,17 @@ describe('notification request builders', () => {
 	it('uses a replacement thumbnail URL in app-push media', () => {
 		const replacementThumbnailUrl =
 			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const values: AppAlertFormValues = {
+			alertType: 'breaking-news',
+			headline: 'A developing story',
+			editions: ['UK'],
+			includeThumbnail: true,
+			replacementImageUrl: 'https://media.guim.co.uk/unapplied-draft.jpg',
+			articleThumbnailUrl: replacementThumbnailUrl,
+			deliveryOption: 'appImmediate',
+		};
 		const request = buildAppAlertRequest({
-			values: {
-				alertType: 'breaking-news',
-				headline: 'A developing story',
-				editions: ['UK'],
-				includeThumbnail: true,
-				articleThumbnailUrl: replacementThumbnailUrl,
-				deliveryOption: 'appImmediate',
-			},
+			values,
 			alertTypeLabel: 'Breaking news',
 			article: articleFixture,
 			idempotencyKey: 'app-alert-with-replacement-thumbnail',

@@ -62,6 +62,7 @@ export const notifications = pgTable(
 			withTimezone: true,
 			mode: 'date',
 		}),
+		articleId: text('article_id'),
 		content: jsonb('content').$type<ContentItemsJson>().notNull(),
 		channels: jsonb('channels').$type<ChannelsJson>().notNull(),
 		// Denormalised from the dispatch outcomes; lets the list endpoint report
@@ -93,6 +94,12 @@ export const notifications = pgTable(
 		index('notifications_send_created_at_idx')
 			.on(table.createdAt.desc())
 			.where(sql`${table.kind} = 'send'`),
+		// Serves article-history lookups without scanning and normalising content
+		// JSON for every notification. The trailing timestamp supplies the result
+		// ordering, and test notifications are excluded from the index entirely.
+		index('notifications_send_article_id_created_at_idx')
+			.on(table.articleId, table.createdAt.desc())
+			.where(sql`${table.kind} = 'send' and ${table.articleId} is not null`),
 		// Serves the distinct-senders endpoint and the sender-filtered list. Keyed
 		// on `lower(created_by_email)` so both match senders case-insensitively:
 		// the prefix answers the equality filter and lets the distinct scan group
