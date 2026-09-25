@@ -3,8 +3,6 @@ import { semanticRadius, semanticSpacing } from '@guardian/stand';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
 import { from } from '@guardian/stand/utils';
-import { useContext } from 'react';
-import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes, withArticleUrl } from '../routes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 
@@ -19,11 +17,11 @@ export const DispatchCreateNotificationModal = ({
 	onOpenChange,
 	articleUrl,
 }: DispatchCreateNotificationModalProps) => {
-	const config = useContext(ConfigContext);
-	const routes = getAppRoutes(config);
-	const createAppAlertHref = routes.createAppAlert
-		? withArticleUrl(routes.createAppAlert, articleUrl ?? '')
-		: undefined;
+	const routes = getAppRoutes();
+	const createAppAlertHref = withArticleUrl(
+		routes.createAppAlert,
+		articleUrl ?? '',
+	);
 	const createNewsletterEmailHref = withArticleUrl(
 		routes.createNewsletterEmail,
 		articleUrl ?? '',
@@ -69,17 +67,15 @@ export const DispatchCreateNotificationModal = ({
 							gap: semanticSpacing.stackSm,
 						})}
 					>
-						{createAppAlertHref && (
-							<Tile
-								size="sm"
-								href={createAppAlertHref}
-								icon={phoneIphoneIcon}
-								typography="headingMd"
-								cssOverrides={tileStyles}
-							>
-								Create an app alert
-							</Tile>
-						)}
+						<Tile
+							size="sm"
+							href={createAppAlertHref}
+							icon={phoneIphoneIcon}
+							typography="headingMd"
+							cssOverrides={tileStyles}
+						>
+							Create an app alert
+						</Tile>
 						<Tile
 							size="sm"
 							href={createNewsletterEmailHref}

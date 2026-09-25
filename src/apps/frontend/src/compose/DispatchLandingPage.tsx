@@ -5,9 +5,7 @@ import { Layout } from '@guardian/stand/Layout';
 import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import { between, from } from '@guardian/stand/utils';
-import { useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ConfigContext } from '../config/ConfigContext';
 import { DispatchLandingHistoryView } from '../history/DispatchLandingHistoryView';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { LatestPublishedContentPanel } from '../latest-content/LatestPublishedContentPanel';
@@ -30,7 +28,6 @@ const landingTileStyles = css({
 });
 
 export const DispatchLandingPage = () => {
-	const config = useContext(ConfigContext);
 	const [searchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
 	const historyQuery = {
@@ -130,11 +127,9 @@ export const DispatchLandingPage = () => {
 					/>
 				</div>
 			</Layout.Main>
-			{!config?.DISABLE_LATEST_PUBLISHED_CONTENT && (
-				<aside css={dispatchLandingTheme.latestContentRail}>
-					<LatestPublishedContentPanel />
-				</aside>
-			)}
+			<aside css={dispatchLandingTheme.latestContentRail}>
+				<LatestPublishedContentPanel />
+			</aside>
 		</>
 	);
 };

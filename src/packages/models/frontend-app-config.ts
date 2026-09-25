@@ -8,8 +8,6 @@ export interface UserResponse {
 }
 
 export type AppConfig = UserResponse & {
-	DISABLE_APP_SEND_TAB?: boolean;
-	DISABLE_LATEST_PUBLISHED_CONTENT?: boolean;
 	stage?: 'DEV' | 'CODE' | 'PROD';
 	gridApiUri: string;
 	gridUri: string;
