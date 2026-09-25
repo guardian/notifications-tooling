@@ -89,7 +89,7 @@ describe('article URL route helpers', () => {
 });
 
 describe('copy to another channel navigation state', () => {
-	it('round-trips the edited content title', () => {
+	it('parses valid copied notification state', () => {
 		const state = createCopiedNotificationState('Edited title');
 
 		expect(parseCopiedNotificationState(state)).toEqual(state);
