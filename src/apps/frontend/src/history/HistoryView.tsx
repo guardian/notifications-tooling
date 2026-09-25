@@ -58,15 +58,17 @@ export const HistoryView = ({
 	onPageChange,
 	onRefresh,
 }: HistoryViewProps) => {
+	const hasPagination = !isLoading && !error && totalItems > limit;
+
 	return (
 		<Layout.Main theme={layoutMainTheme}>
 			<div css={historyViewStyles.page}>
 				<HistoryFilters />
 				<section
 					aria-labelledby="history-heading"
-					css={historyViewStyles.container}
+					css={historyViewStyles.container(hasPagination)}
 				>
-					<div css={historyViewStyles.header}>
+					<div css={historyViewStyles.header(hasPagination)}>
 						<div css={historyViewStyles.titleBlock}>
 							<Typography id="history-heading" element="h1" variant="headingLg">
 								History
@@ -81,26 +83,33 @@ export const HistoryView = ({
 										isRefreshing={isRefreshing}
 									/>
 								</div>
-								{totalItems > limit && (
-									<HistoryPagination
-										currentPage={currentPage}
-										totalItems={totalItems}
-										onPageChange={onPageChange}
-										limit={limit}
-									/>
-								)}
 							</div>
 						)}
 					</div>
-					{isLoading && <HistoryTableSkeleton />}
-					{error}
-					{refreshError}
-					{!isLoading && !error && notifications.length > 0 && (
-						<HistoryTable notifications={notifications} audiences={audiences} />
+					{hasPagination && (
+						<div css={historyViewStyles.paginationRow}>
+							<HistoryPagination
+								currentPage={currentPage}
+								totalItems={totalItems}
+								onPageChange={onPageChange}
+								limit={limit}
+							/>
+						</div>
 					)}
-					{!isLoading && !error && notifications.length === 0 && (
-						<HistoryEmptyState isFilteredResult={hasActiveFilters} />
-					)}
+					<div css={historyViewStyles.results}>
+						{isLoading && <HistoryTableSkeleton />}
+						{error}
+						{refreshError}
+						{!isLoading && !error && notifications.length > 0 && (
+							<HistoryTable
+								notifications={notifications}
+								audiences={audiences}
+							/>
+						)}
+						{!isLoading && !error && notifications.length === 0 && (
+							<HistoryEmptyState isFilteredResult={hasActiveFilters} />
+						)}
+					</div>
 				</section>
 			</div>
 		</Layout.Main>

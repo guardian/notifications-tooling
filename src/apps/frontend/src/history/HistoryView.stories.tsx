@@ -107,6 +107,53 @@ export const Default: Story = {
 	},
 };
 
+export const SmallScreenFilters: Story = {
+	args: {
+		notifications,
+		totalItems: notifications.length,
+		currentPage: 1,
+		limit: 10,
+		onPageChange: () => undefined,
+		onRefresh: fn(),
+	},
+	globals: {
+		viewport: { value: 'mobile1', isRotated: false },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const toggle = canvas.getByRole('button', {
+			name: 'Search and filter the history',
+		});
+		const filters =
+			canvasElement.querySelector<HTMLElement>('#history-filters');
+		if (!filters) {
+			throw new globalThis.Error('Filters panel not found');
+		}
+
+		await expect(toggle).toHaveAttribute('aria-controls', filters.id);
+		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+		await expect(filters).not.toBeVisible();
+
+		await userEvent.click(toggle);
+		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+		await expect(filters).toBeVisible();
+		const historySection = canvas
+			.getByRole('heading', { name: 'History' })
+			.closest('section');
+		if (!historySection) {
+			throw new globalThis.Error('History section not found');
+		}
+		await expect(filters.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+			historySection.getBoundingClientRect().top,
+		);
+		const page = filters.parentElement?.parentElement;
+		if (!page) {
+			throw new globalThis.Error('History page not found');
+		}
+		await expect(page.scrollHeight).toBeGreaterThan(page.clientHeight);
+	},
+};
+
 export const Empty: Story = {
 	args: {
 		notifications: [],

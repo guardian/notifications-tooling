@@ -29,9 +29,10 @@ export const SendTimeTooltip = ({ sentAt }: { sentAt: string }) => {
 		<Tooltip
 			label="Local send times"
 			theme={{
-				backgroundColor: semanticColors.fill.strong,
-				triggerColor: semanticColors.fill.strong,
 				color: semanticColors.text.strongerInverse,
+				backgroundColor: semanticColors.text.weak,
+				triggerColor: semanticColors.text.weak,
+				triggerHoverColor: semanticColors.fill.strongHover,
 			}}
 		>
 			<ul css={styles.list}>

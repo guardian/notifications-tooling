@@ -123,7 +123,7 @@ export const HistoryTable = ({
 				<TableColumnHeader>Send time</TableColumnHeader>
 				<TableColumnHeader>Status</TableColumnHeader>
 			</TableHeader>
-			<TableBody>
+			<TableBody cssOverrides={historyViewStyles.tableBody}>
 				{notifications.map((notification) => {
 					return (
 						<TableRow
@@ -274,7 +274,7 @@ export const HistoryTableSkeleton = () => (
 				<TableColumnHeader>Send time</TableColumnHeader>
 				<TableColumnHeader>Status</TableColumnHeader>
 			</TableHeader>
-			<TableBody>
+			<TableBody cssOverrides={historyViewStyles.tableBody}>
 				{Array.from({ length: 5 }, (_, index) => (
 					<TableRow
 						key={index}
