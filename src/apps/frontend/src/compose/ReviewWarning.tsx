@@ -25,8 +25,10 @@ export const ReviewWarning = () => {
 					shared: {
 						content: {
 							alignItems: 'flex-start',
-							icon: { color: semanticColors.text.blue },
 						},
+					},
+					information: {
+						icon: { color: semanticColors.text.blue },
 					},
 				}}
 			>
