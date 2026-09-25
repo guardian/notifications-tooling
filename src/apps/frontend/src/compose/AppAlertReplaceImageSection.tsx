@@ -9,6 +9,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { useImageUrlCheck } from '../hooks/use-image-url-check';
+import { GridImagePicker } from './GridImagePicker';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -111,6 +112,11 @@ export const AppAlertReplaceImageSection = ({
 			{imageUpdated && replacementImageUrl && (
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}
+
+			<GridImagePicker
+				onUpdate={onUpdate}
+				setTextInput={handleImageUrlChange}
+			/>
 		</>
 	);
 };
