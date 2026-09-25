@@ -14,17 +14,30 @@ export const notificationRoutes = {
 export const articleUrlSearchParam = 'articleUrl';
 export const guardianMainUrl = 'https://www.theguardian.com';
 
-export const reviewWarningNavigationState = {
-	showReviewWarning: true,
-} as const;
+interface CopiedNotificationState {
+	showReviewWarning: true;
+	contentTitle: string;
+}
 
-export const hasReviewWarningNavigationState = (
+export const createCopiedNotificationState = (
+	contentTitle: string,
+): CopiedNotificationState => ({
+	showReviewWarning: true,
+	contentTitle,
+});
+
+export const parseCopiedNotificationState = (
 	state: unknown,
-): state is typeof reviewWarningNavigationState =>
+): CopiedNotificationState | undefined =>
 	typeof state === 'object' &&
 	state !== null &&
 	'showReviewWarning' in state &&
-	state.showReviewWarning === true;
+	state.showReviewWarning === true &&
+	'contentTitle' in state &&
+	typeof state.contentTitle === 'string' &&
+	state.contentTitle.trim() !== ''
+		? { showReviewWarning: true, contentTitle: state.contentTitle }
+		: undefined;
 
 const isGuardianHostname = (hostname: string) =>
 	hostname === 'theguardian.com' || hostname.endsWith('.theguardian.com');

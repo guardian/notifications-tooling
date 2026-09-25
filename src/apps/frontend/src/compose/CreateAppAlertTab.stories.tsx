@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { ApiError } from '../api-client/errors';
 import { ConfigContext } from '../config/ConfigContext';
 import {
 	articleUrlSearchParam,
+	createCopiedNotificationState,
 	notificationRoutes,
-	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { mockAppConfig } from '../testing/app-config';
@@ -87,6 +88,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const copiedNewsletterSubject = 'Edited newsletter subject';
+const replacementArticle = {
+	...articleFixture,
+	id: 'world/2026/sep/25/replacement-article',
+	webUrl: 'https://www.theguardian.com/world/2026/sep/25/replacement-article',
+	webTitle: 'Replacement article web title',
+	fields: {
+		...articleFixture.fields,
+		headline: 'Replacement article headline',
+	},
+};
+let articleRequestCount = 0;
+let failedImportRequestCount = 0;
+let retryRequestCount = 0;
+let changedArticleRequestCount = 0;
+
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -104,21 +121,26 @@ export const Default: Story = {
 
 export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 	args: {
+		formValues: completeAppAlertFormValues,
 		resolveArticleFromCapi: () =>
 			Promise.resolve({
 				success: true,
 				data: {
-					article: {
-						...articleFixture,
-						fields: {
-							...articleFixture.fields,
-							headline: `  ${articleFixture.fields?.headline ?? articleFixture.webTitle}  `,
-						},
-					},
+					article:
+						articleRequestCount++ === 0
+							? {
+									...articleFixture,
+									fields: {
+										...articleFixture.fields,
+										headline: `  ${articleFixture.fields?.headline ?? articleFixture.webTitle}  `,
+									},
+								}
+							: replacementArticle,
 				},
 			}),
 	},
 	beforeEach: () => {
+		articleRequestCount = 0;
 		const originalUrl = window.location.href;
 		const originalState: unknown = window.history.state;
 		const currentState: unknown = window.history.state;
@@ -127,7 +149,7 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 				...(typeof currentState === 'object' && currentState !== null
 					? currentState
 					: {}),
-				usr: reviewWarningNavigationState,
+				usr: createCopiedNotificationState(copiedNewsletterSubject),
 			},
 			'',
 			withArticleUrl(
@@ -154,8 +176,14 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 			articleFixture.webUrl,
 		);
 		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
-			articleFixture.fields?.headline,
+			copiedNewsletterSubject,
 		);
+		await expect(
+			canvas.getByRole('button', { name: 'Breaking news Alert type' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('button', { name: 'Select United Kingdom' }),
+		).toHaveAttribute('aria-pressed', 'true');
 		await expect(
 			canvas.getByRole('switch', { name: 'Show article thumbnail image' }),
 		).toBeChecked();
@@ -170,12 +198,200 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 		await expect(
 			canvas.getByText('Review the content before sending'),
 		).toBeVisible();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Replace' }));
+		const articleUrlInput = canvas.getByLabelText('article URL');
+		await userEvent.clear(articleUrlInput);
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
+	},
+};
+
+export const ClearsCopiedHeadlineAfterFailedImport: Story = {
+	args: {
+		resolveArticleFromCapi: () => {
+			if (failedImportRequestCount++ === 0) {
+				return Promise.resolve({
+					success: false,
+					failure: new ApiError({
+						message: 'Initial article import failed',
+						failure: 'fetch-fail',
+					}),
+				});
+			}
+
+			return Promise.resolve({
+				success: true,
+				data: { article: replacementArticle },
+			});
+		},
+	},
+	beforeEach: () => {
+		failedImportRequestCount = 0;
+		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
+		window.history.replaceState(
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: createCopiedNotificationState(copiedNewsletterSubject),
+			},
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(originalState, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByText('Initial article import failed'),
+		).toBeVisible();
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		await expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+			'',
+		);
+		const articleUrlInput = canvas.getByLabelText('article URL');
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
+	},
+};
+
+export const RetainsCopiedHeadlineWhenRetryingFailedImport: Story = {
+	args: {
+		resolveArticleFromCapi: () => {
+			if (retryRequestCount++ === 0) {
+				return Promise.resolve({
+					success: false,
+					failure: new ApiError({
+						message: 'Initial article import failed',
+						failure: 'fetch-fail',
+					}),
+				});
+			}
+
+			return Promise.resolve({
+				success: true,
+				data: { article: articleFixture },
+			});
+		},
+	},
+	beforeEach: () => {
+		retryRequestCount = 0;
+		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
+		window.history.replaceState(
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: createCopiedNotificationState(copiedNewsletterSubject),
+			},
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(originalState, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByText('Initial article import failed'),
+		).toBeVisible();
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+				copiedNewsletterSubject,
+			),
+		);
+	},
+};
+
+export const UsesFetchedHeadlineWhenChangingFailedImport: Story = {
+	args: {
+		resolveArticleFromCapi: () => {
+			if (changedArticleRequestCount++ === 0) {
+				return Promise.resolve({
+					success: false,
+					failure: new ApiError({
+						message: 'Initial article import failed',
+						failure: 'fetch-fail',
+					}),
+				});
+			}
+
+			return Promise.resolve({
+				success: true,
+				data: { article: replacementArticle },
+			});
+		},
+	},
+	beforeEach: () => {
+		changedArticleRequestCount = 0;
+		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
+		window.history.replaceState(
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: createCopiedNotificationState(copiedNewsletterSubject),
+			},
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(originalState, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByText('Initial article import failed'),
+		).toBeVisible();
+		const articleUrlInput = canvas.getByLabelText('article URL');
+		await userEvent.clear(articleUrlInput);
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
 	},
 };
 
 export const PopulatesArticleFromLatestList: Story = {
 	args: PopulatesArticleCopiedFromAnotherChannel.args,
 	beforeEach: () => {
+		articleRequestCount = 0;
 		const originalUrl = window.location.href;
 		window.history.replaceState(
 			null,

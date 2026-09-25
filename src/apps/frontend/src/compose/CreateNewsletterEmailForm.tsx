@@ -1,8 +1,9 @@
-import { type FormEvent, useContext } from 'react';
+import { type FormEvent, useContext, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { AudienceSegmentsFormField } from '../segment/AudienceSegmentsFormField';
 import { buildNewsletterEmailRequest } from '../utils/build-request-payloads';
+import { parseArticleUrlInputToArticleId } from '../utils/form-validation';
 import { htmlToSingleLineText } from '../utils/html-helpers';
 import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { KickerFormField } from './KickerFormField';
@@ -17,6 +18,7 @@ import { SubjectFormField } from './SubjectFormField';
 
 interface CreateNewsletterEmailFormProps {
 	initialArticleUrl?: string;
+	initialSubjectText?: string;
 	showReviewWarning?: boolean;
 	showPreview: boolean;
 	onTogglePreview: (showPreview: boolean) => void;
@@ -24,12 +26,22 @@ interface CreateNewsletterEmailFormProps {
 
 export const CreateNewsletterEmailForm = ({
 	initialArticleUrl,
+	initialSubjectText,
 	showReviewWarning,
 	showPreview,
 	onTogglePreview,
 }: CreateNewsletterEmailFormProps) => {
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
+	);
+	const copiedSubjectText = useRef(
+		initialSubjectText && initialArticleUrl
+			? {
+					articleId:
+						parseArticleUrlInputToArticleId(initialArticleUrl).articleId,
+					subjectText: initialSubjectText,
+				}
+			: undefined,
 	);
 	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<NewsletterEmailFormValues>();
@@ -84,6 +96,7 @@ export const CreateNewsletterEmailForm = ({
 			sendButtonLabel="Send newsletter email"
 			onSubmit={handleSubmitForm}
 			onResetNotification={() => {
+				copiedSubjectText.current = undefined;
 				onTogglePreview(true);
 				updateComposerState({ type: 'reset-newsletter-email' });
 			}}
@@ -91,8 +104,14 @@ export const CreateNewsletterEmailForm = ({
 				onTogglePreview(true);
 
 				const { headline, trailText } = article.fields ?? {};
-				if (headline) {
-					setValue('subjectText', headline);
+				const pendingCopiedSubjectText = copiedSubjectText.current;
+				copiedSubjectText.current = undefined;
+				const subjectText =
+					pendingCopiedSubjectText?.articleId === article.id
+						? pendingCopiedSubjectText.subjectText
+						: headline;
+				if (subjectText !== undefined) {
+					setValue('subjectText', subjectText);
 				}
 				const previewText = htmlToSingleLineText(trailText);
 				if (previewText) {

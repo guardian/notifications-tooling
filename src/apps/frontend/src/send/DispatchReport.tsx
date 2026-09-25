@@ -16,8 +16,8 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import {
 	articleUrlSearchParam,
+	createCopiedNotificationState,
 	notificationRoutes,
-	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { EDITION_OPTIONS } from '../segment/edition-options';
@@ -348,10 +348,12 @@ export const DispatchReport = ({
 const DispatchReportTab = ({
 	channel,
 	notificationId,
+	contentTitle,
 	children,
 }: {
 	channel: ChannelOption;
 	notificationId?: string;
+	contentTitle: string;
 	children: ReactNode;
 }) => {
 	const { reset, setValue } = useFormContext<{ notificationId?: string }>();
@@ -386,7 +388,9 @@ const DispatchReportTab = ({
 									notificationRoutes[getAlternateChannel(channel)].create,
 									searchParams.get(articleUrlSearchParam) ?? '',
 								),
-								{ state: reviewWarningNavigationState },
+								{
+									state: createCopiedNotificationState(contentTitle),
+								},
 							);
 						}}
 					>
@@ -402,8 +406,16 @@ export const NewsletterEmailDispatchReportTab = () => {
 	const notificationId = useWatch<NewsletterEmailFormValues, 'notificationId'>({
 		name: 'notificationId',
 	});
+	const subjectText = useWatch<NewsletterEmailFormValues, 'subjectText'>({
+		name: 'subjectText',
+		defaultValue: defaultNewsletterEmailFormValues.subjectText,
+	});
 	return (
-		<DispatchReportTab channel="newsletter" notificationId={notificationId}>
+		<DispatchReportTab
+			channel="newsletter"
+			notificationId={notificationId}
+			contentTitle={subjectText}
+		>
 			<NewsletterEmailDispatchDetails />
 		</DispatchReportTab>
 	);
@@ -413,8 +425,16 @@ export const AppAlertDispatchReportTab = () => {
 	const notificationId = useWatch<AppAlertFormValues, 'notificationId'>({
 		name: 'notificationId',
 	});
+	const headline = useWatch<AppAlertFormValues, 'headline'>({
+		name: 'headline',
+		defaultValue: defaultAppAlertFormValues.headline,
+	});
 	return (
-		<DispatchReportTab channel="app-push" notificationId={notificationId}>
+		<DispatchReportTab
+			channel="app-push"
+			notificationId={notificationId}
+			contentTitle={headline}
+		>
 			<AppAlertDispatchDetails />
 		</DispatchReportTab>
 	);
