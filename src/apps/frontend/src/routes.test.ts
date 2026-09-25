@@ -106,5 +106,17 @@ describe('copy to another channel navigation state', () => {
 				contentTitle: 42,
 			}),
 		).toBeUndefined();
+		expect(
+			parseCopiedNotificationState({
+				showReviewWarning: true,
+				contentTitle: '',
+			}),
+		).toBeUndefined();
+		expect(
+			parseCopiedNotificationState({
+				showReviewWarning: true,
+				contentTitle: '   ',
+			}),
+		).toBeUndefined();
 	});
 });

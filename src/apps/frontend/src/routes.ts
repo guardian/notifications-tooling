@@ -34,7 +34,8 @@ export const parseCopiedNotificationState = (
 	'showReviewWarning' in state &&
 	state.showReviewWarning === true &&
 	'contentTitle' in state &&
-	typeof state.contentTitle === 'string'
+	typeof state.contentTitle === 'string' &&
+	state.contentTitle.trim() !== ''
 		? { showReviewWarning: true, contentTitle: state.contentTitle }
 		: undefined;
 
