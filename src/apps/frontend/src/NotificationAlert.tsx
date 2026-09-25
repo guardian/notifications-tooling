@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { ConfigContext } from '../config/ConfigContext';
-import type { HistoryNotification } from '../history/HistoryView';
-import { useNotificationHistory } from '../hooks/useNotificationHistory';
-import type { NotificationSummary } from '../schemas';
-import { NewNotificationToast } from '../ui/NewNotificationToast';
-import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
+import { ConfigContext } from './config/ConfigContext';
+import type { HistoryNotification } from './history/HistoryView';
+import { useNotificationHistory } from './hooks/useNotificationHistory';
+import type { NotificationSummary } from './schemas';
+import { NewNotificationToast } from './ui/NewNotificationToast';
+import { mapNotificationToHistoryNotification } from './utils/notification-history-mapper';
 
 const isAlertableSend = (
 	notification: NotificationSummary,
@@ -14,33 +14,14 @@ const isAlertableSend = (
 	notification.status !== 'failed' &&
 	notification.createdByEmail !== currentUserEmail;
 
-export const ArticleNotificationAlert = ({
-	articleId,
-}: {
-	articleId?: string;
-}) => {
+export const NotificationAlert = () => {
 	const config = useContext(ConfigContext);
 	const seenNotificationIds = useRef<Set<string> | undefined>(undefined);
-	const activeArticleId = useRef<string | undefined>(undefined);
 	const [notification, setNotification] = useState<HistoryNotification>();
-	const notificationHistory = useNotificationHistory(
-		{
-			limit: 10,
-			offset: 0,
-			...(articleId !== undefined ? { articleId } : {}),
-		},
-		{ enabled: articleId !== undefined },
-	);
+	const notificationHistory = useNotificationHistory({ limit: 10, offset: 0 });
 
 	useEffect(() => {
-		if (activeArticleId.current !== articleId) {
-			activeArticleId.current = articleId;
-			seenNotificationIds.current = undefined;
-			setNotification(undefined);
-		}
-
 		if (
-			articleId === undefined ||
 			notificationHistory.data === undefined ||
 			notificationHistory.isPlaceholderData
 		) {
@@ -62,7 +43,6 @@ export const ArticleNotificationAlert = ({
 			setNotification(mapNotificationToHistoryNotification(newNotification));
 		}
 	}, [
-		articleId,
 		config?.user.email,
 		notificationHistory.data,
 		notificationHistory.dataUpdatedAt,
