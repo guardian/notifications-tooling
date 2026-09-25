@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import { useContext } from 'react';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
+import { ArticleNotificationAlert } from './ArticleNotificationAlert';
 import { NoSendPermissionWarning } from './NoSendPermissionWarning';
 import { NotificationFormContext } from './NotificationFormContext';
 import { SideNavigationPanel } from './SideNavigationPanel';
@@ -35,6 +36,7 @@ export const NotificationTabLayout = ({
 
 	return (
 		<>
+			<ArticleNotificationAlert articleId={article?.id} />
 			<Layout.Sidebar layoutSmBreakpoint="hidden">
 				<SideNavigationPanel channel={channel} />
 			</Layout.Sidebar>
