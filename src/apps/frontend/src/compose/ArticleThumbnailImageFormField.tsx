@@ -4,8 +4,13 @@ import { Button } from '@guardian/stand/Button';
 import { Icon } from '@guardian/stand/Icon';
 import { ToggleSwitch } from '@guardian/stand/ToggleSwitch';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext, useState } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { useContext } from 'react';
+import {
+	Controller,
+	useController,
+	useFormContext,
+	useWatch,
+} from 'react-hook-form';
 import { replaceThumbnailButtonTheme } from '../themes';
 import { toggleSwitchTheme } from '../themes';
 import { getArticleThumbnail } from '../utils/article-thumbnail';
@@ -13,13 +18,26 @@ import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AppAlertReplaceImageSection } from './AppAlertReplaceImageSection';
 import { NotificationFormContext } from './NotificationFormContext';
 
-export const ArticleThumbnailImageFormField = () => {
+interface ArticleThumbnailImageFormFieldProps {
+	openReplaceSection: boolean;
+	setOpenReplaceSection: (isOpen: boolean) => void;
+}
+
+export const ArticleThumbnailImageFormField = ({
+	openReplaceSection,
+	setOpenReplaceSection,
+}: ArticleThumbnailImageFormFieldProps) => {
 	const {
 		clearErrors,
 		control,
 		formState: { errors },
 		setValue,
 	} = useFormContext<AppAlertFormValues>();
+	const { field: replacementImageUrlField } = useController({
+		control,
+		name: 'replacementImageUrl',
+	});
+	const replacementImageUrl = replacementImageUrlField.value;
 	const { composerState } = useContext(NotificationFormContext);
 	const originalArticleThumbnailUrl =
 		getArticleThumbnail(composerState.article).src ?? '';
@@ -32,8 +50,7 @@ export const ArticleThumbnailImageFormField = () => {
 	const hasThumbnail = Boolean(
 		articleThumbnailUrl || originalArticleThumbnailUrl,
 	);
-	const [replacementImageUrl, setReplacementImageUrl] = useState('');
-	const [openReplaceSection, setOpenReplaceSection] = useState(false);
+
 	return (
 		<div
 			css={{
@@ -104,7 +121,7 @@ export const ArticleThumbnailImageFormField = () => {
 									<AppAlertReplaceImageSection
 										replacementImageUrl={replacementImageUrl}
 										onReplacementImageUrlChange={(replacementImageUrl) => {
-											setReplacementImageUrl(replacementImageUrl);
+											replacementImageUrlField.onChange(replacementImageUrl);
 											clearErrors('articleThumbnailUrl');
 										}}
 										errorMessage={errors.articleThumbnailUrl?.message}

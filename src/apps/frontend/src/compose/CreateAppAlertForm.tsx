@@ -1,4 +1,4 @@
-import { type FormEvent, useContext } from 'react';
+import { type FormEvent, useContext, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
@@ -30,7 +30,7 @@ export const CreateAppAlertForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
-
+	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	const { data: constraints } = useChannelConstraints();
 	const topicTypes = useAppAlertTopicTypes();
 	const prepareSend = (values: AppAlertFormValues) => {
@@ -84,10 +84,13 @@ export const CreateAppAlertForm = ({
 			showReviewWarning={showReviewWarning}
 			sendButtonLabel="Send app alert"
 			onSubmit={handleSubmitForm}
-			onResetNotification={() =>
-				updateComposerState({ type: 'reset-app-alert' })
-			}
+			onResetNotification={() => {
+				updateComposerState({ type: 'reset-app-alert' });
+				setOpenReplaceSection(false);
+			}}
 			onArticleImported={(article) => {
+				setValue('replacementImageUrl', '');
+				setOpenReplaceSection(false);
 				setValue(
 					'headline',
 					(article.fields?.headline ?? article.webTitle).trim(),
@@ -103,7 +106,10 @@ export const CreateAppAlertForm = ({
 			</NotificationFormSection>
 			<NotificationFormSection id="content-section">
 				<HeadlineFormField constraints={constraints} />
-				<ArticleThumbnailImageFormField />
+				<ArticleThumbnailImageFormField
+					openReplaceSection={openReplaceSection}
+					setOpenReplaceSection={setOpenReplaceSection}
+				/>
 			</NotificationFormSection>
 		</NotificationFormWrapper>
 	);
