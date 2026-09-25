@@ -40,11 +40,11 @@
 		"@guardian/eslint-config": "16.0.0",
 		"@guardian/prettier": "11.0.0",
 		"@guardian/tsconfig": "2.0.0",
-		"@types/bun": "1.4.0",
-		"@types/node": "26.4.1",
+		"@types/bun": "1.4.2",
+		"@types/node": "26.6.1",
 		"eslint": "9.39.5",
-		"lefthook": "2.1.12",
-		"prettier": "3.9.6",
+		"lefthook": "2.1.14",
+		"prettier": "3.9.8",
 		"tslib": "2.8.1",
 		"typescript": "6.0.3"
 	}
