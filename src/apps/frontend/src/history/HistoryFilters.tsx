@@ -1,7 +1,5 @@
-import { Icon } from '@guardian/stand/Icon';
-import { Typography } from '@guardian/stand/Typography';
-import { useState } from 'react';
 import { historyViewStyles } from '../themes';
+import { CollapsibleSection } from '../ui/CollapsibleSection';
 import { ClearHistoryFiltersButton } from './ClearHistoryFiltersButton';
 import { HistoryAlertTypeFilter } from './HistoryAlertTypeFilter';
 import { HistoryAudienceFilter } from './HistoryAudienceFilter';
@@ -13,39 +11,26 @@ import { HistoryStatusFilter } from './HistoryStatusFilter';
 const filtersId = 'history-filters';
 
 export const HistoryFilters = () => {
-	const [isExpanded, setIsExpanded] = useState(false);
-
 	return (
-		<div css={historyViewStyles.filtersPanel(isExpanded)}>
-			<button
-				type="button"
-				aria-controls={filtersId}
-				aria-expanded={isExpanded}
-				onClick={() => setIsExpanded((expanded) => !expanded)}
-				css={historyViewStyles.filtersToggle(isExpanded)}
-			>
-				<Typography variant="bodyBoldMd">
-					Search and filter the history
-				</Typography>
-				<Icon
-					symbol={isExpanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-				/>
-			</button>
-			<aside
-				id={filtersId}
-				aria-label="Filters"
-				css={historyViewStyles.filters(isExpanded)}
-			>
-				<ClearHistoryFiltersButton />
-				<div css={historyViewStyles.filterFields}>
-					<HistorySearchFilter />
-					<HistoryChannelFilter />
-					<HistoryAlertTypeFilter />
-					<HistorySenderFilter />
-					<HistoryAudienceFilter />
-					<HistoryStatusFilter />
-				</div>
-			</aside>
-		</div>
+		<CollapsibleSection
+			label="Search and filter the history"
+			contentId={filtersId}
+			contentAs="aside"
+			contentAriaLabel="Filters"
+			keepMounted
+			containerStyles={historyViewStyles.filtersPanel}
+			toggleStyles={historyViewStyles.filtersToggle}
+			contentStyles={historyViewStyles.filters}
+		>
+			<ClearHistoryFiltersButton />
+			<div css={historyViewStyles.filterFields}>
+				<HistorySearchFilter />
+				<HistoryChannelFilter />
+				<HistoryAlertTypeFilter />
+				<HistorySenderFilter />
+				<HistoryAudienceFilter />
+				<HistoryStatusFilter />
+			</div>
+		</CollapsibleSection>
 	);
 };
