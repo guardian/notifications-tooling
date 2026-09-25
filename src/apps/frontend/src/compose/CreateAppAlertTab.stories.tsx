@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ConfigContext } from '../config/ConfigContext';
 import {
 	articleUrlSearchParam,
@@ -88,6 +88,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const copiedNewsletterSubject = 'Edited newsletter subject';
+const replacementArticle = {
+	...articleFixture,
+	id: 'world/2026/sep/25/replacement-article',
+	webUrl: 'https://www.theguardian.com/world/2026/sep/25/replacement-article',
+	webTitle: 'Replacement article web title',
+	fields: {
+		...articleFixture.fields,
+		headline: 'Replacement article headline',
+	},
+};
+let articleRequestCount = 0;
 
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
@@ -110,17 +121,21 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 			Promise.resolve({
 				success: true,
 				data: {
-					article: {
-						...articleFixture,
-						fields: {
-							...articleFixture.fields,
-							headline: `  ${articleFixture.fields?.headline ?? articleFixture.webTitle}  `,
-						},
-					},
+					article:
+						articleRequestCount++ === 0
+							? {
+									...articleFixture,
+									fields: {
+										...articleFixture.fields,
+										headline: `  ${articleFixture.fields?.headline ?? articleFixture.webTitle}  `,
+									},
+								}
+							: replacementArticle,
 				},
 			}),
 	},
 	beforeEach: () => {
+		articleRequestCount = 0;
 		const originalUrl = window.location.href;
 		const originalState: unknown = window.history.state;
 		const currentState: unknown = window.history.state;
@@ -172,12 +187,24 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 		await expect(
 			canvas.getByText('Review the content before sending'),
 		).toBeVisible();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Replace' }));
+		const articleUrlInput = canvas.getByLabelText('article URL');
+		await userEvent.clear(articleUrlInput);
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
 	},
 };
 
 export const PopulatesArticleFromLatestList: Story = {
 	args: PopulatesArticleCopiedFromAnotherChannel.args,
 	beforeEach: () => {
+		articleRequestCount = 0;
 		const originalUrl = window.location.href;
 		window.history.replaceState(
 			null,

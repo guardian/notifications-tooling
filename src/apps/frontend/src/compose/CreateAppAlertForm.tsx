@@ -1,4 +1,4 @@
-import { type FormEvent, useContext } from 'react';
+import { type FormEvent, useContext, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
@@ -32,6 +32,7 @@ export const CreateAppAlertForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
+	const copiedHeadline = useRef(initialHeadline);
 
 	const { data: constraints } = useChannelConstraints();
 	const topicTypes = useAppAlertTopicTypes();
@@ -90,11 +91,11 @@ export const CreateAppAlertForm = ({
 				updateComposerState({ type: 'reset-app-alert' })
 			}
 			onArticleImported={(article) => {
-				setValue(
-					'headline',
-					initialHeadline ??
-						(article.fields?.headline ?? article.webTitle).trim(),
-				);
+				const headline =
+					copiedHeadline.current ??
+					(article.fields?.headline ?? article.webTitle).trim();
+				copiedHeadline.current = undefined;
+				setValue('headline', headline);
 				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
 				setValue('articleThumbnailUrl', articleThumbnailUrl);

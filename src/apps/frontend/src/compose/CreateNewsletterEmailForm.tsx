@@ -1,4 +1,4 @@
-import { type FormEvent, useContext } from 'react';
+import { type FormEvent, useContext, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { AudienceSegmentsFormField } from '../segment/AudienceSegmentsFormField';
@@ -33,6 +33,7 @@ export const CreateNewsletterEmailForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
+	const copiedSubjectText = useRef(initialSubjectText);
 	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<NewsletterEmailFormValues>();
 
@@ -93,7 +94,8 @@ export const CreateNewsletterEmailForm = ({
 				onTogglePreview(true);
 
 				const { headline, trailText } = article.fields ?? {};
-				const subjectText = initialSubjectText ?? headline;
+				const subjectText = copiedSubjectText.current ?? headline;
+				copiedSubjectText.current = undefined;
 				if (subjectText !== undefined) {
 					setValue('subjectText', subjectText);
 				}

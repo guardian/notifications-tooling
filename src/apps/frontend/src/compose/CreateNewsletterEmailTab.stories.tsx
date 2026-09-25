@@ -17,10 +17,12 @@ import type { NotificationComposerState } from '../types';
 import { defaultComposerState } from '../utils/notification-composer-reducer';
 import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
+import type { NotificationFormContextProps } from './NotificationFormContext';
 
 type StoryArgs = {
 	composerState: NotificationComposerState;
 	formValues?: Partial<NewsletterEmailFormValues>;
+	resolveArticleFromCapi?: NotificationFormContextProps['resolveArticleFromCapi'];
 	containerMinWidth: string;
 };
 
@@ -48,7 +50,12 @@ const meta: Meta<StoryArgs> = {
 		},
 	},
 	render: function Render(args) {
-		const { composerState, formValues, containerMinWidth } = args;
+		const {
+			composerState,
+			formValues,
+			resolveArticleFromCapi,
+			containerMinWidth,
+		} = args;
 		return (
 			<div
 				style={{
@@ -61,7 +68,7 @@ const meta: Meta<StoryArgs> = {
 				{useNotificationFormStory(
 					<CreateNewsletterEmailTab />,
 					composerState,
-					{},
+					resolveArticleFromCapi ? { resolveArticleFromCapi } : {},
 					'newsletter',
 					formValues,
 				)}
@@ -74,6 +81,17 @@ export default meta;
 type Story = StoryObj<StoryArgs>;
 
 const copiedAppAlertHeadline = 'Edited app alert headline';
+const replacementArticle = {
+	...articleFixture,
+	id: 'world/2026/sep/25/replacement-article',
+	webUrl: 'https://www.theguardian.com/world/2026/sep/25/replacement-article',
+	webTitle: 'Replacement article web title',
+	fields: {
+		...articleFixture.fields,
+		headline: 'Replacement article headline',
+	},
+};
+let articleRequestCount = 0;
 
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
@@ -93,7 +111,18 @@ export const Default: Story = {
 };
 
 export const PopulatesArticleCopiedFromAnotherChannel: Story = {
+	args: {
+		resolveArticleFromCapi: () =>
+			Promise.resolve({
+				success: true,
+				data: {
+					article:
+						articleRequestCount++ === 0 ? articleFixture : replacementArticle,
+				},
+			}),
+	},
 	beforeEach: () => {
+		articleRequestCount = 0;
 		const originalUrl = window.location.href;
 		const originalState: unknown = window.history.state;
 		const currentState: unknown = window.history.state;
@@ -149,6 +178,17 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 		await expect(
 			canvas.getByText('Review the content before sending'),
 		).toBeVisible();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Replace' }));
+		const articleUrlInput = canvas.getByLabelText('article URL');
+		await userEvent.clear(articleUrlInput);
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByLabelText('Subject')).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
 	},
 };
 
