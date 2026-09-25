@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { AudienceSegmentsFormField } from '../segment/AudienceSegmentsFormField';
 import { buildNewsletterEmailRequest } from '../utils/build-request-payloads';
+import { parseArticleUrlInputToArticleId } from '../utils/form-validation';
 import { htmlToSingleLineText } from '../utils/html-helpers';
 import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { KickerFormField } from './KickerFormField';
@@ -33,7 +34,15 @@ export const CreateNewsletterEmailForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
-	const copiedSubjectText = useRef(initialSubjectText);
+	const copiedSubjectText = useRef(
+		initialSubjectText && initialArticleUrl
+			? {
+					articleId:
+						parseArticleUrlInputToArticleId(initialArticleUrl).articleId,
+					subjectText: initialSubjectText,
+				}
+			: undefined,
+	);
 	const { clearErrors, handleSubmit, setValue } =
 		useFormContext<NewsletterEmailFormValues>();
 
@@ -95,8 +104,12 @@ export const CreateNewsletterEmailForm = ({
 				onTogglePreview(true);
 
 				const { headline, trailText } = article.fields ?? {};
-				const subjectText = copiedSubjectText.current ?? headline;
+				const pendingCopiedSubjectText = copiedSubjectText.current;
 				copiedSubjectText.current = undefined;
+				const subjectText =
+					pendingCopiedSubjectText?.articleId === article.id
+						? pendingCopiedSubjectText.subjectText
+						: headline;
 				if (subjectText !== undefined) {
 					setValue('subjectText', subjectText);
 				}

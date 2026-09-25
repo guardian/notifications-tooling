@@ -8,10 +8,7 @@ import {
 	parseCopiedNotificationState,
 	toGuardianArticleUrl,
 } from '../routes';
-import {
-	defaultNewsletterEmailFormValues,
-	type NewsletterEmailFormValues,
-} from '../utils/notification-forms';
+import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { CreateNewsletterEmailForm } from './CreateNewsletterEmailForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
 
@@ -30,19 +27,12 @@ export const CreateNewsletterEmailTab = () => {
 	);
 	const showPreview = watch('showPreview');
 
-	useEffect(
-		() =>
-			reset(
-				{
-					...defaultNewsletterEmailFormValues,
-					subjectText:
-						copyNavigationState?.contentTitle ??
-						defaultNewsletterEmailFormValues.subjectText,
-				},
-				{ keepDefaultValues: true },
-			),
-		[copyNavigationState, reset],
-	);
+	useEffect(() => {
+		reset();
+		if (copyNavigationState) {
+			setValue('subjectText', copyNavigationState.contentTitle);
+		}
+	}, [copyNavigationState, reset, setValue]);
 
 	return (
 		<NotificationTabLayout

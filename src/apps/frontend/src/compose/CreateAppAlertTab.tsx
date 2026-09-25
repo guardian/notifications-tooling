@@ -9,15 +9,12 @@ import {
 	toGuardianArticleUrl,
 } from '../routes';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
-import {
-	type AppAlertFormValues,
-	defaultAppAlertFormValues,
-} from '../utils/notification-forms';
+import type { AppAlertFormValues } from '../utils/notification-forms';
 import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
 
 export const CreateAppAlertTab = () => {
-	const { reset } = useFormContext<AppAlertFormValues>();
+	const { reset, setValue } = useFormContext<AppAlertFormValues>();
 	const [searchParams] = useSearchParams();
 	const location = useLocation();
 	const [initialArticleUrl] = useState(() =>
@@ -30,19 +27,12 @@ export const CreateAppAlertTab = () => {
 	);
 	const topicTypes = useAppAlertTopicTypes();
 
-	useEffect(
-		() =>
-			reset(
-				{
-					...defaultAppAlertFormValues,
-					headline:
-						copyNavigationState?.contentTitle ??
-						defaultAppAlertFormValues.headline,
-				},
-				{ keepDefaultValues: true },
-			),
-		[copyNavigationState, reset],
-	);
+	useEffect(() => {
+		reset();
+		if (copyNavigationState) {
+			setValue('headline', copyNavigationState.contentTitle);
+		}
+	}, [copyNavigationState, reset, setValue]);
 
 	return (
 		<NotificationTabLayout
