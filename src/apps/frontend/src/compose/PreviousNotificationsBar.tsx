@@ -150,8 +150,8 @@ const CombinedAvatar = ({ sends }: { sends: NotificationSummary[] }) => {
 				})}
 			>
 				<ul css={{ listStyle: 'none' }}>
-					{sends.map((send, index) => (
-						<li key={index}>{emailToName(send.createdByEmail)}</li>
+					{sends.map((send) => (
+						<li key={send.id}>{emailToName(send.createdByEmail)}</li>
 					))}
 				</ul>
 			</Tooltip>
@@ -177,13 +177,13 @@ const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
 		<>
 			{sends.length === 1 ? (
 				<>
-					{sends.map((send, index) => (
+					{sends.map((send) => (
 						<Typography
-							key={index}
+							key={send.id}
 							variant="bodySm"
 							color={semanticColors.text.weak}
 						>
-							[{send.createdAt}]
+							[{formatTime(send.createdAt)}]
 						</Typography>
 					))}
 				</>
@@ -216,8 +216,8 @@ const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
 								</tr>
 							</thead>
 							<tbody>
-								{sends.map((send, index) => (
-									<tr key={index}>
+								{sends.map((send) => (
+									<tr key={send.id}>
 										<td>{emailToName(send.createdByEmail)}</td>
 										<td>{notificationChannelNames[getChannel(send)]}</td>
 										<td>{formatTime(send.createdAt)}</td>
@@ -276,13 +276,13 @@ export const PreviousNotificationsBar = ({
 	return (
 		<div css={style.bar}>
 			<div css={style.avatars}>
-				{firstThreeSends.map((send, index) => (
-					<SenderAvatar key={index} send={send} />
+				{firstThreeSends.map((send) => (
+					<SenderAvatar key={send.id} send={send} />
 				))}
 
 				{sendsPastThree.length === 1 &&
-					sendsPastThree.map((send, index) => (
-						<SenderAvatar key={index} send={send} />
+					sendsPastThree.map((send) => (
+						<SenderAvatar key={send.id} send={send} />
 					))}
 				{sendsPastThree.length > 1 && <CombinedAvatar sends={sendsPastThree} />}
 			</div>
