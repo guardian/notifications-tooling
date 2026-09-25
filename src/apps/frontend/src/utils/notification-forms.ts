@@ -56,6 +56,7 @@ export const appAlertFormSchema = z.object({
 		.array(displayAppAlertTopicEditionId)
 		.min(1, 'Please select an edition'),
 	includeThumbnail: z.boolean(),
+	replacementImageUrl: z.string(),
 	articleThumbnailUrl: z
 		.string()
 		.refine((url) => !validateGuardianImageUrl(url), {
@@ -95,6 +96,7 @@ export const defaultAppAlertFormValues: AppAlertFormValues = {
 	headline: '',
 	editions: [],
 	includeThumbnail: true,
+	replacementImageUrl: '',
 	articleThumbnailUrl: '',
 	deliveryOption: 'appImmediate',
 };

@@ -30,7 +30,6 @@ export const CreateAppAlertForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
-	const [replacementImageUrl, setReplacementImageUrl] = useState('');
 	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	const { data: constraints } = useChannelConstraints();
 	const topicTypes = useAppAlertTopicTypes();
@@ -87,11 +86,10 @@ export const CreateAppAlertForm = ({
 			onSubmit={handleSubmitForm}
 			onResetNotification={() => {
 				updateComposerState({ type: 'reset-app-alert' });
-				setReplacementImageUrl('');
 				setOpenReplaceSection(false);
 			}}
 			onArticleImported={(article) => {
-				setReplacementImageUrl('');
+				setValue('replacementImageUrl', '');
 				setOpenReplaceSection(false);
 				setValue(
 					'headline',
@@ -109,8 +107,6 @@ export const CreateAppAlertForm = ({
 			<NotificationFormSection id="content-section">
 				<HeadlineFormField constraints={constraints} />
 				<ArticleThumbnailImageFormField
-					replacementImageUrl={replacementImageUrl}
-					setReplacementImageUrl={setReplacementImageUrl}
 					openReplaceSection={openReplaceSection}
 					setOpenReplaceSection={setOpenReplaceSection}
 				/>

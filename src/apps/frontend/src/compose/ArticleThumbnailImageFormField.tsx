@@ -5,7 +5,12 @@ import { Icon } from '@guardian/stand/Icon';
 import { ToggleSwitch } from '@guardian/stand/ToggleSwitch';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import {
+	Controller,
+	useController,
+	useFormContext,
+	useWatch,
+} from 'react-hook-form';
 import { replaceThumbnailButtonTheme } from '../themes';
 import { toggleSwitchTheme } from '../themes';
 import { getArticleThumbnail } from '../utils/article-thumbnail';
@@ -14,15 +19,11 @@ import { AppAlertReplaceImageSection } from './AppAlertReplaceImageSection';
 import { NotificationFormContext } from './NotificationFormContext';
 
 interface ArticleThumbnailImageFormFieldProps {
-	replacementImageUrl: string;
-	setReplacementImageUrl: (replacementImageUrl: string) => void;
 	openReplaceSection: boolean;
 	setOpenReplaceSection: (isOpen: boolean) => void;
 }
 
 export const ArticleThumbnailImageFormField = ({
-	replacementImageUrl,
-	setReplacementImageUrl,
 	openReplaceSection,
 	setOpenReplaceSection,
 }: ArticleThumbnailImageFormFieldProps) => {
@@ -32,6 +33,11 @@ export const ArticleThumbnailImageFormField = ({
 		formState: { errors },
 		setValue,
 	} = useFormContext<AppAlertFormValues>();
+	const { field: replacementImageUrlField } = useController({
+		control,
+		name: 'replacementImageUrl',
+	});
+	const replacementImageUrl = replacementImageUrlField.value;
 	const { composerState } = useContext(NotificationFormContext);
 	const originalArticleThumbnailUrl =
 		getArticleThumbnail(composerState.article).src ?? '';
@@ -115,7 +121,7 @@ export const ArticleThumbnailImageFormField = ({
 									<AppAlertReplaceImageSection
 										replacementImageUrl={replacementImageUrl}
 										onReplacementImageUrlChange={(replacementImageUrl) => {
-											setReplacementImageUrl(replacementImageUrl);
+											replacementImageUrlField.onChange(replacementImageUrl);
 											clearErrors('articleThumbnailUrl');
 										}}
 										errorMessage={errors.articleThumbnailUrl?.message}
