@@ -337,11 +337,9 @@ export const alertBannerCss = css({
 });
 
 export const customAlertBannerTheme: NonNullable<AlertBannerProps['theme']> = {
-	shared: {
-		content: {
-			icon: {
-				color: semanticColors.text.blue,
-			},
+	information: {
+		icon: {
+			color: semanticColors.text.blue,
 		},
 	},
 };
