@@ -32,12 +32,15 @@ export const CreateAppAlertTab = () => {
 
 	useEffect(
 		() =>
-			reset({
-				...defaultAppAlertFormValues,
-				headline:
-					copyNavigationState?.contentTitle ??
-					defaultAppAlertFormValues.headline,
-			}),
+			reset(
+				{
+					...defaultAppAlertFormValues,
+					headline:
+						copyNavigationState?.contentTitle ??
+						defaultAppAlertFormValues.headline,
+				},
+				{ keepDefaultValues: true },
+			),
 		[copyNavigationState, reset],
 	);
 

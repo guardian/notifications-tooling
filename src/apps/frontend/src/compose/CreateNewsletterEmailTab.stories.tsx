@@ -243,6 +243,7 @@ export const ClearsCopiedSubjectAfterFailedImport: Story = {
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Clear all fields' }),
 		);
+		await expect(canvas.getByLabelText('Subject')).toHaveValue('');
 		const articleUrlInput = canvas.getByLabelText('article URL');
 		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
 		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));

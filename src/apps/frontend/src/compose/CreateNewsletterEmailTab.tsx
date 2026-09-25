@@ -32,12 +32,15 @@ export const CreateNewsletterEmailTab = () => {
 
 	useEffect(
 		() =>
-			reset({
-				...defaultNewsletterEmailFormValues,
-				subjectText:
-					copyNavigationState?.contentTitle ??
-					defaultNewsletterEmailFormValues.subjectText,
-			}),
+			reset(
+				{
+					...defaultNewsletterEmailFormValues,
+					subjectText:
+						copyNavigationState?.contentTitle ??
+						defaultNewsletterEmailFormValues.subjectText,
+				},
+				{ keepDefaultValues: true },
+			),
 		[copyNavigationState, reset],
 	);
 
