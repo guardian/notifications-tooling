@@ -87,9 +87,10 @@ export const CreateAppAlertForm = ({
 			showReviewWarning={showReviewWarning}
 			sendButtonLabel="Send app alert"
 			onSubmit={handleSubmitForm}
-			onResetNotification={() =>
-				updateComposerState({ type: 'reset-app-alert' })
-			}
+			onResetNotification={() => {
+				copiedHeadline.current = undefined;
+				updateComposerState({ type: 'reset-app-alert' });
+			}}
 			onArticleImported={(article) => {
 				const headline =
 					copiedHeadline.current ??

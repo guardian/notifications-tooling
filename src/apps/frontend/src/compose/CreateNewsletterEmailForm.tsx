@@ -87,6 +87,7 @@ export const CreateNewsletterEmailForm = ({
 			sendButtonLabel="Send newsletter email"
 			onSubmit={handleSubmitForm}
 			onResetNotification={() => {
+				copiedSubjectText.current = undefined;
 				onTogglePreview(true);
 				updateComposerState({ type: 'reset-newsletter-email' });
 			}}

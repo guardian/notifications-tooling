@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { ApiError } from '../api-client/errors';
 import { ConfigContext } from '../config/ConfigContext';
 import {
 	articleUrlSearchParam,
@@ -99,6 +100,7 @@ const replacementArticle = {
 	},
 };
 let articleRequestCount = 0;
+let failedImportRequestCount = 0;
 
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
@@ -191,6 +193,66 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 		await userEvent.click(canvas.getByRole('button', { name: 'Replace' }));
 		const articleUrlInput = canvas.getByLabelText('article URL');
 		await userEvent.clear(articleUrlInput);
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByRole('textbox', { name: 'Headline' })).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
+	},
+};
+
+export const ClearsCopiedHeadlineAfterFailedImport: Story = {
+	args: {
+		resolveArticleFromCapi: () => {
+			if (failedImportRequestCount++ === 0) {
+				return Promise.resolve({
+					success: false,
+					failure: new ApiError({
+						message: 'Initial article import failed',
+						failure: 'fetch-fail',
+					}),
+				});
+			}
+
+			return Promise.resolve({
+				success: true,
+				data: { article: replacementArticle },
+			});
+		},
+	},
+	beforeEach: () => {
+		failedImportRequestCount = 0;
+		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
+		window.history.replaceState(
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: createCopiedNotificationState(copiedNewsletterSubject),
+			},
+			'',
+			withArticleUrl(
+				notificationRoutes['app-push'].create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(originalState, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByText('Initial article import failed'),
+		).toBeVisible();
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		const articleUrlInput = canvas.getByLabelText('article URL');
 		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
 		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
 		await waitFor(() =>
