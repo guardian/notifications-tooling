@@ -432,11 +432,14 @@ export const dispatchLandingTheme = {
 			'&::before': {
 				display: 'none',
 			},
-			'& [data-latest-content-table-header]': {
-				display: 'none',
-			},
 			'& [data-latest-content-table-body] > [role="row"]:nth-of-type(n + 4)': {
 				display: 'grid',
+			},
+			'& [data-latest-content-show-all]': {
+				display: 'none',
+			},
+			'& [data-latest-content-create-alert]': {
+				display: 'block',
 			},
 		},
 	}),
@@ -487,6 +490,12 @@ export const latestPublishedContentTheme = {
 			minHeight: 0,
 			flex: 1,
 			overflow: 'hidden',
+			'& [data-latest-content-scroll-region]': {
+				display: 'flex',
+				minHeight: 0,
+				flexDirection: 'column',
+				overflow: 'hidden',
+			},
 		},
 	}),
 	header: css({
@@ -524,6 +533,11 @@ export const latestPublishedContentTheme = {
 		containerName: 'latest-content-table',
 		backgroundColor: semanticColors.bg.raisedLevel1,
 		[from.lg]: {
+			display: 'grid',
+			gridTemplateRows: 'auto minmax(0, 1fr)',
+			minHeight: 0,
+			flex: 1,
+			overflow: 'hidden',
 			backgroundColor: 'transparent',
 		},
 	}),
@@ -538,6 +552,21 @@ export const latestPublishedContentTheme = {
 				},
 			}),
 			[from.lg]: {
+				minHeight: 0,
+				overflowY: 'auto',
+				scrollbarGutter: 'stable',
+				scrollbarWidth: 'thin',
+				scrollbarColor: `${semanticColors.border.strong} transparent`,
+				'&::-webkit-scrollbar': {
+					width: baseSpacing['8Px'],
+				},
+				'&::-webkit-scrollbar-track': {
+					backgroundColor: 'transparent',
+				},
+				'&::-webkit-scrollbar-thumb': {
+					borderRadius: semanticRadius.cornerSm,
+					backgroundColor: semanticColors.border.strong,
+				},
 				'& > [role="row"]': {
 					backgroundColor: 'transparent',
 				},
@@ -550,14 +579,37 @@ export const latestPublishedContentTheme = {
 		},
 	}),
 	tableHeaderContent: css({
-		display: 'flex',
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr) 104px',
 		alignItems: 'center',
-		justifyContent: 'space-between',
 		gap: semanticSpacing.stackSm,
+		fontSize: baseTypography.size['14Px'],
+		[expandedLatestContentQuery]: {
+			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px 104px',
+		},
+		[compactLatestContentQuery]: {
+			gridTemplateColumns: 'minmax(0, 1fr) 104px',
+		},
 		'& button': {
 			height: 'auto',
 			padding: 0,
 		},
+	}),
+	tablePrimaryHeader: css({
+		[expandedLatestContentQuery]: {
+			gridColumn: '1 / 4',
+		},
+		[compactLatestContentQuery]: {
+			gridColumn: '1',
+		},
+	}),
+	tableShowAllHeader: css({
+		paddingLeft: semanticSpacing.stackSm,
+	}),
+	tableCreateAlertHeader: css({
+		display: 'none',
+		paddingLeft: semanticSpacing.stackSm,
+		fontWeight: 500,
 	}),
 	card: css({
 		display: 'grid',
@@ -567,7 +619,7 @@ export const latestPublishedContentTheme = {
 		backgroundColor: 'transparent',
 		[expandedLatestContentQuery]: {
 			display: 'grid',
-			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px max-content',
+			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px 104px',
 			alignItems: 'center',
 			columnGap: semanticSpacing.stackSm,
 			rowGap: semanticSpacing.stackXxs,

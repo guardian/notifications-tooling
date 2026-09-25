@@ -169,6 +169,7 @@ export const Default: Story = {
 				'Choose a recent article from below to begin creating an alert',
 			),
 		).toBeVisible();
+		await expect(canvas.getByText('Latest published')).toBeVisible();
 		const showAllButton = await canvas.findByRole('button', {
 			name: 'Show all',
 		});

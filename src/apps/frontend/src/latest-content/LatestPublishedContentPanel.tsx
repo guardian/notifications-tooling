@@ -69,6 +69,7 @@ export const LatestPublishedContentPanel = ({
 					</Typography>
 				</div>
 				<ScrollWrapper
+					data-latest-content-scroll-region
 					role="region"
 					aria-label="Latest published content list"
 					tabIndex={0}
@@ -112,14 +113,29 @@ export const LatestPublishedContentPanel = ({
 								>
 									<TableColumnHeader isRowHeader>
 										<div css={latestPublishedContentTheme.tableHeaderContent}>
-											<span>Latest published content</span>
+											<span
+												css={latestPublishedContentTheme.tablePrimaryHeader}
+											>
+												Latest published
+											</span>
 											{content.length > 3 && !showAll && (
-												<TextLinkButton
-													text="Show all"
-													textVariant="bodySm"
-													onClick={() => setShowAll(true)}
-												/>
+												<span
+													data-latest-content-show-all
+													css={latestPublishedContentTheme.tableShowAllHeader}
+												>
+													<TextLinkButton
+														text="Show all"
+														textVariant="bodySm"
+														onClick={() => setShowAll(true)}
+													/>
+												</span>
 											)}
+											<span
+												data-latest-content-create-alert
+												css={latestPublishedContentTheme.tableCreateAlertHeader}
+											>
+												Create alert
+											</span>
 										</div>
 									</TableColumnHeader>
 								</TableHeader>

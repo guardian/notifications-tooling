@@ -17,12 +17,12 @@ export const ScrollWrapper = ({ children, ...props }: ScrollWrapperProps) => {
 					overflowY: 'scroll',
 					scrollbarGutter: 'stable',
 					scrollbarWidth: 'thin',
-					scrollbarColor: `${semanticColors.border.strong} ${semanticColors.fill.weak}`,
+					scrollbarColor: `${semanticColors.border.strong} transparent`,
 					'&::-webkit-scrollbar': {
 						width: baseSpacing['8Px'],
 					},
 					'&::-webkit-scrollbar-track': {
-						backgroundColor: semanticColors.fill.weak,
+						backgroundColor: 'transparent',
 					},
 					'&::-webkit-scrollbar-thumb': {
 						borderRadius: semanticRadius.cornerSm,

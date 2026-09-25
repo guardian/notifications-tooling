@@ -249,6 +249,17 @@ export const Default: Story = {
 			throw new Error('Expected latest published content rail to be rendered');
 		}
 		await expect(
+			within(latestPublishedContentRail).getByText('Latest published'),
+		).toBeVisible();
+		await expect(
+			within(latestPublishedContentRail).queryByRole('button', {
+				name: 'Show all',
+			}),
+		).not.toBeInTheDocument();
+		await expect(
+			within(latestPublishedContentRail).getByText('Create alert'),
+		).toBeVisible();
+		await expect(
 			within(latestPublishedContentRail).getByText('Last updated:'),
 		).toBeInTheDocument();
 		await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
