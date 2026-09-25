@@ -2,12 +2,9 @@ import { semanticSpacing } from '@guardian/stand';
 import { Layout } from '@guardian/stand/Layout';
 import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
-import { useContext } from 'react';
-import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes } from '../routes';
 
 export const NotFoundTab = () => {
-	const config = useContext(ConfigContext);
 	return (
 		<Layout.Main>
 			<div
@@ -24,7 +21,7 @@ export const NotFoundTab = () => {
 				</Typography>
 				<Typography>The page you requested does not exist.</Typography>
 				<LinkButton
-					href={getAppRoutes(config).createNewsletterEmail}
+					href={getAppRoutes().createNewsletterEmail}
 					variant="primary"
 				>
 					Go to Create newsletter email

@@ -48,18 +48,3 @@ export const Default: Story = {
 		await expect(args.onOpenChange).toHaveBeenCalledWith(false);
 	},
 };
-
-export const AppAlertDisabled: Story = {
-	args: {
-		appConfig: { ...mockAppConfig, DISABLE_APP_SEND_TAB: true },
-	},
-	play: async ({ canvasElement }) => {
-		const screen = within(canvasElement.ownerDocument.body);
-		await expect(
-			await screen.findByRole('link', { name: 'Create a newsletter email' }),
-		).toBeVisible();
-		await expect(
-			screen.queryByRole('link', { name: 'Create an app alert' }),
-		).not.toBeInTheDocument();
-	},
-};

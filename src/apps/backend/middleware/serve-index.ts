@@ -39,14 +39,7 @@ export const serveIndex: RequestHandler = async (
 	req: Request,
 	res: Response,
 ) => {
-	const [
-		DISABLE_APP_SEND_TAB,
-		DISABLE_LATEST_PUBLISHED_CONTENT,
-		GRID_API_URI,
-		GRID_URI,
-	] = await Promise.all([
-		getSSMParameter('DISABLE_APP_SEND_TAB'),
-		getSSMParameter('DISABLE_LATEST_PUBLISHED_CONTENT'),
+	const [GRID_API_URI, GRID_URI] = await Promise.all([
 		getSSMParameter('GRID_API_URI'),
 		getSSMParameter('GRID_URI'),
 	]);
@@ -54,9 +47,6 @@ export const serveIndex: RequestHandler = async (
 	const config: AppConfig = {
 		user: req.user!,
 		permissions,
-		DISABLE_APP_SEND_TAB: DISABLE_APP_SEND_TAB.toLowerCase() === 'true',
-		DISABLE_LATEST_PUBLISHED_CONTENT:
-			DISABLE_LATEST_PUBLISHED_CONTENT.toLowerCase() === 'true',
 		stage: env.STAGE,
 		gridApiUri: GRID_API_URI,
 		gridUri: GRID_URI,
