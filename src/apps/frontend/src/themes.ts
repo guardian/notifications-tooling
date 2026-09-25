@@ -1012,13 +1012,17 @@ export const historyViewStyles = {
 			display: 'none',
 		},
 	}),
-	container: css({
-		display: 'grid',
-		gridTemplateRows: 'auto auto minmax(0, 1fr)',
-		minHeight: 0,
-		gap: semanticSpacing.stackMd,
-		padding: semanticSpacing.stackLg,
-	}),
+	container: (hasPagination: boolean) =>
+		css({
+			display: 'grid',
+			gridTemplateRows: hasPagination
+				? 'auto auto minmax(0, 1fr)'
+				: 'auto minmax(0, 1fr)',
+			minHeight: 0,
+			gap: semanticSpacing.stackMd,
+			padding: semanticSpacing.stackLg,
+			paddingBottom: 0,
+		}),
 	results: css({
 		overflow: 'hidden',
 		minHeight: 0,

@@ -66,7 +66,7 @@ export const HistoryView = ({
 				<HistoryFilters />
 				<section
 					aria-labelledby="history-heading"
-					css={historyViewStyles.container}
+					css={historyViewStyles.container(hasPagination)}
 				>
 					<div css={historyViewStyles.header(hasPagination)}>
 						<div css={historyViewStyles.titleBlock}>
