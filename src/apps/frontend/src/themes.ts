@@ -15,6 +15,7 @@ import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { ButtonTheme } from '@guardian/stand/Button';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
+import type { ModalTheme } from '@guardian/stand/Modal';
 import type { TileTheme } from '@guardian/stand/Tile';
 import type { ToggleSwitchTheme } from '@guardian/stand/ToggleSwitch';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
@@ -362,6 +363,33 @@ export const replaceThumbnailButtonTheme: ButtonTheme = {
 	},
 };
 
+export const dispatchTileModalTheme = {
+	modal: {
+		overlay: {
+			position: 'fixed',
+			overflow: 'auto',
+		},
+		modal: {
+			width: '484px',
+			maxWidth: 'min(484px, 90svw)',
+			maxHeight: '352px',
+			borderRadius: semanticRadius.cornerMd,
+			padding: {
+				top: semanticSpacing.stackMd,
+				bottom: semanticSpacing.stackLg,
+				left: semanticSpacing.stackLg,
+				right: semanticSpacing.stackLg,
+			},
+			boxShadow: '0px 2px 6px 0px #0000004D',
+		},
+	} satisfies ModalTheme,
+	tileList: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+	}),
+};
+
 export const dispatchLandingTheme = {
 	global: css({
 		[from.lg]: {
@@ -412,6 +440,19 @@ export const dispatchLandingTheme = {
 				overflowY: 'auto',
 			},
 		},
+	}),
+	headerRow: css({
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: semanticSpacing.stackSm,
+		[from.lg]: {
+			paddingBottom: baseSpacing['24Px'],
+		},
+	}),
+	infoButton: css({
+		fontWeight: 'normal',
 	}),
 	latestContentRail: css({
 		gridArea: 'latest',

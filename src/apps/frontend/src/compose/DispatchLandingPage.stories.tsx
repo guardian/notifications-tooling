@@ -10,6 +10,7 @@ import { notificationRoutes, withArticleUrl } from '../routes';
 import type { NotificationListResponse } from '../schemas';
 import { mockAppConfig } from '../testing/app-config';
 import { channelAudiencesHandler } from '../testing/handlers/channels';
+import { DISPATCH_INFORMATION_MODAL_TITLE } from './DispatchInformationModal';
 import { DispatchLandingPage } from './DispatchLandingPage';
 
 type StoryArgs = {
@@ -294,6 +295,40 @@ export const Default: Story = {
 				mockLatestPublishedContent[0]!.url,
 			),
 		);
+	},
+};
+
+export const InformationModal: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			screen.queryByRole('dialog', {
+				name: DISPATCH_INFORMATION_MODAL_TITLE,
+			}),
+		).not.toBeInTheDocument();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Information' }));
+		const dialog = await screen.findByRole('dialog', {
+			name: DISPATCH_INFORMATION_MODAL_TITLE,
+		});
+		await expect(
+			within(dialog).getByRole('link', { name: 'View Dispatch runbook' }),
+		).toBeVisible();
+		await expect(
+			within(dialog).getByRole('link', { name: 'Contact Central Production' }),
+		).toBeVisible();
+
+		await userEvent.click(
+			within(dialog).getByRole('button', { name: 'Close Modal' }),
+		);
+		await waitFor(async () => {
+			await expect(
+				screen.queryByRole('dialog', {
+					name: DISPATCH_INFORMATION_MODAL_TITLE,
+				}),
+			).not.toBeInTheDocument();
+		});
 	},
 };
 

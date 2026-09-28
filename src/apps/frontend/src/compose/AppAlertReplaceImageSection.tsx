@@ -9,6 +9,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { useImageUrlCheck } from '../hooks/use-image-url-check';
+import { CENTRAL_PRODUCTION_CONTACT_HREF } from '../support-links';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -101,9 +102,7 @@ export const AppAlertReplaceImageSection = ({
 			{imageCheckRemedy === 'contact-cp' && (
 				<Typography>
 					Please contact{' '}
-					<Link href='mailto:central.production@theguardian.com"'>
-						Central Production
-					</Link>{' '}
+					<Link href={CENTRAL_PRODUCTION_CONTACT_HREF}>Central Production</Link>{' '}
 					if the problem persists
 				</Typography>
 			)}
