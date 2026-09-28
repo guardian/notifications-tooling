@@ -1252,6 +1252,7 @@ export const historyViewStyles = {
 	tableHeader: css({
 		'& > tr > *': {
 			padding: '16px',
+			fontSize: baseTypography.size['14Px'],
 		},
 		'& > tr > :not(:first-of-type)': {
 			display: 'none',
