@@ -207,7 +207,9 @@ export const Default: Story = {
 			documentCanvas.getByRole('button', { name: 'Close Modal' }),
 		);
 		await userEvent.click(showAllButton);
-		await expect(showAllButton).not.toBeInTheDocument();
+		await expect(
+			await canvas.findByRole('button', { name: 'Show less' }),
+		).toBeVisible();
 		await expect(
 			await canvas.findAllByRole('button', { name: /create/i }),
 		).toHaveLength(6);
