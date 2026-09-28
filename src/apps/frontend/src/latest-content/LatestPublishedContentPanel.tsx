@@ -118,15 +118,15 @@ export const LatestPublishedContentPanel = ({
 											>
 												Latest published
 											</span>
-											{content.length > 3 && !showAll && (
+											{content.length > 3 && (
 												<span
 													data-latest-content-show-all
 													css={latestPublishedContentTheme.tableShowAllHeader}
 												>
 													<TextLinkButton
-														text="Show all"
+														text={showAll ? 'Show less' : 'Show all'}
 														textVariant="bodySm"
-														onClick={() => setShowAll(true)}
+														onClick={() => setShowAll((prev) => !prev)}
 													/>
 												</span>
 											)}
