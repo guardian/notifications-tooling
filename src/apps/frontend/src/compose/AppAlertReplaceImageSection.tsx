@@ -66,7 +66,7 @@ export const AppAlertReplaceImageSection = ({
 					isInvalid={!!displayedErrorMessage}
 					size="md"
 					value={replacementImageUrl}
-					placeholder="Enter replacement image URL..."
+					placeholder="Paste a Guardian image or Grid URL to replace this image"
 					onChange={handleImageUrlChange}
 					id="replacement-image-URL"
 				/>
