@@ -1,9 +1,9 @@
 import { css } from '@emotion/react';
-import { semanticRadius, semanticSpacing } from '@guardian/stand';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
 import { from } from '@guardian/stand/utils';
 import { getAppRoutes, withArticleUrl } from '../routes';
+import { dispatchTileModalTheme } from '../themes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 
 interface DispatchCreateNotificationModalProps {
@@ -37,36 +37,13 @@ export const DispatchCreateNotificationModal = ({
 		<Modal
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			theme={{
-				overlay: {
-					position: 'fixed',
-				},
-				modal: {
-					width: '484px',
-					maxWidth: 'min(484px, 90svw)',
-					maxHeight: '352px',
-					borderRadius: semanticRadius.cornerMd,
-					padding: {
-						top: semanticSpacing.stackMd,
-						bottom: semanticSpacing.stackLg,
-						left: semanticSpacing.stackLg,
-						right: semanticSpacing.stackLg,
-					},
-					boxShadow: '0px 2px 6px 0px #0000004D',
-				},
-			}}
+			theme={dispatchTileModalTheme.modal}
 		>
 			<Dialog aria-label="Choose an alert type for this content">
 				<Dialog.Dismiss ariaLabel="Close Modal" />
 				<Dialog.Header>Choose an alert type for this content</Dialog.Header>
 				<Dialog.Content>
-					<div
-						css={css({
-							display: 'flex',
-							flexDirection: 'column',
-							gap: semanticSpacing.stackSm,
-						})}
-					>
+					<div css={dispatchTileModalTheme.tileList}>
 						<Tile
 							size="sm"
 							href={createAppAlertHref}
