@@ -41,7 +41,7 @@
 		"@guardian/prettier": "11.0.0",
 		"@guardian/tsconfig": "2.0.0",
 		"@types/bun": "1.4.2",
-		"@types/node": "26.6.1",
+		"@types/node": "26.6.2",
 		"eslint": "9.39.5",
 		"lefthook": "2.1.14",
 		"prettier": "3.9.8",
