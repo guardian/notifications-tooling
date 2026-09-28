@@ -407,6 +407,10 @@ export const dispatchLandingTheme = {
 			flexDirection: 'column',
 			paddingBottom: baseSpacing['24Px'],
 			overflow: 'hidden',
+			'@media (max-height: 700px)': {
+				overflowX: 'hidden',
+				overflowY: 'auto',
+			},
 		},
 	}),
 	latestContentRail: css({
@@ -455,6 +459,10 @@ export const dispatchLandingTheme = {
 			flex: 1,
 			flexDirection: 'column',
 			overflow: 'hidden',
+			'@media (max-height: 700px)': {
+				minHeight: '20rem',
+				flex: '0 0 20rem',
+			},
 		},
 	}),
 	activityHeading: css({
