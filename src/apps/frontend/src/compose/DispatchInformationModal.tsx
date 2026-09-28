@@ -49,6 +49,7 @@ export const DispatchInformationModal = ({
 						href={CENTRAL_PRODUCTION_CONTACT_HREF}
 						icon="info"
 						typography="headingMd"
+						target="_blank"
 						cssOverrides={tileStyles}
 					>
 						Contact Central Production
