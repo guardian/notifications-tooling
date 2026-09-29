@@ -54,6 +54,7 @@ export const mockLatestPublishedContent: LatestPublishedContentItem[] = [
 	},
 	{
 		id: 'mock-2',
+		type: 'liveblog',
 		headline: 'Luigi Mangione due to appear in New York court',
 		url: ARTICLE_URL,
 		imageUrl:
