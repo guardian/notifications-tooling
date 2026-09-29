@@ -46,6 +46,17 @@ export const Default: Story = {
 			name: `${selectedContent.headline} content`,
 		});
 		await expect(preview).toBeVisible();
+		await expect(preview.children).toHaveLength(3);
+		const previewMeta = preview.firstElementChild;
+		if (!(previewMeta instanceof HTMLElement)) {
+			throw new Error('Expected preview metadata');
+		}
+		const separatorStyle = getComputedStyle(previewMeta, '::after');
+		await expect(separatorStyle.width).toBe('36px');
+		await expect(separatorStyle.height).toBe('0px');
+		await expect(separatorStyle.borderTopWidth).toBe('1px');
+		await expect(separatorStyle.opacity).toBe('1');
+		await expect(separatorStyle.transform).not.toBe('none');
 		await expect(
 			within(preview).getByRole('link', {
 				name: new RegExp(selectedContent.headline),
