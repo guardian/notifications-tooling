@@ -1,6 +1,6 @@
 import { Button } from '@guardian/stand/Button';
-import { useQueryClient } from '@tanstack/react-query';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 import { ConfigContext } from './config/ConfigContext';
@@ -10,8 +10,8 @@ import {
 } from './hooks/useNotificationHistory';
 import { NotificationAlert } from './NotificationAlert';
 import type { NotificationListResponse } from './schemas';
-import { mockAppConfig } from './testing/app-config';
 import { appPushSendBeyondBradford } from './testing/api-fixtures';
+import { mockAppConfig } from './testing/app-config';
 
 const historyQuery: NotificationHistoryQuery = { limit: 10, offset: 0 };
 const historyQueryKey = getNotificationHistoryQueryKey(historyQuery);
