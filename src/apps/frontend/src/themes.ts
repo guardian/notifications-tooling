@@ -698,6 +698,17 @@ export const latestPublishedContentTheme = {
 			minWidth: 0,
 		},
 	}),
+	cardTitleAndLive: css({
+		display: 'flex',
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		[expandedLatestContentQuery]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: semanticSpacing.stackXxs,
+		},
+	}),
 	sectionLabel: (color: string) =>
 		css({
 			fontSize: baseTypography.size['12Px'],
