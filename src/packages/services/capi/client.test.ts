@@ -241,6 +241,7 @@ describe('fetchLatestArticles', () => {
 		expect(articles).toEqual([
 			{
 				id: 'uk-news/2026/sep/16/newer',
+				type: 'liveblog',
 				webUrl: 'https://www.theguardian.com/uk-news/2026/sep/16/newer',
 				publishedAt: '2026-09-16T12:00:00.000Z',
 				headline: 'Newer article',
