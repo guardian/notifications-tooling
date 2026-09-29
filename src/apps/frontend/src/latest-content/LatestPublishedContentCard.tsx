@@ -64,7 +64,7 @@ export const LatestPublishedContentCard = ({
 								variant="bodyXs"
 								cssOverrides={latestPublishedContentTheme.published}
 							>
-								Published{' '}
+								{isLiveblog ? 'Updated ' : 'Published '}
 								<time
 									dateTime={publishedAt.iso8601}
 									title={publishedAt.formattedAbsoluteTime}
