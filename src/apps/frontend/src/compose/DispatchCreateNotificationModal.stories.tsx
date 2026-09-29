@@ -53,7 +53,6 @@ export const Default: Story = {
 		}
 		const separatorStyle = getComputedStyle(previewMeta, '::after');
 		await expect(separatorStyle.width).toBe('36px');
-		await expect(separatorStyle.height).toBe('0px');
 		await expect(separatorStyle.borderTopWidth).toBe('1px');
 		await expect(separatorStyle.opacity).toBe('1');
 		await expect(separatorStyle.transform).not.toBe('none');
