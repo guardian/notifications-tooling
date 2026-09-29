@@ -70,9 +70,7 @@ export const IncomingAppAlert: Story = {
 		);
 
 		const toast = await page.findByRole('alert');
-		await expect(toast).toHaveTextContent(
-			'ann.nonymous@guardian.co.uk sent an app alert',
-		);
+		await expect(toast).toHaveTextContent('Ann Nonymous sent an app alert');
 		await expect(toast).toHaveTextContent(
 			'Beyond Bradford and the Brontës – new walking trail shows West Yorkshire’s natural beauty',
 		);
