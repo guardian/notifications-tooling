@@ -2,6 +2,7 @@ import type { LatestArticle } from '@models';
 
 export interface LatestPublishedContentItem {
 	id: string;
+	type?: string;
 	headline: string;
 	url: string;
 	imageUrl?: string;
@@ -17,6 +18,7 @@ export const mapLatestArticleToContentItem = (
 	article: LatestArticle,
 ): LatestPublishedContentItem => ({
 	id: article.id,
+	type: article.type,
 	headline: article.headline,
 	url: article.webUrl,
 	imageUrl: article.thumbnail,
