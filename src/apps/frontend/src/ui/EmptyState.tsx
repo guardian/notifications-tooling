@@ -28,7 +28,7 @@ export const EmptyState = ({
 			{title}
 		</Typography>
 		{description && (
-			<Typography variant="bodyMd" cssOverrides={emptyStateStyles.emptyCopy}>
+			<Typography variant="bodySm" cssOverrides={emptyStateStyles.emptyCopy}>
 				{description}
 			</Typography>
 		)}
