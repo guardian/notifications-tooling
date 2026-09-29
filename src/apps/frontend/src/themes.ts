@@ -190,21 +190,6 @@ export const articlePreviewCardTheme = {
 		alignItems: 'center',
 		gap: semanticSpacing.stackXs,
 	}),
-	liveIndicator: css({
-		display: 'flex',
-		alignItems: 'center',
-		gap: semanticSpacing.stackXxs,
-		padding: `${baseSpacing['2Px']} ${baseSpacing['6Px']}`,
-		color: semanticColors.text.strongerInverse,
-		backgroundColor: semanticColors.text.error,
-		textTransform: 'uppercase',
-	}),
-	liveIndicatorDot: css({
-		width: '8px',
-		height: '8px',
-		borderRadius: '50%',
-		backgroundColor: semanticColors.text.strongerInverse,
-	}),
 	liveblogBlockId: css({
 		fontSize: '12px',
 		fontWeight: 700,
