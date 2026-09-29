@@ -19,7 +19,25 @@ const toastLinkStyles = css({
 	display: 'block',
 	maxWidth: '100%',
 	overflowWrap: 'anywhere',
+	textDecoration: 'underline',
+	textDecorationSkipInk: 'auto',
+	textDecorationStyle: 'solid',
+	textDecorationThickness: '0%',
+	textUnderlineOffset: '0%',
 });
+const toastTheme = {
+	shared: {
+		content: {
+			gap: '8px',
+			titleTypography: {
+				letterSpacing: '0px',
+			},
+			additionalInfoTypography: {
+				font: 'normal 460 0.875rem/1.3 Open Sans',
+			},
+		},
+	},
+} as const;
 const toastTimeout = 10_000;
 
 const isAlertableSend = (
@@ -136,5 +154,5 @@ export const NotificationAlert = () => {
 		notificationHistory.isPlaceholderData,
 	]);
 
-	return <ToastRegion />;
+	return <ToastRegion toastProps={{ theme: toastTheme }} />;
 };
