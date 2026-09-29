@@ -859,9 +859,12 @@ export const emptyStateStyles = {
 		placeItems: 'center',
 		color: semanticColors.text.blue,
 	}),
+	emptyTitle: css({
+		color: semanticColors.text.blue,
+	}),
 	emptyCopy: css({
 		maxWidth: '420px',
-		color: semanticColors.text.blue,
+		color: semanticColors.text.weak,
 	}),
 } as const;
 
