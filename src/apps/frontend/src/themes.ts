@@ -856,17 +856,12 @@ export const emptyStateStyles = {
 	}),
 	emptyIcon: css({
 		display: 'grid',
-		width: '48px',
-		height: '48px',
 		placeItems: 'center',
-		marginBottom: semanticSpacing.stackXs,
-		borderRadius: '50%',
-		color: semanticColors.text.weak,
-		backgroundColor: semanticColors.fill.neutralWeak,
+		color: semanticColors.text.blue,
 	}),
 	emptyCopy: css({
 		maxWidth: '420px',
-		color: semanticColors.text.weak,
+		color: semanticColors.text.blue,
 	}),
 } as const;
 
