@@ -126,9 +126,7 @@ export const createContentRouter = (
 				const resolvedArticle = await resolveArticle(articleId);
 				let requestedUrl: string | undefined;
 				let requestedBlock: ResolveArticleResponse['requestedBlock'] =
-					resolvedArticle.type === 'liveblog'
-						? resolvedArticle.blocks?.main
-						: undefined;
+					undefined;
 
 				try {
 					const url = new URL(article);
