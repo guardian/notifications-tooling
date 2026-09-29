@@ -36,8 +36,8 @@ const newsletterSegmentsByStage: Record<
 	PROD: {
 		UK: {
 			label: 'UK',
-			brazeCampaignId: '',
-			emailRenderingNewsletterId: '',
+			brazeCampaignId: '4105446f-678c-4faf-98e3-7a91bdaa27f4',
+			emailRenderingNewsletterId: 'breaking-news-uk',
 		},
 		US: {
 			label: 'US',
