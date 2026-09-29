@@ -180,9 +180,13 @@ export const Default: Story = {
 			canvas.getAllByRole('button', { name: /create/i })[0]!,
 		);
 		const documentCanvas = within(canvasElement.ownerDocument.body);
+		const createDialog = await documentCanvas.findByRole('dialog', {
+			name: 'Choose an alert type for this content',
+		});
+		await expect(createDialog).toBeVisible();
 		await expect(
-			await documentCanvas.findByRole('dialog', {
-				name: 'Choose an alert type for this content',
+			within(createDialog).getByRole('link', {
+				name: new RegExp(mockLatestPublishedContent[0]!.headline),
 			}),
 		).toBeVisible();
 		await expect(
