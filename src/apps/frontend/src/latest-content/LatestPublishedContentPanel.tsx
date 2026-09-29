@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { DispatchCreateNotificationModal } from '../compose/DispatchCreateNotificationModal';
 import { ScrollWrapper } from '../compose/ScrollWrapper';
 import { useLatestPublishedContent } from '../hooks/useLatestPublishedContent';
+import { useRelativeTimeClock } from '../hooks/useRelativeTime';
 import { latestPublishedContentTheme } from '../themes';
 import { EmptyState } from '../ui/EmptyState';
 import { LastUpdated } from '../ui/LastUpdated';
@@ -43,6 +44,9 @@ export const LatestPublishedContentPanel = ({
 	const lastUpdatedAt = latestPublishedContent.dataUpdatedAt
 		? new Date(latestPublishedContent.dataUpdatedAt).toISOString()
 		: undefined;
+	const now = useRelativeTimeClock(
+		content.map(({ publishedAt }) => publishedAt),
+	);
 
 	return (
 		<>
@@ -147,6 +151,7 @@ export const LatestPublishedContentPanel = ({
 										<LatestPublishedContentCard
 											key={item.id}
 											content={item}
+											now={now}
 											onCreate={() => {
 												setSelectedArticleUrl(item.url);
 												setIsCreateNotificationModalOpen(true);

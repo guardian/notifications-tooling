@@ -28,15 +28,19 @@ interface RelativeTime {
 export const useRelativeTime = (
 	iso8601?: string,
 	style: RelativeTimeStyle = 'short',
+	nowOverride?: Date,
 ): RelativeTime | undefined => {
 	const date = useMemo(() => parsePublicationDate(iso8601), [iso8601]);
 	const [, tick] = useReducer((count: number) => count + 1, 0);
-	const now = new Date();
+	const now = nowOverride ?? new Date();
 
 	// Derived from the current time rather than held in state, so it stays
 	// correct when `iso8601` changes without an effect having to re-sync it.
 	const label = date ? formatRelativeTime(date, now, style) : undefined;
-	const intervalMs = date ? getRefreshIntervalMs(date, now, style) : undefined;
+	const intervalMs =
+		nowOverride === undefined && date
+			? getRefreshIntervalMs(date, now, style)
+			: undefined;
 
 	useEffect(() => {
 		if (intervalMs === undefined) {
@@ -58,4 +62,39 @@ export const useRelativeTime = (
 		iso8601,
 		isRelative: isRelativeTime(date, now),
 	};
+};
+
+export const useRelativeTimeClock = (
+	iso8601Values: ReadonlyArray<string | undefined>,
+	style: RelativeTimeStyle = 'short',
+): Date => {
+	const [, tick] = useReducer((count: number) => count + 1, 0);
+	const now = new Date();
+	const refreshIntervalMs = iso8601Values.reduce<number | undefined>(
+		(shortestInterval, iso8601) => {
+			const date = parsePublicationDate(iso8601);
+			const interval = date
+				? getRefreshIntervalMs(date, now, style)
+				: undefined;
+			if (interval === undefined) {
+				return shortestInterval;
+			}
+			return shortestInterval === undefined
+				? interval
+				: Math.min(shortestInterval, interval);
+		},
+		undefined,
+	);
+
+	useEffect(() => {
+		if (refreshIntervalMs === undefined) {
+			return;
+		}
+
+		const timer = setInterval(tick, refreshIntervalMs);
+
+		return () => clearInterval(timer);
+	}, [refreshIntervalMs]);
+
+	return now;
 };
