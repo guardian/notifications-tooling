@@ -51,53 +51,7 @@ const isAlertableSend = (
 export const NotificationAlert = () => {
 	const config = useContext(ConfigContext);
 	const seenNotificationIds = useRef<Set<string> | undefined>(undefined);
-	const hasShownFakeToast = useRef(false);
 	const notificationHistory = useNotificationHistory({ limit: 10, offset: 0 });
-
-	useEffect(() => {
-		if (process.env.NODE_ENV === 'production') {
-			return;
-		}
-
-		const showFakeToast = () => {
-			const href =
-				'https://www.theguardian.com/world/2026/sep/28/yemen-fighting-houthis-families-flee-displacement';
-			toastQueue.add(
-				{
-					level: 'information',
-					title: 'Claire Phipps sent an app alert',
-					subject:
-						'Children forced to give up school for work as fighting upends daily life in Yemen',
-					additionalInfo: (
-						<Link
-							href={href}
-							target="_blank"
-							rel="noreferrer"
-							cssOverrides={toastLinkStyles}
-						>
-							{href}
-						</Link>
-					),
-					thumbnail: (
-						<img
-							src="https://media.guim.co.uk/5f2a9721082c580c1696cd5bb8e2ca0d711bf608/361_0_1440_1152/500.jpg"
-							alt=""
-						/>
-					),
-				},
-				{ timeout: toastTimeout },
-			);
-		};
-
-		// Temporary local trigger for reviewing incoming toasts.
-		if (!hasShownFakeToast.current) {
-			hasShownFakeToast.current = true;
-			showFakeToast();
-		}
-		const intervalId = window.setInterval(showFakeToast, 60_000);
-
-		return () => window.clearInterval(intervalId);
-	}, []);
 
 	useEffect(() => {
 		if (
