@@ -390,6 +390,96 @@ export const dispatchTileModalTheme = {
 	}),
 };
 
+export const dispatchTileModalStyles = {
+	content: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+	}),
+	preview: css({
+		display: 'grid',
+		gridTemplateColumns: 'minmax(92px, max-content) minmax(0, 1fr) 71px',
+		alignItems: 'stretch',
+		minHeight: '71px',
+		overflow: 'hidden',
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		borderRadius: semanticRadius.cornerXs,
+		backgroundColor: semanticColors.bg.base,
+	}),
+	previewMeta: css({
+		position: 'relative',
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center',
+		gap: '2px',
+		padding: '8px',
+		'&::after': {
+			position: 'absolute',
+			top: '50%',
+			right: '-18px',
+			width: '36px',
+			height: 0,
+			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			opacity: 1,
+			transform: 'rotate(-90deg)',
+			content: '""',
+			pointerEvents: 'none',
+		},
+	}),
+	section: (color: string) =>
+		css({
+			color,
+			fontSize: '12px',
+			whiteSpace: 'nowrap',
+		}),
+	sectionName: css({ fontWeight: 700 }),
+	published: css({
+		color: semanticColors.text.strong,
+		fontSize: '12px',
+		whiteSpace: 'nowrap',
+	}),
+	publishedRelative: css({ fontWeight: 700 }),
+	previewHeadline: css({
+		display: 'flex',
+		minWidth: 0,
+		alignItems: 'flex-start',
+		padding: '8px',
+	}),
+	headline: css({
+		display: 'relative',
+		overflow: 'hidden',
+		fontSize: '12px',
+		lineHeight: 1.35,
+		color: semanticColors.text.strong,
+	}),
+	thumbnail: css({
+		width: '80px',
+		height: '55px',
+		alignSelf: 'start',
+		justifySelf: 'center',
+		padding: '8px 8px 0px 0px',
+		borderRadius: semanticRadius.cornerSm,
+	}),
+	thumbnailFallback: css({
+		display: 'grid',
+		width: '80px',
+		height: '55px',
+		alignSelf: 'start',
+		justifySelf: 'center',
+		placeItems: 'center',
+		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+		borderRadius: semanticRadius.cornerSm,
+		padding: '6px',
+	}),
+	tileStyles: css({
+		width: '100%',
+		[from.md]: {
+			width: '420px',
+		},
+	}),
+};
+
 export const dispatchLandingTheme = {
 	global: css({
 		[from.lg]: {

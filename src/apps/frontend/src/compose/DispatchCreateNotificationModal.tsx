@@ -1,112 +1,14 @@
-import { css } from '@emotion/react';
-import {
-	semanticColors,
-	semanticRadius,
-	semanticSizing,
-	semanticSpacing,
-} from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
-import { from } from '@guardian/stand/utils';
 import { useRelativeTime } from '../hooks/useRelativeTime';
 import type { LatestPublishedContentItem } from '../latest-content/latest-published-content';
 import { getAppRoutes, withArticleUrl } from '../routes';
-import { dispatchTileModalTheme } from '../themes';
+import { dispatchTileModalStyles, dispatchTileModalTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 import { getPillarColor } from '../utils/pillar-colors';
-
-const styles = {
-	content: css({
-		display: 'flex',
-		flexDirection: 'column',
-		gap: semanticSpacing.stackSm,
-	}),
-	preview: css({
-		display: 'grid',
-		gridTemplateColumns: 'minmax(92px, max-content) minmax(0, 1fr) 71px',
-		alignItems: 'stretch',
-		minHeight: '71px',
-		overflow: 'hidden',
-		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
-		borderRadius: semanticRadius.cornerXs,
-		backgroundColor: semanticColors.bg.base,
-	}),
-	previewMeta: css({
-		position: 'relative',
-		display: 'flex',
-		flexDirection: 'column',
-		justifyContent: 'center',
-		gap: '2px',
-		padding: '8px',
-		'&::after': {
-			position: 'absolute',
-			top: '50%',
-			right: '-18px',
-			width: '36px',
-			height: 0,
-			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-			opacity: 1,
-			transform: 'rotate(-90deg)',
-			content: '""',
-			pointerEvents: 'none',
-		},
-	}),
-	section: (color: string) =>
-		css({
-			color,
-			fontSize: '12px',
-			whiteSpace: 'nowrap',
-		}),
-	sectionName: css({ fontWeight: 700 }),
-	published: css({
-		color: semanticColors.text.strong,
-		fontSize: '12px',
-		whiteSpace: 'nowrap',
-	}),
-	publishedRelative: css({ fontWeight: 700 }),
-	previewHeadline: css({
-		display: 'flex',
-		minWidth: 0,
-		alignItems: 'flex-start',
-		padding: '8px',
-	}),
-	headline: css({
-		display: 'relative',
-		overflow: 'hidden',
-		fontSize: '12px',
-		lineHeight: 1.35,
-		color: semanticColors.text.strong,
-	}),
-	thumbnail: css({
-		width: '80px',
-		height: '55px',
-		alignSelf: 'start',
-		justifySelf: 'center',
-		padding: '8px 8px 0px 0px',
-		borderRadius: semanticRadius.cornerSm,
-	}),
-	thumbnailFallback: css({
-		display: 'grid',
-		width: '80px',
-		height: '55px',
-		alignSelf: 'start',
-		justifySelf: 'center',
-		placeItems: 'center',
-		color: semanticColors.text.weak,
-		backgroundColor: semanticColors.fill.neutralWeak,
-		borderRadius: semanticRadius.cornerSm,
-		padding: '6px',
-	}),
-	tileStyles: css({
-		width: '100%',
-		[from.md]: {
-			width: '420px',
-		},
-	}),
-};
 
 interface DispatchCreateNotificationModalProps {
 	isOpen: boolean;
@@ -141,53 +43,62 @@ export const DispatchCreateNotificationModal = ({
 				<Dialog.Dismiss ariaLabel="Close Modal" />
 				<Dialog.Header>Choose an alert type for this content</Dialog.Header>
 				<Dialog.Content>
-					<div css={styles.content}>
+					<div css={dispatchTileModalStyles.content}>
 						{content && (
 							<article
 								aria-label={`${content.headline} content`}
-								css={styles.preview}
+								css={dispatchTileModalStyles.preview}
 							>
-								<div css={styles.previewMeta}>
+								<div css={dispatchTileModalStyles.previewMeta}>
 									<Typography
 										variant="bodyXs"
-										cssOverrides={styles.section(
+										cssOverrides={dispatchTileModalStyles.section(
 											getPillarColor(content.pillarId),
 										)}
 									>
-										<span css={styles.sectionName}>{content.section}</span>
+										<span css={dispatchTileModalStyles.sectionName}>
+											{content.section}
+										</span>
 										{content.pillarName ? ` / ${content.pillarName}` : null}
 									</Typography>
 									{publishedAt && (
 										<Typography
 											variant="bodyXs"
-											cssOverrides={styles.published}
+											cssOverrides={dispatchTileModalStyles.published}
 										>
 											Published{' '}
 											<time
 												dateTime={publishedAt.iso8601}
 												title={publishedAt.formattedAbsoluteTime}
-												css={styles.publishedRelative}
+												css={dispatchTileModalStyles.publishedRelative}
 											>
 												{publishedAt.label}
 											</time>
 										</Typography>
 									)}
 								</div>
-								<div css={styles.previewHeadline}>
+								<div css={dispatchTileModalStyles.previewHeadline}>
 									<ExternalLink href={content.url}>
 										<Typography
 											variant="bodySm"
 											element="span"
-											cssOverrides={styles.headline}
+											cssOverrides={dispatchTileModalStyles.headline}
 										>
 											{content.headline}
 										</Typography>
 									</ExternalLink>
 								</div>
 								{content.imageUrl ? (
-									<img src={content.imageUrl} alt="" css={styles.thumbnail} />
+									<img
+										src={content.imageUrl}
+										alt=""
+										css={dispatchTileModalStyles.thumbnail}
+									/>
 								) : (
-									<div css={styles.thumbnailFallback} aria-label="No image">
+									<div
+										css={dispatchTileModalStyles.thumbnailFallback}
+										aria-label="No image"
+									>
 										<Icon size="sm" symbol="image" />
 									</div>
 								)}
@@ -199,7 +110,7 @@ export const DispatchCreateNotificationModal = ({
 								href={createAppAlertHref}
 								icon={phoneIphoneIcon}
 								typography="headingMd"
-								cssOverrides={styles.tileStyles}
+								cssOverrides={dispatchTileModalStyles.tileStyles}
 							>
 								Create an app alert
 							</Tile>
@@ -209,7 +120,7 @@ export const DispatchCreateNotificationModal = ({
 							href={createNewsletterEmailHref}
 							icon="mail"
 							typography="headingMd"
-							cssOverrides={styles.tileStyles}
+							cssOverrides={dispatchTileModalStyles.tileStyles}
 						>
 							Create a newsletter email
 						</Tile>
