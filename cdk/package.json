@@ -10,7 +10,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@guardian/cdk": "64.7.0",
+		"@guardian/cdk": "65.0.0",
 		"aws-cdk": "2.1142.0",
 		"aws-cdk-lib": "2.270.0",
 		"constructs": "10.8.1"
