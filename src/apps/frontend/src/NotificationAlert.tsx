@@ -39,6 +39,7 @@ const toastTheme = {
 	},
 } as const;
 const toastTimeout = 10_000;
+const normalizeEmail = (email?: string) => email?.trim().toLowerCase();
 
 const isAlertableSend = (
 	notification: NotificationSummary,
@@ -46,7 +47,8 @@ const isAlertableSend = (
 ) =>
 	notification.kind === 'send' &&
 	notification.status === 'delivered' &&
-	notification.createdByEmail !== currentUserEmail;
+	normalizeEmail(notification.createdByEmail) !==
+		normalizeEmail(currentUserEmail);
 
 export const NotificationAlert = () => {
 	const config = useContext(ConfigContext);
@@ -62,7 +64,9 @@ export const NotificationAlert = () => {
 		}
 
 		const currentIds = new Set(
-			notificationHistory.data.notifications.map(({ id }) => id),
+			notificationHistory.data.notifications
+				.filter(({ status }) => status === 'delivered')
+				.map(({ id }) => id),
 		);
 		const newNotifications = notificationHistory.data.notifications.filter(
 			(candidate) =>

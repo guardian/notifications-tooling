@@ -30,6 +30,17 @@ const partiallyDeliveredAppPush: NotificationSummary = {
 	status: 'partially_delivered',
 	createdByEmail: 'partial.sender@guardian.co.uk',
 };
+const currentUserAppPush: NotificationSummary = {
+	...appPushSendBeyondBradford,
+	id: 'current-user-app-push',
+	createdByEmail: mockAppConfig.user.email.toUpperCase(),
+};
+const acceptedAppPush: NotificationSummary = {
+	...appPushSendBeyondBradford,
+	id: 'accepted-app-push',
+	status: 'accepted',
+	createdByEmail: 'transition.sender@guardian.co.uk',
+};
 
 const NotificationAlertExample = () => {
 	const queryClient = useQueryClient();
@@ -41,16 +52,45 @@ const NotificationAlertExample = () => {
 				onPress={() =>
 					queryClient.setQueryData<NotificationListResponse>(historyQueryKey, {
 						...emptyHistory,
-						total: 3,
+						total: 4,
 						notifications: [
 							appPushSendBeyondBradford,
 							newsletterSendBeyondBradford,
 							partiallyDeliveredAppPush,
+							currentUserAppPush,
 						],
 					})
 				}
 			>
 				Receive notifications
+			</Button>
+			<NotificationAlert />
+		</>
+	);
+};
+
+const AcceptedNotificationExample = () => {
+	const queryClient = useQueryClient();
+	useState(() =>
+		queryClient.setQueryData<NotificationListResponse>(historyQueryKey, {
+			...emptyHistory,
+			total: 1,
+			notifications: [acceptedAppPush],
+		}),
+	);
+
+	return (
+		<>
+			<Button
+				onPress={() =>
+					queryClient.setQueryData<NotificationListResponse>(historyQueryKey, {
+						...emptyHistory,
+						total: 1,
+						notifications: [{ ...acceptedAppPush, status: 'delivered' }],
+					})
+				}
+			>
+				Complete delivery
 			</Button>
 			<NotificationAlert />
 		</>
@@ -103,5 +143,24 @@ export const IncomingAppAlert: Story = {
 				'https://www.theguardian.com/travel/2026/sep/17/bradford-pennine-gateway-walking-trail-west-yorkshire',
 			),
 		).toHaveLength(2);
+	},
+};
+
+export const DeliveryCompletesAfterPolling: Story = {
+	render: () => <AcceptedNotificationExample />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const page = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			page.queryByText('Transition Sender sent an app alert'),
+		).not.toBeInTheDocument();
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Complete delivery' }),
+		);
+
+		await expect(
+			await page.findByText('Transition Sender sent an app alert'),
+		).toBeVisible();
 	},
 };
