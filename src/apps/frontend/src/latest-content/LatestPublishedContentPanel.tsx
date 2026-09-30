@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { DispatchCreateNotificationModal } from '../compose/DispatchCreateNotificationModal';
 import { ScrollWrapper } from '../compose/ScrollWrapper';
 import { useLatestPublishedContent } from '../hooks/useLatestPublishedContent';
+import { useRelativeTimeClock } from '../hooks/useRelativeTime';
 import { latestPublishedContentTheme } from '../themes';
 import { EmptyState } from '../ui/EmptyState';
 import { LastUpdated } from '../ui/LastUpdated';
@@ -37,12 +38,16 @@ export const LatestPublishedContentPanel = ({
 	const [showAll, setShowAll] = useState(false);
 	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =
 		useState(false);
-	const [selectedArticleUrl, setSelectedArticleUrl] = useState<string>();
+	const [selectedContent, setSelectedContent] =
+		useState<LatestPublishedContentItem>();
 	const hasCachedData = latestPublishedContent.data !== undefined;
 	const isEmpty = !latestPublishedContent.isPending && content.length === 0;
 	const lastUpdatedAt = latestPublishedContent.dataUpdatedAt
 		? new Date(latestPublishedContent.dataUpdatedAt).toISOString()
 		: undefined;
+	const now = useRelativeTimeClock(
+		content.map(({ publishedAt }) => publishedAt),
+	);
 
 	return (
 		<>
@@ -147,8 +152,9 @@ export const LatestPublishedContentPanel = ({
 										<LatestPublishedContentCard
 											key={item.id}
 											content={item}
+											now={now}
 											onCreate={() => {
-												setSelectedArticleUrl(item.url);
+												setSelectedContent(item);
 												setIsCreateNotificationModalOpen(true);
 											}}
 										/>
@@ -162,7 +168,7 @@ export const LatestPublishedContentPanel = ({
 			<DispatchCreateNotificationModal
 				isOpen={isCreateNotificationModalOpen}
 				onOpenChange={setIsCreateNotificationModalOpen}
-				articleUrl={selectedArticleUrl}
+				content={selectedContent}
 			/>
 		</>
 	);

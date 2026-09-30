@@ -16,11 +16,13 @@ import type { LatestPublishedContentItem } from './latest-published-content';
 interface LatestPublishedContentCardProps {
 	content: LatestPublishedContentItem;
 	onCreate: () => void;
+	now?: Date;
 }
 
 export const LatestPublishedContentCard = ({
 	content,
 	onCreate,
+	now,
 }: LatestPublishedContentCardProps) => {
 	const {
 		id,
@@ -34,7 +36,7 @@ export const LatestPublishedContentCard = ({
 		type,
 	} = content;
 	const pillarColor = getPillarColor(pillarId);
-	const publishedAt = useRelativeTime(content.publishedAt);
+	const publishedAt = useRelativeTime(content.publishedAt, 'short', now);
 	const intendedAudience = mapTagsToSourceAndTarget(tags);
 	const isLiveblog = type === 'liveblog';
 
