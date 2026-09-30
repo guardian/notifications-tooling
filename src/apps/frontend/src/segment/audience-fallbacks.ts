@@ -12,7 +12,10 @@ const FALLBACK_APP_ALERT_EDITIONS: TopicTypeEditionOption[] = [
 	{ id: 'europe', label: 'Europe' },
 ];
 
-export const FALLBACK_TOPIC_TYPES: AppAlertTopicOption[] = [
+export const FALLBACK_TOPIC_TYPES: [
+	AppAlertTopicOption,
+	...AppAlertTopicOption[],
+] = [
 	{
 		id: 'breaking-news',
 		label: 'Breaking news',
