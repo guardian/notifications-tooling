@@ -396,6 +396,7 @@ export const dispatchTileModalStyles = {
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'center',
+		alignItems: 'flex-start',
 		gap: '2px',
 		padding: '8px',
 		'&::after': {

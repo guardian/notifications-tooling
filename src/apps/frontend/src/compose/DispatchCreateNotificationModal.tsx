@@ -8,6 +8,7 @@ import { getAppRoutes, withArticleUrl } from '../routes';
 import { dispatchTileModalStyles, dispatchTileModalTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
 import { phoneIphoneIcon } from '../ui/flag-icons';
+import { LiveIndicator } from '../ui/LiveIndicator';
 import { getPillarColor } from '../utils/pillar-colors';
 
 interface DispatchCreateNotificationModalProps {
@@ -32,6 +33,7 @@ export const DispatchCreateNotificationModal = ({
 		routes.createNewsletterEmail,
 		selectedArticleUrl,
 	);
+	const isLiveblog = content?.type === 'liveblog';
 
 	return (
 		<Modal
@@ -61,12 +63,13 @@ export const DispatchCreateNotificationModal = ({
 										</span>
 										{content.pillarName ? ` / ${content.pillarName}` : null}
 									</Typography>
+									{isLiveblog && <LiveIndicator />}
 									{publishedAt && (
 										<Typography
 											variant="bodyXs"
 											cssOverrides={dispatchTileModalStyles.published}
 										>
-											Published{' '}
+											{isLiveblog ? 'Updated ' : 'Published '}
 											<time
 												dateTime={publishedAt.iso8601}
 												title={publishedAt.formattedAbsoluteTime}
