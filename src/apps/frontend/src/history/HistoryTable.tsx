@@ -14,7 +14,10 @@ import {
 	type DisplayAppAlertTopicEditionId,
 	notificationChannelNames,
 } from '@models';
-import { useRelativeTime } from '../hooks/useRelativeTime';
+import {
+	useRelativeTime,
+	useRelativeTimeClock,
+} from '../hooks/useRelativeTime';
 import type { ChannelAudienceResponse } from '../schemas';
 import { historyViewStyles } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
@@ -54,8 +57,8 @@ const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
 		Failed: 'red',
 	};
 
-const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
-	const sendTime = useRelativeTime(sentAt, 'long');
+const HistorySendTime = ({ sentAt, now }: { sentAt: string; now: Date }) => {
+	const sendTime = useRelativeTime(sentAt, 'long', now);
 
 	return (
 		<span
@@ -109,6 +112,11 @@ export const HistoryTable = ({
 	audiences,
 	showUserName = false,
 }: HistoryTableProps) => {
+	const now = useRelativeTimeClock(
+		notifications.map(({ sentAt }) => sentAt),
+		'long',
+	);
+
 	return (
 		<Table
 			aria-label="Sent alerts"
@@ -222,7 +230,7 @@ export const HistoryTable = ({
 								<span css={historyViewStyles.compactLabel} aria-hidden="true">
 									Send time:{' '}
 								</span>
-								<HistorySendTime sentAt={notification.sentAt} />
+								<HistorySendTime sentAt={notification.sentAt} now={now} />
 							</TableCell>
 							<TableCell
 								gridColumn={{ md: '2', lg: '5' }}
