@@ -4,7 +4,12 @@ import { Avatar } from '@guardian/stand/Avatar';
 import { IconButton } from '@guardian/stand/IconButton';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
-import { type NotificationChannelId, notificationChannelNames } from '@models';
+import {
+	channelAudienceResponseSchema,
+	NotificationChannel,
+	type NotificationChannelId,
+	notificationChannelNames,
+} from '@models';
 import { useState } from 'react';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';
@@ -12,6 +17,7 @@ import { darkTooltipTheme, Tooltip } from '../ui/Tooltip';
 import { capitalise } from '../utils/display-text-helpers';
 import type { LocalSendTimeRegion } from '../utils/history-send-time';
 import { formatLocalSendDateTimes } from '../utils/history-send-time';
+import z from 'zod';
 
 interface Props {
 	articleId?: string;
@@ -172,9 +178,63 @@ const formatTime = (
 	);
 };
 
+const appAudienceJsonData = z.looseObject({
+	compose: z.record(z.string(), z.unknown()),
+	audience: z.looseObject({
+		type: z.string(),
+		items: z
+			.looseObject({
+				name: z.string(),
+				type: z.string(),
+			})
+			.array(),
+	}),
+});
+
+const newsletterAudienceJsonData = z.looseObject({
+	compose: z.record(z.string(), z.unknown()),
+	audience: z.looseObject({
+		type: z.string(),
+		items: z.string().array(),
+	}),
+});
+
+const parseAudience = (send: NotificationSummary): string[] => {
+	const audiences: string[] = [];
+	Object.entries(send.channels).flatMap(([channelId, data]) => {
+		if (
+			(channelId as NotificationChannel) ===
+			NotificationChannel.AppPushNotification
+		) {
+			const parseResult = appAudienceJsonData.safeParse(data);
+			if (parseResult.success) {
+				audiences.push(
+					...parseResult.data.audience.items.map((item) => item.name),
+				);
+			}
+		}
+
+		if ((channelId as NotificationChannel) == NotificationChannel.Newsletter) {
+			const parseResult = newsletterAudienceJsonData.safeParse(data);
+			if (parseResult.success) {
+				audiences.push(...parseResult.data.audience.items);
+			}
+		}
+	});
+
+	return audiences;
+};
+
 const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
 	return (
-		<>
+		<div
+			css={{
+				marginLeft: 'auto',
+				display: 'flex',
+				alignItems: 'center',
+				gap: semanticSpacing.stackXxs,
+			}}
+		>
 			{sends.length === 1 ? (
 				<>
 					{sends.map((send) => (
@@ -188,47 +248,41 @@ const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
 					))}
 				</>
 			) : (
-				<div
-					css={{
-						marginLeft: 'auto',
-						display: 'flex',
-						alignItems: 'center',
-						gap: semanticSpacing.stackXxs,
-					}}
-				>
-					<Typography variant="bodySm" color={semanticColors.text.weak}>
-						Timestamp
-					</Typography>
-					<Tooltip
-						theme={darkTooltipTheme}
-						label="send times"
-						cssOverrides={css({
-							maxWidth: 'unset',
-							color: semanticColors.text.weak,
-						})}
-					>
-						<table css={style.detailTable}>
-							<thead>
-								<tr>
-									<th>sender</th>
-									<th>channel</th>
-									<th>send time</th>
-								</tr>
-							</thead>
-							<tbody>
-								{sends.map((send) => (
-									<tr key={send.id}>
-										<td>{emailToName(send.createdByEmail)}</td>
-										<td>{notificationChannelNames[getChannel(send)]}</td>
-										<td>{formatTime(send.createdAt)}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</Tooltip>
-				</div>
+				<Typography variant="bodySm" color={semanticColors.text.weak}>
+					Timestamp
+				</Typography>
 			)}
-		</>
+
+			<Tooltip
+				theme={darkTooltipTheme}
+				label="send times"
+				cssOverrides={css({
+					maxWidth: 'unset',
+					color: semanticColors.text.weak,
+				})}
+			>
+				<table css={style.detailTable}>
+					<thead>
+						<tr>
+							<th>sender</th>
+							<th>channel</th>
+							<th>send time</th>
+							<th>audience</th>
+						</tr>
+					</thead>
+					<tbody>
+						{sends.map((send) => (
+							<tr key={send.id}>
+								<td>{emailToName(send.createdByEmail)}</td>
+								<td>{notificationChannelNames[getChannel(send)]}</td>
+								<td>{formatTime(send.createdAt)}</td>
+								<td>{parseAudience(send).join()}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</Tooltip>
+		</div>
 	);
 };
 
@@ -248,7 +302,8 @@ export const PreviousNotificationsBar = ({
 
 	const sentNotifications =
 		data?.notifications.filter(
-			(send) => !send.dryRun && send.status !== 'failed',
+			(send) =>
+				!send.dryRun && send.status !== 'failed' && send.kind === 'send',
 		) ?? [];
 
 	if (error) {
