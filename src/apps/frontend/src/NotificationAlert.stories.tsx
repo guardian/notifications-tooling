@@ -9,8 +9,11 @@ import {
 	type NotificationHistoryQuery,
 } from './hooks/useNotificationHistory';
 import { NotificationAlert } from './NotificationAlert';
-import type { NotificationListResponse } from './schemas';
-import { appPushSendBeyondBradford } from './testing/api-fixtures';
+import type { NotificationListResponse, NotificationSummary } from './schemas';
+import {
+	appPushSendBeyondBradford,
+	newsletterSendBeyondBradford,
+} from './testing/api-fixtures';
 import { mockAppConfig } from './testing/app-config';
 
 const historyQuery: NotificationHistoryQuery = { limit: 10, offset: 0 };
@@ -20,6 +23,12 @@ const emptyHistory: NotificationListResponse = {
 	limit: 10,
 	offset: 0,
 	notifications: [],
+};
+const partiallyDeliveredAppPush: NotificationSummary = {
+	...appPushSendBeyondBradford,
+	id: 'partially-delivered-app-push',
+	status: 'partially_delivered',
+	createdByEmail: 'partial.sender@guardian.co.uk',
 };
 
 const NotificationAlertExample = () => {
@@ -32,12 +41,16 @@ const NotificationAlertExample = () => {
 				onPress={() =>
 					queryClient.setQueryData<NotificationListResponse>(historyQueryKey, {
 						...emptyHistory,
-						total: 1,
-						notifications: [appPushSendBeyondBradford],
+						total: 3,
+						notifications: [
+							appPushSendBeyondBradford,
+							newsletterSendBeyondBradford,
+							partiallyDeliveredAppPush,
+						],
 					})
 				}
 			>
-				Receive notification
+				Receive notifications
 			</Button>
 			<NotificationAlert />
 		</>
@@ -66,16 +79,29 @@ export const IncomingAppAlert: Story = {
 		const page = within(canvasElement.ownerDocument.body);
 
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Receive notification' }),
+			canvas.getByRole('button', { name: 'Receive notifications' }),
 		);
 
-		const toast = await page.findByRole('alert');
-		await expect(toast).toHaveTextContent('Ann Nonymous sent an app alert');
-		await expect(toast).toHaveTextContent(
-			'Beyond Bradford and the Brontës – new walking trail shows West Yorkshire’s natural beauty',
-		);
-		await expect(toast).toHaveTextContent(
-			'https://www.theguardian.com/travel/2026/sep/17/bradford-pennine-gateway-walking-trail-west-yorkshire',
-		);
+		const toasts = await page.findAllByRole('alert');
+		await expect(toasts).toHaveLength(2);
+		await expect(
+			page.getByText('Ann Nonymous sent an app alert'),
+		).toBeVisible();
+		await expect(
+			page.getByText('John Doe sent a newsletter email'),
+		).toBeVisible();
+		await expect(
+			page.queryByText('Partial Sender sent an app alert'),
+		).not.toBeInTheDocument();
+		await expect(
+			page.getAllByText(
+				'Beyond Bradford and the Brontës – new walking trail shows West Yorkshire’s natural beauty',
+			),
+		).toHaveLength(2);
+		await expect(
+			page.getAllByText(
+				'https://www.theguardian.com/travel/2026/sep/17/bradford-pennine-gateway-walking-trail-west-yorkshire',
+			),
+		).toHaveLength(2);
 	},
 };

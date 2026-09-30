@@ -45,7 +45,7 @@ const isAlertableSend = (
 	currentUserEmail?: string,
 ) =>
 	notification.kind === 'send' &&
-	notification.status !== 'failed' &&
+	notification.status === 'delivered' &&
 	notification.createdByEmail !== currentUserEmail;
 
 export const NotificationAlert = () => {
@@ -64,7 +64,7 @@ export const NotificationAlert = () => {
 		const currentIds = new Set(
 			notificationHistory.data.notifications.map(({ id }) => id),
 		);
-		const newNotification = notificationHistory.data.notifications.find(
+		const newNotifications = notificationHistory.data.notifications.filter(
 			(candidate) =>
 				isAlertableSend(candidate, config?.user.email) &&
 				seenNotificationIds.current !== undefined &&
@@ -72,11 +72,11 @@ export const NotificationAlert = () => {
 		);
 
 		seenNotificationIds.current = currentIds;
-		if (newNotification) {
+		for (const newNotification of newNotifications) {
 			const notification =
 				mapNotificationToHistoryNotification(newNotification);
 			if (!notification) {
-				return;
+				continue;
 			}
 
 			toastQueue.add(
