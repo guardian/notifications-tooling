@@ -1,37 +1,37 @@
-import { css } from '@emotion/react';
+import { Icon } from '@guardian/stand/Icon';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
-import { from } from '@guardian/stand/utils';
+import { Typography } from '@guardian/stand/Typography';
+import { useRelativeTime } from '../hooks/useRelativeTime';
+import type { LatestPublishedContentItem } from '../latest-content/latest-published-content';
 import { getAppRoutes, withArticleUrl } from '../routes';
-import { dispatchTileModalTheme } from '../themes';
+import { dispatchTileModalStyles, dispatchTileModalTheme } from '../themes';
+import { ExternalLink } from '../ui/ExternalLink';
 import { phoneIphoneIcon } from '../ui/flag-icons';
+import { getPillarColor } from '../utils/pillar-colors';
 
 interface DispatchCreateNotificationModalProps {
 	isOpen: boolean;
 	onOpenChange: (isOpen: boolean) => void;
-	articleUrl?: string;
+	content?: LatestPublishedContentItem;
 }
 
 export const DispatchCreateNotificationModal = ({
 	isOpen,
 	onOpenChange,
-	articleUrl,
+	content,
 }: DispatchCreateNotificationModalProps) => {
 	const routes = getAppRoutes();
+	const publishedAt = useRelativeTime(content?.publishedAt);
+	const selectedArticleUrl = content?.url ?? '';
 	const createAppAlertHref = withArticleUrl(
 		routes.createAppAlert,
-		articleUrl ?? '',
+		selectedArticleUrl,
 	);
 	const createNewsletterEmailHref = withArticleUrl(
 		routes.createNewsletterEmail,
-		articleUrl ?? '',
+		selectedArticleUrl,
 	);
-	const tileStyles = css({
-		width: '100%',
-		[from.md]: {
-			width: '420px',
-		},
-	});
 
 	return (
 		<Modal
@@ -43,22 +43,84 @@ export const DispatchCreateNotificationModal = ({
 				<Dialog.Dismiss ariaLabel="Close Modal" />
 				<Dialog.Header>Choose an alert type for this content</Dialog.Header>
 				<Dialog.Content>
-					<div css={dispatchTileModalTheme.tileList}>
-						<Tile
-							size="sm"
-							href={createAppAlertHref}
-							icon={phoneIphoneIcon}
-							typography="headingMd"
-							cssOverrides={tileStyles}
-						>
-							Create an app alert
-						</Tile>
+					<div css={dispatchTileModalStyles.content}>
+						{content && (
+							<article
+								aria-label={`${content.headline} content`}
+								css={dispatchTileModalStyles.preview}
+							>
+								<div css={dispatchTileModalStyles.previewMeta}>
+									<Typography
+										variant="bodyXs"
+										cssOverrides={dispatchTileModalStyles.section(
+											getPillarColor(content.pillarId),
+										)}
+									>
+										<span css={dispatchTileModalStyles.sectionName}>
+											{content.section}
+										</span>
+										{content.pillarName ? ` / ${content.pillarName}` : null}
+									</Typography>
+									{publishedAt && (
+										<Typography
+											variant="bodyXs"
+											cssOverrides={dispatchTileModalStyles.published}
+										>
+											Published{' '}
+											<time
+												dateTime={publishedAt.iso8601}
+												title={publishedAt.formattedAbsoluteTime}
+												css={dispatchTileModalStyles.publishedRelative}
+											>
+												{publishedAt.label}
+											</time>
+										</Typography>
+									)}
+								</div>
+								<div css={dispatchTileModalStyles.previewHeadline}>
+									<ExternalLink href={content.url}>
+										<Typography
+											variant="bodySm"
+											element="span"
+											cssOverrides={dispatchTileModalStyles.headline}
+										>
+											{content.headline}
+										</Typography>
+									</ExternalLink>
+								</div>
+								{content.imageUrl ? (
+									<img
+										src={content.imageUrl}
+										alt=""
+										css={dispatchTileModalStyles.thumbnail}
+									/>
+								) : (
+									<div
+										css={dispatchTileModalStyles.thumbnailFallback}
+										aria-label="No image"
+									>
+										<Icon size="sm" symbol="image" />
+									</div>
+								)}
+							</article>
+						)}
+						{createAppAlertHref && (
+							<Tile
+								size="sm"
+								href={createAppAlertHref}
+								icon={phoneIphoneIcon}
+								typography="headingMd"
+								cssOverrides={dispatchTileModalStyles.tileStyles}
+							>
+								Create an app alert
+							</Tile>
+						)}
 						<Tile
 							size="sm"
 							href={createNewsletterEmailHref}
 							icon="mail"
 							typography="headingMd"
-							cssOverrides={tileStyles}
+							cssOverrides={dispatchTileModalStyles.tileStyles}
 						>
 							Create a newsletter email
 						</Tile>
