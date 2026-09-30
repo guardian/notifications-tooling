@@ -16,6 +16,11 @@ import {
 	GRID_CROP_ID,
 	GRID_IMAGE_ID,
 } from '../testing/grid-fixtures';
+import { channelHandlers } from '../testing/handlers/channels';
+import {
+	notificationHistoryHandler,
+	notificationSendersHandler,
+} from '../testing/handlers/notifications';
 import {
 	completeAppAlertFormValues,
 	populatedAppAlertComposerState,
@@ -452,6 +457,9 @@ export const RestoresOriginalThumbnailAfterClearingReplacement: Story = {
 	parameters: {
 		msw: {
 			handlers: [
+				...channelHandlers,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
 					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
 						headers: { 'Content-Type': 'image/svg+xml' },
@@ -557,6 +565,9 @@ export const FallsBackToOriginalThumbnailOnBrokenReplacementImage: Story = {
 	parameters: {
 		msw: {
 			handlers: [
+				...channelHandlers,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
 					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
 						headers: { 'Content-Type': 'image/svg+xml' },
@@ -629,6 +640,9 @@ export const AcceptsGridCropReplacementThumbnail: Story = {
 	parameters: {
 		msw: {
 			handlers: [
+				...channelHandlers,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 				http.get(`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`, () =>
 					HttpResponse.json(FIVE_FOUR_CROP_RESPONSE),
 				),
@@ -683,6 +697,9 @@ export const ShowsErrorWhenGridLookupFails: Story = {
 	parameters: {
 		msw: {
 			handlers: [
+				...channelHandlers,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 				http.get(
 					`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`,
 					() => new HttpResponse(null, { status: 501 }),
@@ -727,6 +744,9 @@ export const ShowsErrorAndAuthButtonWhenGridApiReturnsForbidden: Story = {
 	parameters: {
 		msw: {
 			handlers: [
+				...channelHandlers,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 				http.get(
 					`${mockAppConfig.gridApiUri}/images/${GRID_IMAGE_ID}`,
 					() => new HttpResponse(null, { status: 401 }),

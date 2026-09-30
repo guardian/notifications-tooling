@@ -9,6 +9,10 @@ import {
 	channelAudiencesHandler,
 	channelConstraintsHandler,
 } from '../testing/handlers/channels';
+import {
+	notificationHistoryHandler,
+	notificationSendersHandler,
+} from '../testing/handlers/notifications';
 import { htmlToSingleLineText } from '../utils/html-helpers';
 import type {
 	AppAlertFormValues,
@@ -138,6 +142,8 @@ const meta = {
 				resolveArticleFromCapiHandler,
 				channelConstraintsHandler,
 				channelAudiencesHandler,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 			],
 		},
 	},
@@ -180,6 +186,8 @@ export const InvalidLiveblogBlockId: Story = {
 				invalidLiveblogBlockHandler,
 				channelConstraintsHandler,
 				channelAudiencesHandler,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 			],
 		},
 	},

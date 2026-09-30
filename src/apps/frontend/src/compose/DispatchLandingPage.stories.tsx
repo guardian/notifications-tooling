@@ -9,7 +9,11 @@ import { MainLayout } from '../layout/MainLayout';
 import { notificationRoutes, withArticleUrl } from '../routes';
 import type { NotificationListResponse } from '../schemas';
 import { mockAppConfig } from '../testing/app-config';
-import { channelAudiencesHandler } from '../testing/handlers/channels';
+import {
+	channelAudiencesHandler,
+	channelConstraintsHandler,
+} from '../testing/handlers/channels';
+import { notificationSendersHandler } from '../testing/handlers/notifications';
 import { DISPATCH_INFORMATION_MODAL_TITLE } from './DispatchInformationModal';
 import { DispatchLandingPage } from './DispatchLandingPage';
 
@@ -157,6 +161,8 @@ const meta = {
 			handlers: [
 				historyHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
+				notificationSendersHandler,
 				latestPublishedContentHandler,
 			],
 		},
@@ -353,6 +359,8 @@ export const RecentOnly: Story = {
 			handlers: [
 				sinceAwareHistoryHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
+				notificationSendersHandler,
 				latestPublishedContentHandler,
 			],
 		},

@@ -12,7 +12,7 @@
 		"test": "bun test",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"test-storybook": "vitest run"
+		"test-storybook": "NODE_OPTIONS='--disable-warning=DEP0205' vitest run"
 	},
 	"dependencies": {
 		"@emotion/react": "11.14.0",
