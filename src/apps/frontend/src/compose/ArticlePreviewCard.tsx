@@ -3,6 +3,7 @@ import type { CapiBlock, ResolvedArticle } from '@models';
 import { useRelativeTime } from '../hooks/useRelativeTime';
 import { articlePreviewCardTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
+import { LiveIndicator } from '../ui/LiveIndicator';
 import { getArticlePresentation } from '../utils/article-presentation';
 import { getPillarColor } from '../utils/pillar-colors';
 
@@ -53,17 +54,7 @@ export const ArticlePreviewCard = ({
 
 				{isLiveblog && (
 					<div css={articlePreviewCardTheme.liveStatus}>
-						<Typography
-							variant="bodyBoldXs"
-							element="span"
-							cssOverrides={articlePreviewCardTheme.liveIndicator}
-						>
-							<span
-								css={articlePreviewCardTheme.liveIndicatorDot}
-								aria-hidden="true"
-							/>
-							Live
-						</Typography>
+						<LiveIndicator />
 						{publishedAt && (
 							<Typography
 								variant="bodyXs"

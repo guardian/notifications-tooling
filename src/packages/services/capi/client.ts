@@ -151,6 +151,7 @@ export const fetchLatestArticles = async ({
 		.flatMap(
 			({
 				id,
+				type,
 				webUrl,
 				webPublicationDate,
 				webTitle,
@@ -167,6 +168,7 @@ export const fetchLatestArticles = async ({
 				return [
 					{
 						id,
+						type,
 						webUrl,
 						publishedAt: webPublicationDate,
 						headline: fields?.headline ?? webTitle,

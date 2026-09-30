@@ -12,7 +12,8 @@ type StoryArgs = ComponentProps<typeof DispatchCreateNotificationModal> & {
 	appConfig: AppConfig;
 };
 
-const selectedContent = mockLatestPublishedContent[1]!;
+const selectedArticle = mockLatestPublishedContent[0]!;
+const selectedLiveblog = mockLatestPublishedContent[1]!;
 
 const meta = {
 	title: 'Dispatch/Compose/DispatchCreateNotificationModal',
@@ -22,7 +23,7 @@ const meta = {
 		appConfig: mockAppConfig,
 		isOpen: true,
 		onOpenChange: fn(),
-		content: selectedContent,
+		content: selectedArticle,
 	},
 	render: ({ appConfig, ...args }) => (
 		<ConfigContext.Provider value={appConfig}>
@@ -43,7 +44,7 @@ export const Default: Story = {
 			}),
 		).toBeVisible();
 		const preview = screen.getByRole('article', {
-			name: `${selectedContent.headline} content`,
+			name: `${selectedArticle.headline} content`,
 		});
 		await expect(preview).toBeVisible();
 		await expect(preview.children).toHaveLength(3);
@@ -52,13 +53,19 @@ export const Default: Story = {
 			throw new Error('Expected preview metadata');
 		}
 		const separatorStyle = getComputedStyle(previewMeta, '::after');
-		await expect(separatorStyle.width).toBe('36px');
-		await expect(separatorStyle.borderTopWidth).toBe('1px');
+		const toRoundedPixels = (styleValue: string) =>
+			Math.round(Number(styleValue.split('px').shift() ?? ''));
+		const widthInPixels = toRoundedPixels(separatorStyle.width);
+		const borderTopWidthInPixels = toRoundedPixels(
+			separatorStyle.borderTopWidth,
+		);
+		await expect(widthInPixels).toEqual(36);
+		await expect(borderTopWidthInPixels).toEqual(1);
 		await expect(separatorStyle.opacity).toBe('1');
 		await expect(separatorStyle.transform).not.toBe('none');
 		await expect(
 			within(preview).getByRole('link', {
-				name: new RegExp(selectedContent.headline),
+				name: new RegExp(selectedArticle.headline),
 			}),
 		).toBeVisible();
 		const appAlertLink = screen.getByRole('link', {
@@ -69,11 +76,11 @@ export const Default: Story = {
 		});
 		await expect(appAlertLink).toHaveAttribute(
 			'href',
-			withArticleUrl('/app-alert/create', selectedContent.url),
+			withArticleUrl('/app-alert/create', selectedArticle.url),
 		);
 		await expect(newsletterLink).toHaveAttribute(
 			'href',
-			withArticleUrl('/newsletter-email/create', selectedContent.url),
+			withArticleUrl('/newsletter-email/create', selectedArticle.url),
 		);
 		const previewWidth = preview.getBoundingClientRect().width;
 		await expect(appAlertLink.getBoundingClientRect().width).toBeCloseTo(
@@ -87,5 +94,11 @@ export const Default: Story = {
 
 		await userEvent.click(screen.getByRole('button', { name: 'Close Modal' }));
 		await expect(args.onOpenChange).toHaveBeenCalledWith(false);
+	},
+};
+
+export const ForLiveblog: Story = {
+	args: {
+		content: selectedLiveblog,
 	},
 };

@@ -190,21 +190,6 @@ export const articlePreviewCardTheme = {
 		alignItems: 'center',
 		gap: semanticSpacing.stackXs,
 	}),
-	liveIndicator: css({
-		display: 'flex',
-		alignItems: 'center',
-		gap: semanticSpacing.stackXxs,
-		padding: `${baseSpacing['2Px']} ${baseSpacing['6Px']}`,
-		color: semanticColors.text.strongerInverse,
-		backgroundColor: semanticColors.text.error,
-		textTransform: 'uppercase',
-	}),
-	liveIndicatorDot: css({
-		width: '8px',
-		height: '8px',
-		borderRadius: '50%',
-		backgroundColor: semanticColors.text.strongerInverse,
-	}),
 	liveblogBlockId: css({
 		fontSize: '12px',
 		fontWeight: 700,
@@ -411,6 +396,7 @@ export const dispatchTileModalStyles = {
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'center',
+		alignItems: 'flex-start',
 		gap: '2px',
 		padding: '8px',
 		'&::after': {
@@ -802,6 +788,17 @@ export const latestPublishedContentTheme = {
 		gap: semanticSpacing.stackXxs,
 		[expandedLatestContentQuery]: {
 			minWidth: 0,
+		},
+	}),
+	cardTitleAndLive: css({
+		display: 'flex',
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		[expandedLatestContentQuery]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: semanticSpacing.stackXxs,
 		},
 	}),
 	sectionLabel: (color: string) =>
