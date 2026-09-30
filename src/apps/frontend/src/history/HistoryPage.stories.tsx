@@ -8,7 +8,10 @@ import type {
 	NotificationResource,
 } from '../schemas';
 import { articleFixture } from '../testing/capi-fixtures';
-import { channelAudiencesHandler } from '../testing/handlers/channels';
+import {
+	channelAudiencesHandler,
+	channelConstraintsHandler,
+} from '../testing/handlers/channels';
 import {
 	notificationSenders,
 	notificationSendersHandler,
@@ -330,6 +333,7 @@ const meta = {
 				historyHandler,
 				failureDetailHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -346,6 +350,7 @@ export const Loaded: Story = {
 				historyHandler,
 				failureDetailHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -646,6 +651,7 @@ export const SenderFilterCutoff: Story = {
 				historyHandler,
 				failureDetailHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -787,6 +793,7 @@ export const InvalidSearch: Story = {
 				notificationSendersHandler,
 				emptyHistoryHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -916,6 +923,7 @@ export const Loading: Story = {
 				notificationSendersHandler,
 				loadingHistoryHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -937,6 +945,7 @@ export const Error: Story = {
 				notificationSendersHandler,
 				failedHistoryHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
