@@ -453,6 +453,7 @@ export const dispatchLandingTheme = {
 	}),
 	infoButton: css({
 		fontWeight: 'normal',
+		gap: baseSpacing['4Px'],
 	}),
 	latestContentRail: css({
 		gridArea: 'latest',

@@ -1,4 +1,6 @@
 import { css } from '@emotion/react';
+import { baseSpacing } from '@guardian/stand';
+import { Icon } from '@guardian/stand/Icon';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
 import {
@@ -12,6 +14,12 @@ export const DISPATCH_INFORMATION_MODAL_TITLE =
 
 const tileStyles = css({
 	width: '100%',
+});
+
+const tileLabelStyles = css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: baseSpacing['6Px'],
 });
 
 interface DispatchInformationModalProps {
@@ -38,21 +46,27 @@ export const DispatchInformationModal = ({
 						href={DISPATCH_RUNBOOK_URL}
 						target="_blank"
 						rel="noopener noreferrer"
-						icon="library_books"
+						icon=""
 						typography="headingMd"
 						cssOverrides={tileStyles}
 					>
-						View Dispatch runbook
+						<span css={tileLabelStyles}>
+							<Icon size="sm" symbol="library_books" />
+							View Dispatch runbook
+						</span>
 					</Tile>
 					<Tile
 						size="sm"
 						href={CENTRAL_PRODUCTION_CONTACT_HREF}
-						icon="info"
+						icon=""
 						typography="headingMd"
 						target="_blank"
 						cssOverrides={tileStyles}
 					>
-						Contact Central Production
+						<span css={tileLabelStyles}>
+							<Icon size="sm" symbol="info" />
+							Contact Central Production
+						</span>
 					</Tile>
 				</div>
 			</Dialog.Content>
