@@ -2,13 +2,11 @@ import { Icon } from '@guardian/stand/Icon';
 import {
 	appAlertTopicEditionId,
 	type AppAlertTopicOption,
-	toApiEditionId,
 	toDisplayEditionId,
 } from '@models';
 import { FlagAtom } from '../ui/FlagAtom';
 import { PreviewPillList } from '../ui/PreviewPillList';
 import { FALLBACK_TOPIC_TYPES } from './audience-fallbacks';
-import { EDITION_OPTIONS } from './edition-options';
 
 export interface AppAlertTopicSelection {
 	type: string;
@@ -25,15 +23,11 @@ interface EditionsProps {
 const selectionId = ({ type, name }: AppAlertTopicSelection) =>
 	`${!type ? FALLBACK_TOPIC_TYPES[0].id : type}:${name}`;
 
-const editionLabels = Object.fromEntries(
-	EDITION_OPTIONS.map(({ code, label }) => [toApiEditionId(code), label]),
-);
-
 export const Editions = ({ topicTypes, selected }: EditionsProps) => {
 	const options = topicTypes.flatMap((topicType) =>
 		topicType.editions.map((edition) => ({
 			id: selectionId({ type: topicType.id, name: edition.id }),
-			label: editionLabels[edition.id] ?? edition.label,
+			label: edition.label,
 		})),
 	);
 	const selectedIds = selected.map(selectionId);

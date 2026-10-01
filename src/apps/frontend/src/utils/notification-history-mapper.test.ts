@@ -81,7 +81,7 @@ describe('mapNotificationToHistoryNotification', () => {
 			channel: 'newsletter',
 			alertType: 'Breaking news',
 			sentBy: 'joshua.anderson@guardian.co.uk',
-			sentTo: ['AU'],
+			sentTo: [{ id: 'AU', label: 'Australia' }],
 			sentAt: '2026-08-26T14:52:16.143Z',
 			status: 'Sent',
 		});
@@ -116,7 +116,9 @@ describe('mapNotificationToHistoryNotification', () => {
 			},
 		});
 
-		expect(notification?.sentTo).toEqual(['UK']);
+		expect(notification?.sentTo).toEqual([
+			{ id: 'UK', label: 'United Kingdom' },
+		]);
 	});
 
 	it('uses a generic newsletter label when the subject has no known kicker', () => {
@@ -188,7 +190,10 @@ describe('mapNotificationToHistoryNotification', () => {
 			channel: 'app-push',
 			alertType: 'Sports news',
 			thumbnailUrl: 'https://media.guim.co.uk/thumb.jpg',
-			sentTo: ['INT', 'EU'],
+			sentTo: [
+				{ id: 'INT', label: 'International' },
+				{ id: 'EU', label: 'Europe' },
+			],
 			status: 'Partially sent',
 		});
 	});

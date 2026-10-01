@@ -35,17 +35,17 @@ const newsletterSegmentsByStage: Record<
 	},
 	PROD: {
 		UK: {
-			label: 'UK',
+			label: 'United Kingdom',
 			brazeCampaignId: '4105446f-678c-4faf-98e3-7a91bdaa27f4',
 			emailRenderingNewsletterId: 'breaking-news-uk',
 		},
 		US: {
-			label: 'US',
+			label: 'United States',
 			brazeCampaignId: '93b0c12d-8c7e-43be-b3b5-88a149ba511f',
 			emailRenderingNewsletterId: 'breaking-news-us',
 		},
 		AU: {
-			label: 'AU',
+			label: 'Australia',
 			brazeCampaignId: '149aa55d-570a-40a5-82d4-8f44a713ad58',
 			emailRenderingNewsletterId: 'breaking-news-australia',
 		},
@@ -109,15 +109,15 @@ const codeAppPushTopicTypes = {
 		importance: AppPushImportance.Major,
 		editions: {
 			uk: {
-				label: 'UK',
+				label: 'United Kingdom',
 				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
 			},
 			us: {
-				label: 'US',
+				label: 'United States',
 				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
 			},
 			au: {
-				label: 'AU',
+				label: 'Australia',
 				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
 			},
 			international: {
@@ -138,17 +138,17 @@ const codeAppPushTopicTypes = {
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
-				label: 'UK',
+				label: 'United Kingdom',
 				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
 				titleOverride: 'Sport news',
 			},
 			us: {
-				label: 'US',
+				label: 'United States',
 				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
 				titleOverride: 'Sports news',
 			},
 			au: {
-				label: 'AU',
+				label: 'Australia',
 				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
 				titleOverride: 'Sport news',
 			},
@@ -175,21 +175,21 @@ const codeAppPushTopicTypes = {
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
-				label: 'UK',
+				label: 'United Kingdom',
 				mobileN10nTopic: {
 					type: 'breaking',
 					name: 'internal-dispatch-test',
 				},
 			},
 			us: {
-				label: 'US',
+				label: 'United States',
 				mobileN10nTopic: {
 					type: 'breaking',
 					name: 'internal-dispatch-test',
 				},
 			},
 			au: {
-				label: 'AU',
+				label: 'Australia',
 				mobileN10nTopic: {
 					type: 'breaking',
 					name: 'internal-dispatch-test',
@@ -216,21 +216,21 @@ const codeAppPushTopicTypes = {
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
-				label: 'UK',
+				label: 'United Kingdom',
 				mobileN10nTopic: {
 					type: 'breaking',
 					name: 'internal-dispatch-test',
 				},
 			},
 			us: {
-				label: 'US',
+				label: 'United States',
 				mobileN10nTopic: {
 					type: 'breaking',
 					name: 'internal-dispatch-test',
 				},
 			},
 			au: {
-				label: 'AU',
+				label: 'Australia',
 				mobileN10nTopic: {
 					type: 'breaking',
 					name: 'internal-dispatch-test',
@@ -263,9 +263,18 @@ const prodAppPushTopicTypes = {
 		label: 'Breaking news',
 		importance: AppPushImportance.Major,
 		editions: {
-			uk: { label: 'UK', mobileN10nTopic: { type: 'breaking', name: 'uk' } },
-			us: { label: 'US', mobileN10nTopic: { type: 'breaking', name: 'us' } },
-			au: { label: 'AU', mobileN10nTopic: { type: 'breaking', name: 'au' } },
+			uk: {
+				label: 'United Kingdom',
+				mobileN10nTopic: { type: 'breaking', name: 'uk' },
+			},
+			us: {
+				label: 'United States',
+				mobileN10nTopic: { type: 'breaking', name: 'us' },
+			},
+			au: {
+				label: 'Australia',
+				mobileN10nTopic: { type: 'breaking', name: 'au' },
+			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: { type: 'breaking', name: 'international' },
@@ -281,17 +290,17 @@ const prodAppPushTopicTypes = {
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
-				label: 'UK',
+				label: 'United Kingdom',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
 				titleOverride: 'Sport news',
 			},
 			us: {
-				label: 'US',
+				label: 'United States',
 				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
 				titleOverride: 'Sports news',
 			},
 			au: {
-				label: 'AU',
+				label: 'Australia',
 				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
 				titleOverride: 'Sport news',
 			},
@@ -312,15 +321,15 @@ const prodAppPushTopicTypes = {
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
-				label: 'UK',
+				label: 'United Kingdom',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-editors-picks' },
 			},
 			us: {
-				label: 'US',
+				label: 'United States',
 				mobileN10nTopic: { type: 'breaking', name: 'us-editors-picks' },
 			},
 			au: {
-				label: 'AU',
+				label: 'Australia',
 				mobileN10nTopic: { type: 'breaking', name: 'au-editors-picks' },
 			},
 			international: {
@@ -341,15 +350,15 @@ const prodAppPushTopicTypes = {
 		importance: AppPushImportance.Minor,
 		editions: {
 			uk: {
-				label: 'UK',
+				label: 'United Kingdom',
 				mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
 			},
 			us: {
-				label: 'US',
+				label: 'United States',
 				mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
 			},
 			au: {
-				label: 'AU',
+				label: 'Australia',
 				mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
 			},
 			international: {

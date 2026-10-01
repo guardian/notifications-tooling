@@ -20,9 +20,11 @@ import {
 	notificationRoutes,
 	withArticleUrl,
 } from '../routes';
-import { EDITION_OPTIONS } from '../segment/edition-options';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
-import { useNewsletterEmailSegmentOptions } from '../segment/useAudienceEditions';
+import {
+	useNewsletterEmailSegmentOptions,
+	useTopicEditionOptions,
+} from '../segment/useAudienceEditions';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import { layoutMainTheme } from '../themes';
 import type { ChannelOption } from '../types';
@@ -223,6 +225,7 @@ export const AppAlertDispatchDetails = () => {
 		name: 'includeThumbnail',
 		defaultValue: defaultAppAlertFormValues.includeThumbnail,
 	});
+	const editionOptions = useTopicEditionOptions(alertType);
 
 	return (
 		<section>
@@ -243,7 +246,7 @@ export const AppAlertDispatchDetails = () => {
 			<ParameterLabel label="Editions">
 				<FlagPreviewPill
 					title="Editions"
-					options={EDITION_OPTIONS}
+					options={editionOptions}
 					selected={editions}
 					muted
 					showTitle={false}

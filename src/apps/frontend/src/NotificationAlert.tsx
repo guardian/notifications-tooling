@@ -3,30 +3,24 @@ import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Avatar } from '@guardian/stand/Avatar';
 import { Link } from '@guardian/stand/Link';
 import { toastQueue, ToastRegion } from '@guardian/stand/Toast';
-import type { DisplayAppAlertTopicEditionId } from '@models';
 import { useContext, useEffect, useRef } from 'react';
 import { ConfigContext } from './config/ConfigContext';
 import type { HistoryNotification } from './history/HistoryView';
 import { useNotificationHistory } from './hooks/useNotificationHistory';
 import type { NotificationSummary } from './schemas';
+import { useChannelAudiences } from './segment/useChannelAudiences';
 import { FlagAtom } from './ui/FlagAtom';
 import { darkTooltipTheme, Tooltip } from './ui/Tooltip';
 import {
 	getSenderDisplayName,
-	mapNotificationToHistoryNotification,
-} from './utils/notification-history-mapper';
+	getSenderInitials,
+} from './utils/display-text-helpers';
+import { mapNotificationToHistoryNotification } from './utils/notification-history-mapper';
 
 const channelLabel = {
 	'app-push': 'an app alert',
 	newsletter: 'a newsletter email',
 } as const;
-const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
-	UK: 'United Kingdom',
-	US: 'United States',
-	AU: 'Australia',
-	EU: 'Europe',
-	INT: 'International',
-};
 
 const toastLinkStyles = css({
 	display: 'block',
@@ -85,13 +79,6 @@ const toastTheme = {
 } as const;
 const toastTimeout = 10_000;
 const normalizeEmail = (email?: string) => email?.trim().toLowerCase();
-const getSenderInitials = (email: string) =>
-	getSenderDisplayName(email)
-		.split(' ')
-		.map((name) => name[0])
-		.join('')
-		.slice(0, 2)
-		.toUpperCase();
 
 const isAlertableSend = (
 	notification: NotificationSummary,
@@ -134,14 +121,14 @@ const enqueueNotificationToast = (notification: HistoryNotification) => {
 				<span css={toastAdditionalInfoStyles}>
 					<span css={toastAudienceStyles}>
 						<span>Sent to</span>
-						{notification.sentTo.map((edition) => (
+						{notification.sentTo.map(({ id, label }) => (
 							<span
-								key={edition}
-								aria-label={editionNames[edition]}
+								key={id}
+								aria-label={label}
 								role="img"
 								css={toastFlagStyles}
 							>
-								<FlagAtom segmentCode={edition} />
+								<FlagAtom segmentCode={id} />
 							</span>
 						))}
 					</span>
@@ -167,9 +154,11 @@ export const NotificationAlert = () => {
 	const config = useContext(ConfigContext);
 	const seenNotificationIds = useRef<Set<string> | undefined>(undefined);
 	const notificationHistory = useNotificationHistory({ limit: 10, offset: 0 });
+	const channelAudiences = useChannelAudiences();
 
 	useEffect(() => {
 		if (
+			channelAudiences.isPending ||
 			notificationHistory.data === undefined ||
 			notificationHistory.isPlaceholderData
 		) {
@@ -190,8 +179,10 @@ export const NotificationAlert = () => {
 
 		seenNotificationIds.current = currentIds;
 		for (const newNotification of newNotifications) {
-			const notification =
-				mapNotificationToHistoryNotification(newNotification);
+			const notification = mapNotificationToHistoryNotification(
+				newNotification,
+				channelAudiences.data,
+			);
 			if (!notification) {
 				continue;
 			}
@@ -199,6 +190,8 @@ export const NotificationAlert = () => {
 			enqueueNotificationToast(notification);
 		}
 	}, [
+		channelAudiences.data,
+		channelAudiences.isPending,
 		config?.user.email,
 		notificationHistory.data,
 		notificationHistory.dataUpdatedAt,
