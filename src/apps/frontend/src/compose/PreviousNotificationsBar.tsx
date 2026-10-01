@@ -8,6 +8,7 @@ import { type NotificationChannelId, notificationChannelNames } from '@models';
 import { useState } from 'react';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';
+import { FlagAtom } from '../ui/FlagAtom';
 import { darkTooltipTheme, Tooltip } from '../ui/Tooltip';
 import {
 	getSenderDisplayName,
@@ -15,6 +16,7 @@ import {
 } from '../utils/display-text-helpers';
 import type { LocalSendTimeRegion } from '../utils/history-send-time';
 import { formatLocalSendDateTimes } from '../utils/history-send-time';
+import { parseAudience } from '../utils/parse-notification-audience';
 
 interface Props {
 	articleId?: string;
@@ -53,20 +55,37 @@ const style = {
 		height: '1.5rem',
 		fontSize: '8px',
 	}),
-	detailTable: css({
-		thead: {
-			visibility: 'collapse',
-		},
-		td: {
-			paddingLeft: semanticSpacing.stackXxs,
-			paddingRight: semanticSpacing.stackXxs,
-			paddingBottom: 2,
-		},
-		'td:first-child': {
-			paddingLeft: 0,
-		},
-		'td:last-child': {
-			paddingRight: 0,
+	nameList: css({
+		listStyle: 'none',
+	}),
+	sendDetails: css({
+		marginLeft: 'auto',
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
+	}),
+	sendDetailsList: css({
+		listStyle: 'none',
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackXs,
+	}),
+	sendDetailsItem: css({
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'flex-start',
+		gap: semanticSpacing.stackXxs,
+	}),
+	audienceIcons: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
+
+		// need enough specificity to override the styling applied to the svg in
+		// tooltip arrow
+		'.no-rotate>svg': {
+			transform: 'none',
+			width: 20,
 		},
 	}),
 };
@@ -151,7 +170,7 @@ const AvatarsWithTooltip = ({
 				padding: semanticSpacing.stackSm,
 			})}
 		>
-			<ul css={{ listStyle: 'none' }}>
+			<ul css={style.nameList}>
 				{sentNotifications.map((send) => (
 					<li key={send.id}>{getSenderDisplayName(send.createdByEmail)}</li>
 				))}
@@ -170,73 +189,6 @@ const formatTime = (
 			?.time.split(', ')
 			.toReversed()
 			.join(' ') ?? input
-	);
-};
-
-const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
-	return (
-		<div
-			css={{
-				marginLeft: 'auto',
-				display: 'flex',
-				alignItems: 'center',
-				gap: semanticSpacing.stackXxs,
-			}}
-		>
-			{sends.length === 1 ? (
-				<>
-					{sends.map((send) => (
-						<Typography
-							key={send.id}
-							variant="bodySm"
-							color={semanticColors.text.weak}
-						>
-							[{formatTime(send.createdAt)}]
-						</Typography>
-					))}
-				</>
-			) : (
-				<div
-					css={{
-						marginLeft: 'auto',
-						display: 'flex',
-						alignItems: 'center',
-						gap: semanticSpacing.stackXxs,
-					}}
-				>
-					<Typography variant="bodySm" color={semanticColors.text.weak}>
-						Timestamp
-					</Typography>
-					<Tooltip
-						theme={darkTooltipTheme}
-						label="send times"
-						cssOverrides={css({
-							maxWidth: 'unset',
-							color: semanticColors.text.weak,
-						})}
-					>
-						<table css={style.detailTable}>
-							<thead>
-								<tr>
-									<th>sender</th>
-									<th>channel</th>
-									<th>send time</th>
-								</tr>
-							</thead>
-							<tbody>
-								{sends.map((send) => (
-									<tr key={send.id}>
-										<td>{getSenderDisplayName(send.createdByEmail)}</td>
-										<td>{notificationChannelNames[getChannel(send)]}</td>
-										<td>{formatTime(send.createdAt)}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</Tooltip>
-				</div>
-			)}
-		</div>
 	);
 };
 
@@ -280,11 +232,55 @@ export const PreviousNotificationsBar = ({
 
 	const description = getChannelDescriptionForSet(sentNotifications);
 
+	const getSendText = (send: NotificationSummary) =>
+		sentNotifications.length > 1
+			? [
+					getSenderDisplayName(send.createdByEmail),
+					notificationChannelNames[getChannel(send)],
+					formatTime(send.createdAt),
+				].join(', ')
+			: [
+					notificationChannelNames[getChannel(send)],
+					formatTime(send.createdAt),
+				].join(', ');
+
 	return (
 		<div css={style.bar}>
 			<AvatarsWithTooltip sentNotifications={sentNotifications} />
 			<Typography variant="bodySm">Sent {description} with this URL</Typography>
-			<SendingDetails sends={sentNotifications} />
+			<div css={style.sendDetails}>
+				<Typography variant="bodySm" color={semanticColors.text.weak}>
+					Send info
+				</Typography>
+				<Tooltip
+					theme={darkTooltipTheme}
+					label="send times"
+					cssOverrides={css({
+						maxWidth: 'unset',
+						color: semanticColors.text.weak,
+						padding: semanticSpacing.stackSm,
+					})}
+				>
+					<ul css={style.sendDetailsList}>
+						{sentNotifications.map((send) => (
+							<li css={style.sendDetailsItem} key={send.id}>
+								<span>{getSendText(send)}</span>
+								<div css={style.audienceIcons}>
+									{parseAudience(send).map((audienceId) => (
+										<span
+											className="no-rotate"
+											key={audienceId}
+											title={audienceId}
+										>
+											<FlagAtom segmentCode={audienceId} />
+										</span>
+									))}
+								</div>
+							</li>
+						))}
+					</ul>
+				</Tooltip>
+			</div>
 			<IconButton
 				onClick={() => setDismissedFor(articleId)}
 				ariaLabel="dismiss"

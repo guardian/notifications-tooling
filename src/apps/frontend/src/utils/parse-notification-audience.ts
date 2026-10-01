@@ -1,5 +1,14 @@
 import z from 'zod';
-import { NotificationChannel } from '../../../../packages/models';
+import type {
+	DisplayAppAlertTopicEditionId,
+	NewsletterSegmentId,
+} from '../../../../packages/models';
+import {
+	appAlertTopicEditionId,
+	newsletterSegmentId,
+	NotificationChannel,
+	toDisplayEditionId,
+} from '../../../../packages/models';
 import type { NotificationSummary } from '../schemas';
 
 const appAudienceJsonData = z.looseObject({
@@ -23,8 +32,11 @@ const newsletterAudienceJsonData = z.looseObject({
 	}),
 });
 
-export const parseAudience = (send: NotificationSummary): string[] => {
-	const audiences: string[] = [];
+export const parseAudience = (
+	send: NotificationSummary,
+): Array<NewsletterSegmentId | DisplayAppAlertTopicEditionId> => {
+	const audiences: Array<NewsletterSegmentId | DisplayAppAlertTopicEditionId> =
+		[];
 	Object.entries(send.channels).flatMap(([channelId, data]) => {
 		if (
 			(channelId as NotificationChannel) ===
@@ -33,7 +45,14 @@ export const parseAudience = (send: NotificationSummary): string[] => {
 			const parseResult = appAudienceJsonData.safeParse(data);
 			if (parseResult.success) {
 				audiences.push(
-					...parseResult.data.audience.items.map((item) => item.name),
+					...parseResult.data.audience.items
+						.map((item) => item.name)
+						.flatMap((name) => {
+							const parsedName = appAlertTopicEditionId.safeParse(name);
+							return parsedName.success
+								? toDisplayEditionId(parsedName.data)
+								: [];
+						}),
 				);
 			}
 		}
@@ -41,10 +60,14 @@ export const parseAudience = (send: NotificationSummary): string[] => {
 		if ((channelId as NotificationChannel) == NotificationChannel.Newsletter) {
 			const parseResult = newsletterAudienceJsonData.safeParse(data);
 			if (parseResult.success) {
-				audiences.push(...parseResult.data.audience.items);
+				audiences.push(
+					...parseResult.data.audience.items.flatMap((name) => {
+						const parsedName = newsletterSegmentId.safeParse(name);
+						return parsedName.success ? parsedName.data : [];
+					}),
+				);
 			}
 		}
 	});
-
-	return audiences;
+	return Array.from(new Set(audiences));
 };
