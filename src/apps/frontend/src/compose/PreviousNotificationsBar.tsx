@@ -4,12 +4,7 @@ import { Avatar } from '@guardian/stand/Avatar';
 import { IconButton } from '@guardian/stand/IconButton';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
-import {
-	channelAudienceResponseSchema,
-	NotificationChannel,
-	type NotificationChannelId,
-	notificationChannelNames,
-} from '@models';
+import { type NotificationChannelId, notificationChannelNames } from '@models';
 import { useState } from 'react';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';
@@ -17,7 +12,7 @@ import { darkTooltipTheme, Tooltip } from '../ui/Tooltip';
 import { capitalise } from '../utils/display-text-helpers';
 import type { LocalSendTimeRegion } from '../utils/history-send-time';
 import { formatLocalSendDateTimes } from '../utils/history-send-time';
-import z from 'zod';
+import { parseAudience } from '../utils/parse-notification-audience';
 
 interface Props {
 	articleId?: string;
@@ -176,53 +171,6 @@ const formatTime = (
 			.toReversed()
 			.join(' ') ?? input
 	);
-};
-
-const appAudienceJsonData = z.looseObject({
-	compose: z.record(z.string(), z.unknown()),
-	audience: z.looseObject({
-		type: z.string(),
-		items: z
-			.looseObject({
-				name: z.string(),
-				type: z.string(),
-			})
-			.array(),
-	}),
-});
-
-const newsletterAudienceJsonData = z.looseObject({
-	compose: z.record(z.string(), z.unknown()),
-	audience: z.looseObject({
-		type: z.string(),
-		items: z.string().array(),
-	}),
-});
-
-const parseAudience = (send: NotificationSummary): string[] => {
-	const audiences: string[] = [];
-	Object.entries(send.channels).flatMap(([channelId, data]) => {
-		if (
-			(channelId as NotificationChannel) ===
-			NotificationChannel.AppPushNotification
-		) {
-			const parseResult = appAudienceJsonData.safeParse(data);
-			if (parseResult.success) {
-				audiences.push(
-					...parseResult.data.audience.items.map((item) => item.name),
-				);
-			}
-		}
-
-		if ((channelId as NotificationChannel) == NotificationChannel.Newsletter) {
-			const parseResult = newsletterAudienceJsonData.safeParse(data);
-			if (parseResult.success) {
-				audiences.push(...parseResult.data.audience.items);
-			}
-		}
-	});
-
-	return audiences;
 };
 
 const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
