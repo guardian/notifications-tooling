@@ -14,7 +14,7 @@ import type { AppAlertFormValues } from './notification-forms';
 describe('notification request builders', () => {
 	const liveBlogMainImageAssetUrl = liveblogFixture.blocks?.main?.elements
 		?.at(0)
-		?.assets?.at(0)?.file;
+		?.assets?.at(1)?.file;
 
 	it.each([
 		['breaking-news', 'Breaking news: Edited subject'],
