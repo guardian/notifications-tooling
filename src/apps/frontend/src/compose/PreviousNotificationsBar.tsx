@@ -177,9 +177,8 @@ const SenderAvatars = ({ sends }: { sends: NotificationSummary[] }) => {
 
 const formatTime = (input: string): string => {
 	const sentAt = new Date(input);
-	return Number.isNaN(sentAt.getTime())
-		? input
-		: `${formatAbsoluteTime(sentAt)} UK`;
+	
+	return Number.isNaN(sentAt.getTime()) ? input : formatAbsoluteTime(sentAt);
 };
 
 const SendDetails = ({
