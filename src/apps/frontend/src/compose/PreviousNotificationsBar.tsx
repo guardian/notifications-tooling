@@ -9,7 +9,10 @@ import { useState } from 'react';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';
 import { darkTooltipTheme, Tooltip } from '../ui/Tooltip';
-import { capitalise } from '../utils/display-text-helpers';
+import {
+	getSenderDisplayName,
+	getSenderInitials,
+} from '../utils/display-text-helpers';
 import type { LocalSendTimeRegion } from '../utils/history-send-time';
 import { formatLocalSendDateTimes } from '../utils/history-send-time';
 
@@ -68,17 +71,6 @@ const style = {
 	}),
 };
 
-const emailToIntials = (sentBy: string): string => {
-	const names = sentBy.split('@').at(0)?.split('.') ?? [];
-	const [firstName, lastName] = names;
-	return `${firstName?.at(0) ?? ''}${lastName?.at(0) ?? ''}`;
-};
-
-const emailToName = (sentBy: string): string => {
-	const names = sentBy.split('@').at(0)?.split('.') ?? [];
-	return names.map(capitalise).join(' ');
-};
-
 const getChannel = (send: NotificationSummary): NotificationChannelId => {
 	const keys = Object.keys(send.channels);
 
@@ -106,12 +98,12 @@ const SenderAvatar = ({ send }: { send: NotificationSummary }) => {
 	return (
 		<div css={style.avatarWrapper}>
 			<Tooltip
-				label={emailToName(send.createdByEmail)}
+				label={getSenderDisplayName(send.createdByEmail)}
 				trigger={
 					<Avatar
 						cssOverrides={style.avatarOverrides}
 						size="sm"
-						initials={emailToIntials(send.createdByEmail)}
+						initials={getSenderInitials(send.createdByEmail)}
 					/>
 				}
 				theme={darkTooltipTheme}
@@ -119,7 +111,7 @@ const SenderAvatar = ({ send }: { send: NotificationSummary }) => {
 					padding: semanticSpacing.stackSm,
 				})}
 			>
-				{emailToName(send.createdByEmail)}
+				{getSenderDisplayName(send.createdByEmail)}
 			</Tooltip>
 		</div>
 	);
@@ -151,7 +143,7 @@ const CombinedAvatar = ({ sends }: { sends: NotificationSummary[] }) => {
 			>
 				<ul css={{ listStyle: 'none' }}>
 					{sends.map((send) => (
-						<li key={send.id}>{emailToName(send.createdByEmail)}</li>
+						<li key={send.id}>{getSenderDisplayName(send.createdByEmail)}</li>
 					))}
 				</ul>
 			</Tooltip>
@@ -218,7 +210,7 @@ const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
 							<tbody>
 								{sends.map((send) => (
 									<tr key={send.id}>
-										<td>{emailToName(send.createdByEmail)}</td>
+										<td>{getSenderDisplayName(send.createdByEmail)}</td>
 										<td>{notificationChannelNames[getChannel(send)]}</td>
 										<td>{formatTime(send.createdAt)}</td>
 									</tr>

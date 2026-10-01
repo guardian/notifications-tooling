@@ -222,10 +222,10 @@ export const PartialMobileNotificationServiceFailure: Story = {
 			await screen.findByText('The app alert had partial delivery issues'),
 		).toBeVisible();
 		await expect(
-			screen.getByText('Accepted for delivery to: UK'),
+			screen.getByText('Accepted for delivery to: United Kingdom'),
 		).toBeVisible();
 		await expect(
-			screen.getByText('Delivery not confirmed for: US'),
+			screen.getByText('Delivery not confirmed for: United States'),
 		).toBeVisible();
 		await expect(
 			screen.getByText('Reference: push-partial-1234'),

@@ -10,11 +10,13 @@ import {
 } from './hooks/useNotificationHistory';
 import { NotificationAlert } from './NotificationAlert';
 import type { NotificationListResponse, NotificationSummary } from './schemas';
+import { channelAudiencesQueryKey } from './segment/useChannelAudiences';
 import {
 	appPushSendBeyondBradford,
 	newsletterSendBeyondBradford,
 } from './testing/api-fixtures';
 import { mockAppConfig } from './testing/app-config';
+import { channelAudiences } from './testing/handlers/channels';
 
 const historyQuery: NotificationHistoryQuery = { limit: 10, offset: 0 };
 const historyQueryKey = getNotificationHistoryQueryKey(historyQuery);
@@ -44,7 +46,10 @@ const acceptedAppPush: NotificationSummary = {
 
 const NotificationAlertExample = () => {
 	const queryClient = useQueryClient();
-	useState(() => queryClient.setQueryData(historyQueryKey, emptyHistory));
+	useState(() => {
+		queryClient.setQueryData(channelAudiencesQueryKey, channelAudiences);
+		queryClient.setQueryData(historyQueryKey, emptyHistory);
+	});
 
 	return (
 		<>
@@ -71,13 +76,14 @@ const NotificationAlertExample = () => {
 
 const AcceptedNotificationExample = () => {
 	const queryClient = useQueryClient();
-	useState(() =>
+	useState(() => {
+		queryClient.setQueryData(channelAudiencesQueryKey, channelAudiences);
 		queryClient.setQueryData<NotificationListResponse>(historyQueryKey, {
 			...emptyHistory,
 			total: 1,
 			notifications: [acceptedAppPush],
-		}),
-	);
+		});
+	});
 
 	return (
 		<>
