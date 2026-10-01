@@ -7,6 +7,7 @@ import {
 import { z } from 'zod';
 import type { HistoryNotification } from '../history/HistoryView';
 import type { ChannelAudienceResponse, NotificationSummary } from '../schemas';
+import { getAudienceEditionLabel } from './audience-edition-label';
 
 const contentItemSchema = z.object({
 	title: z.string(),
@@ -82,18 +83,6 @@ const getNewsletterEmailAlertType = (subjectLine: string): string => {
 	return kicker ?? 'Newsletter';
 };
 
-export const getSenderDisplayName = (createdByEmail: string): string => {
-	const [senderName] = createdByEmail.split('@');
-	const names = senderName?.split(/[._-]+/).filter(Boolean) ?? [];
-	if (names.length === 0) {
-		return createdByEmail;
-	}
-
-	return names
-		.map((name) => `${name[0]?.toUpperCase()}${name.slice(1).toLowerCase()}`)
-		.join(' ');
-};
-
 export const mapNotificationToHistoryNotification = (
 	notification: NotificationSummary,
 	audiences?: ChannelAudienceResponse,
@@ -123,7 +112,7 @@ export const mapNotificationToHistoryNotification = (
 	}
 
 	const appAlertAudience = appAlertPlan?.audience.items ?? [];
-	const sentTo = newsletterEmailPlan
+	const sentToIds = newsletterEmailPlan
 		? newsletterEmailPlan.audience.type === 'segment'
 			? newsletterEmailPlan.audience.items
 			: (newsletterEmailPlan.variants ?? [])
@@ -139,6 +128,15 @@ export const mapNotificationToHistoryNotification = (
 				({ id }) => id === topicTypeId,
 			)?.label ?? topicTypeId)
 		: getNewsletterEmailAlertType(newsletterEmailPlan?.compose.subject ?? '');
+	const sentTo = sentToIds.map((edition) => ({
+		id: edition,
+		label: getAudienceEditionLabel({
+			audiences,
+			channel,
+			edition,
+			topicTypeId,
+		}),
+	}));
 
 	return {
 		id: notification.id,

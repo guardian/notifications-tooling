@@ -49,12 +49,21 @@ export const channelConstraintsFailureHandler = http.get(
 	() => HttpResponse.json({ error: 'internal_error' }, { status: 500 }),
 );
 
+const appPushEditions = [
+	{ id: 'uk', label: 'United Kingdom' },
+	{ id: 'us', label: 'United States' },
+	{ id: 'au', label: 'Australia' },
+	{ id: 'international', label: 'International' },
+	{ id: 'europe', label: 'Europe' },
+];
+
 export const channelAudiences: ChannelAudienceResponse = {
 	channels: {
 		newsletter: {
 			segments: [
 				{ id: 'UK', label: 'United Kingdom' },
 				{ id: 'US', label: 'United States' },
+				{ id: 'AU', label: 'Australia' },
 			],
 		},
 		'app-push': {
@@ -62,18 +71,12 @@ export const channelAudiences: ChannelAudienceResponse = {
 				{
 					id: 'breaking-news',
 					label: 'Breaking news',
-					editions: [
-						{ id: 'uk', label: 'UK' },
-						{ id: 'us', label: 'US' },
-					],
+					editions: appPushEditions,
 				},
 				{
 					id: 'sport',
 					label: 'Sports news',
-					editions: [
-						{ id: 'uk', label: 'UK' },
-						{ id: 'us', label: 'US' },
-					],
+					editions: appPushEditions,
 				},
 			],
 		},

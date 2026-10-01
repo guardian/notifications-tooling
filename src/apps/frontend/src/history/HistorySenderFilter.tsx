@@ -6,12 +6,12 @@ import { Typography } from '@guardian/stand/Typography';
 import { useSearchParams } from 'react-router-dom';
 import { useNotificationSenders } from '../hooks/useNotificationSenders';
 import { historyViewStyles } from '../themes';
+import { getSenderDisplayName } from '../utils/display-text-helpers';
 import {
 	parseHistorySearchParams,
 	resolveHistoryFilterSelection,
 	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
-import { getSenderDisplayName } from '../utils/notification-history-mapper';
 
 export const HistorySenderFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();

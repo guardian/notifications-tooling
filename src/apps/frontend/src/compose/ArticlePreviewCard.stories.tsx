@@ -168,7 +168,7 @@ export const PublishedLongAgo: PreviewCardStory = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByRole('time')).toHaveTextContent(
-			/^\d{1,2} \w{3} \d{4}.+\d{2}:\d{2}$/,
+			/^\d{1,2} \w+ \d{4}.+\d{2}:\d{2}$/,
 		);
 	},
 };

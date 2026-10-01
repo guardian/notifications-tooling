@@ -10,11 +10,13 @@ import {
 } from './hooks/useNotificationHistory';
 import { NotificationAlert } from './NotificationAlert';
 import type { NotificationListResponse, NotificationSummary } from './schemas';
+import { channelAudiencesQueryKey } from './segment/useChannelAudiences';
 import {
 	appPushSendBeyondBradford,
 	newsletterSendBeyondBradford,
 } from './testing/api-fixtures';
 import { mockAppConfig } from './testing/app-config';
+import { channelAudiences } from './testing/handlers/channels';
 
 const historyQuery: NotificationHistoryQuery = { limit: 10, offset: 0 };
 const historyQueryKey = getNotificationHistoryQueryKey(historyQuery);
@@ -44,7 +46,10 @@ const acceptedAppPush: NotificationSummary = {
 
 const NotificationAlertExample = () => {
 	const queryClient = useQueryClient();
-	useState(() => queryClient.setQueryData(historyQueryKey, emptyHistory));
+	useState(() => {
+		queryClient.setQueryData(channelAudiencesQueryKey, channelAudiences);
+		queryClient.setQueryData(historyQueryKey, emptyHistory);
+	});
 
 	return (
 		<>
@@ -71,13 +76,14 @@ const NotificationAlertExample = () => {
 
 const AcceptedNotificationExample = () => {
 	const queryClient = useQueryClient();
-	useState(() =>
+	useState(() => {
+		queryClient.setQueryData(channelAudiencesQueryKey, channelAudiences);
 		queryClient.setQueryData<NotificationListResponse>(historyQueryKey, {
 			...emptyHistory,
 			total: 1,
 			notifications: [acceptedAppPush],
-		}),
-	);
+		});
+	});
 
 	return (
 		<>
@@ -98,7 +104,7 @@ const AcceptedNotificationExample = () => {
 };
 
 const meta = {
-	title: 'Dispatch/NotificationAlert',
+	title: 'Dispatch/Layout/NotificationAlert',
 	component: NotificationAlert,
 	decorators: [
 		(Story) => (
@@ -124,15 +130,23 @@ export const IncomingAppAlert: Story = {
 
 		const toasts = await page.findAllByRole('alert');
 		await expect(toasts).toHaveLength(2);
-		await expect(
-			page.getByText('Ann Nonymous sent an app alert'),
-		).toBeVisible();
-		await expect(
-			page.getByText('John Doe sent a newsletter email'),
-		).toBeVisible();
-		await expect(
-			page.queryByText('Partial Sender sent an app alert'),
-		).not.toBeInTheDocument();
+		await expect(page.getByText('Sent an app alert')).toBeVisible();
+		await expect(page.getByText('Sent a newsletter email')).toBeVisible();
+		await expect(page.getByText('AN')).toBeVisible();
+		await expect(page.getByText('JD')).toBeVisible();
+		await userEvent.hover(page.getByText('AN'));
+		await expect(await page.findByRole('tooltip')).toHaveTextContent(
+			'Ann Nonymous',
+		);
+		await expect(page.getAllByText('Sent to')).toHaveLength(2);
+		for (const audience of [
+			'United States',
+			'International',
+			'Europe',
+			'United Kingdom',
+		]) {
+			await expect(page.getByRole('img', { name: audience })).toBeVisible();
+		}
 		await expect(
 			page.getAllByText(
 				'Beyond Bradford and the Brontës – new walking trail shows West Yorkshire’s natural beauty',
@@ -152,15 +166,11 @@ export const DeliveryCompletesAfterPolling: Story = {
 		const canvas = within(canvasElement);
 		const page = within(canvasElement.ownerDocument.body);
 
-		await expect(
-			page.queryByText('Transition Sender sent an app alert'),
-		).not.toBeInTheDocument();
+		await expect(page.queryByText('TS')).not.toBeInTheDocument();
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Complete delivery' }),
 		);
 
-		await expect(
-			await page.findByText('Transition Sender sent an app alert'),
-		).toBeVisible();
+		await expect(await page.findByText('TS')).toBeVisible();
 	},
 };

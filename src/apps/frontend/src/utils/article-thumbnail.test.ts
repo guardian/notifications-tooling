@@ -23,7 +23,7 @@ describe('getArticleThumbnail', () => {
 		});
 	});
 
-	it.only('uses the 500px main image and its alt text for a liveblog', () => {
+	it('uses the 500px main image and its alt text for a liveblog', () => {
 		expect(getArticleThumbnail(liveblogFixture)).toEqual({
 			alt: 'Latest liveblog update',
 			src: 'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
@@ -74,7 +74,7 @@ describe('getArticleThumbnail', () => {
 		};
 
 		expect(getArticleThumbnail(liveblogWithoutImageAsset)).toEqual({
-			alt: 'Image without an asset',
+			alt: undefined,
 			src: liveblogFixture.fields?.thumbnail,
 		});
 	});

@@ -5,9 +5,9 @@ import type {
 } from '@models';
 
 const FALLBACK_APP_ALERT_EDITIONS: TopicTypeEditionOption[] = [
-	{ id: 'uk', label: 'UK' },
-	{ id: 'us', label: 'US' },
-	{ id: 'au', label: 'AU' },
+	{ id: 'uk', label: 'United Kingdom' },
+	{ id: 'us', label: 'United States' },
+	{ id: 'au', label: 'Australia' },
 	{ id: 'international', label: 'International' },
 	{ id: 'europe', label: 'Europe' },
 ];

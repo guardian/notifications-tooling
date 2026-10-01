@@ -35,6 +35,22 @@ describe('resolveAppPushTopic', () => {
 		});
 	});
 
+	it('exposes full regional edition labels in every stage and topic', () => {
+		for (const stage of ['CODE', 'PROD'] as const) {
+			for (const { editions } of Object.values(getAppPushTopicTypes(stage))) {
+				expect({
+					uk: editions.uk?.label,
+					us: editions.us?.label,
+					au: editions.au?.label,
+				}).toEqual({
+					uk: 'United Kingdom',
+					us: 'United States',
+					au: 'Australia',
+				});
+			}
+		}
+	});
+
 	it('resolves the internal test topic to its mobile-n10n coordinates', () => {
 		expect(resolveAppPushTopic('test', 'test')).toEqual({
 			topic: { type: 'breaking', name: 'internal-dispatch-test' },

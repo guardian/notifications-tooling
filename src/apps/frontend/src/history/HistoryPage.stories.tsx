@@ -403,9 +403,11 @@ export const Loaded: Story = {
 			}),
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Accepted')).toBeInTheDocument();
-		await expect(
-			canvas.getAllByRole('img', { name: 'Australia' }),
-		).toHaveLength(2);
+		const australiaFlags = canvas.getAllByRole('img', { name: 'Australia' });
+		await expect(australiaFlags).toHaveLength(2);
+		for (const flag of australiaFlags) {
+			await expect(flag).toBeVisible();
+		}
 
 		await userEvent.click(failedNotification);
 		const page = within(document.body);

@@ -1,14 +1,21 @@
 import { css } from '@emotion/react';
+import { semanticColors, semanticSpacing } from '@guardian/stand';
+import { Avatar } from '@guardian/stand/Avatar';
 import { Link } from '@guardian/stand/Link';
 import { toastQueue, ToastRegion } from '@guardian/stand/Toast';
 import { useContext, useEffect, useRef } from 'react';
 import { ConfigContext } from './config/ConfigContext';
+import type { HistoryNotification } from './history/HistoryView';
 import { useNotificationHistory } from './hooks/useNotificationHistory';
 import type { NotificationSummary } from './schemas';
+import { useChannelAudiences } from './segment/useChannelAudiences';
+import { FlagAtom } from './ui/FlagAtom';
+import { darkTooltipTheme, Tooltip } from './ui/Tooltip';
 import {
 	getSenderDisplayName,
-	mapNotificationToHistoryNotification,
-} from './utils/notification-history-mapper';
+	getSenderInitials,
+} from './utils/display-text-helpers';
+import { mapNotificationToHistoryNotification } from './utils/notification-history-mapper';
 
 const channelLabel = {
 	'app-push': 'an app alert',
@@ -24,6 +31,38 @@ const toastLinkStyles = css({
 	textDecorationStyle: 'solid',
 	textDecorationThickness: '0%',
 	textUnderlineOffset: '0%',
+});
+const toastTitleStyles = css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '8px',
+});
+const toastAvatarStyles = css({
+	borderWidth: 1,
+	borderStyle: 'solid',
+	borderColor: semanticColors.border.strongInverse,
+	width: '1.5rem',
+	height: '1.5rem',
+	fontSize: '8px',
+	flexShrink: 0,
+});
+const toastAdditionalInfoStyles = css({
+	display: 'flex',
+	flexDirection: 'column',
+	gap: '8px',
+});
+const toastAudienceStyles = css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '4px',
+});
+const toastFlagStyles = css({
+	display: 'flex',
+	alignItems: 'center',
+	lineHeight: 0,
+	'& > svg': {
+		display: 'block',
+	},
 });
 const toastTheme = {
 	shared: {
@@ -50,13 +89,76 @@ const isAlertableSend = (
 	normalizeEmail(notification.createdByEmail) !==
 		normalizeEmail(currentUserEmail);
 
+const enqueueNotificationToast = (notification: HistoryNotification) => {
+	const senderDisplayName = getSenderDisplayName(notification.sentBy);
+
+	toastQueue.add(
+		{
+			level: 'information',
+			title: (
+				<span css={toastTitleStyles}>
+					<Tooltip
+						label={senderDisplayName}
+						trigger={
+							<Avatar
+								size="sm"
+								initials={getSenderInitials(notification.sentBy)}
+								cssOverrides={toastAvatarStyles}
+							/>
+						}
+						theme={darkTooltipTheme}
+						cssOverrides={css({
+							padding: semanticSpacing.stackSm,
+						})}
+					>
+						{senderDisplayName}
+					</Tooltip>
+					<span>Sent {channelLabel[notification.channel]}</span>
+				</span>
+			),
+			subject: notification.title,
+			additionalInfo: (
+				<span css={toastAdditionalInfoStyles}>
+					<span css={toastAudienceStyles}>
+						<span>Sent to</span>
+						{notification.sentTo.map(({ id, label }) => (
+							<span
+								key={id}
+								aria-label={label}
+								role="img"
+								css={toastFlagStyles}
+							>
+								<FlagAtom segmentCode={id} />
+							</span>
+						))}
+					</span>
+					<Link
+						href={notification.href}
+						target="_blank"
+						rel="noreferrer"
+						cssOverrides={toastLinkStyles}
+					>
+						{notification.href}
+					</Link>
+				</span>
+			),
+			thumbnail: notification.thumbnailUrl ? (
+				<img src={notification.thumbnailUrl} alt="" />
+			) : undefined,
+		},
+		{ timeout: toastTimeout },
+	);
+};
+
 export const NotificationAlert = () => {
 	const config = useContext(ConfigContext);
 	const seenNotificationIds = useRef<Set<string> | undefined>(undefined);
 	const notificationHistory = useNotificationHistory({ limit: 10, offset: 0 });
+	const channelAudiences = useChannelAudiences();
 
 	useEffect(() => {
 		if (
+			channelAudiences.isPending ||
 			notificationHistory.data === undefined ||
 			notificationHistory.isPlaceholderData
 		) {
@@ -77,35 +179,19 @@ export const NotificationAlert = () => {
 
 		seenNotificationIds.current = currentIds;
 		for (const newNotification of newNotifications) {
-			const notification =
-				mapNotificationToHistoryNotification(newNotification);
+			const notification = mapNotificationToHistoryNotification(
+				newNotification,
+				channelAudiences.data,
+			);
 			if (!notification) {
 				continue;
 			}
 
-			toastQueue.add(
-				{
-					level: 'information',
-					title: `${getSenderDisplayName(notification.sentBy)} sent ${channelLabel[notification.channel]}`,
-					subject: notification.title,
-					additionalInfo: (
-						<Link
-							href={notification.href}
-							target="_blank"
-							rel="noreferrer"
-							cssOverrides={toastLinkStyles}
-						>
-							{notification.href}
-						</Link>
-					),
-					thumbnail: notification.thumbnailUrl ? (
-						<img src={notification.thumbnailUrl} alt="" />
-					) : undefined,
-				},
-				{ timeout: toastTimeout },
-			);
+			enqueueNotificationToast(notification);
 		}
 	}, [
+		channelAudiences.data,
+		channelAudiences.isPending,
 		config?.user.email,
 		notificationHistory.data,
 		notificationHistory.dataUpdatedAt,
