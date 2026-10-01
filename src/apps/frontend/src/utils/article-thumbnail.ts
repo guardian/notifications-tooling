@@ -5,16 +5,24 @@ interface ArticleThumbnail {
 	src?: string;
 }
 
+const getBlockToFindImageElementIn = (article?: ResolvedArticle) => {
+	if (article?.type === 'liveblog') {
+		return article.blocks?.main;
+	}
+	return undefined;
+};
+
 export const getArticleThumbnail = (
 	article?: ResolvedArticle,
 ): ArticleThumbnail => {
-	const image = article?.blocks?.main?.elements?.find(
+	const image = getBlockToFindImageElementIn(article)?.elements?.find(
 		({ type }) => type === 'image',
 	);
 	const preferredAsset = image?.assets?.find(
 		({ file, typeData }) => file && typeData?.width === 500,
 	);
 	const fallbackAsset = image?.assets?.find(({ file }) => file);
+
 	return {
 		alt: image?.imageTypeData?.alt,
 		src:
