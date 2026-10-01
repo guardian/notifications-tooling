@@ -54,7 +54,7 @@ export const liveblogFixture: ResolvedArticle = {
 		headline: 'Latest developments',
 		lastModified: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
 		thumbnail:
-			'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+			'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/1000.jpg',
 	},
 	blocks: {
 		main: {
@@ -63,6 +63,10 @@ export const liveblogFixture: ResolvedArticle = {
 				{
 					type: 'image',
 					assets: [
+						{
+							file: 'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/140.jpg',
+							typeData: { width: 140 },
+						},
 						{
 							file: 'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
 							typeData: { width: 500 },

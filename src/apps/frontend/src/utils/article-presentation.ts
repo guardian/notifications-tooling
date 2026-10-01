@@ -1,5 +1,4 @@
 import type { CapiBlock, ResolvedArticle } from '@models';
-import { getSelectedLiveblogBlock } from './article-liveblog';
 import { getArticleThumbnail } from './article-thumbnail';
 
 interface ArticlePresentationOptions {
@@ -7,6 +6,12 @@ interface ArticlePresentationOptions {
 	requestedUrl?: string;
 	requestedBlock?: CapiBlock;
 }
+
+const getSelectedLiveblogBlock = (
+	article?: ResolvedArticle,
+	requestedBlock?: CapiBlock,
+): CapiBlock | undefined =>
+	article?.type === 'liveblog' ? requestedBlock : undefined;
 
 export const getArticlePresentation = ({
 	article,

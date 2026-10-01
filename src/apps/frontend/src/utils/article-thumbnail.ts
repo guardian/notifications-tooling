@@ -1,15 +1,21 @@
 import type { ResolvedArticle } from '@models';
-import { getSelectedLiveblogBlock } from './article-liveblog';
 
 interface ArticleThumbnail {
 	alt?: string;
 	src?: string;
 }
 
+const getBlockToFindImageElementIn = (article?: ResolvedArticle) => {
+	if (article?.type === 'liveblog') {
+		return article.blocks?.main;
+	}
+	return undefined;
+};
+
 export const getArticleThumbnail = (
 	article?: ResolvedArticle,
 ): ArticleThumbnail => {
-	const image = getSelectedLiveblogBlock(article)?.elements?.find(
+	const image = getBlockToFindImageElementIn(article)?.elements?.find(
 		({ type }) => type === 'image',
 	);
 	const preferredAsset = image?.assets?.find(
