@@ -8,7 +8,10 @@ import type {
 	NotificationResource,
 } from '../schemas';
 import { articleFixture } from '../testing/capi-fixtures';
-import { channelAudiencesHandler } from '../testing/handlers/channels';
+import {
+	channelAudiencesHandler,
+	channelConstraintsHandler,
+} from '../testing/handlers/channels';
 import {
 	notificationSenders,
 	notificationSendersHandler,
@@ -330,6 +333,7 @@ const meta = {
 				historyHandler,
 				failureDetailHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -346,6 +350,7 @@ export const Loaded: Story = {
 				historyHandler,
 				failureDetailHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -398,9 +403,11 @@ export const Loaded: Story = {
 			}),
 		).toBeInTheDocument();
 		await expect(canvas.getByText('Accepted')).toBeInTheDocument();
-		await expect(
-			canvas.getAllByRole('img', { name: 'Australia' }),
-		).toHaveLength(2);
+		const australiaFlags = canvas.getAllByRole('img', { name: 'Australia' });
+		await expect(australiaFlags).toHaveLength(2);
+		for (const flag of australiaFlags) {
+			await expect(flag).toBeVisible();
+		}
 
 		await userEvent.click(failedNotification);
 		const page = within(document.body);
@@ -646,6 +653,7 @@ export const SenderFilterCutoff: Story = {
 				historyHandler,
 				failureDetailHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -787,6 +795,7 @@ export const InvalidSearch: Story = {
 				notificationSendersHandler,
 				emptyHistoryHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -916,6 +925,7 @@ export const Loading: Story = {
 				notificationSendersHandler,
 				loadingHistoryHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},
@@ -937,6 +947,7 @@ export const Error: Story = {
 				notificationSendersHandler,
 				failedHistoryHandler,
 				channelAudiencesHandler,
+				channelConstraintsHandler,
 			],
 		},
 	},

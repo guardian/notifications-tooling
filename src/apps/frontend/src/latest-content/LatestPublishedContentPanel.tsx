@@ -38,7 +38,8 @@ export const LatestPublishedContentPanel = ({
 	const [showAll, setShowAll] = useState(false);
 	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =
 		useState(false);
-	const [selectedArticleUrl, setSelectedArticleUrl] = useState<string>();
+	const [selectedContent, setSelectedContent] =
+		useState<LatestPublishedContentItem>();
 	const hasCachedData = latestPublishedContent.data !== undefined;
 	const isEmpty = !latestPublishedContent.isPending && content.length === 0;
 	const lastUpdatedAt = latestPublishedContent.dataUpdatedAt
@@ -153,7 +154,7 @@ export const LatestPublishedContentPanel = ({
 											content={item}
 											now={now}
 											onCreate={() => {
-												setSelectedArticleUrl(item.url);
+												setSelectedContent(item);
 												setIsCreateNotificationModalOpen(true);
 											}}
 										/>
@@ -167,7 +168,7 @@ export const LatestPublishedContentPanel = ({
 			<DispatchCreateNotificationModal
 				isOpen={isCreateNotificationModalOpen}
 				onOpenChange={setIsCreateNotificationModalOpen}
-				articleUrl={selectedArticleUrl}
+				content={selectedContent}
 			/>
 		</>
 	);

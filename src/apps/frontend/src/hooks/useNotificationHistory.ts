@@ -16,6 +16,7 @@ export interface NotificationHistoryQuery {
 	limit: number;
 	offset: number;
 	since?: number;
+	articleId?: string;
 	cacheScope?: string;
 	search?: string;
 	senders?: string[];
@@ -34,6 +35,7 @@ export const getNotificationHistoryQueryKey = ({
 	limit,
 	offset,
 	since,
+	articleId,
 	cacheScope,
 	search,
 	senders,
@@ -47,6 +49,7 @@ export const getNotificationHistoryQueryKey = ({
 		{
 			limit,
 			offset,
+			...(articleId ? { articleId } : {}),
 			...(cacheScope !== undefined ? { cacheScope } : { since }),
 			...(search ? { search } : {}),
 			...(senders?.length ? { senders } : {}),
@@ -66,6 +69,7 @@ export const fetchNotificationHistory = ({
 	limit,
 	offset,
 	since,
+	articleId,
 	search,
 	senders,
 	channels,
@@ -80,6 +84,9 @@ export const fetchNotificationHistory = ({
 
 	if (since !== undefined) {
 		searchParams.set('since', String(since));
+	}
+	if (articleId !== undefined) {
+		searchParams.set('articleId', articleId);
 	}
 	if (search !== undefined) {
 		searchParams.set('search', search);

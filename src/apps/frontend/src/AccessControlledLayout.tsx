@@ -4,6 +4,7 @@ import { UserPermissions } from '../../../packages/models';
 import { ConfigContext } from './config/ConfigContext';
 import { MainLayout } from './layout/MainLayout';
 import { NoPermissionsTab } from './layout/NoPermissionsTab';
+import { NotificationAlert } from './NotificationAlert';
 
 export const AccessControlledLayout = () => {
 	const config = useContext(ConfigContext);
@@ -13,6 +14,7 @@ export const AccessControlledLayout = () => {
 
 	return (
 		<>
+			{hasAccess && <NotificationAlert />}
 			{hasAccess ? (
 				<MainLayout>
 					<Outlet />

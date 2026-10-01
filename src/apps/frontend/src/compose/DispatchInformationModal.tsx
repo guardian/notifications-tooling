@@ -1,6 +1,9 @@
 import { css } from '@emotion/react';
+import { baseSpacing } from '@guardian/stand';
+import { Icon } from '@guardian/stand/Icon';
 import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
+import type { ComponentProps, ReactNode } from 'react';
 import {
 	CENTRAL_PRODUCTION_CONTACT_HREF,
 	DISPATCH_RUNBOOK_URL,
@@ -13,6 +16,24 @@ export const DISPATCH_INFORMATION_MODAL_TITLE =
 const tileStyles = css({
 	width: '100%',
 });
+
+const tileLabelStyles = css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: baseSpacing['6Px'],
+});
+
+interface TileLabelProps {
+	children: ReactNode;
+	symbol: ComponentProps<typeof Icon>['symbol'];
+}
+
+const TileLabel = ({ children, symbol }: TileLabelProps) => (
+	<span css={tileLabelStyles}>
+		<Icon size="sm" symbol={symbol} />
+		{children}
+	</span>
+);
 
 interface DispatchInformationModalProps {
 	isOpen: boolean;
@@ -38,21 +59,21 @@ export const DispatchInformationModal = ({
 						href={DISPATCH_RUNBOOK_URL}
 						target="_blank"
 						rel="noopener noreferrer"
-						icon="library_books"
+						icon=""
 						typography="headingMd"
 						cssOverrides={tileStyles}
 					>
-						View Dispatch runbook
+						<TileLabel symbol="library_books">View Dispatch runbook</TileLabel>
 					</Tile>
 					<Tile
 						size="sm"
 						href={CENTRAL_PRODUCTION_CONTACT_HREF}
-						icon="info"
+						icon=""
 						typography="headingMd"
 						target="_blank"
 						cssOverrides={tileStyles}
 					>
-						Contact Central Production
+						<TileLabel symbol="info">Contact Central Production</TileLabel>
 					</Tile>
 				</div>
 			</Dialog.Content>

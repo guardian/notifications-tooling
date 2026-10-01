@@ -14,6 +14,11 @@ import { HistoryTable, HistoryTableSkeleton } from './HistoryTable';
 
 export type HistoryStatus = 'Accepted' | 'Sent' | 'Partially sent' | 'Failed';
 
+export interface HistoryAudience {
+	id: DisplayAppAlertTopicEditionId;
+	label: string;
+}
+
 export interface HistoryNotification {
 	id: string;
 	title: string;
@@ -22,7 +27,7 @@ export interface HistoryNotification {
 	channel: ChannelOption;
 	alertType: string;
 	sentBy: string;
-	sentTo: DisplayAppAlertTopicEditionId[];
+	sentTo: HistoryAudience[];
 	sentAt: string;
 	status: HistoryStatus;
 }

@@ -11,7 +11,11 @@ import { PreviousNotificationsBar } from './PreviousNotificationsBar';
 const articleId = 'global/2016/march/01/some-article';
 
 const respondWith = (sends: NotificationSummary[]) =>
-	http.get(`${getApiBaseUrl()}/v1/notifications?articleId=${articleId}`, () => {
+	http.get(`${getApiBaseUrl()}/v1/notifications`, ({ request }) => {
+		if (new URL(request.url).searchParams.get('articleId') !== articleId) {
+			return;
+		}
+
 		const response: NotificationListResponse = {
 			total: sends.length,
 			offset: 0,
@@ -45,50 +49,56 @@ type Story = StoryObj<typeof meta>;
 export const OnePreviousAppSend: Story = {
 	args: {},
 	parameters: {
-		msw: [respondWith([appPushSendBeyondBradford])],
+		msw: { handlers: [respondWith([appPushSendBeyondBradford])] },
 	},
 };
 
 export const OnePreviousNewsletterSend: Story = {
 	args: {},
 	parameters: {
-		msw: [respondWith([newsletterSendBeyondBradford])],
+		msw: { handlers: [respondWith([newsletterSendBeyondBradford])] },
 	},
 };
 
 export const TwoPreviousSends: Story = {
 	args: {},
 	parameters: {
-		msw: [
-			respondWith([appPushSendBeyondBradford, newsletterSendBeyondBradford]),
-		],
+		msw: {
+			handlers: [
+				respondWith([appPushSendBeyondBradford, newsletterSendBeyondBradford]),
+			],
+		},
 	},
 };
 
 export const FourPreviousSends: Story = {
 	args: {},
 	parameters: {
-		msw: [
-			respondWith([
-				newsletterSendBeyondBradford,
-				appPushSendBeyondBradford,
-				newsletterSendBeyondBradford,
-				appPushSendBeyondBradford,
-			]),
-		],
+		msw: {
+			handlers: [
+				respondWith([
+					newsletterSendBeyondBradford,
+					appPushSendBeyondBradford,
+					{ ...newsletterSendBeyondBradford, id: 'newsletter-send-2' },
+					{ ...appPushSendBeyondBradford, id: 'app-push-send-2' },
+				]),
+			],
+		},
 	},
 };
 export const FivePreviousSends: Story = {
 	args: {},
 	parameters: {
-		msw: [
-			respondWith([
-				appPushSendBeyondBradford,
-				newsletterSendBeyondBradford,
-				appPushSendBeyondBradford,
-				newsletterSendBeyondBradford,
-				appPushSendBeyondBradford,
-			]),
-		],
+		msw: {
+			handlers: [
+				respondWith([
+					appPushSendBeyondBradford,
+					newsletterSendBeyondBradford,
+					{ ...appPushSendBeyondBradford, id: 'app-push-send-2' },
+					{ ...newsletterSendBeyondBradford, id: 'newsletter-send-2' },
+					{ ...appPushSendBeyondBradford, id: 'app-push-send-3' },
+				]),
+			],
+		},
 	},
 };

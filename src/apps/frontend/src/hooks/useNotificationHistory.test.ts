@@ -72,6 +72,7 @@ describe('fetchNotificationHistory', () => {
 			limit: 20,
 			offset: 40,
 			since: 1_700_000_000,
+			articleId: 'world/2026/sep/25/example',
 			search: 'climate',
 			senders: ['alex@example.com', 'jamie@example.com'],
 			channels: ['newsletter', 'app-push'],
@@ -86,6 +87,9 @@ describe('fetchNotificationHistory', () => {
 		expect(requestUrl.searchParams.get('limit')).toBe('20');
 		expect(requestUrl.searchParams.get('offset')).toBe('40');
 		expect(requestUrl.searchParams.get('since')).toBe('1700000000');
+		expect(requestUrl.searchParams.get('articleId')).toBe(
+			'world/2026/sep/25/example',
+		);
 		expect(requestUrl.searchParams.get('search')).toBe('climate');
 		expect(requestUrl.searchParams.getAll('createdByEmail')).toEqual([
 			'alex@example.com',
@@ -129,6 +133,22 @@ describe('notification history query keys', () => {
 				limit: 20,
 				offset: 0,
 				search: 'sport',
+			}),
+		);
+	});
+
+	it('separates article filters in the cache', () => {
+		expect(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				articleId: 'world/2026/sep/25/first',
+			}),
+		).not.toEqual(
+			getNotificationHistoryQueryKey({
+				limit: 20,
+				offset: 0,
+				articleId: 'world/2026/sep/25/second',
 			}),
 		);
 	});

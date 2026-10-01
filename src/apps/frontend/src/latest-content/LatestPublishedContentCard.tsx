@@ -9,6 +9,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { useRelativeTime } from '../hooks/useRelativeTime';
 import { latestPublishedContentTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
+import { LiveIndicator } from '../ui/LiveIndicator';
 import { getPillarColor } from '../utils/pillar-colors';
 import type { LatestPublishedContentItem } from './latest-published-content';
 
@@ -23,34 +24,49 @@ export const LatestPublishedContentCard = ({
 	onCreate,
 	now,
 }: LatestPublishedContentCardProps) => {
-	const { id, headline, url, imageUrl, section, pillarName, pillarId, tags } =
-		content;
+	const {
+		id,
+		headline,
+		url,
+		imageUrl,
+		section,
+		pillarName,
+		pillarId,
+		tags,
+		type,
+	} = content;
 	const pillarColor = getPillarColor(pillarId);
 	const publishedAt = useRelativeTime(content.publishedAt, 'short', now);
 	const intendedAudience = mapTagsToSourceAndTarget(tags);
+	const isLiveblog = type === 'liveblog';
 
 	return (
 		<TableRow id={id}>
 			<TableCell cssOverrides={latestPublishedContentTheme.card}>
 				<div css={latestPublishedContentTheme.cardDetails}>
 					<div css={latestPublishedContentTheme.cardMeta}>
-						<Typography
-							variant="bodyXs"
-							cssOverrides={latestPublishedContentTheme.sectionLabel(
-								pillarColor,
-							)}
-						>
-							<span css={latestPublishedContentTheme.sectionName}>
-								{section}
-							</span>
-							{pillarName ? ` / ${pillarName}` : null}
-						</Typography>
+						<div css={latestPublishedContentTheme.cardTitleAndLive}>
+							<Typography
+								variant="bodyXs"
+								cssOverrides={latestPublishedContentTheme.sectionLabel(
+									pillarColor,
+								)}
+							>
+								<span css={latestPublishedContentTheme.sectionName}>
+									{section}
+								</span>
+								{pillarName ? ` / ${pillarName}` : null}
+							</Typography>
+
+							{isLiveblog && <LiveIndicator />}
+						</div>
+
 						{publishedAt && (
 							<Typography
 								variant="bodyXs"
 								cssOverrides={latestPublishedContentTheme.published}
 							>
-								Published{' '}
+								{isLiveblog ? 'Updated ' : 'Published '}
 								<time
 									dateTime={publishedAt.iso8601}
 									title={publishedAt.formattedAbsoluteTime}

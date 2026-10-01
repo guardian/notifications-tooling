@@ -3,8 +3,11 @@ import { Checkbox } from '@guardian/stand/Checkbox';
 import { Icon } from '@guardian/stand/Icon';
 import { Menu, MenuItem, MenuToggle } from '@guardian/stand/Menu';
 import { Typography } from '@guardian/stand/Typography';
+import { appAlertTopicEditionId, toDisplayEditionId } from '@models';
 import { useSearchParams } from 'react-router-dom';
+import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { historyViewStyles } from '../themes';
+import { getAudienceEditionLabel } from '../utils/audience-edition-label';
 import {
 	HISTORY_AUDIENCE_IDS,
 	parseHistorySearchParams,
@@ -12,23 +15,18 @@ import {
 	updateHistoryMultiSelectFilter,
 } from '../utils/history-search-params';
 
-const audienceLabels: Record<string, string> = {
-	uk: 'United Kingdom',
-	us: 'United States',
-	au: 'Australia',
-	europe: 'Europe',
-	international: 'International',
-};
-
-const audienceOptions = HISTORY_AUDIENCE_IDS.map((id) => ({
-	id,
-	label: audienceLabels[id] ?? id.toUpperCase(),
-}));
-
 export const HistoryAudienceFilter = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
+	const channelAudiences = useChannelAudiences();
 	const { audiences: selectedAudiences = [] } =
 		parseHistorySearchParams(searchParams);
+	const audienceOptions = HISTORY_AUDIENCE_IDS.map((id) => ({
+		id,
+		label: getAudienceEditionLabel({
+			audiences: channelAudiences.data,
+			edition: toDisplayEditionId(appAlertTopicEditionId.parse(id)),
+		}),
+	}));
 	const selectedAudienceLabel = audienceOptions
 		.filter(({ id }) => selectedAudiences.includes(id))
 		.map(({ label }) => label)
