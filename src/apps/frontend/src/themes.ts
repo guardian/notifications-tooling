@@ -524,9 +524,8 @@ export const dispatchLandingTheme = {
 		[from.md]: {
 			flexWrap: 'wrap',
 			alignItems: 'center',
-	},
-	}
-	),
+		},
+	}),
 	infoButton: css({
 		fontWeight: 'normal',
 		gap: baseSpacing['4Px'],
@@ -588,7 +587,7 @@ export const dispatchLandingTheme = {
 		marginBottom: semanticSpacing.stackSm,
 		[from.lg]: {
 			marginBottom: 0,
-		}
+		},
 	}),
 	activityControls: css({
 		display: 'flex',
@@ -598,7 +597,7 @@ export const dispatchLandingTheme = {
 		gap: semanticSpacing.stackSm,
 		marginBottom: semanticSpacing.stackMd,
 		[from.lg]: {
-			marginBottom: 0
+			marginBottom: 0,
 		},
 	}),
 	activityCounters: css({
