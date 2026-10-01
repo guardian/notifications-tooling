@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import {
-	CENTRAL_PRODUCTION_CONTACT_HREF,
-	DISPATCH_RUNBOOK_URL,
+	DISPATCH_FEEDBACK_FORM_URL,
+	DISPATCH_USER_GUIDE_URL,
 } from '../support-links';
 import {
 	DISPATCH_INFORMATION_MODAL_TITLE,
@@ -35,16 +35,25 @@ export const Default: Story = {
 			}),
 		).toBeVisible();
 
-		const runbookLink = within(dialog).getByRole('link', {
-			name: 'View Dispatch runbook',
+		const userGuideLink = within(dialog).getByRole('link', {
+			name: 'View Dispatch user guide',
 		});
-		await expect(runbookLink).toHaveAttribute('href', DISPATCH_RUNBOOK_URL);
-		await expect(runbookLink).toHaveAttribute('target', '_blank');
-		await expect(runbookLink).toHaveAttribute('rel', 'noopener noreferrer');
+		await expect(userGuideLink).toHaveAttribute(
+			'href',
+			DISPATCH_USER_GUIDE_URL,
+		);
+		await expect(userGuideLink).toHaveAttribute('target', '_blank');
+		await expect(userGuideLink).toHaveAttribute('rel', 'noopener noreferrer');
 
-		await expect(
-			within(dialog).getByRole('link', { name: 'Contact Central Production' }),
-		).toHaveAttribute('href', CENTRAL_PRODUCTION_CONTACT_HREF);
+		const feedbackLink = within(dialog).getByRole('link', {
+			name: 'Report an issue or provide feedback',
+		});
+		await expect(feedbackLink).toHaveAttribute(
+			'href',
+			DISPATCH_FEEDBACK_FORM_URL,
+		);
+		await expect(feedbackLink).toHaveAttribute('target', '_blank');
+		await expect(feedbackLink).toHaveAttribute('rel', 'noopener noreferrer');
 
 		await userEvent.click(
 			within(dialog).getByRole('button', { name: 'Close Modal' }),

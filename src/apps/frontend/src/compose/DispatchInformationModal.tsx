@@ -5,8 +5,8 @@ import { Dialog, Modal } from '@guardian/stand/Modal';
 import { Tile } from '@guardian/stand/Tile';
 import type { ComponentProps, ReactNode } from 'react';
 import {
-	CENTRAL_PRODUCTION_CONTACT_HREF,
-	DISPATCH_RUNBOOK_URL,
+	DISPATCH_FEEDBACK_FORM_URL,
+	DISPATCH_USER_GUIDE_URL,
 } from '../support-links';
 import { dispatchTileModalTheme } from '../themes';
 
@@ -56,24 +56,29 @@ export const DispatchInformationModal = ({
 				<div css={dispatchTileModalTheme.tileList}>
 					<Tile
 						size="sm"
-						href={DISPATCH_RUNBOOK_URL}
+						href={DISPATCH_USER_GUIDE_URL}
 						target="_blank"
 						rel="noopener noreferrer"
 						icon=""
 						typography="headingMd"
 						cssOverrides={tileStyles}
 					>
-						<TileLabel symbol="library_books">View Dispatch runbook</TileLabel>
+						<TileLabel symbol="library_books">
+							View Dispatch user guide
+						</TileLabel>
 					</Tile>
 					<Tile
 						size="sm"
-						href={CENTRAL_PRODUCTION_CONTACT_HREF}
+						href={DISPATCH_FEEDBACK_FORM_URL}
 						icon=""
 						typography="headingMd"
 						target="_blank"
+						rel="noopener noreferrer"
 						cssOverrides={tileStyles}
 					>
-						<TileLabel symbol="info">Contact Central Production</TileLabel>
+						<TileLabel symbol="info">
+							Report an issue or provide feedback
+						</TileLabel>
 					</Tile>
 				</div>
 			</Dialog.Content>
