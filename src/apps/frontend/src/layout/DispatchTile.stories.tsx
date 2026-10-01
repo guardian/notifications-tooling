@@ -9,7 +9,7 @@ type StoryArgs = Pick<ClickableTileProps, 'href' | 'icon'> & {
 };
 
 const meta = {
-	title: 'Stand Frontend/DispatchLanding/Tile',
+	title: 'Dispatch/Layout/DispatchTile',
 	component: Tile,
 	args: {
 		title: 'Create a newsletter email',
