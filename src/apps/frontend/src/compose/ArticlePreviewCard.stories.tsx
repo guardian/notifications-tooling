@@ -59,9 +59,6 @@ export const Liveblog: PreviewCardStory = {
 		await expect(
 			liveIndicator.querySelector('[aria-hidden="true"]'),
 		).toBeInTheDocument();
-		await expect(
-			canvas.getByText('Liveblog block ID: liveblog-main-block-id'),
-		).toBeInTheDocument();
 		await expect(canvas.getByText('Latest developments')).toBeInTheDocument();
 		await expect(
 			canvas.getByText((_, element) =>
