@@ -15,7 +15,7 @@ import {
 	getSenderInitials,
 } from '../utils/display-text-helpers';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
-import { formatAbsoluteTime } from '../utils/relative-time';
+import { formatTimeInTimeZone } from '../utils/relative-time';
 
 interface Props {
 	articleId?: string;
@@ -177,8 +177,8 @@ const SenderAvatars = ({ sends }: { sends: NotificationSummary[] }) => {
 
 const formatTime = (input: string): string => {
 	const sentAt = new Date(input);
-	
-	return Number.isNaN(sentAt.getTime()) ? input : formatAbsoluteTime(sentAt);
+
+	return Number.isNaN(sentAt.getTime()) ? input : formatTimeInTimeZone(sentAt);
 };
 
 const SendDetails = ({

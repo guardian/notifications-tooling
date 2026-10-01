@@ -7,6 +7,7 @@ import {
 	appPushSendBeyondBradford,
 	newsletterSendBeyondBradford,
 } from '../testing/api-fixtures';
+import { formatTimeInTimeZone } from '../utils/relative-time';
 import { PreviousNotificationsBar } from './PreviousNotificationsBar';
 
 const articleId = 'global/2016/march/01/some-article';
@@ -68,7 +69,9 @@ export const OnePreviousAppSend: Story = {
 
 		await userEvent.click(canvas.getByRole('button', { name: 'send details' }));
 		const details = await page.findByRole('tooltip');
-		await expect(details).toHaveTextContent('21 Sept 2026, 09:41 UK');
+		await expect(details).toHaveTextContent(
+			formatTimeInTimeZone(new Date(appPushSendBeyondBradford.createdAt)),
+		);
 		await expect(details).not.toHaveTextContent('Ann Nonymous');
 		await expect(details).not.toHaveTextContent('App alert');
 		for (const audience of ['United States', 'International', 'Europe']) {
@@ -121,10 +124,10 @@ export const TwoPreviousSends: Story = {
 
 		const tooltip = await page.findByRole('tooltip');
 		await expect(tooltip).toHaveTextContent(
-			'Ann Nonymous, App alert, 21 Sept 2026, 09:41 UK',
+			`Ann Nonymous, App alert, ${formatTimeInTimeZone(new Date(appPushSendBeyondBradford.createdAt))}`,
 		);
 		await expect(tooltip).toHaveTextContent(
-			'John Doe, Newsletter email, 18 Sept 2026, 11:23 UK',
+			`John Doe, Newsletter email, ${formatTimeInTimeZone(new Date(newsletterSendBeyondBradford.createdAt))}`,
 		);
 		for (const audience of [
 			'United States',
