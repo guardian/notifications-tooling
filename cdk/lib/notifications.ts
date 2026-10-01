@@ -8,8 +8,8 @@ import {
 	GuVpc,
 	SubnetType,
 } from '@guardian/cdk/lib/constructs/ec2';
+import { GuDeveloperPolicy } from '@guardian/cdk/lib/constructs/iam/policies';
 import { GuDatabaseInstance } from '@guardian/cdk/lib/constructs/rds';
-import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { GuApiLambda } from '@guardian/cdk/lib/patterns/api-lambda';
 import type { App } from 'aws-cdk-lib';
 import { CfnOutput, Duration, Fn, RemovalPolicy } from 'aws-cdk-lib';
@@ -302,7 +302,7 @@ export class DispatchStack extends GuStack {
 		});
 
 		if (!isProd) {
-			new GuDeveloperPolicyExperimental(this, 'DispatchLocalPolicy', {
+			new GuDeveloperPolicy(this, 'DispatchLocalPolicy', {
 				grantId: 'run-dispatch-locally',
 				friendlyName: 'Run dispatch locally',
 				statements: [
