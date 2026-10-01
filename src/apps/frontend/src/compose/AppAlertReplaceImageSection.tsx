@@ -8,7 +8,7 @@ import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
-import { useImageUrlCheck } from '../hooks/use-image-url-check';
+import { useImageUrlCheck } from '../hooks/useImageUrlCheck';
 import { CENTRAL_PRODUCTION_CONTACT_HREF } from '../support-links';
 
 interface AppAlertReplaceImageSectionProps {
