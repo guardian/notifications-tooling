@@ -94,60 +94,69 @@ const getChannelDescriptionForSet = (sends: NotificationSummary[]): string => {
 	return 'notifications';
 };
 
-const SenderAvatar = ({ send }: { send: NotificationSummary }) => {
-	return (
-		<div css={style.avatarWrapper}>
-			<Tooltip
-				label={getSenderDisplayName(send.createdByEmail)}
-				trigger={
-					<Avatar
-						cssOverrides={style.avatarOverrides}
-						size="sm"
-						initials={getSenderInitials(send.createdByEmail)}
-					/>
-				}
-				theme={darkTooltipTheme}
-				cssOverrides={css({
-					padding: semanticSpacing.stackSm,
-				})}
-			>
-				{getSenderDisplayName(send.createdByEmail)}
-			</Tooltip>
-		</div>
-	);
-};
+const AvatarsWithTooltip = ({
+	sentNotifications,
+}: {
+	sentNotifications: NotificationSummary[];
+}) => {
+	const firstThreeSends = sentNotifications.slice(0, 3);
+	const sendsPastThree = sentNotifications.slice(3);
 
-const CombinedAvatar = ({ sends }: { sends: NotificationSummary[] }) => {
 	return (
-		<div css={style.avatarWrapper}>
-			<Tooltip
-				label={'other senders'}
-				trigger={
-					<Avatar
-						size="sm"
-						initials={'…'}
-						cssOverrides={[
-							style.avatarOverrides,
-							css({
-								backgroundColor: semanticColors.fill.neutralWeak,
-								alignItems: 'start',
-								fontSize: 'large',
-							}),
-						]}
-					/>
-				}
-				theme={darkTooltipTheme}
-				cssOverrides={css({
-					padding: semanticSpacing.stackSm,
-				})}
-			>
-				<ul css={{ listStyle: 'none' }}>
-					{sends.map((send) => (
-						<li key={send.id}>{getSenderDisplayName(send.createdByEmail)}</li>
+		<Tooltip
+			placement="bottom start"
+			label={'senders'}
+			trigger={
+				<div css={style.avatars}>
+					{firstThreeSends.map((send) => (
+						<div css={style.avatarWrapper} key={send.id}>
+							<Avatar
+								cssOverrides={style.avatarOverrides}
+								size="sm"
+								initials={getSenderInitials(send.createdByEmail)}
+							/>
+						</div>
 					))}
-				</ul>
-			</Tooltip>
-		</div>
+
+					{sendsPastThree.length === 1 &&
+						sendsPastThree.map((send) => (
+							<div css={style.avatarWrapper} key={send.id}>
+								<Avatar
+									cssOverrides={style.avatarOverrides}
+									size="sm"
+									initials={getSenderInitials(send.createdByEmail)}
+								/>
+							</div>
+						))}
+					{sendsPastThree.length > 1 && (
+						<div css={style.avatarWrapper}>
+							<Avatar
+								size="sm"
+								initials={'…'}
+								cssOverrides={[
+									style.avatarOverrides,
+									css({
+										backgroundColor: semanticColors.fill.neutralWeak,
+										alignItems: 'start',
+										fontSize: 'large',
+									}),
+								]}
+							/>
+						</div>
+					)}
+				</div>
+			}
+			theme={darkTooltipTheme}
+			cssOverrides={css({
+				padding: semanticSpacing.stackSm,
+			})}
+		>
+			<ul css={{ listStyle: 'none' }}>
+				{sentNotifications.map((send) => (
+					<li key={send.id}>{getSenderDisplayName(send.createdByEmail)}</li>
+				))}
+			</ul>
+		</Tooltip>
 	);
 };
 
@@ -270,22 +279,10 @@ export const PreviousNotificationsBar = ({
 	}
 
 	const description = getChannelDescriptionForSet(sentNotifications);
-	const firstThreeSends = sentNotifications.slice(0, 3);
-	const sendsPastThree = sentNotifications.slice(3);
 
 	return (
 		<div css={style.bar}>
-			<div css={style.avatars}>
-				{firstThreeSends.map((send) => (
-					<SenderAvatar key={send.id} send={send} />
-				))}
-
-				{sendsPastThree.length === 1 &&
-					sendsPastThree.map((send) => (
-						<SenderAvatar key={send.id} send={send} />
-					))}
-				{sendsPastThree.length > 1 && <CombinedAvatar sends={sendsPastThree} />}
-			</div>
+			<AvatarsWithTooltip sentNotifications={sentNotifications} />
 			<Typography variant="bodySm">Sent {description} with this URL</Typography>
 			<SendingDetails sends={sentNotifications} />
 			<IconButton
