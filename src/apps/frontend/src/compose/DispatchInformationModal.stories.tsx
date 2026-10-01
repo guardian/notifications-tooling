@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import {
-	DISPATCH_FEEDBACK_FORM_URL,
-	DISPATCH_USER_GUIDE_URL,
-} from '../support-links';
+import { ConfigContext } from '../config/ConfigContext';
+import { mockAppConfig } from '../testing/app-config';
 import {
 	DISPATCH_INFORMATION_MODAL_TITLE,
 	DispatchInformationModal,
@@ -13,6 +11,13 @@ const meta = {
 	title: 'Dispatch/Compose/DispatchInformationModal',
 	component: DispatchInformationModal,
 	parameters: { layout: 'centered' },
+	decorators: [
+		(Story) => (
+			<ConfigContext.Provider value={mockAppConfig}>
+				<Story />
+			</ConfigContext.Provider>
+		),
+	],
 	args: {
 		isOpen: true,
 		onOpenChange: fn(),
@@ -40,7 +45,7 @@ export const Default: Story = {
 		});
 		await expect(userGuideLink).toHaveAttribute(
 			'href',
-			DISPATCH_USER_GUIDE_URL,
+			mockAppConfig.dispatchUserGuideUrl,
 		);
 		await expect(userGuideLink).toHaveAttribute('target', '_blank');
 		await expect(userGuideLink).toHaveAttribute('rel', 'noopener noreferrer');
@@ -50,7 +55,7 @@ export const Default: Story = {
 		});
 		await expect(feedbackLink).toHaveAttribute(
 			'href',
-			DISPATCH_FEEDBACK_FORM_URL,
+			mockAppConfig.dispatchFeedbackFormUrl,
 		);
 		await expect(feedbackLink).toHaveAttribute('target', '_blank');
 		await expect(feedbackLink).toHaveAttribute('rel', 'noopener noreferrer');

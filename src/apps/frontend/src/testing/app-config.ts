@@ -16,4 +16,6 @@ export const mockAppConfig: AppConfig = {
 	],
 	gridUri: 'https://api.media.mock.dev-gutools.co.uk',
 	gridApiUri: 'https://media.mock.dev-gutools.co.uk',
+	dispatchUserGuideUrl: 'https://docs.example.com/dispatch-user-guide',
+	dispatchFeedbackFormUrl: 'https://forms.example.com/dispatch-feedback',
 };

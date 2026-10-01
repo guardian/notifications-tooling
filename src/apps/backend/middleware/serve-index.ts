@@ -39,9 +39,16 @@ export const serveIndex: RequestHandler = async (
 	req: Request,
 	res: Response,
 ) => {
-	const [GRID_API_URI, GRID_URI] = await Promise.all([
+	const [
+		GRID_API_URI,
+		GRID_URI,
+		DISPATCH_USER_GUIDE_URL,
+		DISPATCH_FEEDBACK_FORM_URL,
+	] = await Promise.all([
 		getSSMParameter('GRID_API_URI'),
 		getSSMParameter('GRID_URI'),
+		getSSMParameter('DISPATCH_USER_GUIDE_URL'),
+		getSSMParameter('DISPATCH_FEEDBACK_FORM_URL'),
 	]);
 	const permissions = await listUserPermissions(req.user!.email);
 	const config: AppConfig = {
@@ -50,6 +57,8 @@ export const serveIndex: RequestHandler = async (
 		stage: env.STAGE,
 		gridApiUri: GRID_API_URI,
 		gridUri: GRID_URI,
+		dispatchUserGuideUrl: DISPATCH_USER_GUIDE_URL,
+		dispatchFeedbackFormUrl: DISPATCH_FEEDBACK_FORM_URL,
 	};
 	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,
