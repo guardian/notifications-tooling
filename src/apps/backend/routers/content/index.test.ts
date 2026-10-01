@@ -269,7 +269,7 @@ describe('POST /v1/content/articles/resolve', () => {
 			});
 		});
 
-		it('defaults an unfragmented liveblog URL to its main block', async () => {
+		it('does not include a requestedBlock for an unfragmented liveblog URL without a requestedBlockId param', async () => {
 			const mainBlock = {
 				id: 'liveblog-main-block-id',
 				elements: [],
@@ -293,7 +293,7 @@ describe('POST /v1/content/articles/resolve', () => {
 				expect(response.status).toBe(200);
 				expect(await response.json()).toEqual({
 					article: liveblog,
-					requestedBlock: mainBlock,
+					requestedBlock: undefined,
 				});
 			});
 		});
