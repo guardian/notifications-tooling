@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
+import { expect, userEvent, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';
 import type { NotificationListResponse, NotificationSummary } from '../schemas';
 import {
@@ -51,12 +52,44 @@ export const OnePreviousAppSend: Story = {
 	parameters: {
 		msw: { handlers: [respondWith([appPushSendBeyondBradford])] },
 	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const page = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			await canvas.findByText('Sent an App alert with this URL'),
+		).toBeVisible();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Ann Nonymous' }));
+		await expect(await page.findByRole('tooltip')).toHaveTextContent(
+			'Ann Nonymous',
+		);
+		await userEvent.keyboard('{Escape}');
+
+		await userEvent.click(canvas.getByRole('button', { name: 'send details' }));
+		const details = await page.findByRole('tooltip');
+		await expect(details).toHaveTextContent('21 Sept 2026, 09:41 UK');
+		await expect(details).not.toHaveTextContent('Ann Nonymous');
+		await expect(details).not.toHaveTextContent('App alert');
+		for (const audience of ['United States', 'International', 'Europe']) {
+			await expect(
+				within(details).getByRole('img', { name: audience }),
+			).toBeVisible();
+		}
+	},
 };
 
 export const OnePreviousNewsletterSend: Story = {
 	args: {},
 	parameters: {
 		msw: { handlers: [respondWith([newsletterSendBeyondBradford])] },
+	},
+	play: async ({ canvasElement }) => {
+		await expect(
+			await within(canvasElement).findByText(
+				'Sent a Newsletter email with this URL',
+			),
+		).toBeVisible();
 	},
 };
 
@@ -68,6 +101,41 @@ export const TwoPreviousSends: Story = {
 				respondWith([appPushSendBeyondBradford, newsletterSendBeyondBradford]),
 			],
 		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const page = within(canvasElement.ownerDocument.body);
+
+		await expect(
+			await canvas.findByText('Sent an alert with this URL'),
+		).toBeVisible();
+		await userEvent.click(canvas.getByRole('button', { name: 'senders' }));
+		const sendersTooltip = await page.findByRole('tooltip');
+		const senderNames = within(sendersTooltip).getAllByRole('listitem');
+		await expect(senderNames).toHaveLength(2);
+		await expect(senderNames[0]).toHaveTextContent('Ann Nonymous');
+		await expect(senderNames[1]).toHaveTextContent('John Doe');
+		await userEvent.keyboard('{Escape}');
+
+		await userEvent.click(canvas.getByRole('button', { name: 'send details' }));
+
+		const tooltip = await page.findByRole('tooltip');
+		await expect(tooltip).toHaveTextContent(
+			'Ann Nonymous, App alert, 21 Sept 2026, 09:41 UK',
+		);
+		await expect(tooltip).toHaveTextContent(
+			'John Doe, Newsletter email, 18 Sept 2026, 11:23 UK',
+		);
+		for (const audience of [
+			'United States',
+			'International',
+			'Europe',
+			'United Kingdom',
+		]) {
+			await expect(
+				within(tooltip).getByRole('img', { name: audience }),
+			).toBeVisible();
+		}
 	},
 };
 

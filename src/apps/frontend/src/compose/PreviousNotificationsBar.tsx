@@ -8,13 +8,14 @@ import { type NotificationChannelId, notificationChannelNames } from '@models';
 import { useState } from 'react';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';
+import { FlagAtom } from '../ui/FlagAtom';
 import { darkTooltipTheme, Tooltip } from '../ui/Tooltip';
 import {
 	getSenderDisplayName,
 	getSenderInitials,
 } from '../utils/display-text-helpers';
-import type { LocalSendTimeRegion } from '../utils/history-send-time';
-import { formatLocalSendDateTimes } from '../utils/history-send-time';
+import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
+import { formatAbsoluteTime } from '../utils/relative-time';
 
 interface Props {
 	articleId?: string;
@@ -53,20 +54,34 @@ const style = {
 		height: '1.5rem',
 		fontSize: '8px',
 	}),
-	detailTable: css({
-		thead: {
-			visibility: 'collapse',
-		},
-		td: {
-			paddingLeft: semanticSpacing.stackXxs,
-			paddingRight: semanticSpacing.stackXxs,
-			paddingBottom: 2,
-		},
-		'td:first-child': {
-			paddingLeft: 0,
-		},
-		'td:last-child': {
-			paddingRight: 0,
+	senderList: css({
+		listStyle: 'none',
+		margin: 0,
+		padding: 0,
+	}),
+	detailList: css({
+		display: 'grid',
+		gap: semanticSpacing.stackXs,
+		listStyle: 'none',
+		margin: 0,
+		padding: 0,
+	}),
+	detailItem: css({
+		display: 'grid',
+		gap: semanticSpacing.stackXxs,
+	}),
+	detailHeading: css({
+		whiteSpace: 'nowrap',
+	}),
+	detailAudiences: css({
+		display: 'flex',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXxs,
+		minHeight: 24,
+		svg: {
+			display: 'block',
+			maxHeight: 24,
+			width: 'auto',
 		},
 	}),
 };
@@ -84,143 +99,158 @@ const getChannel = (send: NotificationSummary): NotificationChannelId => {
 };
 
 const getChannelDescriptionForSet = (sends: NotificationSummary[]): string => {
-	const channels = sends.map(getChannel);
-	if (channels.every((channel) => channel === 'app-push')) {
-		return `an ${notificationChannelNames['app-push']}`;
+	if (sends.length > 1) {
+		return 'an alert';
 	}
-	if (channels.every((channel) => channel === 'newsletter')) {
-		return `a ${notificationChannelNames['newsletter']}`;
-	}
-	return 'notifications';
+
+	const channel = getChannel(sends[0]!);
+	return `${channel === 'app-push' ? 'an' : 'a'} ${notificationChannelNames[channel]}`;
 };
 
 const SenderAvatar = ({ send }: { send: NotificationSummary }) => {
 	return (
 		<div css={style.avatarWrapper}>
-			<Tooltip
-				label={getSenderDisplayName(send.createdByEmail)}
-				trigger={
-					<Avatar
-						cssOverrides={style.avatarOverrides}
-						size="sm"
-						initials={getSenderInitials(send.createdByEmail)}
-					/>
-				}
-				theme={darkTooltipTheme}
-				cssOverrides={css({
-					padding: semanticSpacing.stackSm,
-				})}
-			>
-				{getSenderDisplayName(send.createdByEmail)}
-			</Tooltip>
+			<Avatar
+				cssOverrides={style.avatarOverrides}
+				size="sm"
+				initials={getSenderInitials(send.createdByEmail)}
+			/>
 		</div>
 	);
 };
 
-const CombinedAvatar = ({ sends }: { sends: NotificationSummary[] }) => {
+const CombinedAvatar = () => {
 	return (
 		<div css={style.avatarWrapper}>
-			<Tooltip
-				label={'other senders'}
-				trigger={
-					<Avatar
-						size="sm"
-						initials={'…'}
-						cssOverrides={[
-							style.avatarOverrides,
-							css({
-								backgroundColor: semanticColors.fill.neutralWeak,
-								alignItems: 'start',
-								fontSize: 'large',
-							}),
-						]}
-					/>
-				}
-				theme={darkTooltipTheme}
-				cssOverrides={css({
-					padding: semanticSpacing.stackSm,
-				})}
-			>
-				<ul css={{ listStyle: 'none' }}>
-					{sends.map((send) => (
-						<li key={send.id}>{getSenderDisplayName(send.createdByEmail)}</li>
-					))}
-				</ul>
-			</Tooltip>
+			<Avatar
+				size="sm"
+				initials={'…'}
+				cssOverrides={[
+					style.avatarOverrides,
+					css({
+						backgroundColor: semanticColors.fill.neutralWeak,
+						alignItems: 'start',
+						fontSize: 'large',
+					}),
+				]}
+			/>
 		</div>
 	);
 };
 
-const formatTime = (
-	input: string,
-	preferredRegion: LocalSendTimeRegion = 'UK',
-): string => {
+const SenderAvatars = ({ sends }: { sends: NotificationSummary[] }) => {
+	const firstThreeSends = sends.slice(0, 3);
+	const sendsPastThree = sends.slice(3);
+	const senderNames = [
+		...new Set(sends.map((send) => getSenderDisplayName(send.createdByEmail))),
+	];
+
 	return (
-		formatLocalSendDateTimes(input)
-			.find((time) => time.region === preferredRegion)
-			?.time.split(', ')
-			.toReversed()
-			.join(' ') ?? input
+		<Tooltip
+			label={senderNames.length === 1 ? senderNames[0]! : 'senders'}
+			trigger={
+				<div css={style.avatars}>
+					{firstThreeSends.map((send) => (
+						<SenderAvatar key={send.id} send={send} />
+					))}
+					{sendsPastThree.length === 1 && (
+						<SenderAvatar send={sendsPastThree[0]!} />
+					)}
+					{sendsPastThree.length > 1 && <CombinedAvatar />}
+				</div>
+			}
+			theme={darkTooltipTheme}
+			cssOverrides={css({ padding: semanticSpacing.stackSm })}
+		>
+			{senderNames.length === 1 ? (
+				senderNames[0]
+			) : (
+				<ul css={style.senderList}>
+					{senderNames.map((name) => (
+						<li key={name}>{name}</li>
+					))}
+				</ul>
+			)}
+		</Tooltip>
+	);
+};
+
+const formatTime = (input: string): string => {
+	const sentAt = new Date(input);
+	return Number.isNaN(sentAt.getTime())
+		? input
+		: `${formatAbsoluteTime(sentAt)} UK`;
+};
+
+const SendDetails = ({
+	send,
+	showSenderAndChannel,
+}: {
+	send: NotificationSummary;
+	showSenderAndChannel: boolean;
+}) => {
+	const channel = getChannel(send);
+	const audiences = mapNotificationToHistoryNotification(send)?.sentTo ?? [];
+	const displayedAudiences =
+		audiences.length > 0
+			? audiences
+			: [{ id: 'INT' as const, label: 'International' }];
+
+	return (
+		<li css={style.detailItem}>
+			<div css={style.detailHeading}>
+				{showSenderAndChannel && (
+					<>
+						{getSenderDisplayName(send.createdByEmail)},{' '}
+						{notificationChannelNames[channel]},{' '}
+					</>
+				)}
+				{formatTime(send.createdAt)}
+			</div>
+			<div css={style.detailAudiences}>
+				{displayedAudiences.map(({ id, label }) => (
+					<span key={id} aria-label={label} role="img">
+						<FlagAtom segmentCode={id} />
+					</span>
+				))}
+			</div>
+		</li>
 	);
 };
 
 const SendingDetails = ({ sends }: { sends: NotificationSummary[] }) => {
 	return (
-		<>
-			{sends.length === 1 ? (
-				<>
+		<div
+			css={{
+				marginLeft: 'auto',
+				display: 'flex',
+				alignItems: 'center',
+				gap: semanticSpacing.stackXxs,
+			}}
+		>
+			<Typography variant="bodySm" color={semanticColors.text.weak}>
+				Send info
+			</Typography>
+			<Tooltip
+				theme={darkTooltipTheme}
+				label="send details"
+				cssOverrides={css({
+					width: 'max-content',
+					maxWidth: 'calc(100vw - 2rem)',
+					color: semanticColors.text.weak,
+				})}
+			>
+				<ul css={style.detailList}>
 					{sends.map((send) => (
-						<Typography
+						<SendDetails
 							key={send.id}
-							variant="bodySm"
-							color={semanticColors.text.weak}
-						>
-							[{formatTime(send.createdAt)}]
-						</Typography>
+							send={send}
+							showSenderAndChannel={sends.length > 1}
+						/>
 					))}
-				</>
-			) : (
-				<div
-					css={{
-						marginLeft: 'auto',
-						display: 'flex',
-						alignItems: 'center',
-						gap: semanticSpacing.stackXxs,
-					}}
-				>
-					<Typography variant="bodySm" color={semanticColors.text.weak}>
-						Timestamp
-					</Typography>
-					<Tooltip
-						theme={darkTooltipTheme}
-						label="send times"
-						cssOverrides={css({
-							maxWidth: 'unset',
-							color: semanticColors.text.weak,
-						})}
-					>
-						<table css={style.detailTable}>
-							<thead>
-								<tr>
-									<th>sender</th>
-									<th>channel</th>
-									<th>send time</th>
-								</tr>
-							</thead>
-							<tbody>
-								{sends.map((send) => (
-									<tr key={send.id}>
-										<td>{getSenderDisplayName(send.createdByEmail)}</td>
-										<td>{notificationChannelNames[getChannel(send)]}</td>
-										<td>{formatTime(send.createdAt)}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</Tooltip>
-				</div>
-			)}
-		</>
+				</ul>
+			</Tooltip>
+		</div>
 	);
 };
 
@@ -262,22 +292,10 @@ export const PreviousNotificationsBar = ({
 	}
 
 	const description = getChannelDescriptionForSet(sentNotifications);
-	const firstThreeSends = sentNotifications.slice(0, 3);
-	const sendsPastThree = sentNotifications.slice(3);
 
 	return (
 		<div css={style.bar}>
-			<div css={style.avatars}>
-				{firstThreeSends.map((send) => (
-					<SenderAvatar key={send.id} send={send} />
-				))}
-
-				{sendsPastThree.length === 1 &&
-					sendsPastThree.map((send) => (
-						<SenderAvatar key={send.id} send={send} />
-					))}
-				{sendsPastThree.length > 1 && <CombinedAvatar sends={sendsPastThree} />}
-			</div>
+			<SenderAvatars sends={sentNotifications} />
 			<Typography variant="bodySm">Sent {description} with this URL</Typography>
 			<SendingDetails sends={sentNotifications} />
 			<IconButton
