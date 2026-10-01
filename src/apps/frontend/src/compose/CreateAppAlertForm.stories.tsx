@@ -12,6 +12,11 @@ import {
 	liveblogFixture,
 	requestedLiveblogBlock,
 } from '../testing/capi-fixtures';
+import { channelHandlers } from '../testing/handlers/channels';
+import {
+	notificationHistoryHandler,
+	notificationSendersHandler,
+} from '../testing/handlers/notifications';
 import {
 	completeAppAlertFormValues,
 	populatedAppAlertComposerState,
@@ -299,6 +304,9 @@ export const WithReplacementThumbnail: Story = {
 	parameters: {
 		msw: {
 			handlers: [
+				...channelHandlers,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
 					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
 						headers: { 'Content-Type': 'image/svg+xml' },

@@ -12,11 +12,11 @@
 		"test": "bun test",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"test-storybook": "vitest run"
+		"test-storybook": "NODE_OPTIONS='--disable-warning=DEP0205' vitest run"
 	},
 	"dependencies": {
 		"@emotion/react": "11.14.0",
-		"@guardian/stand": "0.0.76",
+		"@guardian/stand": "0.0.79",
 		"@hookform/resolvers": "5.9.1",
 		"@models": "workspace:*",
 		"@tanstack/react-query": "5.103.1",

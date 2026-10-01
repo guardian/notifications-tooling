@@ -18,13 +18,17 @@ export const EmptyState = ({
 }: EmptyStateProps) => (
 	<div css={emptyStateStyles.empty}>
 		<div css={emptyStateStyles.emptyIcon} aria-hidden="true">
-			<Icon symbol={icon} size="lg" />
+			<Icon symbol={icon} size="md" />
 		</div>
-		<Typography element="h2" variant="headingSm">
+		<Typography
+			element="h2"
+			variant="headingSm"
+			cssOverrides={emptyStateStyles.emptyTitle}
+		>
 			{title}
 		</Typography>
 		{description && (
-			<Typography variant="bodyMd" cssOverrides={emptyStateStyles.emptyCopy}>
+			<Typography variant="bodySm" cssOverrides={emptyStateStyles.emptyCopy}>
 				{description}
 			</Typography>
 		)}

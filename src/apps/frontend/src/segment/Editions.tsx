@@ -7,6 +7,7 @@ import {
 } from '@models';
 import { FlagAtom } from '../ui/FlagAtom';
 import { PreviewPillList } from '../ui/PreviewPillList';
+import { FALLBACK_TOPIC_TYPES } from './audience-fallbacks';
 import { EDITION_OPTIONS } from './edition-options';
 
 export interface AppAlertTopicSelection {
@@ -19,8 +20,10 @@ interface EditionsProps {
 	selected: AppAlertTopicSelection[];
 }
 
+// if the user hasn't selected an alertType, `type` will be an empty string
+// provide a fallback alertType so the id will be in the options passed to PreviewPillList
 const selectionId = ({ type, name }: AppAlertTopicSelection) =>
-	`${type}:${name}`;
+	`${!type ? FALLBACK_TOPIC_TYPES[0].id : type}:${name}`;
 
 const editionLabels = Object.fromEntries(
 	EDITION_OPTIONS.map(({ code, label }) => [toApiEditionId(code), label]),
