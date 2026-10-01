@@ -96,10 +96,10 @@ describe('formatTimeInTimeZone', () => {
 		const sentAt = new Date('2026-09-21T08:41:43.779Z');
 
 		expect(formatTimeInTimeZone(sentAt, 'Europe/London')).toMatch(
-			/^21 Sep 2026, 09:41 \S+$/,
+			/^21 Sep(?:t)? 2026, 09:41 \S+$/,
 		);
 		expect(formatTimeInTimeZone(sentAt, 'America/New_York')).toMatch(
-			/^21 Sep 2026, 04:41 \S+$/,
+			/^21 Sep(?:t)? 2026, 04:41 \S+$/,
 		);
 	});
 });
