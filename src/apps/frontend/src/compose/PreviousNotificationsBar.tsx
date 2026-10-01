@@ -253,6 +253,7 @@ export const PreviousNotificationsBar = ({
 					Send info
 				</Typography>
 				<Tooltip
+					placement="bottom"
 					theme={darkTooltipTheme}
 					label="send times"
 					cssOverrides={css({
