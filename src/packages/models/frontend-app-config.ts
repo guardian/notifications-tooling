@@ -11,4 +11,6 @@ export type AppConfig = UserResponse & {
 	stage?: 'DEV' | 'CODE' | 'PROD';
 	gridApiUri: string;
 	gridUri: string;
+	dispatchUserGuideUrl: string;
+	dispatchFeedbackFormUrl: string;
 };

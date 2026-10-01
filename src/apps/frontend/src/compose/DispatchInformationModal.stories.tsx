@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import {
-	CENTRAL_PRODUCTION_CONTACT_HREF,
-	DISPATCH_RUNBOOK_URL,
-} from '../support-links';
+import { ConfigContext } from '../config/ConfigContext';
+import { mockAppConfig } from '../testing/app-config';
 import {
 	DISPATCH_INFORMATION_MODAL_TITLE,
 	DispatchInformationModal,
@@ -13,6 +11,13 @@ const meta = {
 	title: 'Dispatch/Compose/DispatchInformationModal',
 	component: DispatchInformationModal,
 	parameters: { layout: 'centered' },
+	decorators: [
+		(Story) => (
+			<ConfigContext.Provider value={mockAppConfig}>
+				<Story />
+			</ConfigContext.Provider>
+		),
+	],
 	args: {
 		isOpen: true,
 		onOpenChange: fn(),
@@ -35,16 +40,25 @@ export const Default: Story = {
 			}),
 		).toBeVisible();
 
-		const runbookLink = within(dialog).getByRole('link', {
-			name: 'View Dispatch runbook',
+		const userGuideLink = within(dialog).getByRole('link', {
+			name: 'View Dispatch user guide',
 		});
-		await expect(runbookLink).toHaveAttribute('href', DISPATCH_RUNBOOK_URL);
-		await expect(runbookLink).toHaveAttribute('target', '_blank');
-		await expect(runbookLink).toHaveAttribute('rel', 'noopener noreferrer');
+		await expect(userGuideLink).toHaveAttribute(
+			'href',
+			mockAppConfig.dispatchUserGuideUrl,
+		);
+		await expect(userGuideLink).toHaveAttribute('target', '_blank');
+		await expect(userGuideLink).toHaveAttribute('rel', 'noopener noreferrer');
 
-		await expect(
-			within(dialog).getByRole('link', { name: 'Contact Central Production' }),
-		).toHaveAttribute('href', CENTRAL_PRODUCTION_CONTACT_HREF);
+		const feedbackLink = within(dialog).getByRole('link', {
+			name: 'Report an issue or provide feedback',
+		});
+		await expect(feedbackLink).toHaveAttribute(
+			'href',
+			mockAppConfig.dispatchFeedbackFormUrl,
+		);
+		await expect(feedbackLink).toHaveAttribute('target', '_blank');
+		await expect(feedbackLink).toHaveAttribute('rel', 'noopener noreferrer');
 
 		await userEvent.click(
 			within(dialog).getByRole('button', { name: 'Close Modal' }),

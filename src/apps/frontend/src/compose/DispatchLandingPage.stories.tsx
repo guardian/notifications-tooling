@@ -319,10 +319,12 @@ export const InformationModal: Story = {
 			name: DISPATCH_INFORMATION_MODAL_TITLE,
 		});
 		await expect(
-			within(dialog).getByRole('link', { name: 'View Dispatch runbook' }),
+			within(dialog).getByRole('link', { name: 'View Dispatch user guide' }),
 		).toBeVisible();
 		await expect(
-			within(dialog).getByRole('link', { name: 'Contact Central Production' }),
+			within(dialog).getByRole('link', {
+				name: 'Report an issue or provide feedback',
+			}),
 		).toBeVisible();
 
 		await userEvent.click(
