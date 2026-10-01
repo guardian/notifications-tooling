@@ -16,10 +16,10 @@
 	},
 	"dependencies": {
 		"@emotion/react": "11.14.0",
-		"@guardian/stand": "0.0.79",
+		"@guardian/stand": "1.0.0",
 		"@hookform/resolvers": "5.9.1",
 		"@models": "workspace:*",
-		"@tanstack/react-query": "5.103.1",
+		"@tanstack/react-query": "5.103.2",
 		"react": "19.3.0",
 		"react-aria-components": "1.19.0",
 		"react-dom": "19.3.0",
