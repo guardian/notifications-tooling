@@ -75,6 +75,27 @@ export const formatAbsoluteTime = (date: Date): string =>
 	`${absoluteDateFormatter.format(date)}, ${absoluteTimeFormatter.format(date)}`;
 
 /**
+ * Full date and time in a chosen timezone, defaulting to the viewer's local
+ * browser timezone. Includes the timezone abbreviation to make the conversion
+ * explicit.
+ */
+export const formatTimeInTimeZone = (date: Date, timeZone?: string): string => {
+	const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+		dateStyle: 'medium',
+		timeZone,
+	});
+	const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false,
+		timeZoneName: 'short',
+		timeZone,
+	});
+
+	return `${dateFormatter.format(date)}, ${timeFormatter.format(date)}`;
+};
+
+/**
  * How often a relative label needs re-rendering to stay accurate: every 30s
  * while it counts minutes, then every 5 minutes, and never once it has settled
  * on an absolute date.

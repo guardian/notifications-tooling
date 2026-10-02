@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import {
 	formatRelativeTime,
+	formatTimeInTimeZone,
 	getRefreshIntervalMs,
 	isRelativeTime,
 	parsePublicationDate,
@@ -87,6 +88,19 @@ describe('formatRelativeTime', () => {
 	it('falls back to an absolute date for future publication dates', () => {
 		const tomorrow = new Date(TEST_DATE.getTime() + 24 * 60 * 60 * 1000);
 		expect(formatRelativeTime(tomorrow, TEST_DATE)).toBe('20 Jul 2026, 13:00');
+	});
+});
+
+describe('formatTimeInTimeZone', () => {
+	it('formats the same instant in the viewer timezone', () => {
+		const sentAt = new Date('2026-09-21T08:41:43.779Z');
+
+		expect(formatTimeInTimeZone(sentAt, 'Europe/London')).toMatch(
+			/^21 Sep(?:t)? 2026, 09:41 \S+$/,
+		);
+		expect(formatTimeInTimeZone(sentAt, 'America/New_York')).toMatch(
+			/^21 Sep(?:t)? 2026, 04:41 \S+$/,
+		);
 	});
 });
 
