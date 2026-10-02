@@ -12,24 +12,32 @@ import '@guardian/stand/fonts/MaterialSymbolsOutlined.css';
 import '@guardian/stand/semantic/colors.css';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { StrictMode } from 'react';
+import { StrictMode, useState } from 'react';
 import { RouterProvider as ReactAriaRouterProvider } from 'react-aria-components';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
 import { queryClient } from './api-client/query-client';
 import { App } from './App';
+import { UnsavedChangesContext } from './navigation/UnsavedChangesContext';
 
 const RoutedApp = () => {
 	const navigate = useNavigate();
+	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
 	return (
-		<ReactAriaRouterProvider
-			navigate={(path, options) => {
-				void navigate(path, options);
-			}}
-		>
-			<App />
-		</ReactAriaRouterProvider>
+		<UnsavedChangesContext.Provider value={setHasUnsavedChanges}>
+			<ReactAriaRouterProvider
+				navigate={(path, options) => {
+					if (hasUnsavedChanges) {
+						window.location.assign(path);
+						return;
+					}
+					void navigate(path, options);
+				}}
+			>
+				<App />
+			</ReactAriaRouterProvider>
+		</UnsavedChangesContext.Provider>
 	);
 };
 

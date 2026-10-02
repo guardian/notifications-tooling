@@ -7,6 +7,8 @@ import {
 	useContext,
 	useState,
 } from 'react';
+import { useFormState } from 'react-hook-form';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { SendButton } from '../send/SendButton';
 import { SendConfirmationModal } from '../send/SendConfirmationModal';
 import { SendFailedModal } from '../send/SendFailedModal';
@@ -51,6 +53,11 @@ export const NotificationFormWrapper = ({
 		() => initialArticleUrl ?? composerState.article?.webUrl ?? '',
 	);
 	const [lockArticleInputText, setLockArticleInputText] = useState(false);
+	const { isDirty } = useFormState();
+	const hasUnsavedChanges =
+		!composerState.isWaitingForSend &&
+		(isDirty || articleInputText.trim().length > 0);
+	useUnsavedChanges(hasUnsavedChanges);
 
 	return (
 		<>

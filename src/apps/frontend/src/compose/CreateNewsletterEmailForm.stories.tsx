@@ -101,6 +101,29 @@ export const Default: Story = {
 	},
 };
 
+export const WarnsBeforeLeavingWithFormChanges: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const pristineUnload = new Event('beforeunload', { cancelable: true });
+		await expect(window.dispatchEvent(pristineUnload)).toBe(true);
+
+		await userEvent.type(canvas.getByLabelText('Subject'), 'Breaking news');
+
+		await waitFor(async () => {
+			const unsavedUnload = new Event('beforeunload', { cancelable: true });
+			await expect(window.dispatchEvent(unsavedUnload)).toBe(false);
+		});
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		await waitFor(async () => {
+			const clearedUnload = new Event('beforeunload', { cancelable: true });
+			await expect(window.dispatchEvent(clearedUnload)).toBe(true);
+		});
+	},
+};
+
 export const UpdatesFormFields: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
