@@ -1,0 +1,23 @@
+import { baseColors } from '@guardian/stand';
+
+interface Props {
+	color?: string;
+}
+
+export const GridIcon = ({ color = baseColors.neutral[900] }: Props) => (
+	<svg
+		version="1.1"
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 32 32"
+		width="32"
+		height="32"
+	>
+		<path
+			transform="translate(-0.5 0.5)"
+			d="M 7 7 h 18 v 18 h -18 z M 13 7 v 18 M 19 7 v 18 M 7 13 h 18 M 7 19 h 18"
+			fill="none"
+			stroke={color}
+			strokeWidth="1"
+		/>
+	</svg>
+);

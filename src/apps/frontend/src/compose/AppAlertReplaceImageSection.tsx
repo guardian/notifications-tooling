@@ -10,12 +10,14 @@ import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { useImageUrlCheck } from '../hooks/useImageUrlCheck';
 import { CENTRAL_PRODUCTION_CONTACT_HREF } from '../support-links';
+import { GridImagePicker } from './GridImagePicker';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
 	onReplacementImageUrlChange: (replacementImageUrl: string) => void;
 	onUpdate: (replacementImageUrl: string) => void;
 	errorMessage?: string;
+	show: boolean;
 }
 
 export const AppAlertReplaceImageSection = ({
@@ -23,6 +25,7 @@ export const AppAlertReplaceImageSection = ({
 	onReplacementImageUrlChange,
 	onUpdate,
 	errorMessage,
+	show,
 }: AppAlertReplaceImageSectionProps) => {
 	const { gridApiUri, gridUri } = useContext(ConfigContext) ?? {};
 
@@ -44,7 +47,13 @@ export const AppAlertReplaceImageSection = ({
 	});
 
 	return (
-		<>
+		<section
+			css={{
+				display: show ? 'flex' : 'none',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackXs,
+			}}
+		>
 			<Typography
 				variant="helpTextFormMd"
 				cssOverrides={css({ color: semanticColors.text.weak })}
@@ -110,6 +119,11 @@ export const AppAlertReplaceImageSection = ({
 			{imageUpdated && replacementImageUrl && (
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}
-		</>
+
+			<GridImagePicker
+				onUpdate={onUpdate}
+				setTextInput={handleImageUrlChange}
+			/>
+		</section>
 	);
 };
