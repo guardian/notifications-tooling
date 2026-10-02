@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { http, HttpResponse } from 'msw';
 import type { ComponentProps } from 'react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
 	failedAppPushSendResponse,
 	partiallyDeliveredAppPushSendResponse,
@@ -82,6 +81,31 @@ export const Default: Story = {
 			canvas.getByText('The app alert is sent immediately'),
 		).toBeVisible();
 		await expect(canvas.getByText('Sends right now')).toBeVisible();
+	},
+};
+
+export const WarnsBeforeLeavingWithArticleInput: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const pristineUnload = new Event('beforeunload', { cancelable: true });
+		await expect(window.dispatchEvent(pristineUnload)).toBe(true);
+
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			'https://www.theguardian.com/',
+		);
+
+		await waitFor(async () => {
+			const unsavedUnload = new Event('beforeunload', { cancelable: true });
+			await expect(window.dispatchEvent(unsavedUnload)).toBe(false);
+		});
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		await waitFor(async () => {
+			const clearedUnload = new Event('beforeunload', { cancelable: true });
+			await expect(window.dispatchEvent(clearedUnload)).toBe(true);
+		});
 	},
 };
 
@@ -301,17 +325,28 @@ export const WithReplacementThumbnail: Story = {
 		composerState: populatedAppAlertComposerState,
 		formValues: completeAppAlertFormValues,
 	},
+	beforeEach: () => {
+		const BrowserImage = window.Image;
+		class SuccessfulImage {
+			onload: ((event: Event) => void) | null = null;
+			onerror: ((event: Event) => void) | null = null;
+
+			set src(_value: string) {
+				queueMicrotask(() => this.onload?.(new Event('load')));
+			}
+		}
+
+		window.Image = SuccessfulImage as unknown as typeof Image;
+		return () => {
+			window.Image = BrowserImage;
+		};
+	},
 	parameters: {
 		msw: {
 			handlers: [
 				...channelHandlers,
 				notificationHistoryHandler,
 				notificationSendersHandler,
-				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
-					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
-						headers: { 'Content-Type': 'image/svg+xml' },
-					}),
-				),
 			],
 		},
 	},
