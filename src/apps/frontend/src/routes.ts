@@ -1,5 +1,3 @@
-import type { AppConfig } from '@models';
-
 export const notificationRoutes = {
 	newsletter: {
 		create: '/newsletter-email/create',
@@ -14,17 +12,30 @@ export const notificationRoutes = {
 export const articleUrlSearchParam = 'articleUrl';
 export const guardianMainUrl = 'https://www.theguardian.com';
 
-export const reviewWarningNavigationState = {
-	showReviewWarning: true,
-} as const;
+interface CopiedNotificationState {
+	showReviewWarning: true;
+	contentTitle: string;
+}
 
-export const hasReviewWarningNavigationState = (
+export const createCopiedNotificationState = (
+	contentTitle: string,
+): CopiedNotificationState => ({
+	showReviewWarning: true,
+	contentTitle,
+});
+
+export const parseCopiedNotificationState = (
 	state: unknown,
-): state is typeof reviewWarningNavigationState =>
+): CopiedNotificationState | undefined =>
 	typeof state === 'object' &&
 	state !== null &&
 	'showReviewWarning' in state &&
-	state.showReviewWarning === true;
+	state.showReviewWarning === true &&
+	'contentTitle' in state &&
+	typeof state.contentTitle === 'string' &&
+	state.contentTitle.trim() !== ''
+		? { showReviewWarning: true, contentTitle: state.contentTitle }
+		: undefined;
 
 const isGuardianHostname = (hostname: string) =>
 	hostname === 'theguardian.com' || hostname.endsWith('.theguardian.com');
@@ -65,25 +76,23 @@ export const toGuardianArticleUrl = (
 		: undefined;
 };
 
-export const getAppRoutes = (config: AppConfig | undefined) => {
+export const getAppRoutes = () => {
 	return {
 		dispatchLanding: '/',
 		createNewsletterEmail: notificationRoutes.newsletter.create,
 		newsletterEmailReport: notificationRoutes.newsletter.report,
-		createAppAlert: config?.DISABLE_APP_SEND_TAB
-			? undefined
-			: notificationRoutes['app-push'].create,
-		appAlertReport: config?.DISABLE_APP_SEND_TAB
-			? undefined
-			: notificationRoutes['app-push'].report,
+		createAppAlert: notificationRoutes['app-push'].create,
+		appAlertReport: notificationRoutes['app-push'].report,
 		history: '/history',
 	};
 };
 
-export const getTopBarNavigationItems = (
-	config: AppConfig | undefined,
-): Array<{ text: string; path: string; activePaths: string[] }> => {
-	const routes = getAppRoutes(config);
+export const getTopBarNavigationItems = (): Array<{
+	text: string;
+	path: string;
+	activePaths: string[];
+}> => {
+	const routes = getAppRoutes();
 
 	return [
 		{
@@ -91,13 +100,11 @@ export const getTopBarNavigationItems = (
 			path: routes.createNewsletterEmail,
 			activePaths: [routes.createNewsletterEmail, routes.newsletterEmailReport],
 		},
-		!routes.createAppAlert
-			? []
-			: {
-					text: 'Create app alert',
-					path: routes.createAppAlert,
-					activePaths: [routes.createAppAlert, routes.appAlertReport!],
-				},
+		{
+			text: 'Create app alert',
+			path: routes.createAppAlert,
+			activePaths: [routes.createAppAlert, routes.appAlertReport],
+		},
 		{ text: 'History', path: routes.history, activePaths: [routes.history] },
-	].flat();
+	];
 };

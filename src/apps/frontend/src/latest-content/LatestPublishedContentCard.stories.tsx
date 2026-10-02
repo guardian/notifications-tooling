@@ -98,3 +98,18 @@ export const NoIntendedAudience: Story = {
 		await expect(canvas.getByRole('button', { name: /create/i })).toBeVisible();
 	},
 };
+
+export const LiveBlog: Story = {
+	...Default,
+	args: { ...Default.args, content: mockLatestPublishedContent[1] },
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByText('Live')).toBeVisible();
+	},
+};
+
+export const LiveBlogCompact: Story = {
+	...Default,
+	args: { ...Default.args, content: mockLatestPublishedContent[1] },
+	render: (args) => <CardStory args={args} width="380px" />,
+};

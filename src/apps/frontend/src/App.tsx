@@ -23,7 +23,7 @@ import {
 
 export function App() {
 	const [config] = useState<AppConfig | undefined>(getAppConfig());
-	const [appRoutes] = useState(() => getAppRoutes(config));
+	const [appRoutes] = useState(getAppRoutes);
 
 	return (
 		<ConfigContext.Provider value={config}>
@@ -44,19 +44,17 @@ export function App() {
 							element={<NewsletterEmailDispatchReportTab />}
 						/>
 					</Route>
-					{appRoutes.createAppAlert && (
-						<Route
-							path="app-alert"
-							element={
-								<AppAlertNotificationFormProvider>
-									<Outlet />
-								</AppAlertNotificationFormProvider>
-							}
-						>
-							<Route path="create" element={<CreateAppAlertTab />} />
-							<Route path="report" element={<AppAlertDispatchReportTab />} />
-						</Route>
-					)}
+					<Route
+						path="app-alert"
+						element={
+							<AppAlertNotificationFormProvider>
+								<Outlet />
+							</AppAlertNotificationFormProvider>
+						}
+					>
+						<Route path="create" element={<CreateAppAlertTab />} />
+						<Route path="report" element={<AppAlertDispatchReportTab />} />
+					</Route>
 					<Route path={appRoutes.history} element={<HistoryPage />} />
 					<Route path="*" element={<NotFoundTab />} />
 				</Route>

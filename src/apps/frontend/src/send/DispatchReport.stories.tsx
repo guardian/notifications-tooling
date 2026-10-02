@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import {
+	createCopiedNotificationState,
 	notificationRoutes,
-	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
@@ -232,7 +232,11 @@ export const NewsletterReportCopiesArticleToAppAlert: Story = {
 				window.location.pathname.endsWith(destination.pathname),
 			).toBe(true);
 			await expect(window.location.search).toBe(destination.search);
-			await expect(getHistoryUserState()).toEqual(reviewWarningNavigationState);
+			await expect(getHistoryUserState()).toEqual(
+				createCopiedNotificationState(
+					completeNewsletterEmailFormValues.subjectText,
+				),
+			);
 		});
 	},
 };
@@ -280,7 +284,9 @@ export const AppAlertReportCopiesArticleToNewsletter: Story = {
 				window.location.pathname.endsWith(destination.pathname),
 			).toBe(true);
 			await expect(window.location.search).toBe(destination.search);
-			await expect(getHistoryUserState()).toEqual(reviewWarningNavigationState);
+			await expect(getHistoryUserState()).toEqual(
+				createCopiedNotificationState(completeAppAlertFormValues.headline),
+			);
 		});
 	},
 };

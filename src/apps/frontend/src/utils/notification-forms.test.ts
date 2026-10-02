@@ -55,6 +55,25 @@ describe('notification form length rules', () => {
 		).toBe(true);
 	});
 
+	it('keeps the replacement image URL as an unvalidated draft field', () => {
+		expect(defaultAppAlertFormValues.replacementImageUrl).toBe('');
+
+		const result = appAlertFormSchema.safeParse({
+			...defaultAppAlertFormValues,
+			alertType: 'breaking-news',
+			headline: 'A developing story',
+			editions: ['UK'],
+			replacementImageUrl: 'https://example.com/unapplied-draft.jpg',
+		});
+
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data.replacementImageUrl).toBe(
+				'https://example.com/unapplied-draft.jpg',
+			);
+		}
+	});
+
 	it('rejects an invalid app-alert thumbnail URL', () => {
 		expect(
 			appAlertFormSchema.safeParse({

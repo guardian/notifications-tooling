@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import { CENTRAL_PRODUCTION_CONTACT_HREF } from '../support-links';
 import { NoPermissionsTab } from './NoPermissionsTab';
 
 const meta = {
@@ -19,6 +20,6 @@ export const Default: Story = {
 		).toBeVisible();
 		await expect(
 			canvas.getByRole('link', { name: 'contact central production' }),
-		).toHaveAttribute('href', 'mailto:central.production@guardian.co.uk');
+		).toHaveAttribute('href', CENTRAL_PRODUCTION_CONTACT_HREF);
 	},
 };

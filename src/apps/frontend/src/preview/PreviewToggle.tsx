@@ -1,10 +1,8 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
-import { Icon } from '@guardian/stand/Icon';
-import { Typography } from '@guardian/stand/Typography';
 import type { AppAlertTopicOption } from '@models';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { CollapsibleSection } from '../ui/CollapsibleSection';
 import { AppAlertPreviewSection } from './AppAlertPreviewSection';
 import { NewsletterEmailPreviewSection } from './NewsletterEmailPreviewSection';
 
@@ -13,11 +11,10 @@ interface PreviewToggleProps {
 }
 
 const PreviewToggle = ({ children }: PreviewToggleProps) => {
-	const [isExpanded, setIsExpanded] = useState(false);
-
 	return (
-		<div
-			css={css({
+		<CollapsibleSection
+			label="Preview"
+			containerStyles={css({
 				display: 'flex',
 				flexDirection: 'column',
 				['@media (min-width: 1310px)']: {
@@ -25,31 +22,20 @@ const PreviewToggle = ({ children }: PreviewToggleProps) => {
 				},
 				borderBottom: `2px solid ${semanticColors.border.weak}`,
 			})}
+			toggleStyles={css({
+				alignItems: 'center',
+				background: semanticColors.bg.raisedLevel1,
+				border: 0,
+				color: semanticColors.text.strong,
+				cursor: 'pointer',
+				display: 'flex',
+				justifyContent: 'space-between',
+				padding: semanticSpacing.stackSm,
+				width: '100%',
+			})}
 		>
-			<button
-				type="button"
-				aria-expanded={isExpanded}
-				onClick={() => setIsExpanded((expanded) => !expanded)}
-				css={css({
-					alignItems: 'center',
-					background: semanticColors.bg.raisedLevel1,
-					border: 0,
-					color: semanticColors.text.strong,
-					cursor: 'pointer',
-					display: 'flex',
-					justifyContent: 'space-between',
-					padding: semanticSpacing.stackSm,
-					width: '100%',
-				})}
-			>
-				<Typography variant="bodyBoldMd">Preview</Typography>
-				<Icon
-					symbol={isExpanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-				/>
-			</button>
-
-			{isExpanded && children}
-		</div>
+			{children}
+		</CollapsibleSection>
 	);
 };
 

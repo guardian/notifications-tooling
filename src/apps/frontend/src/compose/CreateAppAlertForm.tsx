@@ -1,10 +1,11 @@
-import { type FormEvent, useContext } from 'react';
+import { type FormEvent, useContext, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import { getArticleThumbnail } from '../utils/article-thumbnail';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
+import { parseArticleUrlInputToArticleId } from '../utils/form-validation';
 import type { AppAlertFormValues } from '../utils/notification-forms';
 import { AlertTypeFormField } from './AlertTypeFormField';
 import { ArticleThumbnailImageFormField } from './ArticleThumbnailImageFormField';
@@ -18,11 +19,13 @@ import { NotificationFormWrapper } from './NotificationFormWrapper';
 
 interface CreateAppAlertFormProps {
 	initialArticleUrl?: string;
+	initialHeadline?: string;
 	showReviewWarning?: boolean;
 }
 
 export const CreateAppAlertForm = ({
 	initialArticleUrl,
+	initialHeadline,
 	showReviewWarning,
 }: CreateAppAlertFormProps) => {
 	const { clearErrors, handleSubmit, setValue } =
@@ -30,7 +33,16 @@ export const CreateAppAlertForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
-
+	const copiedHeadline = useRef(
+		initialHeadline && initialArticleUrl
+			? {
+					articleId:
+						parseArticleUrlInputToArticleId(initialArticleUrl).articleId,
+					headline: initialHeadline,
+				}
+			: undefined,
+	);
+	const [openReplaceSection, setOpenReplaceSection] = useState(false);
 	const { data: constraints } = useChannelConstraints();
 	const topicTypes = useAppAlertTopicTypes();
 	const prepareSend = (values: AppAlertFormValues) => {
@@ -84,14 +96,21 @@ export const CreateAppAlertForm = ({
 			showReviewWarning={showReviewWarning}
 			sendButtonLabel="Send app alert"
 			onSubmit={handleSubmitForm}
-			onResetNotification={() =>
-				updateComposerState({ type: 'reset-app-alert' })
-			}
+			onResetNotification={() => {
+				copiedHeadline.current = undefined;
+				updateComposerState({ type: 'reset-app-alert' });
+				setOpenReplaceSection(false);
+			}}
 			onArticleImported={(article) => {
-				setValue(
-					'headline',
-					(article.fields?.headline ?? article.webTitle).trim(),
-				);
+				setValue('replacementImageUrl', '');
+				setOpenReplaceSection(false);
+				const pendingCopiedHeadline = copiedHeadline.current;
+				copiedHeadline.current = undefined;
+				const headline =
+					pendingCopiedHeadline?.articleId === article.id
+						? pendingCopiedHeadline.headline
+						: (article.fields?.headline ?? article.webTitle).trim();
+				setValue('headline', headline);
 				const articleThumbnailUrl = getArticleThumbnail(article).src ?? '';
 				setValue('includeThumbnail', Boolean(articleThumbnailUrl));
 				setValue('articleThumbnailUrl', articleThumbnailUrl);
@@ -103,7 +122,10 @@ export const CreateAppAlertForm = ({
 			</NotificationFormSection>
 			<NotificationFormSection id="content-section">
 				<HeadlineFormField constraints={constraints} />
-				<ArticleThumbnailImageFormField />
+				<ArticleThumbnailImageFormField
+					openReplaceSection={openReplaceSection}
+					setOpenReplaceSection={setOpenReplaceSection}
+				/>
 			</NotificationFormSection>
 		</NotificationFormWrapper>
 	);

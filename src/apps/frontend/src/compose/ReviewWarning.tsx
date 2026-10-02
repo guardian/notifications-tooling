@@ -22,13 +22,11 @@ export const ReviewWarning = () => {
 				showIcon
 				cssOverrides={alertBannerCss}
 				theme={{
-					shared: {
-						content: {
-							alignItems: 'flex-start',
-						},
-					},
 					information: {
 						icon: { color: semanticColors.text.blue },
+					},
+					shared: {
+						content: { alignItems: 'flex-start' },
 					},
 				}}
 			>

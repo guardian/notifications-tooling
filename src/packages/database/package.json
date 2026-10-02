@@ -15,14 +15,14 @@
 	},
 	"devDependencies": {
 		"@types/pg": "8.23.1",
-		"drizzle-kit": "0.31.10"
+		"drizzle-kit": "0.31.11"
 	},
 	"dependencies": {
 		"@config": "workspace:*",
 		"@http-logger": "workspace:*",
 		"@models": "workspace:*",
-		"drizzle-orm": "0.45.2",
+		"drizzle-orm": "0.45.3",
 		"pg": "8.23.0",
-		"zod": "4.5.4"
+		"zod": "4.6.5"
 	}
 }

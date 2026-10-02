@@ -8,7 +8,8 @@ import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
-import { useImageUrlCheck } from '../hooks/use-image-url-check';
+import { useImageUrlCheck } from '../hooks/useImageUrlCheck';
+import { CENTRAL_PRODUCTION_CONTACT_HREF } from '../support-links';
 import { GridImagePicker } from './GridImagePicker';
 
 interface AppAlertReplaceImageSectionProps {
@@ -66,7 +67,7 @@ export const AppAlertReplaceImageSection = ({
 					isInvalid={!!displayedErrorMessage}
 					size="md"
 					value={replacementImageUrl}
-					placeholder="Enter replacement image URL..."
+					placeholder="Paste a Guardian image or Grid URL to replace this image"
 					onChange={handleImageUrlChange}
 					id="replacement-image-URL"
 				/>
@@ -102,9 +103,7 @@ export const AppAlertReplaceImageSection = ({
 			{imageCheckRemedy === 'contact-cp' && (
 				<Typography>
 					Please contact{' '}
-					<Link href='mailto:central.production@theguardian.com"'>
-						Central Production
-					</Link>{' '}
+					<Link href={CENTRAL_PRODUCTION_CONTACT_HREF}>Central Production</Link>{' '}
 					if the problem persists
 				</Typography>
 			)}

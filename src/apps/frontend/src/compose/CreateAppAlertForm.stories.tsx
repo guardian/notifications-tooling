@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { http, HttpResponse } from 'msw';
 import type { ComponentProps } from 'react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
 	failedAppPushSendResponse,
 	partiallyDeliveredAppPushSendResponse,
@@ -12,6 +11,11 @@ import {
 	liveblogFixture,
 	requestedLiveblogBlock,
 } from '../testing/capi-fixtures';
+import { channelHandlers } from '../testing/handlers/channels';
+import {
+	notificationHistoryHandler,
+	notificationSendersHandler,
+} from '../testing/handlers/notifications';
 import {
 	completeAppAlertFormValues,
 	populatedAppAlertComposerState,
@@ -77,6 +81,31 @@ export const Default: Story = {
 			canvas.getByText('The app alert is sent immediately'),
 		).toBeVisible();
 		await expect(canvas.getByText('Sends right now')).toBeVisible();
+	},
+};
+
+export const WarnsBeforeLeavingWithArticleInput: Story = {
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const pristineUnload = new Event('beforeunload', { cancelable: true });
+		await expect(window.dispatchEvent(pristineUnload)).toBe(true);
+
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			'https://www.theguardian.com/',
+		);
+
+		await waitFor(async () => {
+			const unsavedUnload = new Event('beforeunload', { cancelable: true });
+			await expect(window.dispatchEvent(unsavedUnload)).toBe(false);
+		});
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		await waitFor(async () => {
+			const clearedUnload = new Event('beforeunload', { cancelable: true });
+			await expect(window.dispatchEvent(clearedUnload)).toBe(true);
+		});
 	},
 };
 
@@ -217,10 +246,10 @@ export const PartialMobileNotificationServiceFailure: Story = {
 			await screen.findByText('The app alert had partial delivery issues'),
 		).toBeVisible();
 		await expect(
-			screen.getByText('Accepted for delivery to: UK'),
+			screen.getByText('Accepted for delivery to: United Kingdom'),
 		).toBeVisible();
 		await expect(
-			screen.getByText('Delivery not confirmed for: US'),
+			screen.getByText('Delivery not confirmed for: United States'),
 		).toBeVisible();
 		await expect(
 			screen.getByText('Reference: push-partial-1234'),
@@ -296,14 +325,28 @@ export const WithReplacementThumbnail: Story = {
 		composerState: populatedAppAlertComposerState,
 		formValues: completeAppAlertFormValues,
 	},
+	beforeEach: () => {
+		const BrowserImage = window.Image;
+		class SuccessfulImage {
+			onload: ((event: Event) => void) | null = null;
+			onerror: ((event: Event) => void) | null = null;
+
+			set src(_value: string) {
+				queueMicrotask(() => this.onload?.(new Event('load')));
+			}
+		}
+
+		window.Image = SuccessfulImage as unknown as typeof Image;
+		return () => {
+			window.Image = BrowserImage;
+		};
+	},
 	parameters: {
 		msw: {
 			handlers: [
-				http.get('https://media.guim.co.uk/replacement-thumbnail.jpg', () =>
-					HttpResponse.text('<svg xmlns="http://www.w3.org/2000/svg" />', {
-						headers: { 'Content-Type': 'image/svg+xml' },
-					}),
-				),
+				...channelHandlers,
+				notificationHistoryHandler,
+				notificationSendersHandler,
 			],
 		},
 	},
@@ -345,6 +388,51 @@ export const WithReplacementThumbnail: Story = {
 		await expect(
 			await screen.findByText('Are you sure you want to send the app alert?'),
 		).toBeVisible();
+	},
+};
+
+export const ClearAllFieldsResetsReplacementThumbnail: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+		formValues: completeAppAlertFormValues,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const replacementThumbnailUrl =
+			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		const replacementInput = canvas.getByRole('textbox', {
+			name: 'replacement image URL',
+		});
+		await userEvent.type(replacementInput, replacementThumbnailUrl);
+		await expect(replacementInput).toHaveValue(replacementThumbnailUrl);
+
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		await expect(
+			canvas.queryByRole('textbox', { name: 'replacement image URL' }),
+		).not.toBeInTheDocument();
+
+		await userEvent.type(
+			canvas.getByLabelText('article URL'),
+			articleFixture.webUrl,
+		);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await expect(await canvas.findByText('Article imported')).toBeVisible();
+
+		await expect(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		).toHaveAttribute('aria-expanded', 'false');
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Replace image' }),
+		);
+		await expect(
+			canvas.getByRole('textbox', { name: 'replacement image URL' }),
+		).toHaveValue('');
 	},
 };
 

@@ -6,6 +6,7 @@ import {
 	baseTypography,
 	semanticColors,
 	semanticRadius,
+	semanticShadow,
 	semanticSizing,
 	semanticSpacing,
 	semanticTypography,
@@ -14,6 +15,7 @@ import type { AlertBannerProps } from '@guardian/stand/AlertBanner';
 import type { ButtonTheme } from '@guardian/stand/Button';
 import type { FaviconTheme } from '@guardian/stand/Favicon';
 import type { LayoutMainProps } from '@guardian/stand/Layout';
+import type { ModalTheme } from '@guardian/stand/Modal';
 import type { TileTheme } from '@guardian/stand/Tile';
 import type { ToggleSwitchTheme } from '@guardian/stand/ToggleSwitch';
 import type { TopBarTheme } from '@guardian/stand/TopBar';
@@ -188,21 +190,6 @@ export const articlePreviewCardTheme = {
 		alignItems: 'center',
 		gap: semanticSpacing.stackXs,
 	}),
-	liveIndicator: css({
-		display: 'flex',
-		alignItems: 'center',
-		gap: semanticSpacing.stackXxs,
-		padding: `${baseSpacing['2Px']} ${baseSpacing['6Px']}`,
-		color: semanticColors.text.strongerInverse,
-		backgroundColor: semanticColors.text.error,
-		textTransform: 'uppercase',
-	}),
-	liveIndicatorDot: css({
-		width: '8px',
-		height: '8px',
-		borderRadius: '50%',
-		backgroundColor: semanticColors.text.strongerInverse,
-	}),
 	liveblogBlockId: css({
 		fontSize: '12px',
 		fontWeight: 700,
@@ -361,6 +348,124 @@ export const replaceThumbnailButtonTheme: ButtonTheme = {
 	},
 };
 
+export const dispatchTileModalTheme = {
+	modal: {
+		overlay: {
+			position: 'fixed',
+			overflow: 'auto',
+		},
+		modal: {
+			width: '484px',
+			maxWidth: 'min(484px, 90svw)',
+			maxHeight: '352px',
+			borderRadius: semanticRadius.cornerMd,
+			padding: {
+				top: semanticSpacing.stackMd,
+				bottom: semanticSpacing.stackLg,
+				left: semanticSpacing.stackLg,
+				right: semanticSpacing.stackLg,
+			},
+			boxShadow: '0px 2px 6px 0px #0000004D',
+		},
+	} satisfies ModalTheme,
+	tileList: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+	}),
+};
+
+export const dispatchTileModalStyles = {
+	content: css({
+		display: 'flex',
+		flexDirection: 'column',
+		gap: semanticSpacing.stackSm,
+	}),
+	preview: css({
+		display: 'grid',
+		gridTemplateColumns: 'minmax(92px, max-content) minmax(0, 1fr) 71px',
+		alignItems: 'stretch',
+		minHeight: '71px',
+		overflow: 'hidden',
+		border: `${semanticSizing.border.default} solid ${semanticColors.border.strong}`,
+		borderRadius: semanticRadius.cornerXs,
+		backgroundColor: semanticColors.bg.base,
+	}),
+	previewMeta: css({
+		position: 'relative',
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center',
+		alignItems: 'flex-start',
+		gap: '2px',
+		padding: '8px',
+		'&::after': {
+			position: 'absolute',
+			top: '50%',
+			right: '-18px',
+			width: '36px',
+			height: 0,
+			borderTop: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			opacity: 1,
+			transform: 'rotate(-90deg)',
+			content: '""',
+			pointerEvents: 'none',
+		},
+	}),
+	section: (color: string) =>
+		css({
+			color,
+			fontSize: '12px',
+			whiteSpace: 'nowrap',
+		}),
+	sectionName: css({ fontWeight: 700 }),
+	published: css({
+		color: semanticColors.text.strong,
+		fontSize: '12px',
+		whiteSpace: 'nowrap',
+	}),
+	publishedRelative: css({ fontWeight: 700 }),
+	previewHeadline: css({
+		display: 'flex',
+		minWidth: 0,
+		alignItems: 'flex-start',
+		padding: '8px',
+	}),
+	headline: css({
+		display: 'relative',
+		overflow: 'hidden',
+		fontSize: '12px',
+		lineHeight: 1.35,
+		color: semanticColors.text.strong,
+	}),
+	thumbnail: css({
+		width: '80px',
+		height: '55px',
+		alignSelf: 'start',
+		justifySelf: 'center',
+		padding: '8px 8px 0px 0px',
+		borderRadius: semanticRadius.cornerSm,
+	}),
+	thumbnailFallback: css({
+		display: 'grid',
+		width: '80px',
+		height: '55px',
+		alignSelf: 'start',
+		justifySelf: 'center',
+		placeItems: 'center',
+		color: semanticColors.text.weak,
+		backgroundColor: semanticColors.fill.neutralWeak,
+		borderRadius: semanticRadius.cornerSm,
+		padding: '6px',
+	}),
+	tileStyles: css({
+		width: '100%',
+		[from.md]: {
+			width: '420px',
+		},
+	}),
+};
+
 export const dispatchLandingTheme = {
 	global: css({
 		[from.lg]: {
@@ -383,6 +488,9 @@ export const dispatchLandingTheme = {
 				"'alertbanner alertbanner alertbanner' 'topbar topbar topbar' 'main gap latest'",
 			gridTemplateColumns: 'minmax(0, 983px) minmax(0, 1fr) minmax(0, 676px)',
 			gridTemplateRows: 'min-content min-content minmax(0, 1fr)',
+			position: 'fixed',
+			inset: 0,
+			width: '100%',
 			height: '100svh',
 			overflow: 'hidden',
 		},
@@ -403,7 +511,24 @@ export const dispatchLandingTheme = {
 			flexDirection: 'column',
 			paddingBottom: baseSpacing['24Px'],
 			overflow: 'hidden',
+			'@media (max-height: 700px)': {
+				overflowX: 'hidden',
+				overflowY: 'auto',
+			},
 		},
+	}),
+	headerRow: css({
+		display: 'flex',
+		justifyContent: 'space-between',
+		gap: semanticSpacing.stackSm,
+		[from.md]: {
+			flexWrap: 'wrap',
+			alignItems: 'center',
+		},
+	}),
+	infoButton: css({
+		fontWeight: 'normal',
+		gap: baseSpacing['4Px'],
 	}),
 	latestContentRail: css({
 		gridArea: 'latest',
@@ -428,11 +553,14 @@ export const dispatchLandingTheme = {
 			'&::before': {
 				display: 'none',
 			},
-			'& [data-latest-content-table-header]': {
-				display: 'none',
-			},
 			'& [data-latest-content-table-body] > [role="row"]:nth-of-type(n + 4)': {
 				display: 'grid',
+			},
+			'& [data-latest-content-show-all]': {
+				display: 'none',
+			},
+			'& [data-latest-content-create-alert]': {
+				display: 'block',
 			},
 		},
 	}),
@@ -448,10 +576,18 @@ export const dispatchLandingTheme = {
 			flex: 1,
 			flexDirection: 'column',
 			overflow: 'hidden',
+			'@media (max-height: 700px)': {
+				minHeight: '20rem',
+				flex: '0 0 20rem',
+			},
+			marginTop: 0,
 		},
 	}),
 	activityHeading: css({
 		marginBottom: semanticSpacing.stackSm,
+		[from.lg]: {
+			marginBottom: 0,
+		},
 	}),
 	activityControls: css({
 		display: 'flex',
@@ -460,6 +596,9 @@ export const dispatchLandingTheme = {
 		justifyContent: 'space-between',
 		gap: semanticSpacing.stackSm,
 		marginBottom: semanticSpacing.stackMd,
+		[from.lg]: {
+			marginBottom: 0,
+		},
 	}),
 	activityCounters: css({
 		display: 'flex',
@@ -483,6 +622,12 @@ export const latestPublishedContentTheme = {
 			minHeight: 0,
 			flex: 1,
 			overflow: 'hidden',
+			'& [data-latest-content-scroll-region]': {
+				display: 'flex',
+				minHeight: 0,
+				flexDirection: 'column',
+				overflow: 'hidden',
+			},
 		},
 	}),
 	header: css({
@@ -520,6 +665,11 @@ export const latestPublishedContentTheme = {
 		containerName: 'latest-content-table',
 		backgroundColor: semanticColors.bg.raisedLevel1,
 		[from.lg]: {
+			display: 'grid',
+			gridTemplateRows: 'auto minmax(0, 1fr)',
+			minHeight: 0,
+			flex: 1,
+			overflow: 'hidden',
 			backgroundColor: 'transparent',
 		},
 	}),
@@ -534,6 +684,21 @@ export const latestPublishedContentTheme = {
 				},
 			}),
 			[from.lg]: {
+				minHeight: 0,
+				overflowY: 'auto',
+				scrollbarGutter: 'stable',
+				scrollbarWidth: 'thin',
+				scrollbarColor: `${semanticColors.border.strong} transparent`,
+				'&::-webkit-scrollbar': {
+					width: baseSpacing['8Px'],
+				},
+				'&::-webkit-scrollbar-track': {
+					backgroundColor: 'transparent',
+				},
+				'&::-webkit-scrollbar-thumb': {
+					borderRadius: semanticRadius.cornerSm,
+					backgroundColor: semanticColors.border.strong,
+				},
 				'& > [role="row"]': {
 					backgroundColor: 'transparent',
 				},
@@ -546,14 +711,37 @@ export const latestPublishedContentTheme = {
 		},
 	}),
 	tableHeaderContent: css({
-		display: 'flex',
+		display: 'grid',
+		gridTemplateColumns: 'minmax(0, 1fr) 104px',
 		alignItems: 'center',
-		justifyContent: 'space-between',
 		gap: semanticSpacing.stackSm,
+		fontSize: baseTypography.size['14Px'],
+		[expandedLatestContentQuery]: {
+			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px 104px',
+		},
+		[compactLatestContentQuery]: {
+			gridTemplateColumns: 'minmax(0, 1fr) 104px',
+		},
 		'& button': {
 			height: 'auto',
 			padding: 0,
 		},
+	}),
+	tablePrimaryHeader: css({
+		[expandedLatestContentQuery]: {
+			gridColumn: '1 / 4',
+		},
+		[compactLatestContentQuery]: {
+			gridColumn: '1',
+		},
+	}),
+	tableShowAllHeader: css({
+		paddingLeft: semanticSpacing.stackSm,
+	}),
+	tableCreateAlertHeader: css({
+		display: 'none',
+		paddingLeft: semanticSpacing.stackSm,
+		fontWeight: 500,
 	}),
 	card: css({
 		display: 'grid',
@@ -563,7 +751,7 @@ export const latestPublishedContentTheme = {
 		backgroundColor: 'transparent',
 		[expandedLatestContentQuery]: {
 			display: 'grid',
-			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px max-content',
+			gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.5fr) 80px 104px',
 			alignItems: 'center',
 			columnGap: semanticSpacing.stackSm,
 			rowGap: semanticSpacing.stackXxs,
@@ -606,6 +794,17 @@ export const latestPublishedContentTheme = {
 		gap: semanticSpacing.stackXxs,
 		[expandedLatestContentQuery]: {
 			minWidth: 0,
+		},
+	}),
+	cardTitleAndLive: css({
+		display: 'flex',
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: semanticSpacing.stackXs,
+		[expandedLatestContentQuery]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: semanticSpacing.stackXxs,
 		},
 	}),
 	sectionLabel: (color: string) =>
@@ -751,13 +950,11 @@ export const emptyStateStyles = {
 	}),
 	emptyIcon: css({
 		display: 'grid',
-		width: '48px',
-		height: '48px',
 		placeItems: 'center',
-		marginBottom: semanticSpacing.stackXs,
-		borderRadius: '50%',
-		color: semanticColors.text.weak,
-		backgroundColor: semanticColors.fill.neutralWeak,
+		color: semanticColors.text.blue,
+	}),
+	emptyTitle: css({
+		color: semanticColors.text.blue,
 	}),
 	emptyCopy: css({
 		maxWidth: '420px',
@@ -767,28 +964,76 @@ export const emptyStateStyles = {
 
 export const historyViewStyles = {
 	page: css({
+		position: 'fixed',
+		top: stickyHeaderHeight,
+		right: 0,
+		bottom: 0,
+		left: 0,
 		display: 'grid',
+		overflow: 'hidden',
 		gridTemplateColumns: 'minmax(0, 1fr)',
-		[from.md]: {
+		gridTemplateRows: 'auto minmax(0, 1fr)',
+		'&:has(button[aria-controls="history-filters"][aria-expanded="true"])': {
+			overflowY: 'auto',
+			gridTemplateRows: `max-content calc(100vh - ${stickyHeaderHeight})`,
+		},
+		[from.lg]: {
+			overflow: 'hidden',
 			gridTemplateColumns: '18rem minmax(0, 1fr)',
+			gridTemplateRows: 'minmax(0, 1fr)',
 		},
 	}),
-	filters: css({
-		display: 'flex',
-		flexDirection: 'column',
-		gap: semanticSpacing.stackSm,
-		padding: semanticSpacing.stackSm,
-		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-		backgroundColor: semanticColors.fill.neutralWeak,
-		[from.md]: {
-			minHeight: `calc(100vh - ${stickyHeaderHeight})`,
-			borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
-			borderBottom: 0,
-		},
-	}),
+	filtersPanel: (isExpanded: boolean) =>
+		css({
+			display: 'flex',
+			minHeight: 0,
+			flexDirection: 'column',
+			borderBottom: isExpanded
+				? `${semanticSizing.border.default} solid ${semanticColors.border.weak}`
+				: 0,
+			boxShadow: isExpanded ? semanticShadow.raised : 'none',
+			[from.lg]: {
+				borderBottom: 0,
+				boxShadow: 'none',
+			},
+		}),
+	filtersToggle: (isExpanded: boolean) =>
+		css({
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			width: '100%',
+			padding: semanticSpacing.stackSm,
+			border: 0,
+			borderBottom: `${isExpanded ? semanticSizing.border.md : semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			color: semanticColors.text.strong,
+			backgroundColor: semanticColors.bg.raisedLevel1,
+			cursor: 'pointer',
+			display: 'flex',
+			[from.lg]: {
+				display: 'none',
+			},
+		}),
+	filters: (isExpanded: boolean) =>
+		css({
+			display: isExpanded ? 'flex' : 'none',
+			minHeight: 0,
+			flexDirection: 'column',
+			gap: 0,
+			padding: `0 ${semanticSpacing.stackSm} calc(${semanticSpacing.stackSm} * 2)`,
+			backgroundColor: semanticColors.bg.raisedLevel1,
+			overflowY: 'auto',
+			[from.lg]: {
+				display: 'flex',
+				flex: 1,
+				gap: semanticSpacing.stackSm,
+				padding: semanticSpacing.stackSm,
+				borderRight: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+			},
+		}),
 	clearFilters: css({
 		alignSelf: 'flex-end',
 		height: 'auto',
+		marginTop: semanticSpacing.stackMd,
 		padding: 0,
 		border: 0,
 		color: semanticColors.text.link,
@@ -804,6 +1049,9 @@ export const historyViewStyles = {
 			outline: `${semanticSizing.border.md} solid ${semanticColors.border.focused}`,
 			outlineOffset: semanticSizing.border.md,
 		},
+		[from.lg]: {
+			marginTop: 0,
+		},
 	}),
 	clearFiltersHidden: css({
 		visibility: 'hidden',
@@ -813,6 +1061,8 @@ export const historyViewStyles = {
 	}),
 	filterFields: css({
 		display: 'flex',
+		width: '100%',
+		maxWidth: '364px',
 		flexDirection: 'column',
 		gap: semanticSpacing.stackLg,
 	}),
@@ -917,7 +1167,7 @@ export const historyViewStyles = {
 		gridTemplateColumns: 'minmax(0, 1fr) auto',
 		alignItems: 'center',
 		width: '100%',
-		height: '40px',
+		height: semanticSizing.height.md,
 		paddingLeft: semanticSpacing.stackSm,
 		paddingRight: semanticSpacing.stackXs,
 		textAlign: 'left',
@@ -956,30 +1206,44 @@ export const historyViewStyles = {
 			display: 'none',
 		},
 	}),
-	container: css({
-		display: 'flex',
-		flexDirection: 'column',
-		gap: semanticSpacing.stackMd,
-		padding: semanticSpacing.stackLg,
+	container: (hasPagination: boolean) =>
+		css({
+			display: 'grid',
+			gridTemplateRows: hasPagination
+				? 'auto auto minmax(0, 1fr)'
+				: 'auto minmax(0, 1fr)',
+			minHeight: 0,
+			gap: semanticSpacing.stackMd,
+			padding: semanticSpacing.stackLg,
+			paddingBottom: 0,
+		}),
+	results: css({
+		overflow: 'hidden',
+		minHeight: 0,
 	}),
-	header: css({
-		display: 'flex',
-		flexDirection: 'column',
-		gap: semanticSpacing.stackLg,
-		[from.md]: {
+	header: (hasPagination: boolean) =>
+		css({
+			display: 'flex',
 			flexDirection: 'row',
+			flexWrap: 'wrap',
 			alignItems: 'center',
-		},
-	}),
+			gap: semanticSpacing.stackLg,
+			paddingBottom: semanticSpacing.stackSm,
+			borderBottom: hasPagination
+				? `${semanticSizing.border.default} solid ${semanticColors.border.weak}`
+				: 0,
+		}),
 	headerActions: css({
 		display: 'flex',
 		flexWrap: 'wrap',
 		alignItems: 'center',
 		gap: semanticSpacing.stackSm,
 		minWidth: 0,
-		[from.md]: {
-			marginLeft: 'auto',
-		},
+		marginLeft: 'auto',
+	}),
+	paginationRow: css({
+		display: 'flex',
+		justifyContent: 'flex-end',
 	}),
 	refreshControls: css({
 		display: 'flex',
@@ -1055,6 +1319,10 @@ export const historyViewStyles = {
 		},
 	}),
 	table: css({
+		display: 'grid',
+		gridTemplateRows: 'auto minmax(0, 1fr)',
+		height: '100%',
+		overflow: 'hidden',
 		containerType: 'inline-size',
 		containerName: 'history-table',
 		'@media (min-width: 600px) and (max-width: 1055.9px)': {
@@ -1076,6 +1344,7 @@ export const historyViewStyles = {
 	tableHeader: css({
 		'& > tr > *': {
 			padding: '16px',
+			fontSize: baseTypography.size['14Px'],
 		},
 		'& > tr > :not(:first-of-type)': {
 			display: 'none',
@@ -1086,6 +1355,10 @@ export const historyViewStyles = {
 				display: 'none',
 			},
 		},
+	}),
+	tableBody: css({
+		overflowY: 'auto',
+		minHeight: 0,
 	}),
 	tableRow: css({
 		rowGap: semanticSpacing.stackXs,

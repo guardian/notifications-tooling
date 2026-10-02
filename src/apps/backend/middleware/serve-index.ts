@@ -40,26 +40,25 @@ export const serveIndex: RequestHandler = async (
 	res: Response,
 ) => {
 	const [
-		DISABLE_APP_SEND_TAB,
-		DISABLE_LATEST_PUBLISHED_CONTENT,
 		GRID_API_URI,
 		GRID_URI,
+		DISPATCH_USER_GUIDE_URL,
+		DISPATCH_FEEDBACK_FORM_URL,
 	] = await Promise.all([
-		getSSMParameter('DISABLE_APP_SEND_TAB'),
-		getSSMParameter('DISABLE_LATEST_PUBLISHED_CONTENT'),
 		getSSMParameter('GRID_API_URI'),
 		getSSMParameter('GRID_URI'),
+		getSSMParameter('DISPATCH_USER_GUIDE_URL'),
+		getSSMParameter('DISPATCH_FEEDBACK_FORM_URL'),
 	]);
 	const permissions = await listUserPermissions(req.user!.email);
 	const config: AppConfig = {
 		user: req.user!,
 		permissions,
-		DISABLE_APP_SEND_TAB: DISABLE_APP_SEND_TAB.toLowerCase() === 'true',
-		DISABLE_LATEST_PUBLISHED_CONTENT:
-			DISABLE_LATEST_PUBLISHED_CONTENT.toLowerCase() === 'true',
 		stage: env.STAGE,
 		gridApiUri: GRID_API_URI,
 		gridUri: GRID_URI,
+		dispatchUserGuideUrl: DISPATCH_USER_GUIDE_URL,
+		dispatchFeedbackFormUrl: DISPATCH_FEEDBACK_FORM_URL,
 	};
 	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,

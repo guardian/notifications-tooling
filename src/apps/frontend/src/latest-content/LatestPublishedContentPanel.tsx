@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { DispatchCreateNotificationModal } from '../compose/DispatchCreateNotificationModal';
 import { ScrollWrapper } from '../compose/ScrollWrapper';
 import { useLatestPublishedContent } from '../hooks/useLatestPublishedContent';
+import { useRelativeTimeClock } from '../hooks/useRelativeTime';
 import { latestPublishedContentTheme } from '../themes';
 import { EmptyState } from '../ui/EmptyState';
 import { LastUpdated } from '../ui/LastUpdated';
@@ -37,12 +38,16 @@ export const LatestPublishedContentPanel = ({
 	const [showAll, setShowAll] = useState(false);
 	const [isCreateNotificationModalOpen, setIsCreateNotificationModalOpen] =
 		useState(false);
-	const [selectedArticleUrl, setSelectedArticleUrl] = useState<string>();
+	const [selectedContent, setSelectedContent] =
+		useState<LatestPublishedContentItem>();
 	const hasCachedData = latestPublishedContent.data !== undefined;
 	const isEmpty = !latestPublishedContent.isPending && content.length === 0;
 	const lastUpdatedAt = latestPublishedContent.dataUpdatedAt
 		? new Date(latestPublishedContent.dataUpdatedAt).toISOString()
 		: undefined;
+	const now = useRelativeTimeClock(
+		content.map(({ publishedAt }) => publishedAt),
+	);
 
 	return (
 		<>
@@ -69,6 +74,7 @@ export const LatestPublishedContentPanel = ({
 					</Typography>
 				</div>
 				<ScrollWrapper
+					data-latest-content-scroll-region
 					role="region"
 					aria-label="Latest published content list"
 					tabIndex={0}
@@ -112,14 +118,29 @@ export const LatestPublishedContentPanel = ({
 								>
 									<TableColumnHeader isRowHeader>
 										<div css={latestPublishedContentTheme.tableHeaderContent}>
-											<span>Latest published content</span>
-											{content.length > 3 && !showAll && (
-												<TextLinkButton
-													text="Show all"
-													textVariant="bodySm"
-													onClick={() => setShowAll(true)}
-												/>
+											<span
+												css={latestPublishedContentTheme.tablePrimaryHeader}
+											>
+												Latest published
+											</span>
+											{content.length > 3 && (
+												<span
+													data-latest-content-show-all
+													css={latestPublishedContentTheme.tableShowAllHeader}
+												>
+													<TextLinkButton
+														text={showAll ? 'Show less' : 'Show all'}
+														textVariant="bodySm"
+														onClick={() => setShowAll((prev) => !prev)}
+													/>
+												</span>
 											)}
+											<span
+												data-latest-content-create-alert
+												css={latestPublishedContentTheme.tableCreateAlertHeader}
+											>
+												Create alert
+											</span>
 										</div>
 									</TableColumnHeader>
 								</TableHeader>
@@ -131,8 +152,9 @@ export const LatestPublishedContentPanel = ({
 										<LatestPublishedContentCard
 											key={item.id}
 											content={item}
+											now={now}
 											onCreate={() => {
-												setSelectedArticleUrl(item.url);
+												setSelectedContent(item);
 												setIsCreateNotificationModalOpen(true);
 											}}
 										/>
@@ -146,7 +168,7 @@ export const LatestPublishedContentPanel = ({
 			<DispatchCreateNotificationModal
 				isOpen={isCreateNotificationModalOpen}
 				onOpenChange={setIsCreateNotificationModalOpen}
-				articleUrl={selectedArticleUrl}
+				content={selectedContent}
 			/>
 		</>
 	);

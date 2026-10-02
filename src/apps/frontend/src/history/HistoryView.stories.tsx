@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { articleFixture } from '../testing/capi-fixtures';
+import { channelAudiences } from '../testing/handlers/channels';
 import { type HistoryNotification, HistoryView } from './HistoryView';
 
 const notifications: HistoryNotification[] = [
@@ -12,7 +13,11 @@ const notifications: HistoryNotification[] = [
 		channel: 'app-push',
 		alertType: 'Breaking news',
 		sentBy: 'alex@example.com',
-		sentTo: ['US', 'AU'],
+		sentTo: [
+			{ id: 'US', label: 'United States' },
+			{ id: 'AU', label: 'Australia' },
+			{ id: 'INT', label: 'International' },
+		],
 		sentAt: new Date(Date.now() - 5 * 60_000).toISOString(),
 		status: 'Sent',
 	},
@@ -23,7 +28,13 @@ const notifications: HistoryNotification[] = [
 		channel: 'newsletter',
 		alertType: 'Breaking news',
 		sentBy: 'jamie@example.com',
-		sentTo: ['US', 'UK', 'AU', 'INT', 'EU'],
+		sentTo: [
+			{ id: 'US', label: 'United States' },
+			{ id: 'UK', label: 'United Kingdom' },
+			{ id: 'AU', label: 'Australia' },
+			{ id: 'INT', label: 'International' },
+			{ id: 'EU', label: 'Europe' },
+		],
 		sentAt: '2026-08-11T15:34:00Z',
 		status: 'Failed',
 	},
@@ -57,6 +68,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
 	args: {
 		notifications,
+		audiences: channelAudiences,
 		totalItems: notifications.length,
 		currentPage: 1,
 		limit: 10,
@@ -91,8 +103,8 @@ export const Default: Story = {
 		);
 		await expect(args.onRefresh).toHaveBeenCalledOnce();
 		await expect(
-			canvas.getByRole('img', { name: 'International' }),
-		).toBeInTheDocument();
+			canvas.getAllByRole('img', { name: 'International' }),
+		).toHaveLength(2);
 		const recentSendTime = canvas
 			.getAllByRole('time')
 			.find((element) =>
@@ -104,6 +116,53 @@ export const Default: Story = {
 			'datetime',
 			notifications[0]?.sentAt,
 		);
+	},
+};
+
+export const SmallScreenFilters: Story = {
+	args: {
+		notifications,
+		totalItems: notifications.length,
+		currentPage: 1,
+		limit: 10,
+		onPageChange: () => undefined,
+		onRefresh: fn(),
+	},
+	globals: {
+		viewport: { value: 'mobile1', isRotated: false },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const toggle = canvas.getByRole('button', {
+			name: 'Search and filter the history',
+		});
+		const filters =
+			canvasElement.querySelector<HTMLElement>('#history-filters');
+		if (!filters) {
+			throw new globalThis.Error('Filters panel not found');
+		}
+
+		await expect(toggle).toHaveAttribute('aria-controls', filters.id);
+		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+		await expect(filters).not.toBeVisible();
+
+		await userEvent.click(toggle);
+		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+		await expect(filters).toBeVisible();
+		const historySection = canvas
+			.getByRole('heading', { name: 'History' })
+			.closest('section');
+		if (!historySection) {
+			throw new globalThis.Error('History section not found');
+		}
+		await expect(filters.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+			historySection.getBoundingClientRect().top,
+		);
+		const page = filters.parentElement?.parentElement;
+		if (!page) {
+			throw new globalThis.Error('History page not found');
+		}
+		await expect(page.scrollHeight).toBeGreaterThan(page.clientHeight);
 	},
 };
 

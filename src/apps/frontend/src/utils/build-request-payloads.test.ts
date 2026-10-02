@@ -9,8 +9,13 @@ import {
 	buildAppAlertRequest,
 	buildNewsletterEmailRequest,
 } from './build-request-payloads';
+import type { AppAlertFormValues } from './notification-forms';
 
 describe('notification request builders', () => {
+	const liveBlogMainImageAssetUrl = liveblogFixture.blocks?.main?.elements
+		?.at(0)
+		?.assets?.at(1)?.file;
+
 	it.each([
 		['breaking-news', 'Breaking news: Edited subject'],
 		['exclusive', 'Exclusive: Edited subject'],
@@ -138,23 +143,25 @@ describe('notification request builders', () => {
 		expect(request.content.items['lead-story']).toMatchObject({
 			link: requestedUrl,
 			media: {
-				imageUrl: liveblogFixture.fields?.thumbnail,
-				thumbnailUrl: liveblogFixture.fields?.thumbnail,
+				imageUrl: liveBlogMainImageAssetUrl,
+				thumbnailUrl: liveBlogMainImageAssetUrl,
 			},
 		});
 	});
 	it('uses a replacement thumbnail URL in app-push media', () => {
 		const replacementThumbnailUrl =
 			'https://media.guim.co.uk/replacement-thumbnail.jpg';
+		const values: AppAlertFormValues = {
+			alertType: 'breaking-news',
+			headline: 'A developing story',
+			editions: ['UK'],
+			includeThumbnail: true,
+			replacementImageUrl: 'https://media.guim.co.uk/unapplied-draft.jpg',
+			articleThumbnailUrl: replacementThumbnailUrl,
+			deliveryOption: 'appImmediate',
+		};
 		const request = buildAppAlertRequest({
-			values: {
-				alertType: 'breaking-news',
-				headline: 'A developing story',
-				editions: ['UK'],
-				includeThumbnail: true,
-				articleThumbnailUrl: replacementThumbnailUrl,
-				deliveryOption: 'appImmediate',
-			},
+			values,
 			alertTypeLabel: 'Breaking news',
 			article: articleFixture,
 			idempotencyKey: 'app-alert-with-replacement-thumbnail',
@@ -192,11 +199,50 @@ describe('notification request builders', () => {
 		expect(request.content.items['lead-story']).toMatchObject({
 			media: {
 				type: 'image',
-				imageUrl:
-					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
-				thumbnailUrl:
-					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+				imageUrl: liveBlogMainImageAssetUrl,
+				thumbnailUrl: liveBlogMainImageAssetUrl,
 			},
+		});
+	});
+
+	it('uses the liveblog thumbnail for the media if the liveblog has no image in the main block', () => {
+		const request = buildAppAlertRequest({
+			values: {
+				alertType: 'breaking-news',
+				headline: 'Latest developments',
+				editions: ['UK'],
+				includeThumbnail: true,
+				articleThumbnailUrl: '',
+				deliveryOption: 'appImmediate',
+			},
+			alertTypeLabel: 'Breaking news',
+			article: {
+				...liveblogFixture,
+				blocks: {
+					...liveblogFixture.blocks,
+					main: {
+						id: 'liveblog-main-block-id',
+						elements: [
+							{
+								type: 'video',
+								assets: [
+									{
+										file: 'https://media.guim.co.uk/some-video-source/video_78.mp4',
+										typeData: { width: 500, duration: 90 },
+									},
+								],
+							},
+						],
+					},
+				},
+			},
+			idempotencyKey: 'liveblog-app-alert-operation-id',
+		});
+
+		expect(request.content.items['lead-story']?.media).toMatchObject({
+			type: 'image',
+			imageUrl: liveblogFixture.fields?.thumbnail,
+			thumbnailUrl: liveblogFixture.fields?.thumbnail,
 		});
 	});
 
@@ -221,10 +267,8 @@ describe('notification request builders', () => {
 		expect(request.content.items['lead-story']).toMatchObject({
 			link: requestedUrl,
 			media: {
-				imageUrl:
-					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
-				thumbnailUrl:
-					'https://media.guim.co.uk/a3c03b15c4f2b06bd40cfe450f898cb7c659d737/2133_482_3367_2694/500.jpg',
+				imageUrl: liveBlogMainImageAssetUrl,
+				thumbnailUrl: liveBlogMainImageAssetUrl,
 			},
 		});
 	});

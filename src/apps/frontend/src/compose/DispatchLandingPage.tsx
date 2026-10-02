@@ -1,13 +1,14 @@
 import { css } from '@emotion/react';
 import { semanticSpacing } from '@guardian/stand';
+import { Button } from '@guardian/stand/Button';
+import { Icon } from '@guardian/stand/Icon';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Layout } from '@guardian/stand/Layout';
 import { Tile } from '@guardian/stand/Tile';
 import { Typography } from '@guardian/stand/Typography';
 import { between, from } from '@guardian/stand/utils';
-import { useContext } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ConfigContext } from '../config/ConfigContext';
 import { DispatchLandingHistoryView } from '../history/DispatchLandingHistoryView';
 import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { LatestPublishedContentPanel } from '../latest-content/LatestPublishedContentPanel';
@@ -17,6 +18,7 @@ import { dispatchLandingTheme } from '../themes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 import { parseHistorySearchParams } from '../utils/history-search-params';
 import { mapNotificationToHistoryNotification } from '../utils/notification-history-mapper';
+import { DispatchInformationModal } from './DispatchInformationModal';
 
 const landingTileStyles = css({
 	width: '100%',
@@ -30,7 +32,6 @@ const landingTileStyles = css({
 });
 
 export const DispatchLandingPage = () => {
-	const config = useContext(ConfigContext);
 	const [searchParams] = useSearchParams();
 	const parsedHistoryQuery = parseHistorySearchParams(searchParams);
 	const historyQuery = {
@@ -41,6 +42,7 @@ export const DispatchLandingPage = () => {
 		getSince: () => Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000),
 	});
 	const channelAudiences = useChannelAudiences();
+	const [isInformationModalOpen, setIsInformationModalOpen] = useState(false);
 	const handleRefresh = () => void notificationHistory.refetch();
 	const notifications =
 		notificationHistory.data?.notifications.flatMap((notification) => {
@@ -54,18 +56,33 @@ export const DispatchLandingPage = () => {
 	return (
 		<>
 			<Layout.Main css={dispatchLandingTheme.primaryColumn}>
-				<Typography variant="titleXl" element={'h1'}>
-					Welcome to Dispatch
-				</Typography>
+				<header css={dispatchLandingTheme.headerRow}>
+					<Typography variant="titleXl" element={'h1'}>
+						Welcome to Dispatch
+					</Typography>
+					<Button
+						variant="tertiary"
+						size="sm"
+						cssOverrides={dispatchLandingTheme.infoButton}
+						onPress={() => setIsInformationModalOpen(true)}
+					>
+						<Icon size="sm" symbol="info" />
+						Information
+					</Button>
+				</header>
+				<DispatchInformationModal
+					isOpen={isInformationModalOpen}
+					onOpenChange={setIsInformationModalOpen}
+				/>
+
 				<div
 					css={{
 						display: 'flex',
 						flexDirection: 'column',
 						gap: '12px',
 						width: '100%',
-						marginTop: semanticSpacing.stackMd,
+						marginTop: semanticSpacing.stackLg,
 						marginBottom: semanticSpacing.stackLg,
-						paddingTop: semanticSpacing.stackMd,
 						[from.md]: {
 							display: 'grid',
 							gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
@@ -130,11 +147,9 @@ export const DispatchLandingPage = () => {
 					/>
 				</div>
 			</Layout.Main>
-			{!config?.DISABLE_LATEST_PUBLISHED_CONTENT && (
-				<aside css={dispatchLandingTheme.latestContentRail}>
-					<LatestPublishedContentPanel />
-				</aside>
-			)}
+			<aside css={dispatchLandingTheme.latestContentRail}>
+				<LatestPublishedContentPanel />
+			</aside>
 		</>
 	);
 };

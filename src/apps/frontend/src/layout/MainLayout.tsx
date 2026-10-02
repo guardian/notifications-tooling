@@ -38,7 +38,7 @@ const getInitials = (user: AppConfig['user']): string => {
 
 export const MainLayout = ({ children }: Props) => {
 	const config = useContext(ConfigContext);
-	const routes = getAppRoutes(config);
+	const routes = getAppRoutes();
 	const { user } = config ?? {};
 	const { pathname } = useLocation();
 	const stage = config?.stage;
@@ -77,16 +77,14 @@ export const MainLayout = ({ children }: Props) => {
 						collapsedHoverText=""
 					/>
 					<TopBarContainerLeft>
-						{getTopBarNavigationItems(config).map(
-							({ text, path, activePaths }) => (
-								<TopBarNavigation
-									key={path}
-									text={text}
-									isSelected={activePaths.includes(pathname)}
-									href={path}
-								/>
-							),
-						)}
+						{getTopBarNavigationItems().map(({ text, path, activePaths }) => (
+							<TopBarNavigation
+								key={path}
+								text={text}
+								isSelected={activePaths.includes(pathname)}
+								href={path}
+							/>
+						))}
 					</TopBarContainerLeft>
 					{user && (
 						<Avatar

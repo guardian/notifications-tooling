@@ -1,6 +1,6 @@
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
-import { componentTooltip } from '@guardian/stand';
+import { componentTooltip, semanticColors } from '@guardian/stand';
 import type { IconProps } from '@guardian/stand/Icon';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
@@ -18,6 +18,7 @@ export interface TooltipTheme {
 	color: string;
 	backgroundColor: string;
 	triggerColor: string;
+	triggerHoverColor: string;
 }
 
 export interface TooltipProps {
@@ -36,6 +37,7 @@ const defaultTheme: TooltipTheme = {
 	color: componentTooltip.shared.color,
 	backgroundColor: componentTooltip.shared.backgroundColor,
 	triggerColor: 'inherit',
+	triggerHoverColor: 'inherit',
 };
 
 const styles = {
@@ -50,6 +52,12 @@ const styles = {
 			background: 'none',
 			color: theme.triggerColor,
 			cursor: 'pointer',
+			'&[data-hovered], &:hover': {
+				color:
+					theme.triggerHoverColor === 'inherit'
+						? theme.triggerColor
+						: theme.triggerHoverColor,
+			},
 		}),
 	tooltip: (theme: TooltipTheme) =>
 		css({
@@ -62,18 +70,22 @@ const styles = {
 
 			"&[data-placement='top']": {
 				marginBottom: componentTooltip.tooltip.offset,
-				svg: { transform: 'rotate(-90deg) translateX(3px)' },
+				'svg[data-tooltip-arrow]': {
+					transform: 'rotate(-90deg) translateX(3px)',
+				},
 			},
 			"&[data-placement='bottom']": {
 				marginTop: componentTooltip.tooltip.offset,
-				svg: { transform: 'rotate(90deg) translateX(3px)' },
+				'svg[data-tooltip-arrow]': {
+					transform: 'rotate(90deg) translateX(3px)',
+				},
 			},
 			"&[data-placement='right']": {
 				marginLeft: componentTooltip.tooltip.offset,
 			},
 			"&[data-placement='left']": {
 				marginRight: componentTooltip.tooltip.offset,
-				svg: { transform: 'rotate(180deg)' },
+				'svg[data-tooltip-arrow]': { transform: 'rotate(180deg)' },
 			},
 		}),
 	arrow: (theme: TooltipTheme) =>
@@ -86,6 +98,7 @@ const styles = {
 const TooltipArrow = ({ theme }: { theme: TooltipTheme }) => (
 	<OverlayArrow>
 		<svg
+			data-tooltip-arrow
 			xmlns="http://www.w3.org/2000/svg"
 			width="9"
 			height="14"
@@ -140,4 +153,9 @@ export const Tooltip = ({
 			</AriaTooltip>
 		</TooltipTrigger>
 	);
+};
+
+export const darkTooltipTheme: Partial<TooltipTheme> = {
+	color: semanticColors.text.strongerInverse,
+	backgroundColor: semanticColors.fill.strong,
 };

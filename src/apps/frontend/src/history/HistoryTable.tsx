@@ -10,11 +10,11 @@ import {
 	TableRow,
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
+import { notificationChannelNames } from '@models';
 import {
-	type DisplayAppAlertTopicEditionId,
-	notificationChannelNames,
-} from '@models';
-import { useRelativeTime } from '../hooks/useRelativeTime';
+	useRelativeTime,
+	useRelativeTimeClock,
+} from '../hooks/useRelativeTime';
 import type { ChannelAudienceResponse } from '../schemas';
 import { historyViewStyles } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
@@ -22,7 +22,7 @@ import { phoneIphoneIcon } from '../ui/flag-icons';
 import { FlagAtom } from '../ui/FlagAtom';
 import { SendTimeTooltip } from '../ui/SendTimeTooltip';
 import { Tooltip } from '../ui/Tooltip';
-import { getSenderDisplayName } from '../utils/notification-history-mapper';
+import { getSenderDisplayName } from '../utils/display-text-helpers';
 import { HistoryFailureTooltip } from './HistoryFailureTooltip';
 import type { HistoryNotification, HistoryStatus } from './HistoryView';
 
@@ -38,14 +38,6 @@ const tableColumns = {
 	lg: 'minmax(280px, 2.4fr) minmax(180px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1fr) 132px',
 } as const;
 
-const editionNames: Record<DisplayAppAlertTopicEditionId, string> = {
-	UK: 'United Kingdom',
-	US: 'United States',
-	AU: 'Australia',
-	EU: 'Europe',
-	INT: 'International',
-};
-
 const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
 	{
 		Accepted: 'grey',
@@ -54,8 +46,8 @@ const statusColors: Record<HistoryStatus, 'green' | 'yellow' | 'grey' | 'red'> =
 		Failed: 'red',
 	};
 
-const HistorySendTime = ({ sentAt }: { sentAt: string }) => {
-	const sendTime = useRelativeTime(sentAt, 'long');
+const HistorySendTime = ({ sentAt, now }: { sentAt: string; now: Date }) => {
+	const sendTime = useRelativeTime(sentAt, 'long', now);
 
 	return (
 		<span
@@ -109,6 +101,11 @@ export const HistoryTable = ({
 	audiences,
 	showUserName = false,
 }: HistoryTableProps) => {
+	const now = useRelativeTimeClock(
+		notifications.map(({ sentAt }) => sentAt),
+		'long',
+	);
+
 	return (
 		<Table
 			aria-label="Sent alerts"
@@ -123,7 +120,7 @@ export const HistoryTable = ({
 				<TableColumnHeader>Send time</TableColumnHeader>
 				<TableColumnHeader>Status</TableColumnHeader>
 			</TableHeader>
-			<TableBody>
+			<TableBody cssOverrides={historyViewStyles.tableBody}>
 				{notifications.map((notification) => {
 					return (
 						<TableRow
@@ -203,13 +200,9 @@ export const HistoryTable = ({
 										historyViewStyles.regions,
 									]}
 								>
-									{notification.sentTo.map((edition) => (
-										<span
-											key={edition}
-											aria-label={editionNames[edition]}
-											role="img"
-										>
-											<FlagAtom segmentCode={edition} />
+									{notification.sentTo.map(({ id, label }) => (
+										<span key={id} aria-label={label} role="img">
+											<FlagAtom segmentCode={id} />
 										</span>
 									))}
 								</span>
@@ -222,7 +215,7 @@ export const HistoryTable = ({
 								<span css={historyViewStyles.compactLabel} aria-hidden="true">
 									Send time:{' '}
 								</span>
-								<HistorySendTime sentAt={notification.sentAt} />
+								<HistorySendTime sentAt={notification.sentAt} now={now} />
 							</TableCell>
 							<TableCell
 								gridColumn={{ md: '2', lg: '5' }}
@@ -274,7 +267,7 @@ export const HistoryTableSkeleton = () => (
 				<TableColumnHeader>Send time</TableColumnHeader>
 				<TableColumnHeader>Status</TableColumnHeader>
 			</TableHeader>
-			<TableBody>
+			<TableBody cssOverrides={historyViewStyles.tableBody}>
 				{Array.from({ length: 5 }, (_, index) => (
 					<TableRow
 						key={index}

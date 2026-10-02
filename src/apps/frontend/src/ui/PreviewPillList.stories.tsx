@@ -4,8 +4,8 @@ import { expect, within } from 'storybook/test';
 import { PreviewPillList } from './PreviewPillList';
 
 const options = [
-	{ id: 'uk', label: 'UK' },
-	{ id: 'us', label: 'US' },
+	{ id: 'uk', label: 'United Kingdom' },
+	{ id: 'us', label: 'United States' },
 	{ id: 'international', label: 'International' },
 ];
 
@@ -27,9 +27,9 @@ export const Default: Story = {
 		const canvas = within(canvasElement);
 
 		await expect(canvas.getByText('Editions')).toBeVisible();
-		await expect(canvas.getByText('UK')).toBeVisible();
+		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
-		await expect(canvas.queryByText('US')).not.toBeInTheDocument();
+		await expect(canvas.queryByText('United States')).not.toBeInTheDocument();
 	},
 };
 
@@ -48,7 +48,7 @@ export const DispatchReport: Story = {
 		const canvas = within(canvasElement);
 
 		await expect(canvas.queryByText('Editions')).not.toBeInTheDocument();
-		await expect(canvas.getByText('UK')).toBeVisible();
+		await expect(canvas.getByText('United Kingdom')).toBeVisible();
 		await expect(canvas.getByText('International')).toBeVisible();
 	},
 };

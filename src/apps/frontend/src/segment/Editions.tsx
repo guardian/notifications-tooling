@@ -2,12 +2,11 @@ import { Icon } from '@guardian/stand/Icon';
 import {
 	appAlertTopicEditionId,
 	type AppAlertTopicOption,
-	toApiEditionId,
 	toDisplayEditionId,
 } from '@models';
 import { FlagAtom } from '../ui/FlagAtom';
 import { PreviewPillList } from '../ui/PreviewPillList';
-import { EDITION_OPTIONS } from './edition-options';
+import { FALLBACK_TOPIC_TYPES } from './audience-fallbacks';
 
 export interface AppAlertTopicSelection {
 	type: string;
@@ -19,18 +18,16 @@ interface EditionsProps {
 	selected: AppAlertTopicSelection[];
 }
 
+// if the user hasn't selected an alertType, `type` will be an empty string
+// provide a fallback alertType so the id will be in the options passed to PreviewPillList
 const selectionId = ({ type, name }: AppAlertTopicSelection) =>
-	`${type}:${name}`;
-
-const editionLabels = Object.fromEntries(
-	EDITION_OPTIONS.map(({ code, label }) => [toApiEditionId(code), label]),
-);
+	`${!type ? FALLBACK_TOPIC_TYPES[0].id : type}:${name}`;
 
 export const Editions = ({ topicTypes, selected }: EditionsProps) => {
 	const options = topicTypes.flatMap((topicType) =>
 		topicType.editions.map((edition) => ({
 			id: selectionId({ type: topicType.id, name: edition.id }),
-			label: editionLabels[edition.id] ?? edition.label,
+			label: edition.label,
 		})),
 	);
 	const selectedIds = selected.map(selectionId);

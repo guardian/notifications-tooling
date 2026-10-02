@@ -10,6 +10,18 @@ Locally, aplication environment variables are read from the CODE SSM namespace
 using the `composer` AWS profile, but the gitignored `.env` or `.env.local` files
 in this package may define a local override for any of the variables in `.env.example` when needed.
 
+The links shown in the Dispatch information modal are stored in SSM Parameter
+Store under the following paths:
+
+| Environment | User guide                                             | Issue reporting and feedback                              |
+| ----------- | ------------------------------------------------------ | --------------------------------------------------------- |
+| CODE        | `/CODE/notifications/dispatch/dispatch-user-guide-url` | `/CODE/notifications/dispatch/dispatch-feedback-form-url` |
+| PROD        | `/PROD/notifications/dispatch/dispatch-user-guide-url` | `/PROD/notifications/dispatch/dispatch-feedback-form-url` |
+
+For local development, these values default to the CODE parameters and can be
+overridden with the `DISPATCH_USER_GUIDE_URL` and
+`DISPATCH_FEEDBACK_FORM_URL` environment variables.
+
 ### Newsletter channel configuration
 
 - `BRAZE_API_KEY` needs the Braze `campaigns.trigger.send`, `users.track`, and

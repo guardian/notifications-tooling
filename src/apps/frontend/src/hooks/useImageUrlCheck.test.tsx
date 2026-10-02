@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
 import { act, renderHook } from '@testing-library/react';
 import '../../happydom-setup';
-import { useImageUrlCheck } from './use-image-url-check';
+import { useImageUrlCheck } from './useImageUrlCheck';
 
 class ControllableImage {
 	static instances: ControllableImage[] = [];

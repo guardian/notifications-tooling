@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { ApiError } from '../api-client/errors';
 import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
 import {
 	articleUrlSearchParam,
+	createCopiedNotificationState,
 	notificationRoutes,
-	reviewWarningNavigationState,
 	withArticleUrl,
 } from '../routes';
 import { articleFixture } from '../testing/capi-fixtures';
@@ -17,10 +18,12 @@ import type { NotificationComposerState } from '../types';
 import { defaultComposerState } from '../utils/notification-composer-reducer';
 import type { NewsletterEmailFormValues } from '../utils/notification-forms';
 import { CreateNewsletterEmailTab } from './CreateNewsletterEmailTab';
+import type { NotificationFormContextProps } from './NotificationFormContext';
 
 type StoryArgs = {
 	composerState: NotificationComposerState;
 	formValues?: Partial<NewsletterEmailFormValues>;
+	resolveArticleFromCapi?: NotificationFormContextProps['resolveArticleFromCapi'];
 	containerMinWidth: string;
 };
 
@@ -48,7 +51,12 @@ const meta: Meta<StoryArgs> = {
 		},
 	},
 	render: function Render(args) {
-		const { composerState, formValues, containerMinWidth } = args;
+		const {
+			composerState,
+			formValues,
+			resolveArticleFromCapi,
+			containerMinWidth,
+		} = args;
 		return (
 			<div
 				style={{
@@ -61,7 +69,7 @@ const meta: Meta<StoryArgs> = {
 				{useNotificationFormStory(
 					<CreateNewsletterEmailTab />,
 					composerState,
-					{},
+					resolveArticleFromCapi ? { resolveArticleFromCapi } : {},
 					'newsletter',
 					formValues,
 				)}
@@ -72,6 +80,22 @@ const meta: Meta<StoryArgs> = {
 
 export default meta;
 type Story = StoryObj<StoryArgs>;
+
+const copiedAppAlertHeadline = 'Edited app alert headline';
+const replacementArticle = {
+	...articleFixture,
+	id: 'world/2026/sep/25/replacement-article',
+	webUrl: 'https://www.theguardian.com/world/2026/sep/25/replacement-article',
+	webTitle: 'Replacement article web title',
+	fields: {
+		...articleFixture.fields,
+		headline: 'Replacement article headline',
+	},
+};
+let articleRequestCount = 0;
+let failedImportRequestCount = 0;
+let retryRequestCount = 0;
+let changedArticleRequestCount = 0;
 
 export const Default: Story = {
 	play: async ({ canvasElement }) => {
@@ -91,7 +115,19 @@ export const Default: Story = {
 };
 
 export const PopulatesArticleCopiedFromAnotherChannel: Story = {
+	args: {
+		formValues: completeNewsletterEmailFormValues,
+		resolveArticleFromCapi: () =>
+			Promise.resolve({
+				success: true,
+				data: {
+					article:
+						articleRequestCount++ === 0 ? articleFixture : replacementArticle,
+				},
+			}),
+	},
 	beforeEach: () => {
+		articleRequestCount = 0;
 		const originalUrl = window.location.href;
 		const originalState: unknown = window.history.state;
 		const currentState: unknown = window.history.state;
@@ -100,7 +136,7 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 				...(typeof currentState === 'object' && currentState !== null
 					? currentState
 					: {}),
-				usr: reviewWarningNavigationState,
+				usr: createCopiedNotificationState(copiedAppAlertHeadline),
 			},
 			'',
 			withArticleUrl(
@@ -127,8 +163,14 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 			articleFixture.webUrl,
 		);
 		await expect(canvas.getByLabelText('Subject')).toHaveValue(
-			articleFixture.fields?.headline,
+			copiedAppAlertHeadline,
 		);
+		await expect(
+			canvas.getByRole('button', { name: 'Exclusive Kicker' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('button', { name: 'Select United Kingdom' }),
+		).toHaveAttribute('aria-pressed', 'true');
 		await expect(canvas.getByLabelText('Preview text')).toHaveValue(
 			completeNewsletterEmailFormValues.previewText,
 		);
@@ -147,6 +189,191 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 		await expect(
 			canvas.getByText('Review the content before sending'),
 		).toBeVisible();
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Replace' }));
+		const articleUrlInput = canvas.getByLabelText('article URL');
+		await userEvent.clear(articleUrlInput);
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByLabelText('Subject')).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
+	},
+};
+
+export const ClearsCopiedSubjectAfterFailedImport: Story = {
+	args: {
+		resolveArticleFromCapi: () => {
+			if (failedImportRequestCount++ === 0) {
+				return Promise.resolve({
+					success: false,
+					failure: new ApiError({
+						message: 'Initial article import failed',
+						failure: 'fetch-fail',
+					}),
+				});
+			}
+
+			return Promise.resolve({
+				success: true,
+				data: { article: replacementArticle },
+			});
+		},
+	},
+	beforeEach: () => {
+		failedImportRequestCount = 0;
+		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
+		window.history.replaceState(
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: createCopiedNotificationState(copiedAppAlertHeadline),
+			},
+			'',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(originalState, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByText('Initial article import failed'),
+		).toBeVisible();
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Clear all fields' }),
+		);
+		await expect(canvas.getByLabelText('Subject')).toHaveValue('');
+		const articleUrlInput = canvas.getByLabelText('article URL');
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByLabelText('Subject')).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
+	},
+};
+
+export const RetainsCopiedSubjectWhenRetryingFailedImport: Story = {
+	args: {
+		resolveArticleFromCapi: () => {
+			if (retryRequestCount++ === 0) {
+				return Promise.resolve({
+					success: false,
+					failure: new ApiError({
+						message: 'Initial article import failed',
+						failure: 'fetch-fail',
+					}),
+				});
+			}
+
+			return Promise.resolve({
+				success: true,
+				data: { article: articleFixture },
+			});
+		},
+	},
+	beforeEach: () => {
+		retryRequestCount = 0;
+		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
+		window.history.replaceState(
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: createCopiedNotificationState(copiedAppAlertHeadline),
+			},
+			'',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(originalState, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByText('Initial article import failed'),
+		).toBeVisible();
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByLabelText('Subject')).toHaveValue(
+				copiedAppAlertHeadline,
+			),
+		);
+	},
+};
+
+export const UsesFetchedSubjectWhenChangingFailedImport: Story = {
+	args: {
+		resolveArticleFromCapi: () => {
+			if (changedArticleRequestCount++ === 0) {
+				return Promise.resolve({
+					success: false,
+					failure: new ApiError({
+						message: 'Initial article import failed',
+						failure: 'fetch-fail',
+					}),
+				});
+			}
+
+			return Promise.resolve({
+				success: true,
+				data: { article: replacementArticle },
+			});
+		},
+	},
+	beforeEach: () => {
+		changedArticleRequestCount = 0;
+		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
+		window.history.replaceState(
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: createCopiedNotificationState(copiedAppAlertHeadline),
+			},
+			'',
+			withArticleUrl(
+				notificationRoutes.newsletter.create,
+				articleFixture.webUrl,
+			),
+		);
+
+		return () => window.history.replaceState(originalState, '', originalUrl);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+
+		await expect(
+			await canvas.findByText('Initial article import failed'),
+		).toBeVisible();
+		const articleUrlInput = canvas.getByLabelText('article URL');
+		await userEvent.clear(articleUrlInput);
+		await userEvent.type(articleUrlInput, replacementArticle.webUrl);
+		await userEvent.click(canvas.getByRole('button', { name: 'Fetch' }));
+		await waitFor(() =>
+			expect(canvas.getByLabelText('Subject')).toHaveValue(
+				replacementArticle.fields.headline,
+			),
+		);
 	},
 };
 

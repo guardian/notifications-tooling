@@ -18,6 +18,11 @@ type BuildRequestArgs<Values> = {
 	requestedBlock?: CapiBlock;
 };
 
+type AppAlertRequestFormValues = Omit<
+	AppAlertFormValues,
+	'replacementImageUrl'
+>;
+
 export const buildNewsletterEmailRequest = ({
 	values,
 	article,
@@ -76,7 +81,7 @@ export const buildAppAlertRequest = ({
 	article,
 	idempotencyKey,
 	requestedUrl,
-}: BuildRequestArgs<AppAlertFormValues> & {
+}: BuildRequestArgs<AppAlertRequestFormValues> & {
 	alertTypeLabel: string;
 }): SendNotificationRequest => {
 	const {

@@ -57,7 +57,7 @@ describe('formatDispatchTarget', () => {
 					},
 					audiences,
 				),
-			).toBe('United Kingdom app users, US');
+			).toBe('United Kingdom app users, United States');
 		});
 
 		it('uses edition IDs when no labels exist', () => {

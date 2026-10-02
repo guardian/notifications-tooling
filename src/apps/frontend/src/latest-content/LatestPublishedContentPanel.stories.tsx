@@ -169,6 +169,7 @@ export const Default: Story = {
 				'Choose a recent article from below to begin creating an alert',
 			),
 		).toBeVisible();
+		await expect(canvas.getByText('Latest published')).toBeVisible();
 		const showAllButton = await canvas.findByRole('button', {
 			name: 'Show all',
 		});
@@ -179,9 +180,13 @@ export const Default: Story = {
 			canvas.getAllByRole('button', { name: /create/i })[0]!,
 		);
 		const documentCanvas = within(canvasElement.ownerDocument.body);
+		const createDialog = await documentCanvas.findByRole('dialog', {
+			name: 'Choose an alert type for this content',
+		});
+		await expect(createDialog).toBeVisible();
 		await expect(
-			await documentCanvas.findByRole('dialog', {
-				name: 'Choose an alert type for this content',
+			within(createDialog).getByRole('link', {
+				name: new RegExp(mockLatestPublishedContent[0]!.headline),
 			}),
 		).toBeVisible();
 		await expect(
@@ -206,7 +211,9 @@ export const Default: Story = {
 			documentCanvas.getByRole('button', { name: 'Close Modal' }),
 		);
 		await userEvent.click(showAllButton);
-		await expect(showAllButton).not.toBeInTheDocument();
+		await expect(
+			await canvas.findByRole('button', { name: 'Show less' }),
+		).toBeVisible();
 		await expect(
 			await canvas.findAllByRole('button', { name: /create/i }),
 		).toHaveLength(6);

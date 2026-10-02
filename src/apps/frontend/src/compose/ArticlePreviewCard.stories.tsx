@@ -59,9 +59,6 @@ export const Liveblog: PreviewCardStory = {
 		await expect(
 			liveIndicator.querySelector('[aria-hidden="true"]'),
 		).toBeInTheDocument();
-		await expect(
-			canvas.getByText('Liveblog block ID: liveblog-main-block-id'),
-		).toBeInTheDocument();
 		await expect(canvas.getByText('Latest developments')).toBeInTheDocument();
 		await expect(
 			canvas.getByText((_, element) =>
@@ -171,7 +168,7 @@ export const PublishedLongAgo: PreviewCardStory = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByRole('time')).toHaveTextContent(
-			/^\d{1,2} \w{3} \d{4}.+\d{2}:\d{2}$/,
+			/^\d{1,2} \w+ \d{4}.+\d{2}:\d{2}$/,
 		);
 	},
 };

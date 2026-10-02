@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test';
 import { ApiError } from '../api-client/errors';
 import {
 	mockFailingRequestTestEmailSend,
@@ -154,6 +154,7 @@ export const FailingTestEmail: Story = {
 		);
 	},
 	play: async ({ canvasElement }) => {
+		const consoleError = spyOn(console, 'error').mockImplementation(() => {});
 		const canvas = within(canvasElement);
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
 		const button = canvas.getByRole('button', {
@@ -165,6 +166,8 @@ export const FailingTestEmail: Story = {
 		await waitFor(() =>
 			expect(canvas.getByText(/^Test email failed/)).toBeInTheDocument(),
 		);
+		await expect(consoleError).toHaveBeenCalledOnce();
+		consoleError.mockRestore();
 	},
 };
 
@@ -192,6 +195,7 @@ export const RetryAfterFailure: Story = {
 		);
 	},
 	play: async ({ canvasElement }) => {
+		const consoleError = spyOn(console, 'error').mockImplementation(() => {});
 		const canvas = within(canvasElement);
 		const input = canvas.getByPlaceholderText('name@theguardian.com');
 		const button = canvas.getByRole('button', { name: BUTTON_TEXT });
@@ -210,5 +214,7 @@ export const RetryAfterFailure: Story = {
 		await expect(
 			canvas.queryByText(/^Test email failed/),
 		).not.toBeInTheDocument();
+		await expect(consoleError).toHaveBeenCalledOnce();
+		consoleError.mockRestore();
 	},
 };

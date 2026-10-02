@@ -8,8 +8,8 @@ const topicTypes: AppAlertTopicOption[] = [
 		id: 'breaking-news',
 		label: 'Breaking news',
 		editions: [
-			{ id: 'uk', label: 'UK' },
-			{ id: 'us', label: 'US' },
+			{ id: 'uk', label: 'United Kingdom' },
+			{ id: 'us', label: 'United States' },
 			{ id: 'international', label: 'International' },
 		],
 	},
