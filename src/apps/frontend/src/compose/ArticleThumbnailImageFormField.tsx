@@ -117,30 +117,28 @@ export const ArticleThumbnailImageFormField = ({
 										/>
 									</div>
 								</Button>
-								{openReplaceSection && (
-									<AppAlertReplaceImageSection
-										replacementImageUrl={replacementImageUrl}
-										onReplacementImageUrlChange={(replacementImageUrl) => {
-											replacementImageUrlField.onChange(replacementImageUrl);
-											clearErrors('articleThumbnailUrl');
-										}}
-										errorMessage={errors.articleThumbnailUrl?.message}
-										onUpdate={(replacementImageUrl) => {
-											const nextThumbnailUrl =
-												replacementImageUrl.trim() ||
-												originalArticleThumbnailUrl;
+								<AppAlertReplaceImageSection
+									show={openReplaceSection}
+									replacementImageUrl={replacementImageUrl}
+									onReplacementImageUrlChange={(replacementImageUrl) => {
+										replacementImageUrlField.onChange(replacementImageUrl);
+										clearErrors('articleThumbnailUrl');
+									}}
+									errorMessage={errors.articleThumbnailUrl?.message}
+									onUpdate={(replacementImageUrl) => {
+										const nextThumbnailUrl =
+											replacementImageUrl.trim() || originalArticleThumbnailUrl;
 
-											setValue('articleThumbnailUrl', nextThumbnailUrl, {
-												shouldDirty: true,
-												shouldValidate: true,
-											});
-											setValue('includeThumbnail', Boolean(nextThumbnailUrl), {
-												shouldDirty: true,
-												shouldValidate: true,
-											});
-										}}
-									/>
-								)}
+										setValue('articleThumbnailUrl', nextThumbnailUrl, {
+											shouldDirty: true,
+											shouldValidate: true,
+										});
+										setValue('includeThumbnail', Boolean(nextThumbnailUrl), {
+											shouldDirty: true,
+											shouldValidate: true,
+										});
+									}}
+								/>
 							</div>
 						)}
 					</>

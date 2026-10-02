@@ -17,6 +17,7 @@ interface AppAlertReplaceImageSectionProps {
 	onReplacementImageUrlChange: (replacementImageUrl: string) => void;
 	onUpdate: (replacementImageUrl: string) => void;
 	errorMessage?: string;
+	show: boolean;
 }
 
 export const AppAlertReplaceImageSection = ({
@@ -24,6 +25,7 @@ export const AppAlertReplaceImageSection = ({
 	onReplacementImageUrlChange,
 	onUpdate,
 	errorMessage,
+	show,
 }: AppAlertReplaceImageSectionProps) => {
 	const { gridApiUri, gridUri } = useContext(ConfigContext) ?? {};
 
@@ -45,7 +47,13 @@ export const AppAlertReplaceImageSection = ({
 	});
 
 	return (
-		<>
+		<section
+			css={{
+				display: show ? 'flex' : 'none',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackXs,
+			}}
+		>
 			<Typography
 				variant="helpTextFormMd"
 				cssOverrides={css({ color: semanticColors.text.weak })}
@@ -116,6 +124,6 @@ export const AppAlertReplaceImageSection = ({
 				onUpdate={onUpdate}
 				setTextInput={handleImageUrlChange}
 			/>
-		</>
+		</section>
 	);
 };
