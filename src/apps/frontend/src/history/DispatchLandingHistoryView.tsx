@@ -92,12 +92,17 @@ export const DispatchLandingHistoryView = ({
 				role="region"
 				aria-label="Last 24-hour activity table"
 				tabIndex={0}
+				reserveScrollbarSpace={false}
 			>
 				{isLoading && <HistoryTableSkeleton />}
 				{error}
 				{refreshError}
 				{!isLoading && !error && notifications.length > 0 && (
-					<HistoryTable notifications={notifications} showUserName />
+					<HistoryTable
+						notifications={notifications}
+						showUserName
+						fillAvailableHeight={false}
+					/>
 				)}
 				{!isLoading && !error && notifications.length === 0 && (
 					<HistoryEmptyState />

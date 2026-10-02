@@ -78,6 +78,13 @@ export const Default: Story = {
 	},
 	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
+		const historyHeader = canvas.getByRole('heading', {
+			name: 'History',
+		}).parentElement?.parentElement;
+		if (!historyHeader) {
+			throw new globalThis.Error('History header not found');
+		}
+		await expect(getComputedStyle(historyHeader).borderBottomWidth).toBe('1px');
 		await expect(
 			canvas.getByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();

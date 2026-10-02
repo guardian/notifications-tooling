@@ -64,6 +64,26 @@ export const Populated: Story = {
 	},
 };
 
+export const SingleNotification: Story = {
+	args: { notifications: [notifications[0]!] },
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const table = canvas.getByRole('grid', { name: 'Sent alerts' });
+		const row = canvas.getByRole('row', { name: /Morning briefing/ });
+		const refreshButton = canvas.getByRole('button', {
+			name: 'Refresh activity',
+		});
+
+		await expect(
+			table.getBoundingClientRect().bottom - row.getBoundingClientRect().bottom,
+		).toBeLessThanOrEqual(1);
+		await expect(table.getBoundingClientRect().right).toBeCloseTo(
+			refreshButton.getBoundingClientRect().right,
+			0,
+		);
+	},
+};
+
 export const Empty: Story = {
 	args: { notifications: [] },
 	play: async ({ canvasElement }) => {

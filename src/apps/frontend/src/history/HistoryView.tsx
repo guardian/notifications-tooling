@@ -73,7 +73,7 @@ export const HistoryView = ({
 					aria-labelledby="history-heading"
 					css={historyViewStyles.container(hasPagination)}
 				>
-					<div css={historyViewStyles.header(hasPagination)}>
+					<div css={historyViewStyles.header}>
 						<div css={historyViewStyles.titleBlock}>
 							<Typography id="history-heading" element="h1" variant="headingLg">
 								History
