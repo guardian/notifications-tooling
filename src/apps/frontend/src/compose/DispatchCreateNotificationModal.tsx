@@ -63,7 +63,7 @@ export const DispatchCreateNotificationModal = ({
 										</span>
 										{content.pillarName ? ` / ${content.pillarName}` : null}
 									</Typography>
-									{isLiveblog && <LiveIndicator />}
+									{isLiveblog && <LiveIndicator pillarId={content.pillarId} />}
 									{publishedAt && (
 										<Typography
 											variant="bodyXs"

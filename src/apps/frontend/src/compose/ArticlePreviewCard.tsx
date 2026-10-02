@@ -54,7 +54,7 @@ export const ArticlePreviewCard = ({
 
 				{isLiveblog && (
 					<div css={articlePreviewCardTheme.liveStatus}>
-						<LiveIndicator />
+						<LiveIndicator pillarId={pillarId} />
 						{publishedAt && (
 							<Typography
 								variant="bodyXs"
