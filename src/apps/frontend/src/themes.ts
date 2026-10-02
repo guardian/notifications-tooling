@@ -519,12 +519,11 @@ export const dispatchLandingTheme = {
 	}),
 	headerRow: css({
 		display: 'flex',
-		flexWrap: 'wrap',
-		alignItems: 'center',
 		justifyContent: 'space-between',
 		gap: semanticSpacing.stackSm,
-		[from.lg]: {
-			paddingBottom: baseSpacing['24Px'],
+		[from.md]: {
+			flexWrap: 'wrap',
+			alignItems: 'center',
 		},
 	}),
 	infoButton: css({
@@ -581,10 +580,14 @@ export const dispatchLandingTheme = {
 				minHeight: '20rem',
 				flex: '0 0 20rem',
 			},
+			marginTop: 0,
 		},
 	}),
 	activityHeading: css({
 		marginBottom: semanticSpacing.stackSm,
+		[from.lg]: {
+			marginBottom: 0,
+		},
 	}),
 	activityControls: css({
 		display: 'flex',
@@ -593,6 +596,9 @@ export const dispatchLandingTheme = {
 		justifyContent: 'space-between',
 		gap: semanticSpacing.stackSm,
 		marginBottom: semanticSpacing.stackMd,
+		[from.lg]: {
+			marginBottom: 0,
+		},
 	}),
 	activityCounters: css({
 		display: 'flex',

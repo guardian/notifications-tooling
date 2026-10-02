@@ -81,9 +81,8 @@ export const DispatchLandingPage = () => {
 						flexDirection: 'column',
 						gap: '12px',
 						width: '100%',
-						marginTop: semanticSpacing.stackMd,
+						marginTop: semanticSpacing.stackLg,
 						marginBottom: semanticSpacing.stackLg,
-						paddingTop: semanticSpacing.stackMd,
 						[from.md]: {
 							display: 'grid',
 							gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
