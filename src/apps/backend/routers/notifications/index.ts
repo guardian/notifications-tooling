@@ -24,6 +24,7 @@ import {
 	toNotificationResponse,
 	toNotificationSummary,
 } from '../../persistence/persist-notification';
+import { dispatchAndPersistNotification } from '../dispatch-and-persist-notification';
 import {
 	notificationListQuerySchema,
 	notificationSendersQuerySchema,
@@ -57,6 +58,24 @@ const toJsonPointer = (path: readonly PropertyKey[]): string =>
 		.map((segment) => String(segment).replace(/~/g, '~0').replace(/\//g, '~1'))
 		.join('/')}`;
 
+const validationErrorDetails = (errors: Parameters<ErrorRequestHandler>[0]) =>
+	errors.flatMap((item) =>
+		item.errors.issues.map((issue) => ({
+			code: issue.code,
+			path: toJsonPointer(issue.path),
+			message: issue.message,
+		})),
+	);
+
+const createBadRequestValidationHandler =
+	(message: string): ErrorRequestHandler =>
+	(errors, req, res) => {
+		res.status(400).json({
+			...buildErrorEnvelope(req, 'bad_request', message),
+			details: validationErrorDetails(errors),
+		});
+	};
+
 /**
  * express-zod-safe error hook. Flattens the Zod issues into the proposal's
  * `{ error, message, requestId, details[] }` envelope and returns 400 for
@@ -67,13 +86,7 @@ export const handleValidationErrors: ErrorRequestHandler = (
 	req,
 	res,
 ) => {
-	const details = errors.flatMap((item) =>
-		item.errors.issues.map((issue) => ({
-			code: issue.code,
-			path: toJsonPointer(issue.path),
-			message: issue.message,
-		})),
-	);
+	const details = validationErrorDetails(errors);
 
 	const isStructural = errors.some((item) =>
 		item.errors.issues.some((issue) => STRUCTURAL_ISSUE_CODES.has(issue.code)),
@@ -99,82 +112,28 @@ const notificationIdParamsSchema = { id: z.uuid() };
  * can never match a stored notification, so it is a structural `400` rather
  * than a `404`.
  */
-export const handleNotificationIdValidationError: ErrorRequestHandler = (
-	errors,
-	req,
-	res,
-) => {
-	const details = errors.flatMap((item) =>
-		item.errors.issues.map((issue) => ({
-			code: issue.code,
-			path: toJsonPointer(issue.path),
-			message: issue.message,
-		})),
+export const handleNotificationIdValidationError =
+	createBadRequestValidationHandler(
+		'The notification id must be a valid UUID.',
 	);
-
-	res.status(400).json({
-		...buildErrorEnvelope(
-			req,
-			'bad_request',
-			'The notification id must be a valid UUID.',
-		),
-		details,
-	});
-};
 
 /**
  * express-zod-safe error hook for `GET /v1/notifications`. Malformed query
  * params are always a structural `400`.
  */
-export const handleNotificationListValidationError: ErrorRequestHandler = (
-	errors,
-	req,
-	res,
-) => {
-	const details = errors.flatMap((item) =>
-		item.errors.issues.map((issue) => ({
-			code: issue.code,
-			path: toJsonPointer(issue.path),
-			message: issue.message,
-		})),
+export const handleNotificationListValidationError =
+	createBadRequestValidationHandler(
+		'The notification list query parameters are invalid.',
 	);
-
-	res.status(400).json({
-		...buildErrorEnvelope(
-			req,
-			'bad_request',
-			'The notification list query parameters are invalid.',
-		),
-		details,
-	});
-};
 
 /**
  * express-zod-safe error hook for `GET /v1/notifications/senders`. Malformed
  * query params are always a structural `400`.
  */
-export const handleNotificationSendersValidationError: ErrorRequestHandler = (
-	errors,
-	req,
-	res,
-) => {
-	const details = errors.flatMap((item) =>
-		item.errors.issues.map((issue) => ({
-			code: issue.code,
-			path: toJsonPointer(issue.path),
-			message: issue.message,
-		})),
+export const handleNotificationSendersValidationError =
+	createBadRequestValidationHandler(
+		'The notification senders query parameters are invalid.',
 	);
-
-	res.status(400).json({
-		...buildErrorEnvelope(
-			req,
-			'bad_request',
-			'The notification senders query parameters are invalid.',
-		),
-		details,
-	});
-};
 
 type FindNotificationById = (
 	id: string,
@@ -231,84 +190,68 @@ export const createNotificationsRouter = (
 		}),
 		async (req, res) => {
 			const body = req.body;
+			const result = await dispatchAndPersistNotification({
+				request: body,
+				createdByEmail: req.user!.email,
+				dispatchRequest,
+				store,
+			});
 
-			// Record the envelope first so the DB mints the id; each channel
-			// adapter then tags its downstream calls with that same id.
-			const notification = await store.create(body, req.user!.email);
-
-			let outcomesRecorded = false;
-			try {
-				const { error, ...outcomes } = await dispatchRequest(
-					body,
-					notification.id,
-					notification.createdByEmail,
-				);
-				const persisted = await store.recordOutcomes(notification, outcomes);
-				outcomesRecorded = true;
-
-				if (error !== undefined) {
+			if (result.type === 'recorded') {
+				if (result.providerError !== undefined) {
 					req.log.warn(
 						{
-							notificationId: notification.id,
-							status: persisted.notification.status,
-							err: error,
-							...outcomes,
+							notificationId: result.notification.id,
+							status: result.persisted.notification.status,
+							err: result.providerError,
+							...result.outcomes,
 						},
 						'Recorded notification with provider failures',
 					);
 				} else {
 					req.log.info(
 						{
-							notificationId: notification.id,
-							status: persisted.notification.status,
-							...outcomes,
+							notificationId: result.notification.id,
+							status: result.persisted.notification.status,
+							...result.outcomes,
 						},
 						'Dispatched and recorded notification channels',
 					);
 				}
 
 				res
-					.status(httpStatusForNotification(persisted.notification.status))
-					.json(toNotificationResponse(persisted));
-			} catch (error) {
-				// Dispatch or persistence threw before any outcome was recorded (e.g.
-				// a config, SSM, or DB failure); flag the stored row failed and return
-				// it so the caller sees the failure rather than a terse error
-				// envelope. When outcomes were recorded the status is already
-				// accurate, so rethrow to surface anything unexpected.
-				if (!outcomesRecorded) {
-					req.log.error(
-						{
-							err: error,
-							notificationId: notification.id,
-						},
-						'Notification dispatch or outcome persistence failed',
-					);
-
-					const failed = await store
-						.markFailed(notification)
-						.catch((markError) => {
-							req.log.error(
-								{
-									err: markError,
-									notificationId: notification.id,
-								},
-								'Failed to persist notification failure status',
-							);
-							return notification;
-						});
-
-					res
-						.status(httpStatusForNotification(failed.status))
-						.json(
-							toNotificationResponse({ notification: failed, dispatches: [] }),
-						);
-
-					return;
-				}
-
-				throw error;
+					.status(
+						httpStatusForNotification(result.persisted.notification.status),
+					)
+					.json(toNotificationResponse(result.persisted));
+				return;
 			}
+
+			req.log.error(
+				{
+					err: result.dispatchError,
+					notificationId: result.notification.id,
+				},
+				'Notification dispatch or outcome persistence failed',
+			);
+			if (result.markFailedError !== undefined) {
+				req.log.error(
+					{
+						err: result.markFailedError,
+						notificationId: result.notification.id,
+					},
+					'Failed to persist notification failure status',
+				);
+			}
+
+			res
+				.status(httpStatusForNotification(result.failedNotification.status))
+				.json(
+					toNotificationResponse({
+						notification: result.failedNotification,
+						dispatches: [],
+					}),
+				);
 		},
 	);
 
