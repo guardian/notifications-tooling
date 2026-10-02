@@ -7,6 +7,7 @@ import { gridImageResponse } from '@models';
 import { useContext, useState } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { extractAsset, isFiveFourCrop } from '../grid-client/grid-api';
+import { GridIcon } from '../ui/GridIcon';
 
 type ImageAndCrop = {
 	crop: CropData;
@@ -74,6 +75,7 @@ export const GridImagePicker = ({ onUpdate, setTextInput }: Props) => {
 			}}
 		>
 			<Button
+				icon={<GridIcon />}
 				variant="secondary"
 				onClick={() => {
 					seGridPageOpen('search');
@@ -85,13 +87,14 @@ export const GridImagePicker = ({ onUpdate, setTextInput }: Props) => {
 
 			{lastImageId && (
 				<Button
+					icon="crop"
 					variant="secondary"
 					onClick={() => {
 						seGridPageOpen('image');
 						setFailureFeedBack(undefined);
 					}}
 				>
-					change crop
+					Change crop
 				</Button>
 			)}
 
@@ -99,6 +102,7 @@ export const GridImagePicker = ({ onUpdate, setTextInput }: Props) => {
 				<InlineMessage level="error">{failureFeedback}</InlineMessage>
 			)}
 			<PickerIframeModal
+				showOpenInNewTabButton
 				modalTheme={{
 					overlay: { position: 'fixed' },
 					modal: {
