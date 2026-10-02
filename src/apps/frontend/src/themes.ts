@@ -1320,6 +1320,7 @@ export const historyViewStyles = {
 			display: 'grid',
 			gridTemplateRows: 'auto minmax(0, 1fr)',
 			height: fillAvailableHeight ? '100%' : 'auto',
+			maxHeight: '100%',
 			overflow: 'hidden',
 			containerType: 'inline-size',
 			containerName: 'history-table',
