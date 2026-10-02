@@ -38,6 +38,37 @@ export const newsletterStatusCode = (error: unknown): number | undefined =>
 		? error.status
 		: undefined;
 
+type NewsletterDispatchTarget = Pick<
+	NewsletterDispatchOutcome,
+	'requested' | 'resolved'
+>;
+
+export const mapNewsletterOutcomes = (
+	settled: ReadonlyArray<
+		PromiseSettledResult<{ providerRef: string | undefined; status: number }>
+	>,
+	targets: readonly NewsletterDispatchTarget[],
+): NewsletterDispatchOutcome[] =>
+	settled.map((result, index) => {
+		const target = targets[index]!;
+		if (result.status === 'fulfilled') {
+			return {
+				...target,
+				status: 'success',
+				providerRef: result.value.providerRef ?? null,
+				failureReason: null,
+				providerStatusCode: result.value.status,
+			};
+		}
+		return {
+			...target,
+			status: 'failure',
+			providerRef: null,
+			failureReason: newsletterFailureReason(result.reason),
+			providerStatusCode: newsletterStatusCode(result.reason) ?? null,
+		};
+	});
+
 export const resolveNewsletterDispatch = (request: NotificationSendRequest) => {
 	const plan = request.channels[NotificationChannel.Newsletter];
 
@@ -118,39 +149,24 @@ export const dispatchNewsletter = async (
 					timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
 				});
 
-			return { dispatchId, status };
+			return { providerRef: dispatchId, status };
 		}),
 	);
 
-	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
-		const { segmentId, brazeCampaignId, emailRenderingNewsletterId } =
-			segments[index]!;
-		const requested = { channel: 'newsletter' as const, segment: segmentId };
-		const resolved = {
-			channel: 'newsletter' as const,
-			brazeCampaignId,
-			emailRenderingId: emailRenderingNewsletterId,
-			...(blockId ? { blockId } : {}),
-		};
-		if (result.status === 'fulfilled') {
-			return {
-				requested,
-				resolved,
-				status: 'success',
-				providerRef: result.value.dispatchId ?? null,
-				failureReason: null,
-				providerStatusCode: result.value.status,
-			};
-		}
-		return {
-			requested,
-			resolved,
-			status: 'failure',
-			providerRef: null,
-			failureReason: newsletterFailureReason(result.reason),
-			providerStatusCode: newsletterStatusCode(result.reason) ?? null,
-		};
-	});
+	const outcomes = mapNewsletterOutcomes(
+		settled,
+		segments.map(
+			({ segmentId, brazeCampaignId, emailRenderingNewsletterId }) => ({
+				requested: { channel: 'newsletter', segment: segmentId },
+				resolved: {
+					channel: 'newsletter',
+					brazeCampaignId,
+					emailRenderingId: emailRenderingNewsletterId,
+					...(blockId ? { blockId } : {}),
+				},
+			}),
+		),
+	);
 
 	return { outcomes, error: firstSettledError(settled) };
 };

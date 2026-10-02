@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isTimeoutError } from '../is-timeout-error';
 
 const renderedNotificationSchema = z.object({
 	body: z.string().min(1),
@@ -43,10 +44,6 @@ export class EmailRenderingError extends Error {
 		this.name = 'EmailRenderingError';
 	}
 }
-
-const isTimeoutError = (error: unknown): boolean =>
-	error instanceof Error &&
-	(error.name === 'AbortError' || error.name === 'TimeoutError');
 
 const articleIdFromUrl = (articleUrl: string): string => {
 	const articleId = new URL(articleUrl).pathname.replace(/^\/+/, '');

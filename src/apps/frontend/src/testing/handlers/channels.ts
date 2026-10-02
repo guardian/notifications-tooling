@@ -1,3 +1,4 @@
+import type { AppAlertTopicOption } from '@models';
 import { http, HttpResponse } from 'msw';
 import { getApiBaseUrl } from '../../api-client/config';
 import type {
@@ -49,7 +50,7 @@ export const channelConstraintsFailureHandler = http.get(
 	() => HttpResponse.json({ error: 'internal_error' }, { status: 500 }),
 );
 
-const appPushEditions = [
+const appPushEditions: AppAlertTopicOption['editions'] = [
 	{ id: 'uk', label: 'United Kingdom' },
 	{ id: 'us', label: 'United States' },
 	{ id: 'au', label: 'Australia' },

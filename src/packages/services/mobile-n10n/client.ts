@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isTimeoutError } from '../is-timeout-error';
 
 /** mobile-n10n rejects a push targeting more than this many topics. */
 export const MAX_APP_NOTIFICATION_TOPICS = 20;
@@ -72,10 +73,6 @@ export class AppNotificationApiError extends Error {
 }
 
 const pushResultSchema = z.object({ id: z.string() });
-
-const isTimeoutError = (error: unknown): boolean =>
-	error instanceof Error &&
-	(error.name === 'AbortError' || error.name === 'TimeoutError');
 
 /**
  * Pushes a breaking-news notification to mobile-n10n's `POST /push/topic`, which

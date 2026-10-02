@@ -12,9 +12,8 @@ import {
 	requireContentItem,
 } from '../shared';
 import {
+	mapNewsletterOutcomes,
 	newsletterEnvironmentSchema,
-	newsletterFailureReason,
-	newsletterStatusCode,
 } from './dispatch-newsletter';
 
 const testEmailEnvironmentSchema = z.object({
@@ -124,8 +123,8 @@ export const dispatchNewsletterTest = async (
 
 	// allSettled so one variant's send failure does not abort the others.
 	const settled = await Promise.allSettled(
-		renderedVariants.map(({ html }) =>
-			brazeClient.sendTestEmail({
+		renderedVariants.map(async ({ html }) => {
+			const result = await brazeClient.sendTestEmail({
 				appId: configuration.BRAZE_APP_ID,
 				from: configuration.BRAZE_TEST_EMAIL_FROM,
 				replyTo: configuration.BRAZE_TEST_EMAIL_REPLY_TO,
@@ -133,37 +132,22 @@ export const dispatchNewsletterTest = async (
 				html,
 				subject: plan.compose.subject,
 				timeoutMs: PROVIDER_REQUEST_TIMEOUT_MS,
-			}),
-		),
+			});
+			return { providerRef: result.dispatch_id, status: result.status };
+		}),
 	);
 
-	const outcomes = settled.map((result, index): NewsletterDispatchOutcome => {
-		const { segmentId, emailRenderingId } = renderedVariants[index]!;
-		const requested = { channel: 'newsletter' as const, segment: segmentId };
-		const resolved = {
-			channel: 'newsletter' as const,
-			emailRenderingId,
-			...(blockId ? { blockId } : {}),
-		};
-		if (result.status === 'fulfilled') {
-			return {
-				requested,
-				resolved,
-				status: 'success',
-				providerRef: result.value.dispatch_id ?? null,
-				failureReason: null,
-				providerStatusCode: result.value.status,
-			};
-		}
-		return {
-			requested,
-			resolved,
-			status: 'failure',
-			providerRef: null,
-			failureReason: newsletterFailureReason(result.reason),
-			providerStatusCode: newsletterStatusCode(result.reason) ?? null,
-		};
-	});
+	const outcomes = mapNewsletterOutcomes(
+		settled,
+		renderedVariants.map(({ segmentId, emailRenderingId }) => ({
+			requested: { channel: 'newsletter', segment: segmentId },
+			resolved: {
+				channel: 'newsletter',
+				emailRenderingId,
+				...(blockId ? { blockId } : {}),
+			},
+		})),
+	);
 
 	return { outcomes, error: firstSettledError(settled) };
 };
