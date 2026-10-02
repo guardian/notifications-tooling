@@ -30,6 +30,7 @@ interface HistoryTableProps {
 	notifications?: HistoryNotification[];
 	audiences?: ChannelAudienceResponse;
 	showUserName?: boolean;
+	fillAvailableHeight?: boolean;
 }
 
 const tableColumns = {
@@ -100,6 +101,7 @@ export const HistoryTable = ({
 	notifications = [],
 	audiences,
 	showUserName = false,
+	fillAvailableHeight = true,
 }: HistoryTableProps) => {
 	const now = useRelativeTimeClock(
 		notifications.map(({ sentAt }) => sentAt),
@@ -109,7 +111,7 @@ export const HistoryTable = ({
 	return (
 		<Table
 			aria-label="Sent alerts"
-			cssOverrides={historyViewStyles.table}
+			cssOverrides={historyViewStyles.table(fillAvailableHeight)}
 			columns={tableColumns}
 			headerVisibleFrom="sm"
 		>
@@ -256,7 +258,7 @@ export const HistoryTableSkeleton = () => (
 	<div role="status" aria-label="Loading alert history" aria-busy="true">
 		<Table
 			aria-label="Loading sent alerts"
-			cssOverrides={historyViewStyles.table}
+			cssOverrides={historyViewStyles.table()}
 			columns={tableColumns}
 			headerVisibleFrom="sm"
 		>

@@ -1221,18 +1221,15 @@ export const historyViewStyles = {
 		overflow: 'hidden',
 		minHeight: 0,
 	}),
-	header: (hasPagination: boolean) =>
-		css({
-			display: 'flex',
-			flexDirection: 'row',
-			flexWrap: 'wrap',
-			alignItems: 'center',
-			gap: semanticSpacing.stackLg,
-			paddingBottom: semanticSpacing.stackSm,
-			borderBottom: hasPagination
-				? `${semanticSizing.border.default} solid ${semanticColors.border.weak}`
-				: 0,
-		}),
+	header: css({
+		display: 'flex',
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: semanticSpacing.stackLg,
+		paddingBottom: semanticSpacing.stackSm,
+		borderBottom: `${semanticSizing.border.default} solid ${semanticColors.border.weak}`,
+	}),
 	headerActions: css({
 		display: 'flex',
 		flexWrap: 'wrap',
@@ -1318,29 +1315,30 @@ export const historyViewStyles = {
 			height: '18px',
 		},
 	}),
-	table: css({
-		display: 'grid',
-		gridTemplateRows: 'auto minmax(0, 1fr)',
-		height: '100%',
-		overflow: 'hidden',
-		containerType: 'inline-size',
-		containerName: 'history-table',
-		'@media (min-width: 600px) and (max-width: 1055.9px)': {
-			'& [role="row"]': {
-				gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+	table: (fillAvailableHeight = true) =>
+		css({
+			display: 'grid',
+			gridTemplateRows: 'auto minmax(0, 1fr)',
+			height: fillAvailableHeight ? '100%' : 'auto',
+			overflow: 'hidden',
+			containerType: 'inline-size',
+			containerName: 'history-table',
+			'@media (min-width: 600px) and (max-width: 1055.9px)': {
+				'& [role="row"]': {
+					gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+				},
 			},
-		},
-		'@container history-table (max-width: 899.9px)': {
-			'& [role="row"]': {
-				gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+			'@container history-table (max-width: 899.9px)': {
+				'& [role="row"]': {
+					gridTemplateColumns: 'minmax(0, 1.2fr) minmax(240px, 0.8fr)',
+				},
 			},
-		},
-		'@container history-table (max-width: 599.9px)': {
-			'& [role="row"]': {
-				gridTemplateColumns: 'minmax(0, 1fr)',
+			'@container history-table (max-width: 599.9px)': {
+				'& [role="row"]': {
+					gridTemplateColumns: 'minmax(0, 1fr)',
+				},
 			},
-		},
-	}),
+		}),
 	tableHeader: css({
 		'& > tr > *': {
 			padding: '16px',
