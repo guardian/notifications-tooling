@@ -110,26 +110,26 @@ const codeAppPushTopicTypes = {
 		editions: {
 			uk: {
 				label: 'United Kingdom',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				mobileN10nTopic: { type: 'breaking', name: 'uk' },
 			},
 			us: {
 				label: 'United States',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				mobileN10nTopic: { type: 'breaking', name: 'us' },
 			},
 			au: {
 				label: 'Australia',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				mobileN10nTopic: { type: 'breaking', name: 'au' },
 			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: {
 					type: 'breaking',
-					name: 'internal-dispatch-test',
+					name: 'international',
 				},
 			},
 			europe: {
 				label: 'Europe',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				mobileN10nTopic: { type: 'breaking', name: 'europe' },
 			},
 		},
 	},
@@ -139,33 +139,27 @@ const codeAppPushTopicTypes = {
 		editions: {
 			uk: {
 				label: 'United Kingdom',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				mobileN10nTopic: { type: 'breaking', name: 'uk-sport' },
 				titleOverride: 'Sport news',
 			},
 			us: {
 				label: 'United States',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				mobileN10nTopic: { type: 'breaking', name: 'us-sport' },
 				titleOverride: 'Sports news',
 			},
 			au: {
 				label: 'Australia',
-				mobileN10nTopic: { type: 'breaking', name: 'internal-dispatch-test' },
+				mobileN10nTopic: { type: 'breaking', name: 'au-sport' },
 				titleOverride: 'Sport news',
 			},
 			international: {
 				label: 'International',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'international-sport' },
 				titleOverride: 'Sport news',
 			},
 			europe: {
 				label: 'Europe',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'europe-sport' },
 				titleOverride: 'Sport news',
 			},
 		},
@@ -176,38 +170,26 @@ const codeAppPushTopicTypes = {
 		editions: {
 			uk: {
 				label: 'United Kingdom',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'uk-editors-picks' },
 			},
 			us: {
 				label: 'United States',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'us-editors-picks' },
 			},
 			au: {
 				label: 'Australia',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'au-editors-picks' },
 			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: {
 					type: 'breaking',
-					name: 'internal-dispatch-test',
+					name: 'international-editors-picks',
 				},
 			},
 			europe: {
 				label: 'Europe',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'europe-editors-picks' },
 			},
 		},
 	},
@@ -217,38 +199,26 @@ const codeAppPushTopicTypes = {
 		editions: {
 			uk: {
 				label: 'United Kingdom',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'uk-one-not-to-miss' },
 			},
 			us: {
 				label: 'United States',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'us-one-not-to-miss' },
 			},
 			au: {
 				label: 'Australia',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'au-one-not-to-miss' },
 			},
 			international: {
 				label: 'International',
 				mobileN10nTopic: {
 					type: 'breaking',
-					name: 'internal-dispatch-test',
+					name: 'international-one-not-to-miss',
 				},
 			},
 			europe: {
 				label: 'Europe',
-				mobileN10nTopic: {
-					type: 'breaking',
-					name: 'internal-dispatch-test',
-				},
+				mobileN10nTopic: { type: 'breaking', name: 'europe-one-not-to-miss' },
 			},
 		},
 	},

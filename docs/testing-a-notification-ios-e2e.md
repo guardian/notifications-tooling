@@ -1,8 +1,10 @@
-# Testing a notification send from Dispatch through to receiving on a real iOS device
+# Testing a notification sent to the test channel to receiving on a real iOS device
 
 ## Prerequisites
 
 You should have followed the instructions in [iOS-live repo](https://github.com/guardian/ios-live) to get the iOS app running locally on your device, you should have installed it onto your device. The icon is a yellow G icon, different to the regular Guardian app.
+
+In most cases, it is not necessary to send app-alert to the test channel ("internal-dispatch-test"), which is what this guide covers. The CODE / LOCAL audience configuration for the Dispatch UI sends app-alert to the channels on CODE that can be subscribed to in the test Guardian App and/or emulators as normal.
 
 **NB: This guide does not cover any troubleshooting you may have with that**
 
@@ -39,8 +41,7 @@ A valid response to this is:
 
 ## Next steps
 
-1. [Go to the Dispatch tool on code](https://dispatch.code.dev-gutools.co.uk/)
-1. Send an app-alert
+1. Send an app-alert to the '/v1/notification-tests' endpoint **(There is not a UI interaction for this)**
 1. Wait for ~1 minute
 1. Look at your notifications
 
