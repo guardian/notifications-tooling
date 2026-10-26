@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import { newsletterSegments } from 'config';
-import { UserPermissions } from 'models';
 import express from 'express';
+import { UserPermissions } from 'models';
 import {
 	authenticateRequests,
 	installPandaAuthMock,

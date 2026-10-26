@@ -1,9 +1,3 @@
-import type {
-	HistoryAlertType,
-	KickerHistoryAlertType,
-	NotificationChannelId,
-} from 'models';
-import { kickerHistoryAlertTypes } from 'models';
 import {
 	and,
 	count,
@@ -16,6 +10,12 @@ import {
 	or,
 	sql,
 } from 'drizzle-orm';
+import type {
+	HistoryAlertType,
+	KickerHistoryAlertType,
+	NotificationChannelId,
+} from 'models';
+import { kickerHistoryAlertTypes } from 'models';
 import type { Database } from '../client';
 import { notifications } from '../schema';
 import type { FailedTargets } from '../schema/notifications';

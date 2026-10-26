@@ -1,5 +1,5 @@
-import { notificationAudienceFilterIds } from 'models';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { notificationAudienceFilterIds } from 'models';
 import { delay, http, HttpResponse } from 'msw';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { getApiBaseUrl } from '../api-client/config';

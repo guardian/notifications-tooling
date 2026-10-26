@@ -1,10 +1,10 @@
 import { fromIni, fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { isRunningLocally, pandaSettingsFileName } from 'config';
 import {
 	guardianValidation,
 	PanDomainAuthentication,
 	type User,
 } from '@guardian/pan-domain-node';
+import { isRunningLocally, pandaSettingsFileName } from 'config';
 
 const LOCAL_PROFILE = 'composer';
 

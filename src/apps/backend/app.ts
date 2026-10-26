@@ -1,12 +1,12 @@
 import type { ServerResponse } from 'node:http';
 import { basename } from 'node:path';
 import serverlessExpress from '@codegenie/serverless-express';
-import { httpLogger } from 'http-logger';
 import express, {
 	type Application,
 	type Request,
 	type Response,
 } from 'express';
+import { httpLogger } from 'http-logger';
 import { clientAssetsDir } from './client-assets';
 import { buildErrorEnvelope } from './error-envelope';
 import { authRedirectMiddleware } from './middleware/auth-middleware';

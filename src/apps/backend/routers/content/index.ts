@@ -1,4 +1,6 @@
 import { getSSMParameter } from 'config/ssm';
+import { type Request, type Response, Router } from 'express';
+import validate from 'express-zod-safe';
 import type {
 	LatestArticle,
 	LatestArticlesResponse,
@@ -13,8 +15,6 @@ import {
 } from 'models';
 import { fetchArticle, fetchLatestArticles } from 'services';
 import { determineArticleId } from 'utils';
-import { type Request, type Response, Router } from 'express';
-import validate from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';

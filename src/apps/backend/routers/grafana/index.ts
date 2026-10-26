@@ -4,9 +4,9 @@ import {
 	type Notification,
 	type NotificationWithDispatches,
 } from 'database';
-import { UserPermissions } from 'models';
 import { type Request, type Response, Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
+import { UserPermissions } from 'models';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';

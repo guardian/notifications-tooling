@@ -7,6 +7,7 @@ import {
 	NotificationChannel,
 	notificationChannelContentLimits,
 } from 'config';
+import { type Request, type Response, Router } from 'express';
 import type {
 	AppAlertTopicEditionId,
 	AppAlertTopicOption,
@@ -16,7 +17,6 @@ import type {
 } from 'models';
 import { UserPermissions } from 'models';
 import type { BrazeCampaignDetails } from 'services';
-import { type Request, type Response, Router } from 'express';
 import { loadBrazeClient } from '../../braze-client';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';

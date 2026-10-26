@@ -1,5 +1,7 @@
 import { newsletterSegments } from 'config';
 import { getSSMParameter } from 'config/ssm';
+import { type Request, type Response, Router } from 'express';
+import validate from 'express-zod-safe';
 import type {
 	EmailPreviewRequest,
 	EmailPreviewResponse,
@@ -8,8 +10,6 @@ import type {
 import { emailPreviewRequestSchema, UserPermissions } from 'models';
 import { EmailRenderingError, renderEmail } from 'services';
 import { determineArticleId, determineBlockId } from 'utils';
-import { type Request, type Response, Router } from 'express';
-import validate from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';

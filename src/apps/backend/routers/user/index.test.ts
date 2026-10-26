@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import { UserPermissions, type UserResponse } from 'models';
 import type {
 	Request as ExpressRequest,
 	Response as ExpressResponse,
 } from 'express';
+import { UserPermissions, type UserResponse } from 'models';
 import { installDatabaseMock } from '../../utils/test-utils/database';
 import {
 	assertUnauthenticatedRequestBlocked,
