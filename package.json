@@ -10,9 +10,9 @@
 		"url": "https://github.com/guardian/notifications-tooling.git"
 	},
 	"prettier": "@guardian/prettier",
-	"packageManager": "bun@1.4.0",
+	"packageManager": "bun@1.4.4",
 	"engines": {
-		"bun": "1.4.0",
+		"bun": "1.4.4",
 		"node": ">=24 <25"
 	},
 	"workspaces": [
