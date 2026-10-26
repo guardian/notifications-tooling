@@ -4,7 +4,7 @@ import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { TextInput } from '@guardian/stand/TextInput';
 import { Typography } from '@guardian/stand/Typography';
-import type { CapiBlock, ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from 'models';
 import { useContext, useEffect, useEffectEvent, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import type { ApiError } from '../api-client/errors';

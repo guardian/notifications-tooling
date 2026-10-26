@@ -1,11 +1,11 @@
-import { newsletterSegments, NotificationChannel } from '@config';
+import { newsletterSegments, NotificationChannel } from 'config';
 import {
 	BrazeApiError,
 	type BrazeFailureReason,
 	EmailRenderingError,
 	type EmailRenderingFailureReason,
-} from '@services';
-import { determineBlockId } from '@utils';
+} from 'services';
+import { determineBlockId } from 'utils';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { NewsletterDispatchOutcome } from '../dispatch-outcome';

@@ -6,7 +6,7 @@ import {
 	type NewNotificationDispatch,
 	type Notification,
 	type NotificationDispatch,
-} from '@database';
+} from 'database';
 import type { DispatchOutcomes } from '../notification-channels/dispatch-notification';
 import type { TestDispatchOutcomes } from '../notification-channels/dispatch-notification-test';
 import type { DispatchOutcome } from '../notification-channels/dispatch-outcome';

@@ -1,4 +1,4 @@
-import { latestArticleSchema } from '@models';
+import { latestArticleSchema } from 'models';
 import { z } from 'zod';
 
 /** An article returned by `GET /v1/content/articles/latest`. */

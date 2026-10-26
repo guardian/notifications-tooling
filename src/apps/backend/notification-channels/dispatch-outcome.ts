@@ -1,9 +1,9 @@
-import type { DispatchRequested, DispatchResolved } from '@database';
+import type { DispatchRequested, DispatchResolved } from 'database';
 import type {
 	AppNotificationFailureReason,
 	BrazeFailureReason,
 	EmailRenderingFailureReason,
-} from '@services';
+} from 'services';
 
 /**
  * The result of one downstream provider call, recorded the same way for every

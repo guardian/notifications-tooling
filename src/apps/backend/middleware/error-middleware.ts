@@ -1,4 +1,4 @@
-import { DuplicateIdempotencyKeyError } from '@database';
+import { DuplicateIdempotencyKeyError } from 'database';
 import type { ErrorRequestHandler } from 'express';
 import { buildErrorEnvelope } from '../error-envelope';
 

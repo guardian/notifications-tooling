@@ -1,6 +1,6 @@
-import { latestArticlesResponseSchema } from '@models';
 import { useQuery } from '@tanstack/react-query';
 import type { QueryKey } from '@tanstack/react-query';
+import { latestArticlesResponseSchema } from 'models';
 import { fetchJsonAndParse } from '../api-client/client';
 import {
 	type LatestPublishedContentItem,

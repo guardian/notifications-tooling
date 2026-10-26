@@ -5,10 +5,10 @@ import {
 	type ListRecentNotificationsOptions,
 	type NotificationListPage,
 	type NotificationWithDispatches,
-} from '@database';
-import { UserPermissions } from '@models';
+} from 'database';
 import { type RequestHandler, Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
+import { UserPermissions } from 'models';
 import { z } from 'zod';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';

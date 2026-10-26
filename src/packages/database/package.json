@@ -1,5 +1,5 @@
 {
-	"name": "@database",
+	"name": "database",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,
@@ -18,9 +18,9 @@
 		"drizzle-kit": "0.31.11"
 	},
 	"dependencies": {
-		"@config": "workspace:*",
-		"@http-logger": "workspace:*",
-		"@models": "workspace:*",
+		"config": "workspace:*",
+		"http-logger": "workspace:*",
+		"models": "workspace:*",
 		"drizzle-orm": "0.45.3",
 		"pg": "8.23.0",
 		"zod": "4.6.5"

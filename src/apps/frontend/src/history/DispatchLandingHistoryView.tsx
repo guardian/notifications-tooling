@@ -1,6 +1,6 @@
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
-import { notificationChannelNames } from '@models';
+import { notificationChannelNames } from 'models';
 import type { ReactNode } from 'react';
 import { ScrollWrapper } from '../compose/ScrollWrapper';
 import {

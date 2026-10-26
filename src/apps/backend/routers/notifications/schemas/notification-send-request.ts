@@ -9,8 +9,8 @@ import {
 	newsletterSegmentIds,
 	NotificationChannel,
 	notificationChannelContentLimits,
-} from '@config';
-import { determineArticleId, isGuardianUrl } from '@utils';
+} from 'config';
+import { determineArticleId, isGuardianUrl } from 'utils';
 import { z } from 'zod';
 
 const pushLimits =

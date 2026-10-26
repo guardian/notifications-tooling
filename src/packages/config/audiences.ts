@@ -7,7 +7,7 @@
  * Hard-coded stub until resolved from the downstream services.
  */
 
-import type { NewsletterSegment, NewsletterSegmentId } from '@models';
+import type { NewsletterSegment, NewsletterSegmentId } from 'models';
 import { configurationStage, type Env } from './env';
 
 // TODO: Move this configuration into settings backed by JSON in S3 or RDS.

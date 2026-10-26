@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
-import type { AppAlertTopicOption } from '@models';
+import type { AppAlertTopicOption } from 'models';
 import type { ReactNode } from 'react';
 import { CollapsibleSection } from '../ui/CollapsibleSection';
 import { AppAlertPreviewSection } from './AppAlertPreviewSection';

@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import type { LatestArticle } from '@models';
-import { UserPermissions } from '@models';
-import { CapiError } from '@models';
 import express from 'express';
+import type { LatestArticle } from 'models';
+import { UserPermissions } from 'models';
+import { CapiError } from 'models';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,

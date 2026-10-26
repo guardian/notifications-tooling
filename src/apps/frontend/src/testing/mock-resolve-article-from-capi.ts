@@ -1,4 +1,4 @@
-import type { ResolveArticleResponse } from '@models';
+import type { ResolveArticleResponse } from 'models';
 import type { Result } from '../api-client/client';
 import { articleFixture } from './capi-fixtures';
 

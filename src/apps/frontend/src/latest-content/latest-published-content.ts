@@ -1,4 +1,4 @@
-import type { LatestArticle } from '@models';
+import type { LatestArticle } from 'models';
 
 export interface LatestPublishedContentItem {
 	id: string;

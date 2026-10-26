@@ -2,7 +2,7 @@ import {
 	appPushTopicTypeIds,
 	newsletterSegmentIds,
 	NotificationChannel,
-} from '@config';
+} from 'config';
 
 /**
  * Named request-body examples for `POST /v1/notifications`, referenced from the

@@ -1,4 +1,4 @@
-import { emailPreviewResponseSchema } from '@models';
+import { emailPreviewResponseSchema } from 'models';
 import { safeFetchJsonAndParse } from '../api-client/client';
 import type { RequestEmailHtml } from '../types';
 

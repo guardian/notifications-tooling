@@ -2,7 +2,7 @@ import {
 	type DisplayAppAlertTopicEditionId,
 	type NewsletterSegmentId,
 	toDisplayEditionId,
-} from '@models';
+} from 'models';
 import { FALLBACK_NEWSLETTER_EMAIL_SEGMENTS } from './audience-fallbacks';
 import { EDITION_OPTIONS } from './edition-options';
 import type { SegmentOption } from './SegmentPicker';

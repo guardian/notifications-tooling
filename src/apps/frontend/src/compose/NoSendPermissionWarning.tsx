@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Link } from '@guardian/stand/Link';
-import { UserPermissions } from '@models';
+import { UserPermissions } from 'models';
 import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { CENTRAL_PRODUCTION_CONTACT_HREF } from '../support-links';

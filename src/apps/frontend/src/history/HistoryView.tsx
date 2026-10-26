@@ -1,6 +1,6 @@
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
-import type { DisplayAppAlertTopicEditionId } from '@models';
+import type { DisplayAppAlertTopicEditionId } from 'models';
 import type { ReactNode } from 'react';
 import type { ChannelAudienceResponse } from '../schemas';
 import { historyViewStyles, layoutMainTheme } from '../themes';

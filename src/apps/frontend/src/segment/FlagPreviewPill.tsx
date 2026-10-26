@@ -1,7 +1,7 @@
 import type {
 	DisplayAppAlertTopicEditionId,
 	NewsletterSegmentId,
-} from '@models';
+} from 'models';
 import { FlagAtom } from '../ui/FlagAtom';
 import { PreviewPillList } from '../ui/PreviewPillList';
 

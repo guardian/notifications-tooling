@@ -1,4 +1,4 @@
-import { emailPreviewResponseSchema } from '@models';
+import { emailPreviewResponseSchema } from 'models';
 import { z } from 'zod';
 
 /** The successful `POST /v1/preview/email` response body. */

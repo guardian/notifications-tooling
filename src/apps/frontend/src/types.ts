@@ -4,7 +4,7 @@ import type {
 	EmailPreviewResponse,
 	NotificationChannelId,
 	ResolvedArticle,
-} from '@models';
+} from 'models';
 import type { Result } from './api-client/client';
 import type { SendNotificationRequest } from './schemas';
 import type { SendNotificationFailure } from './utils/send-notification';

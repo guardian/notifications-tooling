@@ -1,7 +1,7 @@
 import { semanticSpacing } from '@guardian/stand';
 import { Icon } from '@guardian/stand/Icon';
 import { Typography } from '@guardian/stand/Typography';
-import { notificationChannelNames } from '@models';
+import { notificationChannelNames } from 'models';
 import { activePillTheme } from '../themes';
 import type { ChannelOption, DeliveryOption } from '../types';
 import { phoneIphoneIcon } from '../ui/flag-icons';

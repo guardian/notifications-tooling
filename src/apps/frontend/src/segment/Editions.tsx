@@ -3,7 +3,7 @@ import {
 	appAlertTopicEditionId,
 	type AppAlertTopicOption,
 	toDisplayEditionId,
-} from '@models';
+} from 'models';
 import { FlagAtom } from '../ui/FlagAtom';
 import { PreviewPillList } from '../ui/PreviewPillList';
 import { FALLBACK_TOPIC_TYPES } from './audience-fallbacks';

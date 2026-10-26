@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import type { ResolvedArticle } from '@models';
+import type { ResolvedArticle } from 'models';
 import { articleFixture, liveblogFixture } from '../testing/capi-fixtures';
 import { getArticleThumbnail } from './article-thumbnail';
 

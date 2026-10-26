@@ -1,4 +1,4 @@
-import type { AppConfig } from '@models';
+import type { AppConfig } from 'models';
 
 declare global {
 	interface Window {

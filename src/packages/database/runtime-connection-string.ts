@@ -1,5 +1,5 @@
-import { getSecretValue } from '@config/ssm';
-import { logger } from '@http-logger';
+import { getSecretValue } from 'config/ssm';
+import { logger } from 'http-logger';
 import { loadDatabaseEnvironment } from './database-environment';
 import { parseManagedDatabaseSecret } from './managed-database-secret';
 

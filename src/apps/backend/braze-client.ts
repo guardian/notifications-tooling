@@ -1,5 +1,5 @@
-import { getSSMParameter } from '@config/ssm';
-import { type BrazeClient, createBrazeClient } from '@services';
+import { getSSMParameter } from 'config/ssm';
+import { type BrazeClient, createBrazeClient } from 'services';
 import { z } from 'zod';
 
 const brazeEnvironmentSchema = z.object({

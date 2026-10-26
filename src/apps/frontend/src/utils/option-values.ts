@@ -1,5 +1,5 @@
 import type { Icon } from '@guardian/stand/Icon';
-import { notificationChannelNames } from '@models';
+import { notificationChannelNames } from 'models';
 import type { ComponentProps, ReactNode } from 'react';
 import type { Kicker } from '../schemas';
 import type { ChannelOption, DeliveryOption } from '../types';

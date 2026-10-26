@@ -1,4 +1,4 @@
-import { type DisplayAppAlertTopicEditionId, toApiEditionId } from '@models';
+import { type DisplayAppAlertTopicEditionId, toApiEditionId } from 'models';
 import type { ChannelAudienceResponse } from '../schemas';
 import {
 	FALLBACK_NEWSLETTER_EMAIL_SEGMENTS,
