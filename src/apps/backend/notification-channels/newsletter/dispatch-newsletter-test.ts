@@ -1,5 +1,5 @@
-import { newsletterSegments, NotificationChannel } from '@config';
-import { determineBlockId } from '@utils';
+import { newsletterSegments, NotificationChannel } from 'config';
+import { determineBlockId } from 'utils';
 import { z } from 'zod';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { NewsletterDispatchOutcome } from '../dispatch-outcome';

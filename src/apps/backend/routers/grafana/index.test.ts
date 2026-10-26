@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { UserPermissions } from '@models';
+import { UserPermissions } from 'models';
 import {
 	buildPersistedNotification,
 	installDatabaseMock,

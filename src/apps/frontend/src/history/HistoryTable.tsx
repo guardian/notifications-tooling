@@ -10,7 +10,7 @@ import {
 	TableRow,
 } from '@guardian/stand/Table';
 import { Typography } from '@guardian/stand/Typography';
-import { notificationChannelNames } from '@models';
+import { notificationChannelNames } from 'models';
 import {
 	useRelativeTime,
 	useRelativeTimeClock,

@@ -6,16 +6,16 @@ import {
 	newsletterSegments,
 	NotificationChannel,
 	notificationChannelContentLimits,
-} from '@config';
+} from 'config';
 import type {
 	AppAlertTopicEditionId,
 	AppAlertTopicOption,
 	NewsletterSegment,
 	NewsletterSegmentId,
 	TopicTypeEditionOption,
-} from '@models';
-import { UserPermissions } from '@models';
-import type { BrazeCampaignDetails } from '@services';
+} from 'models';
+import { UserPermissions } from 'models';
+import type { BrazeCampaignDetails } from 'services';
 import { type Request, type Response, Router } from 'express';
 import { loadBrazeClient } from '../../braze-client';
 import { authMiddleware } from '../../middleware/auth-middleware';

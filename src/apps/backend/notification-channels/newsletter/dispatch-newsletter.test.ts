@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { newsletterSegments, NotificationChannel } from '@config';
-import { BrazeApiError } from '@services';
+import { newsletterSegments, NotificationChannel } from 'config';
+import { BrazeApiError } from 'services';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import { dispatchNotification } from '../dispatch-notification';
 import {

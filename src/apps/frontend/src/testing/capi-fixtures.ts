@@ -1,4 +1,4 @@
-import type { ResolvedArticle } from '@models';
+import type { ResolvedArticle } from 'models';
 
 export const requestedLiveblogBlock = {
 	id: 'block-6a9af4938f0834a1091dfae4',

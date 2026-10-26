@@ -34,7 +34,7 @@ setupPostgres() {
 
 runDatabaseMigrations() {
 	echo "Running database migrations"
-	bun run --filter @database db:migration:apply
+	bun run --filter database db:migration:apply
 }
 
 setupNginx

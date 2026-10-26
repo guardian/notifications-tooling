@@ -8,7 +8,7 @@ import {
 	newsletterSegmentIds,
 	NotificationChannel,
 	notificationChannelContentLimits,
-} from '@config';
+} from 'config';
 import {
 	determineComposedArticleId,
 	notificationSendRequestSchema,

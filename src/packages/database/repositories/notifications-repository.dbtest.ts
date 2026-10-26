@@ -6,7 +6,7 @@ import {
 	expect,
 	it,
 } from 'bun:test';
-import { historyAlertTypeSchema } from '@models';
+import { historyAlertTypeSchema } from 'models';
 import {
 	buildDispatch,
 	buildNotification,

@@ -1,4 +1,4 @@
-import { NotificationChannel } from '@config';
+import { NotificationChannel } from 'config';
 
 /**
  * The delivery channel a notification (or plan) targets. Referenced via

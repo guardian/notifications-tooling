@@ -1,4 +1,4 @@
-import { NotificationChannel } from '@config';
+import { NotificationChannel } from 'config';
 import type { NotificationTestSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { AppPushDispatchOutcome } from '../dispatch-outcome';
 import {

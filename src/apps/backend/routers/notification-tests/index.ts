@@ -1,4 +1,4 @@
-import { UserPermissions } from '@models';
+import { UserPermissions } from 'models';
 import { Router } from 'express';
 import validate from 'express-zod-safe';
 import { authMiddleware } from '../../middleware/auth-middleware';

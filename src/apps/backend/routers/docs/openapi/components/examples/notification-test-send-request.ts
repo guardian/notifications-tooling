@@ -3,7 +3,7 @@ import {
 	appPushTestTopicTypeIds,
 	newsletterSegmentIds,
 	NotificationChannel,
-} from '@config';
+} from 'config';
 
 /**
  * Named request-body examples for `POST /v1/notification-tests`, referenced from

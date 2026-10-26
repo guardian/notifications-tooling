@@ -1,7 +1,7 @@
 import type { ServerResponse } from 'node:http';
 import { basename } from 'node:path';
 import serverlessExpress from '@codegenie/serverless-express';
-import { httpLogger } from '@http-logger';
+import { httpLogger } from 'http-logger';
 import express, {
 	type Application,
 	type Request,

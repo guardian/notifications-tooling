@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import type { NewNotificationDispatch, NotificationDispatch } from '@database';
+import type { NewNotificationDispatch, NotificationDispatch } from 'database';
 import type { DispatchOutcomes } from '../notification-channels/dispatch-notification';
 import type { TestDispatchOutcomes } from '../notification-channels/dispatch-notification-test';
 import {

@@ -1,4 +1,4 @@
-import type { ResolvedArticle } from '@models';
+import type { ResolvedArticle } from 'models';
 
 interface ArticleThumbnail {
 	alt?: string;

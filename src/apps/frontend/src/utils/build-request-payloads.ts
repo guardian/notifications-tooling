@@ -1,4 +1,4 @@
-import { type CapiBlock, type ResolvedArticle, toApiEditionId } from '@models';
+import { type CapiBlock, type ResolvedArticle, toApiEditionId } from 'models';
 import type { SendNotificationRequest } from '../schemas';
 import { getArticleThumbnail } from './article-thumbnail';
 import { composeNewsletterEmailSubjectLine } from './newsletter-email-subject';

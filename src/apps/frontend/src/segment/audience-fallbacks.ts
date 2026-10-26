@@ -2,7 +2,7 @@ import type {
 	AppAlertTopicOption,
 	NewsletterSegmentOption,
 	TopicTypeEditionOption,
-} from '@models';
+} from 'models';
 
 const FALLBACK_APP_ALERT_EDITIONS: TopicTypeEditionOption[] = [
 	{ id: 'uk', label: 'United Kingdom' },

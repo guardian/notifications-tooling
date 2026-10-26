@@ -1,7 +1,7 @@
 import type {
 	DisplayAppAlertTopicEditionId,
 	NewsletterSegmentId,
-} from '@models/api-contract/audience';
+} from 'models/api-contract/audience';
 import {
 	auFlag,
 	euFlag,

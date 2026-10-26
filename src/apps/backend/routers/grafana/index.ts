@@ -3,8 +3,8 @@ import {
 	getDb,
 	type Notification,
 	type NotificationWithDispatches,
-} from '@database';
-import { UserPermissions } from '@models';
+} from 'database';
+import { UserPermissions } from 'models';
 import { type Request, type Response, Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';

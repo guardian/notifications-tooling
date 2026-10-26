@@ -1,4 +1,4 @@
-import type { ResolveArticleRequest, ResolveArticleResponse } from '@models';
+import type { ResolveArticleRequest, ResolveArticleResponse } from 'models';
 import type { ActionDispatch } from 'react';
 import { createContext } from 'react';
 import type { Result } from '../api-client/client';

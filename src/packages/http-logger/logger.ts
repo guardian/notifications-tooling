@@ -1,4 +1,4 @@
-import { env } from '@config';
+import { env } from 'config';
 import pino from 'pino';
 
 const isProduction = env.NODE_ENV === 'production';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { NotificationChannel } from '@config';
-import { AppNotificationApiError } from '@services';
+import { NotificationChannel } from 'config';
+import { AppNotificationApiError } from 'services';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import { dispatchNotification } from '../dispatch-notification';
 import {

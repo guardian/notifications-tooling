@@ -5,8 +5,8 @@ import {
 	type ListRecentNotificationsOptions,
 	type NotificationListPage,
 	type NotificationWithDispatches,
-} from '@database';
-import { UserPermissions } from '@models';
+} from 'database';
+import { UserPermissions } from 'models';
 import { type RequestHandler, Router } from 'express';
 import validate, { type ErrorRequestHandler } from 'express-zod-safe';
 import { z } from 'zod';

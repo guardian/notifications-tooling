@@ -1,4 +1,4 @@
-import { NotificationChannel, notificationChannelNames } from '@models';
+import { NotificationChannel, notificationChannelNames } from 'models';
 import type { ChannelOption } from '../types';
 
 export const getChannelDescription = (channel?: ChannelOption) =>

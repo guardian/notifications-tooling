@@ -2,7 +2,7 @@ import {
 	canonicalHistoryAlertTypes,
 	notificationAudienceFilterId,
 	notificationAudienceFilterIds,
-} from '@models';
+} from 'models';
 
 export const DEFAULT_LIMIT = 20;
 export const MAXIMUM_LIMIT = 50;

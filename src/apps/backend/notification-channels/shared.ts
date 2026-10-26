@@ -1,6 +1,6 @@
-import type { NotificationChannel } from '@config';
-import { getSSMParameter } from '@config/ssm';
-import { renderEmail, sendAppNotification } from '@services';
+import type { NotificationChannel } from 'config';
+import { getSSMParameter } from 'config/ssm';
+import { renderEmail, sendAppNotification } from 'services';
 import { loadBrazeClient } from '../braze-client';
 import type {
 	NotificationSendRequest,

@@ -1,6 +1,6 @@
-import { NotificationChannel } from '@models';
+import { NotificationChannel } from 'models';
 
-export { NotificationChannel } from '@models';
+export { NotificationChannel } from 'models';
 
 /**
  * The limits that apply to one piece of notification text. They are distinct

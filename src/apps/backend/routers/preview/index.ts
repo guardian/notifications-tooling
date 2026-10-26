@@ -1,13 +1,13 @@
-import { newsletterSegments } from '@config';
-import { getSSMParameter } from '@config/ssm';
+import { newsletterSegments } from 'config';
+import { getSSMParameter } from 'config/ssm';
 import type {
 	EmailPreviewRequest,
 	EmailPreviewResponse,
 	NewsletterSegment,
-} from '@models';
-import { emailPreviewRequestSchema, UserPermissions } from '@models';
-import { EmailRenderingError, renderEmail } from '@services';
-import { determineArticleId, determineBlockId } from '@utils';
+} from 'models';
+import { emailPreviewRequestSchema, UserPermissions } from 'models';
+import { EmailRenderingError, renderEmail } from 'services';
+import { determineArticleId, determineBlockId } from 'utils';
 import { type Request, type Response, Router } from 'express';
 import validate from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';

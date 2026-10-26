@@ -1,5 +1,5 @@
 import { fromIni, fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { isRunningLocally, pandaSettingsFileName } from '@config';
+import { isRunningLocally, pandaSettingsFileName } from 'config';
 import {
 	guardianValidation,
 	PanDomainAuthentication,

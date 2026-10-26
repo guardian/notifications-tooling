@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
-import { newsletterSegments } from '@config';
-import { UserPermissions } from '@models';
+import { newsletterSegments } from 'config';
+import { UserPermissions } from 'models';
 import express from 'express';
 import {
 	authenticateRequests,

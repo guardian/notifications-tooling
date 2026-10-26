@@ -1,4 +1,4 @@
-import { canonicalHistoryAlertTypes } from '@models';
+import { canonicalHistoryAlertTypes } from 'models';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';

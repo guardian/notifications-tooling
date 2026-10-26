@@ -3,7 +3,7 @@ import {
 	displayAppAlertTopicEditionId,
 	type DisplayAppAlertTopicEditionId,
 	toDisplayEditionId,
-} from '@models';
+} from 'models';
 import { z } from 'zod';
 import type { HistoryNotification } from '../history/HistoryView';
 import type { ChannelAudienceResponse, NotificationSummary } from '../schemas';

@@ -1,5 +1,5 @@
-import type { CropAsset, CropData, ImageData } from '@models';
-import { gridImage } from '@models';
+import type { CropAsset, CropData, ImageData } from 'models';
+import { gridImage } from 'models';
 
 export type GridErrorRemedy = 'authenticate' | 'contact-cp';
 

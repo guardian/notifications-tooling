@@ -1,18 +1,18 @@
-import { getSSMParameter } from '@config/ssm';
+import { getSSMParameter } from 'config/ssm';
 import type {
 	LatestArticle,
 	LatestArticlesResponse,
 	ResolveArticleRequest,
 	ResolveArticleResponse,
-} from '@models';
+} from 'models';
 import {
 	CapiError,
 	resolveArticleRequestSchema,
 	type ResolvedArticle,
 	UserPermissions,
-} from '@models';
-import { fetchArticle, fetchLatestArticles } from '@services';
-import { determineArticleId } from '@utils';
+} from 'models';
+import { fetchArticle, fetchLatestArticles } from 'services';
+import { determineArticleId } from 'utils';
 import { type Request, type Response, Router } from 'express';
 import validate from 'express-zod-safe';
 import { buildErrorEnvelope } from '../../error-envelope';

@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { env, isRunningLocally } from '@config';
-import { getSSMParameter } from '@config/ssm';
-import type { AppConfig } from '@models';
+import { env, isRunningLocally } from 'config';
+import { getSSMParameter } from 'config/ssm';
+import type { AppConfig } from 'models';
 import type { Request, RequestHandler, Response } from 'express';
 import { clientAssetsDir } from '../client-assets';
 import { listUserPermissions } from '../utils/permissions/permissions-store';

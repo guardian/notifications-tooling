@@ -6,12 +6,12 @@ import type {
 	LatestArticle,
 	ProductionOffice,
 	ResolvedArticle,
-} from '@models';
+} from 'models';
 import {
 	CapiError,
 	capiResponseSchema,
 	capiSearchResponseSchema,
-} from '@models';
+} from 'models';
 
 type FetchArticleRequest = {
 	endpoint: string;

@@ -1,7 +1,7 @@
 import {
 	type DisplayAppAlertTopicEditionId,
 	toDisplayEditionId,
-} from '@models';
+} from 'models';
 import { FALLBACK_TOPIC_TYPES } from './audience-fallbacks';
 import type { SegmentOption } from './SegmentPicker';
 

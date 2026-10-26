@@ -2,7 +2,7 @@ import {
 	type ResolveArticleRequest,
 	type ResolveArticleResponse,
 	resolveArticleResponseSchema,
-} from '@models';
+} from 'models';
 import type { Result } from '../api-client/client';
 import { safeFetchJsonAndParse } from '../api-client/client';
 

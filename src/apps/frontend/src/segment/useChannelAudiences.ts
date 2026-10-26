@@ -2,7 +2,7 @@ import {
 	type AppAlertTopicOption,
 	type ChannelAudienceResponse,
 	channelAudienceResponseSchema,
-} from '@models';
+} from 'models';
 import { useQuery } from '@tanstack/react-query';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';

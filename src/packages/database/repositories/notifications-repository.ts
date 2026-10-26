@@ -2,8 +2,8 @@ import type {
 	HistoryAlertType,
 	KickerHistoryAlertType,
 	NotificationChannelId,
-} from '@models';
-import { kickerHistoryAlertTypes } from '@models';
+} from 'models';
+import { kickerHistoryAlertTypes } from 'models';
 import {
 	and,
 	count,
