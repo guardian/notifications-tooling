@@ -20,6 +20,7 @@ import {
 	AppAlertDispatchReportTab,
 	NewsletterEmailDispatchReportTab,
 } from './send/DispatchReport';
+import { TelemetryServiceProvider } from './telemetry/TelemetryContext';
 
 export function App() {
 	const [config] = useState<AppConfig | undefined>(getAppConfig());
@@ -27,38 +28,40 @@ export function App() {
 
 	return (
 		<ConfigContext.Provider value={config}>
-			<Routes>
-				<Route element={<AccessControlledLayout />}>
-					<Route index element={<DispatchLandingPage />} />
-					<Route
-						path="newsletter-email"
-						element={
-							<NewsletterEmailNotificationFormProvider>
-								<Outlet />
-							</NewsletterEmailNotificationFormProvider>
-						}
-					>
-						<Route path="create" element={<CreateNewsletterEmailTab />} />
+			<TelemetryServiceProvider>
+				<Routes>
+					<Route element={<AccessControlledLayout />}>
+						<Route index element={<DispatchLandingPage />} />
 						<Route
-							path="report"
-							element={<NewsletterEmailDispatchReportTab />}
-						/>
+							path="newsletter-email"
+							element={
+								<NewsletterEmailNotificationFormProvider>
+									<Outlet />
+								</NewsletterEmailNotificationFormProvider>
+							}
+						>
+							<Route path="create" element={<CreateNewsletterEmailTab />} />
+							<Route
+								path="report"
+								element={<NewsletterEmailDispatchReportTab />}
+							/>
+						</Route>
+						<Route
+							path="app-alert"
+							element={
+								<AppAlertNotificationFormProvider>
+									<Outlet />
+								</AppAlertNotificationFormProvider>
+							}
+						>
+							<Route path="create" element={<CreateAppAlertTab />} />
+							<Route path="report" element={<AppAlertDispatchReportTab />} />
+						</Route>
+						<Route path={appRoutes.history} element={<HistoryPage />} />
+						<Route path="*" element={<NotFoundTab />} />
 					</Route>
-					<Route
-						path="app-alert"
-						element={
-							<AppAlertNotificationFormProvider>
-								<Outlet />
-							</AppAlertNotificationFormProvider>
-						}
-					>
-						<Route path="create" element={<CreateAppAlertTab />} />
-						<Route path="report" element={<AppAlertDispatchReportTab />} />
-					</Route>
-					<Route path={appRoutes.history} element={<HistoryPage />} />
-					<Route path="*" element={<NotFoundTab />} />
-				</Route>
-			</Routes>
+				</Routes>
+			</TelemetryServiceProvider>
 		</ConfigContext.Provider>
 	);
 }
