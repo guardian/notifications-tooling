@@ -60,7 +60,7 @@ describe('resolveAppPushTopic', () => {
 
 	it('resolves a production topic edition', () => {
 		expect(resolveAppPushTopic('breaking-news', 'uk')).toEqual({
-			topic: { type: 'breaking', name: 'internal-dispatch-test' },
+			topic: { type: 'breaking', name: 'uk' },
 			importance: AppPushImportance.Major,
 			titleOverride: undefined,
 		});
