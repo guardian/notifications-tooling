@@ -13,6 +13,7 @@ import {
 	testNotificationStore,
 	toNotificationResponse,
 } from '../../persistence/persist-notification';
+import { dispatchAndPersistNotification } from '../dispatch-and-persist-notification';
 import { handleValidationErrors } from '../notifications';
 import {
 	type NotificationTestSendRequest,
@@ -42,90 +43,70 @@ export const createNotificationTestsRouter = (
 		}),
 		async (req, res) => {
 			const body = req.body;
+			const result = await dispatchAndPersistNotification({
+				request: body,
+				createdByEmail: req.user!.email,
+				dispatchRequest,
+				store,
+			});
 
-			// Record the envelope first so the DB mints the id; the dispatch then
-			// tags its downstream calls with that same id.
-			const notification = await store.create(body, req.user!.email);
-
-			let outcomesRecorded = false;
-			try {
-				const { error, ...outcomes } = await dispatchRequest(
-					body,
-					notification.id,
-					notification.createdByEmail,
-				);
-				const persisted = await store.recordOutcomes(notification, outcomes);
-				outcomesRecorded = true;
-
-				// A provider rejection is reflected in the persisted dispatch rows and
-				// the rolled-up status (any failure -> 502), so return the recorded
-				// notification either way — the caller sees each target's outcome
-				// instead of a terse error envelope.
-				if (error !== undefined) {
+			if (result.type === 'recorded') {
+				if (result.providerError !== undefined) {
 					req.log.warn(
 						{
-							testId: notification.id,
+							testId: result.notification.id,
 							dryRun: body.options.dryRun,
-							status: persisted.notification.status,
-							err: error,
-							...outcomes,
+							status: result.persisted.notification.status,
+							err: result.providerError,
+							...result.outcomes,
 						},
 						'Recorded notification test with provider failures',
 					);
 				} else {
 					req.log.info(
 						{
-							testId: notification.id,
+							testId: result.notification.id,
 							dryRun: body.options.dryRun,
-							status: persisted.notification.status,
-							...outcomes,
+							status: result.persisted.notification.status,
+							...result.outcomes,
 						},
 						'Dispatched and recorded notification test',
 					);
 				}
 
 				res
-					.status(httpStatusForNotification(persisted.notification.status))
-					.json(toNotificationResponse(persisted));
-			} catch (error) {
-				// Dispatch or persistence threw before any outcome was recorded (e.g.
-				// a config, SSM, or DB failure); flag the stored row failed and return
-				// it so the caller sees the failure rather than a terse error
-				// envelope. When outcomes were recorded the status is already
-				// accurate, so rethrow to surface anything unexpected.
-				if (!outcomesRecorded) {
-					req.log.error(
-						{
-							err: error,
-							testId: notification.id,
-						},
-						'Notification test dispatch or outcome persistence failed',
-					);
-
-					const failed = await store
-						.markFailed(notification)
-						.catch((markError) => {
-							req.log.error(
-								{
-									err: markError,
-									testId: notification.id,
-								},
-								'Failed to persist notification test failure status',
-							);
-							return notification;
-						});
-
-					res
-						.status(httpStatusForNotification(failed.status))
-						.json(
-							toNotificationResponse({ notification: failed, dispatches: [] }),
-						);
-
-					return;
-				}
-
-				throw error;
+					.status(
+						httpStatusForNotification(result.persisted.notification.status),
+					)
+					.json(toNotificationResponse(result.persisted));
+				return;
 			}
+
+			req.log.error(
+				{
+					err: result.dispatchError,
+					testId: result.notification.id,
+				},
+				'Notification test dispatch or outcome persistence failed',
+			);
+			if (result.markFailedError !== undefined) {
+				req.log.error(
+					{
+						err: result.markFailedError,
+						testId: result.notification.id,
+					},
+					'Failed to persist notification test failure status',
+				);
+			}
+
+			res
+				.status(httpStatusForNotification(result.failedNotification.status))
+				.json(
+					toNotificationResponse({
+						notification: result.failedNotification,
+						dispatches: [],
+					}),
+				);
 		},
 	);
 

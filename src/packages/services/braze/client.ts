@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isTimeoutError } from '../is-timeout-error';
 
 export const MAX_BRAZE_TRIGGER_PROPERTIES_BYTES = 50_000;
 
@@ -114,10 +115,6 @@ const brazeCampaignDetailsSchema = z.object({
 export type BrazeCampaignDetails = z.infer<typeof brazeCampaignDetailsSchema>;
 
 const testEmailUserAliasLabel = 'dispatch-tool-test-email';
-
-const isTimeoutError = (error: unknown): boolean =>
-	error instanceof Error &&
-	(error.name === 'AbortError' || error.name === 'TimeoutError');
 
 const requestBraze = async (
 	url: string,
