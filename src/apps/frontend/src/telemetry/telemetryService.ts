@@ -52,14 +52,19 @@ export class TelemetryService {
 		const tags = { ...tagsWithoutSessionId, sessionId: this.sessionId };
 		if (this.stage === 'DEV') {
 			console.log(type, tags, value);
+			return;	
 		}
-		this.userTelemetryEventSender.addEvent({
-			app: APP_NAME,
-			stage: this.stage,
-			eventTime: new Date().toISOString(),
-			type,
-			value,
-			tags,
-		});
+		try {
+			this.userTelemetryEventSender.addEvent({
+				app: APP_NAME,
+				stage: this.stage,
+				eventTime: new Date().toISOString(),
+				type,
+				value,
+				tags,
+			});
+		} catch (err) {
+			console.warn('telemetry failure', err);
+		}
 	};
 }

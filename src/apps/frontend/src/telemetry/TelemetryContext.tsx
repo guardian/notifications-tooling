@@ -37,14 +37,10 @@ export const useTelemetryBeforeInternalLink = (component: string) => {
 	return (path: string) => ({
 		href: path,
 		onPress: () => {
-			try {
-				telemetry.sendEvent(TelemetryEvent.NavigationEvent, {
-					path,
-					component,
-				});
-			} catch (err) {
-				console.warn('telemetry failure', err);
-			}
+			telemetry.sendEvent(TelemetryEvent.NavigationEvent, {
+				path,
+				component,
+			});
 		},
 	});
 };
