@@ -4,7 +4,7 @@ import { UserTelemetryEventSender } from '@guardian/user-telemetry-client';
 export enum TelemetryEvent {
 	ButtonClick = 'BUTTON_CLICK',
 	ShortcutEvent = 'SHORTCUT_EVENT',
-
+	NavigationEvent = 'NAVIGATION_EVENT'
 }
 
 export type SendTelemetryEvent = {
