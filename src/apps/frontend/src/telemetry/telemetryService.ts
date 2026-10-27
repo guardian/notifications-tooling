@@ -28,11 +28,13 @@ function getUserTelemetryClientUrl(stage: Stage): string {
 	}
 }
 
+const APP_NAME = 'dispatch';
+
 export class TelemetryService {
 	private userTelemetryEventSender: UserTelemetryEventSender;
 
 	public constructor(
-		private readonly app: string,
+		private readonly sessionId: string,
 		private readonly stage: Stage,
 		private throttleDelay: number = 10000,
 	) {
@@ -44,14 +46,15 @@ export class TelemetryService {
 
 	public sendEvent: SendTelemetryEvent = (
 		type: TelemetryEvent,
-		tags?: IUserTelemetryEvent['tags'],
+		tagsWithoutSessionId?: IUserTelemetryEvent['tags'],
 		value: boolean | number = true,
 	) => {
+		const tags = { ...tagsWithoutSessionId, sessionId: this.sessionId };
 		if (this.stage === 'DEV') {
 			console.log(type, tags, value);
 		}
 		this.userTelemetryEventSender.addEvent({
-			app: this.app,
+			app: APP_NAME,
 			stage: this.stage,
 			eventTime: new Date().toISOString(),
 			type,

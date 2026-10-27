@@ -15,4 +15,5 @@ export type AppConfig = UserResponse & {
 	gridUri: string;
 	dispatchUserGuideUrl: string;
 	dispatchFeedbackFormUrl: string;
+	sessionId: string;
 };

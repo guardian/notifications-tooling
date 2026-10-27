@@ -4,7 +4,7 @@ import { ConfigContext } from '../config/ConfigContext';
 import { TelemetryEvent, TelemetryService } from './telemetryService';
 
 export const TelemetryContext = createContext<TelemetryService>(
-	new TelemetryService('unconfigured', 'DEV'),
+	new TelemetryService('no-session', 'DEV'),
 );
 
 export const TelemetryServiceProvider = ({
@@ -15,7 +15,10 @@ export const TelemetryServiceProvider = ({
 	const appConfig = useContext(ConfigContext);
 
 	const [telemetryService] = useState(
-		new TelemetryService('dispatch', appConfig?.stage ?? 'DEV'),
+		new TelemetryService(
+			appConfig?.sessionId ?? 'no-session',
+			appConfig?.stage ?? 'DEV',
+		),
 	);
 
 	return (

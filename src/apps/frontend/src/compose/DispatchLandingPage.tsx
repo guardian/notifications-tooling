@@ -14,9 +14,7 @@ import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { LatestPublishedContentPanel } from '../latest-content/LatestPublishedContentPanel';
 import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
-import {
-	useTelemetryBeforeInternalLink
-} from '../telemetry/TelemetryContext';
+import { useTelemetryBeforeInternalLink } from '../telemetry/TelemetryContext';
 import { dispatchLandingTheme } from '../themes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 import { parseHistorySearchParams } from '../utils/history-search-params';

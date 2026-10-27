@@ -16,9 +16,7 @@ import { type ReactNode, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes, getTopBarNavigationItems } from '../routes';
-import {
-	useTelemetryBeforeInternalLink
-} from '../telemetry/TelemetryContext';
+import { useTelemetryBeforeInternalLink } from '../telemetry/TelemetryContext';
 import {
 	dispatchLandingTheme,
 	faviconTheme,
@@ -42,7 +40,7 @@ const getInitials = (user: AppConfig['user']): string => {
 export const MainLayout = ({ children }: Props) => {
 	const config = useContext(ConfigContext);
 	const routes = getAppRoutes();
-	const { user } = config ?? {};
+	const { user, sessionId } = config ?? {};
 	const { pathname } = useLocation();
 	const stage = config?.stage;
 	const shouldShowEnvBadge = stage !== undefined && stage !== 'PROD';
@@ -59,6 +57,7 @@ export const MainLayout = ({ children }: Props) => {
 
 	return (
 		<Layout
+			data-session={sessionId}
 			cssOverrides={[
 				css({
 					[stickyHeaderHeightProperty]: stickyHeaderHeight,
