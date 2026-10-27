@@ -16,8 +16,9 @@ import { type ReactNode, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes, getTopBarNavigationItems } from '../routes';
-import { TelemetryContext } from '../telemetry/TelemetryContext';
-import { TelemetryEvent } from '../telemetry/telemetryService';
+import {
+	useTelemetryBeforeInternalLink
+} from '../telemetry/TelemetryContext';
 import {
 	dispatchLandingTheme,
 	faviconTheme,
@@ -54,7 +55,7 @@ export const MainLayout = ({ children }: Props) => {
 	}, [pathname]);
 
 	const isDispatchLanding = pathname === routes.dispatchLanding;
-	const telemetry = useContext(TelemetryContext);
+	const sendTelemetryAndNavigate = useTelemetryBeforeInternalLink('MainLayout');
 
 	return (
 		<Layout
@@ -72,32 +73,20 @@ export const MainLayout = ({ children }: Props) => {
 				<TopBar theme={topBarTheme}>
 					<TopBarToolName
 						name="Dispatch"
-						href={routes.dispatchLanding}
+						{...sendTelemetryAndNavigate(routes.dispatchLanding)}
 						favicon={{
 							icon: <Favicon icon="notifications" theme={faviconTheme} />,
 						}}
 						hoverText=""
 						collapsedHoverText=""
-						onPress={() => {
-							telemetry.sendEvent(TelemetryEvent.NavigationEvent, {
-								path: routes.dispatchLanding,
-								component: 'TopBar',
-							});
-						}}
 					/>
 					<TopBarContainerLeft>
 						{getTopBarNavigationItems().map(({ text, path, activePaths }) => (
 							<TopBarNavigation
 								key={path}
+								{...sendTelemetryAndNavigate(path)}
 								text={text}
 								isSelected={activePaths.includes(pathname)}
-								href={path}
-								onPress={() => {
-									telemetry.sendEvent(TelemetryEvent.NavigationEvent, {
-										path,
-										component: 'TopBar',
-									});
-								}}
 							/>
 						))}
 					</TopBarContainerLeft>
