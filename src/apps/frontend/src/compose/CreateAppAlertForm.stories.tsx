@@ -529,7 +529,7 @@ export const WithThumbnailTurnedOff: Story = {
 	},
 };
 
-export const SubmitWithNativeForm: Story = {
+export const NativeFormSubmitRequiresConfirmation: Story = {
 	args: {
 		composerState: populatedAppAlertComposerState,
 	},
@@ -542,6 +542,22 @@ export const SubmitWithNativeForm: Story = {
 		await expect(form).toHaveAttribute('method', 'post');
 		await expect(form).toHaveAttribute('novalidate');
 		form.requestSubmit();
+
+		const screen = within(canvasElement.ownerDocument.body);
+		await expect(
+			screen.queryByText('Are you sure you want to send the app alert?'),
+		).not.toBeInTheDocument();
+	},
+};
+
+export const SubmitButtonWithEnterKey: Story = {
+	args: {
+		composerState: populatedAppAlertComposerState,
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		canvas.getByRole('button', { name: 'Send app alert' }).focus();
+		await userEvent.keyboard('{Enter}');
 
 		const screen = within(canvasElement.ownerDocument.body);
 		await expect(
@@ -567,6 +583,12 @@ export const FetchingArticle: Story = {
 			...defaultAppAlertComposerState,
 			isFetchingArticle: true,
 		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		).toBeDisabled();
 	},
 };
 

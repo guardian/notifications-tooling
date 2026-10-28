@@ -3,7 +3,11 @@ import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
-import { notificationRoutes, withArticleUrl } from '../routes';
+import {
+	createDispatchReportState,
+	notificationRoutes,
+	withArticleUrl,
+} from '../routes';
 import type { SendNotificationRequest } from '../schemas';
 import type { SendNotificationResult } from '../utils/send-notification';
 import { notificationHistoryQueryKey } from './useNotificationHistory';
@@ -57,6 +61,7 @@ export const useSendNotification = () => {
 					notificationRoutes[channel].report,
 					leadStory?.link ?? '',
 				),
+				{ state: createDispatchReportState(result.data.id) },
 			);
 		});
 	};

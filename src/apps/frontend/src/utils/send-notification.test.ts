@@ -11,9 +11,13 @@ import type {
 	SendNotificationRequest,
 	SendNotificationResponse,
 } from '../schemas';
-import { sendNotification } from './send-notification';
+import {
+	SEND_NOTIFICATION_TIMEOUT_MS,
+	sendNotification,
+} from './send-notification';
 
 const originalFetch = globalThis.fetch;
+const originalAbortSignalTimeout = AbortSignal.timeout.bind(AbortSignal);
 const originalLocation = Object.getOwnPropertyDescriptor(
 	globalThis,
 	'location',
@@ -28,6 +32,7 @@ beforeAll(() => {
 
 afterEach(() => {
 	globalThis.fetch = originalFetch;
+	AbortSignal.timeout = originalAbortSignalTimeout;
 });
 
 afterAll(() => {
@@ -79,6 +84,23 @@ const failedNotification: SendNotificationResponse = {
 };
 
 describe('sendNotification', () => {
+	it('allows the backend provider timeout to complete before timing out', async () => {
+		const timeout = mock(() => new AbortController().signal);
+		AbortSignal.timeout = timeout;
+		globalThis.fetch = mock(() =>
+			Promise.resolve(
+				new Response(JSON.stringify(failedNotification), {
+					status: 502,
+					headers: { 'content-type': 'application/json' },
+				}),
+			),
+		) as unknown as typeof fetch;
+
+		await sendNotification(request);
+
+		expect(timeout).toHaveBeenCalledWith(SEND_NOTIFICATION_TIMEOUT_MS);
+	});
+
 	it('preserves dispatch outcomes from a 502 response', async () => {
 		globalThis.fetch = mock(() =>
 			Promise.resolve(

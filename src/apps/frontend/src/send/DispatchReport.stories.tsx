@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import {
 	createCopiedNotificationState,
+	createDispatchReportState,
 	notificationRoutes,
 	withArticleUrl,
 } from '../routes';
@@ -306,5 +307,40 @@ export const ReportRouteRequiresNotificationId: Story = {
 		await expect(
 			canvas.queryByRole('heading', { name: 'Newsletter email sent' }),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const NewsletterReportUsesNavigationNotificationId: Story = {
+	beforeEach: () => {
+		const originalUrl = window.location.href;
+		const originalState: unknown = window.history.state;
+		const currentState: unknown = window.history.state;
+		window.history.replaceState(
+			{
+				...(typeof currentState === 'object' && currentState !== null
+					? currentState
+					: {}),
+				usr: createDispatchReportState('newsletter-dispatch-id'),
+			},
+			'',
+			notificationRoutes.newsletter.report,
+		);
+
+		return () => window.history.replaceState(originalState, '', originalUrl);
+	},
+	render: function Render() {
+		return useNotificationFormStory(
+			<NewsletterEmailDispatchReportTab />,
+			defaultComposerState,
+			{},
+			'newsletter',
+			completeNewsletterEmailFormValues,
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
+		).toBeVisible();
 	},
 };

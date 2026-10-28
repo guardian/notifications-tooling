@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'bun:test';
 import {
 	createCopiedNotificationState,
+	createDispatchReportState,
 	getAppRoutes,
 	getTopBarNavigationItems,
 	guardianMainUrl,
 	notificationRoutes,
 	parseCopiedNotificationState,
+	parseDispatchReportState,
 	toGuardianArticleUrl,
 	withArticleUrl,
 } from './routes';
@@ -120,5 +122,20 @@ describe('copy to another channel navigation state', () => {
 				contentTitle: '   ',
 			}),
 		).toBeUndefined();
+	});
+});
+
+describe('dispatch report navigation state', () => {
+	it('parses a successful send notification ID', () => {
+		const state = createDispatchReportState('notification-123');
+
+		expect(parseDispatchReportState(state)).toEqual(state);
+	});
+
+	it('rejects missing or blank notification IDs', () => {
+		expect(parseDispatchReportState(undefined)).toBeUndefined();
+		expect(parseDispatchReportState({})).toBeUndefined();
+		expect(parseDispatchReportState({ notificationId: '' })).toBeUndefined();
+		expect(parseDispatchReportState({ notificationId: '   ' })).toBeUndefined();
 	});
 });

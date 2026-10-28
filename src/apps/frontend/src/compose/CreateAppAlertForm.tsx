@@ -1,4 +1,4 @@
-import { type FormEvent, useContext, useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
@@ -63,7 +63,7 @@ export const CreateAppAlertForm = ({
 			}),
 		});
 	};
-	const handleSubmitForm = (event: FormEvent<HTMLFormElement>) => {
+	const handlePrepareSend = () => {
 		clearErrors();
 		void handleSubmit(
 			(values) => {
@@ -84,7 +84,7 @@ export const CreateAppAlertForm = ({
 					jumpToFormSection('delivery-timing-section');
 				}
 			},
-		)(event);
+		)();
 	};
 
 	return (
@@ -95,7 +95,7 @@ export const CreateAppAlertForm = ({
 			initialArticleUrl={initialArticleUrl}
 			showReviewWarning={showReviewWarning}
 			sendButtonLabel="Send app alert"
-			onSubmit={handleSubmitForm}
+			onPrepareSend={handlePrepareSend}
 			onResetNotification={() => {
 				copiedHeadline.current = undefined;
 				updateComposerState({ type: 'reset-app-alert' });

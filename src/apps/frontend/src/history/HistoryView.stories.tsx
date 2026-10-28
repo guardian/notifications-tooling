@@ -88,6 +88,16 @@ export const Default: Story = {
 		await expect(
 			canvas.getByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
+		const table = canvas.getByRole('grid', { name: 'Sent alerts' });
+		const rows = canvas.getAllByRole('row');
+		const lastRow = rows.at(-1);
+		if (!lastRow) {
+			throw new globalThis.Error('Expected at least one history row');
+		}
+		await expect(
+			table.getBoundingClientRect().bottom -
+				lastRow.getBoundingClientRect().bottom,
+		).toBeLessThanOrEqual(1);
 		await expect(
 			canvas.getByRole('complementary', { name: 'Filters' }),
 		).toBeInTheDocument();

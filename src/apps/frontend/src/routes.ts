@@ -37,6 +37,25 @@ export const parseCopiedNotificationState = (
 		? { showReviewWarning: true, contentTitle: state.contentTitle }
 		: undefined;
 
+interface DispatchReportState {
+	notificationId: string;
+}
+
+export const createDispatchReportState = (
+	notificationId: string,
+): DispatchReportState => ({ notificationId });
+
+export const parseDispatchReportState = (
+	state: unknown,
+): DispatchReportState | undefined =>
+	typeof state === 'object' &&
+	state !== null &&
+	'notificationId' in state &&
+	typeof state.notificationId === 'string' &&
+	state.notificationId.trim() !== ''
+		? { notificationId: state.notificationId }
+		: undefined;
+
 const isGuardianHostname = (hostname: string) =>
 	hostname === 'theguardian.com' || hostname.endsWith('.theguardian.com');
 

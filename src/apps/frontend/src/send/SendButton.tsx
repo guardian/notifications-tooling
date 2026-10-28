@@ -7,13 +7,17 @@ import {
 import { Button } from '@guardian/stand/Button';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
+import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { NotificationFormContext } from '../compose/NotificationFormContext';
 
 interface SendButtonProps {
 	children: React.ReactNode;
+	onPress: () => void;
 }
 
-export const SendButton = ({ children }: SendButtonProps) => {
+export const SendButton = ({ children, onPress }: SendButtonProps) => {
+	const { composerState } = useContext(NotificationFormContext);
 	const {
 		formState: { errors },
 	} = useFormContext();
@@ -35,7 +39,12 @@ export const SendButton = ({ children }: SendButtonProps) => {
 			>
 				Before sending, review in the preview on the right
 			</Typography>
-			<Button type="submit" variant="primary">
+			<Button
+				type="button"
+				variant="primary"
+				isDisabled={composerState.isFetchingArticle}
+				onPress={onPress}
+			>
 				{children}
 			</Button>
 			{errors.root?.request && (

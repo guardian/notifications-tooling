@@ -2,12 +2,13 @@ import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
 import type { CapiBlock, ResolvedArticle } from 'models';
 import {
-	type FormEventHandler,
+	type FormEvent,
 	type PropsWithChildren,
 	useContext,
 	useState,
 } from 'react';
 import { useFormState } from 'react-hook-form';
+import { useSendNotification } from '../hooks/useSendNotification';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { SendButton } from '../send/SendButton';
 import { SendConfirmationModal } from '../send/SendConfirmationModal';
@@ -28,7 +29,7 @@ interface NotificationFormWrapperProps {
 	initialArticleUrl?: string;
 	showReviewWarning?: boolean;
 	sendButtonLabel: string;
-	onSubmit: FormEventHandler<HTMLFormElement>;
+	onPrepareSend: () => void;
 	onResetNotification: () => void;
 	onArticleImported: (
 		article: ResolvedArticle,
@@ -43,12 +44,14 @@ export const NotificationFormWrapper = ({
 	initialArticleUrl,
 	showReviewWarning = false,
 	sendButtonLabel,
-	onSubmit,
+	onPrepareSend,
 	onResetNotification,
 	onArticleImported,
 	children,
 }: PropsWithChildren<NotificationFormWrapperProps>) => {
 	const { composerState } = useContext(NotificationFormContext);
+	const sendNotification = useSendNotification();
+	const formId = `create-${channel}-form`;
 	const [articleInputText, setArticleInputText] = useState(
 		() => initialArticleUrl ?? composerState.article?.webUrl ?? '',
 	);
@@ -58,14 +61,21 @@ export const NotificationFormWrapper = ({
 		!composerState.isWaitingForSend &&
 		(isDirty || articleInputText.trim().length > 0);
 	useUnsavedChanges(hasUnsavedChanges);
+	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		if (composerState.pendingRequest) {
+			sendNotification(composerState.pendingRequest);
+		}
+	};
 
 	return (
 		<>
 			<form
+				id={formId}
 				aria-label={formLabel}
 				method="post"
 				noValidate
-				onSubmit={onSubmit}
+				onSubmit={handleSubmit}
 				css={{
 					marginTop: semanticSpacing.stackXl,
 					marginBottom: semanticSpacing.stackXl,
@@ -111,11 +121,11 @@ export const NotificationFormWrapper = ({
 						<DeliveryOptionFormField channel={channel} />
 					</NotificationFormSection>
 					<NotificationFormSection id="send-button-section">
-						<SendButton>{sendButtonLabel}</SendButton>
+						<SendButton onPress={onPrepareSend}>{sendButtonLabel}</SendButton>
 					</NotificationFormSection>
 				</div>
 			</form>
-			<SendConfirmationModal />
+			<SendConfirmationModal formId={formId} />
 			<SendFailedModal />
 		</>
 	);
