@@ -4,7 +4,7 @@ import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { AudienceSegmentsFormField } from '../segment/AudienceSegmentsFormField';
 import {
 	NO_ARTICLE_ERROR,
-	serialiseFormValidationErrors
+	serialiseFormValidationErrors,
 } from '../telemetry/errorFormatting';
 import { TelemetryContext } from '../telemetry/TelemetryContext';
 import { TelemetryEvent } from '../telemetry/telemetryService';

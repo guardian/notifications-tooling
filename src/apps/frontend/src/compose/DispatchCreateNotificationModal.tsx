@@ -5,12 +5,12 @@ import { Typography } from '@guardian/stand/Typography';
 import { useRelativeTime } from '../hooks/useRelativeTime';
 import type { LatestPublishedContentItem } from '../latest-content/latest-published-content';
 import { getAppRoutes, withArticleUrl } from '../routes';
+import { useTelemetryBeforeInternalLink } from '../telemetry/TelemetryContext';
 import { dispatchTileModalStyles, dispatchTileModalTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 import { LiveIndicator } from '../ui/LiveIndicator';
 import { getPillarColor } from '../utils/pillar-colors';
-import { useTelemetryBeforeInternalLink } from '../telemetry/TelemetryContext';
 
 interface DispatchCreateNotificationModalProps {
 	isOpen: boolean;

@@ -5,7 +5,7 @@ import { EditionsFormField } from '../segment/EditionsFormField';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import {
 	NO_ARTICLE_ERROR,
-	serialiseFormValidationErrors
+	serialiseFormValidationErrors,
 } from '../telemetry/errorFormatting';
 import { TelemetryContext } from '../telemetry/TelemetryContext';
 import { TelemetryEvent } from '../telemetry/telemetryService';
