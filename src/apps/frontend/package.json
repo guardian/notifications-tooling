@@ -31,7 +31,7 @@
 	"devDependencies": {
 		"@happy-dom/global-registrator": "20.14.5",
 		"@storybook/addon-docs": "10.6.0",
-		"@storybook/addon-vitest": "10.6.0",
+		"@storybook/addon-vitest": "10.6.3",
 		"@storybook/builder-vite": "10.6.0",
 		"@storybook/react-vite": "10.6.0",
 		"@testing-library/dom": "10.4.2",
@@ -45,7 +45,7 @@
 		"msw": "2.15.0",
 		"msw-storybook-addon": "3.0.3",
 		"playwright": "1.63.0",
-		"storybook": "10.6.0",
+		"storybook": "10.6.2",
 		"vitest": "4.1.11"
 	}
 }
