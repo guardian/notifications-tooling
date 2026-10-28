@@ -59,13 +59,22 @@ export const CreateNewsletterEmailForm = ({
 			return;
 		}
 		const valuesToSend = showPreview ? values : { ...values, previewText: '' };
+
+		const idempotencyKey = crypto.randomUUID();
+		telemetry.sendEvent(TelemetryEvent.FormSubmitPrepareSend, {
+			idempotencyKey,
+			requestedUrl: composerState.requestedUrl ?? '',
+			notificationId: values.notificationId ?? '',
+			channel: 'newsletter',
+		});
+
 		updateComposerState({
 			type: 'prepare-send',
 			request: buildNewsletterEmailRequest({
 				values: valuesToSend,
 				article: composerState.article,
 				requestedUrl: composerState.requestedUrl,
-				idempotencyKey: crypto.randomUUID(),
+				idempotencyKey,
 			}),
 		});
 	};

@@ -6,7 +6,8 @@ export enum TelemetryEvent {
 	ButtonClick = 'BUTTON_CLICK',
 	ShortcutEvent = 'SHORTCUT_EVENT',
 	NavigationEvent = 'NAVIGATION_EVENT',
-	FormSubmitError = 'FORM_SUBMT_ERROR_EVENT',
+	FormSubmitError = 'FORM_SUBMIT_ERROR_EVENT',
+	FormSubmitPrepareSend = 'FORM_SUBMIT_PREPARE_SEND_EVENT',
 }
 
 export type TelemetryTags = IUserTelemetryEvent['tags'];

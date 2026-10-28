@@ -56,6 +56,15 @@ export const CreateAppAlertForm = ({
 		if (!composerState.article) {
 			return;
 		}
+
+		const idempotencyKey = crypto.randomUUID();
+		telemetry.sendEvent(TelemetryEvent.FormSubmitPrepareSend, {
+			idempotencyKey,
+			requestedUrl: composerState.requestedUrl ?? '',
+			notificationId: values.notificationId ?? '',
+			channel: 'app-push',
+		});
+
 		updateComposerState({
 			type: 'prepare-send',
 			request: buildAppAlertRequest({
@@ -66,7 +75,7 @@ export const CreateAppAlertForm = ({
 				article: composerState.article,
 				requestedUrl: composerState.requestedUrl,
 				requestedBlock: composerState.requestedBlock,
-				idempotencyKey: crypto.randomUUID(),
+				idempotencyKey,
 			}),
 		});
 	};
