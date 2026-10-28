@@ -2,6 +2,12 @@ import { type FormEvent, useContext, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { AudienceSegmentsFormField } from '../segment/AudienceSegmentsFormField';
+import {
+	NO_ARTICLE_ERROR,
+	serialiseFormValidationErrors
+} from '../telemetry/errorFormatting';
+import { TelemetryContext } from '../telemetry/TelemetryContext';
+import { TelemetryEvent } from '../telemetry/telemetryService';
 import { buildNewsletterEmailRequest } from '../utils/build-request-payloads';
 import { parseArticleUrlInputToArticleId } from '../utils/form-validation';
 import { htmlToSingleLineText } from '../utils/html-helpers';
@@ -34,6 +40,7 @@ export const CreateNewsletterEmailForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
+	const telemetry = useContext(TelemetryContext);
 	const copiedSubjectText = useRef(
 		initialSubjectText && initialArticleUrl
 			? {
@@ -67,12 +74,17 @@ export const CreateNewsletterEmailForm = ({
 		void handleSubmit(
 			(values) => {
 				if (!composerState.article) {
+					telemetry.sendEvent(TelemetryEvent.FormSubmitError, NO_ARTICLE_ERROR);
 					jumpToFormSection('article-section');
 					return;
 				}
 				prepareSend(values);
 			},
 			(errors) => {
+				telemetry.sendEvent(
+					TelemetryEvent.FormSubmitError,
+					serialiseFormValidationErrors(errors, !composerState.article),
+				);
 				if (!composerState.article) {
 					jumpToFormSection('article-section');
 				} else if (errors.kicker || errors.subjectText || errors.previewText) {

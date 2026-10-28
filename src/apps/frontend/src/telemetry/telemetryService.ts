@@ -6,14 +6,13 @@ export enum TelemetryEvent {
 	ButtonClick = 'BUTTON_CLICK',
 	ShortcutEvent = 'SHORTCUT_EVENT',
 	NavigationEvent = 'NAVIGATION_EVENT',
+	FormSubmitError = 'FORM_SUBMT_ERROR_EVENT',
 }
 
+export type TelemetryTags = IUserTelemetryEvent['tags'];
+
 export type SendTelemetryEvent = {
-	(
-		type: TelemetryEvent,
-		tags?: IUserTelemetryEvent['tags'],
-		value?: boolean | number,
-	): void;
+	(type: TelemetryEvent, tags?: TelemetryTags, value?: boolean | number): void;
 };
 
 function getUserTelemetryClientUrl(stage: Stage): string {
@@ -52,7 +51,7 @@ export class TelemetryService {
 		const tags = { ...tagsWithoutSessionId, sessionId: this.sessionId };
 		if (this.stage === 'DEV') {
 			console.log(type, tags, value);
-			return;	
+			return;
 		}
 		try {
 			this.userTelemetryEventSender.addEvent({
