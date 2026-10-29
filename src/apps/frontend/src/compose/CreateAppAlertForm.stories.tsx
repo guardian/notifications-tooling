@@ -568,6 +568,12 @@ export const FetchingArticle: Story = {
 			isFetchingArticle: true,
 		},
 	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			canvas.getByRole('button', { name: 'Send app alert' }),
+		).toBeDisabled();
+	},
 };
 
 export const FetchArticleError: Story = {

@@ -64,6 +64,7 @@ export const HistoryView = ({
 	onRefresh,
 }: HistoryViewProps) => {
 	const hasPagination = !isLoading && !error && totalItems > limit;
+	const fillsAvailableHeight = notifications.length >= limit;
 
 	return (
 		<Layout.Main theme={layoutMainTheme}>
@@ -109,6 +110,7 @@ export const HistoryView = ({
 							<HistoryTable
 								notifications={notifications}
 								audiences={audiences}
+								fillAvailableHeight={fillsAvailableHeight}
 							/>
 						)}
 						{!isLoading && !error && notifications.length === 0 && (

@@ -1218,7 +1218,7 @@ export const historyViewStyles = {
 			paddingBottom: 0,
 		}),
 	results: css({
-		overflow: 'hidden',
+		overflow: 'auto',
 		minHeight: 0,
 	}),
 	header: css({
