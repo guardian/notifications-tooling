@@ -4,6 +4,8 @@ import { useContext } from 'react';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
 import { useSendNotification } from '../hooks/useSendNotification';
 import type { SendNotificationRequest } from '../schemas';
+import { TelemetryContext } from '../telemetry/TelemetryContext';
+import { TelemetryEvent } from '../telemetry/telemetryService';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { getChannelDescription } from '../utils/display-text-helpers';
 
@@ -19,6 +21,8 @@ export const SendConfirmationModal = () => {
 	const handleConfirmSend =
 		(sendNotificationRequest: SendNotificationRequest) => () =>
 			sendNotification(sendNotificationRequest);
+
+	const telemetry = useContext(TelemetryContext);
 
 	return (
 		<Modal
@@ -49,6 +53,11 @@ export const SendConfirmationModal = () => {
 						isDisabled={isWaitingForSend}
 						variant="tertiary"
 						onPress={() => {
+							telemetry.sendEvent(TelemetryEvent.ButtonClick, {
+								component: 'SendConfirmationModal--cancel',
+								channel,
+								requestedUrl: composerState.requestedUrl ?? '',
+							});
 							updateComposerState({
 								type: 'set-send-confirmation-open',
 								isOpen: false,
@@ -61,7 +70,16 @@ export const SendConfirmationModal = () => {
 						isDisabled={isWaitingForSend || !pendingRequest}
 						icon={isWaitingForSend ? <LoadingSpinner /> : undefined}
 						onPress={
-							pendingRequest ? handleConfirmSend(pendingRequest) : undefined
+							pendingRequest
+								? () => {
+										telemetry.sendEvent(TelemetryEvent.ButtonClick, {
+											component: 'SendConfirmationModal--confirm',
+											channel,
+											requestedUrl: composerState.requestedUrl ?? '',
+										});
+										return handleConfirmSend(pendingRequest);
+									}
+								: undefined
 						}
 					>
 						Confirm send

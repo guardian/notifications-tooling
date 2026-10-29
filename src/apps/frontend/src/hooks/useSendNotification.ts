@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
 import { notificationRoutes, withArticleUrl } from '../routes';
 import type { SendNotificationRequest } from '../schemas';
+import { TelemetryContext } from '../telemetry/TelemetryContext';
+import { TelemetryEvent } from '../telemetry/telemetryService';
 import type { SendNotificationResult } from '../utils/send-notification';
 import { notificationHistoryQueryKey } from './useNotificationHistory';
 import { notificationSendersQueryKey } from './useNotificationSenders';
@@ -36,13 +38,24 @@ export const useSendNotification = () => {
 	const { setValue } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const telemetry = useContext(TelemetryContext);
 
 	return (request: SendNotificationRequest) => {
 		updateComposerState({ type: 'waiting-for-send' });
+		const { idempotencyKey } = request;
+		telemetry.sendEvent(TelemetryEvent.SendNotificationEvent, {
+			idempotencyKey,
+			channel,
+		});
 		void sendNotification(request).then((result) => {
 			void invalidateNotificationHistoryAfterSend(queryClient, result);
 
 			if (!result.success) {
+				telemetry.sendEvent(TelemetryEvent.FailedNotificationEvent, {
+					idempotencyKey,
+					channel,
+					failure: result.failure.failure,
+				});
 				updateComposerState({
 					type: 'receive-send-failure',
 					failure: result.failure,
@@ -50,6 +63,11 @@ export const useSendNotification = () => {
 				return;
 			}
 			setValue('notificationId', result.data.id);
+			telemetry.sendEvent(TelemetryEvent.SuccesfulNotificationEvent, {
+				idempotencyKey,
+				channel,
+				notificationId: result.data.id,
+			});
 			updateComposerState({ type: 'complete-send' });
 			const leadStory = request.content.items['lead-story'];
 			void navigate(
