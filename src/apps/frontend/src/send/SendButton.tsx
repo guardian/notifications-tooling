@@ -51,6 +51,7 @@ export const SendButton = ({ children }: SendButtonProps) => {
 						requestedUrl: composerState.requestedUrl ?? '',
 					});
 				}}
+				isDisabled={composerState.isFetchingArticle}
 			>
 				{children}
 			</Button>

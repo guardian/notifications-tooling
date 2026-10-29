@@ -7,6 +7,8 @@ import type {
 } from '../schemas';
 import { sendNotificationResponseSchema } from '../schemas';
 
+export const SEND_NOTIFICATION_TIMEOUT_MS = 30_000;
+
 export type NotificationDispatchFailure = {
 	failure: 'dispatch-fail';
 	notification: SendNotificationResponse;
@@ -38,6 +40,7 @@ export const sendNotification = async (
 			headers,
 			body: JSON.stringify(sendNotificationRequest),
 			credentials: 'include',
+			timeoutMs: SEND_NOTIFICATION_TIMEOUT_MS,
 			acceptedResponseStatuses: [502],
 		},
 	);
