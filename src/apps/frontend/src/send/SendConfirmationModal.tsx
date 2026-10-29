@@ -3,7 +3,6 @@ import { Dialog, Modal } from '@guardian/stand/Modal';
 import { useContext } from 'react';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
 import { useSendNotification } from '../hooks/useSendNotification';
-import type { SendNotificationRequest } from '../schemas';
 import { TelemetryContext } from '../telemetry/TelemetryContext';
 import { TelemetryEvent } from '../telemetry/telemetryService';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -17,10 +16,6 @@ export const SendConfirmationModal = () => {
 	const { isSendConfirmationOpen, isWaitingForSend, pendingRequest } =
 		composerState;
 	const channelDescription = getChannelDescription(channel);
-
-	const handleConfirmSend =
-		(sendNotificationRequest: SendNotificationRequest) => () =>
-			sendNotification(sendNotificationRequest);
 
 	const telemetry = useContext(TelemetryContext);
 
@@ -77,7 +72,7 @@ export const SendConfirmationModal = () => {
 											channel,
 											requestedUrl: composerState.requestedUrl ?? '',
 										});
-										return handleConfirmSend(pendingRequest);
+										return sendNotification(pendingRequest);
 									}
 								: undefined
 						}
