@@ -14,6 +14,7 @@ import { useNotificationHistory } from '../hooks/useNotificationHistory';
 import { LatestPublishedContentPanel } from '../latest-content/LatestPublishedContentPanel';
 import { notificationRoutes } from '../routes';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
+import { useTelemetryBeforeInternalLink } from '../telemetry/TelemetryContext';
 import { dispatchLandingTheme } from '../themes';
 import { phoneIphoneIcon } from '../ui/flag-icons';
 import { parseHistorySearchParams } from '../utils/history-search-params';
@@ -53,6 +54,10 @@ export const DispatchLandingPage = () => {
 			return historyNotification ? [historyNotification] : [];
 		}) ?? [];
 
+	const sendTelemetryAndNavigate = useTelemetryBeforeInternalLink(
+		'DispatchLandingPage',
+	);
+
 	return (
 		<>
 			<Layout.Main css={dispatchLandingTheme.primaryColumn}>
@@ -91,7 +96,7 @@ export const DispatchLandingPage = () => {
 				>
 					<Tile
 						size="sm"
-						href={notificationRoutes.newsletter.create}
+						{...sendTelemetryAndNavigate(notificationRoutes.newsletter.create)}
 						icon="mail"
 						typography="headingMd"
 						cssOverrides={landingTileStyles}
@@ -100,7 +105,7 @@ export const DispatchLandingPage = () => {
 					</Tile>
 					<Tile
 						size="sm"
-						href={notificationRoutes['app-push'].create}
+						{...sendTelemetryAndNavigate(notificationRoutes['app-push'].create)}
 						icon={phoneIphoneIcon}
 						typography="headingMd"
 						cssOverrides={landingTileStyles}
@@ -109,7 +114,7 @@ export const DispatchLandingPage = () => {
 					</Tile>
 					<Tile
 						size="sm"
-						href="/history"
+						{...sendTelemetryAndNavigate('/history')}
 						icon="history"
 						typography="headingMd"
 						cssOverrides={landingTileStyles}

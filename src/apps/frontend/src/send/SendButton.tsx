@@ -10,16 +10,19 @@ import { Typography } from '@guardian/stand/Typography';
 import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
+import { TelemetryContext } from '../telemetry/TelemetryContext';
+import { TelemetryEvent } from '../telemetry/telemetryService';
 
 interface SendButtonProps {
 	children: React.ReactNode;
 }
 
 export const SendButton = ({ children }: SendButtonProps) => {
-	const { composerState } = useContext(NotificationFormContext);
 	const {
 		formState: { errors },
 	} = useFormContext();
+	const telemetry = useContext(TelemetryContext);
+	const { composerState, channel } = useContext(NotificationFormContext);
 
 	return (
 		<div
@@ -41,6 +44,13 @@ export const SendButton = ({ children }: SendButtonProps) => {
 			<Button
 				type="submit"
 				variant="primary"
+				onPress={() => {
+					telemetry.sendEvent(TelemetryEvent.ButtonClick, {
+						component: 'SendButton',
+						channel,
+						requestedUrl: composerState.requestedUrl ?? '',
+					});
+				}}
 				isDisabled={composerState.isFetchingArticle}
 			>
 				{children}

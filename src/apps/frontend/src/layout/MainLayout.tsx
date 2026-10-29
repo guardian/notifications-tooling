@@ -16,6 +16,7 @@ import { type ReactNode, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';
 import { getAppRoutes, getTopBarNavigationItems } from '../routes';
+import { useTelemetryBeforeInternalLink } from '../telemetry/TelemetryContext';
 import {
 	dispatchLandingTheme,
 	faviconTheme,
@@ -39,7 +40,7 @@ const getInitials = (user: AppConfig['user']): string => {
 export const MainLayout = ({ children }: Props) => {
 	const config = useContext(ConfigContext);
 	const routes = getAppRoutes();
-	const { user } = config ?? {};
+	const { user, sessionId } = config ?? {};
 	const { pathname } = useLocation();
 	const stage = config?.stage;
 	const shouldShowEnvBadge = stage !== undefined && stage !== 'PROD';
@@ -52,9 +53,11 @@ export const MainLayout = ({ children }: Props) => {
 	}, [pathname]);
 
 	const isDispatchLanding = pathname === routes.dispatchLanding;
+	const sendTelemetryAndNavigate = useTelemetryBeforeInternalLink('MainLayout');
 
 	return (
 		<Layout
+			data-session={sessionId}
 			cssOverrides={[
 				css({
 					[stickyHeaderHeightProperty]: stickyHeaderHeight,
@@ -69,7 +72,7 @@ export const MainLayout = ({ children }: Props) => {
 				<TopBar theme={topBarTheme}>
 					<TopBarToolName
 						name="Dispatch"
-						href={routes.dispatchLanding}
+						{...sendTelemetryAndNavigate(routes.dispatchLanding)}
 						favicon={{
 							icon: <Favicon icon="notifications" theme={faviconTheme} />,
 						}}
@@ -80,9 +83,9 @@ export const MainLayout = ({ children }: Props) => {
 						{getTopBarNavigationItems().map(({ text, path, activePaths }) => (
 							<TopBarNavigation
 								key={path}
+								{...sendTelemetryAndNavigate(path)}
 								text={text}
 								isSelected={activePaths.includes(pathname)}
-								href={path}
 							/>
 						))}
 					</TopBarContainerLeft>

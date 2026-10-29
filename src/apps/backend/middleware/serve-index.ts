@@ -59,6 +59,7 @@ export const serveIndex: RequestHandler = async (
 		gridUri: GRID_URI,
 		dispatchUserGuideUrl: DISPATCH_USER_GUIDE_URL,
 		dispatchFeedbackFormUrl: DISPATCH_FEEDBACK_FORM_URL,
+		sessionId: crypto.randomUUID(),
 	};
 	const html = (await readIndexTemplate()).replace(
 		configPlaceholder,
