@@ -13,10 +13,9 @@ import { NotificationFormContext } from '../compose/NotificationFormContext';
 
 interface SendButtonProps {
 	children: React.ReactNode;
-	onPress: () => void;
 }
 
-export const SendButton = ({ children, onPress }: SendButtonProps) => {
+export const SendButton = ({ children }: SendButtonProps) => {
 	const { composerState } = useContext(NotificationFormContext);
 	const {
 		formState: { errors },
@@ -40,10 +39,9 @@ export const SendButton = ({ children, onPress }: SendButtonProps) => {
 				Before sending, review in the preview on the right
 			</Typography>
 			<Button
-				type="button"
+				type="submit"
 				variant="primary"
 				isDisabled={composerState.isFetchingArticle}
-				onPress={onPress}
 			>
 				{children}
 			</Button>

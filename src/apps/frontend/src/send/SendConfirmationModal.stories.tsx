@@ -16,7 +16,6 @@ import { defaultAppAlertComposerState } from '../utils/notification-composer-red
 import { SendConfirmationModal } from './SendConfirmationModal';
 
 type StoryArgs = {
-	formId: string;
 	composerState: NotificationComposerState;
 	channel: ChannelOption;
 };
@@ -34,7 +33,6 @@ const meta = {
 		},
 	},
 	args: {
-		formId: 'notification-form',
 		channel: 'newsletter',
 		composerState: {
 			...populatedNewsletterEmailComposerState,
@@ -46,9 +44,9 @@ const meta = {
 			}),
 		},
 	},
-	render: function Render({ formId, channel, composerState }: StoryArgs) {
+	render: function Render({ channel, composerState }: StoryArgs) {
 		return useNotificationFormStory(
-			<SendConfirmationModal formId={formId} />,
+			<SendConfirmationModal />,
 			composerState,
 			{},
 			channel,
@@ -69,10 +67,9 @@ export const NewsletterEmail: Story = {
 			canvas.getByText('Sent newsletter emails cannot be undone.'),
 		).toBeVisible();
 		await expect(canvas.getByRole('button', { name: 'Cancel' })).toBeVisible();
-		const confirmSend = canvas.getByRole('button', { name: 'Confirm send' });
-		await expect(confirmSend).toBeVisible();
-		await expect(confirmSend).toHaveAttribute('type', 'submit');
-		await expect(confirmSend).toHaveAttribute('form', 'notification-form');
+		await expect(
+			canvas.getByRole('button', { name: 'Confirm send' }),
+		).toBeVisible();
 	},
 };
 
@@ -99,9 +96,8 @@ export const AppAlert: Story = {
 			canvas.getByText('Sent app alerts cannot be undone.'),
 		).toBeVisible();
 		await expect(canvas.getByRole('button', { name: 'Cancel' })).toBeVisible();
-		const confirmSend = canvas.getByRole('button', { name: 'Confirm send' });
-		await expect(confirmSend).toBeVisible();
-		await expect(confirmSend).toHaveAttribute('type', 'submit');
-		await expect(confirmSend).toHaveAttribute('form', 'notification-form');
+		await expect(
+			canvas.getByRole('button', { name: 'Confirm send' }),
+		).toBeVisible();
 	},
 };

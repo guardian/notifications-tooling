@@ -399,7 +399,7 @@ export const PreviewTextExcludedFromSend: Story = {
 	},
 };
 
-export const NativeFormSubmitRequiresConfirmation: Story = {
+export const SubmitWithNativeForm: Story = {
 	args: {
 		composerState: populatedNewsletterEmailComposerState,
 	},
@@ -415,8 +415,10 @@ export const NativeFormSubmitRequiresConfirmation: Story = {
 
 		const screen = within(canvasElement.ownerDocument.body);
 		await expect(
-			screen.queryByText('Are you sure you want to send the newsletter email?'),
-		).not.toBeInTheDocument();
+			await screen.findByText(
+				'Are you sure you want to send the newsletter email?',
+			),
+		).toBeVisible();
 	},
 };
 

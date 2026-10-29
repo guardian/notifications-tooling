@@ -13,17 +13,11 @@ import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
 import type { ReactNode } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import {
-	Navigate,
-	useLocation,
-	useNavigate,
-	useSearchParams,
-} from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import {
 	articleUrlSearchParam,
 	createCopiedNotificationState,
 	notificationRoutes,
-	parseDispatchReportState,
 	withArticleUrl,
 } from '../routes';
 import { FlagPreviewPill } from '../segment/FlagPreviewPill';
@@ -366,13 +360,10 @@ const DispatchReportTab = ({
 	children: ReactNode;
 }) => {
 	const { reset, setValue } = useFormContext<{ notificationId?: string }>();
-	const location = useLocation();
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
-	const resolvedNotificationId =
-		notificationId ?? parseDispatchReportState(location.state)?.notificationId;
 
-	if (!resolvedNotificationId) {
+	if (!notificationId) {
 		return <Navigate to={notificationRoutes[channel].create} replace />;
 	}
 

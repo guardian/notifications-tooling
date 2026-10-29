@@ -5,11 +5,9 @@ import { ACTIVE_SECTION_VIEWPORT_POSITION } from '../layout/constants';
 import {
 	articleUrlSearchParam,
 	createCopiedNotificationState,
-	createDispatchReportState,
 	notificationRoutes,
 	withArticleUrl,
 } from '../routes';
-import { deliveredNewsletterEmailSendResponse } from '../testing/api-fixtures';
 import { articleFixture } from '../testing/capi-fixtures';
 import {
 	completeNewsletterEmailFormValues,
@@ -202,58 +200,6 @@ export const PopulatesArticleCopiedFromAnotherChannel: Story = {
 				replacementArticle.fields.headline,
 			),
 		);
-	},
-};
-
-export const CopiedAppAlertFirstSendNavigatesToReport: Story = {
-	args: {
-		formValues: completeNewsletterEmailFormValues,
-		resolveArticleFromCapi: () =>
-			Promise.resolve({
-				success: true,
-				data: { article: articleFixture },
-			}),
-	},
-	beforeEach: () => {
-		const originalUrl = window.location.href;
-		const originalState: unknown = window.history.state;
-		const currentState: unknown = window.history.state;
-		window.history.replaceState(
-			{
-				...(typeof currentState === 'object' && currentState !== null
-					? currentState
-					: {}),
-				usr: createCopiedNotificationState(copiedAppAlertHeadline),
-			},
-			'',
-			withArticleUrl(
-				notificationRoutes.newsletter.create,
-				articleFixture.webUrl,
-			),
-		);
-
-		return () => window.history.replaceState(originalState, '', originalUrl);
-	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		const screen = within(canvasElement.ownerDocument.body);
-		await expect(await canvas.findByText('Article imported')).toBeVisible();
-
-		await userEvent.click(
-			canvas.getByRole('button', { name: 'Send newsletter email' }),
-		);
-		await userEvent.click(
-			await screen.findByRole('button', { name: 'Confirm send' }),
-		);
-
-		await waitFor(async () => {
-			await expect(
-				window.location.pathname.endsWith(notificationRoutes.newsletter.report),
-			).toBe(true);
-			await expect(window.history.state).toMatchObject({
-				usr: createDispatchReportState(deliveredNewsletterEmailSendResponse.id),
-			});
-		});
 	},
 };
 

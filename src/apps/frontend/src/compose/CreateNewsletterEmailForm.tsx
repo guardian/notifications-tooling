@@ -1,4 +1,4 @@
-import { useContext, useRef } from 'react';
+import { type FormEvent, useContext, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { AudienceSegmentsFormField } from '../segment/AudienceSegmentsFormField';
@@ -62,7 +62,7 @@ export const CreateNewsletterEmailForm = ({
 			}),
 		});
 	};
-	const handlePrepareSend = () => {
+	const handleSubmitForm = (event: FormEvent<HTMLFormElement>) => {
 		clearErrors();
 		void handleSubmit(
 			(values) => {
@@ -83,7 +83,7 @@ export const CreateNewsletterEmailForm = ({
 					jumpToFormSection('delivery-timing-section');
 				}
 			},
-		)();
+		)(event);
 	};
 
 	return (
@@ -94,7 +94,7 @@ export const CreateNewsletterEmailForm = ({
 			initialArticleUrl={initialArticleUrl}
 			showReviewWarning={showReviewWarning}
 			sendButtonLabel="Send newsletter email"
-			onPrepareSend={handlePrepareSend}
+			onSubmit={handleSubmitForm}
 			onResetNotification={() => {
 				copiedSubjectText.current = undefined;
 				onTogglePreview(true);
