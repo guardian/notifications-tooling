@@ -84,7 +84,8 @@ const failedNotification: SendNotificationResponse = {
 };
 
 describe('sendNotification', () => {
-	it('allows the backend provider timeout to complete before timing out', async () => {
+	it('allows headroom beyond sequential newsletter provider timeouts', async () => {
+		const combinedNewsletterProviderTimeoutMs = 2 * 10_000;
 		const timeout = mock(() => new AbortController().signal);
 		AbortSignal.timeout = timeout;
 		globalThis.fetch = mock(() =>
@@ -98,6 +99,9 @@ describe('sendNotification', () => {
 
 		await sendNotification(request);
 
+		expect(SEND_NOTIFICATION_TIMEOUT_MS).toBeGreaterThan(
+			combinedNewsletterProviderTimeoutMs,
+		);
 		expect(timeout).toHaveBeenCalledWith(SEND_NOTIFICATION_TIMEOUT_MS);
 	});
 

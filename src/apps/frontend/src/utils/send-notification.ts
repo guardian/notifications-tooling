@@ -7,7 +7,7 @@ import type {
 } from '../schemas';
 import { sendNotificationResponseSchema } from '../schemas';
 
-export const SEND_NOTIFICATION_TIMEOUT_MS = 20_000;
+export const SEND_NOTIFICATION_TIMEOUT_MS = 30_000;
 
 export type NotificationDispatchFailure = {
 	failure: 'dispatch-fail';
