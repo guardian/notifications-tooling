@@ -78,7 +78,7 @@ const findCrop = (imageData: ImageData, cropId: string): Result<CropData> => {
 	};
 };
 
-export const extractAsset = (crop: CropData): Result<CropAsset> => {
+const extractAsset = (crop: CropData): Result<CropAsset> => {
 	const assetsSmallestFirst = crop.assets?.sort(
 		(assetA, assetB) =>
 			(assetA.dimensions?.width ?? 0) - (assetB.dimensions?.width ?? 0),
@@ -100,7 +100,7 @@ export const extractAsset = (crop: CropData): Result<CropAsset> => {
 	};
 };
 
-export const isFiveFourCrop = (crop: CropData): boolean | undefined => {
+const isFiveFourCrop = (crop: CropData): boolean | undefined => {
 	const { specification, master } = crop;
 	if (specification?.aspectRatio) {
 		return specification.aspectRatio === '5:4';
