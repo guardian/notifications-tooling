@@ -10,7 +10,7 @@ import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { useImageUrlCheck } from '../hooks/useImageUrlCheck';
 import { CENTRAL_PRODUCTION_CONTACT_HREF } from '../support-links';
-import { GridImagePicker } from './GridImagePicker';
+import { GridImagePickerImp } from './GridImagePicker';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -120,7 +120,7 @@ export const AppAlertReplaceImageSection = ({
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}
 
-			<GridImagePicker
+			<GridImagePickerImp
 				onUpdate={onUpdate}
 				setTextInput={handleImageUrlChange}
 			/>
