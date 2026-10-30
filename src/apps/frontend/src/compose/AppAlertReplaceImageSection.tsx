@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
+import { GridImagePicker } from '@guardian/stand/GridImagePicker';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Link } from '@guardian/stand/Link';
 import { LinkButton } from '@guardian/stand/LinkButton';
@@ -16,6 +17,7 @@ interface AppAlertReplaceImageSectionProps {
 	onReplacementImageUrlChange: (replacementImageUrl: string) => void;
 	onUpdate: (replacementImageUrl: string) => void;
 	errorMessage?: string;
+	show: boolean;
 }
 
 export const AppAlertReplaceImageSection = ({
@@ -23,6 +25,7 @@ export const AppAlertReplaceImageSection = ({
 	onReplacementImageUrlChange,
 	onUpdate,
 	errorMessage,
+	show,
 }: AppAlertReplaceImageSectionProps) => {
 	const { gridApiUri, gridUri } = useContext(ConfigContext) ?? {};
 
@@ -44,7 +47,13 @@ export const AppAlertReplaceImageSection = ({
 	});
 
 	return (
-		<>
+		<section
+			css={{
+				display: show ? 'flex' : 'none',
+				flexDirection: 'column',
+				gap: semanticSpacing.stackXs,
+			}}
+		>
 			<Typography
 				variant="helpTextFormMd"
 				cssOverrides={css({ color: semanticColors.text.weak })}
@@ -110,6 +119,26 @@ export const AppAlertReplaceImageSection = ({
 			{imageUpdated && replacementImageUrl && (
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}
-		</>
+
+			{gridUri && (
+				<GridImagePicker
+					handleCropData={({ imageAssetUrl }) => {
+						onUpdate(imageAssetUrl);
+						handleImageUrlChange(imageAssetUrl);
+					}}
+					gridUri={gridUri}
+					allowedAspectRatios={['5:4']}
+					theme={{
+						container: {
+							width: '100%',
+						},
+						imagePreview: {
+							maxHeight: '200px',
+							maxWidth: '300px',
+						},
+					}}
+				/>
+			)}
+		</section>
 	);
 };
