@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { newsletterSegmentId } from '@models';
+import { newsletterSegmentId } from 'models';
 import {
 	parseHistorySearchParams,
 	resolveHistoryFilterSelection,

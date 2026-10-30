@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import { semanticColors } from '@guardian/stand';
 import { AlertBanner } from '@guardian/stand/AlertBanner';
 import { Typography } from '@guardian/stand/Typography';
-import { type AppAlertTopicOption, toApiEditionId } from '@models';
+import { type AppAlertTopicOption, toApiEditionId } from 'models';
 import { useContext } from 'react';
 import { useWatch } from 'react-hook-form';
 import { NotificationFormContext } from '../compose/NotificationFormContext';

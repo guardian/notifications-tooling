@@ -1,4 +1,4 @@
-import type { CapiBlock, ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from 'models';
 import { getArticleThumbnail } from './article-thumbnail';
 
 interface ArticlePresentationOptions {

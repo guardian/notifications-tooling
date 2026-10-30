@@ -2,7 +2,7 @@ import {
 	appAlertTopicEditionId,
 	displayAppAlertTopicEditionId,
 	toDisplayEditionId,
-} from '@models';
+} from 'models';
 import type { ChannelAudienceResponse, NotificationDispatch } from '../schemas';
 import { getAudienceEditionLabel } from './audience-edition-label';
 

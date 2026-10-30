@@ -1,5 +1,5 @@
 import { Typography } from '@guardian/stand/Typography';
-import type { CapiBlock, ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from 'models';
 import { useRelativeTime } from '../hooks/useRelativeTime';
 import { articlePreviewCardTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
@@ -54,7 +54,7 @@ export const ArticlePreviewCard = ({
 
 				{isLiveblog && (
 					<div css={articlePreviewCardTheme.liveStatus}>
-						<LiveIndicator />
+						<LiveIndicator pillarId={pillarId} />
 						{publishedAt && (
 							<Typography
 								variant="bodyXs"

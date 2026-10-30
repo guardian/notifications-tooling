@@ -1,5 +1,5 @@
 import { expect, mock } from 'bun:test';
-import { NotificationChannel } from '@config';
+import { NotificationChannel } from 'config';
 import type { DispatchNotificationDependencies } from './shared';
 
 // `expect.any(String)` is typed `any`; cast so it sits in typed positions.

@@ -7,12 +7,12 @@ import {
 	it,
 	mock,
 } from 'bun:test';
-import { createNotificationsRepository } from '@database';
-import { setupTestDatabase } from '@database/test-helpers';
-import { httpLogger } from '@http-logger';
-import { UserPermissions } from '@models';
-import { BrazeApiError } from '@services';
+import { createNotificationsRepository } from 'database';
+import { setupTestDatabase } from 'database/test-helpers';
 import express from 'express';
+import { httpLogger } from 'http-logger';
+import { UserPermissions } from 'models';
+import { BrazeApiError } from 'services';
 import { errorMiddleware } from '../../middleware/error-middleware';
 import {
 	authenticateRequests,

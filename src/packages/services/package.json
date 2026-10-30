@@ -1,5 +1,5 @@
 {
-	"name": "@services",
+	"name": "services",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,
@@ -8,7 +8,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@models": "workspace:*",
+		"models": "workspace:*",
 		"zod": "4.6.5"
 	}
 }

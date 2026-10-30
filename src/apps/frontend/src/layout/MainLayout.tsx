@@ -11,7 +11,7 @@ import {
 	TopBarToolName,
 } from '@guardian/stand/TopBar';
 import { Typography } from '@guardian/stand/Typography';
-import type { AppConfig } from '@models';
+import type { AppConfig } from 'models';
 import { type ReactNode, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ConfigContext } from '../config/ConfigContext';

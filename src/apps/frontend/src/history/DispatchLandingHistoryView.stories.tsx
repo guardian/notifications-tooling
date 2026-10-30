@@ -32,6 +32,11 @@ const notifications: HistoryNotification[] = [
 	},
 ];
 
+const manyNotifications = Array.from({ length: 20 }, (_, index) => ({
+	...notifications[index % notifications.length]!,
+	id: `notification-${index}`,
+}));
+
 const meta = {
 	title: 'Dispatch/History/DispatchLandingHistoryView',
 	component: DispatchLandingHistoryView,
@@ -61,6 +66,49 @@ export const Populated: Story = {
 			canvas.getByRole('button', { name: 'Refresh activity' }),
 		);
 		await expect(args.onRefresh).toHaveBeenCalledOnce();
+	},
+};
+
+export const SingleNotification: Story = {
+	args: { notifications: [notifications[0]!] },
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const table = canvas.getByRole('grid', { name: 'Sent alerts' });
+		const row = canvas.getByRole('row', { name: /Morning briefing/ });
+		const refreshButton = canvas.getByRole('button', {
+			name: 'Refresh activity',
+		});
+
+		await expect(
+			table.getBoundingClientRect().bottom - row.getBoundingClientRect().bottom,
+		).toBeLessThanOrEqual(1);
+		await expect(table.getBoundingClientRect().right).toBeCloseTo(
+			refreshButton.getBoundingClientRect().right,
+			0,
+		);
+	},
+};
+
+export const ScrollableRows: Story = {
+	args: { notifications: manyNotifications },
+	decorators: [
+		(Story) => (
+			<div css={{ display: 'flex', flexDirection: 'column', height: '500px' }}>
+				<Story />
+			</div>
+		),
+	],
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const [header, body] = canvas.getAllByRole('rowgroup');
+		if (!header || !body) {
+			throw new globalThis.Error('Expected table header and body');
+		}
+
+		await expect(body.scrollHeight).toBeGreaterThan(body.clientHeight);
+		const headerTop = header.getBoundingClientRect().top;
+		body.scrollTop = body.scrollHeight;
+		await expect(header.getBoundingClientRect().top).toBe(headerTop);
 	},
 };
 

@@ -1,6 +1,6 @@
 import { semanticSpacing } from '@guardian/stand';
 import { from } from '@guardian/stand/utils';
-import type { CapiBlock, ResolvedArticle } from '@models';
+import type { CapiBlock, ResolvedArticle } from 'models';
 import {
 	type FormEventHandler,
 	type PropsWithChildren,

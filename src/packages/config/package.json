@@ -1,5 +1,5 @@
 {
-	"name": "@config",
+	"name": "config",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,
@@ -9,7 +9,7 @@
 	"dependencies": {
 		"@aws-sdk/client-ssm": "3.1139.0",
 		"@aws-sdk/credential-providers": "3.1139.0",
-		"@models": "workspace:*",
+		"models": "workspace:*",
 		"zod": "4.6.5"
 	}
 }

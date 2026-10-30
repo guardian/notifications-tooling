@@ -1,4 +1,4 @@
-import { displayAppAlertTopicEditionId, newsletterSegmentId } from '@models';
+import { displayAppAlertTopicEditionId, newsletterSegmentId } from 'models';
 import { z } from 'zod';
 import { kickerSchema } from '../schemas';
 import {

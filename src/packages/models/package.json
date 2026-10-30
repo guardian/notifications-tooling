@@ -1,5 +1,5 @@
 {
-	"name": "@models",
+	"name": "models",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,

@@ -4,7 +4,7 @@ import { Avatar } from '@guardian/stand/Avatar';
 import { IconButton } from '@guardian/stand/IconButton';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
-import { type NotificationChannelId, notificationChannelNames } from '@models';
+import { type NotificationChannelId, notificationChannelNames } from 'models';
 import { useState } from 'react';
 import { usePreviousNotifications } from '../hooks/usePreviousNotifications';
 import type { NotificationSummary } from '../schemas';

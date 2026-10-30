@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import type { ChannelAudienceResponse } from '@models';
+import type { ChannelAudienceResponse } from 'models';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../../happydom-setup';

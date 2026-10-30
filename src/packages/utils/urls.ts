@@ -1,4 +1,4 @@
-import { guardianUrlDomains } from '@config';
+import { guardianUrlDomains } from 'config';
 
 /** Returns `true` when `value` is a valid `https` URL on a Guardian domain. */
 export const isGuardianUrl = (value: string): boolean => {

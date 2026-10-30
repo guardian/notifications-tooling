@@ -58,7 +58,7 @@ export const LatestPublishedContentCard = ({
 								{pillarName ? ` / ${pillarName}` : null}
 							</Typography>
 
-							{isLiveblog && <LiveIndicator />}
+							{isLiveblog && <LiveIndicator pillarId={content.pillarId} />}
 						</div>
 
 						{publishedAt && (

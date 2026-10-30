@@ -1,5 +1,5 @@
 {
-	"name": "@utils",
+	"name": "utils",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,
@@ -7,6 +7,6 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@config": "workspace:*"
+		"config": "workspace:*"
 	}
 }

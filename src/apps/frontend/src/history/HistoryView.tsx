@@ -1,6 +1,6 @@
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
-import type { DisplayAppAlertTopicEditionId } from '@models';
+import type { DisplayAppAlertTopicEditionId } from 'models';
 import type { ReactNode } from 'react';
 import type { ChannelAudienceResponse } from '../schemas';
 import { historyViewStyles, layoutMainTheme } from '../themes';
@@ -64,6 +64,7 @@ export const HistoryView = ({
 	onRefresh,
 }: HistoryViewProps) => {
 	const hasPagination = !isLoading && !error && totalItems > limit;
+	const fillsAvailableHeight = notifications.length >= limit;
 
 	return (
 		<Layout.Main theme={layoutMainTheme}>
@@ -73,7 +74,7 @@ export const HistoryView = ({
 					aria-labelledby="history-heading"
 					css={historyViewStyles.container(hasPagination)}
 				>
-					<div css={historyViewStyles.header(hasPagination)}>
+					<div css={historyViewStyles.header}>
 						<div css={historyViewStyles.titleBlock}>
 							<Typography id="history-heading" element="h1" variant="headingLg">
 								History
@@ -109,6 +110,7 @@ export const HistoryView = ({
 							<HistoryTable
 								notifications={notifications}
 								audiences={audiences}
+								fillAvailableHeight={fillsAvailableHeight}
 							/>
 						)}
 						{!isLoading && !error && notifications.length === 0 && (

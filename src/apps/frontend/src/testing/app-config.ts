@@ -1,4 +1,4 @@
-import { type AppConfig, UserPermissions } from '@models';
+import { type AppConfig, UserPermissions } from 'models';
 
 export const mockAppConfig: AppConfig = {
 	user: {

@@ -1,4 +1,4 @@
-import { NotificationChannel } from '@config';
+import { NotificationChannel } from 'config';
 import { channelAudiences } from '../../../../channels';
 
 /** A selectable audience segment exposed to the SPA: its id and human label. */

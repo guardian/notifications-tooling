@@ -1,5 +1,5 @@
-import type { UserPermissions } from '@models';
 import type { NextFunction, Request, Response } from 'express';
+import type { UserPermissions } from 'models';
 import { buildErrorEnvelope } from '../error-envelope';
 import { listUserPermissions } from '../utils/permissions/permissions-store';
 

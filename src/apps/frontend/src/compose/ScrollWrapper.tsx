@@ -5,17 +5,22 @@ import type { ComponentProps, ReactNode } from 'react';
 
 interface ScrollWrapperProps extends Omit<ComponentProps<'div'>, 'children'> {
 	children: ReactNode;
+	reserveScrollbarSpace?: boolean;
 }
 
-export const ScrollWrapper = ({ children, ...props }: ScrollWrapperProps) => {
+export const ScrollWrapper = ({
+	children,
+	reserveScrollbarSpace = true,
+	...props
+}: ScrollWrapperProps) => {
 	return (
 		<div
 			css={css({
 				[from.lg]: {
 					minHeight: 0,
 					flex: 1,
-					overflowY: 'scroll',
-					scrollbarGutter: 'stable',
+					overflowY: reserveScrollbarSpace ? 'scroll' : 'auto',
+					scrollbarGutter: reserveScrollbarSpace ? 'stable' : 'auto',
 					scrollbarWidth: 'thin',
 					scrollbarColor: `${semanticColors.border.strong} transparent`,
 					'&::-webkit-scrollbar': {

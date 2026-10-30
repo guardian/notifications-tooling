@@ -1,4 +1,4 @@
-import type { NewsletterSegmentId } from '@models';
+import type { NewsletterSegmentId } from 'models';
 import type z from 'zod';
 import type { Result } from '../api-client/client';
 import { safeFetchJsonAndParse } from '../api-client/client';

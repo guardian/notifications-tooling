@@ -52,7 +52,7 @@ const createNotificationDispatchesRepository = () => ({
 });
 
 export const installDatabaseMock = (): void => {
-	void mock.module('@database', () => ({
+	void mock.module('database', () => ({
 		createNotificationDispatchesRepository,
 		createNotificationsRepository,
 		DuplicateIdempotencyKeyError,

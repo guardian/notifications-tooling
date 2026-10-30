@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Badge } from '@guardian/stand/Badge';
-import { notificationChannelNames } from '@models';
+import { notificationChannelNames } from 'models';
 import { useState } from 'react';
 import { useNotificationDetail } from '../hooks/useNotificationDetail';
 import type { ChannelAudienceResponse, NotificationResource } from '../schemas';

@@ -78,9 +78,26 @@ export const Default: Story = {
 	},
 	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
+		const historyHeader = canvas.getByRole('heading', {
+			name: 'History',
+		}).parentElement?.parentElement;
+		if (!historyHeader) {
+			throw new globalThis.Error('History header not found');
+		}
+		await expect(getComputedStyle(historyHeader).borderBottomWidth).toBe('1px');
 		await expect(
 			canvas.getByRole('grid', { name: 'Sent alerts' }),
 		).toBeInTheDocument();
+		const table = canvas.getByRole('grid', { name: 'Sent alerts' });
+		const rows = canvas.getAllByRole('row');
+		const lastRow = rows.at(-1);
+		if (!lastRow) {
+			throw new globalThis.Error('Expected at least one history row');
+		}
+		await expect(
+			table.getBoundingClientRect().bottom -
+				lastRow.getBoundingClientRect().bottom,
+		).toBeLessThanOrEqual(1);
 		await expect(
 			canvas.getByRole('complementary', { name: 'Filters' }),
 		).toBeInTheDocument();

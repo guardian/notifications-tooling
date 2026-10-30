@@ -2,11 +2,11 @@ import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import type {
 	NotificationListPage,
 	NotificationWithDispatches,
-} from '@database';
-import { httpLogger } from '@http-logger';
-import { UserPermissions } from '@models';
-import { BrazeApiError } from '@services';
+} from 'database';
 import express from 'express';
+import { httpLogger } from 'http-logger';
+import { UserPermissions } from 'models';
+import { BrazeApiError } from 'services';
 import { errorMiddleware } from '../../middleware/error-middleware';
 import {
 	installDatabaseMock,

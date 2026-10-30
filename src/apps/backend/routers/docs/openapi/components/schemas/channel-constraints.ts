@@ -1,4 +1,4 @@
-import { NotificationChannel } from '@config';
+import { NotificationChannel } from 'config';
 import { channelConstraints } from '../../../../channels';
 
 const pushConstraints =

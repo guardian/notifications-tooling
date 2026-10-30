@@ -1,10 +1,10 @@
-import { NotificationChannel } from '@config';
+import { NotificationChannel } from 'config';
 import {
 	canonicalHistoryAlertTypes,
 	historyAlertTypeSchema,
 	notificationAudienceFilterId,
-} from '@models';
-import { determineArticleId, isGuardianUrl } from '@utils';
+} from 'models';
+import { determineArticleId, isGuardianUrl } from 'utils';
 import { z } from 'zod';
 
 const defaultLimit = 10;

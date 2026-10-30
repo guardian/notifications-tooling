@@ -3,7 +3,7 @@ import { Checkbox } from '@guardian/stand/Checkbox';
 import { Icon } from '@guardian/stand/Icon';
 import { Menu, MenuItem, MenuToggle } from '@guardian/stand/Menu';
 import { Typography } from '@guardian/stand/Typography';
-import { appAlertTopicEditionId, toDisplayEditionId } from '@models';
+import { appAlertTopicEditionId, toDisplayEditionId } from 'models';
 import { useSearchParams } from 'react-router-dom';
 import { useChannelAudiences } from '../segment/useChannelAudiences';
 import { historyViewStyles } from '../themes';

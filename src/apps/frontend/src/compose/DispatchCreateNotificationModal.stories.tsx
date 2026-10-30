@@ -1,5 +1,5 @@
-import type { AppConfig } from '@models';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { AppConfig } from 'models';
 import type { ComponentProps } from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { ConfigContext } from '../config/ConfigContext';

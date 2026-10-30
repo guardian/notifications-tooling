@@ -1,9 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
 import {
 	type AppAlertTopicOption,
 	type ChannelAudienceResponse,
 	channelAudienceResponseSchema,
-} from '@models';
-import { useQuery } from '@tanstack/react-query';
+} from 'models';
 import { fetchJsonAndParse } from '../api-client/client';
 import { ApiError } from '../api-client/errors';
 import { redirectToLogin } from '../api-client/redirect-to-login';

@@ -1,4 +1,4 @@
-import { env } from '@config';
+import { env } from 'config';
 import type { NextFunction, Request, Response } from 'express';
 import { buildErrorEnvelope } from '../error-envelope';
 import { verifyCookie } from '../utils/auth/pan-domain-authentication';

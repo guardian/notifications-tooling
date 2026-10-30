@@ -7,7 +7,7 @@ import { Typography } from '@guardian/stand/Typography';
 import type {
 	DisplayAppAlertTopicEditionId,
 	NewsletterSegmentId,
-} from '@models';
+} from 'models';
 import { audienceSegmentTileCss, audienceSegmentTileTheme } from '../themes';
 import { FlagAtom } from '../ui/FlagAtom';
 

@@ -4,12 +4,12 @@ import {
 	type AppPushTopicTypeId,
 	NotificationChannel,
 	resolveAppPushTopic,
-} from '@config';
+} from 'config';
 import {
 	AppNotificationApiError,
 	type AppNotificationImportance,
-} from '@services';
-import { determineArticleId, determineBlockId } from '@utils';
+} from 'services';
+import { determineArticleId, determineBlockId } from 'utils';
 import { z } from 'zod';
 import type { NotificationSendRequest } from '../../routers/notifications/schemas/notification-send-request';
 import type { AppPushDispatchOutcome } from '../dispatch-outcome';
