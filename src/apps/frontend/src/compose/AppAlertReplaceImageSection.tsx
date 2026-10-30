@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import { semanticColors, semanticSpacing } from '@guardian/stand';
 import { Button } from '@guardian/stand/Button';
+import { GridImagePicker } from '@guardian/stand/GridImagePicker';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Link } from '@guardian/stand/Link';
 import { LinkButton } from '@guardian/stand/LinkButton';
@@ -10,7 +11,6 @@ import { useContext } from 'react';
 import { ConfigContext } from '../config/ConfigContext';
 import { useImageUrlCheck } from '../hooks/useImageUrlCheck';
 import { CENTRAL_PRODUCTION_CONTACT_HREF } from '../support-links';
-import { GridImagePickerImp } from './GridImagePicker';
 
 interface AppAlertReplaceImageSectionProps {
 	replacementImageUrl: string;
@@ -120,10 +120,25 @@ export const AppAlertReplaceImageSection = ({
 				<InlineMessage level="success">Image updated</InlineMessage>
 			)}
 
-			<GridImagePickerImp
-				onUpdate={onUpdate}
-				setTextInput={handleImageUrlChange}
-			/>
+			{gridUri && (
+				<GridImagePicker
+					handleCropData={({ imageAssetUrl }) => {
+						onUpdate(imageAssetUrl);
+						handleImageUrlChange(imageAssetUrl);
+					}}
+					gridUri={gridUri}
+					allowedAspectRatios={['5:4']}
+					theme={{
+						container: {
+							width: '100%',
+						},
+						imagePreview: {
+							maxHeight: '200px',
+							maxWidth: '300px',
+						},
+					}}
+				/>
+			)}
 		</section>
 	);
 };
