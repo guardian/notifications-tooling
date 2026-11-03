@@ -7,10 +7,13 @@ export interface UserResponse {
 	permissions: string[];
 }
 
+export type Stage = 'DEV' | 'CODE' | 'PROD';
+
 export type AppConfig = UserResponse & {
-	stage?: 'DEV' | 'CODE' | 'PROD';
+	stage?: Stage;
 	gridApiUri: string;
 	gridUri: string;
 	dispatchUserGuideUrl: string;
 	dispatchFeedbackFormUrl: string;
+	sessionId: string;
 };

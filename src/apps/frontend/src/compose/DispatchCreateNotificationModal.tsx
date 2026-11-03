@@ -5,6 +5,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { useRelativeTime } from '../hooks/useRelativeTime';
 import type { LatestPublishedContentItem } from '../latest-content/latest-published-content';
 import { getAppRoutes, withArticleUrl } from '../routes';
+import { useTelemetryBeforeInternalLink } from '../telemetry/TelemetryContext';
 import { dispatchTileModalStyles, dispatchTileModalTheme } from '../themes';
 import { ExternalLink } from '../ui/ExternalLink';
 import { phoneIphoneIcon } from '../ui/flag-icons';
@@ -34,6 +35,10 @@ export const DispatchCreateNotificationModal = ({
 		selectedArticleUrl,
 	);
 	const isLiveblog = content?.type === 'liveblog';
+
+	const sendTelemetryAndNavigate = useTelemetryBeforeInternalLink(
+		'DispatchCreateNotificationModal',
+	);
 
 	return (
 		<Modal
@@ -110,7 +115,7 @@ export const DispatchCreateNotificationModal = ({
 						{createAppAlertHref && (
 							<Tile
 								size="sm"
-								href={createAppAlertHref}
+								{...sendTelemetryAndNavigate(createAppAlertHref)}
 								icon={phoneIphoneIcon}
 								typography="headingMd"
 								cssOverrides={dispatchTileModalStyles.tileStyles}
@@ -120,7 +125,7 @@ export const DispatchCreateNotificationModal = ({
 						)}
 						<Tile
 							size="sm"
-							href={createNewsletterEmailHref}
+							{...sendTelemetryAndNavigate(createNewsletterEmailHref)}
 							icon="mail"
 							typography="headingMd"
 							cssOverrides={dispatchTileModalStyles.tileStyles}
