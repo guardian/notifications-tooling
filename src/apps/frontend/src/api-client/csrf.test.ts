@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
+import '../../happydom-setup';
 import { z } from 'zod';
 import { safeFetchJsonAndParse } from './client';
 import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME, readCsrfToken } from './csrf';
