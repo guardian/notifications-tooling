@@ -54,9 +54,9 @@ describe('safeFetchJsonAndParse CSRF header', () => {
 		});
 
 	const installFetchMock = () => {
-		const fetchMock = mock((_url: string, _init?: RequestInit) =>
-			Promise.resolve(okResponse()),
-		);
+		const fetchMock = mock<
+			(url: string, init?: RequestInit) => Promise<Response>
+		>(() => Promise.resolve(okResponse()));
 		globalThis.fetch = fetchMock as unknown as typeof fetch;
 		return () => new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
 	};
