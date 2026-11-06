@@ -133,6 +133,19 @@ describe('POST /v1/notification-tests', () => {
 		);
 	});
 
+	it('rejects a form-encoded body', async () => {
+		const response = await fetch(`${baseUrl}/v1/notification-tests`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams({ articleUrl: 'x' }).toString(),
+		});
+
+		expect(response.status).toBe(415);
+		expect(((await response.json()) as { error: string }).error).toBe(
+			'unsupported_media_type',
+		);
+	});
+
 	it('accepts and dispatches a direct email test', async () => {
 		const dispatchRequest = mock(() =>
 			Promise.resolve({ newsletter: [], appPush: [] }),

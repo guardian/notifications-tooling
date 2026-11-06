@@ -129,6 +129,19 @@ describe('POST /v1/notifications', () => {
 				'csrf_token_invalid',
 			);
 		});
+
+		it('rejects a form-encoded body', async () => {
+			const response = await fetch(`${baseUrl}/v1/notifications`, {
+				method: 'POST',
+				headers: { 'content-type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({ articleUrl: 'x' }).toString(),
+			});
+
+			expect(response.status).toBe(415);
+			expect(((await response.json()) as { error: string }).error).toBe(
+				'unsupported_media_type',
+			);
+		});
 	});
 
 	describe('permissions', () => {

@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
+import { requireJsonBody } from '../../middleware/require-json-body';
 import { verifyCsrfToken } from '../../middleware/verify-csrf';
 import { verifyOrigin } from '../../middleware/verify-origin';
 import {
@@ -229,6 +230,7 @@ export const createNotificationsRouter = (
 		]),
 		verifyOrigin,
 		verifyCsrfToken,
+		requireJsonBody,
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
