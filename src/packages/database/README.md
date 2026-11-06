@@ -145,14 +145,6 @@ The remote command:
 
 You do not need to run `db:migration:tunnel` first.
 
-The runner loads the repository's `certificates/eu-west-1-bundle.pem` relative
-to the helper's location, so developers do not need to download certificates
-separately. Although the TCP connection goes through `127.0.0.1`, TLS verifies
-the certificate against the actual RDS hostname from Secrets Manager using
-`servername`. The same verified connection pool is used for the connectivity
-check and migrations. A missing bundle or invalid certificate fails the command
-without falling back to unverified TLS.
-
 If AWS reports that no session policy allows `secretsmanager:GetSecretValue`,
 the active credentials do not include the required developer policy. Confirm
 that the latest CODE infrastructure containing the policy has been deployed,
