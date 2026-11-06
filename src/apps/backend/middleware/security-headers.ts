@@ -52,7 +52,7 @@ export const securityHeaders = (
 	if (env.STAGE !== 'DEV') {
 		response.setHeader(
 			'Strict-Transport-Security',
-			'max-age=63072000; includeSubDomains; preload',
+			'max-age=63072000; includeSubDomains',
 		);
 	}
 

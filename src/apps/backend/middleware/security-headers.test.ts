@@ -51,10 +51,14 @@ describe('securityHeaders', () => {
 
 	it('locks down the dangerous CSP directives', () => {
 		const csp = run().headers.get('Content-Security-Policy') ?? '';
+		const scriptSrc = csp
+			.split('; ')
+			.find((directive) => directive.startsWith('script-src '));
 		expect(csp).toContain(`object-src 'none'`);
 		expect(csp).toContain(`base-uri 'self'`);
 		expect(csp).toContain(`frame-ancestors 'none'`);
-		expect(csp).not.toContain(`script-src 'self' 'unsafe-inline'`);
+		expect(scriptSrc).not.toContain(`'unsafe-inline'`);
+		expect(scriptSrc).not.toContain(`'unsafe-eval'`);
 	});
 
 	it('sets the supporting security headers', () => {

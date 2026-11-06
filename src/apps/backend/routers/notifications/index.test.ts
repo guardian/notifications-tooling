@@ -97,6 +97,40 @@ describe('POST /v1/notifications', () => {
 		});
 	});
 
+	describe('CSRF', () => {
+		it('rejects a request from another origin', async () => {
+			const response = await fetch(`${baseUrl}/v1/notifications`, {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+					origin: 'https://composer.gutools.co.uk',
+				},
+				body: JSON.stringify(validPushRequest()),
+			});
+
+			expect(response.status).toBe(403);
+			expect(((await response.json()) as { error: string }).error).toBe(
+				'origin_not_allowed',
+			);
+		});
+
+		it('rejects a token that does not match the cookie', async () => {
+			const response = await fetch(`${baseUrl}/v1/notifications`, {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+					'x-csrf-token': 'forged',
+				},
+				body: JSON.stringify(validPushRequest()),
+			});
+
+			expect(response.status).toBe(403);
+			expect(((await response.json()) as { error: string }).error).toBe(
+				'csrf_token_invalid',
+			);
+		});
+	});
+
 	describe('permissions', () => {
 		it('blocks POST /v1/notifications without the dispatch permission', async () => {
 			await assertInsufficientPermissionsRequestBlocked(baseUrl, {

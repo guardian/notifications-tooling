@@ -14,12 +14,10 @@ const dispatchOriginLookup = (): string => {
 	}
 };
 
-const stateChangingMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-
 /**
  * The browser-set origin of the request, taken from `Origin` and falling back
- * to the origin of `Referer`. Page script cannot forge or strip either header,
- * so they are a trustworthy witness of who issued the request.
+ * to the origin of `Referer`. Page script cannot forge either header (a page
+ * can suppress `Referer`, but browsers always send `Origin` on a `POST`).
  */
 const requestOrigin = (request: Request): string | undefined => {
 	const origin = request.get('origin');
@@ -40,7 +38,7 @@ const requestOrigin = (request: Request): string | undefined => {
 };
 
 /**
- * Rejects state-changing requests that carry a cross-origin `Origin`/`Referer`.
+ * Rejects requests that carry a cross-origin `Origin`/`Referer`.
  *
  * The pan-domain cookie is shared across every `*.gutools.co.uk` host, so cookie
  * auth alone lets any gutools origin forge a send on a logged-in user's behalf
@@ -49,20 +47,14 @@ const requestOrigin = (request: Request): string | undefined => {
  * a cross-origin (or form) `POST`, so requiring it to match Dispatch's own origin
  * closes the vector — including the same-site subdomain case.
  *
- * A request with no `Origin`/`Referer` at all is not a browser-driven CSRF (the
- * browser forces the header on mutating requests), so it is allowed through:
- * that path is reserved for non-browser callers, which must already hold the
- * cookie themselves and so are out of scope for CSRF.
+ * A request with neither header is let through: it is not browser-issued, and
+ * {@link verifyCsrfToken} still requires the double-submit token.
  */
 export const verifyOrigin = (
 	request: Request,
 	response: Response,
 	next: NextFunction,
 ) => {
-	if (!stateChangingMethods.has(request.method)) {
-		return next();
-	}
-
 	const origin = requestOrigin(request);
 	if (origin === undefined || origin === dispatchOriginLookup()) {
 		return next();
@@ -73,7 +65,7 @@ export const verifyOrigin = (
 		.json(
 			buildErrorEnvelope(
 				request,
-				'forbidden',
+				'origin_not_allowed',
 				'The request did not originate from Dispatch.',
 			),
 		);

@@ -28,16 +28,6 @@ describe('verifyCsrfToken', () => {
 		mockNextFunction.mockReset();
 	});
 
-	it('calls next for a non-mutating method', () => {
-		const request = createMockRequest('GET');
-		const { status, response } = createMockResponse();
-
-		verifyCsrfToken(request, response, mockNextFunction);
-
-		expect(mockNextFunction).toHaveBeenCalledTimes(1);
-		expect(status).not.toHaveBeenCalled();
-	});
-
 	it('calls next when the header matches the cookie', () => {
 		const request = createMockRequest('POST', {
 			cookie: `${CSRF_COOKIE_NAME}=${token}`,
@@ -62,7 +52,7 @@ describe('verifyCsrfToken', () => {
 		expect(mockNextFunction).not.toHaveBeenCalled();
 		expect(status).toHaveBeenCalledWith(403);
 		expect((json.mock.calls[0]?.[0] as { error: string }).error).toBe(
-			'forbidden',
+			'csrf_token_invalid',
 		);
 	});
 

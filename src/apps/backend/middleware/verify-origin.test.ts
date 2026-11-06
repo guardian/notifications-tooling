@@ -28,18 +28,6 @@ describe('verifyOrigin', () => {
 		mockNextFunction.mockReset();
 	});
 
-	it('calls next for a non-mutating method regardless of origin', () => {
-		const request = createMockRequest('GET', {
-			origin: 'https://evil.gutools.co.uk',
-		});
-		const { status, response } = createMockResponse();
-
-		verifyOrigin(request, response, mockNextFunction);
-
-		expect(mockNextFunction).toHaveBeenCalledTimes(1);
-		expect(status).not.toHaveBeenCalled();
-	});
-
 	it('calls next when the Origin matches Dispatch', () => {
 		const request = createMockRequest('POST', { origin: dispatchOrigin });
 		const { status, response } = createMockResponse();
@@ -61,7 +49,7 @@ describe('verifyOrigin', () => {
 		expect(mockNextFunction).not.toHaveBeenCalled();
 		expect(status).toHaveBeenCalledWith(403);
 		expect((json.mock.calls[0]?.[0] as { error: string }).error).toBe(
-			'forbidden',
+			'origin_not_allowed',
 		);
 	});
 

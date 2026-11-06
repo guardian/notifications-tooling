@@ -20,16 +20,14 @@ export const CSRF_HEADER_NAME = 'x-csrf-token';
 
 const generateToken = (): string => randomBytes(32).toString('base64url');
 
-/** Issues a fresh token cookie on the response and returns the token. */
-export const issueCsrfCookie = (response: Response): string => {
-	const token = generateToken();
-	response.cookie(CSRF_COOKIE_NAME, token, {
+/** Issues a fresh token cookie on the response. */
+export const issueCsrfCookie = (response: Response): void => {
+	response.cookie(CSRF_COOKIE_NAME, generateToken(), {
 		secure: true,
 		path: '/',
 		sameSite: 'strict',
 		httpOnly: false, // the SPA must read it to echo it back in the header
 	});
-	return token;
 };
 
 const readCookie = (

@@ -101,6 +101,38 @@ describe('POST /v1/notification-tests', () => {
 		});
 	});
 
+	it('rejects a request from another origin', async () => {
+		const response = await fetch(`${baseUrl}/v1/notification-tests`, {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				origin: 'https://composer.gutools.co.uk',
+			},
+			body: JSON.stringify(validTestRequest()),
+		});
+
+		expect(response.status).toBe(403);
+		expect(((await response.json()) as { error: string }).error).toBe(
+			'origin_not_allowed',
+		);
+	});
+
+	it('rejects a token that does not match the cookie', async () => {
+		const response = await fetch(`${baseUrl}/v1/notification-tests`, {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				'x-csrf-token': 'forged',
+			},
+			body: JSON.stringify(validTestRequest()),
+		});
+
+		expect(response.status).toBe(403);
+		expect(((await response.json()) as { error: string }).error).toBe(
+			'csrf_token_invalid',
+		);
+	});
+
 	it('accepts and dispatches a direct email test', async () => {
 		const dispatchRequest = mock(() =>
 			Promise.resolve({ newsletter: [], appPush: [] }),

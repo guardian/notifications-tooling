@@ -69,9 +69,11 @@ export const serveIndex: RequestHandler = async (
 		dispatchFeedbackFormUrl: DISPATCH_FEEDBACK_FORM_URL,
 		sessionId: crypto.randomUUID(),
 	};
+	// Nonce first so a placeholder inside user-derived config can't capture it;
+	// replacer functions stop `$&`-style patterns in the values being expanded.
 	const html = (await readIndexTemplate())
-		.replace(configPlaceholder, JSON.stringify(config))
-		.replace(noncePlaceholder, String(res.locals.cspNonce ?? ''));
+		.replace(noncePlaceholder, () => String(res.locals.cspNonce ?? ''))
+		.replace(configPlaceholder, () => JSON.stringify(config));
 
 	// Mint the double-submit CSRF token on the document load that boots the SPA,
 	// so it is present before the first state-changing request is issued.
