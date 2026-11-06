@@ -12,6 +12,7 @@ import { buildErrorEnvelope } from './error-envelope';
 import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { errorMiddleware } from './middleware/error-middleware';
 import { grafanaCorsMiddleware } from './middleware/grafana-cors';
+import { securityHeaders } from './middleware/security-headers';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { contentRouter } from './routers/content';
@@ -28,6 +29,7 @@ export const app: Application = express();
 app.disable('x-powered-by');
 
 app.use(httpLogger);
+app.use(securityHeaders);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(['/metrics', '/query'], grafanaCorsMiddleware);
