@@ -12,23 +12,11 @@ configuration, and package-level database scripts.
 ## RDS CA bundle packaging
 
 The official AWS RDS CA bundle for `eu-west-1` is stored in
-`certificates/eu-west-1-bundle.pem`. It contains public CA certificates, not
-credentials or private keys.
+`certificates/eu-west-1-bundle.pem`.
 
 CI copies this file into `certificates/eu-west-1-bundle.pem` in the Lambda
 deployment ZIP, making it available at
 `/var/task/certificates/eu-west-1-bundle.pem`.
-
-In Lambda, the database client reads the bundle once when creating its cached
-connection pool, using `LAMBDA_TASK_ROOT` to locate the deployed file. TLS
-verification is enabled, including the standard PostgreSQL driver's hostname
-check against the RDS endpoint from Secrets Manager. Missing bundle files and
-certificate verification errors fail the connection; there is no insecure
-fallback. Local development connections remain unchanged and do not load the
-bundle.
-
-The remote migration helper still has separate TLS configuration; packaging
-and configuring the Lambda client does not enable verification for migrations.
 
 The official download is
 <https://truststore.pki.rds.amazonaws.com/eu-west-1/eu-west-1-bundle.pem>.
