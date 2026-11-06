@@ -10,7 +10,7 @@ configuration, and package-level database scripts.
 - Drizzle config: `src/packages/database/drizzle.config.ts`
 
 ## RDS CA bundle packaging
-
+We use the official AWS RDS CA bundle to verify the database server’s certificate and hostname.
 The official AWS RDS CA bundle for `eu-west-1` is stored in
 `certificates/eu-west-1-bundle.pem`.
 
@@ -137,11 +137,20 @@ The remote command:
 1. Reads the database credentials from Secrets Manager.
 2. Resolves the stage's migration host from the CloudFormation stack.
 3. Opens an SSM port-forwarding session on the local port.
-4. Connects to PostgreSQL over SSL and confirms the database and user.
+4. Connects to PostgreSQL over TLS, verifies its certificate, and confirms the
+   database and user.
 5. Applies all pending Drizzle migrations.
 6. Closes the database connection and SSM session.
 
 You do not need to run `db:migration:tunnel` first.
+
+The runner loads the repository's `certificates/eu-west-1-bundle.pem` relative
+to the helper's location, so developers do not need to download certificates
+separately. Although the TCP connection goes through `127.0.0.1`, TLS verifies
+the certificate against the actual RDS hostname from Secrets Manager using
+`servername`. The same verified connection pool is used for the connectivity
+check and migrations. A missing bundle or invalid certificate fails the command
+without falling back to unverified TLS.
 
 If AWS reports that no session policy allows `secretsmanager:GetSecretValue`,
 the active credentials do not include the required developer policy. Confirm

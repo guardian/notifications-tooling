@@ -1,13 +1,10 @@
 // Remote database access helpers for parsing secrets, probing connectivity, and shaping migration env.
+import { readFile } from 'node:fs/promises';
 import { Pool } from 'pg';
 import type { ManagedDatabaseSecret } from '../../../../managed-database-secret';
 import { parseManagedDatabaseSecret } from '../../../../managed-database-secret';
 import { getDatabaseSecretString } from './aws';
 import type { RemoteMigrationConfig } from './cli-args';
-
-const remoteSslConfig = {
-	rejectUnauthorized: false,
-};
 
 export const getDatabaseSecret = (
 	config: RemoteMigrationConfig,
@@ -17,7 +14,7 @@ export const getDatabaseSecret = (
 	return parseManagedDatabaseSecret(JSON.parse(secretString));
 };
 
-export const createRemoteDatabasePool = (
+export const createRemoteDatabasePool = async (
 	config: RemoteMigrationConfig,
 	secret: ManagedDatabaseSecret,
 ) =>
@@ -27,7 +24,18 @@ export const createRemoteDatabasePool = (
 		database: secret.dbname,
 		user: secret.username,
 		password: secret.password,
-		ssl: remoteSslConfig,
+		ssl: {
+			ca: await readFile(
+				new URL(
+					'../../../../certificates/eu-west-1-bundle.pem',
+					import.meta.url,
+				),
+				'utf8',
+			),
+			rejectUnauthorized: true,
+			// TCP goes through localhost, but the certificate identifies the RDS host.
+			servername: secret.host,
+		},
 	});
 
 export const verifyRemoteDatabaseConnection = async (
