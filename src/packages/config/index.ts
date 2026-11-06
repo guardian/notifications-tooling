@@ -6,20 +6,26 @@ import { env } from './env';
  */
 export const isRunningLocally = !process.env.LAMBDA_TASK_ROOT;
 
+/** The pan-domain (tools) domain for the current stage. */
+export const toolsDomain = ((): string => {
+	switch (env.STAGE) {
+		case 'DEV':
+			return 'local.dev-gutools.co.uk';
+		case 'CODE':
+			return 'code.dev-gutools.co.uk';
+		case 'PROD':
+			return 'gutools.co.uk';
+	}
+})();
+
 /**
  * The pan-domain settings file for the current stage, held in the
  * `pan-domain-auth-settings` bucket.
  */
-export const pandaSettingsFileName = ((): string => {
-	switch (env.STAGE) {
-		case 'DEV':
-			return 'local.dev-gutools.co.uk.settings.public';
-		case 'CODE':
-			return 'code.dev-gutools.co.uk.settings.public';
-		case 'PROD':
-			return 'gutools.co.uk.settings.public';
-	}
-})();
+export const pandaSettingsFileName = `${toolsDomain}.settings.public`;
+
+/** Dispatch's own web origin for the current stage. */
+export const dispatchOrigin = `https://dispatch.${toolsDomain}`;
 
 /**
  * The stage whose permissions cache bucket to read. The permissions cache is

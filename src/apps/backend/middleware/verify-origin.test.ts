@@ -1,9 +1,7 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test';
+import { dispatchOrigin } from 'config';
 import type { Request, Response } from 'express';
 import { verifyOrigin } from './verify-origin';
-
-// STAGE defaults to DEV in tests, so the expected origin is the local host.
-const dispatchOrigin = 'https://dispatch.local.dev-gutools.co.uk';
 
 const mockNextFunction = mock(() => undefined);
 

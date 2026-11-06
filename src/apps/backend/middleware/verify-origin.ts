@@ -1,18 +1,6 @@
-import { env } from 'config';
+import { dispatchOrigin } from 'config';
 import type { NextFunction, Request, Response } from 'express';
 import { buildErrorEnvelope } from '../error-envelope';
-
-/** Dispatch's own web origin per stage; the only origin allowed to mutate. */
-const dispatchOriginLookup = (): string => {
-	switch (env.STAGE) {
-		case 'DEV':
-			return 'https://dispatch.local.dev-gutools.co.uk';
-		case 'CODE':
-			return 'https://dispatch.code.dev-gutools.co.uk';
-		case 'PROD':
-			return 'https://dispatch.gutools.co.uk';
-	}
-};
 
 /**
  * The browser-set origin of the request, taken from `Origin` and falling back
@@ -56,7 +44,7 @@ export const verifyOrigin = (
 	next: NextFunction,
 ) => {
 	const origin = requestOrigin(request);
-	if (origin === undefined || origin === dispatchOriginLookup()) {
+	if (origin === undefined || origin === dispatchOrigin) {
 		return next();
 	}
 
