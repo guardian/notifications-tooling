@@ -7,6 +7,7 @@ import {
 } from '@guardian/stand';
 import { InlineMessage } from '@guardian/stand/InlineMessage';
 import { Typography } from '@guardian/stand/Typography';
+import DOMPurify from 'dompurify';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
@@ -88,7 +89,12 @@ export const NewsletterEmailPreview = () => {
 		if (!articleElement) {
 			return;
 		}
-		articleElement.innerHTML = preview?.html ?? '';
+		articleElement.innerHTML = DOMPurify.sanitize(preview?.html ?? '', {
+			USE_PROFILES: { html: true },
+			FORCE_BODY: true,
+			FORBID_TAGS: ['form', 'input', 'button', 'select', 'textarea'],
+			FORBID_ATTR: ['href', 'autofocus'],
+		});
 		if (preview?.html) {
 			modifyContent(articleElement, parameters);
 		}
