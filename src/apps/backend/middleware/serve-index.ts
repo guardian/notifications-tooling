@@ -5,6 +5,7 @@ import { getSSMParameter } from 'config/ssm';
 import type { Request, RequestHandler, Response } from 'express';
 import type { AppConfig } from 'models';
 import { clientAssetsDir } from '../client-assets';
+import { issueCsrfCookie } from '../utils/auth/csrf';
 import { listUserPermissions } from '../utils/permissions/permissions-store';
 
 const indexHtmlPath = join(clientAssetsDir, 'index.html');
@@ -15,6 +16,13 @@ const indexHtmlPath = join(clientAssetsDir, 'index.html');
  * injected config JSON.
  */
 const configPlaceholder = '<!--APP_CONFIG-->';
+
+/**
+ * Placeholder on the inline bootstrap script's `nonce` attribute, replaced per
+ * request with the CSP nonce set by {@link securityHeaders} so that one inline
+ * script is allowed to run under the strict `script-src`.
+ */
+const noncePlaceholder = '%%CSP_NONCE%%';
 
 let cachedTemplate: string | undefined;
 
@@ -61,10 +69,18 @@ export const serveIndex: RequestHandler = async (
 		dispatchFeedbackFormUrl: DISPATCH_FEEDBACK_FORM_URL,
 		sessionId: crypto.randomUUID(),
 	};
-	const html = (await readIndexTemplate()).replace(
-		configPlaceholder,
-		JSON.stringify(config),
-	);
+	// Nonce first so a placeholder inside user-derived config can't capture it;
+	// replacer functions stop `$&`-style patterns in the values being expanded.
+	const html = (await readIndexTemplate())
+		.replace(noncePlaceholder, () => String(res.locals.cspNonce ?? ''))
+		// Escaped `<` stops a value containing `</script>` closing the tag early.
+		.replace(configPlaceholder, () =>
+			JSON.stringify(config).replaceAll('<', '\\u003c'),
+		);
+
+	// Mint the double-submit CSRF token on the document load that boots the SPA,
+	// so it is present before the first state-changing request is issued.
+	issueCsrfCookie(res);
 
 	res
 		.status(200)

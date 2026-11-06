@@ -70,6 +70,7 @@ export const notificationTestsPath = {
 				},
 			},
 			'409': { $ref: '#/components/responses/IdempotencyKeyConflict' },
+			'415': { $ref: '#/components/responses/UnsupportedMediaType' },
 			'502': {
 				description:
 					'At least one target failed — whether at an upstream provider (email rendering, Braze, or the mobile-n10n app-notification service) or before any outcome could be recorded — a partial or total failure is treated as a failure. The body is the stored notification with its per-target `dispatches` (empty when the failure occurred before anything could be recorded).',

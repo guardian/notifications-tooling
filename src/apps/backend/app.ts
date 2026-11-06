@@ -12,6 +12,7 @@ import { buildErrorEnvelope } from './error-envelope';
 import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { errorMiddleware } from './middleware/error-middleware';
 import { grafanaCorsMiddleware } from './middleware/grafana-cors';
+import { securityHeaders } from './middleware/security-headers';
 import { serveIndex } from './middleware/serve-index';
 import { channelsRouter } from './routers/channels';
 import { contentRouter } from './routers/content';
@@ -28,6 +29,7 @@ export const app: Application = express();
 app.disable('x-powered-by');
 
 app.use(httpLogger);
+app.use(securityHeaders);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(['/metrics', '/query'], grafanaCorsMiddleware);
@@ -65,7 +67,9 @@ app.use(
 	}),
 );
 
-// Private - authenticated routes
+// Private - authenticated routes. The notifications and notification-tests
+// routers additionally guard their state-changing handlers against CSRF riding
+// the shared pan-domain cookie (see verifyOrigin / verifyCsrfToken).
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/content', contentRouter);
 app.use('/v1/notification-tests', notificationTestsRouter);

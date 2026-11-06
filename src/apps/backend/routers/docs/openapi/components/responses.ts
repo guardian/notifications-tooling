@@ -40,4 +40,12 @@ export const responses = {
 			},
 		},
 	},
+	UnsupportedMediaType: {
+		description: 'The request body was not sent as application/json.',
+		content: {
+			'application/json': {
+				schema: { $ref: '#/components/schemas/UnsupportedMediaType' },
+			},
+		},
+	},
 } as const;

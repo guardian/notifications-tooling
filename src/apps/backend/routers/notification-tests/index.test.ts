@@ -1,9 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { dispatchOrigin } from 'config';
 import express from 'express';
 import { httpLogger } from 'http-logger';
 import { UserPermissions } from 'models';
 import { BrazeApiError } from 'services';
 import { errorMiddleware } from '../../middleware/error-middleware';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '../../utils/auth/csrf';
 import {
 	installDatabaseMock,
 	mockNotificationStore,
@@ -99,6 +101,66 @@ describe('POST /v1/notification-tests', () => {
 			path: '/v1/notification-tests',
 			body: validTestRequest(),
 		});
+	});
+
+	it('accepts a same-origin request with a matching CSRF token', async () => {
+		const response = await fetch(`${baseUrl}/v1/notification-tests`, {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				origin: dispatchOrigin,
+				cookie: `${CSRF_COOKIE_NAME}=a-valid-token`,
+				[CSRF_HEADER_NAME]: 'a-valid-token',
+			},
+			body: JSON.stringify(validTestRequest()),
+		});
+
+		expect(response.status).toBe(202);
+	});
+
+	it('rejects a request from another origin', async () => {
+		const response = await fetch(`${baseUrl}/v1/notification-tests`, {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				origin: 'https://composer.gutools.co.uk',
+			},
+			body: JSON.stringify(validTestRequest()),
+		});
+
+		expect(response.status).toBe(403);
+		expect(((await response.json()) as { error: string }).error).toBe(
+			'origin_not_allowed',
+		);
+	});
+
+	it('rejects a token that does not match the cookie', async () => {
+		const response = await fetch(`${baseUrl}/v1/notification-tests`, {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				'x-csrf-token': 'forged',
+			},
+			body: JSON.stringify(validTestRequest()),
+		});
+
+		expect(response.status).toBe(403);
+		expect(((await response.json()) as { error: string }).error).toBe(
+			'csrf_token_invalid',
+		);
+	});
+
+	it('rejects a form-encoded body', async () => {
+		const response = await fetch(`${baseUrl}/v1/notification-tests`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams({ articleUrl: 'x' }).toString(),
+		});
+
+		expect(response.status).toBe(415);
+		expect(((await response.json()) as { error: string }).error).toBe(
+			'unsupported_media_type',
+		);
 	});
 
 	it('accepts and dispatches a direct email test', async () => {
