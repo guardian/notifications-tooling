@@ -13,7 +13,6 @@ import { authRedirectMiddleware } from './middleware/auth-middleware';
 import { errorMiddleware } from './middleware/error-middleware';
 import { grafanaCorsMiddleware } from './middleware/grafana-cors';
 import { serveIndex } from './middleware/serve-index';
-import { verifyOrigin } from './middleware/verify-origin';
 import { channelsRouter } from './routers/channels';
 import { contentRouter } from './routers/content';
 import { docsRouter } from './routers/docs';
@@ -66,12 +65,13 @@ app.use(
 	}),
 );
 
-// Private - authenticated routes. `verifyOrigin` guards the state-changing
-// routers against cross-origin CSRF riding the shared pan-domain cookie.
+// Private - authenticated routes. The notifications and notification-tests
+// routers additionally guard their state-changing handlers against CSRF riding
+// the shared pan-domain cookie (see verifyOrigin / verifyCsrfToken).
 app.use('/v1/channels', channelsRouter);
 app.use('/v1/content', contentRouter);
-app.use('/v1/notification-tests', verifyOrigin, notificationTestsRouter);
-app.use('/v1/notifications', verifyOrigin, notificationsRouter);
+app.use('/v1/notification-tests', notificationTestsRouter);
+app.use('/v1/notifications', notificationsRouter);
 app.use('/v1/user', userRouter);
 app.use('/v1/preview', previewRouter);
 app.use('/docs/api', docsRouter);

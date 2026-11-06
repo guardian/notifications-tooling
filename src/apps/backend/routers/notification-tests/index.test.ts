@@ -8,6 +8,7 @@ import {
 	installDatabaseMock,
 	mockNotificationStore,
 } from '../../utils/test-utils/database';
+import { csrfTestHeaders } from '../../utils/test-utils/csrf';
 import {
 	assertUnauthenticatedRequestBlocked,
 	authenticateRequests,

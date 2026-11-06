@@ -5,6 +5,7 @@ import { getSSMParameter } from 'config/ssm';
 import type { Request, RequestHandler, Response } from 'express';
 import type { AppConfig } from 'models';
 import { clientAssetsDir } from '../client-assets';
+import { issueCsrfCookie } from '../utils/auth/csrf';
 import { listUserPermissions } from '../utils/permissions/permissions-store';
 
 const indexHtmlPath = join(clientAssetsDir, 'index.html');
@@ -65,6 +66,10 @@ export const serveIndex: RequestHandler = async (
 		configPlaceholder,
 		JSON.stringify(config),
 	);
+
+	// Mint the double-submit CSRF token on the document load that boots the SPA,
+	// so it is present before the first state-changing request is issued.
+	issueCsrfCookie(res);
 
 	res
 		.status(200)

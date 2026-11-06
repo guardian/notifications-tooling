@@ -13,6 +13,8 @@ import { z } from 'zod';
 import { buildErrorEnvelope } from '../../error-envelope';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
+import { verifyCsrfToken } from '../../middleware/verify-csrf';
+import { verifyOrigin } from '../../middleware/verify-origin';
 import {
 	dispatchNotification,
 	type DispatchOutcomes,
@@ -225,6 +227,8 @@ export const createNotificationsRouter = (
 			UserPermissions.DispatchAccess,
 			UserPermissions.SendNotification,
 		]),
+		verifyOrigin,
+		verifyCsrfToken,
 		validate({
 			body: notificationSendRequestSchema,
 			handler: handleValidationErrors,
