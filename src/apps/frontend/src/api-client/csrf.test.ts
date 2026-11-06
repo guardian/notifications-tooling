@@ -53,27 +53,31 @@ describe('safeFetchJsonAndParse CSRF header', () => {
 			headers: { 'content-type': 'application/json' },
 		});
 
+	const installFetchMock = () => {
+		const fetchMock = mock((_url: string, _init?: RequestInit) =>
+			Promise.resolve(okResponse()),
+		);
+		globalThis.fetch = fetchMock as unknown as typeof fetch;
+		return () => new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
+	};
+
 	it('attaches the token header to a state-changing request', async () => {
 		stubCookie(`${CSRF_COOKIE_NAME}=token-abc`);
-		const fetchMock = mock(() => Promise.resolve(okResponse()));
-		globalThis.fetch = fetchMock as unknown as typeof fetch;
+		const sentHeaders = installFetchMock();
 
 		await safeFetchJsonAndParse(schema, '/v1/notifications', {
 			method: 'POST',
 		});
 
-		const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-		expect(new Headers(init.headers).get(CSRF_HEADER_NAME)).toBe('token-abc');
+		expect(sentHeaders().get(CSRF_HEADER_NAME)).toBe('token-abc');
 	});
 
 	it('does not attach the header to a GET request', async () => {
 		stubCookie(`${CSRF_COOKIE_NAME}=token-abc`);
-		const fetchMock = mock(() => Promise.resolve(okResponse()));
-		globalThis.fetch = fetchMock as unknown as typeof fetch;
+		const sentHeaders = installFetchMock();
 
 		await safeFetchJsonAndParse(schema, '/v1/notifications');
 
-		const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-		expect(new Headers(init.headers).has(CSRF_HEADER_NAME)).toBe(false);
+		expect(sentHeaders().has(CSRF_HEADER_NAME)).toBe(false);
 	});
 });
