@@ -73,7 +73,10 @@ export const serveIndex: RequestHandler = async (
 	// replacer functions stop `$&`-style patterns in the values being expanded.
 	const html = (await readIndexTemplate())
 		.replace(noncePlaceholder, () => String(res.locals.cspNonce ?? ''))
-		.replace(configPlaceholder, () => JSON.stringify(config));
+		// Escaped `<` stops a value containing `</script>` closing the tag early.
+		.replace(configPlaceholder, () =>
+			JSON.stringify(config).replaceAll('<', '\\u003c'),
+		);
 
 	// Mint the double-submit CSRF token on the document load that boots the SPA,
 	// so it is present before the first state-changing request is issued.
