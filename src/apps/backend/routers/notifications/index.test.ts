@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { dispatchOrigin } from 'config';
 import type {
 	NotificationListPage,
 	NotificationWithDispatches,
@@ -8,6 +9,7 @@ import { httpLogger } from 'http-logger';
 import { UserPermissions } from 'models';
 import { BrazeApiError } from 'services';
 import { errorMiddleware } from '../../middleware/error-middleware';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '../../utils/auth/csrf';
 import {
 	installDatabaseMock,
 	mockNotificationStore,
@@ -98,6 +100,40 @@ describe('POST /v1/notifications', () => {
 	});
 
 	describe('CSRF', () => {
+		it('accepts a same-origin request with a matching token', async () => {
+			const testApp = express();
+			testApp.use(httpLogger);
+			testApp.use(express.json());
+			testApp.use(
+				'/v1/notifications',
+				createNotificationsRouter(
+					mock(() => Promise.resolve({ appPush: [], newsletter: [] })),
+					mockNotificationStore(),
+				),
+			);
+			const dispatchServer = await startTestServer(testApp);
+
+			try {
+				const response = await fetch(
+					`${dispatchServer.baseUrl}/v1/notifications`,
+					{
+						method: 'POST',
+						headers: {
+							'content-type': 'application/json',
+							origin: dispatchOrigin,
+							cookie: `${CSRF_COOKIE_NAME}=a-valid-token`,
+							[CSRF_HEADER_NAME]: 'a-valid-token',
+						},
+						body: JSON.stringify(validPushRequest()),
+					},
+				);
+
+				expect(response.status).toBe(202);
+			} finally {
+				await dispatchServer.close();
+			}
+		});
+
 		it('rejects a request from another origin', async () => {
 			const response = await fetch(`${baseUrl}/v1/notifications`, {
 				method: 'POST',

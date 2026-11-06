@@ -1,9 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { dispatchOrigin } from 'config';
 import express from 'express';
 import { httpLogger } from 'http-logger';
 import { UserPermissions } from 'models';
 import { BrazeApiError } from 'services';
 import { errorMiddleware } from '../../middleware/error-middleware';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '../../utils/auth/csrf';
 import {
 	installDatabaseMock,
 	mockNotificationStore,
@@ -99,6 +101,21 @@ describe('POST /v1/notification-tests', () => {
 			path: '/v1/notification-tests',
 			body: validTestRequest(),
 		});
+	});
+
+	it('accepts a same-origin request with a matching CSRF token', async () => {
+		const response = await fetch(`${baseUrl}/v1/notification-tests`, {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				origin: dispatchOrigin,
+				cookie: `${CSRF_COOKIE_NAME}=a-valid-token`,
+				[CSRF_HEADER_NAME]: 'a-valid-token',
+			},
+			body: JSON.stringify(validTestRequest()),
+		});
+
+		expect(response.status).toBe(202);
 	});
 
 	it('rejects a request from another origin', async () => {
