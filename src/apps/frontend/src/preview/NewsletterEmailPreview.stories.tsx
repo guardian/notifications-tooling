@@ -88,6 +88,70 @@ export const WithContentAndAudience: Story = {
 	},
 };
 
+export const UntrustedHtml: Story = {
+	args: {
+		...WithContentAndAudience.args,
+		formValues: {
+			audienceSegments: ['UK'],
+			subjectText: '<img src=x onerror=alert(1)>',
+			previewText: 'Editor preview text',
+			showPreview: true,
+		},
+		functions: {
+			requestEmailHtml: async (request) => {
+				const result = await mockRequestEmailHtmlWithoutDelay(request);
+				if (!result.success) {
+					return result;
+				}
+				return {
+					...result,
+					data: {
+						...result.data,
+						html: `<!DOCTYPE html><html><head>
+							<meta http-equiv="refresh" content="0;url=https://example.com">
+							<base href="https://example.com" target="_top">
+							<style>
+								.preview-security-fixture { color: rgb(12, 34, 56); }
+								@media screen and (min-width: 0px) {
+									.preview-security-fixture { font-size: 12px !important; }
+								}
+							</style>
+						</head><body>
+							<p class="preview-security-fixture">Email stylesheet</p>
+							<script>document.title = 'Compromised preview';</script>
+							<img src="data:image/png,invalid" onerror="document.title = 'Compromised preview'">
+							<svg onload="document.title = 'Compromised preview'"></svg>
+							<iframe srcdoc="<script>parent.document.title = 'Compromised preview'</script>"></iframe>
+							<form action="https://example.com"><button>Submit malicious form</button></form>
+							<a href="javascript:document.title = 'Compromised preview'">Unsafe link</a>
+							<a href="https://example.com" target="_top">External link</a>
+							<div style="display: block !important">${result.data.html}</div>
+						</body></html>`,
+					},
+				};
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const originalTitle = document.title;
+		await waitFor(async () => {
+			await expect(canvas.getByRole('heading', { level: 2 })).toHaveTextContent(
+				'<img src=x onerror=alert(1)>',
+			);
+			await expect(canvas.getByText('Editor preview text')).toBeInTheDocument();
+			await expect(canvas.getByText('Email stylesheet')).toHaveStyle({
+				color: 'rgb(12, 34, 56)',
+				fontSize: '12px',
+			});
+			await expect(canvas.queryByRole('link')).not.toBeInTheDocument();
+			await expect(canvas.queryByRole('button')).not.toBeInTheDocument();
+		});
+		await expect(canvas.getByText('Newsletter email preview')).toBeVisible();
+		await expect(document.title).toBe(originalTitle);
+	},
+};
+
 export const Loading: Story = {
 	args: {
 		notificationState: {
