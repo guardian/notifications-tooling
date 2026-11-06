@@ -98,6 +98,8 @@ jobs:
           mkdir -p dist/frontend
           cp -v src/apps/backend/dist/handler.js dist/
           cp -Rv src/apps/frontend/dist/. dist/frontend/
+          mkdir -p dist/certificates
+          cp -v src/packages/database/certificates/eu-west-1-bundle.pem dist/certificates/
           mkdir -p dist/node_modules
           cp -LR src/apps/backend/node_modules/swagger-ui-dist dist/node_modules/swagger-ui-dist
           cd dist

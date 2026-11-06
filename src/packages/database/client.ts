@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { getRuntimeConnectionString } from './runtime-connection-string';
@@ -9,16 +11,20 @@ export type Database = ReturnType<typeof drizzle<typeof schema>>;
 let poolPromise: Promise<Pool> | undefined;
 let dbPromise: Promise<Database> | undefined;
 
-const isRunningInLambda = !!process.env.LAMBDA_TASK_ROOT;
+const lambdaTaskRoot = process.env.LAMBDA_TASK_ROOT;
 
 const getPool = async (): Promise<Pool> => {
 	poolPromise ??= (async () => {
 		const connectionString = await getRuntimeConnectionString();
 		return new Pool({
 			connectionString,
-			ssl: isRunningInLambda
+			ssl: lambdaTaskRoot
 				? {
-						rejectUnauthorized: false,
+						ca: await readFile(
+							join(lambdaTaskRoot, 'certificates/eu-west-1-bundle.pem'),
+							'utf8',
+						),
+						rejectUnauthorized: true,
 					}
 				: false,
 		});
