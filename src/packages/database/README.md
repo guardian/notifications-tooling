@@ -10,6 +10,7 @@ configuration, and package-level database scripts.
 - Drizzle config: `src/packages/database/drizzle.config.ts`
 
 ## RDS CA bundle packaging
+
 We use the official AWS RDS CA bundle to verify the database server’s certificate and hostname.
 The official AWS RDS CA bundle for `eu-west-1` is stored in
 `certificates/eu-west-1-bundle.pem`.
