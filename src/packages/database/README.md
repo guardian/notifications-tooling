@@ -11,12 +11,15 @@ configuration, and package-level database scripts.
 
 ## RDS CA bundle packaging
 
+We use the official AWS RDS Certificate Authority(CA) bundle to verify the database server’s certificate and hostname.
 The official AWS RDS CA bundle for `eu-west-1` is stored in
 `certificates/eu-west-1-bundle.pem`.
 
 CI copies this file into `certificates/eu-west-1-bundle.pem` in the Lambda
 deployment ZIP, making it available at
 `/var/task/certificates/eu-west-1-bundle.pem`.
+
+The migration runner also uses the AWS RDS CA bundle to verify the database server’s certificate and hostname when connecting through the SSM tunnel.
 
 The official download is
 <https://truststore.pki.rds.amazonaws.com/eu-west-1/eu-west-1-bundle.pem>.
@@ -137,7 +140,8 @@ The remote command:
 1. Reads the database credentials from Secrets Manager.
 2. Resolves the stage's migration host from the CloudFormation stack.
 3. Opens an SSM port-forwarding session on the local port.
-4. Connects to PostgreSQL over SSL and confirms the database and user.
+4. Connects to PostgreSQL over TLS, verifies its certificate, and confirms the
+   database and user.
 5. Applies all pending Drizzle migrations.
 6. Closes the database connection and SSM session.
 
