@@ -9,6 +9,18 @@ configuration, and package-level database scripts.
 - Migrations: `src/packages/database/migrations`
 - Drizzle config: `src/packages/database/drizzle.config.ts`
 
+## RDS CA bundle packaging
+
+The official AWS RDS CA bundle for `eu-west-1` is stored in
+`certificates/eu-west-1-bundle.pem`.
+
+CI copies this file into `certificates/eu-west-1-bundle.pem` in the Lambda
+deployment ZIP, making it available at
+`/var/task/certificates/eu-west-1-bundle.pem`.
+
+The official download is
+<https://truststore.pki.rds.amazonaws.com/eu-west-1/eu-west-1-bundle.pem>.
+
 ## Environment
 
 Bun and local Docker load environment variables from `.env` in this package
