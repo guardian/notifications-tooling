@@ -37,7 +37,7 @@ const tunnelProcess = spawnCommand({
 	cwd: new URL('../../../', import.meta.url).pathname,
 });
 
-const pool = createRemoteDatabasePool(config, adminSecret);
+const pool = await createRemoteDatabasePool(config, adminSecret);
 
 try {
 	await verifyRemoteDatabaseConnection(config, pool);
