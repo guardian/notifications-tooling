@@ -35,6 +35,7 @@ import {
 	PostgresEngineVersion,
 	SubnetGroup,
 } from 'aws-cdk-lib/aws-rds';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 
 const PAN_DOMAIN_AUTH_SETTINGS_BUCKET = 'pan-domain-auth-settings';
@@ -268,7 +269,7 @@ export class DispatchStack extends GuStack {
 			},
 		};
 
-		new GuDatabaseInstance(this, `DispatchDatabase`, {
+		const database = new GuDatabaseInstance(this, `DispatchDatabase`, {
 			allocatedStorage: 20,
 			allowMajorVersionUpgrade: false,
 			app: `${app}-db`,
@@ -299,6 +300,24 @@ export class DispatchStack extends GuStack {
 				description: 'Subnet for the Dispatch database',
 			}),
 			vpc: accountVpc,
+		});
+
+		new Secret(this, 'DispatchRuntimeDatabaseSecret', {
+			secretName: `/${stage}/${props.stack}/dispatch/app-db`,
+			description:
+				'Credentials for the restricted Dispatch runtime database user.',
+			generateSecretString: {
+				secretStringTemplate: JSON.stringify({
+					host: database.dbInstanceEndpointAddress,
+					port: DB_PORT,
+					dbname: 'dispatchdb',
+					username: 'dispatch_runtime',
+				}),
+				generateStringKey: 'password',
+				passwordLength: 32,
+				excludePunctuation: true,
+			},
+			removalPolicy: RemovalPolicy.RETAIN,
 		});
 
 		if (!isProd) {
