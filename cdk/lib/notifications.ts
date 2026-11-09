@@ -241,16 +241,6 @@ export class DispatchStack extends GuStack {
 			}),
 		);
 
-		guApiLambda.addToRolePolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['secretsmanager:GetSecretValue'],
-				resources: [
-					`arn:aws:secretsmanager:${this.region}:${this.account}:secret:/${stage}/notifications/dispatch/db*`,
-				],
-			}),
-		);
-
 		const dbConfig = {
 			TEST: {
 				instanceType: 'db.t4g.micro',
@@ -302,23 +292,30 @@ export class DispatchStack extends GuStack {
 			vpc: accountVpc,
 		});
 
-		new Secret(this, 'DispatchRuntimeDatabaseSecret', {
-			secretName: `/${stage}/${props.stack}/dispatch/app-db`,
-			description:
-				'Credentials for the restricted Dispatch runtime database user.',
-			generateSecretString: {
-				secretStringTemplate: JSON.stringify({
-					host: database.dbInstanceEndpointAddress,
-					port: DB_PORT,
-					dbname: 'dispatchdb',
-					username: 'dispatch_runtime',
-				}),
-				generateStringKey: 'password',
-				passwordLength: 32,
-				excludePunctuation: true,
+		const appDatabaseSecret = new Secret(
+			this,
+			'DispatchRuntimeDatabaseSecret',
+			{
+				secretName: `/${stage}/${props.stack}/dispatch/app-db`,
+				description:
+					'Credentials for the restricted Dispatch runtime database user.',
+				generateSecretString: {
+					secretStringTemplate: JSON.stringify({
+						host: database.dbInstanceEndpointAddress,
+						port: DB_PORT,
+						dbname: 'dispatchdb',
+						username: 'dispatch_runtime',
+					}),
+					generateStringKey: 'password',
+					passwordLength: 32,
+					excludePunctuation: true,
+				},
+				removalPolicy: RemovalPolicy.RETAIN,
 			},
-			removalPolicy: RemovalPolicy.RETAIN,
-		});
+		);
+
+		// The Lambda only reads the restricted app user's secret, never the admin `db` secret.
+		appDatabaseSecret.grantRead(guApiLambda);
 
 		if (!isProd) {
 			new GuDeveloperPolicy(this, 'DispatchLocalPolicy', {
