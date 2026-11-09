@@ -679,6 +679,53 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       },
       "Type": "AWS::EC2::SecurityGroup",
     },
+    "DispatchRuntimeDatabaseSecretCA5EA1F0": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "Description": "Credentials for the restricted Dispatch runtime database user.",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "password",
+          "PasswordLength": 32,
+          "SecretStringTemplate": {
+            "Fn::Join": [
+              "",
+              [
+                "{"host":"",
+                {
+                  "Fn::GetAtt": [
+                    "DispatchDatabaseDispatchdbCB51798D",
+                    "Endpoint.Address",
+                  ],
+                },
+                "","port":5432,"dbname":"dispatchdb","username":"dispatch_runtime"}",
+              ],
+            ],
+          },
+        },
+        "Name": "/TEST/notifications/dispatch/app-db",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "65.0.0",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/notifications-tooling",
+          },
+          {
+            "Key": "Stack",
+            "Value": "notifications",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::SecretsManager::Secret",
+      "UpdateReplacePolicy": "Retain",
+    },
     "dispatchlambdaEBD865CC": {
       "DependsOn": [
         "dispatchlambdaServiceRoleDefaultPolicy2917D760",
