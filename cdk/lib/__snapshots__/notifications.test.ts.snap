@@ -956,19 +956,13 @@ exports[`The Notifications stack matches the snapshot 1`] = `
               ],
             },
             {
-              "Action": "secretsmanager:GetSecretValue",
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:eu-west-1:",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:/TEST/notifications/dispatch/db*",
-                  ],
-                ],
+                "Ref": "DispatchRuntimeDatabaseSecretCA5EA1F0",
               },
             },
           ],

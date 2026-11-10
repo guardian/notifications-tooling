@@ -42,6 +42,36 @@ describe('The Notifications stack', () => {
 		},
 	);
 
+	it('lets the Lambda read only the app-db secret', () => {
+		const stack = new DispatchStack(
+			new App(),
+			'Dispatch',
+			{ stack: 'notifications', stage: 'CODE', env: { region: 'eu-west-1' } },
+			'dispatch',
+		);
+		const template = Template.fromStack(stack);
+		const [appSecretLogicalId] = Object.keys(
+			template.findResources('AWS::SecretsManager::Secret', {
+				Properties: { Name: '/CODE/notifications/dispatch/app-db' },
+			}),
+		);
+
+		template.hasResourceProperties('AWS::IAM::Policy', {
+			PolicyDocument: {
+				Statement: Match.arrayWith([
+					Match.objectLike({
+						Action: [
+							'secretsmanager:GetSecretValue',
+							'secretsmanager:DescribeSecret',
+						],
+						Resource: { Ref: appSecretLogicalId },
+					}),
+				]),
+			},
+		});
+		expect(JSON.stringify(template.toJSON())).not.toContain('dispatch/db*');
+	});
+
 	it('matches the snapshot', () => {
 		const app = new App();
 		const stack = new DispatchStack(
