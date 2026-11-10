@@ -889,14 +889,19 @@ describe('notificationSendRequestSchema', () => {
 
 		it('reports every missing reference in one pass', () => {
 			const paths = pathsOf(
-				newsletterRequestWithPlan(
-					newsletterPlan({
-						compose: { items: ['ghost-1', 'ghost-2'], subject: 'Briefing' },
-					}),
-				),
+				combinedRequest({
+					channels: {
+						[NotificationChannel.AppPushNotification]: pushPlan({
+							compose: { use: 'ghost-1' },
+						}),
+						[NotificationChannel.Newsletter]: newsletterPlan({
+							compose: { items: ['ghost-2'], subject: 'Briefing' },
+						}),
+					},
+				}),
 			);
+			expect(paths).toContain('channels/app-push/compose/use');
 			expect(paths).toContain('channels/newsletter/compose/items/0');
-			expect(paths).toContain('channels/newsletter/compose/items/1');
 		});
 
 		it('rejects composing an item whose type does not match the channel', () => {

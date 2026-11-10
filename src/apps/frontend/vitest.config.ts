@@ -4,6 +4,14 @@ import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+	optimizeDeps: {
+		rolldownOptions: {
+			transform: {
+				// Keep React's development JSX runtime when Vitest prebundles dependencies.
+				define: { 'process.env.NODE_ENV': JSON.stringify('test') },
+			},
+		},
+	},
 	test: {
 		projects: [
 			{

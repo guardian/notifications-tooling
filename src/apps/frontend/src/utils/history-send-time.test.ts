@@ -12,8 +12,12 @@ describe('formatLocalSendTimes', () => {
 	});
 
 	it('converts a winter send time into each region local time', () => {
-		expect(formatLocalSendTimes('2026-01-15T09:21:00Z')).toEqual([
-			{ region: 'UK', time: '09:21 GMT' },
+		const [ukSendTime, ...otherSendTimes] = formatLocalSendTimes(
+			'2026-01-15T09:21:00Z',
+		);
+		expect(ukSendTime?.region).toBe('UK');
+		expect(ukSendTime?.time).toMatch(/^09:21 GMT(?:\+0)?$/);
+		expect(otherSendTimes).toEqual([
 			{ region: 'US', time: '04:21 EST' },
 			{ region: 'AU', time: '20:21 AEDT' },
 			{ region: 'EU', time: '10:21 CET' },

@@ -18,7 +18,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "GuDatabaseInstance",
       "GuDeveloperPolicy",
     ],
-    "gu:cdk:version": "65.0.0",
+    "gu:cdk:version": "TEST",
   },
   "Outputs": {
     "MigrationHostInstanceId": {
@@ -88,7 +88,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "Tags": {
           "Stack": "notifications",
           "Stage": "TEST",
-          "gu:cdk:version": "65.0.0",
+          "gu:cdk:version": "TEST",
           "gu:repo": "guardian/notifications-tooling",
         },
         "Type": "String",
@@ -125,7 +125,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -168,7 +168,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -240,7 +240,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -323,7 +323,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -394,7 +394,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -431,7 +431,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -560,7 +560,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -623,7 +623,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -658,7 +658,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -707,7 +707,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -770,7 +770,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -849,7 +849,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -1144,7 +1144,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -1163,7 +1163,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "dispatchlambdadispatchapiDeployment664A949C5291a956922b7b78095c0b5786f13542": {
+    "dispatchlambdadispatchapiDeployment664A949C256523aa33f7e427db80b82518fed8b7": {
       "DependsOn": [
         "dispatchlambdadispatchapiproxyANYE34E6F78",
         "dispatchlambdadispatchapiproxy929EBBAA",
@@ -1186,7 +1186,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "dispatchlambdadispatchapiDeployment664A949C5291a956922b7b78095c0b5786f13542",
+          "Ref": "dispatchlambdadispatchapiDeployment664A949C256523aa33f7e427db80b82518fed8b7",
         },
         "MethodSettings": [
           {
@@ -1209,7 +1209,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -1241,7 +1241,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
@@ -1277,7 +1277,7 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           },
           {
             "Key": "gu:cdk:version",
-            "Value": "65.0.0",
+            "Value": "TEST",
           },
           {
             "Key": "gu:repo",
