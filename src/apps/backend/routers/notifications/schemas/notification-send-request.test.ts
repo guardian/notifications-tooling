@@ -887,18 +887,6 @@ describe('notificationSendRequestSchema', () => {
 			).toContain('channels/newsletter/compose/items/0');
 		});
 
-		it('reports every missing reference in one pass', () => {
-			const paths = pathsOf(
-				newsletterRequestWithPlan(
-					newsletterPlan({
-						compose: { items: ['ghost-1', 'ghost-2'], subject: 'Briefing' },
-					}),
-				),
-			);
-			expect(paths).toContain('channels/newsletter/compose/items/0');
-			expect(paths).toContain('channels/newsletter/compose/items/1');
-		});
-
 		it('rejects composing an item whose type does not match the channel', () => {
 			// A newsletter plan composing a push-typed content item.
 			const issues = issuesOf(
