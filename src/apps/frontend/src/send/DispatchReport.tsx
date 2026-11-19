@@ -11,9 +11,10 @@ import { Grid, Item } from '@guardian/stand/Grid';
 import { Icon } from '@guardian/stand/Icon';
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
-import type { ReactNode } from 'react';
+import { type ReactNode, useContext } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { PreviousSendContext } from '../previous-send/PreviousSendContext';
 import {
 	articleUrlSearchParam,
 	createCopiedNotificationState,
@@ -27,8 +28,7 @@ import {
 } from '../segment/useAudienceEditions';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import { layoutMainTheme } from '../themes';
-import type { ChannelOption } from '../types';
-import type { DeliveryOption } from '../types';
+import type { ChannelOption, DeliveryOption } from '../types';
 import { scheduleIcon } from '../ui/flag-icons';
 import {
 	capitalise,
@@ -406,9 +406,10 @@ const DispatchReportTab = ({
 };
 
 export const NewsletterEmailDispatchReportTab = () => {
-	const notificationId = useWatch<NewsletterEmailFormValues, 'notificationId'>({
-		name: 'notificationId',
-	});
+	const { previousSend } = useContext(PreviousSendContext);
+	// const notificationId = useWatch<NewsletterEmailFormValues, 'notificationId'>({
+	// 	name: 'notificationId',
+	// });
 	const subjectText = useWatch<NewsletterEmailFormValues, 'subjectText'>({
 		name: 'subjectText',
 		defaultValue: defaultNewsletterEmailFormValues.subjectText,
@@ -416,7 +417,7 @@ export const NewsletterEmailDispatchReportTab = () => {
 	return (
 		<DispatchReportTab
 			channel="newsletter"
-			notificationId={notificationId}
+			notificationId={previousSend?.notificationId}
 			contentTitle={subjectText}
 		>
 			<NewsletterEmailDispatchDetails />
@@ -425,9 +426,10 @@ export const NewsletterEmailDispatchReportTab = () => {
 };
 
 export const AppAlertDispatchReportTab = () => {
-	const notificationId = useWatch<AppAlertFormValues, 'notificationId'>({
-		name: 'notificationId',
-	});
+	// const notificationId = useWatch<AppAlertFormValues, 'notificationId'>({
+	// 	name: 'notificationId',
+	// });
+	const { previousSend } = useContext(PreviousSendContext);
 	const headline = useWatch<AppAlertFormValues, 'headline'>({
 		name: 'headline',
 		defaultValue: defaultAppAlertFormValues.headline,
@@ -435,7 +437,7 @@ export const AppAlertDispatchReportTab = () => {
 	return (
 		<DispatchReportTab
 			channel="app-push"
-			notificationId={notificationId}
+			notificationId={previousSend?.notificationId}
 			contentTitle={headline}
 		>
 			<AppAlertDispatchDetails />

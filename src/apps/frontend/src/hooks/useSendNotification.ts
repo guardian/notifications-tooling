@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
+import { PreviousSendContext } from '../previous-send/PreviousSendContext';
 import { notificationRoutes, withArticleUrl } from '../routes';
 import type { SendNotificationRequest } from '../schemas';
 import { TelemetryContext } from '../telemetry/TelemetryContext';
@@ -35,6 +36,7 @@ export const useSendNotification = () => {
 	const { channel, sendNotification, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
+	const { setPreviousSend } = useContext(PreviousSendContext);
 	const { setValue } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
@@ -62,7 +64,13 @@ export const useSendNotification = () => {
 				});
 				return;
 			}
+			// TO DO - store notification data in state instead of the form
+			// **not** the ComposerState as that is only around the form, not the whole app
+			// change `AppAlertDispatchReportTab` and `NewsletterEmailDispatchReportTab` to read it from there
 			setValue('notificationId', result.data.id);
+			setPreviousSend({
+				notificationId: result.data.id,
+			});
 			telemetry.sendEvent(TelemetryEvent.SuccesfulNotificationEvent, {
 				idempotencyKey,
 				channel,
