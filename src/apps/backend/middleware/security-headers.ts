@@ -22,7 +22,7 @@ const buildContentSecurityPolicy = (nonce: string): string =>
 		`img-src 'self' data: blob: https:`,
 		`font-src 'self' data: https:`,
 		`connect-src 'self' https:`,
-		`frame-src 'self'`,
+		`frame-src 'self https://media.test.dev-gutools.co.uk/ https://media.gutools.co.uk/`, // TO DO - read the Grid URI from config?
 	].join('; ');
 
 /**
