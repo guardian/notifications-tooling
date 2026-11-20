@@ -18,6 +18,7 @@ import { PreviousSendContext } from '../previous-send/PreviousSendContext';
 import {
 	articleUrlSearchParam,
 	createCopiedNotificationState,
+	getAppRoutes,
 	notificationRoutes,
 	withArticleUrl,
 } from '../routes';
@@ -348,6 +349,8 @@ export const DispatchReport = ({
 	);
 };
 
+const historyRoute = getAppRoutes().history
+
 const DispatchReportTab = ({
 	channel,
 	notificationId,
@@ -364,7 +367,7 @@ const DispatchReportTab = ({
 	const [searchParams] = useSearchParams();
 
 	if (!notificationId) {
-		return <Navigate to={notificationRoutes[channel].create} replace />;
+		return <Navigate to={historyRoute} replace />;
 	}
 
 	return (
