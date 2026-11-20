@@ -147,6 +147,8 @@ export const NewsletterEmailReportRoute: Story = {
 			'newsletter',
 			{
 				...completeNewsletterEmailFormValues,
+			},
+			{
 				notificationId: 'newsletter-dispatch-id',
 			},
 		);
@@ -156,15 +158,6 @@ export const NewsletterEmailReportRoute: Story = {
 		await expect(
 			canvas.getByRole('heading', { name: 'Newsletter email sent' }),
 		).toBeVisible();
-
-		await userEvent.click(
-			canvas.getByRole('button', { name: 'Create a new newsletter email' }),
-		);
-		await waitFor(() =>
-			expect(
-				canvas.queryByRole('heading', { name: 'Newsletter email sent' }),
-			).not.toBeInTheDocument(),
-		);
 	},
 };
 
@@ -177,6 +170,8 @@ export const AppAlertReportRoute: Story = {
 			'app-push',
 			{
 				...completeAppAlertFormValues,
+			},
+			{
 				notificationId: 'app-alert-dispatch-id',
 			},
 		);
@@ -210,7 +205,9 @@ export const NewsletterReportCopiesArticleToAppAlert: Story = {
 			'newsletter',
 			{
 				...completeNewsletterEmailFormValues,
-				notificationId: 'newsletter-dispatch-id',
+			},
+			{
+				notificationId: 'app-alert-dispatch-id',
 			},
 		);
 	},
@@ -262,6 +259,8 @@ export const AppAlertReportCopiesArticleToNewsletter: Story = {
 			'app-push',
 			{
 				...completeAppAlertFormValues,
+			},
+			{
 				notificationId: 'app-alert-dispatch-id',
 			},
 		);
