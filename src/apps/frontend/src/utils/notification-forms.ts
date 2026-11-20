@@ -13,7 +13,6 @@ import {
  */
 export const newsletterEmailFormSchema = z
 	.object({
-		notificationId: z.string().optional(),
 		kicker: z
 			.union([kickerSchema, z.literal('')])
 			.refine((kicker): boolean => kicker !== '', 'Please select a kicker'),
@@ -41,7 +40,6 @@ export const newsletterEmailFormSchema = z
 	});
 
 export const appAlertFormSchema = z.object({
-	notificationId: z.string().optional(),
 	// The selectable alert types are the topic types the backend exposes via
 	// `GET /v1/channels/audiences`, so this cannot be a fixed enum. The select
 	// constrains the value to that list, and the broker rejects unknown ids.

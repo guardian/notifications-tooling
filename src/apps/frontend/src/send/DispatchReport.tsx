@@ -359,7 +359,7 @@ const DispatchReportTab = ({
 	contentTitle: string;
 	children: ReactNode;
 }) => {
-	const { reset, setValue } = useFormContext<{ notificationId?: string }>();
+	const { reset } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 
@@ -382,7 +382,6 @@ const DispatchReportTab = ({
 						channel={channel}
 						onCreateNew={() => {
 							reset();
-							setValue('notificationId', undefined);
 							void navigate(notificationRoutes[channel].create);
 						}}
 						onCopyToAnotherChannel={() => {
@@ -407,9 +406,6 @@ const DispatchReportTab = ({
 
 export const NewsletterEmailDispatchReportTab = () => {
 	const { previousSend } = useContext(PreviousSendContext);
-	// const notificationId = useWatch<NewsletterEmailFormValues, 'notificationId'>({
-	// 	name: 'notificationId',
-	// });
 	const subjectText = useWatch<NewsletterEmailFormValues, 'subjectText'>({
 		name: 'subjectText',
 		defaultValue: defaultNewsletterEmailFormValues.subjectText,
@@ -426,9 +422,6 @@ export const NewsletterEmailDispatchReportTab = () => {
 };
 
 export const AppAlertDispatchReportTab = () => {
-	// const notificationId = useWatch<AppAlertFormValues, 'notificationId'>({
-	// 	name: 'notificationId',
-	// });
 	const { previousSend } = useContext(PreviousSendContext);
 	const headline = useWatch<AppAlertFormValues, 'headline'>({
 		name: 'headline',

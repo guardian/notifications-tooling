@@ -1,7 +1,7 @@
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import { createContext, useState } from 'react';
 
-type PreviousSendContextData = {
+export type PreviousSendContextData = {
 	notificationId?: string;
 };
 type PreviousSendContextProps = {
@@ -15,7 +15,7 @@ export const PreviousSendContext = createContext<PreviousSendContextProps>({
 	setPreviousSend: () => {},
 });
 
-export const PreviousSendServiceProvider = ({
+export const PreviousSendProvider = ({
 	children,
 }: {
 	children: ReactNode;

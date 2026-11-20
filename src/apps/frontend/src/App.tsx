@@ -15,7 +15,7 @@ import { ConfigContext } from './config/ConfigContext';
 import { getAppConfig } from './config/get-config';
 import { HistoryPage } from './history/HistoryPage';
 import { NotFoundTab } from './layout/NotFoundTab';
-import { PreviousSendServiceProvider } from './previous-send/PreviousSendContext';
+import { PreviousSendProvider } from './previous-send/PreviousSendContext';
 import { getAppRoutes } from './routes';
 import {
 	AppAlertDispatchReportTab,
@@ -30,7 +30,7 @@ export function App() {
 	return (
 		<ConfigContext.Provider value={config}>
 			<TelemetryServiceProvider>
-				<PreviousSendServiceProvider>
+				<PreviousSendProvider>
 					<Routes>
 						<Route element={<AccessControlledLayout />}>
 							<Route index element={<DispatchLandingPage />} />
@@ -63,7 +63,7 @@ export function App() {
 							<Route path="*" element={<NotFoundTab />} />
 						</Route>
 					</Routes>
-				</PreviousSendServiceProvider>
+				</PreviousSendProvider>
 			</TelemetryServiceProvider>
 		</ConfigContext.Provider>
 	);

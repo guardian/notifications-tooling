@@ -1,6 +1,5 @@
 import { type QueryClient, useQueryClient } from '@tanstack/react-query';
 import { useContext } from 'react';
-import { useFormContext } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
 import { PreviousSendContext } from '../previous-send/PreviousSendContext';
@@ -37,7 +36,6 @@ export const useSendNotification = () => {
 		NotificationFormContext,
 	);
 	const { setPreviousSend } = useContext(PreviousSendContext);
-	const { setValue } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const telemetry = useContext(TelemetryContext);
@@ -64,10 +62,6 @@ export const useSendNotification = () => {
 				});
 				return;
 			}
-			// TO DO - store notification data in state instead of the form
-			// **not** the ComposerState as that is only around the form, not the whole app
-			// change `AppAlertDispatchReportTab` and `NewsletterEmailDispatchReportTab` to read it from there
-			setValue('notificationId', result.data.id);
 			setPreviousSend({
 				notificationId: result.data.id,
 			});

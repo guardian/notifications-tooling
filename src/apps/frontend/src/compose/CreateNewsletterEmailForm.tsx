@@ -64,7 +64,6 @@ export const CreateNewsletterEmailForm = ({
 		telemetry.sendEvent(TelemetryEvent.FormSubmitPrepareSend, {
 			idempotencyKey,
 			requestedUrl: composerState.requestedUrl ?? '',
-			notificationId: values.notificationId ?? '',
 			channel: 'newsletter',
 		});
 
