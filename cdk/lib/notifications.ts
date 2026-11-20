@@ -35,6 +35,7 @@ import {
 	PostgresEngineVersion,
 	SubnetGroup,
 } from 'aws-cdk-lib/aws-rds';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 
 const PAN_DOMAIN_AUTH_SETTINGS_BUCKET = 'pan-domain-auth-settings';
@@ -240,16 +241,6 @@ export class DispatchStack extends GuStack {
 			}),
 		);
 
-		guApiLambda.addToRolePolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['secretsmanager:GetSecretValue'],
-				resources: [
-					`arn:aws:secretsmanager:${this.region}:${this.account}:secret:/${stage}/notifications/dispatch/db*`,
-				],
-			}),
-		);
-
 		const dbConfig = {
 			TEST: {
 				instanceType: 'db.t4g.micro',
@@ -268,7 +259,7 @@ export class DispatchStack extends GuStack {
 			},
 		};
 
-		new GuDatabaseInstance(this, `DispatchDatabase`, {
+		const database = new GuDatabaseInstance(this, `DispatchDatabase`, {
 			allocatedStorage: 20,
 			allowMajorVersionUpgrade: false,
 			app: `${app}-db`,
@@ -300,6 +291,31 @@ export class DispatchStack extends GuStack {
 			}),
 			vpc: accountVpc,
 		});
+
+		const appDatabaseSecret = new Secret(
+			this,
+			'DispatchRuntimeDatabaseSecret',
+			{
+				secretName: `/${stage}/${props.stack}/dispatch/app-db`,
+				description:
+					'Credentials for the restricted Dispatch runtime database user.',
+				generateSecretString: {
+					secretStringTemplate: JSON.stringify({
+						host: database.dbInstanceEndpointAddress,
+						port: DB_PORT,
+						dbname: 'dispatchdb',
+						username: 'dispatch_runtime',
+					}),
+					generateStringKey: 'password',
+					passwordLength: 32,
+					excludePunctuation: true,
+				},
+				removalPolicy: RemovalPolicy.RETAIN,
+			},
+		);
+
+		// The Lambda only reads the restricted app user's secret, never the admin `db` secret.
+		appDatabaseSecret.grantRead(guApiLambda);
 
 		if (!isProd) {
 			new GuDeveloperPolicy(this, 'DispatchLocalPolicy', {

@@ -38,6 +38,7 @@ import { resolveArticleRequestSchema } from './resolve-article-request';
 import { resolveArticleResponseSchema } from './resolve-article-response';
 import { resolvedArticleSchema } from './resolved-article';
 import { unauthenticatedSchema } from './unauthenticated';
+import { unsupportedMediaTypeSchema } from './unsupported-media-type';
 import { userResponseSchema, userSchema } from './user';
 
 /** Reusable schema objects referenced via `#/components/schemas/*`. */
@@ -77,6 +78,7 @@ export const schemas = {
 	UserResponse: userResponseSchema,
 	Unauthenticated: unauthenticatedSchema,
 	InsufficientPermissions: insufficientPermissionsSchema,
+	UnsupportedMediaType: unsupportedMediaTypeSchema,
 	EmailPreviewErrorSchema: emailPreviewErrorSchema,
 	EmailPreviewRequest: emailPreviewRequestJsonSchema,
 	EmailPreviewResponse: emailPreviewResponseJsonSchema,

@@ -15,7 +15,7 @@ export const getEnvConnectionString = (): string => {
 
 const getLambdaDbConfig = async () => {
 	try {
-		return await getSecretValue('db', parseManagedDatabaseSecret);
+		return await getSecretValue('app_db', parseManagedDatabaseSecret);
 	} catch (error) {
 		logger.error(
 			{ error },

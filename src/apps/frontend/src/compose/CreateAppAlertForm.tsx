@@ -3,6 +3,12 @@ import { useFormContext } from 'react-hook-form';
 import { useChannelConstraints } from '../hooks/useChannelConstraints';
 import { EditionsFormField } from '../segment/EditionsFormField';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
+import {
+	NO_ARTICLE_ERROR,
+	serialiseFormValidationErrors,
+} from '../telemetry/errorFormatting';
+import { TelemetryContext } from '../telemetry/TelemetryContext';
+import { TelemetryEvent } from '../telemetry/telemetryService';
 import { getArticleThumbnail } from '../utils/article-thumbnail';
 import { buildAppAlertRequest } from '../utils/build-request-payloads';
 import { parseArticleUrlInputToArticleId } from '../utils/form-validation';
@@ -33,6 +39,7 @@ export const CreateAppAlertForm = ({
 	const { composerState, updateComposerState } = useContext(
 		NotificationFormContext,
 	);
+	const telemetry = useContext(TelemetryContext);
 	const copiedHeadline = useRef(
 		initialHeadline && initialArticleUrl
 			? {
@@ -49,6 +56,15 @@ export const CreateAppAlertForm = ({
 		if (!composerState.article) {
 			return;
 		}
+
+		const idempotencyKey = crypto.randomUUID();
+		telemetry.sendEvent(TelemetryEvent.FormSubmitPrepareSend, {
+			idempotencyKey,
+			requestedUrl: composerState.requestedUrl ?? '',
+			notificationId: values.notificationId ?? '',
+			channel: 'app-push',
+		});
+
 		updateComposerState({
 			type: 'prepare-send',
 			request: buildAppAlertRequest({
@@ -59,7 +75,7 @@ export const CreateAppAlertForm = ({
 				article: composerState.article,
 				requestedUrl: composerState.requestedUrl,
 				requestedBlock: composerState.requestedBlock,
-				idempotencyKey: crypto.randomUUID(),
+				idempotencyKey,
 			}),
 		});
 	};
@@ -68,12 +84,17 @@ export const CreateAppAlertForm = ({
 		void handleSubmit(
 			(values) => {
 				if (!composerState.article) {
+					telemetry.sendEvent(TelemetryEvent.FormSubmitError, NO_ARTICLE_ERROR);
 					jumpToFormSection('article-section');
 					return;
 				}
 				prepareSend(values);
 			},
 			(errors) => {
+				telemetry.sendEvent(
+					TelemetryEvent.FormSubmitError,
+					serialiseFormValidationErrors(errors, !composerState.article),
+				);
 				if (!composerState.article) {
 					jumpToFormSection('article-section');
 				} else if (errors.alertType || errors.editions) {

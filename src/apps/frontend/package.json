@@ -16,16 +16,18 @@
 	},
 	"dependencies": {
 		"@emotion/react": "11.14.0",
-		"@guardian/stand": "0.0.0-canary-20261030120059",
+		"@guardian/stand": "0.0.0-canary-20261120120353",
+		"@guardian/user-telemetry-client": "1.2.3",
 		"@hookform/resolvers": "5.9.1",
-		"models": "workspace:*",
 		"@tanstack/react-query": "5.103.2",
+		"dompurify": "3.4.17",
+		"models": "workspace:*",
 		"react": "19.3.0",
 		"react-aria-components": "1.19.0",
 		"react-dom": "19.3.0",
 		"react-hook-form": "7.88.0",
 		"react-router-dom": "7.18.4",
-		"zod": "4.6.5"
+		"zod": "4.6.7"
 	},
 	"devDependencies": {
 		"@happy-dom/global-registrator": "20.14.5",

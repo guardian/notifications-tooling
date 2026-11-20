@@ -3,6 +3,9 @@ import validate from 'express-zod-safe';
 import { UserPermissions } from 'models';
 import { authMiddleware } from '../../middleware/auth-middleware';
 import { requirePermissions } from '../../middleware/permissions-middleware';
+import { requireJsonBody } from '../../middleware/require-json-body';
+import { verifyCsrfToken } from '../../middleware/verify-csrf';
+import { verifyOrigin } from '../../middleware/verify-origin';
 import {
 	dispatchNotificationTest,
 	type TestDispatchOutcomes,
@@ -36,6 +39,9 @@ export const createNotificationTestsRouter = (
 			UserPermissions.DispatchAccess,
 			UserPermissions.SendNotification,
 		]),
+		verifyOrigin,
+		verifyCsrfToken,
+		requireJsonBody,
 		validate({
 			body: notificationTestSendRequestSchema,
 			handler: handleValidationErrors,

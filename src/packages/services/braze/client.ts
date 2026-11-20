@@ -98,18 +98,19 @@ const brazeUserTrackResponseSchema = z.object({
 
 // see https://www.braze.com/docs/api/endpoints/export/campaigns/get_campaign_details#request-parameters
 // this is not the full set of properties returned, just the ones likely to be relevant
+// the docs describe some fields as "optional", but in some cases, the value will be `null`
 const brazeCampaignDetailsSchema = z.object({
 	name: z.string(),
-	created_at: z.string().optional(),
-	updated_at: z.string().optional(),
-	description: z.string().optional(),
+	created_at: z.string().optional().nullable(),
+	updated_at: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
 	archived: z.boolean(),
 	enabled: z.boolean(),
 	draft: z.boolean(),
 	schedule_type: z.string(),
-	channels: z.string().array().optional(),
-	first_sent: z.string().optional(),
-	last_sent: z.string().optional(),
+	channels: z.string().array().optional().nullable(),
+	first_sent: z.string().optional().nullable(),
+	last_sent: z.string().optional().nullable(),
 });
 export type BrazeCampaignDetails = z.infer<typeof brazeCampaignDetailsSchema>;
 

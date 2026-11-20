@@ -9,6 +9,21 @@ configuration, and package-level database scripts.
 - Migrations: `src/packages/database/migrations`
 - Drizzle config: `src/packages/database/drizzle.config.ts`
 
+## RDS CA bundle packaging
+
+We use the official AWS RDS Certificate Authority(CA) bundle to verify the database server’s certificate and hostname.
+The official AWS RDS CA bundle for `eu-west-1` is stored in
+`certificates/eu-west-1-bundle.pem`.
+
+CI copies this file into `certificates/eu-west-1-bundle.pem` in the Lambda
+deployment ZIP, making it available at
+`/var/task/certificates/eu-west-1-bundle.pem`.
+
+The migration runner also uses the AWS RDS CA bundle to verify the database server’s certificate and hostname when connecting through the SSM tunnel.
+
+The official download is
+<https://truststore.pki.rds.amazonaws.com/eu-west-1/eu-west-1-bundle.pem>.
+
 ## Environment
 
 Bun and local Docker load environment variables from `.env` in this package
@@ -23,9 +38,10 @@ If this file does not exist, the setup script will try to create it by copying
 
 Runtime and tooling load database configuration differently:
 
-- The application runtime uses `runtime-db-config.ts`. In Lambda it fetches
-  managed database credentials from Secrets Manager; outside Lambda it falls
-  back to the local `DB_*` environment variables.
+- The application runtime uses `runtime-connection-string.ts`. In Lambda it
+  fetches the restricted app user's credentials from the
+  `/[stage]/notifications/dispatch/app-db` secret in Secrets Manager; outside
+  Lambda it falls back to the local `DB_*` environment variables.
 - Drizzle CLI tooling uses `drizzle.config.ts`, which always reads the local
   `DB_*` environment variables synchronously. This keeps migration commands
   compatible with Drizzle's config loader in local development and CI.
@@ -125,7 +141,8 @@ The remote command:
 1. Reads the database credentials from Secrets Manager.
 2. Resolves the stage's migration host from the CloudFormation stack.
 3. Opens an SSM port-forwarding session on the local port.
-4. Connects to PostgreSQL over SSL and confirms the database and user.
+4. Connects to PostgreSQL over TLS, verifies its certificate, and confirms the
+   database and user.
 5. Applies all pending Drizzle migrations.
 6. Closes the database connection and SSM session.
 
@@ -196,6 +213,24 @@ bun run db:migration:tunnel --stage CODE
 
 5. Keep the tunnel command running while using DBeaver. Stop it with
    <kbd>Ctrl</kbd>+<kbd>C</kbd> when finished.
+
+### Create the app database user
+
+The Lambda connects as a restricted user (`dispatch_runtime`) that can only
+`SELECT`, `INSERT` and `UPDATE` the application tables. Its credentials live in
+the `/[stage]/notifications/dispatch/app-db` secret, created by CDK. The admin
+`/[stage]/notifications/dispatch/db` secret is only used for migrations and
+tooling.
+
+Create the user once per stage, after the CDK has created the secret:
+
+```bash
+bun run db:app-user:create --stage CODE
+# or: bun run db:app-user:create --stage PROD
+```
+
+The script fails without changing anything if the user already exists. New
+tables need their own grants for `dispatch_runtime`.
 
 ### Reset local database
 

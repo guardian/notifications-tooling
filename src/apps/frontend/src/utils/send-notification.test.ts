@@ -7,6 +7,7 @@ import {
 	it,
 	mock,
 } from 'bun:test';
+import '../../happydom-setup';
 import type {
 	SendNotificationRequest,
 	SendNotificationResponse,

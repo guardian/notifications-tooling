@@ -85,13 +85,16 @@ export const terminateSession = (
 	runAws(['ssm', 'terminate-session', '--session-id', sessionId], config);
 };
 
-export const getDatabaseSecretString = (config: RemoteMigrationConfig) =>
+export const getDatabaseSecretString = (
+	config: RemoteMigrationConfig,
+	secretName: 'db' | 'app-db' = 'db',
+) =>
 	runAws(
 		[
 			'secretsmanager',
 			'get-secret-value',
 			'--secret-id',
-			`/${config.stage}/notifications/dispatch/db`,
+			`/${config.stage}/notifications/dispatch/${secretName}`,
 			'--query',
 			'SecretString',
 			'--output',

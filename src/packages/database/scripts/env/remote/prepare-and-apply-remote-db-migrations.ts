@@ -39,7 +39,7 @@ let pool;
 
 try {
 	console.log('Creating database connection pool...');
-	pool = createRemoteDatabasePool(config, secret);
+	pool = await createRemoteDatabasePool(config, secret);
 
 	console.log('Checking remote database connectivity...');
 	await verifyRemoteDatabaseConnection(config, pool);

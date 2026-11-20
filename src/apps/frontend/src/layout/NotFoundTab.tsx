@@ -3,8 +3,11 @@ import { Layout } from '@guardian/stand/Layout';
 import { LinkButton } from '@guardian/stand/LinkButton';
 import { Typography } from '@guardian/stand/Typography';
 import { getAppRoutes } from '../routes';
+import { useTelemetryBeforeInternalLink } from '../telemetry/TelemetryContext';
 
 export const NotFoundTab = () => {
+	const sendTelemetryAndNavigate =
+		useTelemetryBeforeInternalLink('NotFoundTab');
 	return (
 		<Layout.Main>
 			<div
@@ -21,10 +24,16 @@ export const NotFoundTab = () => {
 				</Typography>
 				<Typography>The page you requested does not exist.</Typography>
 				<LinkButton
-					href={getAppRoutes().createNewsletterEmail}
+					{...sendTelemetryAndNavigate(getAppRoutes().createNewsletterEmail)}
 					variant="primary"
 				>
 					Go to Create newsletter email
+				</LinkButton>
+				<LinkButton
+					{...sendTelemetryAndNavigate(getAppRoutes().createAppAlert)}
+					variant="primary"
+				>
+					Go to Create app alert
 				</LinkButton>
 			</div>
 		</Layout.Main>

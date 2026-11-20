@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { getApiBaseUrl } from './config';
+import { CSRF_HEADER_NAME, readCsrfToken } from './csrf';
 import { ApiError, apiErrorEnvelopeSchema } from './errors';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -63,10 +64,22 @@ export async function safeFetchJsonAndParse<Schema extends z.ZodType>(
 	} = init;
 	const url = `${getApiBaseUrl()}${path}`;
 
+	// Echo the double-submit CSRF token on state-changing requests so the
+	// backend can confirm the call originated from this same-origin SPA.
+	const method = (requestInit.method ?? 'GET').toUpperCase();
+	const headers = new Headers(requestInit.headers);
+	if (method !== 'GET' && method !== 'HEAD') {
+		const csrfToken = readCsrfToken();
+		if (csrfToken) {
+			headers.set(CSRF_HEADER_NAME, csrfToken);
+		}
+	}
+
 	let response: Response;
 	try {
 		response = await fetch(url, {
 			...requestInit,
+			headers,
 			signal: signal ?? AbortSignal.timeout(timeoutMs),
 		});
 	} catch (cause) {
