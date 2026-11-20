@@ -235,8 +235,9 @@ export const SendFailedModal = () => {
 	const failure = getFailure(composerState, channel, audiences);
 
 	const handleRetry =
-		(sendNotificationRequest: SendNotificationRequest) => () =>
-			sendNotification(sendNotificationRequest);
+		(sendNotificationRequest: SendNotificationRequest) => () => {
+			void sendNotification(sendNotificationRequest);
+		};
 
 	return (
 		<Modal

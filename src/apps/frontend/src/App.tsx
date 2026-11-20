@@ -15,6 +15,7 @@ import { ConfigContext } from './config/ConfigContext';
 import { getAppConfig } from './config/get-config';
 import { HistoryPage } from './history/HistoryPage';
 import { NotFoundTab } from './layout/NotFoundTab';
+import { PreviousSendProvider } from './previous-send/PreviousSendContext';
 import { getAppRoutes } from './routes';
 import {
 	AppAlertDispatchReportTab,
@@ -29,38 +30,40 @@ export function App() {
 	return (
 		<ConfigContext.Provider value={config}>
 			<TelemetryServiceProvider>
-				<Routes>
-					<Route element={<AccessControlledLayout />}>
-						<Route index element={<DispatchLandingPage />} />
-						<Route
-							path="newsletter-email"
-							element={
-								<NewsletterEmailNotificationFormProvider>
-									<Outlet />
-								</NewsletterEmailNotificationFormProvider>
-							}
-						>
-							<Route path="create" element={<CreateNewsletterEmailTab />} />
+				<PreviousSendProvider>
+					<Routes>
+						<Route element={<AccessControlledLayout />}>
+							<Route index element={<DispatchLandingPage />} />
 							<Route
-								path="report"
-								element={<NewsletterEmailDispatchReportTab />}
-							/>
+								path="newsletter-email"
+								element={
+									<NewsletterEmailNotificationFormProvider>
+										<Outlet />
+									</NewsletterEmailNotificationFormProvider>
+								}
+							>
+								<Route path="create" element={<CreateNewsletterEmailTab />} />
+								<Route
+									path="report"
+									element={<NewsletterEmailDispatchReportTab />}
+								/>
+							</Route>
+							<Route
+								path="app-alert"
+								element={
+									<AppAlertNotificationFormProvider>
+										<Outlet />
+									</AppAlertNotificationFormProvider>
+								}
+							>
+								<Route path="create" element={<CreateAppAlertTab />} />
+								<Route path="report" element={<AppAlertDispatchReportTab />} />
+							</Route>
+							<Route path={appRoutes.history} element={<HistoryPage />} />
+							<Route path="*" element={<NotFoundTab />} />
 						</Route>
-						<Route
-							path="app-alert"
-							element={
-								<AppAlertNotificationFormProvider>
-									<Outlet />
-								</AppAlertNotificationFormProvider>
-							}
-						>
-							<Route path="create" element={<CreateAppAlertTab />} />
-							<Route path="report" element={<AppAlertDispatchReportTab />} />
-						</Route>
-						<Route path={appRoutes.history} element={<HistoryPage />} />
-						<Route path="*" element={<NotFoundTab />} />
-					</Route>
-				</Routes>
+					</Routes>
+				</PreviousSendProvider>
 			</TelemetryServiceProvider>
 		</ConfigContext.Provider>
 	);
