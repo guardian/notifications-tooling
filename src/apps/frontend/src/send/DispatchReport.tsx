@@ -349,7 +349,7 @@ export const DispatchReport = ({
 	);
 };
 
-const historyRoute = getAppRoutes().history
+const historyRoute = getAppRoutes().history;
 
 const DispatchReportTab = ({
 	channel,

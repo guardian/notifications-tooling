@@ -3,11 +3,8 @@ import { type ReactNode, useReducer } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { NotificationFormContextProps } from '../compose/NotificationFormContext';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
-import type {
-	PreviousSendContextData} from '../previous-send/PreviousSendContext';
-import {
-	PreviousSendContext
-} from '../previous-send/PreviousSendContext';
+import type { PreviousSendContextData } from '../previous-send/PreviousSendContext';
+import { PreviousSendContext } from '../previous-send/PreviousSendContext';
 import type {
 	ChannelOption,
 	NotificationComposerAction,
