@@ -307,6 +307,7 @@ describe.each(['newsletter', 'app-push'] as const)(
 			expect(sendNotification.mock.calls[1]?.[0]).toBe(request);
 			expect(setPreviousSend).toHaveBeenCalledWith({
 				notificationId: deliveredNewsletterEmailSendResponse.id,
+				channel,
 			});
 			expect(updateComposerState).toHaveBeenLastCalledWith({
 				type: 'complete-send',

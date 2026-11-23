@@ -1,8 +1,10 @@
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import { createContext, useState } from 'react';
+import type { ChannelOption } from '../types';
 
 export type PreviousSendContextData = {
 	notificationId?: string;
+	channel: ChannelOption;
 };
 type PreviousSendContextProps = {
 	previousSend?: PreviousSendContextData;

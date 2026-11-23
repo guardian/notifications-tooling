@@ -85,6 +85,7 @@ export const useSendNotification = () => {
 		}
 		setPreviousSend({
 			notificationId: result.data.id,
+			channel,
 		});
 		telemetry.sendEvent(TelemetryEvent.SuccesfulNotificationEvent, {
 			idempotencyKey,

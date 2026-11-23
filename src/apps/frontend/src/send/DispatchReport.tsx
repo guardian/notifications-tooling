@@ -14,6 +14,7 @@ import { Typography } from '@guardian/stand/Typography';
 import { type ReactNode, useContext } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import type { PreviousSendContextData } from '../previous-send/PreviousSendContext';
 import { PreviousSendContext } from '../previous-send/PreviousSendContext';
 import {
 	articleUrlSearchParam,
@@ -353,12 +354,12 @@ const historyRoute = getAppRoutes().history;
 
 const DispatchReportTab = ({
 	channel,
-	notificationId,
+	previousSend,
 	contentTitle,
 	children,
 }: {
 	channel: ChannelOption;
-	notificationId?: string;
+	previousSend?: PreviousSendContextData;
 	contentTitle: string;
 	children: ReactNode;
 }) => {
@@ -366,7 +367,7 @@ const DispatchReportTab = ({
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 
-	if (!notificationId) {
+	if (!previousSend?.notificationId || previousSend.channel !== channel) {
 		return <Navigate to={historyRoute} replace />;
 	}
 
@@ -416,7 +417,7 @@ export const NewsletterEmailDispatchReportTab = () => {
 	return (
 		<DispatchReportTab
 			channel="newsletter"
-			notificationId={previousSend?.notificationId}
+			previousSend={previousSend}
 			contentTitle={subjectText}
 		>
 			<NewsletterEmailDispatchDetails />
@@ -433,7 +434,7 @@ export const AppAlertDispatchReportTab = () => {
 	return (
 		<DispatchReportTab
 			channel="app-push"
-			notificationId={previousSend?.notificationId}
+			previousSend={previousSend}
 			contentTitle={headline}
 		>
 			<AppAlertDispatchDetails />
