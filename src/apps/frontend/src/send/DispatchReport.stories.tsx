@@ -150,6 +150,7 @@ export const NewsletterEmailReportRoute: Story = {
 			},
 			{
 				notificationId: 'newsletter-dispatch-id',
+				channel: 'newsletter',
 			},
 		);
 	},
@@ -173,6 +174,7 @@ export const AppAlertReportRoute: Story = {
 			},
 			{
 				notificationId: 'app-alert-dispatch-id',
+				channel: 'app-push',
 			},
 		);
 	},
@@ -208,6 +210,7 @@ export const NewsletterReportCopiesArticleToAppAlert: Story = {
 			},
 			{
 				notificationId: 'app-alert-dispatch-id',
+				channel: 'newsletter',
 			},
 		);
 	},
@@ -262,6 +265,7 @@ export const AppAlertReportCopiesArticleToNewsletter: Story = {
 			},
 			{
 				notificationId: 'app-alert-dispatch-id',
+				channel: 'app-push',
 			},
 		);
 	},

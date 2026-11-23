@@ -1,5 +1,5 @@
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
-import { createContext, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import type { ChannelOption } from '../types';
 
 export type PreviousSendContextData = {
@@ -25,4 +25,9 @@ export const PreviousSendProvider = ({ children }: { children: ReactNode }) => {
 			{children}
 		</PreviousSendContext.Provider>
 	);
+};
+
+export const useClearPreviousSend = () => {
+	const { setPreviousSend } = useContext(PreviousSendContext);
+	return useCallback(() => setPreviousSend(undefined), [setPreviousSend]);
 };

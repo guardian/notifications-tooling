@@ -15,7 +15,10 @@ import { type ReactNode, useContext } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import type { PreviousSendContextData } from '../previous-send/PreviousSendContext';
-import { PreviousSendContext } from '../previous-send/PreviousSendContext';
+import {
+	PreviousSendContext,
+	useClearPreviousSend,
+} from '../previous-send/PreviousSendContext';
 import {
 	articleUrlSearchParam,
 	createCopiedNotificationState,
@@ -363,6 +366,7 @@ const DispatchReportTab = ({
 	contentTitle: string;
 	children: ReactNode;
 }) => {
+	const clearPreviousSend = useClearPreviousSend();
 	const { reset } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
@@ -385,6 +389,7 @@ const DispatchReportTab = ({
 					<DispatchReport
 						channel={channel}
 						onCreateNew={() => {
+							clearPreviousSend();
 							reset();
 							void navigate(notificationRoutes[channel].create);
 						}}
