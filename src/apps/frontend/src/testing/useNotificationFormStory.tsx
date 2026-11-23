@@ -4,7 +4,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import type { NotificationFormContextProps } from '../compose/NotificationFormContext';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
 import type { PreviousSendContextData } from '../previous-send/PreviousSendContext';
-import { PreviousSendContext } from '../previous-send/PreviousSendContext';
+import { PreviousSendProvider } from '../previous-send/PreviousSendContext';
 import type {
 	ChannelOption,
 	NotificationComposerAction,
@@ -75,9 +75,7 @@ export const useNotificationFormStory = (
 	} = functions;
 
 	const context = (
-		<PreviousSendContext.Provider
-			value={{ previousSend, setPreviousSend: () => {} }}
-		>
+		<PreviousSendProvider initialState={previousSend}>
 			<NotificationFormContext
 				value={{
 					channel,
@@ -91,7 +89,7 @@ export const useNotificationFormStory = (
 			>
 				{reactNode}
 			</NotificationFormContext>
-		</PreviousSendContext.Provider>
+		</PreviousSendProvider>
 	);
 
 	return channel === 'newsletter' ? (

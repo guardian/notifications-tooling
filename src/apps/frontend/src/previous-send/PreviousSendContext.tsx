@@ -17,8 +17,16 @@ export const PreviousSendContext = createContext<PreviousSendContextProps>({
 	setPreviousSend: () => {},
 });
 
-export const PreviousSendProvider = ({ children }: { children: ReactNode }) => {
-	const [previousSend, setPreviousSend] = useState<PreviousSendContextData>();
+export const PreviousSendProvider = ({
+	children,
+	initialState,
+}: {
+	children: ReactNode;
+	initialState?: PreviousSendContextData;
+}) => {
+	const [previousSend, setPreviousSend] = useState<
+		PreviousSendContextData | undefined
+	>(initialState);
 
 	return (
 		<PreviousSendContext.Provider value={{ previousSend, setPreviousSend }}>
