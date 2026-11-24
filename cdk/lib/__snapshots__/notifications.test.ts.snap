@@ -61,8 +61,8 @@ exports[`The Notifications stack matches the snapshot 1`] = `
       "Description": "A list of private subnets",
       "Type": "AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>",
     },
-    "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter": {
-      "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64",
+    "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61arm64C96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-arm64",
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
     },
     "VpcId": {
@@ -535,9 +535,9 @@ exports[`The Notifications stack matches the snapshot 1`] = `
           "Ref": "DispatchMigrationHostInstanceProfile",
         },
         "ImageId": {
-          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61arm64C96584B6F00A464EAD1953AFF4B05118Parameter",
         },
-        "InstanceType": "t3.nano",
+        "InstanceType": "t4g.nano",
         "MetadataOptions": {
           "HttpTokens": "required",
         },
