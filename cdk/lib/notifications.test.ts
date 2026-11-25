@@ -7,6 +7,31 @@ import { addDispatchStacks } from './register-stacks';
 
 describe('The Notifications stack', () => {
 	it.each(['CODE', 'PROD'] as const)(
+		'uses an ARM64 instance and AMI for the migration host in %s',
+		(stage) => {
+			const stack = new DispatchStack(
+				new App(),
+				`Dispatch${stage}`,
+				{ stack: 'notifications', stage, env: { region: 'eu-west-1' } },
+				'dispatch',
+			);
+			const template = Template.fromStack(stack);
+			const amiParameter =
+				'SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61arm64C96584B6F00A464EAD1953AFF4B05118Parameter';
+			template.hasParameter(amiParameter, {
+				Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>',
+				Default:
+					'/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-arm64',
+			});
+			template.hasResourceProperties('AWS::EC2::Instance', {
+				InstanceType: 't4g.micro',
+				ImageId: { Ref: amiParameter },
+				MetadataOptions: { HttpTokens: 'required' },
+			});
+		},
+	);
+
+	it.each(['CODE', 'PROD'] as const)(
 		'creates a retained runtime database secret in %s',
 		(stage) => {
 			const stack = new DispatchStack(

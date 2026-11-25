@@ -18,7 +18,12 @@ import {
 	ComparisonOperator,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
-import { CfnInstance, MachineImage, Port } from 'aws-cdk-lib/aws-ec2';
+import {
+	AmazonLinuxCpuType,
+	CfnInstance,
+	MachineImage,
+	Port,
+} from 'aws-cdk-lib/aws-ec2';
 import {
 	CfnInstanceProfile,
 	Effect,
@@ -133,8 +138,10 @@ export class DispatchStack extends GuStack {
 
 		const migrationHost = new CfnInstance(this, 'DispatchMigrationHost', {
 			iamInstanceProfile: migrationHostInstanceProfile.ref,
-			imageId: MachineImage.latestAmazonLinux2023().getImage(this).imageId,
-			instanceType: 't3.nano',
+			imageId: MachineImage.latestAmazonLinux2023({
+				cpuType: AmazonLinuxCpuType.ARM_64,
+			}).getImage(this).imageId,
+			instanceType: 't4g.micro',
 			securityGroupIds: [migrationHostSecurityGroup.securityGroupId],
 			subnetId: Fn.select(
 				0,
