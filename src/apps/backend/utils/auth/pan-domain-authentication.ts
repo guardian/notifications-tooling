@@ -8,16 +8,16 @@ import { isRunningLocally, pandaSettingsFileName } from 'config';
 
 const LOCAL_PROFILE = 'composer';
 
-const panda = new PanDomainAuthentication(
-	'gutoolsAuth-assym', // cookie name
-	'eu-west-1', // AWS region
-	'pan-domain-auth-settings', // Settings bucket
-	pandaSettingsFileName, // Settings files
-	guardianValidation,
-	isRunningLocally
+const pandaPromise = PanDomainAuthentication.builder({
+	cookieName: 'gutoolsAuth-assym',
+	region: 'eu-west-1',
+	bucket: 'pan-domain-auth-settings',
+	keyFile: pandaSettingsFileName,
+	validateUser: guardianValidation,
+	credentialsProvider: isRunningLocally
 		? fromIni({ profile: LOCAL_PROFILE })
 		: fromNodeProviderChain(),
-);
+});
 
 export type CookieVerificationResult =
 	{ success: true; user: User } | { success: false };
@@ -25,6 +25,7 @@ export type CookieVerificationResult =
 export const verifyCookie = async (
 	cookieHeader?: string,
 ): Promise<CookieVerificationResult> => {
+	const panda = await pandaPromise;
 	const result = await panda.verify(cookieHeader);
 
 	if (result.success) {

@@ -32,7 +32,7 @@
       "dependencies": {
         "@aws-sdk/client-s3": "3.1139.0",
         "@aws-sdk/credential-providers": "3.1139.0",
-        "@guardian/pan-domain-node": "1.2.5",
+        "@guardian/pan-domain-node": "3.0.0",
         "@guardian/permissions-client": "0.0.4",
         "config": "workspace:*",
         "cors": "2.8.6",
@@ -133,7 +133,7 @@
     "src/packages/models": {
       "name": "models",
       "dependencies": {
-        "@guardian/pan-domain-node": "1.2.5",
+        "@guardian/pan-domain-node": "3.0.0",
         "zod": "4.6.7",
       },
     },
@@ -356,7 +356,7 @@
 
     "@guardian/eslint-config": ["@guardian/eslint-config@16.0.0", "", { "dependencies": { "@eslint-community/eslint-plugin-eslint-comments": "4.7.1", "@eslint/js": "9.39.1", "@stylistic/eslint-plugin": "5.10.0", "eslint-config-prettier": "10.1.8", "eslint-import-resolver-typescript": "4.4.4", "eslint-plugin-import-x": "4.16.2", "eslint-plugin-jsx-a11y": "6.10.2", "eslint-plugin-react": "7.37.5", "eslint-plugin-react-hooks": "7.1.1", "globals": "17.6.0", "read-package-up": "12.0.0", "typescript-eslint": "8.59.3" }, "peerDependencies": { "eslint": "^9.39.1", "eslint-plugin-storybook": "^10.4.0" }, "optionalPeers": ["eslint-plugin-storybook"] }, "sha512-LTd0evYj9HSj24Z8HBm5Tc4GOlbeY5cRhiyXCSCz5XpdBHjgZSYIXDChqge4hd89iFCWU9ztU1QowD6tqEzM4A=="],
 
-    "@guardian/pan-domain-node": ["@guardian/pan-domain-node@1.2.5", "", { "dependencies": { "@aws-sdk/client-s3": "^3.1061.0", "@aws-sdk/credential-providers": "^3.1061.0", "cookie": "^0.4.1", "ini": "6.0.0" } }, "sha512-0gCn3ZQASmhhWWw+zP0/W6KbXPRamnwc/LvG7h5wh2qtFyckxcB9TWAibhOEgdodSsXVin1DuQys4qEfbnKvgg=="],
+    "@guardian/pan-domain-node": ["@guardian/pan-domain-node@3.0.0", "", { "dependencies": { "@aws-sdk/client-s3": "^3.1061.0", "@aws-sdk/credential-providers": "^3.1061.0", "cookie": "^0.4.1", "ini": "6.0.0" } }, "sha512-TG3K7u4x5+SNjHK1mHh+/4hHXz6bgn+5J+jjed9h/QuFsSlZYhgskS3kqKKDZ3dBqmv99BfHMZFjFYCKlHo5ZA=="],
 
     "@guardian/permissions-client": ["@guardian/permissions-client@0.0.4", "", { "peerDependencies": { "@aws-sdk/client-s3": "^3.1090.0", "@aws-sdk/credential-providers": "^3.1090.0" } }, "sha512-h2RPhVnTniW/inWKJ+NegZPybEUveWePjGtGaVelnVnF+ikYJBIu+X6cl6Zz0PiTjNaSW3/26cy0D7qM+HTHzA=="],
 

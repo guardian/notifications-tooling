@@ -24,7 +24,7 @@
 		"@aws-sdk/credential-providers": "3.1139.0",
 		"config": "workspace:*",
 		"database": "workspace:*",
-		"@guardian/pan-domain-node": "1.2.5",
+		"@guardian/pan-domain-node": "3.0.0",
 		"@guardian/permissions-client": "0.0.4",
 		"http-logger": "workspace:*",
 		"models": "workspace:*",
