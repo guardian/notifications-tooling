@@ -141,7 +141,7 @@ export class DispatchStack extends GuStack {
 			imageId: MachineImage.latestAmazonLinux2023({
 				cpuType: AmazonLinuxCpuType.ARM_64,
 			}).getImage(this).imageId,
-			instanceType: 't4g.nano',
+			instanceType: 't4g.micro',
 			securityGroupIds: [migrationHostSecurityGroup.securityGroupId],
 			subnetId: Fn.select(
 				0,

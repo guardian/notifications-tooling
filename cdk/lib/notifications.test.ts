@@ -24,7 +24,7 @@ describe('The Notifications stack', () => {
 					'/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-arm64',
 			});
 			template.hasResourceProperties('AWS::EC2::Instance', {
-				InstanceType: 't4g.nano',
+				InstanceType: 't4g.micro',
 				ImageId: { Ref: amiParameter },
 				MetadataOptions: { HttpTokens: 'required' },
 			});
