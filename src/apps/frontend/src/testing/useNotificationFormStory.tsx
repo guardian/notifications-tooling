@@ -3,6 +3,8 @@ import { type ReactNode, useReducer } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { NotificationFormContextProps } from '../compose/NotificationFormContext';
 import { NotificationFormContext } from '../compose/NotificationFormContext';
+import type { PreviousSendContextData } from '../previous-send/PreviousSendContext';
+import { PreviousSendProvider } from '../previous-send/PreviousSendContext';
 import type {
 	ChannelOption,
 	NotificationComposerAction,
@@ -36,6 +38,7 @@ export const useNotificationFormStory = (
 	> = {},
 	channel: ChannelOption = 'newsletter',
 	formValues?: Partial<NewsletterEmailFormValues> | Partial<AppAlertFormValues>,
+	previousSend?: PreviousSendContextData,
 ) => {
 	const [currentComposerState, updateComposerState] = useReducer<
 		NotificationComposerState,
@@ -72,19 +75,21 @@ export const useNotificationFormStory = (
 	} = functions;
 
 	const context = (
-		<NotificationFormContext
-			value={{
-				channel,
-				composerState: currentComposerState,
-				updateComposerState,
-				resolveArticleFromCapi,
-				sendNotification,
-				requestEmailHtml,
-				requestTestEmailSend,
-			}}
-		>
-			{reactNode}
-		</NotificationFormContext>
+		<PreviousSendProvider initialState={previousSend}>
+			<NotificationFormContext
+				value={{
+					channel,
+					composerState: currentComposerState,
+					updateComposerState,
+					resolveArticleFromCapi,
+					sendNotification,
+					requestEmailHtml,
+					requestTestEmailSend,
+				}}
+			>
+				{reactNode}
+			</NotificationFormContext>
+		</PreviousSendProvider>
 	);
 
 	return channel === 'newsletter' ? (

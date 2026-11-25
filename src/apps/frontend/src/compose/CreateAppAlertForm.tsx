@@ -61,7 +61,6 @@ export const CreateAppAlertForm = ({
 		telemetry.sendEvent(TelemetryEvent.FormSubmitPrepareSend, {
 			idempotencyKey,
 			requestedUrl: composerState.requestedUrl ?? '',
-			notificationId: values.notificationId ?? '',
 			channel: 'app-push',
 		});
 

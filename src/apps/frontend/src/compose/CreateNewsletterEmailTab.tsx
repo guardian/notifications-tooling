@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { NewsletterEmailPreviewSection } from '../preview/NewsletterEmailPreviewSection';
 import { NewsletterEmailPreviewToggle } from '../preview/PreviewToggle';
+import { useClearPreviousSend } from '../previous-send/PreviousSendContext';
 import {
 	articleUrlSearchParam,
 	parseCopiedNotificationState,
@@ -13,6 +14,7 @@ import { CreateNewsletterEmailForm } from './CreateNewsletterEmailForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
 
 export const CreateNewsletterEmailTab = () => {
+	const clearPreviousSend = useClearPreviousSend();
 	const { reset, setValue, watch } =
 		useFormContext<NewsletterEmailFormValues>();
 	const [searchParams] = useSearchParams();
@@ -28,11 +30,12 @@ export const CreateNewsletterEmailTab = () => {
 	const showPreview = watch('showPreview');
 
 	useEffect(() => {
+		clearPreviousSend();
 		reset();
 		if (copyNavigationState) {
 			setValue('subjectText', copyNavigationState.contentTitle);
 		}
-	}, [copyNavigationState, reset, setValue]);
+	}, [copyNavigationState, reset, setValue, clearPreviousSend]);
 
 	return (
 		<NotificationTabLayout

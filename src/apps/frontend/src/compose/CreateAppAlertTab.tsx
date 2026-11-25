@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { AppAlertPreviewSection } from '../preview/AppAlertPreviewSection';
 import { AppAlertPreviewToggle } from '../preview/PreviewToggle';
+import { useClearPreviousSend } from '../previous-send/PreviousSendContext';
 import {
 	articleUrlSearchParam,
 	parseCopiedNotificationState,
@@ -14,6 +15,7 @@ import { CreateAppAlertForm } from './CreateAppAlertForm';
 import { NotificationTabLayout } from './NotificationTabLayout';
 
 export const CreateAppAlertTab = () => {
+	const clearPreviousSend = useClearPreviousSend();
 	const { reset, setValue } = useFormContext<AppAlertFormValues>();
 	const [searchParams] = useSearchParams();
 	const location = useLocation();
@@ -28,11 +30,12 @@ export const CreateAppAlertTab = () => {
 	const topicTypes = useAppAlertTopicTypes();
 
 	useEffect(() => {
+		clearPreviousSend();
 		reset();
 		if (copyNavigationState) {
 			setValue('headline', copyNavigationState.contentTitle);
 		}
-	}, [copyNavigationState, reset, setValue]);
+	}, [copyNavigationState, reset, setValue, clearPreviousSend]);
 
 	return (
 		<NotificationTabLayout

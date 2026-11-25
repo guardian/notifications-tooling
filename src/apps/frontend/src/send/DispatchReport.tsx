@@ -11,12 +11,18 @@ import { Grid, Item } from '@guardian/stand/Grid';
 import { Icon } from '@guardian/stand/Icon';
 import { Layout } from '@guardian/stand/Layout';
 import { Typography } from '@guardian/stand/Typography';
-import type { ReactNode } from 'react';
+import { type ReactNode, useContext } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import type { PreviousSendContextData } from '../previous-send/PreviousSendContext';
+import {
+	PreviousSendContext,
+	useClearPreviousSend,
+} from '../previous-send/PreviousSendContext';
 import {
 	articleUrlSearchParam,
 	createCopiedNotificationState,
+	getAppRoutes,
 	notificationRoutes,
 	withArticleUrl,
 } from '../routes';
@@ -27,8 +33,7 @@ import {
 } from '../segment/useAudienceEditions';
 import { useAppAlertTopicTypes } from '../segment/useChannelAudiences';
 import { layoutMainTheme } from '../themes';
-import type { ChannelOption } from '../types';
-import type { DeliveryOption } from '../types';
+import type { ChannelOption, DeliveryOption } from '../types';
 import { scheduleIcon } from '../ui/flag-icons';
 import {
 	capitalise,
@@ -348,23 +353,26 @@ export const DispatchReport = ({
 	);
 };
 
+const historyRoute = getAppRoutes().history;
+
 const DispatchReportTab = ({
 	channel,
-	notificationId,
+	previousSend,
 	contentTitle,
 	children,
 }: {
 	channel: ChannelOption;
-	notificationId?: string;
+	previousSend?: PreviousSendContextData;
 	contentTitle: string;
 	children: ReactNode;
 }) => {
-	const { reset, setValue } = useFormContext<{ notificationId?: string }>();
+	const clearPreviousSend = useClearPreviousSend();
+	const { reset } = useFormContext<{ notificationId?: string }>();
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 
-	if (!notificationId) {
-		return <Navigate to={notificationRoutes[channel].create} replace />;
+	if (!previousSend?.notificationId || previousSend.channel !== channel) {
+		return <Navigate to={historyRoute} replace />;
 	}
 
 	return (
@@ -381,8 +389,8 @@ const DispatchReportTab = ({
 					<DispatchReport
 						channel={channel}
 						onCreateNew={() => {
+							clearPreviousSend();
 							reset();
-							setValue('notificationId', undefined);
 							void navigate(notificationRoutes[channel].create);
 						}}
 						onCopyToAnotherChannel={() => {
@@ -406,9 +414,7 @@ const DispatchReportTab = ({
 };
 
 export const NewsletterEmailDispatchReportTab = () => {
-	const notificationId = useWatch<NewsletterEmailFormValues, 'notificationId'>({
-		name: 'notificationId',
-	});
+	const { previousSend } = useContext(PreviousSendContext);
 	const subjectText = useWatch<NewsletterEmailFormValues, 'subjectText'>({
 		name: 'subjectText',
 		defaultValue: defaultNewsletterEmailFormValues.subjectText,
@@ -416,7 +422,7 @@ export const NewsletterEmailDispatchReportTab = () => {
 	return (
 		<DispatchReportTab
 			channel="newsletter"
-			notificationId={notificationId}
+			previousSend={previousSend}
 			contentTitle={subjectText}
 		>
 			<NewsletterEmailDispatchDetails />
@@ -425,9 +431,7 @@ export const NewsletterEmailDispatchReportTab = () => {
 };
 
 export const AppAlertDispatchReportTab = () => {
-	const notificationId = useWatch<AppAlertFormValues, 'notificationId'>({
-		name: 'notificationId',
-	});
+	const { previousSend } = useContext(PreviousSendContext);
 	const headline = useWatch<AppAlertFormValues, 'headline'>({
 		name: 'headline',
 		defaultValue: defaultAppAlertFormValues.headline,
@@ -435,7 +439,7 @@ export const AppAlertDispatchReportTab = () => {
 	return (
 		<DispatchReportTab
 			channel="app-push"
-			notificationId={notificationId}
+			previousSend={previousSend}
 			contentTitle={headline}
 		>
 			<AppAlertDispatchDetails />

@@ -72,7 +72,7 @@ export const SendConfirmationModal = () => {
 											channel,
 											requestedUrl: composerState.requestedUrl ?? '',
 										});
-										return sendNotification(pendingRequest);
+										void sendNotification(pendingRequest);
 									}
 								: undefined
 						}
